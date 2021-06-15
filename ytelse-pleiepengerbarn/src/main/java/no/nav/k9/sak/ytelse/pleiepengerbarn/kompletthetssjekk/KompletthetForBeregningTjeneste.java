@@ -181,22 +181,16 @@ public class KompletthetForBeregningTjeneste {
 
         for (DatoIntervallEntitet periode : relevanteVilkårsperioder) {
             var arbeidsgiverSetMap = finnArbeidsforholdForIdentPåDagFunction.apply(ref, periode.getFomDato());
-            var manglendeVedleggForPeriode = utledManglendeInntektsmeldingerPerDag(result, relevanteInntektsmeldinger, periode, tilnternArbeidsforhold, arbeidsgiverSetMap);
+            var manglendeVedleggForPeriode = utledManglendeInntektsmeldingerPerDag(result, relevanteInntektsmeldinger, periode, tilnternArbeidsforhold, arbeidsgiverSetMap, input);
 
-            if (!manglendeVedleggForPeriode.isEmpty()
-                && input.kanVurderesMotArbeidstid()
-                && erPeriodeKomplettBasertPåArbeid(input, periode, manglendeVedleggForPeriode)) {
-                result.put(periode, List.of());
-            } else {
-                result.put(periode, manglendeVedleggForPeriode);
-            }
+            result.put(periode, manglendeVedleggForPeriode);
         }
         return result;
     }
 
-    private boolean erPeriodeKomplettBasertPåArbeid(InputForKompletthetsvurdering input,
-                                                    DatoIntervallEntitet periode,
-                                                    List<ManglendeVedlegg> manglendeVedlegg) {
+    private boolean harFraværFraArbeidetIPerioden(InputForKompletthetsvurdering input,
+                                                  DatoIntervallEntitet periode,
+                                                  ManglendeVedlegg manglendeVedlegg) {
 
         if (input.getSkalHoppeOverVurderingMotArbeid()) {
             return false;
@@ -208,8 +202,7 @@ public class KompletthetForBeregningTjeneste {
 
         var arbeidIPeriode = new MapArbeid(this).map(kravDokumenter, perioderFraSøknadene, timeline, Set.of(), null);
 
-        return manglendeVedlegg.stream()
-            .noneMatch(at -> harFraværFraArbeidsgiverIPerioden(arbeidIPeriode, at));
+        return harFraværFraArbeidsgiverIPerioden(arbeidIPeriode, manglendeVedlegg);
     }
 
     private boolean harFraværFraArbeidsgiverIPerioden(List<Arbeid> arbeidIPeriode, ManglendeVedlegg at) {
@@ -245,7 +238,8 @@ public class KompletthetForBeregningTjeneste {
                                                                                                        Set<Inntektsmelding> relevanteInntektsmeldinger,
                                                                                                        DatoIntervallEntitet periode,
                                                                                                        BiFunction<Arbeidsgiver, InternArbeidsforholdRef, V> tilnternArbeidsforhold,
-                                                                                                       Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger) {
+                                                                                                       Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger,
+                                                                                                       InputForKompletthetsvurdering input) {
         if (påkrevdeInntektsmeldinger.isEmpty()) {
             return List.of();
         } else {
@@ -273,6 +267,7 @@ public class KompletthetForBeregningTjeneste {
                     .map(it -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, entry.getKey().getIdentifikator(), it.getReferanse(), false))
                     .collect(Collectors.toList()))
                 .flatMap(Collection::stream)
+                .filter(it -> harFraværFraArbeidetIPerioden(input, periode, it))
                 .collect(Collectors.toList());
             return manglendeInntektsmeldinger;
         }
