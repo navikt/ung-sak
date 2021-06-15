@@ -146,7 +146,13 @@ public class FagsakRepository {
      * @param tom
      */
     @SuppressWarnings("unchecked")
-    public List<Fagsak> finnFagsakRelatertTil(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
+    public List<Fagsak> finnFagsakRelatertTil(
+            FagsakYtelseType ytelseType,
+            AktørId bruker,
+            AktørId pleietrengendeAktørId,
+            AktørId relatertPersonAktørId,
+            LocalDate fom,
+            LocalDate tom) {
         Query query;
 
         String sqlString = """
@@ -181,7 +187,12 @@ public class FagsakRepository {
      * @param tom
      */
     @SuppressWarnings("unchecked")
-    public List<Fagsak> finnFagsakRelatertTil(FagsakYtelseType ytelseType, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
+    public List<Fagsak> finnFagsakRelatertTil(
+            FagsakYtelseType ytelseType,
+            AktørId pleietrengendeAktørId,
+            AktørId relatertPersonAktørId,
+            LocalDate fom,
+            LocalDate tom) {
         Query query;
 
         String sql = """

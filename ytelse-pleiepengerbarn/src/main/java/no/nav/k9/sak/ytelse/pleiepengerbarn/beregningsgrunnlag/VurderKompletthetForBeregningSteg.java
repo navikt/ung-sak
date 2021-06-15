@@ -61,7 +61,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             .filter(it -> perioderTilVurdering.contains(it.getKey()))
             .collect(Collectors.toList());
 
-        if (relevanteKompletthetsvurderinger.stream().allMatch(it -> it.getValue().isEmpty())) {
+        if (relevanteKompletthetsvurderinger.isEmpty()) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 

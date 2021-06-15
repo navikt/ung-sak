@@ -29,9 +29,18 @@ class MapDtoTilRequest {
      * Mapper aksjonspunktdto til håndteringdto i kalkulus.
      *
      * @param dto BekreftAksjonspunktDto
+     * @param begrunnelse begrunnelsen for aksjonspunktet. I k9sak lagres kun et aksjonspunkt for alle grunnlag og
+     * det er begrunnelsen på dette aksjonspunktet som skal legges ved på alle aksjonspunktene som sendes til kalkulus
      * @return Dto for håndtering av aksjonspunk i Kalkulus
      */
-    public static HåndterBeregningDto map(BekreftetBeregningsgrunnlagDto dto) {
+
+    public static HåndterBeregningDto map(BekreftetBeregningsgrunnlagDto dto, String begrunnelse) {
+        HåndterBeregningDto håndterBeregningDto = mapSpesifikkDto(dto);
+        håndterBeregningDto.setBegrunnelse(begrunnelse);
+        return håndterBeregningDto;
+    }
+
+    public static HåndterBeregningDto mapSpesifikkDto(BekreftetBeregningsgrunnlagDto dto) {
         if (dto instanceof AvklarteAktiviteterDto) {
             AvklarteAktiviteterDto avklarteAktiviteterDto = (AvklarteAktiviteterDto) dto;
             return new AvklarAktiviteterHåndteringDto(OppdatererDtoMapper.mapAvklarteAktiviteterDto(avklarteAktiviteterDto));

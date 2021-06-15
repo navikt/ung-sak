@@ -299,6 +299,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_BEREDSKAP(AksjonspunktKodeDefinisjon.VURDER_BEREDSKAP, AksjonspunktType.MANUELL,
         "Vurder nattevåk og beredskap", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
         VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_BEREDSKAP, TOTRINN, TILBAKE, null, EnumSet.of(PSB)),
+    VURDER_RETT_ETTER_PLEIETRENGENDES_DØD(AksjonspunktKodeDefinisjon.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD, AksjonspunktType.MANUELL,
+        "Vurder rett etter pleietrengendes død", BehandlingStatus.UTREDES,  BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD, TOTRINN, TILBAKE, null, EnumSet.of(PSB)),
+
 
     // Gruppe : 999x
     AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",

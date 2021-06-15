@@ -5,10 +5,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,8 @@ import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 
@@ -187,13 +191,23 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
         var utledet = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref);
         List<Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>>> relevanteKompletthetsvurderinger = utledRelevanteKompletthetsvurderinger(vilkårsPerioder, utledet);
 
+        var inntektsmeldingerSomSkalEtterlyses = new HashSet<Arbeidsgiver>();
+
         for (Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> entry : relevanteKompletthetsvurderinger) {
             var manglendeInntektsmeldinger = entry.getValue();
             if (!manglendeInntektsmeldinger.isEmpty()) {
                 loggManglendeInntektsmeldinger(behandlingId, manglendeInntektsmeldinger);
-                sendEtterlysningForManglendeInntektsmeldinger(ref, manglendeInntektsmeldinger);
+                inntektsmeldingerSomSkalEtterlyses.addAll(manglendeInntektsmeldinger.stream()
+                    .filter(it -> DokumentTypeId.INNTEKTSMELDING.equals(it.getDokumentType()))
+                    .filter(it -> !it.getBrukerHarSagtAtIkkeKommer())
+                    .map(it -> (OrganisasjonsNummerValidator.erGyldig(it.getArbeidsgiver()) || OrgNummer.erKunstig(it.getArbeidsgiver())) ? Arbeidsgiver.virksomhet(it.getArbeidsgiver()) : Arbeidsgiver.fra(new AktørId(it.getArbeidsgiver())))
+                    .collect(Collectors.toSet()));
                 finnVentefristForEtterlysning(ref, entry.getKey().getFomDato()).ifPresent(result::add);
             }
+        }
+
+        if (!inntektsmeldingerSomSkalEtterlyses.isEmpty()) {
+            sendEtterlysningForManglendeInntektsmeldinger(ref, inntektsmeldingerSomSkalEtterlyses);
         }
 
         return result.stream()
@@ -210,15 +224,10 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
         return relevanteKompletthetsvurderinger;
     }
 
-    private void sendEtterlysningForManglendeInntektsmeldinger(BehandlingReferanse ref, List<ManglendeVedlegg> manglendeInntektsmeldinger) {
-        var arbeidsgiverIdenterSomSkalMottaEtterlysning = manglendeInntektsmeldinger.stream()
-            .filter(a -> !a.getBrukerHarSagtAtIkkeKommer())
-            .map(ManglendeVedlegg::getArbeidsgiver)
-            .distinct();
-
+    private void sendEtterlysningForManglendeInntektsmeldinger(BehandlingReferanse ref, Set<Arbeidsgiver> arbeidsgiverIdenterSomSkalMottaEtterlysning) {
         arbeidsgiverIdenterSomSkalMottaEtterlysning.forEach(a -> {
-                var idType = (OrganisasjonsNummerValidator.erGyldig(a) || OrgNummer.erKunstig(a)) ? IdType.ORGNR : IdType.AKTØRID;
-                fellesUtil.sendBrev(ref.getBehandlingId(), DokumentMalType.ETTERLYS_INNTEKTSMELDING_DOK, new Mottaker(a, idType));
+                var idType = a.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID;
+                fellesUtil.sendBrev(ref.getBehandlingId(), DokumentMalType.ETTERLYS_INNTEKTSMELDING_DOK, new Mottaker(a.getIdentifikator(), idType));
             }
         );
     }

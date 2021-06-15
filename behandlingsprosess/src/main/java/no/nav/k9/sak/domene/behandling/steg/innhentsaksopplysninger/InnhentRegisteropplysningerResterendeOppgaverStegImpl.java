@@ -14,11 +14,9 @@ import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -32,7 +30,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.kompletthet.KompletthetModell;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @BehandlingStegRef(kode = "INREG_AVSL")
 @BehandlingTypeRef
@@ -44,7 +41,6 @@ public class InnhentRegisteropplysningerResterendeOppgaverStegImpl implements Be
 
     private BehandlingRepository behandlingRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private KompletthetModell kompletthetModell;
 
     InnhentRegisteropplysningerResterendeOppgaverStegImpl() {
@@ -54,12 +50,10 @@ public class InnhentRegisteropplysningerResterendeOppgaverStegImpl implements Be
     @Inject
     public InnhentRegisteropplysningerResterendeOppgaverStegImpl(BehandlingRepository behandlingRepository,
                                                                  PersonopplysningTjeneste personopplysningTjeneste,
-                                                                 KompletthetModell kompletthetModell,
-                                                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                                                                 KompletthetModell kompletthetModell) {
 
         this.behandlingRepository = behandlingRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.kompletthetModell = kompletthetModell;
     }
 
@@ -67,25 +61,17 @@ public class InnhentRegisteropplysningerResterendeOppgaverStegImpl implements Be
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
-        BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-
-        KompletthetResultat etterlysIM = kompletthetModell.vurderKompletthet(ref, List.of(AUTO_VENT_ETTERLYST_INNTEKTSMELDING));
-        if (!etterlysIM.erOppfylt() && erIkkeOmsorgspenger(ref)) {
+        BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
+        KompletthetResultat etterlysIM = !autopunktAlleredeUtført(AUTO_VENT_ETTERLYST_INNTEKTSMELDING, behandling) ? kompletthetModell.vurderKompletthet(ref, List.of(AUTO_VENT_ETTERLYST_INNTEKTSMELDING)) : KompletthetResultat.oppfylt();
+        if (!etterlysIM.erOppfylt()) {
             // Dette autopunktet har tilbakehopp/gjenopptak. Går ut av steget hvis auto utført før frist (manuelt av vent). Utført på/etter frist antas
             // automatisk gjenopptak.
             if (!etterlysIM.erFristUtløpt() && !autopunktAlleredeUtført(AUTO_VENT_ETTERLYST_INNTEKTSMELDING, behandling)) {
                 return BehandleStegResultat.utførtMedAksjonspunktResultater(singletonList(opprettForAksjonspunkt(AUTO_VENT_ETTERLYST_INNTEKTSMELDING)));
             }
         }
-
         return BehandleStegResultat.utførtMedAksjonspunkter(sjekkPersonstatus(ref));
 
-    }
-
-    private boolean erIkkeOmsorgspenger(BehandlingReferanse ref) {
-        // FIXME : Finn noe bedre
-        return !FagsakYtelseType.OMSORGSPENGER.equals(ref.getFagsakYtelseType());
     }
 
     private List<AksjonspunktDefinisjon> sjekkPersonstatus(BehandlingReferanse ref) {
