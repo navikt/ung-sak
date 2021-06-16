@@ -161,7 +161,7 @@ public class PleietrengendeKravprioritetTest {
         });
         
         final PleietrengendeKravprioritet pleietrengendeKravprioritet = new PleietrengendeKravprioritet(fagsakRepository, behandlingRepository, søknadsfristTjeneste);
-        return pleietrengendeKravprioritet.vurderKravprioritet(0L, new AktørId("utmocket"));
+        return pleietrengendeKravprioritet.vurderKravprioritet(1337L, new AktørId("utmocket"));
     }
     
     private FagsakRepository createFagsakRepositoryMock(int antall) {
