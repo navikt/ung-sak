@@ -28,6 +28,10 @@ import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarUtvidetRettDto;
 import no.nav.k9.sak.typer.Periode;
 
+/**
+ * @deprecated skal erstattes av AvklarUtvidetRettV2 når kronisk syk/midlertidig alene ny periode håntering er uttestet.
+ */
+@Deprecated(forRemoval = true)
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarUtvidetRettDto.class, adapter = AksjonspunktOppdaterer.class)
 public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRettDto> {
