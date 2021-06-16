@@ -16,6 +16,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -44,7 +45,7 @@ public class MapArbeid {
                             Set<PerioderFraSøknad> perioderFraSøknader,
                             LocalDateTimeline<Boolean> tidslinjeTilVurdering,
                             Set<Inntektsmelding> sakInntektsmeldinger,
-                            Vilkår vilkår) {
+                            Vilkår vilkår, BehandlingReferanse behandlingReferanse) {
 
         final Map<DatoIntervallEntitet, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>> arbeidsforholdPerPeriode = new HashMap<>();
 
@@ -55,7 +56,7 @@ public class MapArbeid {
             .collect(Collectors.toSet());
 
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            var identifikatorerFraInntektsmelding = utledRelevanteKeys(periode, sakInntektsmeldinger);
+            var identifikatorerFraInntektsmelding = utledRelevanteKeys(periode, sakInntektsmeldinger, behandlingReferanse);
             final Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold = new HashMap<>();
 
             List<VilkårPeriode> vilkårPerioder = vilkår != null ? vilkår.getPerioder().stream()
@@ -163,8 +164,8 @@ public class MapArbeid {
             new ArbeidsforholdPeriodeInfo(jobberNormalt, jobberFaktisk));
     }
 
-    private Set<AktivitetIdentifikator> utledRelevanteKeys(ArbeidPeriode
-                                                               p, Set<AktivitetIdentifikator> identifikatorerFraInntektsmelding) {
+    private Set<AktivitetIdentifikator> utledRelevanteKeys(ArbeidPeriode p,
+                                                           Set<AktivitetIdentifikator> identifikatorerFraInntektsmelding) {
         var relevanteKeys = identifikatorerFraInntektsmelding.stream()
             .filter(it -> Objects.equals(p.getArbeidsgiver(), it.getArbeidsgiver()))
             .map(AktivitetIdentifikator::getArbeidsforhold)
@@ -180,9 +181,8 @@ public class MapArbeid {
         }
     }
 
-    private Set<AktivitetIdentifikator> utledRelevanteKeys(DatoIntervallEntitet
-                                                               periode, Set<Inntektsmelding> sakInntektsmeldinger) {
-        return kompletthetForBeregningTjeneste.utledRelevanteInntektsmeldingerForPeriode(sakInntektsmeldinger, periode)
+    private Set<AktivitetIdentifikator> utledRelevanteKeys(DatoIntervallEntitet periode, Set<Inntektsmelding> sakInntektsmeldinger, BehandlingReferanse behandlingReferanse) {
+        return kompletthetForBeregningTjeneste.utledInntektsmeldingerSomBenytteMotBeregningForPeriode(behandlingReferanse, sakInntektsmeldinger, periode)
             .stream()
             .map(it -> new AktivitetIdentifikator(UttakArbeidType.ARBEIDSTAKER, it.getArbeidsgiver(), it.getArbeidsforholdRef()))
             .collect(Collectors.toSet());

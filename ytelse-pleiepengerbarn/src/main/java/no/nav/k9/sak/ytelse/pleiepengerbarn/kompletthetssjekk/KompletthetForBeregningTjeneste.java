@@ -15,9 +15,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -49,8 +46,6 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 
 @ApplicationScoped
 public class KompletthetForBeregningTjeneste {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(KompletthetForBeregningTjeneste.class);
 
     private ArbeidsforholdTjeneste arbeidsforholdTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -142,7 +137,7 @@ public class KompletthetForBeregningTjeneste {
         return perioderMedManglendeVedlegg;
     }
 
-    DatoIntervallEntitet utledRelevantPeriode(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet periode) {
+    public DatoIntervallEntitet utledRelevantPeriode(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet periode) {
         return utledRelevantPeriode(tidslinje, periode, true);
     }
 
@@ -182,7 +177,7 @@ public class KompletthetForBeregningTjeneste {
 
         for (DatoIntervallEntitet periode : relevanteVilkårsperioder) {
             var arbeidsgiverSetMap = finnArbeidsforholdForIdentPåDagFunction.apply(ref, periode.getFomDato());
-            var manglendeVedleggForPeriode = utledManglendeInntektsmeldingerPerDag(result, relevanteInntektsmeldinger, periode, tilnternArbeidsforhold, arbeidsgiverSetMap, input);
+            var manglendeVedleggForPeriode = utledManglendeInntektsmeldingerPerDag(relevanteInntektsmeldinger, periode, tilnternArbeidsforhold, arbeidsgiverSetMap, input, ref);
 
             result.put(periode, manglendeVedleggForPeriode);
         }
@@ -191,7 +186,7 @@ public class KompletthetForBeregningTjeneste {
 
     private boolean harFraværFraArbeidetIPerioden(InputForKompletthetsvurdering input,
                                                   DatoIntervallEntitet periode,
-                                                  ManglendeVedlegg manglendeVedlegg) {
+                                                  ManglendeVedlegg manglendeVedlegg, BehandlingReferanse behandlingReferanse) {
 
         if (input.getSkalHoppeOverVurderingMotArbeid()) {
             return false;
@@ -201,7 +196,7 @@ public class KompletthetForBeregningTjeneste {
         var kravDokumenter = input.getVurderteSøknadsperioder().keySet();
         var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.toLocalDateInterval(), true)));
 
-        var arbeidIPeriode = new MapArbeid(this).map(kravDokumenter, perioderFraSøknadene, timeline, Set.of(), null);
+        var arbeidIPeriode = new MapArbeid(this).map(kravDokumenter, perioderFraSøknadene, timeline, Set.of(), null, behandlingReferanse);
 
         return harFraværFraArbeidsgiverIPerioden(arbeidIPeriode, manglendeVedlegg);
     }
@@ -229,18 +224,17 @@ public class KompletthetForBeregningTjeneste {
         return iayTjeneste.hentUnikeInntektsmeldingerForSak(saksnummer);
     }
 
-    public List<Inntektsmelding> utledRelevanteInntektsmeldingerForPeriode(Set<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {
-        var relevanteInntektsmeldinger = utledRelevanteInntektsmeldinger(alleInntektsmeldingerPåSak, periode);
-
-        return inntektsmeldingerRelevantForBeregning.utledInntektsmeldingerSomGjelderForPeriode(relevanteInntektsmeldinger, periode);
+    public List<Inntektsmelding> utledInntektsmeldingerSomBenytteMotBeregningForPeriode(BehandlingReferanse referanse, Set<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {
+        var inntektsmeldings = inntektsmeldingerRelevantForBeregning.begrensSakInntektsmeldinger(referanse, alleInntektsmeldingerPåSak, periode);
+        return inntektsmeldingerRelevantForBeregning.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldings, periode);
     }
 
-    private <V extends ArbeidsforholdRef> List<ManglendeVedlegg> utledManglendeInntektsmeldingerPerDag(HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>> result,
-                                                                                                       Set<Inntektsmelding> relevanteInntektsmeldinger,
+    private <V extends ArbeidsforholdRef> List<ManglendeVedlegg> utledManglendeInntektsmeldingerPerDag(Set<Inntektsmelding> relevanteInntektsmeldinger,
                                                                                                        DatoIntervallEntitet periode,
                                                                                                        BiFunction<Arbeidsgiver, InternArbeidsforholdRef, V> tilnternArbeidsforhold,
                                                                                                        Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger,
-                                                                                                       InputForKompletthetsvurdering input) {
+                                                                                                       InputForKompletthetsvurdering input,
+                                                                                                       BehandlingReferanse referanse) {
         if (påkrevdeInntektsmeldinger.isEmpty()) {
             return List.of();
         } else {
@@ -268,13 +262,13 @@ public class KompletthetForBeregningTjeneste {
                     .map(it -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, entry.getKey().getIdentifikator(), it.getReferanse(), false))
                     .collect(Collectors.toList()))
                 .flatMap(Collection::stream)
-                .filter(it -> harFraværFraArbeidetIPerioden(input, periode, it))
+                .filter(it -> harFraværFraArbeidetIPerioden(input, periode, it, referanse))
                 .collect(Collectors.toList());
             return manglendeInntektsmeldinger;
         }
     }
 
-    private Set<Inntektsmelding> utledRelevanteInntektsmeldinger(Set<Inntektsmelding> inntektsmeldinger, DatoIntervallEntitet relevantPeriode) {
+    public Set<Inntektsmelding> utledRelevanteInntektsmeldinger(Set<Inntektsmelding> inntektsmeldinger, DatoIntervallEntitet relevantPeriode) {
         return inntektsmeldinger.stream()
             .filter(im -> im.getStartDatoPermisjon().isPresent() && relevantPeriode.inkluderer(im.getStartDatoPermisjon().orElseThrow()))
             .collect(Collectors.toSet());

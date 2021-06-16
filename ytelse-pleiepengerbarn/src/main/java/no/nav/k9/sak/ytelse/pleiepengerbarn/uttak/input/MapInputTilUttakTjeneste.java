@@ -188,7 +188,7 @@ public class MapInputTilUttakTjeneste {
         final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
         // TODO: Se kommentarer/TODOs under denne:
-        final List<Arbeid> arbeid = new MapArbeid(kompletthetForBeregningTjeneste).map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering, input.getSakInntektsmeldinger(), input.getVilkårene().getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow());
+        final List<Arbeid> arbeid = new MapArbeid(kompletthetForBeregningTjeneste).map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering, input.getSakInntektsmeldinger(), input.getVilkårene().getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow(), BehandlingReferanse.fra(behandling));
 
         final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehov());
 
