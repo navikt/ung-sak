@@ -182,7 +182,7 @@ public class MapArbeid {
     }
 
     private Set<AktivitetIdentifikator> utledRelevanteKeys(DatoIntervallEntitet periode, Set<Inntektsmelding> sakInntektsmeldinger, BehandlingReferanse behandlingReferanse) {
-        return kompletthetForBeregningTjeneste.utledRelevanteInntektsmeldingerForPeriodeMenReduserInntektsmeldingerMedBegrensetPeriode(behandlingReferanse, sakInntektsmeldinger, periode)
+        return kompletthetForBeregningTjeneste.utledInntektsmeldingerSomBenytteMotBeregningForPeriode(behandlingReferanse, sakInntektsmeldinger, periode)
             .stream()
             .map(it -> new AktivitetIdentifikator(UttakArbeidType.ARBEIDSTAKER, it.getArbeidsgiver(), it.getArbeidsforholdRef()))
             .collect(Collectors.toSet());

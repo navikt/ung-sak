@@ -224,11 +224,7 @@ public class KompletthetForBeregningTjeneste {
         return iayTjeneste.hentUnikeInntektsmeldingerForSak(saksnummer);
     }
 
-    public List<Inntektsmelding> utledRelevanteInntektsmeldingerForPeriode(BehandlingReferanse referanse, Set<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {
-        return inntektsmeldingerRelevantForBeregning.utledInntektsmeldingerSomGjelderForPeriode(alleInntektsmeldingerPåSak, periode);
-    }
-
-    public List<Inntektsmelding> utledRelevanteInntektsmeldingerForPeriodeMenReduserInntektsmeldingerMedBegrensetPeriode(BehandlingReferanse referanse, Set<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {
+    public List<Inntektsmelding> utledInntektsmeldingerSomBenytteMotBeregningForPeriode(BehandlingReferanse referanse, Set<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {
         var inntektsmeldings = inntektsmeldingerRelevantForBeregning.begrensSakInntektsmeldinger(referanse, alleInntektsmeldingerPåSak, periode);
         return inntektsmeldingerRelevantForBeregning.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldings, periode);
     }

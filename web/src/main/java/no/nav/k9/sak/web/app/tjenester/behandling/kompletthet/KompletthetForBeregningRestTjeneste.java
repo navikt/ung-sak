@@ -88,7 +88,7 @@ public class KompletthetForBeregningRestTjeneste {
             .map(at -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(at.getArbeidsgiver(), at.getArbeidsforholdId()), Status.MANGLER, null))
             .collect(Collectors.toCollection(ArrayList::new));
 
-        resultat.addAll(kompletthetForBeregningTjeneste.utledRelevanteInntektsmeldingerForPeriodeMenReduserInntektsmeldingerMedBegrensetPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
+        resultat.addAll(kompletthetForBeregningTjeneste.utledInntektsmeldingerSomBenytteMotBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
             .stream().map(im -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(im.getArbeidsgiver().getIdentifikator(),
                 im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), Status.MOTTATT, im.getJournalpostId()))
             .collect(Collectors.toList()));
