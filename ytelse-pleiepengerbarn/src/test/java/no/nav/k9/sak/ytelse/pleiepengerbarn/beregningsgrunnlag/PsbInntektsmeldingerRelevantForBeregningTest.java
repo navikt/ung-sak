@@ -41,7 +41,7 @@ class PsbInntektsmeldingerRelevantForBeregningTest {
             .build();
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato);
-        var relevanteInntektsmeldinger = tjeneste.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsperiode);
+        var relevanteInntektsmeldinger = tjeneste.sorterOgPlukkUtPrioritert(vilkårsperiode, sakInntektsmeldinger);
         assertThat(relevanteInntektsmeldinger).containsOnly(inntektsmelding2);
     }
 }
