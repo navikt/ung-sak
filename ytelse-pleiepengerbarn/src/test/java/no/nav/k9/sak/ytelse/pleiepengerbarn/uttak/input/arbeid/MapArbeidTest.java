@@ -207,9 +207,6 @@ class MapArbeidTest {
         var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, Set.of(), opprettVilkår(tidlinjeTilVurdering));
 
         assertThat(result).hasSize(1);
-        assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, null),
-            Map.of(new LukketPeriode(arbeidsperiode1.getTomDato().plusDays(1), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)),
-                new LukketPeriode(arbeidsperiode1.getFomDato(), arbeidsperiode1.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7)))));
     }
 
     @Test
