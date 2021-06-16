@@ -71,9 +71,7 @@ public class MapArbeid {
             arbeidsforholdPerPeriode.put(periode, arbeidsforhold);
         }
 
-        var arbeidsforhold = new HashMap<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>();
-
-        slåSammenOpplysningerForSammeArbeidsforhold(arbeidsforholdPerPeriode, arbeidsforhold);
+        var arbeidsforhold = slåSammenOpplysningerForSammeArbeidsforhold(arbeidsforholdPerPeriode);
 
         return arbeidsforhold.keySet()
             .stream()
@@ -129,7 +127,9 @@ public class MapArbeid {
         }
     }
 
-    private void slåSammenOpplysningerForSammeArbeidsforhold(Map<DatoIntervallEntitet, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>> arbeidsforholdPerPeriode, HashMap<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold) {
+    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> slåSammenOpplysningerForSammeArbeidsforhold(Map<DatoIntervallEntitet, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>> arbeidsforholdPerPeriode) {
+        var arbeidsforhold = new HashMap<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>();
+
         for (Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> aktiviteterIPeriode : arbeidsforholdPerPeriode.values()) {
             for (AktivitetIdentifikator aktivitetIdentifikator : aktiviteterIPeriode.keySet()) {
                 var perioder = arbeidsforhold.getOrDefault(aktivitetIdentifikator, new LocalDateTimeline<>(List.of()));
@@ -138,9 +138,11 @@ public class MapArbeid {
                 arbeidsforhold.put(aktivitetIdentifikator, perioder);
             }
         }
+
+        return arbeidsforhold;
     }
 
-    private Arbeid mapArbeidsgiver(HashMap<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, AktivitetIdentifikator key) {
+    private Arbeid mapArbeidsgiver(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, AktivitetIdentifikator key) {
         var perioder = new HashMap<LukketPeriode, ArbeidsforholdPeriodeInfo>();
         arbeidsforhold.get(key)
             .compress()
@@ -152,7 +154,7 @@ public class MapArbeid {
         return new Arbeid(mapArbeidsforhold(key), perioder);
     }
 
-    private void mapArbeidForPeriode(HashMap<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, HashMap<LukketPeriode, ArbeidsforholdPeriodeInfo> perioder, LocalDateSegment<WrappedArbeid> p) {
+    private void mapArbeidForPeriode(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, HashMap<LukketPeriode, ArbeidsforholdPeriodeInfo> perioder, LocalDateSegment<WrappedArbeid> p) {
         var periode = p.getValue().getPeriode();
         var antallLinjerPerArbeidsgiver = arbeidsforhold.keySet().stream().filter(it -> Objects.equals(periode.getAktivitetType(), it.getAktivitetType()) && periode.getArbeidsgiver() != null && Objects.equals(it.getArbeidsgiver(), periode.getArbeidsgiver())).count();
         var jobberNormalt = justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Optional.ofNullable(periode.getJobberNormaltTimerPerDag()).orElse(justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Duration.ZERO)));
