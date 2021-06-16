@@ -129,7 +129,7 @@ public class MapInputTilUttakTjeneste {
             .collect(Collectors.toSet());
 
         final List<EtablertTilsynPeriode> etablertTilsynPerioder = etablertTilsynRepository.hent(referanse.getBehandlingId()).getEtablertTilsyn().getPerioder();
-        final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getPleietrengendeAktørId());
+        final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getFagsakId(), referanse.getPleietrengendeAktørId());
 
         var input = new InputParametere()
             .medBehandling(behandling)
