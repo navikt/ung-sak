@@ -165,7 +165,8 @@ public class KompletthetForBeregningTjeneste {
         return utledRelevantPeriode(tidslinje, relevantPeriode, false);
     }
 
-    private Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledManglendeVedleggForPeriode(BehandlingReferanse ref, Set<Inntektsmelding> inntektsmeldinger,
+    private Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledManglendeVedleggForPeriode(BehandlingReferanse ref,
+                                                                                              Set<Inntektsmelding> inntektsmeldinger,
                                                                                               DatoIntervallEntitet relevantPeriode,
                                                                                               Set<DatoIntervallEntitet> vilkårsPerioder,
                                                                                               InputForKompletthetsvurdering input,
@@ -175,9 +176,9 @@ public class KompletthetForBeregningTjeneste {
         var result = new HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>>();
         var relevanteInntektsmeldinger = utledRelevanteInntektsmeldinger(inntektsmeldinger, relevantPeriode);
         var tilnternArbeidsforhold = new FinnEksternReferanse(iayTjeneste, ref.getBehandlingId());
-        var relevanteVilkårsperioder = vilkårsPerioder.stream().filter(it -> relevantPeriode.overlapper(it.getFomDato(), it.getTomDato())).collect(Collectors.toList());
-
-        LOGGER.info("Vurderer kompletthet for [{}], vurderer mot arbeid, skal vurdere mot arbeid? {} => [{}]", relevanteVilkårsperioder, input.kanVurderesMotArbeidstid(), input.getSkalHoppeOverVurderingMotArbeid());
+        var relevanteVilkårsperioder = vilkårsPerioder.stream()
+            .filter(it -> relevantPeriode.overlapper(it.getFomDato(), it.getTomDato()))
+            .collect(Collectors.toList());
 
         for (DatoIntervallEntitet periode : relevanteVilkårsperioder) {
             var arbeidsgiverSetMap = finnArbeidsforholdForIdentPåDagFunction.apply(ref, periode.getFomDato());
@@ -275,7 +276,7 @@ public class KompletthetForBeregningTjeneste {
 
     private Set<Inntektsmelding> utledRelevanteInntektsmeldinger(Set<Inntektsmelding> inntektsmeldinger, DatoIntervallEntitet relevantPeriode) {
         return inntektsmeldinger.stream()
-            .filter(im -> im.getStartDatoPermisjon().isEmpty() || relevantPeriode.inkluderer(im.getStartDatoPermisjon().orElseThrow()))
+            .filter(im -> im.getStartDatoPermisjon().isPresent() && relevantPeriode.inkluderer(im.getStartDatoPermisjon().orElseThrow()))
             .collect(Collectors.toSet());
     }
 }
