@@ -22,6 +22,7 @@ import no.nav.k9.sak.trigger.ProsessTriggere;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.trigger.Trigger;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBeregningTjeneste;
 
 @ApplicationScoped
 public class RevurderingPerioderTjeneste {
@@ -31,14 +32,17 @@ public class RevurderingPerioderTjeneste {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private ProsessTriggereRepository prosessTriggereRepository;
+    private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
 
     @Inject
     public RevurderingPerioderTjeneste(MottatteDokumentRepository mottatteDokumentRepository,
                                        InntektArbeidYtelseTjeneste iayTjeneste,
-                                       ProsessTriggereRepository prosessTriggereRepository) {
+                                       ProsessTriggereRepository prosessTriggereRepository,
+                                       KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.iayTjeneste = iayTjeneste;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
     }
 
     RevurderingPerioderTjeneste() {
@@ -83,6 +87,7 @@ public class RevurderingPerioderTjeneste {
             return cacheEntries.stream()
                 .map(InntektsmeldingMedPerioder::getPeriode)
                 .filter(Objects::nonNull)
+                .map(it -> kompletthetForBeregningTjeneste.utledRelevantPeriode(referanse, it))
                 .collect(Collectors.toSet());
         }
 
@@ -97,6 +102,7 @@ public class RevurderingPerioderTjeneste {
         return inntektsmeldingerMedPeriode.stream()
             .map(InntektsmeldingMedPerioder::getPeriode)
             .filter(Objects::nonNull)
+            .map(it -> kompletthetForBeregningTjeneste.utledRelevantPeriode(referanse, it))
             .collect(Collectors.toSet());
     }
 

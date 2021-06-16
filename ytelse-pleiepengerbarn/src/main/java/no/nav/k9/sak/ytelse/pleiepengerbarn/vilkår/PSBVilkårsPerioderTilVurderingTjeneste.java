@@ -189,6 +189,10 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                 .collect(Collectors.toSet()));
         }
         periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggereMedÅrsak(referanse));
+        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse)
+            .stream()
+            .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING))
+            .collect(Collectors.toSet()));
 
         return periodeMedÅrsaks;
     }
@@ -208,10 +212,10 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         resultat = SykdomUtils.kunPerioderSomIkkeFinnesI(resultat, SykdomUtils.toLocalDateTimeline(sykdomGrunnlagService.hentManglendeOmsorgenForPerioder(referanse.getBehandlingId())));
         //resultat = SykdomUtils.kunPerioderSomIkkeFinnesI(resultat, SykdomUtils.toLocalDateTimeline(utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)));
         resultat = resultat.intersection(SykdomUtils.toLocalDateTimeline(utledFullstendigePerioder(referanse.getBehandlingId())));
-        
+
         return resultat;
     }
-    
+
     private LocalDateTimeline<Boolean> utledUtvidetPeriodeForSykdom(BehandlingReferanse referanse) {
         var forrigeVedtatteBehandling = behandlingRepository.hentBehandling(referanse.getOriginalBehandlingId().orElseThrow()).getUuid();
         var vedtattSykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(forrigeVedtatteBehandling);
