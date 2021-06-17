@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.hendelser.HendelseType;
+import no.nav.k9.sak.kontrakt.uttak.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
@@ -26,6 +27,7 @@ public class DødsfallHendelse implements Hendelse {
     private HendelseInfo hendelseInfo;
 
     @JsonProperty(value = "dødsdato")
+    @NotNull
     @Valid
     private LocalDate dødsdato;
 
@@ -69,6 +71,11 @@ public class DødsfallHendelse implements Hendelse {
     @Override
     public HendelseType getHendelseType() {
         return HENDELSETYPE_DØDSFALL;
+    }
+
+    @Override
+    public Periode getHendelsePeriode() {
+        return new Periode(dødsdato, dødsdato);
     }
 
 }

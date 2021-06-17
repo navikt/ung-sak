@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import no.nav.k9.kodeverk.hendelser.HendelseType;
+import no.nav.k9.sak.kontrakt.uttak.Periode;
 
 @Valid
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
@@ -23,5 +24,7 @@ public interface Hendelse {
     HendelseType getHendelseType();
 
     HendelseInfo getHendelseInfo();
+
+    Periode getHendelsePeriode();
 
 }
