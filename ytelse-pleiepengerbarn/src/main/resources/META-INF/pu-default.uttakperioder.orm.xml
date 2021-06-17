@@ -18,6 +18,8 @@
 	<sequence-generator name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN" allocation-size="50" sequence-name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN" />
 	<sequence-generator name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN_PERIODE" allocation-size="50" sequence-name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN_PERIODE" />
 	<sequence-generator name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN_BESKRIVELSE" allocation-size="50" sequence-name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN_BESKRIVELSE" />
+	<sequence-generator name="SEQ_PSB_GR_RETT_PLEIEPENGER_VED_DOED" allocation-size="50" sequence-name="SEQ_PSB_GR_RETT_PLEIEPENGER_VED_DOED" />
+	<sequence-generator name="SEQ_PSB_RETT_PLEIEPENGER_VED_DOED" allocation-size="50" sequence-name="SEQ_PSB_RETT_PLEIEPENGER_VED_DOED" />
 
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderHolder" />
@@ -34,5 +36,7 @@
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynPeriode" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynBeskrivelse" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødGrunnlag" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDød" />
 
 </entity-mappings>
