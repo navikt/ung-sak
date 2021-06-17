@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 
 import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -66,6 +67,10 @@ public class VilkårPeriodeDto {
      */
     @JsonProperty("vurdersIBehandlingen")
     private Boolean vurderesIBehandlingen;
+
+    @JsonProperty(value = "merknad")
+    @Valid
+    private VilkårUtfallMerknad merknad;
 
     public VilkårPeriodeDto() {
     }
@@ -130,6 +135,18 @@ public class VilkårPeriodeDto {
         return vurderesIBehandlingen;
     }
 
+    public void setVurderesIBehandlingen(Boolean vurderesIBehandlingen) {
+        this.vurderesIBehandlingen = vurderesIBehandlingen;
+    }
+
+    public VilkårUtfallMerknad getMerknad() {
+        return merknad;
+    }
+
+    public void setMerknad(VilkårUtfallMerknad merknad) {
+        this.merknad = merknad;
+    }
+
     @Override
     public String toString() {
         return getClass().getSimpleName()
@@ -140,9 +157,5 @@ public class VilkårPeriodeDto {
             + (merknadParametere == null ? "" : ", merknadParametere=" + merknadParametere)
             + (vurderesIBehandlingen == null ? "" : ", vurderesIBehandlingen=" + vurderesIBehandlingen)
             + ">";
-    }
-
-    public void setVurderesIBehandlingen(Boolean vurderesIBehandlingen) {
-        this.vurderesIBehandlingen = vurderesIBehandlingen;
     }
 }
