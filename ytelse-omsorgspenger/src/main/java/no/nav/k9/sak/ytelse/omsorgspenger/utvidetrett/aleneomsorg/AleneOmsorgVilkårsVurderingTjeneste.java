@@ -92,7 +92,7 @@ public class AleneOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderTil
     }
 
     DatoIntervallEntitet utledMaksPeriode(NavigableSet<DatoIntervallEntitet> søktePerioder, AktørId barnAktørId) {
-        var barninfo = personinfoAdapter.hentBrukerBasisForAktør(barnAktørId).orElseThrow(() -> new IllegalStateException("Mangler personinfo for pleietrengende aktørId"));
+        var barninfo = personinfoAdapter.hentKjerneinformasjon(barnAktørId);
 
         // ikke åpne fagsaken før barnets fødselsdato
         var fødselsdato = barninfo.getFødselsdato();

@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -24,7 +23,6 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
 
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
-    private MidlertidigAleneVilkårsVurderingTjeneste vilkårsVurderingTjeneste;
 
     MidlertidigAleneSøknadMottaker() {
         // proxy
@@ -32,9 +30,7 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
 
     @Inject
     public MidlertidigAleneSøknadMottaker(SaksnummerRepository saksnummerRepository,
-                                          @Any MidlertidigAleneVilkårsVurderingTjeneste vilkårsVurderingTjeneste,
                                           FagsakTjeneste fagsakTjeneste) {
-        this.vilkårsVurderingTjeneste = vilkårsVurderingTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.saksnummerRepository = saksnummerRepository;
     }
@@ -50,9 +46,8 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
         }
 
         var saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        var fagsakPeriode = vilkårsVurderingTjeneste.utledMaksPeriode(DatoIntervallEntitet.fra(startDato, sluttDato));
 
-        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato());
+        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, startDato, datoIntervall.getTomDato());
     }
 
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {
