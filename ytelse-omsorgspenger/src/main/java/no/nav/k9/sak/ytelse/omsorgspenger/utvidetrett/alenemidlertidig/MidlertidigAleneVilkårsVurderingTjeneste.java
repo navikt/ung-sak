@@ -56,11 +56,14 @@ public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPeriod
         var optVilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (optVilkårene.isPresent()) {
             var vilkårTidslinje = optVilkårene.get().getVilkårTimeline(vilkårType);
+            if (vilkårTidslinje.isEmpty()) {
+                return Collections.emptyNavigableSet();
+            }
             var utlededePerioder = vilkårTidslinje.getLocalDateIntervals().stream().map(p -> DatoIntervallEntitet.fra(p)).collect(Collectors.toCollection(TreeSet::new));
             return Collections.unmodifiableNavigableSet(utlededePerioder);
         } else {
-            // default til søkte perioder hvis vilkår ikke angitt.
-            return søktePerioder.utledPeriode(behandlingId);
+            // default til 'fullstedige' perioder hvis vilkår ikke angitt.
+            return utledFullstendigePerioder(behandlingId);
         }
     }
 

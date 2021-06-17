@@ -2,6 +2,10 @@ package no.nav.k9.sak.domene.typer.tid;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.NavigableSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -9,6 +13,7 @@ import javax.persistence.Embeddable;
 import com.vladmihalcea.hibernate.type.range.Range;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.typer.Periode;
 
 /**
@@ -144,6 +149,15 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
                 fomDato.isAfter(annen.fomDato) ? fomDato : annen.fomDato,
                 tomDato.isBefore(annen.tomDato) ? tomDato : annen.tomDato);
         }
+    }
+
+    public static NavigableSet<DatoIntervallEntitet> fraTimeline(LocalDateTimeline<?> timeline) {
+        if (timeline.isEmpty()) {
+            return Collections.emptyNavigableSet();
+        } else {
+            return Collections.unmodifiableNavigableSet(timeline.getLocalDateIntervals().stream().map(DatoIntervallEntitet::fra).collect(Collectors.toCollection(TreeSet::new)));
+        }
+
     }
 
 }
