@@ -25,6 +25,8 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.abakus.ArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -52,6 +54,7 @@ public class KompletthetForBeregningTjeneste {
     private InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
 
     KompletthetForBeregningTjeneste() {
@@ -64,13 +67,15 @@ public class KompletthetForBeregningTjeneste {
                                            UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                                            @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                            ArbeidsforholdTjeneste arbeidsforholdTjeneste,
-                                           InntektArbeidYtelseTjeneste iayTjeneste) {
+                                           InntektArbeidYtelseTjeneste iayTjeneste,
+                                           VilkårResultatRepository vilkårResultatRepository) {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
         this.arbeidsforholdTjeneste = arbeidsforholdTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
+        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggFraRegister(BehandlingReferanse ref) {
@@ -137,7 +142,27 @@ public class KompletthetForBeregningTjeneste {
         return perioderMedManglendeVedlegg;
     }
 
-    public DatoIntervallEntitet utledRelevantPeriode(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet periode) {
+    private LocalDateTimeline<Boolean> utledTidslinje(BehandlingReferanse referanse) {
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
+        if (vilkårene.isEmpty()) {
+            return new LocalDateTimeline<>(List.of(new LocalDateSegment<>(referanse.getFagsakPeriode().toLocalDateInterval(), true)));
+        }
+        var vilkåret = vilkårene.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+
+        return vilkåret.map(vilkår -> new LocalDateTimeline<>(vilkår.getPerioder().stream()
+            .map(VilkårPeriode::getPeriode)
+            .map(DatoIntervallEntitet::toLocalDateInterval)
+            .map(it -> new LocalDateSegment<>(it, true))
+            .collect(Collectors.toList())))
+            .orElseGet(() -> new LocalDateTimeline<>(List.of(new LocalDateSegment<>(referanse.getFagsakPeriode().toLocalDateInterval(), true))));
+    }
+
+    public DatoIntervallEntitet utledRelevantPeriode(BehandlingReferanse referanse, DatoIntervallEntitet periode) {
+        var tidslinje = utledTidslinje(referanse);
+        return utledRelevantPeriode(tidslinje, periode, true);
+    }
+
+    DatoIntervallEntitet utledRelevantPeriode(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet periode) {
         return utledRelevantPeriode(tidslinje, periode, true);
     }
 
@@ -259,7 +284,7 @@ public class KompletthetForBeregningTjeneste {
                 .stream()
                 .map(entry -> entry.getValue()
                     .stream()
-                    .map(it -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, entry.getKey().getIdentifikator(), it.getReferanse(), false))
+                    .map(it -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, entry.getKey().getIdentifikator(), it != null ? it.getReferanse() : null, false))
                     .collect(Collectors.toList()))
                 .flatMap(Collection::stream)
                 .filter(it -> harFraværFraArbeidetIPerioden(input, periode, it, referanse))

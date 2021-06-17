@@ -42,7 +42,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 
 class MapArbeidTest {
 
-    private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste = new KompletthetForBeregningTjeneste(null, new TestPSBInntektsmeldingerRelevantForBeregning(), null, null, null, null);
+    private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste = new KompletthetForBeregningTjeneste(null, new TestPSBInntektsmeldingerRelevantForBeregning(), null, null, null, null, null);
     private MapArbeid mapper = new MapArbeid(kompletthetForBeregningTjeneste);
 
     @Test

@@ -15,13 +15,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBeregningTjeneste;
@@ -45,8 +41,7 @@ public class PSBInntektsmeldingerRelevantForBeregning implements Inntektsmelding
 
     @Override
     public Collection<Inntektsmelding> begrensSakInntektsmeldinger(BehandlingReferanse referanse, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
-        var tidslinje = utledTidslinje(referanse);
-        var relevantPeriode = kompletthetForBeregningTjeneste.utledRelevantPeriode(tidslinje, vilkårsPeriode);
+        var relevantPeriode = kompletthetForBeregningTjeneste.utledRelevantPeriode(referanse, vilkårsPeriode);
         return kompletthetForBeregningTjeneste.utledRelevanteInntektsmeldinger(new HashSet<>(sakInntektsmeldinger), relevantPeriode);
     }
 
@@ -75,21 +70,6 @@ public class PSBInntektsmeldingerRelevantForBeregning implements Inntektsmelding
         }
 
         return inntektsmeldingene;
-    }
-
-    private LocalDateTimeline<Boolean> utledTidslinje(BehandlingReferanse referanse) {
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
-        if (vilkårene.isEmpty()) {
-            return new LocalDateTimeline<>(List.of(new LocalDateSegment<>(referanse.getFagsakPeriode().toLocalDateInterval(), true)));
-        }
-        var vilkåret = vilkårene.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-
-        return vilkåret.map(vilkår -> new LocalDateTimeline<>(vilkår.getPerioder().stream()
-            .map(VilkårPeriode::getPeriode)
-            .map(DatoIntervallEntitet::toLocalDateInterval)
-            .map(it -> new LocalDateSegment<>(it, true))
-            .collect(Collectors.toList())))
-            .orElseGet(() -> new LocalDateTimeline<>(List.of(new LocalDateSegment<>(referanse.getFagsakPeriode().toLocalDateInterval(), true))));
     }
 
     private boolean skalErstatteEksisterendeInntektsmelding(Inntektsmelding inntektsmelding, List<Inntektsmelding> inntektsmeldingene, DatoIntervallEntitet vilkårsPeriode) {
