@@ -198,7 +198,6 @@ public class VilkårTjeneste {
         var utvidetTilVUrdering = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref);
 
         if (!utvidetTilVUrdering.isEmpty()) {
-            log.info("Fikk utvidet perioder til vurdering {}, i tillegg til vilkårsperioder: {}", utvidetTilVUrdering, perioder);
             perioder.addAll(utvidetTilVUrdering);
         }
 
