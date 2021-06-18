@@ -33,7 +33,7 @@ public class BekreftÅrskvantumUttakSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        // Dette er et dummy steg for å unngå å kjøre hele uttakssteget på nytt ved tilbakehopp
+        // Dette er et dummy steg for at aksjonspunkt 9004 (manuell overstyring) skal kunne kjøres ETTER at uttak er beregnet i foregående steg
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
