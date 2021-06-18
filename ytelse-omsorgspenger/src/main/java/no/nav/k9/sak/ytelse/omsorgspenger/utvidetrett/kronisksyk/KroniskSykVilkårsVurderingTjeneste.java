@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -14,6 +15,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -75,11 +78,14 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
         var optVilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (optVilkårene.isPresent()) {
             var vilkårTidslinje = optVilkårene.get().getVilkårTimeline(vilkårType);
-            var utlededePerioder = vilkårTidslinje.getLocalDateIntervals().stream().map(p -> DatoIntervallEntitet.fra(p)).collect(Collectors.toCollection(TreeSet::new));
+            if (vilkårTidslinje.isEmpty()) {
+                return Collections.emptyNavigableSet();
+            }
+            NavigableSet<DatoIntervallEntitet> utlededePerioder = vilkårTidslinje.getLocalDateIntervals().stream().map(p -> DatoIntervallEntitet.fra(p)).collect(Collectors.toCollection(TreeSet::new));
             return Collections.unmodifiableNavigableSet(utlededePerioder);
         } else {
-            // default til søkte perioder hvis vilkår ikke angitt.
-            return søktePerioder.utledPeriode(behandlingId);
+            // default til 'fullstedige' perioder hvis vilkår ikke angitt.
+            return utledFullstendigePerioder(behandlingId);
         }
     }
 
@@ -101,7 +107,9 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
         var fristFørSøknadsdato = søknadFom.minusYears(3).withMonth(1).withDayOfMonth(1);
 
         var mindato = Set.of(fødselsdato, fristFørSøknadsdato).stream().max(LocalDate::compareTo).get();
-        var maksdato = barninfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31); // siste dag året fyller 18
+
+        // kan ikke gå lenger enn til 18 år (kun oppfylt i årskvantum om kronisk syk også fins
+        var maksdato = barninfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31);
 
         if (maksdato.isAfter(søknadFom)) {
             return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato);
