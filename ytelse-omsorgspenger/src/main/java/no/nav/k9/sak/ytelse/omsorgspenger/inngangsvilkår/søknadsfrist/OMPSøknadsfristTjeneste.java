@@ -47,7 +47,7 @@ public class OMPSøknadsfristTjeneste implements SøknadsfristTjeneste {
     @Override
     public VilkårResultatBuilder vurderSøknadsfrist(BehandlingReferanse referanse, VilkårResultatBuilder vilkårResultatBuilder) {
         var søktePerioder = tjeneste.hentPerioderTilVurdering(referanse);
-        var vurdertePerioder = tjeneste.vurderSøknadsfrist(søktePerioder);
+        var vurdertePerioder = tjeneste.vurderSøknadsfrist(referanse.getBehandlingId(), søktePerioder);
 
         return mapVurderingerTilVilkårsresultat(vilkårResultatBuilder, søktePerioder, vurdertePerioder, referanse.getFagsakPeriode());
     }
