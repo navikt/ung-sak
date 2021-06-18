@@ -100,7 +100,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
         var søknaderMedPerioder = søknadsfristTjeneste.hentPerioderTilVurdering(referanse);
-        var fraværPåSak = trekkUtFraværTjeneste.trekkUtFravær(søknadsfristTjeneste.vurderSøknadsfrist(søknaderMedPerioder))
+        var fraværPåSak = trekkUtFraværTjeneste.trekkUtFravær(søknadsfristTjeneste.vurderSøknadsfrist(behandlingId, søknaderMedPerioder))
             .stream()
             .map(WrappedOppgittFraværPeriode::getPeriode)
             .collect(Collectors.toSet());
