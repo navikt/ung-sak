@@ -80,7 +80,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
             uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandlingId, uttaksPerioderGrunnlag.getOppgitteSøknadsperioder());
         } else {
             var kravDokumenterMedPerioder = søknadsfristTjeneste.hentPerioderTilVurdering(referanse);
-            var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
+            var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
                 .stream()
                 .filter(it -> it.getBehandlingId().equals(behandlingId))
                 .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))

@@ -1,5 +1,11 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -10,11 +16,6 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Dependent
 public class InntektsmeldingerPerioderTjeneste {
@@ -50,7 +51,7 @@ public class InntektsmeldingerPerioderTjeneste {
     }
 
     private Set<JournalpostId> hentUtRelevanteJournalposter(Behandling behandling) {
-        return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
+        return mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
             .stream()
             .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
             .filter(it -> it.getBehandlingId() != null)
