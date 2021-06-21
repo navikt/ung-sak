@@ -15,6 +15,11 @@ registries:
     url: https://maven.pkg.github.com/navikt/k9-aarskvantum
     username: x-access-token
     password: ${{secrets.GITHUB_ACCESS_TOKEN}}
+  pleiepenger-barn-uttak:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/pleiepenger-barn-uttak
+    username: x-access-token
+    password: ${{secrets.GITHUB_ACCESS_TOKEN}} 
   k9-prosesstask:
     type: maven-repository
     url: https://maven.pkg.github.com/navikt/k9-prosesstask
@@ -56,17 +61,18 @@ updates:
     schedule:
       interval: daily
     open-pull-requests-limit: 10
-  registries:
-    - k9-felles
-    - k9-prosesstask
-    - k9-format
-    - k9-aarskvantum
-    - k9-formidling
-    - k9-oppdrag
-    - fp-abakus
-    - ft-kalkulus
-    - fp-nare
-    - fp-tidsserie
+    registries:
+      - k9-felles
+      - k9-prosesstask
+      - k9-format
+      - k9-aarskvantum
+      - pleiepenger-barn-uttak
+      - k9-formidling
+      - k9-oppdrag
+      - fp-abakus
+      - ft-kalkulus
+      - fp-nare
+      - fp-tidsserie
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
