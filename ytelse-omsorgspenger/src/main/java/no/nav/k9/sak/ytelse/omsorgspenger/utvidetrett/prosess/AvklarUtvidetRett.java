@@ -118,9 +118,6 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     }
 
     private LocalDateInterval validerAngittPeriode(Fagsak fagsak, LocalDateInterval angittPeriode) {
-        if (FagsakYtelseType.OMSORGSPENGER_KS == fagsak.getYtelseType()) {
-            throw new UnsupportedOperationException("Kan ikke angi periode for ytelseType=" + fagsak.getYtelseType());
-        }
         if (Objects.requireNonNull(angittPeriode).isOpenStart()) {
             throw new IllegalArgumentException("Angitt periode kan ikke ha åpen start. angitt=" + angittPeriode);
         }
