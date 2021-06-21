@@ -4,15 +4,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
-import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivPeriode;
-
 public class BeregningsgrunnlagPrArbeidsforhold {
 
     /**
      * NB: arbeidsforhold kan være null for anonyme arbeidsforhold (etterlønn, ventelønn, lønn under utdanning, utdanningspermisjon, ol.). Merk
      * at disse vil håndteres som inntektskategori ARBEIDSTAKER.
-     * 
-     * @see AktivPeriode#forAndre
      */
     private Arbeidsforhold arbeidsforhold;
     

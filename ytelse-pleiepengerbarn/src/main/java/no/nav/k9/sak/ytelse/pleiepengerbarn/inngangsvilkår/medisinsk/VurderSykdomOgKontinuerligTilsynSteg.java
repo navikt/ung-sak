@@ -32,6 +32,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -72,6 +73,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private VilkårResultatRepository vilkårResultatRepository;
     private SykdomVurderingService sykdomVurderingService;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
 
     VurderSykdomOgKontinuerligTilsynSteg() {
         // CDI
@@ -82,7 +84,8 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                                                 PleiebehovResultatRepository resultatRepository,
                                                 @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                 SykdomVurderingService sykdomVurderingService,
-                                                SykdomGrunnlagRepository sykdomGrunnlagRepository) {
+                                                SykdomGrunnlagRepository sykdomGrunnlagRepository,
+                                                AksjonspunktKontrollRepository aksjonspunktKontrollRepository) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
@@ -90,24 +93,31 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.sykdomVurderingService = sykdomVurderingService;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
+        this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
+    }
+
+    private static final <T> NavigableSet<T> union(NavigableSet<T> s1, NavigableSet<T> s2) {
+        final var resultat = new TreeSet<>(s1);
+        resultat.addAll(s2);
+        return resultat;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        
+
         final var perioderUnder18årTidslinje = medOmsorgenFor(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR), vilkårene);
         final var perioder18årTidslinje = medOmsorgenFor(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR), vilkårene);
-        
+
         final var perioderUnder18år = kunPerioderMedOmsorgenFor(perioderUnder18årTidslinje, Utfall.OPPFYLT);
         final var perioder18år = kunPerioderMedOmsorgenFor(perioder18årTidslinje, Utfall.OPPFYLT);
         final var perioderSamlet = union(perioderUnder18år, perioder18år);
-        
+
         final var perioderUnder18årUtenOmsorgenFor = kunPerioderMedOmsorgenFor(perioderUnder18årTidslinje, Utfall.IKKE_OPPFYLT);
         final var perioder18årUtenOmsorgenFor = kunPerioderMedOmsorgenFor(perioder18årTidslinje, Utfall.IKKE_OPPFYLT);
         final var perioderTilVurderingUtenOmsorgenFor = kunPerioderMedOmsorgenFor(perioderUnder18årTidslinje.union(perioder18årTidslinje, StandardCombinators::coalesceLeftHandSide), Utfall.IKKE_OPPFYLT);
         // TODO: Fjern søknadsperioder: perioderTilVurderingUtenOmsorgenFor
-       
+
         final Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         final SykdomGrunnlagBehandling sykdomGrunnlagBehandling = opprettGrunnlag(perioderSamlet, perioderTilVurderingUtenOmsorgenFor, behandling);
 
@@ -115,20 +125,31 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         if (!finnesKunPerioderMedManglendeOmsorgenFor && trengerAksjonspunkt(kontekst, behandling, sykdomGrunnlagBehandling)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
-        
+
         var builder = Vilkårene.builderFraEksisterende(vilkårene);
         vurder(kontekst, sykdomGrunnlagBehandling, builder, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, perioderUnder18år, perioderUnder18årUtenOmsorgenFor);
         vurder(kontekst, sykdomGrunnlagBehandling, builder, VilkårType.MEDISINSKEVILKÅR_18_ÅR, perioder18år, perioder18årUtenOmsorgenFor);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
 
+        if (harAvbruttAksjonspunktIDenneBehandlingen(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)) {
+            var aksjonspunktFor = behandling.getAksjonspunktFor(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
+            aksjonspunktKontrollRepository.setReåpnetMedTotrinn(aksjonspunktFor, true);
+        }
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private boolean harAvbruttAksjonspunktIDenneBehandlingen(Behandling behandling, AksjonspunktDefinisjon kontrollerLegeerklæring) {
+        var aksjonspunktFor = behandling.getAksjonspunktFor(kontrollerLegeerklæring.getKode());
+
+        return aksjonspunktFor.isPresent() && aksjonspunktFor.get().erAvbrutt();
     }
 
     private TreeSet<DatoIntervallEntitet> kunPerioderMedOmsorgenFor(final LocalDateTimeline<Utfall> perioderUnder18årTidslinje, Utfall utfall) {
         return perioderUnder18årTidslinje.stream()
-                .filter(s -> utfall == s.getValue())
-                .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
-                .collect(Collectors.toCollection(TreeSet::new));
+            .filter(s -> utfall == s.getValue())
+            .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private LocalDateTimeline<Utfall> medOmsorgenFor(NavigableSet<DatoIntervallEntitet> perioder, Vilkårene vilkårene) {
@@ -151,14 +172,14 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             perioderSamlet.stream()
                 .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
                 .collect(Collectors.toList()),
-                perioderTilVurderingUtenOmsorgenFor.stream()
+            perioderTilVurderingUtenOmsorgenFor.stream()
                 .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
                 .collect(Collectors.toList())
         );
     }
-    
+
     private boolean trengerAksjonspunkt(BehandlingskontrollKontekst kontekst, final Behandling behandling,
-            final SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
+                                        final SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
         final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()));
         final boolean trengerInput = !sykdomAksjonspunkt.isKanLøseAksjonspunkt();
         final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && sykdomGrunnlagBehandling.isFørsteGrunnlagPåBehandling();
@@ -166,39 +187,39 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     }
 
     private void vurder(BehandlingskontrollKontekst kontekst,
-            SykdomGrunnlagBehandling sykdomGrunnlagBehandling,
-            VilkårResultatBuilder builder,
-            VilkårType vilkåret,
-            NavigableSet<DatoIntervallEntitet> perioder,
-            NavigableSet<DatoIntervallEntitet> perioderMedAvslagGrunnetManglendeOmsorg) {
-        
+                        SykdomGrunnlagBehandling sykdomGrunnlagBehandling,
+                        VilkårResultatBuilder builder,
+                        VilkårType vilkåret,
+                        NavigableSet<DatoIntervallEntitet> perioder,
+                        NavigableSet<DatoIntervallEntitet> perioderMedAvslagGrunnetManglendeOmsorg) {
+
         var vilkårBuilder = builder.hentBuilderFor(vilkåret);
         for (DatoIntervallEntitet periode : perioder) {
             final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(vilkåret, kontekst, periode, sykdomGrunnlagBehandling);
             oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårBuilder);
             oppdaterResultatStruktur(kontekst, periode, vilkårData);
         }
-        
+
         for (var periode : perioderMedAvslagGrunnetManglendeOmsorg) {
             avslåGrunnetManglendeOmsorg(kontekst, vilkårBuilder, vilkåret, periode);
         }
-        
+
         builder.leggTil(vilkårBuilder);
     }
 
     private void avslåGrunnetManglendeOmsorg(BehandlingskontrollKontekst kontekst,
-            VilkårBuilder vilkårBuilder,
-            VilkårType vilkåret,
-            DatoIntervallEntitet periodeMedAvslagGrunnetManglendeOmsorg) {
-        
+                                             VilkårBuilder vilkårBuilder,
+                                             VilkårType vilkåret,
+                                             DatoIntervallEntitet periodeMedAvslagGrunnetManglendeOmsorg) {
+
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periodeMedAvslagGrunnetManglendeOmsorg.getFomDato(), periodeMedAvslagGrunnetManglendeOmsorg.getTomDato())
             .medUtfall(Utfall.IKKE_OPPFYLT)
             .medMerknadParametere(new Properties())
             .medRegelEvaluering(null)
             .medRegelInput(null)
-            .medAvslagsårsak( Avslagsårsak.IKKE_DOKUMENTERT_OMSORGEN_FOR)
+            .medAvslagsårsak(Avslagsårsak.IKKE_DOKUMENTERT_OMSORGEN_FOR)
             .medMerknad(null));
-        
+
         final var nåværendeResultat = resultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
         var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
         builder.tilbakeStill(periodeMedAvslagGrunnetManglendeOmsorg);
@@ -277,11 +298,5 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                 .anyMatch(VilkårPeriode::getErOverstyrt);
         }
         return false;
-    }
-    
-    private static final <T> NavigableSet<T> union(NavigableSet<T> s1, NavigableSet<T> s2) {
-        final var resultat = new TreeSet<>(s1);
-        resultat.addAll(s2);
-        return resultat;
     }
 }

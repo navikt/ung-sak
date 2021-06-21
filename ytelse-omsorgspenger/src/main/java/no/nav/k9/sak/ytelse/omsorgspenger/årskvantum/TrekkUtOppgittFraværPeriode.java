@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -12,6 +13,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristResultat;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
@@ -38,13 +40,14 @@ class TrekkUtOppgittFraværPeriode {
     }
 
     Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> mapFra(LinkedHashSet<Inntektsmelding> inntektsmeldinger,
-                                                                             Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> kravDokumenterMedFravær) {
+                                                                             Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> kravDokumenterMedFravær,
+                                                                             Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultat) {
         Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søkteFraværsperioder = new LinkedHashMap<>();
         var søktePerioder = inntektsmeldingMapper.mapTilSøktePerioder(inntektsmeldinger);
         søkteFraværsperioder.putAll(søktePerioder);
         søkteFraværsperioder.putAll(kravDokumenterMedFravær);
 
-        var vurdertePerioder = vurderSøknadsfrist.vurderSøknadsfrist(søkteFraværsperioder);
+        var vurdertePerioder = vurderSøknadsfrist.vurderSøknadsfrist(søkteFraværsperioder, avklartSøknadsfristResultat);
 
         var antallIM = vurdertePerioder.keySet().stream().filter(type -> KravDokumentType.INNTEKTSMELDING.equals(type.getType())).count();
         var antallSøknader = vurdertePerioder.keySet().stream().filter(type -> KravDokumentType.SØKNAD.equals(type.getType())).count();

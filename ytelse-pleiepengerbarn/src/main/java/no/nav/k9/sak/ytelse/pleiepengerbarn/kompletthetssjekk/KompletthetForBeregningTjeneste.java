@@ -214,7 +214,7 @@ public class KompletthetForBeregningTjeneste {
                                                   ManglendeVedlegg manglendeVedlegg, BehandlingReferanse behandlingReferanse) {
 
         if (input.getSkalHoppeOverVurderingMotArbeid()) {
-            return false;
+            return true;
         }
 
         var perioderFraSøknadene = input.getUttakGrunnlag().getOppgitteSøknadsperioder().getPerioderFraSøknadene();

@@ -1,18 +1,78 @@
 version: 2
 registries:
-  maven-github:
+  k9-felles:
     type: maven-repository
     url: https://maven.pkg.github.com/navikt/k9-felles
     username: x-access-token
-    password: ${{secrets.GITHUB_ACCESS_TOKEN}}
-
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}
+  k9-format:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/k9-format
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}
+  k9-aarskvantum:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/k9-aarskvantum
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}
+  pleiepenger-barn-uttak:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/pleiepenger-barn-uttak
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}} 
+  k9-prosesstask:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/k9-prosesstask
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}  
+  k9-formidling:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/k9-formidling
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}   
+  k9-oppdrag:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/k9-oppdrag
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}   
+  fp-abakus:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/fp-abakus
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}   
+  ft-kalkulus:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/ft-kalkulus
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}   
+  fp-nare:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/fp-nare
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}} 
+  fp-tidsserie:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/fp-tidsserie
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}} 
 updates:
   - package-ecosystem: maven
     directory: "/"
     schedule:
       interval: daily
     open-pull-requests-limit: 10
-    
+    registries:
+      - k9-felles
+      - k9-prosesstask
+      - k9-format
+      - k9-aarskvantum
+      - pleiepenger-barn-uttak
+      - k9-formidling
+      - k9-oppdrag
+      - fp-abakus
+      - ft-kalkulus
+      - fp-nare
+      - fp-tidsserie
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
