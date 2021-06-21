@@ -65,7 +65,7 @@ public class MottatteDokumentRepository {
      */
     public List<MottattDokument> hentMottatteDokumentForBehandling(long fagsakId, long behandlingId, List<Brevkode> typer, boolean taSkriveLås, DokumentStatus... statuser) {
         String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :fagsakId AND m.behandlingId = :behandlingId AND m.type IN (:typer) AND(m.status IS NULL OR m.status IN (:status)) order by m.id";
-        Set<DokumentStatus> statusParam = statuser == null || statuser.length == 0 ? EnumSet.complementOf(EnumSet.of(DokumentStatus.UGYLDIG)) : Set.of(statuser);
+        Set<DokumentStatus> statusParam = statuser == null || statuser.length == 0 ? EnumSet.complementOf(EnumSet.of(DokumentStatus.UGYLDIG, DokumentStatus.HENLAGT)) : Set.of(statuser);
         var query = entityManager.createQuery(
             strQueryTemplate, MottattDokument.class)
             .setParameter("fagsakId", fagsakId)
@@ -92,7 +92,7 @@ public class MottatteDokumentRepository {
      * NB: Kan returnere samme dokument flere ganger dersom de har ulike eks. mottatt_dato, journalføringsenhet (dersom byttet enhet). Er derfor
      * ikke å anbefale å bruke.
      */
-    public List<MottattDokument> hentMottatteDokumentMedFagsakId(long fagsakId) {
+    public List<MottattDokument> hentGyldigeDokumenterMedFagsakId(long fagsakId) {
         return hentMottatteDokumentMedFagsakId(fagsakId, DokumentStatus.GYLDIG);
     }
 
@@ -103,7 +103,7 @@ public class MottatteDokumentRepository {
      */
     public List<MottattDokument> hentMottatteDokumentMedFagsakId(long fagsakId, boolean taSkriveLås, DokumentStatus... statuser) {
         String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :param AND (m.status IS NULL OR m.status IN (:status)) order by m.id";
-        Set<DokumentStatus> statusParam = statuser == null || statuser.length == 0 ? EnumSet.complementOf(EnumSet.of(DokumentStatus.UGYLDIG)) : Set.of(statuser);
+        Set<DokumentStatus> statusParam = statuser == null || statuser.length == 0 ? EnumSet.complementOf(EnumSet.of(DokumentStatus.UGYLDIG, DokumentStatus.HENLAGT)) : Set.of(statuser);
         var query = entityManager.createQuery(
             strQueryTemplate, MottattDokument.class)
             .setParameter("param", fagsakId)
@@ -123,7 +123,7 @@ public class MottatteDokumentRepository {
             return Collections.emptyList();
         }
         String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :param AND (m.status IS NULL OR m.status IN (:status)) AND m.journalpostId IN (:journalpostIder)";
-        Set<DokumentStatus> statusParam = statuser == null || statuser.length == 0 ? EnumSet.complementOf(EnumSet.of(DokumentStatus.UGYLDIG)) : Set.of(statuser);
+        Set<DokumentStatus> statusParam = statuser == null || statuser.length == 0 ? EnumSet.complementOf(EnumSet.of(DokumentStatus.UGYLDIG, DokumentStatus.HENLAGT)) : Set.of(statuser);
         return entityManager.createQuery(
             strQueryTemplate, MottattDokument.class)
             .setParameter("param", fagsakId)

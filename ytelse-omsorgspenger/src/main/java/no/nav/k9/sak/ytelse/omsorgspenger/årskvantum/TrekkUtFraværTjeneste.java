@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -132,10 +131,9 @@ public class TrekkUtFraværTjeneste {
     }
 
     private LinkedHashSet<Inntektsmelding> inntektsmeldingerPåBehandling(Behandling behandling) {
-        var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
+        var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
             .stream()
             .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
-            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
             .filter(it -> it.getBehandlingId() != null && it.getBehandlingId().equals(behandling.getId()))
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
@@ -146,10 +144,9 @@ public class TrekkUtFraværTjeneste {
     }
 
     private LinkedHashSet<Inntektsmelding> inntektsmeldingerPåFagsak(Fagsak fagsak) {
-        var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsak.getId())
+        var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(fagsak.getId())
             .stream()
             .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
-            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
             .filter(it -> it.getBehandlingId() != null)
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());

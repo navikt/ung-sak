@@ -10,8 +10,10 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UP
 
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -51,6 +53,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
@@ -71,6 +74,7 @@ import no.nav.k9.sak.kontrakt.behandling.NyBehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.ReåpneBehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
+import no.nav.k9.sak.kontrakt.dokument.MottattDokumentDto;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
@@ -292,7 +296,9 @@ public class BehandlingRestTjeneste {
         Long behandlingId = dto.getBehandlingId();
         behandlingsutredningApplikasjonTjeneste.kanEndreBehandling(behandlingId, dto.getBehandlingVersjon());
         BehandlingResultatType årsakKode = tilHenleggBehandlingResultatType(dto.getÅrsakKode());
-        henleggBehandlingTjeneste.henleggBehandlingAvSaksbehandler(String.valueOf(behandlingId), årsakKode, dto.getBegrunnelse());
+        Map<Long, DokumentStatus> dokumenterMedNyStatus = dto.getMottatteDokumenterDto().stream()
+            .collect(Collectors.toMap(MottattDokumentDto::getMottattDokumentId, MottattDokumentDto::getDokumentStatus));
+        henleggBehandlingTjeneste.henleggBehandlingAvSaksbehandler(String.valueOf(behandlingId), årsakKode, dto.getBegrunnelse(), dokumenterMedNyStatus);
     }
 
     @POST

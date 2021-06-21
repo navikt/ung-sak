@@ -1,5 +1,9 @@
 package no.nav.k9.sak.kontrakt.behandling;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -14,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
+import no.nav.k9.sak.kontrakt.dokument.MottattDokumentDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -45,6 +50,11 @@ public class HenleggBehandlingDto {
     @Min(0)
     @Max(Long.MAX_VALUE)
     private Long behandlingVersjon;
+
+    @JsonProperty(value = "mottatteDokumenter")
+    @Size(max = 1000)
+    @Valid
+    private List<MottattDokumentDto> mottatteDokumenterDto = new ArrayList<>();
 
     public HenleggBehandlingDto() {
         //
@@ -81,6 +91,10 @@ public class HenleggBehandlingDto {
 
     public void setBehandlingVersjon(Long behandlingVersjon) {
         this.behandlingVersjon = behandlingVersjon;
+    }
+
+    public List<MottattDokumentDto> getMottatteDokumenterDto() {
+        return mottatteDokumenterDto;
     }
 
 }

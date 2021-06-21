@@ -167,22 +167,12 @@ public class AksjonspunktApplikasjonTjeneste {
     }
 
     private void håndterOverhopp(OverhoppResultat overhoppResultat, BehandlingskontrollKontekst kontekst) {
-        // TODO (essv): PKMANTIS-1992 Skrive om alle overhopp til å bruke transisjon (se fremoverTransisjon nedenfor)
-        Optional<OppdateringResultat> funnetHenleggelse = overhoppResultat.finnHenleggelse();
-        if (funnetHenleggelse.isPresent()) {
-            OppdateringResultat henleggelse = funnetHenleggelse.get();
-            henleggBehandlingTjeneste.henleggBehandlingAvSaksbehandler(String.valueOf(kontekst.getBehandlingId()),
-                henleggelse.getHenleggelseResultat(), henleggelse.getHenleggingsbegrunnelse());
-            return;
-        }
-
         Optional<TransisjonIdentifikator> fremoverTransisjon = overhoppResultat.finnFremoverTransisjon();
         if (fremoverTransisjon.isPresent()) {
             TransisjonIdentifikator riktigTransisjon = utledFremhoppTransisjon(fremoverTransisjon.get());
             if (riktigTransisjon != null) {
                 behandlingskontrollTjeneste.fremoverTransisjon(riktigTransisjon, kontekst);
             }
-            return;
         }
     }
 

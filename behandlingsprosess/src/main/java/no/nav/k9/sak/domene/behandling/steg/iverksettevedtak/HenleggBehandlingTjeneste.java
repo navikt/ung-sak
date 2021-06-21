@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.iverksettevedtak;
 
+import java.util.Map;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -8,8 +10,11 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -24,9 +29,9 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
+import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveSendTilInfotrygdTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
 @ApplicationScoped
 public class HenleggBehandlingTjeneste {
@@ -41,6 +46,7 @@ public class HenleggBehandlingTjeneste {
     private FagsakRepository fagsakRepository;
     private HistorikkRepository historikkRepository;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
+    private MottatteDokumentRepository mottatteDokumentRepository;
 
     public HenleggBehandlingTjeneste() {
         // for CDI proxy
@@ -51,7 +57,8 @@ public class HenleggBehandlingTjeneste {
                                      BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                      DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
                                      FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                     ProsessTaskRepository prosessTaskRepository) {
+                                     ProsessTaskRepository prosessTaskRepository,
+                                     MottatteDokumentRepository mottatteDokumentRepository) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -60,9 +67,10 @@ public class HenleggBehandlingTjeneste {
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.historikkRepository = repositoryProvider.getHistorikkRepository();
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
 
-    public void henleggBehandlingAvSaksbehandler(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
+    public void henleggBehandlingAvSaksbehandler(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse, Map<Long, DokumentStatus> dokumenterMedNyStatus) {
         BehandlingskontrollKontekst kontekst =  behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var søknad = søknadRepository.hentSøknadHvisEksisterer(behandling.getId());
@@ -75,14 +83,20 @@ public class HenleggBehandlingTjeneste {
 
         fagsakProsessTaskRepository.ryddProsessTasks(behandling.getFagsakId(), behandling.getId());  // rydd tidligere tasks (eks. registerinnhenting, etc)
 
-        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, HistorikkAktør.SAKSBEHANDLER);
+        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, HistorikkAktør.SAKSBEHANDLER, dokumenterMedNyStatus);
     }
 
-    private void doHenleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse, HistorikkAktør historikkAktør) {
+    private void doHenleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse, HistorikkAktør historikkAktør, Map<Long, DokumentStatus> dokumenterMedNyStatus) {
         BehandlingskontrollKontekst kontekst =  behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         behandlingskontrollTjeneste.henleggBehandling(kontekst, årsakKode);
+
+        dokumenterMedNyStatus.forEach((dokId, nyStatus) -> {
+            var dokument = mottatteDokumentRepository.hentMottattDokument(dokId).orElseThrow();
+            validerDokument(dokument, behandling);
+            mottatteDokumentRepository.lagre(dokument, nyStatus);
+        });
 
         if (BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET.equals(årsakKode)) {
             sendHenleggelsesbrev(behandling.getId(), HistorikkAktør.VEDTAKSLØSNINGEN);
@@ -91,6 +105,12 @@ public class HenleggBehandlingTjeneste {
             opprettOppgaveTilInfotrygd(behandling);
         }
         lagHistorikkinnslagForHenleggelse(behandling.getId(), årsakKode, begrunnelse, historikkAktør);
+    }
+
+    private void validerDokument(MottattDokument dokument, Behandling behandling) {
+        if (!dokument.getBehandlingId().equals(behandling.getId())) {
+            throw new IllegalArgumentException("Kan ikke oppdatere status på behandling som ikke tilhører behandling");
+        }
     }
 
     /** Henlegger helt - for forvaltning først og fremst. */
@@ -111,7 +131,9 @@ public class HenleggBehandlingTjeneste {
             behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtførtForHenleggelse(behandling, kontekst);
         }
 
-        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, HistorikkAktør.VEDTAKSLØSNINGEN);
+        // Henlegger ikke dokumenter fra denne forvaltningsmetoden - må gjøres som separat forvaltning-handling
+        Map<Long, DokumentStatus> dokumenterMedNyStatus = Map.of();
+        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, HistorikkAktør.VEDTAKSLØSNINGEN, dokumenterMedNyStatus);
     }
 
     private void opprettOppgaveTilInfotrygd(Behandling behandling) {

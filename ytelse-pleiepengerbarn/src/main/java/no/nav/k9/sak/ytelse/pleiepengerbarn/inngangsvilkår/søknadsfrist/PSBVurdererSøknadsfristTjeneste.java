@@ -72,9 +72,8 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
     public Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
         var result = new HashMap<KravDokument, List<SøktPeriode<Søknadsperiode>>>();
 
-        var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(referanse.getFagsakId())
+        var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(referanse.getFagsakId())
             .stream()
-            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
             .filter(it -> Brevkode.PLEIEPENGER_BARN_SOKNAD.equals(it.getType()))
             .collect(Collectors.toSet());
 
