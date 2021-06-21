@@ -1,6 +1,8 @@
 package no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak;
 
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -38,8 +40,11 @@ public class BehandlingÅrsakUtlederProsessTriggere implements BehandlingÅrsakU
             .map(ProsessTriggere::getTriggere)
             .orElseGet(Set::of);
 
-        grunnlag2.removeAll(grunnlag1);
-
-        return grunnlag2.stream().map(Trigger::getÅrsak).collect(Collectors.toSet());
+        return grunnlag2.stream()
+            .filter(it -> grunnlag1.stream()
+                .noneMatch(at -> Objects.equals(at.getÅrsak(), it.getÅrsak())
+                    && Objects.equals(at.getPeriode(), it.getPeriode())))
+            .map(Trigger::getÅrsak)
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 }

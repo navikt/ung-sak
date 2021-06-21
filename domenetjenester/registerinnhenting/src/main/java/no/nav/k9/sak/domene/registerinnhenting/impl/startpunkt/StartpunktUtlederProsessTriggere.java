@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt;
 
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -47,9 +48,11 @@ class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
             .map(ProsessTriggere::getTriggere)
             .orElseGet(Set::of);
 
-        grunnlag2.removeAll(grunnlag1);
-
-        return grunnlag2.stream().map(this::mapTilStartPunktType)
+        return grunnlag2.stream()
+            .filter(it -> grunnlag1.stream()
+                .noneMatch(at -> Objects.equals(at.getÅrsak(), it.getÅrsak())
+                    && Objects.equals(at.getPeriode(), it.getPeriode())))
+            .map(this::mapTilStartPunktType)
             .min(Comparator.comparing(StartpunktType::getRangering))
             .orElse(StartpunktType.UDEFINERT);
     }
