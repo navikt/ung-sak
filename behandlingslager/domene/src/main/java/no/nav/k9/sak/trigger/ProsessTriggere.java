@@ -44,6 +44,10 @@ public class ProsessTriggere extends BaseEntitet {
         this.triggere = triggere;
     }
 
+    Triggere getTriggereEntity() {
+        return triggere;
+    }
+
     public Set<Trigger> getTriggere() {
         return triggere.getTriggere();
     }

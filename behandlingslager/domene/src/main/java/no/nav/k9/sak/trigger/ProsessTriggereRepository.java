@@ -38,7 +38,7 @@ public class ProsessTriggereRepository {
             .map(Trigger::new)
             .collect(Collectors.toSet())));
 
-        entityManager.persist(oppdatert.getTriggere());
+        entityManager.persist(oppdatert.getTriggereEntity());
         entityManager.persist(oppdatert);
         entityManager.flush();
     }
