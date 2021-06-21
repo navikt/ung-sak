@@ -1,6 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -8,12 +11,15 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
@@ -25,7 +31,13 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 public class OMPVurderSøknadsfristTjenesteTest {
 
-    private OMPVurderSøknadsfristTjeneste tjeneste = new OMPVurderSøknadsfristTjeneste(null, new InntektsmeldingSøktePerioderMapper(), null, new VurderSøknadsfrist(true, LocalDate.of(2021, 1, 1)));
+    private AvklartSøknadsfristRepository avklartSøknadsfristRepository = mock(AvklartSøknadsfristRepository.class);
+    private OMPVurderSøknadsfristTjeneste tjeneste = new OMPVurderSøknadsfristTjeneste(null, new InntektsmeldingSøktePerioderMapper(), null, new VurderSøknadsfrist(true, LocalDate.of(2021, 1, 1)), avklartSøknadsfristRepository);
+
+    @BeforeEach
+    void setUp() {
+        when(avklartSøknadsfristRepository.hentHvisEksisterer(anyLong())).thenReturn(Optional.empty());
+    }
 
     @Test
     void skal_godkjenne_9_måneder_søknadsfrist_for_covid19_utvidet_frist() {
@@ -38,7 +50,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
         var map = Map.of(søknad,
             List.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, oppgittFraværPeriode)));
 
-        var søknadSetMap = tjeneste.vurderSøknadsfrist(map);
+        var søknadSetMap = tjeneste.vurderSøknadsfrist(1L, map);
 
         assertThat(søknadSetMap).containsKey(søknad);
         assertThat(søknadSetMap.get(søknad)).hasSize(2);
@@ -62,7 +74,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
             List.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef,
                 new OppgittFraværPeriode(journalpostId, startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7), FraværÅrsak.UDEFINERT))));
 
-        var søknadSetMap = tjeneste.vurderSøknadsfrist(map);
+        var søknadSetMap = tjeneste.vurderSøknadsfrist(1L, map);
 
         assertThat(søknadSetMap).containsKey(søknad);
         assertThat(søknadSetMap.get(søknad)).hasSize(2);
@@ -87,7 +99,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
         var søktePerioder = List.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, oppgittFraværPeriode));
         var map = Map.of(søknad, søktePerioder);
 
-        var søknadSetMap = tjeneste.vurderSøknadsfrist(map);
+        var søknadSetMap = tjeneste.vurderSøknadsfrist(1L, map);
 
         assertThat(søknadSetMap).hasSize(1);
         assertThat(søknadSetMap).containsKey(søknad);
@@ -106,7 +118,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
 
         var map2 = Map.of(søknad, List.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, oppgittFraværPeriode)), søknad2, søktePerioder2);
 
-        var søknadSetMap2 = tjeneste.vurderSøknadsfrist(map2);
+        var søknadSetMap2 = tjeneste.vurderSøknadsfrist(1L, map2);
 
         assertThat(søknadSetMap2).hasSize(2);
         assertThat(søknadSetMap.get(søknad)).isEqualTo(søknadSetMap2.get(søknad));

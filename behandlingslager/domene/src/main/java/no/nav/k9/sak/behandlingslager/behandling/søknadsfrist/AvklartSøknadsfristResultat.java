@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingslager.behandling.søknadsfrist;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.persistence.Column;
@@ -66,6 +67,13 @@ public class AvklartSøknadsfristResultat extends BaseEntitet {
         return avklartHolder;
     }
 
+    void setBehandlingId(Long behandlingId) {
+        if (this.behandlingId != null) {
+            throw new IllegalStateException("Forsøker å endre behandlingId på persistert grunnlag");
+        }
+        this.behandlingId = Objects.requireNonNull(behandlingId);
+    }
+
     public Optional<AvklartKravDokument> finnAvklaring(JournalpostId journalpostId) {
         var overstyrtStatus = overstyrtHolder.getDokumenter()
             .stream()
@@ -80,5 +88,9 @@ public class AvklartSøknadsfristResultat extends BaseEntitet {
             .stream()
             .filter(it -> it.getJournalpostId().equals(journalpostId))
             .findAny();
+    }
+
+    void deaktiver() {
+        this.aktiv = false;
     }
 }

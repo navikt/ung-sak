@@ -17,6 +17,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Immutable;
 
 import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
@@ -73,6 +74,14 @@ public class AvklartKravDokument extends BaseEntitet implements IndexKey {
 
     public boolean getErGodkjent() {
         return godkjent;
+    }
+
+    public Utfall getUtfall() {
+        if (godkjent) {
+            return Utfall.OPPFYLT;
+        } else {
+            return Utfall.IKKE_OPPFYLT;
+        }
     }
 
     public LocalDate getGodkjentFraDato() {

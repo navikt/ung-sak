@@ -73,7 +73,7 @@ public class AvklarUtvidetRettV2 implements AksjonspunktOppdaterer<AvklarUtvidet
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var originalVilkårTidslinje = vilkårene.getVilkårTimeline(vilkårType);
 
-        // TODO: håndter delvis avslag fra en angitt dato ( eks. dersom tidligere innvilget, så innvilges på ny fra en nyere dato)?
+        // TODO (Revurdering): håndter delvis avslag fra en angitt dato ( eks. dersom tidligere innvilget, så innvilges på ny fra en nyere dato)?
 
         boolean erAvslag = dto.getAvslagsårsak() != null;
         var søknadsperiode = søknadRepository.hentSøknad(behandlingId).getSøknadsperiode();
@@ -104,9 +104,6 @@ public class AvklarUtvidetRettV2 implements AksjonspunktOppdaterer<AvklarUtvidet
     }
 
     private LocalDateInterval validerAngittPeriode(Fagsak fagsak, LocalDateInterval angittPeriode) {
-        if (FagsakYtelseType.OMSORGSPENGER_KS == fagsak.getYtelseType()) {
-            throw new UnsupportedOperationException("Kan ikke angi periode for ytelseType=" + fagsak.getYtelseType());
-        }
         if (Objects.requireNonNull(angittPeriode).isOpenStart()) {
             throw new IllegalArgumentException("Angitt periode kan ikke ha åpen start. angitt=" + angittPeriode);
         }

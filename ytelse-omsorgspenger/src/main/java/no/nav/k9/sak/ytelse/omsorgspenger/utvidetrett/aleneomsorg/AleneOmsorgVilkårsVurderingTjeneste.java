@@ -14,6 +14,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -47,9 +49,9 @@ public class AleneOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderTil
 
     @Inject
     public AleneOmsorgVilkårsVurderingTjeneste(BehandlingRepository behandlingRepository,
-                                                 VilkårResultatRepository vilkårResultatRepository,
-                                                 PersoninfoAdapter personinfoAdapter,
-                                                 SøknadRepository søknadRepository) {
+                                               VilkårResultatRepository vilkårResultatRepository,
+                                               PersoninfoAdapter personinfoAdapter,
+                                               SøknadRepository søknadRepository) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personinfoAdapter = personinfoAdapter;
@@ -76,19 +78,35 @@ public class AleneOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderTil
         var optVilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (optVilkårene.isPresent()) {
             var vilkårTidslinje = optVilkårene.get().getVilkårTimeline(vilkårType);
+            if (vilkårTidslinje.isEmpty()) {
+                return Collections.emptyNavigableSet();
+            }
             var utlededePerioder = vilkårTidslinje.getLocalDateIntervals().stream().map(p -> DatoIntervallEntitet.fra(p)).collect(Collectors.toCollection(TreeSet::new));
             return Collections.unmodifiableNavigableSet(utlededePerioder);
         } else {
-            // default til søkte perioder hvis vilkår ikke angitt.
-            return søktePerioder.utledPeriode(behandlingId);
+            // default til 'fullstedige' perioder hvis vilkår ikke angitt.
+            return utledFullstendigePerioder(behandlingId);
         }
     }
 
     @Override
     public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
         return Map.of(
-            VilkårType.UTVIDETRETT, utled(behandlingId, VilkårType.UTVIDETRETT),
+            VilkårType.UTVIDETRETT, justerTilDefaultAlder(behandlingId, utled(behandlingId, VilkårType.UTVIDETRETT)),
             VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR));
+    }
+
+    private NavigableSet<DatoIntervallEntitet> justerTilDefaultAlder(Long behandlingId, NavigableSet<DatoIntervallEntitet> vilårsperiodeUtvidetRett) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var fagsak = behandling.getFagsak();
+        AktørId barnAktørId = fagsak.getPleietrengendeAktørId();
+        var barninfo = personinfoAdapter.hentBrukerBasisForAktør(barnAktørId).orElseThrow(() -> new IllegalStateException("Mangler personinfo for pleietrengende aktørId"));
+
+        // sett 'tom' for utvidet rett til barnet fyller 18 år by default
+        var _18år = new LocalDateTimeline<>(barninfo.getFødselsdato(), barninfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31), Boolean.TRUE);
+        var sammenstiltUtvidetRettTimeline = _18år.intersection(new LocalDateInterval(vilårsperiodeUtvidetRett.first().getFomDato(), vilårsperiodeUtvidetRett.last().getTomDato()));
+        var utvidetRettPerioder = DatoIntervallEntitet.fraTimeline(sammenstiltUtvidetRettTimeline);
+        return utvidetRettPerioder;
     }
 
     DatoIntervallEntitet utledMaksPeriode(NavigableSet<DatoIntervallEntitet> søktePerioder, AktørId barnAktørId) {

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -150,17 +151,14 @@ class MapSøknadUttakPerioder {
     }
 
     private Collection<FeriePeriode> mapFerie(List<Periode> søknadsperioder, LovbestemtFerie input) {
-        LocalDateTimeline<Boolean> ferieTidslinje = toFerieTidslinje(input.getPerioder().keySet(), true);
-        
+        LocalDateTimeline<Boolean> ferieTidslinje = toFerieTidslinje(input.getPerioder());
+
         /*
          * XXX: Dette er en hack. Vi bør endre til at man for søknadsperioder alltid sender inn en komplett liste med både ferieperioder
          *      man skal ha ... og hvilke som skal fjernes.
          */
-        if (input.getPerioderSomSkalSlettes() != null) {
-            ferieTidslinje = ferieTidslinje.combine(toFerieTidslinje(input.getPerioderSomSkalSlettes().keySet(), false), StandardCombinators::coalesceLeftHandSide, JoinStyle.CROSS_JOIN);
-        }
         ferieTidslinje = ferieTidslinje.combine(toFerieTidslinje(søknadsperioder, false), StandardCombinators::coalesceLeftHandSide, JoinStyle.CROSS_JOIN);
-        
+
         return ferieTidslinje
                 .compress()
                 .stream()
@@ -168,21 +166,29 @@ class MapSøknadUttakPerioder {
                 .collect(Collectors.toList());
     }
 
-    private LocalDateTimeline<Boolean> toFerieTidslinje(Collection<Periode> perioder, boolean skalHaFerie) {
-         return new LocalDateTimeline<>(perioder
-                .stream()
-                .map(entry -> new LocalDateSegment<>(entry.getFraOgMed(), entry.getTilOgMed(), skalHaFerie))
-                .collect(Collectors.toList())
-                );
+    private LocalDateTimeline<Boolean> toFerieTidslinje(Map<Periode, LovbestemtFerie.LovbestemtFeriePeriodeInfo> perioder) {
+        return new LocalDateTimeline<>(perioder.entrySet()
+            .stream()
+            .map(entry -> new LocalDateSegment<>(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), entry.getValue().isSkalHaFerie()))
+            .collect(Collectors.toList())
+        );
     }
-    
+
+    private LocalDateTimeline<Boolean> toFerieTidslinje(Collection<Periode> perioder, boolean skalHaFerie) {
+        return new LocalDateTimeline<>(perioder
+            .stream()
+            .map(entry -> new LocalDateSegment<>(entry.getFraOgMed(), entry.getTilOgMed(), skalHaFerie))
+            .collect(Collectors.toList())
+        );
+    }
+
     private List<BeredskapPeriode> mapBeredskap(Beredskap beredskap) {
         final List<BeredskapPeriode> beredskapsperioder = beredskap.getPerioder()
                 .entrySet()
                 .stream()
                 .map(entry -> new BeredskapPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), true, entry.getValue().getTilleggsinformasjon()))
                 .collect(Collectors.toList());
-        
+
         if (beredskap.getPerioderSomSkalSlettes() != null) {
             beredskapsperioder.addAll(beredskap.getPerioderSomSkalSlettes()
                     .entrySet()
@@ -190,17 +196,17 @@ class MapSøknadUttakPerioder {
                     .map(entry -> new BeredskapPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), false, entry.getValue().getTilleggsinformasjon()))
                     .collect(Collectors.toList()));
         }
-        
+
         return beredskapsperioder;
     }
-    
+
     private List<NattevåkPeriode> mapNattevåk(Nattevåk nattevåk) {
         final List<NattevåkPeriode> nattevåkperioder = nattevåk.getPerioder()
                 .entrySet()
                 .stream()
                 .map(entry -> new NattevåkPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), true, entry.getValue().getTilleggsinformasjon()))
                 .collect(Collectors.toList());
-        
+
         if (nattevåk.getPerioderSomSkalSlettes() != null) {
             nattevåkperioder.addAll(nattevåk.getPerioderSomSkalSlettes()
                     .entrySet()
@@ -208,7 +214,7 @@ class MapSøknadUttakPerioder {
                     .map(entry -> new NattevåkPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), false, entry.getValue().getTilleggsinformasjon()))
                     .collect(Collectors.toList()));
         }
-        
+
         return nattevåkperioder;
     }
 

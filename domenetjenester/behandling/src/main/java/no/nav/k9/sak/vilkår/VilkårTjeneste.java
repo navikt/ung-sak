@@ -2,6 +2,7 @@ package no.nav.k9.sak.vilkår;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -198,7 +199,6 @@ public class VilkårTjeneste {
         var utvidetTilVUrdering = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref);
 
         if (!utvidetTilVUrdering.isEmpty()) {
-            log.info("Fikk utvidet perioder til vurdering {}, i tillegg til vilkårsperioder: {}", utvidetTilVUrdering, perioder);
             perioder.addAll(utvidetTilVUrdering);
         }
 
@@ -251,14 +251,11 @@ public class VilkårTjeneste {
         if (vilkårene.isEmpty()) {
             return LocalDateTimeline.EMPTY_TIMELINE;
         }
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var tjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling);
-        List<DatoIntervallEntitet> allePerioder = tjeneste.utledRådataTilUtledningAvVilkårsperioder(behandlingId).values().stream().flatMap(v -> v.stream()).sorted().collect(Collectors.toList());
-
+        LocalDateTimeline<Boolean> allePerioder = vilkårene.get().getAlleIntervaller();
         if (allePerioder.isEmpty()) {
             return LocalDateTimeline.EMPTY_TIMELINE;
         }
-        var maksPeriode = DatoIntervallEntitet.minmax(allePerioder);
+        var maksPeriode = DatoIntervallEntitet.fra(allePerioder.getMinLocalDate(), allePerioder.getMaxLocalDate());
         return samleVilkårUtfall(vilkårene.get(), maksPeriode);
     }
 

@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -50,6 +51,7 @@ public class TrekkUtFraværTjeneste {
     private SøknadPerioderTjeneste søknadPerioderTjeneste;
 
     private TrekkUtOppgittFraværPeriode mapOppgittFravær;
+    private AvklartSøknadsfristRepository avklartSøknadsfristRepository;
 
     @Inject
     public TrekkUtFraværTjeneste(OmsorgspengerGrunnlagRepository grunnlagRepository,
@@ -58,7 +60,8 @@ public class TrekkUtFraværTjeneste {
                                  InntektArbeidYtelseTjeneste iayTjeneste,
                                  @FagsakYtelseTypeRef("OMP") VurderSøknadsfristTjeneste<OppgittFraværPeriode> søknadsfristTjeneste,
                                  SøknadPerioderTjeneste søknadPerioderTjeneste,
-                                 TrekkUtOppgittFraværPeriode mapOppgittFravær) {
+                                 TrekkUtOppgittFraværPeriode mapOppgittFravær,
+                                 AvklartSøknadsfristRepository avklartSøknadsfristRepository) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
@@ -66,6 +69,7 @@ public class TrekkUtFraværTjeneste {
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.søknadPerioderTjeneste = søknadPerioderTjeneste;
         this.mapOppgittFravær = mapOppgittFravær;
+        this.avklartSøknadsfristRepository = avklartSøknadsfristRepository;
     }
 
     OppgittFravær samleSammenOppgittFravær(Long behandlingId) {
@@ -103,19 +107,22 @@ public class TrekkUtFraværTjeneste {
 
     private List<OppgittFraværPeriode> fraværPåBehandling(Behandling behandling) {
         LinkedHashSet<Inntektsmelding> inntektsmeldingerPåBehandling = inntektsmeldingerPåBehandling(behandling);
-        var vurderteKravOgPerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåBehandling, fraværMedInnsendingstidspunktFraSøknaderPåBehandling(behandling));
+        var avklartSøknadsfristResultat = avklartSøknadsfristRepository.hentHvisEksisterer(behandling.getId());
+        var vurderteKravOgPerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåBehandling, fraværMedInnsendingstidspunktFraSøknaderPåBehandling(behandling), avklartSøknadsfristResultat);
         return trekkUtFravær(vurderteKravOgPerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
     }
 
     public List<OppgittFraværPeriode> fraværFraInntektsmeldingerPåFagsak(Behandling behandling) {
         var inntektsmeldingerPåFagsak = inntektsmeldingerPåFagsak(behandling.getFagsak());
-        var vurderteKravOgPerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåFagsak, Map.of());
+        var avklartSøknadsfristResultat = avklartSøknadsfristRepository.hentHvisEksisterer(behandling.getId());
+        var vurderteKravOgPerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåFagsak, Map.of(), avklartSøknadsfristResultat);
         return trekkUtFravær(vurderteKravOgPerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
     }
 
     public List<OppgittFraværPeriode> fraværPåFagsak(Behandling behandling) {
         var inntektsmeldingerPåFagsak = inntektsmeldingerPåFagsak(behandling.getFagsak());
-        var vurdertePerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåFagsak, fraværMedInnsendingstidspunktFraSøknaderPåFagsak(behandling));
+        var avklartSøknadsfristResultat = avklartSøknadsfristRepository.hentHvisEksisterer(behandling.getId());
+        var vurdertePerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåFagsak, fraværMedInnsendingstidspunktFraSøknaderPåFagsak(behandling), avklartSøknadsfristResultat);
 
         // TBD: hvofor bruker ikke denne #trekkUtFravær som de andre over?
         return vurdertePerioder.values().stream()
