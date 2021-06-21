@@ -102,9 +102,9 @@ public class AleneOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderTil
         AktørId barnAktørId = fagsak.getPleietrengendeAktørId();
         var barninfo = personinfoAdapter.hentBrukerBasisForAktør(barnAktørId).orElseThrow(() -> new IllegalStateException("Mangler personinfo for pleietrengende aktørId"));
 
-        // spesielt for kronisk syk, sett 'tom' for utvidet rett til barnet fyller 13 år by default
-        var _13år = new LocalDateTimeline<>(barninfo.getFødselsdato(), barninfo.getFødselsdato().plusYears(13).withMonth(12).withDayOfMonth(31), Boolean.TRUE);
-        var sammenstiltUtvidetRettTimeline = _13år.intersection(new LocalDateInterval(vilårsperiodeUtvidetRett.first().getFomDato(), vilårsperiodeUtvidetRett.last().getTomDato()));
+        // sett 'tom' for utvidet rett til barnet fyller 18 år by default
+        var _18år = new LocalDateTimeline<>(barninfo.getFødselsdato(), barninfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31), Boolean.TRUE);
+        var sammenstiltUtvidetRettTimeline = _18år.intersection(new LocalDateInterval(vilårsperiodeUtvidetRett.first().getFomDato(), vilårsperiodeUtvidetRett.last().getTomDato()));
         var utvidetRettPerioder = DatoIntervallEntitet.fraTimeline(sammenstiltUtvidetRettTimeline);
         return utvidetRettPerioder;
     }
