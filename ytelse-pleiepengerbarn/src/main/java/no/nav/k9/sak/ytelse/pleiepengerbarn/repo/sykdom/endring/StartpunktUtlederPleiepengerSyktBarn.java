@@ -101,8 +101,11 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
     }
 
     private List<Periode> utledVurderingsperiode(Long behandlingId) {
-        var vilkårene = vilkårResultatRepository.hent(behandlingId);
-        var vurderingsperioder = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR)
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
+        if (vilkårene.isEmpty()) {
+            return List.of();
+        }
+        var vurderingsperioder = vilkårene.get().getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR)
             .map(Vilkår::getPerioder)
             .orElse(List.of())
             .stream()
@@ -110,7 +113,7 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
             .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
             .collect(Collectors.toCollection(ArrayList::new));
 
-        vurderingsperioder.addAll(vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR)
+        vurderingsperioder.addAll(vilkårene.get().getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR)
             .map(Vilkår::getPerioder)
             .orElse(List.of())
             .stream()
