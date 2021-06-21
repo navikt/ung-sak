@@ -40,6 +40,11 @@ public class ProsessTriggere extends BaseEntitet {
     ProsessTriggere() {
     }
 
+    ProsessTriggere(Long behandlingId, Triggere triggere) {
+        this.behandlingId = behandlingId;
+        this.triggere = triggere;
+    }
+
     ProsessTriggere(Triggere triggere) {
         this.triggere = triggere;
     }
