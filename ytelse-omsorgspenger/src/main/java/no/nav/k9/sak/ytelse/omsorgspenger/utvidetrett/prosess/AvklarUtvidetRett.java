@@ -1,14 +1,15 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -22,16 +23,14 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarUtvidetRettDto;
 import no.nav.k9.sak.typer.Periode;
 
-/**
- * @deprecated skal erstattes av AvklarUtvidetRettV2 når kronisk syk/midlertidig alene ny periode håntering er uttestet.
- */
-@Deprecated(forRemoval = true)
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarUtvidetRettDto.class, adapter = AksjonspunktOppdaterer.class)
 public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRettDto> {
@@ -45,9 +44,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private SøknadRepository søknadRepository;
-
-    // TODO:fjern flagg når avklart at ny håndtering fungerer også godt for Kronisk syk/Midlertidig Alene
-    private boolean enableNyAvklarUtvidetRett;
+    private PersoninfoAdapter personinfoAdapter;
 
     AvklarUtvidetRett() {
         // for CDI proxy
@@ -57,13 +54,13 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter,
                       VilkårResultatRepository vilkårResultatRepository,
                       SøknadRepository søknadRepository,
-                      BehandlingRepository behandlingRepository,
-                      @KonfigVerdi(value = "ENABLE_NY_AVKLAR_UTVIDET_RETT", defaultVerdi = "true") boolean enableNyAvklarUtvidetRett) {
+                      PersoninfoAdapter personinfoAdapter,
+                      BehandlingRepository behandlingRepository) {
         this.historikkAdapter = historikkAdapter;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadRepository = søknadRepository;
+        this.personinfoAdapter = personinfoAdapter;
         this.behandlingRepository = behandlingRepository;
-        this.enableNyAvklarUtvidetRett = enableNyAvklarUtvidetRett;
     }
 
     @Override
@@ -72,54 +69,59 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         var behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         var fagsak = behandling.getFagsak();
 
-        if (enableNyAvklarUtvidetRett
-            || fagsak.getYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO) {
-            // ny håndtering - sletter hele periodene først (tar først på OMS_AO venter med andre rammevedtak)
-            var avklarV2 = new AvklarUtvidetRettV2(historikkAdapter, vilkårResultatRepository, søknadRepository, behandlingRepository);
-            return avklarV2.oppdater(dto, param);
-        } else {
-            // TODO: avvikle denne (bruk over)
-            return legacyAvklarUtvidetRett(dto, param, behandlingId, fagsak);
-        }
-    }
-
-    private OppdateringResultat legacyAvklarUtvidetRett(AvklarUtvidetRettDto dto, AksjonspunktOppdaterParameter param, Long behandlingId, Fagsak fagsak) {
         Utfall nyttUtfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         var vilkårResultatBuilder = param.getVilkårResultatBuilder();
+        var periode = dto.getPeriode();
 
         lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
 
-        var periode = dto.getPeriode();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
+        var originalVilkårTidslinje = vilkårene.getVilkårTimeline(vilkårType);
 
-        var timeline = vilkårene.getVilkårTimeline(vilkårType);
+        // TODO (Revurdering): håndter delvis avslag fra en angitt dato ( eks. dersom tidligere innvilget, så innvilges på ny fra en nyere dato)?
+
         boolean erAvslag = dto.getAvslagsårsak() != null;
-        if (erAvslag || erÅpenPeriode(periode)) {
-            // overskriver hele vilkårperioden
-            // TODO: bør mulig avgrense fra søknad#mottattdato / søknadsperiode#fom i forbindelse med endringer?
-            var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
-            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, timeline.getMinLocalDate(), timeline.getMaxLocalDate(), dto.getAvslagsårsak());
-            vilkårResultatBuilder.leggTil(vilkårBuilder);
-        } else {
-            var søknadsperiode = søknadRepository.hentSøknad(behandlingId).getSøknadsperiode();
-            vilkårResultatBuilder.slettVilkårPerioder(vilkårType, DatoIntervallEntitet.fraOgMed(søknadsperiode.getFomDato()));
+        var søknadsperiode = søknadRepository.hentSøknad(behandlingId).getSøknadsperiode();
 
-            var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
+        var minMaxPerioder = new MinMaxPerioder(søknadsperiode, periode, originalVilkårTidslinje);
+
+        vilkårResultatBuilder.slettVilkårPerioder(vilkårType, minMaxPerioder.tilDatoIntervall());
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
+
+        LocalDate minFom = minMaxPerioder.minFom();
+        LocalDate maksTom = minMaxPerioder.maxTom(); // siste dato vi trenger å overskrive til
+
+        if (erAvslag) {
+            // overskriver per nå hele søknadsperioden
+            var avslagFom = søknadsperiode == null ? minFom : søknadsperiode.getFomDato();
+            var avslagTom = søknadsperiode == null ? maksTom : søknadsperiode.getTomDato();
+            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, avslagFom, avslagTom, dto.getAvslagsårsak());
+        } else if (minMaxPerioder.erÅpenPeriode(periode)) {
+            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, minFom, maksTom, null /* avslagsårsak kan bare være null her */);
+        } else {
             var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), periode.getTom()));
-            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), dto.getAvslagsårsak());
-            vilkårResultatBuilder.leggTil(vilkårBuilder);
+            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), null /* avslagsårsak kan bare være null her */);
         }
 
-        return OppdateringResultat.utenOveropp();
-    }
+        vilkårResultatBuilder.leggTil(vilkårBuilder); // lagres utenfor
 
-    private boolean erÅpenPeriode(Periode periode) {
-        return periode == null || !new LocalDateInterval(periode.getFom(), periode.getTom()).isClosedInterval();
+        return OppdateringResultat.utenOveropp();
     }
 
     private LocalDateInterval validerAngittPeriode(Fagsak fagsak, LocalDateInterval angittPeriode) {
         if (Objects.requireNonNull(angittPeriode).isOpenStart()) {
             throw new IllegalArgumentException("Angitt periode kan ikke ha åpen start. angitt=" + angittPeriode);
+        }
+
+        if (fagsak.getPleietrengendeAktørId() != null) {
+            // kan ikke angi dato før barnets fødselsdato
+            var barninfo = personinfoAdapter
+                .hentBrukerBasisForAktør(fagsak.getPleietrengendeAktørId())
+                .orElseThrow(() -> new IllegalStateException("Fant ikke personinfo for fagsak pleietrengende aktørid"));
+            LocalDate fødselsdato = barninfo.getFødselsdato();
+            if (fødselsdato.isAfter(angittPeriode.getFomDato())) {
+                throw new IllegalArgumentException("Kan ikke angi periode før barnets fødselsdato [" + fødselsdato + "]: Angitt =" + angittPeriode);
+            }
         }
 
         var fagsakPeriode = fagsak.getPeriode().toLocalDateInterval();
@@ -145,5 +147,40 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         historikkAdapter.tekstBuilder()
             .medBegrunnelse(begrunnelse, erBegrunnelseForAksjonspunktEndret)
             .medSkjermlenke(skjermlenkeType);
+    }
+
+    record MinMaxPerioder(DatoIntervallEntitet søknadsperiode,
+                          Periode angittPeriode,
+                          LocalDateTimeline<VilkårPeriode> vilkårTimeline) {
+
+        LocalDate minFom() {
+            var fom = Stream.of(
+                søknadsperiode == null ? null : søknadsperiode.getFomDato(),
+                angittPeriode == null ? null : angittPeriode.getFom(),
+                vilkårTimeline.getMinLocalDate())
+                .sorted(Comparator.nullsLast(Comparator.naturalOrder())).findFirst().get();
+            return fom;
+        }
+
+        LocalDate maxTom() {
+            var tom = Stream.of(
+                søknadsperiode == null ? null : søknadsperiode.getTomDato(),
+                angittPeriode == null ? null : angittPeriode.getTom(),
+                vilkårTimeline.getMaxLocalDate())
+                .sorted(Comparator.nullsLast(Comparator.reverseOrder())).findFirst().get();
+            return tom;
+        }
+
+        DatoIntervallEntitet tilDatoIntervall() {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(minFom(), maxTom());
+        }
+
+        boolean erÅpenPeriode(Periode periode) {
+            return periode == null || !erLukketPeriode(periode);
+        }
+
+        boolean erLukketPeriode(Periode periode) {
+            return periode != null && new LocalDateInterval(periode.getFom(), periode.getTom()).isClosedInterval();
+        }
     }
 }

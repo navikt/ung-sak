@@ -42,7 +42,6 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;

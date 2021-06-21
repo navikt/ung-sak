@@ -3,8 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.aksjonspunkt;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 

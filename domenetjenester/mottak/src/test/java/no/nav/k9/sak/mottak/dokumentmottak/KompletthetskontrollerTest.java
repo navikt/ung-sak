@@ -29,7 +29,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
