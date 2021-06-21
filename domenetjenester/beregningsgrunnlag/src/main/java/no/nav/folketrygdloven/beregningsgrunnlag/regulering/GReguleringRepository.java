@@ -30,7 +30,7 @@ public class GReguleringRepository {
                and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
               """;
 
-        query = entityManager.createNativeQuery(sql, Long.class); // NOSONAR
+        query = entityManager.createNativeQuery(sql); // NOSONAR
 
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", periode.getFomDato() == null ? Tid.TIDENES_BEGYNNELSE : periode.getFomDato());
