@@ -1,16 +1,12 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
-import java.util.List;
 import java.util.Set;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringsFeil;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
@@ -21,7 +17,6 @@ import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.domene.registerinnhenting.impl.Endringskontroller;
 import no.nav.k9.sak.kompletthet.KompletthetModell;
-import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 /**
