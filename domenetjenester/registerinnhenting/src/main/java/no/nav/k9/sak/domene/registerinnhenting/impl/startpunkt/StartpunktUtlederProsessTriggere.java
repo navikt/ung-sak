@@ -1,7 +1,7 @@
 package no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt;
 
 import java.util.Comparator;
-import java.util.Objects;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -41,17 +41,11 @@ class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
 
     @Override
     public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {
-        var grunnlag1 = prosessTriggereRepository.hentGrunnlagBasertPåId((Long) grunnlagId1)
+        var grunnlag2 = new HashSet<>(prosessTriggereRepository.hentGrunnlagBasertPåId((Long) grunnlagId2)
             .map(ProsessTriggere::getTriggere)
-            .orElseGet(Set::of);
-        var grunnlag2 = prosessTriggereRepository.hentGrunnlagBasertPåId((Long) grunnlagId2)
-            .map(ProsessTriggere::getTriggere)
-            .orElseGet(Set::of);
+            .orElseGet(Set::of));
 
         return grunnlag2.stream()
-            .filter(it -> grunnlag1.stream()
-                .noneMatch(at -> Objects.equals(at.getÅrsak(), it.getÅrsak())
-                    && Objects.equals(at.getPeriode(), it.getPeriode())))
             .map(this::mapTilStartPunktType)
             .min(Comparator.comparing(StartpunktType::getRangering))
             .orElse(StartpunktType.UDEFINERT);
