@@ -1,5 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.regulering;
 
+import java.math.BigInteger;
 import java.util.Objects;
 
 import javax.enterprise.context.Dependent;
@@ -36,7 +37,7 @@ public class GReguleringRepository {
         query.setParameter("fom", periode.getFomDato() == null ? Tid.TIDENES_BEGYNNELSE : periode.getFomDato());
         query.setParameter("tom", periode.getTomDato() == null ? Tid.TIDENES_ENDE : periode.getFomDato());
 
-        return (Long) query.getSingleResult();
+        return ((BigInteger) query.getSingleResult()).longValueExact();
     }
 
     public Long startGReguleringForPeriode(FagsakYtelseType ytelseType, DatoIntervallEntitet periode, String fomValue, String tomValue) {
