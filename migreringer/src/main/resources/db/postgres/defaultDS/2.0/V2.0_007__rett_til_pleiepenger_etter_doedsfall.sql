@@ -32,3 +32,6 @@ create table psb_gr_rett_pleiepenger_ved_doed (
 
 create index IDX_PSB_GR_RETT_PLEIEPENGER_VED_DOED_1 on psb_gr_rett_pleiepenger_ved_doed (BEHANDLING_ID);
 create index IDX_PSB_GR_RETT_PLEIEPENGER_VED_DOED_2 on psb_gr_rett_pleiepenger_ved_doed (PSB_RETT_PLEIEPENGER_VED_DOED_ID);
+
+create unique index UIDX_PSB_GR_RETT_PLEIEPENGER_VED_DOED_1 on psb_gr_rett_pleiepenger_ved_doed (BEHANDLING_ID) where (aktiv = true);
+create unique index UIDX_PSB_GR_RETT_PLEIEPENGER_VED_DOED_2 on psb_gr_rett_pleiepenger_ved_doed (PSB_RETT_PLEIEPENGER_VED_DOED_ID) where (aktiv = true);

@@ -1,9 +1,6 @@
 package no.nav.k9.kodeverk.uttak;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.*;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 import java.util.LinkedHashMap;
@@ -32,7 +29,7 @@ public enum RettVedDødType implements Kodeverdi {
     }
 
 
-    @JsonIgnore
+    @JsonValue
     private String kode;
 
     @JsonIgnore

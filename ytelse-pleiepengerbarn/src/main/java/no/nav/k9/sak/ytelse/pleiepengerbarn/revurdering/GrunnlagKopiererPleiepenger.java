@@ -14,6 +14,7 @@ import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
@@ -30,6 +31,7 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     private OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository;
     private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
+    private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     public GrunnlagKopiererPleiepenger() {
@@ -44,6 +46,7 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
                                        UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                                        OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository,
                                        UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
+                                       RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
                                        InntektArbeidYtelseTjeneste iayTjeneste) {
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.iayTjeneste = iayTjeneste;
@@ -70,6 +73,7 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
         beregningPerioderGrunnlagRepository.kopier(originalBehandlingId, nyBehandlingId, true);
         omsorgenForGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         unntakEtablertTilsynGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        rettPleiepengerVedDødRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
 
         // gjør til slutt, innebærer kall til abakus
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);

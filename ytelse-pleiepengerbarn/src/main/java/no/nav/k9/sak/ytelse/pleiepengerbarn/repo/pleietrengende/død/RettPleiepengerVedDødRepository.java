@@ -2,14 +2,14 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død;
 
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.Objects;
 import java.util.Optional;
 
-@ApplicationScoped
+@Dependent
 public class RettPleiepengerVedDødRepository {
 
     private EntityManager entityManager;
@@ -61,5 +61,15 @@ public class RettPleiepengerVedDødRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
+    /**
+     * Kopierer grunnlag fra en tidligere behandling. Endrer ikke aggregater, en skaper nye referanser til disse.
+     */
+    public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
+        Optional<RettPleiepengerVedDødGrunnlag> grunnnlag = hentEksisterendeGrunnlag(gammelBehandlingId);
+        grunnnlag.ifPresent(entitet -> lagreOgFlush(nyBehandlingId, new RettPleiepengerVedDød(
+            entitet.getRettVedPleietrengendeDød().getVurdering(),
+            entitet.getRettVedPleietrengendeDød().getRettVedDødType()
+        )));
+    }
 }
 
