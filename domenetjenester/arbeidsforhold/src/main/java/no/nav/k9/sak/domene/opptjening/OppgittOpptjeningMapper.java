@@ -18,7 +18,7 @@ class OppgittOpptjeningMapper {
         return builder.build();
     }
 
-    static private void leggTilEgneNæringer(List<OppgittOpptjening> overlappendeOppgitteOpptjeninger, OppgittOpptjeningBuilder builder) {
+    private static void leggTilEgneNæringer(List<OppgittOpptjening> overlappendeOppgitteOpptjeninger, OppgittOpptjeningBuilder builder) {
         var oppgittOpptjeningSN = overlappendeOppgitteOpptjeninger.stream()
             .filter(opptj -> !opptj.getEgenNæring().isEmpty())
             .findFirst();
@@ -30,7 +30,7 @@ class OppgittOpptjeningMapper {
         });
     }
 
-    static private void leggTilFrilans(List<OppgittOpptjening> overlappendeOppgitteOpptjeninger, OppgittOpptjeningBuilder builder) {
+    private static void leggTilFrilans(List<OppgittOpptjening> overlappendeOppgitteOpptjeninger, OppgittOpptjeningBuilder builder) {
         var oppgittOpptjeningFL = overlappendeOppgitteOpptjeninger.stream()
             .filter(opptj -> opptj.getFrilans().isPresent())
             .findFirst();
@@ -40,7 +40,7 @@ class OppgittOpptjeningMapper {
         });
     }
 
-    static private void leggTilArbeidsforhold(List<OppgittOpptjening> overlappendeOppgitteOpptjeninger, OppgittOpptjeningBuilder builder) {
+    private static void leggTilArbeidsforhold(List<OppgittOpptjening> overlappendeOppgitteOpptjeninger, OppgittOpptjeningBuilder builder) {
         var oppgittOpptjeningAT = overlappendeOppgitteOpptjeninger.stream()
             .filter(opptj -> !opptj.getOppgittArbeidsforhold().isEmpty())
             .findFirst();
@@ -52,7 +52,7 @@ class OppgittOpptjeningMapper {
         });
     }
 
-    static private void leggTilAndreAktiviteter(List<OppgittOpptjening> overlappendeOppgitteOpptjeninger, OppgittOpptjeningBuilder builder) {
+    private static void leggTilAndreAktiviteter(List<OppgittOpptjening> overlappendeOppgitteOpptjeninger, OppgittOpptjeningBuilder builder) {
         var oppgittOpptjeningAnnet = overlappendeOppgitteOpptjeninger.stream()
             .filter(opptj -> !opptj.getAnnenAktivitet().isEmpty())
             .findFirst();
