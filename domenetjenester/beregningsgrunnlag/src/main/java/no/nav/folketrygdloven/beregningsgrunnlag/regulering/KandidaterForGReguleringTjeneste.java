@@ -26,9 +26,24 @@ public class KandidaterForGReguleringTjeneste {
 
     public boolean skalGReguleres(Long fagsakId, DatoIntervallEntitet periode) {
         var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId).orElseThrow();
-        var vilkårene = vilkårResultatRepository.hent(sisteBehandling.getId());
 
-        var harOverlappendeGrunnlag = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+        if (sisteBehandling.erHenlagt()) {
+            sisteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId).orElseThrow();
+        }
+
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(sisteBehandling.getId());
+
+        if (vilkårene.isEmpty()) {
+            return false;
+        }
+
+        var vilkår = vilkårene.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+
+        if (vilkår.isEmpty()) {
+            return false;
+        }
+
+        var harOverlappendeGrunnlag = vilkår
             .orElseThrow(() -> new IllegalStateException("Fagsaken(id=" + fagsakId + ") har ikke beregnignsvilkåret knyttet til siste behandling"))
             .getPerioder()
             .stream()
