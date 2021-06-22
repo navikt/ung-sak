@@ -407,7 +407,7 @@
             <dependency>
                 <groupId>no.nav.pleiepengerbarn.uttak</groupId>
                 <artifactId>kontrakter</artifactId>
-                <version>1.0_20210621140126_e66145e</version>
+                <version>1.0_20210621153111_cf660e4</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
