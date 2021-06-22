@@ -37,13 +37,13 @@ public class AvklartKravDokument extends BaseEntitet implements IndexKey {
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
     private JournalpostId journalpostId;
 
-    @Column(name = "godkjent")
+    @Column(name = "godkjent", nullable = false)
     private boolean godkjent;
 
-    @Column(name = "godkjent_fra_dato")
-    private LocalDate godkjentFraDato;
+    @Column(name = "gyldig_fra", nullable = false)
+    private LocalDate fraDato;
 
-    @Column(name = "begrunnelse")
+    @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
 
     @Version
@@ -58,10 +58,10 @@ public class AvklartKravDokument extends BaseEntitet implements IndexKey {
         this.journalpostId = periode.getJournalpostId();
     }
 
-    public AvklartKravDokument(JournalpostId journalpostId, Boolean godkjent, LocalDate godkjentFraDato) {
+    public AvklartKravDokument(JournalpostId journalpostId, Boolean godkjent, LocalDate fraDato) {
         this.journalpostId = journalpostId;
         this.godkjent = godkjent;
-        this.godkjentFraDato = godkjentFraDato;
+        this.fraDato = fraDato;
     }
 
     public Long getId() {
@@ -84,8 +84,12 @@ public class AvklartKravDokument extends BaseEntitet implements IndexKey {
         }
     }
 
-    public LocalDate getGodkjentFraDato() {
-        return godkjentFraDato;
+    public LocalDate getFraDato() {
+        return fraDato;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
     }
 
     @Override

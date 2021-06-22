@@ -39,6 +39,16 @@ public class KravDokumentStatus {
     @JsonProperty(value = "status")
     private List<SøknadsfristPeriodeDto> statusPerPeriode;
 
+    @Size
+    @Valid
+    @JsonProperty(value = "avklarteOpplysninger")
+    private AvklarteOpplysninger avklarteOpplysninger;
+
+    @Size
+    @Valid
+    @JsonProperty(value = "overstyrteOpplysninger")
+    private AvklarteOpplysninger overstyrteOpplysninger;
+
     public KravDokumentStatus() {
     }
 
@@ -46,11 +56,15 @@ public class KravDokumentStatus {
     public KravDokumentStatus(@Valid @JsonProperty(value = "type") KravDokumenType type,
                               @Size @Valid @JsonProperty(value = "status") List<SøknadsfristPeriodeDto> statusPerPeriode,
                               @Valid @JsonProperty(value = "innsendingstidspunkt") LocalDateTime innsendingstidspunkt,
-                              @NotNull @Valid @JsonProperty(value = "journalpostId") JournalpostId journalpostId) {
+                              @NotNull @Valid @JsonProperty(value = "journalpostId") JournalpostId journalpostId,
+                              @Size @Valid @JsonProperty(value = "avklarteOpplysninger") AvklarteOpplysninger avklarteOpplysninger,
+                              @Size @Valid @JsonProperty(value = "overstyrteOpplysninger") AvklarteOpplysninger overstyrteOpplysninger) {
         this.type = type;
         this.statusPerPeriode = statusPerPeriode;
         this.innsendingstidspunkt = innsendingstidspunkt;
         this.journalpostId = journalpostId;
+        this.avklarteOpplysninger = avklarteOpplysninger;
+        this.overstyrteOpplysninger = overstyrteOpplysninger;
     }
 
     public KravDokumenType getType() {
@@ -67,6 +81,14 @@ public class KravDokumentStatus {
 
     public JournalpostId getJournalpostId() {
         return journalpostId;
+    }
+
+    public AvklarteOpplysninger getAvklarteOpplysninger() {
+        return avklarteOpplysninger;
+    }
+
+    public AvklarteOpplysninger getOverstyrteOpplysninger() {
+        return overstyrteOpplysninger;
     }
 
     @Override

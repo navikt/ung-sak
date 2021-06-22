@@ -14,12 +14,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@JsonTypeName(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE)
-public class AvklarSøknadsfristDto extends BekreftetAksjonspunktDto {
+@JsonTypeName(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE)
+public class OverstyrtSøknadsfristDto extends OverstyringAksjonspunktDto {
 
     @Valid
     @NotNull
@@ -27,15 +28,25 @@ public class AvklarSøknadsfristDto extends BekreftetAksjonspunktDto {
     @JsonProperty(value = "avklarteKrav")
     private List<AvklartKravDto> avklarteKrav;
 
-    public AvklarSøknadsfristDto() {
+    public OverstyrtSøknadsfristDto() {
     }
 
-    public AvklarSøknadsfristDto(String begrunnelse, List<AvklartKravDto> avklarteKrav) {
+    public OverstyrtSøknadsfristDto(String begrunnelse, List<AvklartKravDto> avklarteKrav) {
         super(begrunnelse);
         this.avklarteKrav = avklarteKrav;
     }
 
     public List<AvklartKravDto> getAvklarteKrav() {
         return avklarteKrav;
+    }
+
+    @Override
+    public String getAvslagskode() {
+        return null;
+    }
+
+    @Override
+    public boolean getErVilkarOk() {
+        return false;
     }
 }
