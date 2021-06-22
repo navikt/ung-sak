@@ -8,9 +8,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -70,21 +68,17 @@ public class EtablertTilsynTjeneste {
         final LocalDateTimeline<Duration> forrigeBehandlingEtablertTilsynTidslinje = tilTidslinje(forrigeBehandlingEtablertTilsyn);
         final LocalDateTimeline<Duration> nyBehandlingEtablertTilsynTidslinje = tilTidslinje(nyBehandlingtablertTilsyn);
 
-        return forrigeBehandlingEtablertTilsynTidslinje.combine(nyBehandlingEtablertTilsynTidslinje, new LocalDateSegmentCombinator<Duration, Duration, Boolean>() {
-            @Override
-            public LocalDateSegment<Boolean> combine(LocalDateInterval datoInterval,
-                    LocalDateSegment<Duration> datoSegment, LocalDateSegment<Duration> datoSegment2) {
-                if (datoSegment == null || datoSegment2 == null || !datoSegment.getValue().equals(datoSegment2.getValue())) {
-                    return new LocalDateSegment<>(datoInterval, Boolean.TRUE);
-                }
-                return null;
+        return forrigeBehandlingEtablertTilsynTidslinje.combine(nyBehandlingEtablertTilsynTidslinje, (datoInterval, datoSegment, datoSegment2) -> {
+            if (datoSegment == null || datoSegment2 == null || !datoSegment.getValue().equals(datoSegment2.getValue())) {
+                return new LocalDateSegment<>(datoInterval, Boolean.TRUE);
             }
+            return null;
         }, JoinStyle.CROSS_JOIN);
     }
 
-    private LocalDateTimeline<Duration> tilTidslinje(final EtablertTilsyn forrigeBehandlingEtablertTilsyn) {
+    private LocalDateTimeline<Duration> tilTidslinje(final EtablertTilsyn etablertTilsyn) {
          return new LocalDateTimeline<>(
-            forrigeBehandlingEtablertTilsyn.getPerioder()
+            etablertTilsyn.getPerioder()
             .stream()
             .map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p.getVarighet()))
             .collect(Collectors.toList())

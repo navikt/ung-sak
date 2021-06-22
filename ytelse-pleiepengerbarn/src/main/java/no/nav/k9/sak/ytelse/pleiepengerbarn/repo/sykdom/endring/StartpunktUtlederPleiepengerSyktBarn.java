@@ -12,10 +12,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -23,13 +21,11 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
-import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 
 @ApplicationScoped
 @GrunnlagRef("SykdomGrunnlag")
@@ -41,8 +37,7 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
     private VilkårResultatRepository vilkårResultatRepository;
-    private EtablertTilsynTjeneste etablertTilsynTjeneste;
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
 
     StartpunktUtlederPleiepengerSyktBarn() {
         // For CDI
@@ -52,13 +47,11 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
     StartpunktUtlederPleiepengerSyktBarn(SykdomGrunnlagRepository sykdomGrunnlagRepository,
                                          SykdomGrunnlagService sykdomGrunnlagService,
                                          VilkårResultatRepository vilkårResultatRepository,
-                                         EtablertTilsynTjeneste etablertTilsynTjeneste,
-                                         @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+                                         ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste) {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.etablertTilsynTjeneste = etablertTilsynTjeneste;
-        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
     }
 
     @Override
@@ -75,15 +68,12 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
     }
 
     private StartpunktType utledStartpunktForEtablertTilsyn(BehandlingReferanse referanse) {
-        LocalDateTimeline<Boolean> resultat = etablertTilsynTjeneste.finnForskjellerSidenForrigeBehandling(referanse);
-        resultat = SykdomUtils.kunPerioderSomIkkeFinnesI(resultat, SykdomUtils.toLocalDateTimeline(sykdomGrunnlagService.hentManglendeOmsorgenForPerioder(referanse.getBehandlingId())));
-        //resultat = SykdomUtils.kunPerioderSomIkkeFinnesI(resultat, SykdomUtils.toLocalDateTimeline(utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)));
-        resultat = resultat.intersection(SykdomUtils.toLocalDateTimeline(perioderTilVurderingTjeneste.utledFullstendigePerioder(referanse.getBehandlingId())));
+        var erUhåndterteEndringer = erEndringPåEtablertTilsynTjeneste.erUhåndterteEndringer(referanse);
 
-        if (resultat.isEmpty()) {
-            return StartpunktType.UDEFINERT;
-        } else {
+        if (erUhåndterteEndringer) {
             return StartpunktType.UTTAKSVILKÅR;
+        } else {
+            return StartpunktType.UDEFINERT;
         }
     }
 
