@@ -60,7 +60,7 @@ jobs:
         run: |
           mvn clean verify -e --batch-mode -DtrimStackTrace=false --file pom.xml -Dfile.encoding=UTF-8
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
           DATASOURCE_HOST: localhost
           DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
 
