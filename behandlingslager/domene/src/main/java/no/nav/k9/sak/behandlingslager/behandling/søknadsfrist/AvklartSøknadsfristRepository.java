@@ -21,7 +21,13 @@ public class AvklartSøknadsfristRepository {
     }
 
     public void lagreAvklaring(Long behandlingId, Set<AvklartKravDokument> avklartKravDokumenter) {
+        var avklartSøknadsfristResultat = hentEksisterendeResultat(behandlingId);
+        var overstyrtHolder = avklartSøknadsfristResultat.map(AvklartSøknadsfristResultat::getOverstyrtHolder)
+            .orElse(null);
 
+        var nyttResultat = new AvklartSøknadsfristResultat(overstyrtHolder, new KravDokumentHolder(avklartKravDokumenter));
+
+        lagreResultat(behandlingId, nyttResultat);
     }
 
     public Optional<AvklartSøknadsfristResultat> hentHvisEksisterer(Long behandlingId) {
@@ -32,10 +38,12 @@ public class AvklartSøknadsfristRepository {
     public void lagreOverstyring(Long behandlingId, Set<AvklartKravDokument> overstyrtKravDokumenter) {
         var avklartSøknadsfristResultat = hentEksisterendeResultat(behandlingId);
 
-        avklartSøknadsfristResultat.map(AvklartSøknadsfristResultat::getOverstyrtHolder)
-            .map(KravDokumentHolder::getDokumenter)
+        var avklartKravDokuments = avklartSøknadsfristResultat.map(AvklartSøknadsfristResultat::getAvklartHolder)
             .orElse(null);
 
+        var nyttResultat = new AvklartSøknadsfristResultat(new KravDokumentHolder(overstyrtKravDokumenter), avklartKravDokuments);
+
+        lagreResultat(behandlingId, nyttResultat);
     }
 
     private AvklartSøknadsfristResultat lagreResultat(Long behandlingId, AvklartSøknadsfristResultat nyttResultat) {
