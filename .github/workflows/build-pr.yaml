@@ -58,9 +58,10 @@ jobs:
       - name: Build artifacts & deploy
         shell: bash
         run: |
-          mvn clean verify -e --batch-mode -DtrimStackTrace=false --file pom.xml -Dfile.encoding=UTF-8
+          mvn clean verify -e --batch-mode --settings ./.github/.m2/settings.xml -DtrimStackTrace=false --file pom.xml -Dfile.encoding=UTF-8 
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          GITHUB_USERNAME: x-access-token
+          GITHUB_PASSWORD: ${{ secrets.GH_PAT }}
           DATASOURCE_HOST: localhost
           DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
 
