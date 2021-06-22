@@ -60,6 +60,7 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
+        this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
     }
 
 
