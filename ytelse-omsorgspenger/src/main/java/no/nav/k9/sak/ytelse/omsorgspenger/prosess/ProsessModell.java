@@ -85,6 +85,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_OPPTJENINGSVILKÅR)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_UTTAK)
             .medSteg(BehandlingStegType.VURDER_UTTAK)
+            .medSteg(BehandlingStegType.BEKREFT_UTTAK)
             .medSteg(BehandlingStegType.PRECONDITION_BEREGNING)
             .medSteg(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_BEREGNING)
