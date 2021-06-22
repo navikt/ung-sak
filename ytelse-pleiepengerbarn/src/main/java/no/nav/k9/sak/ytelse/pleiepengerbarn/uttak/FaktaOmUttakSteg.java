@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -16,6 +17,8 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 
@@ -26,6 +29,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtab
 public class FaktaOmUttakSteg implements BehandlingSteg {
 
     private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
+    private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
+    private PleiebehovResultatRepository pleiebehovResultatRepository;
     private BehandlingRepository behandlingRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
 
@@ -35,9 +40,13 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
 
     @Inject
     public FaktaOmUttakSteg(UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
+                            RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
+                            PleiebehovResultatRepository pleiebehovResultatRepository,
                             BehandlingRepository behandlingRepository,
                             PersonopplysningTjeneste personopplysningTjeneste) {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
+        this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
+        this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
     }
@@ -91,9 +100,28 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(ref, ref.getFagsakPeriode().getFomDato());
         var pleietrengendePersonopplysninger = personopplysningerAggregat.getPersonopplysning(behandling.getFagsak().getPleietrengendeAktørId());
 
+        // Bare opprett aksjonspunkt dersom:
+        // * pleietrengende person har dødsdato,
+        // * dødsdato er innefor pleiebehov
+        // * retten ikke allerede er avklart
         if (pleietrengendePersonopplysninger.getDødsdato() != null) {
-            //TODO: sjekk om rett er avklart
-            return true;
+            if (dødDatoInnenforPleiebehov(behandlingId, pleietrengendePersonopplysninger.getDødsdato())) {
+                var rettPleiepengerVedDød = rettPleiepengerVedDødRepository.hentHvisEksisterer(behandlingId);
+                return rettPleiepengerVedDød.isEmpty();
+            }
+        }
+        return false;
+    }
+
+    private boolean dødDatoInnenforPleiebehov(Long behandlingId, LocalDate dødsdato) {
+        var pleiebehov = pleiebehovResultatRepository.hentHvisEksisterer(behandlingId);
+        if (pleiebehov.isPresent()) {
+            var overlappendePleiehov = pleiebehov.get().getPleieperioder().getPerioder()
+                .stream()
+                .filter(pleiebehovPeriode -> pleiebehovPeriode.getGrad().getProsent() > 0)
+                .filter(pleiebehovPeriode -> pleiebehovPeriode.getPeriode().inkluderer(dødsdato))
+                .findAny();
+            return overlappendePleiehov.isPresent();
         }
         return false;
     }
