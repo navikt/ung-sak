@@ -46,7 +46,7 @@ public class DefaultSøknadsfristPeriodeVurderer {
         if (avklartKravDokument.isPresent()) {
             var avklarteOpplysninger = avklartKravDokument.get();
             if (avklarteOpplysninger.getErGodkjent()) {
-                return avklarteOpplysninger.getGodkjentFraDato();
+                return avklarteOpplysninger.getFraDato();
             }
             // Vurderingen opprettholdes
             // TODO: Mulig det må gjøres noe triks for å kunne overstyre fra OPPFYLT -> IKKE_OPPFYLT

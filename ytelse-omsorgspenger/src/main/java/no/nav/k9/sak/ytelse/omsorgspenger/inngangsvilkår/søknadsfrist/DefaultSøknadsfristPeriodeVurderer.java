@@ -36,7 +36,7 @@ public class DefaultSøknadsfristPeriodeVurderer implements SøknadsfristPeriode
 
     private LocalDate utledCutOffDato(LocalDate vurderingsdato, Optional<AvklartKravDokument> avklartKravDokument) {
         if (avklartKravDokument.isPresent() && avklartKravDokument.get().getErGodkjent()) {
-            return avklartKravDokument.get().getGodkjentFraDato();
+            return avklartKravDokument.get().getFraDato();
         }
         return vurderingsdato.minus(frist).withDayOfMonth(1).minusDays(1);
     }
