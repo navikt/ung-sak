@@ -26,8 +26,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.db.util.JpaExtension;
@@ -43,13 +46,10 @@ import no.nav.k9.sak.domene.iay.modell.Refusjon;
 import no.nav.k9.sak.mottak.inntektsmelding.v1.MottattDokumentOversetterInntektsmelding;
 import no.nav.k9.sak.mottak.inntektsmelding.v1.MottattDokumentWrapperInntektsmelding;
 import no.nav.k9.sak.mottak.inntektsmelding.xml.MottattDokumentXmlParser;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
-import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
