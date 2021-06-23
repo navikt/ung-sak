@@ -68,7 +68,7 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
     }
 
     private StartpunktType utledStartpunktForEtablertTilsyn(BehandlingReferanse referanse) {
-        var erUhåndterteEndringer = erEndringPåEtablertTilsynTjeneste.erUhåndterteEndringer(referanse);
+        var erUhåndterteEndringer = erEndringPåEtablertTilsynTjeneste.erUhåndterteEndringerFraForrigeVersjon(referanse);
 
         if (erUhåndterteEndringer) {
             return StartpunktType.UTTAKSVILKÅR;

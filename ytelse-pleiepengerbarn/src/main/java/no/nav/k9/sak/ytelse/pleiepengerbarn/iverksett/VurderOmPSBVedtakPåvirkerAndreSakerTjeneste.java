@@ -75,7 +75,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
                 var kandidatFagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
                 var sisteBehandlingPåKandidat = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(kandidatFagsak.getId()).orElseThrow();
                 boolean skalRevurderesPgaSykdom = vurderBehovForRevurderingPgaSykdom(pleietrengende, kandidatsaksnummer, sisteBehandlingPåKandidat);
-                if (skalRevurderesPgaSykdom || erEndringPåEtablertTilsynTjeneste.erUhåndterteEndringer(BehandlingReferanse.fra(sisteBehandlingPåKandidat))) {
+                if (skalRevurderesPgaSykdom || erEndringPåEtablertTilsynTjeneste.erUhåndterteEndringerFraForrigeBehandling(BehandlingReferanse.fra(sisteBehandlingPåKandidat))) {
                     result.add(kandidatsaksnummer);
                 }
             }
