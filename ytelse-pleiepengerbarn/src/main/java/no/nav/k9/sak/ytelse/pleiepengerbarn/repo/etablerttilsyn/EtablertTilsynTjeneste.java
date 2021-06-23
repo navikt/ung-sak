@@ -67,10 +67,15 @@ public class EtablertTilsynTjeneste {
     }
 
     public LocalDateTimeline<Boolean> finnForskjellerFraEksisterendeVersjon(BehandlingReferanse behandlingRef) {
-        var forrigeEtablertTilsyn = etablertTilsynRepository.hentHvisEksisterer(behandlingRef.getBehandlingId())
+        var etablertTilsynGrunnlag = etablertTilsynRepository.hentHvisEksisterer(behandlingRef.getBehandlingId());
+        if (etablertTilsynGrunnlag.isEmpty()) {
+            return new LocalDateTimeline<>(List.of());
+        }
+
+        var forrigeEtablertTilsyn = etablertTilsynGrunnlag
             .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
-            .orElse(behandlingRef.getOriginalBehandlingId().flatMap(id -> etablertTilsynRepository.hentHvisEksisterer(id)).map(EtablertTilsynGrunnlag::getEtablertTilsyn)
-                .orElse(new EtablertTilsyn(List.of())));
+            .orElse(new EtablertTilsyn(List.of()));
+
         return uhåndterteEndringerFraForrige(behandlingRef, forrigeEtablertTilsyn);
     }
 
