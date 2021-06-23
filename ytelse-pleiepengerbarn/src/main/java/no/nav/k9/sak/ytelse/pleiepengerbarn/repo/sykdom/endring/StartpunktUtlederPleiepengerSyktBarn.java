@@ -2,8 +2,8 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.endring;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -56,13 +56,15 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
 
     @Override
     public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {
+        var result = new HashSet<StartpunktType>();
         StartpunktType sykdomStartpunk = utledStartpunktForSykdom(ref);
+        result.add(sykdomStartpunk);
         log.info("Kjører diff av sykdom, funnet følgende resultat = {}", sykdomStartpunk);
         StartpunktType tilsynStartpunkt = utledStartpunktForEtablertTilsyn(ref);
+        result.add(tilsynStartpunkt);
         log.info("Kjører diff av etablertTilsyn, funnet følgende resultat = {}", tilsynStartpunkt);
 
-        return Set.of(sykdomStartpunk, tilsynStartpunkt)
-            .stream()
+        return result.stream()
             .min(Comparator.comparing(StartpunktType::getRangering))
             .orElse(StartpunktType.UDEFINERT);
     }
