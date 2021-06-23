@@ -18,6 +18,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -26,7 +27,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderin
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingException;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 @Dependent
 public class InnhentDokumentTjeneste {

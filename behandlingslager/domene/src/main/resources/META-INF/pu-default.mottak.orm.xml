@@ -5,6 +5,6 @@
 
 	<sequence-generator name="SEQ_MOTTATT_DOKUMENT" allocation-size="50" sequence-name="SEQ_MOTTATT_DOKUMENT" />
 
-	<entity class="no.nav.k9.sak.mottak.repo.MottattDokument" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument" />
 
 </entity-mappings>

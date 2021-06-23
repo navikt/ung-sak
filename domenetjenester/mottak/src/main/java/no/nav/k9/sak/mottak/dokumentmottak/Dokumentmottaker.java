@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 
 public interface Dokumentmottaker {
 

@@ -10,11 +10,11 @@ import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
-import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
 
 @Dependent

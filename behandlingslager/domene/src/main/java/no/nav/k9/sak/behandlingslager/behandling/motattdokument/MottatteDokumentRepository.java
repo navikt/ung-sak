@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.repo;
+package no.nav.k9.sak.behandlingslager.behandling.motattdokument;
 
 import java.util.Collection;
 import java.util.Collections;

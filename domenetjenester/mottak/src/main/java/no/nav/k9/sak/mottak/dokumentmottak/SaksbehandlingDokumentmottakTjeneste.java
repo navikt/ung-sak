@@ -16,10 +16,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.sak.mottak.repo.MottattDokument;
-import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @Dependent
 public class SaksbehandlingDokumentmottakTjeneste {

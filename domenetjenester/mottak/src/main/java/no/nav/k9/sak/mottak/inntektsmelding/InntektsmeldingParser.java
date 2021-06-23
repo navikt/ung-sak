@@ -11,9 +11,9 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.util.TypeLiteral;
 
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.mottak.inntektsmelding.xml.MottattDokumentXmlParser;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 @SuppressWarnings("rawtypes")
 public class InntektsmeldingParser {
