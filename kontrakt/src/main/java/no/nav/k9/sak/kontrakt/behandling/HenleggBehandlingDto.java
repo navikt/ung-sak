@@ -39,7 +39,7 @@ public class HenleggBehandlingDto {
     // TODO (BehandlingIdDto): bør kunne støtte behandlingUuid også?
     private Long behandlingId;
 
-    @JsonAlias({ "versjon", "behanldingVersjon"}) // bakoverkompatible felt verdier
+    @JsonAlias({"versjon", "behanldingVersjon"}) // bakoverkompatible felt verdier
     @JsonProperty(value = "behandlingVersjon", required = true)
     @NotNull
     @Min(0)

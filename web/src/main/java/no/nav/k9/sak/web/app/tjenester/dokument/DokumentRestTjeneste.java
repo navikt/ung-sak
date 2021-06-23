@@ -34,6 +34,8 @@ import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -48,8 +50,6 @@ import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.dokument.DokumentDto;
 import no.nav.k9.sak.kontrakt.dokument.DokumentIdDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
-import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
@@ -62,6 +62,7 @@ public class DokumentRestTjeneste {
 
     public static final String DOKUMENTER_PATH = "/dokument/hent-dokumentliste";
     public static final String DOKUMENT_PATH = "/dokument/hent-dokument";
+    public static final String DOKUMENTER_BEHANDLING_PATH = "/dokument/hent-dokument-behandling";
     public static final String SAKSNUMMER_PARAM = "saksnummer";
     public static final String JOURNALPOST_ID_PARAM = "journalpostId";
     public static final String DOKUMENT_ID_PARAM = "dokumentId";
@@ -179,7 +180,7 @@ public class DokumentRestTjeneste {
     private DokumentDto mapFraArkivDokument(Saksnummer saksnummer, ArkivJournalPost arkivJournalPost, ArkivDokument arkivDokument,
                                             Map<JournalpostId, List<MottattDokument>> mottatteDokument,
                                             Map<JournalpostId, List<Inntektsmelding>> inntektsmeldinger) {
-        var dto = new DokumentDto(BehandlingDtoUtil.getApiPath(DokumentRestTjeneste.DOKUMENT_PATH + "?" + SAKSNUMMER_PARAM + "=" + saksnummer.getVerdi()));
+        var dto = new DokumentDto(byggApiPath(saksnummer));
         dto.setJournalpostId(arkivJournalPost.getJournalpostId());
         dto.setDokumentId(arkivDokument.getDokumentId());
         dto.setTittel(arkivDokument.getTittel());
@@ -187,27 +188,38 @@ public class DokumentRestTjeneste {
         dto.setTidspunkt(arkivJournalPost.getTidspunkt());
 
         if (mottatteDokument.containsKey(arkivJournalPost.getJournalpostId())) {
-            List<Long> behandlinger = mottatteDokument.get(dto.getJournalpostId()).stream()
-                .filter(imdok -> inntektsmeldinger.containsKey(dto.getJournalpostId()))
+            JournalpostId journalpostId = dto.getJournalpostId();
+            List<Long> behandlinger = mottatteDokument.get(journalpostId).stream()
+                .filter(imdok -> inntektsmeldinger.containsKey(journalpostId))
                 .map(MottattDokument::getBehandlingId)
                 .collect(Collectors.toList());
             dto.setBehandlinger(behandlinger);
 
-            Optional<String> navn = inntektsmeldinger.getOrDefault(dto.getJournalpostId(), Collections.emptyList())
-                .stream()
-                .map((Inntektsmelding inn) -> {
-                    var t = inn.getArbeidsgiver();
-                    if (t.getErVirksomhet()) {
-                        Optional<Virksomhet> virksomhet = virksomhetTjeneste.finnOrganisasjon(t.getOrgnr());
-                        return virksomhet.orElseThrow(() -> new IllegalArgumentException("Kunne ikke hente virksomhet for orgNummer: " + t.getOrgnr()))
-                            .getNavn();
-                    } else {
-                        return "Privatperson";
-                    }
-                })// TODO slå opp navnet på privatpersonen?
-                .findFirst();
+            var imForJournalpost = inntektsmeldinger.getOrDefault(journalpostId, Collections.emptyList());
+            Optional<String> navn = hentGjelderFor(imForJournalpost);
             navn.ifPresent(dto::setGjelderFor);
         }
         return dto;
+    }
+
+    private String byggApiPath(Saksnummer saksnummer) {
+        return BehandlingDtoUtil.getApiPath(DokumentRestTjeneste.DOKUMENT_PATH + "?" + SAKSNUMMER_PARAM + "=" + saksnummer.getVerdi());
+    }
+
+    private Optional<String> hentGjelderFor(List<Inntektsmelding> inntektsmeldinger) {
+        Optional<String> navn = inntektsmeldinger
+            .stream()
+            .map(im -> {
+                var t = im.getArbeidsgiver();
+                if (t.getErVirksomhet()) {
+                    Optional<Virksomhet> virksomhet = virksomhetTjeneste.finnOrganisasjon(t.getOrgnr());
+                    return virksomhet.orElseThrow(() -> new IllegalArgumentException("Kunne ikke hente virksomhet for orgNummer: " + t.getOrgnr()))
+                        .getNavn();
+                } else {
+                    return "Privatperson";
+                }
+            })// TODO slå opp navnet på privatpersonen?
+            .findFirst();
+        return navn;
     }
 }

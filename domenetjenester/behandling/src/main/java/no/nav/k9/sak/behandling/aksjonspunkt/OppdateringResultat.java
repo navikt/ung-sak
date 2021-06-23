@@ -3,12 +3,12 @@ package no.nav.k9.sak.behandling.aksjonspunkt;
 import java.util.ArrayList;
 import java.util.List;
 
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
-import no.nav.k9.felles.util.Tuple;
 
 public class OppdateringResultat {
 
@@ -68,13 +68,6 @@ public class OppdateringResultat {
      */
     public static OppdateringResultat medFremoverHoppTotrinn(TransisjonIdentifikator transisjonId) {
         return new OppdateringResultat(null, OverhoppKontroll.FREMOVERHOPP, transisjonId, true);
-    }
-
-    /**
-     * Vil avbryte alle åpne aksjonspunkt hoppe til iverksetting og avslutte uten vedtak
-     */
-    public static OppdateringResultat medHenleggelse(BehandlingResultatType henleggelseResultat, String henleggingsbegrunnelse) {
-        return new OppdateringResultat(OverhoppKontroll.HENLEGGELSE, henleggelseResultat, henleggingsbegrunnelse);
     }
 
     public BehandlingStegType getNesteSteg() {

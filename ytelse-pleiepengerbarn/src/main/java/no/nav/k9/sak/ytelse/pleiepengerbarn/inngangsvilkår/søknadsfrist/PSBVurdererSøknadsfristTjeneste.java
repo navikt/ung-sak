@@ -21,10 +21,10 @@ import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
-import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.SøktPeriode;
@@ -72,9 +72,8 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
     public Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
         var result = new HashMap<KravDokument, List<SøktPeriode<Søknadsperiode>>>();
 
-        var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(referanse.getFagsakId())
+        var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(referanse.getFagsakId())
             .stream()
-            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
             .filter(it -> Brevkode.PLEIEPENGER_BARN_SOKNAD.equals(it.getType()))
             .collect(Collectors.toSet());
 

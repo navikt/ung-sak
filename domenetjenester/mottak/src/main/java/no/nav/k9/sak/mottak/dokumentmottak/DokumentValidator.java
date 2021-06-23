@@ -2,7 +2,7 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.util.Collection;
 
-import no.nav.k9.sak.mottak.repo.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 
 public interface DokumentValidator {
 
