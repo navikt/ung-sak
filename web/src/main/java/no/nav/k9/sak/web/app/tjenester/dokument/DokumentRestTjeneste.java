@@ -33,7 +33,6 @@ import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -45,12 +44,10 @@ import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.dokument.DokumentDto;
 import no.nav.k9.sak.kontrakt.dokument.DokumentIdDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
-import no.nav.k9.sak.kontrakt.dokument.MottattDokumentDto;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -143,58 +140,6 @@ public class DokumentRestTjeneste {
             ? Collections.emptyMap()
             : inntektsmeldingTjeneste.hentAlleInntektsmeldingerForAngitteBehandlinger(åpneBehandlinger).stream()
             .collect(Collectors.groupingBy(Inntektsmelding::getJournalpostId));
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path(DOKUMENTER_BEHANDLING_PATH)
-    @Operation(description = "Henter dokumentlisten knyttet til en behandling, uansett dokumentstatus", summary = ("Henter dokumentlisten knyttet til en behandling, uansett dokumentstatus"), tags = "dokument")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public List<MottattDokumentDto> hentDokumenterForBehandling(@NotNull @QueryParam("behandlingUuid") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
-        try {
-            var beh = dto.getBehandlingId() != null
-                ? behandlingRepository.hentBehandling(dto.getBehandlingId())
-                : behandlingRepository.hentBehandling(dto.getBehandlingUuid());
-            var saksnummer = beh.getFagsak().getSaksnummer();
-
-            var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(beh.getFagsakId(), DokumentStatus.values())
-                .stream()
-                .filter(dok -> dok.getBehandlingId().equals(beh.getId()))
-                .collect(Collectors.toList());
-            Map<JournalpostId, ArkivJournalPost> journalposterArkiv = dokumentArkivTjeneste.hentAlleJournalposterForSak(saksnummer)
-                .stream()
-                .collect(Collectors.toMap(ArkivJournalPost::getJournalpostId, arkivPost -> arkivPost));
-            Map<JournalpostId, List<Inntektsmelding>> journalposterIm = finnInntektsmeldinger(beh.getFagsak(), Set.of(beh.getId()));
-
-            var mottattDokumentDtoer = mottatteDokumenter.stream()
-                .map(dok -> mapMottattDokumentDto(dok, saksnummer, journalposterArkiv, journalposterIm))
-                .collect(Collectors.toList());
-            return mottattDokumentDtoer;
-
-        } catch (ManglerTilgangException e) {
-            throw DokumentRestTjenesteFeil.FACTORY.applikasjonHarIkkeTilgangTilHentJournalpostListeTjeneste(e).toException();
-        }
-    }
-
-    private MottattDokumentDto mapMottattDokumentDto(MottattDokument dok, Saksnummer saksnummer, Map<JournalpostId, ArkivJournalPost> journalposter, Map<JournalpostId, List<Inntektsmelding>> journalposterIm) {
-        var dokumentDto = new MottattDokumentDto(byggApiPath(saksnummer));
-        dokumentDto.setMottattDokumentId(dokumentDto.getMottattDokumentId());
-        dokumentDto.setJournalpostId(dok.getJournalpostId());
-        dokumentDto.setTidspunkt(dok.getMottattTidspunkt());
-        dokumentDto.setDokumentStatus(dok.getStatus());
-
-        var arkivJournalPost = journalposter.get(dok.getJournalpostId());
-        if (arkivJournalPost != null) {
-            var hovedDokument = arkivJournalPost.getHovedDokument();
-            dokumentDto.setDokumentId(hovedDokument.getDokumentId());
-            dokumentDto.setTittel(hovedDokument.getTittel());
-
-            var inntektsmeldinger = journalposterIm.getOrDefault(dok.getJournalpostId(), List.of());
-            Optional<String> navn = hentGjelderFor(inntektsmeldinger);
-            navn.ifPresent(dokumentDto::setGjelderFor);
-        }
-        return dokumentDto;
     }
 
     @GET
