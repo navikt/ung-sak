@@ -106,7 +106,9 @@ public class HenleggBehandlingTjeneste {
 
         behandlingskontrollTjeneste.henleggBehandling(kontekst, årsakKode);
 
-        henleggDokumenter(behandling);
+        if (henleggDokumenterLansert) {
+            henleggDokumenter(behandling);
+        }
 
         if (BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET.equals(årsakKode)) {
             sendHenleggelsesbrev(behandling.getId(), HistorikkAktør.VEDTAKSLØSNINGEN);
