@@ -32,7 +32,7 @@ public class EtablertTilsynTjeneste {
 
     @Inject
     public EtablertTilsynTjeneste(EtablertTilsynRepository etablertTilsynRepository,
-            PeriodeFraSøknadForPleietrengendeTjeneste periodeFraSøknadForPleietrengendeTjeneste) {
+                                  PeriodeFraSøknadForPleietrengendeTjeneste periodeFraSøknadForPleietrengendeTjeneste) {
         this.etablertTilsynRepository = etablertTilsynRepository;
         this.periodeFraSøknadForPleietrengendeTjeneste = periodeFraSøknadForPleietrengendeTjeneste;
     }
@@ -61,8 +61,20 @@ public class EtablertTilsynTjeneste {
     public LocalDateTimeline<Boolean> finnForskjellerSidenForrigeBehandling(BehandlingReferanse behandlingRef) {
         final var behandlingOpt = behandlingRef.getOriginalBehandlingId();
         final EtablertTilsyn forrigeBehandlingEtablertTilsyn = behandlingOpt.flatMap(behandlingId -> etablertTilsynRepository.hentHvisEksisterer(behandlingId))
-                .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
-                .orElse(new EtablertTilsyn(List.of()));
+            .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
+            .orElse(new EtablertTilsyn(List.of()));
+        return uhåndterteEndringerFraForrige(behandlingRef, forrigeBehandlingEtablertTilsyn);
+    }
+
+    public LocalDateTimeline<Boolean> finnForskjellerFraEksisterendeVersjon(BehandlingReferanse behandlingRef) {
+        var forrigeEtablertTilsyn = etablertTilsynRepository.hentHvisEksisterer(behandlingRef.getBehandlingId())
+            .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
+            .orElse(behandlingRef.getOriginalBehandlingId().flatMap(id -> etablertTilsynRepository.hentHvisEksisterer(id)).map(EtablertTilsynGrunnlag::getEtablertTilsyn)
+                .orElse(new EtablertTilsyn(List.of())));
+        return uhåndterteEndringerFraForrige(behandlingRef, forrigeEtablertTilsyn);
+    }
+
+    private LocalDateTimeline<Boolean> uhåndterteEndringerFraForrige(BehandlingReferanse behandlingRef, EtablertTilsyn forrigeBehandlingEtablertTilsyn) {
         final EtablertTilsyn nyBehandlingtablertTilsyn = utledGrunnlagForTilsynstidlinje(behandlingRef);
 
         final LocalDateTimeline<Duration> forrigeBehandlingEtablertTilsynTidslinje = tilTidslinje(forrigeBehandlingEtablertTilsyn);
@@ -77,11 +89,11 @@ public class EtablertTilsynTjeneste {
     }
 
     private LocalDateTimeline<Duration> tilTidslinje(final EtablertTilsyn etablertTilsyn) {
-         return new LocalDateTimeline<>(
+        return new LocalDateTimeline<>(
             etablertTilsyn.getPerioder()
-            .stream()
-            .map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p.getVarighet()))
-            .collect(Collectors.toList())
+                .stream()
+                .map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p.getVarighet()))
+                .collect(Collectors.toList())
         );
     }
 

@@ -69,7 +69,7 @@ public class PSBDiffUtvidetBehandlingsgrunnlagTjeneste implements DiffUtvidetBeh
     }
 
     private LocalDateTimeline<Boolean> diffEtablertTilsyn(BehandlingReferanse referanse) {
-        return erEndringPåEtablertTilsynTjeneste.perioderMedEndringer(referanse);
+        return erEndringPåEtablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse);
     }
 
     private SykdomGrunnlagSammenlikningsresultat diffSykdomsOpplysninger(BehandlingReferanse ref) {
