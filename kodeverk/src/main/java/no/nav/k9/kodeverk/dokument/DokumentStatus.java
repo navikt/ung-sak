@@ -33,7 +33,7 @@ public enum DokumentStatus implements Kodeverdi {
     GYLDIG("GYLDIG", "Gyldig", 3),
 
     /** Dokument henlagt av saksbehandler. */
-    HENLAGT("HENLAGT", "Henlagt av saksbehandler", 3),
+    HENLAGT("HENLAGT", "Henlagt av saksbehandler", 4),
 
     /** Dokument vurdert som ugyldig. */
     UGYLDIG("UGYLDIG", "Ugyldig", 4),
