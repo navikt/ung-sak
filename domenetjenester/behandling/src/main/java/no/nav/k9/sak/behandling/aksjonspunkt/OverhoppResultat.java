@@ -6,11 +6,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
-import no.nav.k9.felles.util.Tuple;
 
 public class OverhoppResultat {
     Set<OppdateringResultat> oppdatereResultater = new LinkedHashSet<>();
@@ -50,12 +50,6 @@ public class OverhoppResultat {
             .filter(delresultat -> delresultat.getOverhoppKontroll().equals(OverhoppKontroll.FREMOVERHOPP))
             .map(OppdateringResultat::getTransisjon)
             .findFirst(); // TODO (essv): Sorter steg ut fra deres rekkefølge
-    }
-
-    public Optional<OppdateringResultat> finnHenleggelse() {
-        return oppdatereResultater.stream()
-            .filter(delresultat -> delresultat.getOverhoppKontroll().equals(OverhoppKontroll.HENLEGGELSE))
-            .findFirst();
     }
 
     public Set<Tuple<AksjonspunktDefinisjon, AksjonspunktStatus>> finnEkstraAksjonspunktResultat() {

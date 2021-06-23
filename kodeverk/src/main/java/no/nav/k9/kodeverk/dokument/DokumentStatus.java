@@ -22,7 +22,7 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum DokumentStatus implements Kodeverdi {
-    
+
     /** Dokument mottatt, ikke godtatt for behandling ennå (må sette til GYLDIG først). */
     MOTTATT("MOTTATT", "Mottar", 1),
 
@@ -31,6 +31,9 @@ public enum DokumentStatus implements Kodeverdi {
 
     /** Dokument mottatt og validert gyldig. */
     GYLDIG("GYLDIG", "Gyldig", 3),
+
+    /** Dokument henlagt av saksbehandler. */
+    HENLAGT("HENLAGT", "Henlagt av saksbehandler", 4),
 
     /** Dokument vurdert som ugyldig. */
     UGYLDIG("UGYLDIG", "Ugyldig", 4),

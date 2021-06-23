@@ -57,6 +57,8 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.dokument.arkiv.journal.SafAdapter;
@@ -71,8 +73,6 @@ import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingMottatt;
 import no.nav.k9.sak.mottak.SøknadMottakTjenesteContainer;
 import no.nav.k9.sak.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.k9.sak.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
-import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -123,7 +123,7 @@ public class FordelRestTjeneste {
         this.psbInfotrygdRepository= psbInfotrygdRepository;
         this.aktørTjeneste = aktørTjeneste;
     }
-    
+
 
     @POST
     @Path("/psb-infotrygd/fnr")
@@ -142,13 +142,13 @@ public class FordelRestTjeneste {
                 sb.append("Feil for \"" + fnr + "\": " + e.toString() + "\n");
             }
         }
-        
+
         if (sb.length() > 0) {
             return Response.status(400, sb.toString()).build();
         }
         return Response.noContent().build();
     }
-    
+
     @POST
     @Path("/psb-infotrygd/aktoer")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -159,7 +159,7 @@ public class FordelRestTjeneste {
             psbInfotrygdRepository.lagre(aktørId);
         }
     }
-    
+
     @POST
     @Path("/psb-infotrygd/finnes")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -169,7 +169,7 @@ public class FordelRestTjeneste {
     public boolean sjekkPsbInfotrygdPerson(@Parameter(description = "Sjekker om PSB-fordeling skal til Infotrygd for minst én av personen)") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid AktørListeDto aktører) {
         return aktører.getAktører().stream().map(a -> psbInfotrygdRepository.finnes(a)).anyMatch(v -> v);
     }
-    
+
     @POST
     @Path("/fagsak/opprett")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -222,7 +222,7 @@ public class FordelRestTjeneste {
 
         return fagsak.isPresent() ? new SaksnummerDto(fagsak.get().getSaksnummer().getVerdi()) : null;
     }
-    
+
     @POST
     @Path("/relatertSak")
     @Consumes(MediaType.APPLICATION_JSON)

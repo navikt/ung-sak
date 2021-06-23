@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidator;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 @ApplicationScoped
 @DokumentGruppeRef(Brevkode.INNTEKTSMELDING_KODE)
