@@ -132,7 +132,7 @@ public class HenleggBehandlingTjeneste {
 
         log.info("Henlegger behandling og {} dokumenter", gyldigeDokumenterFagsak.size());
         for (MottattDokument kravdokument : gyldigeKravdokumenterBehandling) {
-            log.info("Henlegger kravdokument med journalpostId {} og type {}", kravdokument.getJournalpostId(), kravdokument.getType().getKode());
+            log.info("Henlegger kravdokument med journalpostId {} og type {}", kravdokument.getJournalpostId().getVerdi(), kravdokument.getType().getKode());
             mottatteDokumentRepository.lagre(kravdokument, DokumentStatus.HENLAGT);
         }
     }
