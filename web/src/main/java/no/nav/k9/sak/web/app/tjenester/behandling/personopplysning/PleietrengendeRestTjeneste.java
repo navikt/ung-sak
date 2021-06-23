@@ -44,6 +44,10 @@ public class PleietrengendeRestTjeneste {
     private TpsTjeneste tpsTjeneste;
     private SykdomDokumentRepository sykdomDokumentRepository;
 
+    public PleietrengendeRestTjeneste() {
+        // CDI
+    }
+
     @Inject
     public PleietrengendeRestTjeneste(BehandlingRepository behandlingRepository,
                                       PersonopplysningTjeneste personopplysningTjeneste,
