@@ -10,10 +10,8 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UP
 
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -53,7 +51,6 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
@@ -74,7 +71,6 @@ import no.nav.k9.sak.kontrakt.behandling.NyBehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.ReåpneBehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
-import no.nav.k9.sak.kontrakt.dokument.MottattDokumentDto;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
@@ -138,14 +134,14 @@ public class BehandlingRestTjeneste {
     @Path(BEHANDLINGER_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Init hent behandling", tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "202", description = "Hent behandling initiert, Returnerer link til å polle på fremdrift", headers = @Header(name = HttpHeaders.LOCATION)),
-            @ApiResponse(responseCode = "303", description = "Behandling tilgjenglig (prosesstasks avsluttet)", headers = @Header(name = HttpHeaders.LOCATION))
+        @ApiResponse(responseCode = "202", description = "Hent behandling initiert, Returnerer link til å polle på fremdrift", headers = @Header(name = HttpHeaders.LOCATION)),
+        @ApiResponse(responseCode = "303", description = "Behandling tilgjenglig (prosesstasks avsluttet)", headers = @Header(name = HttpHeaders.LOCATION))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentBehandling(@Context HttpServletRequest request,
                                    @NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto)
-            throws URISyntaxException {
+        throws URISyntaxException {
         var behandlingId = behandlingIdDto.getBehandlingId();
         var behandling = behandlingId != null
             ? behandlingsprosessTjeneste.hentBehandling(behandlingId)
@@ -160,16 +156,16 @@ public class BehandlingRestTjeneste {
     @GET
     @Path(BEHANDLINGER_STATUS)
     @Operation(description = "Url for å polle på behandling mens behandlingprosessen pågår i bakgrunnen(asynkront)", summary = ("Returnerer link til enten samme (hvis ikke ferdig) eller redirecter til /behandlinger dersom asynkrone operasjoner er ferdig."), tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Status", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class))),
-            @ApiResponse(responseCode = "303", description = "Behandling tilgjenglig (prosesstasks avsluttet)", headers = @Header(name = HttpHeaders.LOCATION)),
-            @ApiResponse(responseCode = "418", description = "ProsessTasks har feilet", headers = @Header(name = HttpHeaders.LOCATION), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer Status", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class))),
+        @ApiResponse(responseCode = "303", description = "Behandling tilgjenglig (prosesstasks avsluttet)", headers = @Header(name = HttpHeaders.LOCATION)),
+        @ApiResponse(responseCode = "418", description = "ProsessTasks har feilet", headers = @Header(name = HttpHeaders.LOCATION), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentBehandlingMidlertidigStatus(@Context HttpServletRequest request,
                                                     @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto,
                                                     @QueryParam("gruppe") @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) ProsessTaskGruppeIdDto gruppeDto)
-            throws URISyntaxException {
+        throws URISyntaxException {
         var behandlingId = behandlingIdDto.getBehandlingId();
         var behandling = behandlingId != null
             ? behandlingsprosessTjeneste.hentBehandling(behandlingId)
@@ -182,16 +178,16 @@ public class BehandlingRestTjeneste {
     @GET
     @Path(STATUS_PATH)
     @Operation(description = "Url for å polle på behandling mens behandlingprosessen pågår i bakgrunnen(asynkront)", summary = ("Returnerer link til enten samme (hvis ikke ferdig) eller redirecter til /behandlinger dersom asynkrone operasjoner er ferdig."), tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Status", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class))),
-            @ApiResponse(responseCode = "303", description = "Behandling tilgjenglig (prosesstasks avsluttet)", headers = @Header(name = HttpHeaders.LOCATION)),
-            @ApiResponse(responseCode = "418", description = "ProsessTasks har feilet", headers = @Header(name = HttpHeaders.LOCATION), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer Status", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class))),
+        @ApiResponse(responseCode = "303", description = "Behandling tilgjenglig (prosesstasks avsluttet)", headers = @Header(name = HttpHeaders.LOCATION)),
+        @ApiResponse(responseCode = "418", description = "ProsessTasks har feilet", headers = @Header(name = HttpHeaders.LOCATION), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentBehandlingMidlertidigStatus(@Context HttpServletRequest request,
                                                     @NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid,
                                                     @QueryParam("gruppe") @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) ProsessTaskGruppeIdDto gruppeDto)
-            throws URISyntaxException {
+        throws URISyntaxException {
         var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         String gruppe = gruppeDto == null ? null : gruppeDto.getGruppe();
         Optional<AsyncPollingStatus> prosessTaskGruppePågår = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, gruppe);
@@ -201,7 +197,7 @@ public class BehandlingRestTjeneste {
     @GET
     @Path(BEHANDLINGER_PATH)
     @Operation(description = "Hent behandling gitt id", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -219,7 +215,7 @@ public class BehandlingRestTjeneste {
     @GET
     @Path(BEHANDLING_PATH)
     @Operation(description = "Hent behandling gitt id", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -234,7 +230,7 @@ public class BehandlingRestTjeneste {
     @GET
     @Path("/behandlinger/revurdering-original")
     @Operation(description = "Hent avsluttet førstegangsbehandling gitt id", summary = ("Henter førstegangngsbehandlingen som er/blir revurdert"), tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer avsluttet førstegangsbehandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer avsluttet førstegangsbehandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -252,7 +248,7 @@ public class BehandlingRestTjeneste {
     @GET
     @Path(REVURDERING_ORGINAL_PATH)
     @Operation(description = "Hent avsluttet førstegangsbehandling gitt id", summary = ("Henter førstegangngsbehandlingen som er/blir revurdert"), tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer avsluttet førstegangsbehandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer avsluttet førstegangsbehandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -281,7 +277,7 @@ public class BehandlingRestTjeneste {
     @BeskyttetRessurs(action = UPDATE, resource = VENTEFRIST)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public void endreFristForBehandlingPaVent(
-                                              @Parameter(description = "Frist for behandling på vent") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SettBehandlingPaVentDto dto) {
+        @Parameter(description = "Frist for behandling på vent") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SettBehandlingPaVentDto dto) {
         behandlingsutredningApplikasjonTjeneste.kanEndreBehandling(dto.getBehandlingId(), dto.getBehandlingVersjon());
         behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(dto.getBehandlingId(), dto.getFrist(), dto.getVentearsak(), dto.getVentearsakVariant());
     }
@@ -296,22 +292,20 @@ public class BehandlingRestTjeneste {
         Long behandlingId = dto.getBehandlingId();
         behandlingsutredningApplikasjonTjeneste.kanEndreBehandling(behandlingId, dto.getBehandlingVersjon());
         BehandlingResultatType årsakKode = tilHenleggBehandlingResultatType(dto.getÅrsakKode());
-        Map<Long, DokumentStatus> dokumenterMedNyStatus = dto.getMottatteDokumenterDto().stream()
-            .collect(Collectors.toMap(MottattDokumentDto::getMottattDokumentId, MottattDokumentDto::getDokumentStatus));
-        henleggBehandlingTjeneste.henleggBehandlingAvSaksbehandler(String.valueOf(behandlingId), årsakKode, dto.getBegrunnelse(), dokumenterMedNyStatus);
+        henleggBehandlingTjeneste.henleggBehandlingAvSaksbehandler(String.valueOf(behandlingId), årsakKode, dto.getBegrunnelse());
     }
 
     @POST
     @Path(GJENOPPTA_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Gjenopptar behandling som er satt på vent", tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "200", description = "Gjenoppta behandling påstartet i bakgrunnen", headers = @Header(name = HttpHeaders.LOCATION))
+        @ApiResponse(responseCode = "200", description = "Gjenoppta behandling påstartet i bakgrunnen", headers = @Header(name = HttpHeaders.LOCATION))
     })
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response gjenopptaBehandling(@Context HttpServletRequest request,
                                         @Parameter(description = "BehandlingId for behandling som skal gjenopptas") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) GjenopptaBehandlingDto dto)
-            throws URISyntaxException {
+        throws URISyntaxException {
         Long behandlingId = dto.getBehandlingId();
         Long behandlingVersjon = dto.getBehandlingVersjon();
 
@@ -346,13 +340,13 @@ public class BehandlingRestTjeneste {
     @Path(BEHANDLINGER_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Opprette ny behandling", tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "202", description = "Opprett ny behandling pågår", headers = @Header(name = HttpHeaders.LOCATION))
+        @ApiResponse(responseCode = "202", description = "Opprett ny behandling pågår", headers = @Header(name = HttpHeaders.LOCATION))
     })
     @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response opprettNyBehandling(@Context HttpServletRequest request,
                                         @Parameter(description = "Saksnummer og flagg om det er ny behandling etter klage") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyBehandlingDto dto)
-            throws URISyntaxException {
+        throws URISyntaxException {
         Saksnummer saksnummer = dto.getSaksnummer();
         BehandlingType behandlingType = BehandlingType.fraKode(dto.getBehandlingType().getKode());
         Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
@@ -384,13 +378,13 @@ public class BehandlingRestTjeneste {
     @Path(BEHANDLINGER_UNNTAK_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Opprette ny unntaksbehandling", tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "202", description = "Opprett ny unntaksbehandling pågår", headers = @Header(name = HttpHeaders.LOCATION))
+        @ApiResponse(responseCode = "202", description = "Opprett ny unntaksbehandling pågår", headers = @Header(name = HttpHeaders.LOCATION))
     })
     @BeskyttetRessurs(action = CREATE, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response opprettNyUnntaksbehandling(@Context HttpServletRequest request,
                                                @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyBehandlingDto dto)
-            throws URISyntaxException {
+        throws URISyntaxException {
         if (!unntaksbehandlingTogglet) {
             throw new UnsupportedOperationException("Unntaksbehandling er ikke aktivert");
         }
@@ -445,13 +439,13 @@ public class BehandlingRestTjeneste {
     @Path(OPNE_FOR_ENDRINGER_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Åpner behandling for endringer", tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "200", description = "Åpning av behandling for endringer påstartet i bakgrunnen", headers = @Header(name = HttpHeaders.LOCATION))
+        @ApiResponse(responseCode = "200", description = "Åpning av behandling for endringer påstartet i bakgrunnen", headers = @Header(name = HttpHeaders.LOCATION))
     })
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response åpneBehandlingForEndringer(@Context HttpServletRequest request,
                                                @Parameter(description = "BehandlingId for behandling som skal åpnes for endringer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ReåpneBehandlingDto dto)
-            throws URISyntaxException {
+        throws URISyntaxException {
         Long behandlingId = dto.getBehandlingId();
         Long behandlingVersjon = dto.getBehandlingVersjon();
 
