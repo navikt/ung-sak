@@ -169,7 +169,7 @@ class MapSøknadUttakPerioder {
     private LocalDateTimeline<Boolean> toFerieTidslinje(Map<Periode, LovbestemtFerie.LovbestemtFeriePeriodeInfo> perioder) {
         return new LocalDateTimeline<>(perioder.entrySet()
             .stream()
-            .map(entry -> new LocalDateSegment<>(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), entry.getValue().isSkalHaFerie()))
+            .map(entry -> new LocalDateSegment<>(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), entry.getValue() == null || entry.getValue().isSkalHaFerie()))
             .collect(Collectors.toList())
         );
     }
