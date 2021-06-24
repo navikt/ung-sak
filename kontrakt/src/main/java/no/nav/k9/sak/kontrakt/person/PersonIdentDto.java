@@ -31,9 +31,10 @@ public abstract class PersonIdentDto {
     @Valid
     private Diskresjonskode diskresjonskode;
 
-    @JsonProperty(value = "fnr")
+    @JsonProperty(value = "fnr", required = true)
     @Size(max = 11)
     @Pattern(regexp = "^[\\p{Alnum}]{11}+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @NotNull
     private String fnr;
 
     public PersonIdentDto() {
