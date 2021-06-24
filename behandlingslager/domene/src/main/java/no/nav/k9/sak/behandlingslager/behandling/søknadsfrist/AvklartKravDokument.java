@@ -54,14 +54,11 @@ public class AvklartKravDokument extends BaseEntitet implements IndexKey {
         // hibernate
     }
 
-    AvklartKravDokument(AvklartKravDokument periode) {
-        this.journalpostId = periode.getJournalpostId();
-    }
-
-    public AvklartKravDokument(JournalpostId journalpostId, Boolean godkjent, LocalDate fraDato) {
+    public AvklartKravDokument(JournalpostId journalpostId, Boolean godkjent, LocalDate fraDato, String begrunnelse) {
         this.journalpostId = journalpostId;
         this.godkjent = godkjent;
         this.fraDato = fraDato;
+        this.begrunnelse = begrunnelse;
     }
 
     public Long getId() {

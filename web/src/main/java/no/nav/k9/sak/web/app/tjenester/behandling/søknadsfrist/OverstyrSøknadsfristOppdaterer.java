@@ -53,7 +53,7 @@ public class OverstyrSøknadsfristOppdaterer extends AbstractOverstyringshåndte
     private Set<AvklartKravDokument> mapTilOverstyrteKrav(OverstyrtSøknadsfristDto dto) {
         var avklarteKravDokumenter = dto.getAvklarteKrav()
             .stream()
-            .map(it -> new AvklartKravDokument(it.getJournalpostId(), it.getGodkjent(), it.getFraDato()))
+            .map(it -> new AvklartKravDokument(it.getJournalpostId(), it.getGodkjent(), it.getFraDato(), it.getBegrunnelse()))
             .collect(Collectors.toSet());
 
         return avklarteKravDokumenter;
