@@ -21,7 +21,6 @@ import no.nav.k9.sak.typer.JournalpostId;
 
 @Entity(name = "AvklartSøknadsfristResultat")
 @Table(name = "RS_SOKNADSFRIST")
-@Immutable
 public class AvklartSøknadsfristResultat extends BaseEntitet {
 
     @Id
