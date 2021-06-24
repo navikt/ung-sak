@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.personopplysning;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.kontrakt.person.AvklartPersonstatus;
 import no.nav.k9.sak.kontrakt.person.PersonadresseDto;
 import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.web.app.tjenester.behandling.søknad.SøknadDtoFeil;
 
 @ApplicationScoped
@@ -90,6 +92,7 @@ public class PersonopplysningDtoTjeneste {
 
     private PersonopplysningDto mapPersonopplysningDto(PersonopplysningEntitet søker, PersonopplysningerAggregat aggregat, Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var fagsak = behandling.getFagsak();
 
         PersonopplysningDto dto = enkelMapping(søker, aggregat);
 
@@ -97,7 +100,29 @@ public class PersonopplysningDtoTjeneste {
         leggTilBarnSøktFor(aggregat, dto, behandling);
         leggTilEktefelle(søker, aggregat, dto);
 
+        // fra fagsak
+        leggTilRelatertAnnenPart(aggregat, dto, fagsak.getRelatertPersonAktørId());
+        leggTilPleietrengende(aggregat, dto, fagsak.getPleietrengendeAktørId());
+
         return dto;
+    }
+
+    private void leggTilPleietrengende(PersonopplysningerAggregat aggregat, PersonopplysningDto dto, AktørId pleietrengendeAktørId) {
+        if (pleietrengendeAktørId == null) {
+            return;
+        }
+        var personinfo = aggregat.getPersonopplysning(pleietrengendeAktørId);
+        var pleietrengendeDto = enkelMapping(Objects.requireNonNull(personinfo), aggregat);
+        dto.setPleietrengendePart(pleietrengendeDto);
+    }
+
+    private void leggTilRelatertAnnenPart(PersonopplysningerAggregat aggregat, PersonopplysningDto dto, AktørId relatertPersonAktørId) {
+        if (relatertPersonAktørId == null) {
+            return;
+        }
+        var personinfo = aggregat.getPersonopplysning(relatertPersonAktørId);
+        var relatertPartDto = enkelMapping(Objects.requireNonNull(personinfo), aggregat);
+        dto.setAnnenPart(relatertPartDto);
     }
 
     private void leggTilRegistrerteBarn(PersonopplysningerAggregat aggregat, PersonopplysningDto dto) {
@@ -141,6 +166,7 @@ public class PersonopplysningDtoTjeneste {
         dto.setNavn(formaterMedStoreOgSmåBokstaver(personopplysning.getNavn()));
         dto.setDodsdato(personopplysning.getDødsdato());
         dto.setAdresser(lagAddresseDto(personopplysning, aggregat));
+
         if (personopplysning.getRegion() != null) {
             dto.setRegion(personopplysning.getRegion());
         }
