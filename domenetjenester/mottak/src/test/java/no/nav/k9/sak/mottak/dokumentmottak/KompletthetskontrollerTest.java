@@ -83,10 +83,10 @@ public class KompletthetskontrollerTest {
         KompletthetModell modell = new KompletthetModell(behandlingskontrollTjeneste);
         SkjæringstidspunktTjeneste skjæringstidspunktTjeneste = Mockito.mock(SkjæringstidspunktTjeneste.class);
 
-        kompletthetskontroller = new Kompletthetskontroller(dokumentmottakerFelles,
-            modell,
-            behandlingProsesseringTjeneste,
-            skjæringstidspunktTjeneste);
+        kompletthetskontroller = new Kompletthetskontroller(
+                modell,
+            behandlingProsesseringTjeneste
+        );
 
         mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), null, Brevkode.INNTEKTSMELDING);
 

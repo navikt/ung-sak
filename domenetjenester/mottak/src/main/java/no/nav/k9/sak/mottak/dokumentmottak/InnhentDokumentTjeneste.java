@@ -11,13 +11,16 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
@@ -75,12 +78,26 @@ public class InnhentDokumentTjeneste {
         ProsessTaskData startTask;
         if (resultat.nyopprettet) {
             startTask = asynkStartBehandling(resultat.behandling);
+        } else if (prosessenStårStillePåAksjonspunktForSøknadsfrist(resultat.behandling)) {
+            startTask = restartBehandling(resultat.behandling, behandlingÅrsak);
         } else {
             startTask = asynkVurderKompletthetForÅpenBehandling(resultat.behandling, behandlingÅrsak);
         }
         lagreDokumenter(brevkodeMap, resultat.behandling);
 
         taskRepository.lagre(startTask);
+    }
+
+    private ProsessTaskData restartBehandling(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
+        dokumentMottakerFelles.leggTilBehandlingsårsak(behandling, behandlingÅrsak);
+        dokumentMottakerFelles.opprettHistorikkinnslagForBehandlingOppdatertMedNyInntektsmelding(behandling, behandlingÅrsak);
+        return dokumentMottakerFelles.opprettTaskForÅSpoleTilbakeTilStartOgStartePåNytt(behandling);
+    }
+
+    private boolean prosessenStårStillePåAksjonspunktForSøknadsfrist(Behandling behandling) {
+        return BehandlingStegType.VURDER_SØKNADSFRIST.equals(behandling.getAktivtBehandlingSteg())
+            && (behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE).map(Aksjonspunkt::erÅpentAksjonspunkt).orElse(false)
+            || behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE).map(Aksjonspunkt::erÅpentAksjonspunkt).orElse(false));
     }
 
     private BehandlingMedOpprettelseResultat finnEllerOpprettBehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
