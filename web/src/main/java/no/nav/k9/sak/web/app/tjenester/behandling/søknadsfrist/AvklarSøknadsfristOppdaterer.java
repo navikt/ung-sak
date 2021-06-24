@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -45,8 +46,10 @@ public class AvklarSøknadsfristOppdaterer implements AksjonspunktOppdaterer<Avk
         // NB! Merger ikke listene her med det som er lagret tidligere, så GUI må p.d.d. sende med alle avklaringer på saken
         avklartSøknadsfristRepository.lagreAvklaring(param.getBehandlingId(), avklaringer);
 
-        return OppdateringResultat.utenTransisjon()
-            .medTotrinn()
-            .build();
+        var builder = OppdateringResultat.utenTransisjon()
+            .medTotrinn().build();
+        builder.skalRekjøreSteg();
+        builder.setSteg(BehandlingStegType.INIT_PERIODER);
+        return builder;
     }
 }

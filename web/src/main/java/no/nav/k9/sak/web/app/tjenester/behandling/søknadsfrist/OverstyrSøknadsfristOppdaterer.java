@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.aksjonspunkt.AbstractOverstyringshåndterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -45,9 +46,11 @@ public class OverstyrSøknadsfristOppdaterer extends AbstractOverstyringshåndte
         // NB! Merger ikke listene her med det som er lagret tidligere, så GUI må p.d.d. sende med alle overstyringer på saken
         avklartSøknadsfristRepository.lagreOverstyring(kontekst.getBehandlingId(), overstyringer);
 
-        return OppdateringResultat.utenTransisjon()
-            .medTotrinn()
-            .build();
+        var builder = OppdateringResultat.utenTransisjon()
+            .medTotrinn().build();
+        builder.skalRekjøreSteg();
+        builder.setSteg(BehandlingStegType.INIT_PERIODER);
+        return builder;
     }
 
     private Set<AvklartKravDokument> mapTilOverstyrteKrav(OverstyrtSøknadsfristDto dto) {
