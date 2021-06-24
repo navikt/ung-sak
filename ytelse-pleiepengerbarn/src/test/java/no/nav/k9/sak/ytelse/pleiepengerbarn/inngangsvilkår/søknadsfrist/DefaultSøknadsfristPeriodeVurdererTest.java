@@ -37,7 +37,7 @@ class DefaultSøknadsfristPeriodeVurdererTest {
         var vurderteSegmenter = vurderer.vurderPeriode(kravDokument, timeline, Optional.empty());
 
         assertThat(vurderteSegmenter.toSegments().stream().anyMatch(it -> Utfall.IKKE_VURDERT.equals(it.getValue().getUtfall()))).isTrue();
-        var avklartKravDokument = new AvklartKravDokument(journalpostId, true, LocalDate.now().minusMonths(5));
+        var avklartKravDokument = new AvklartKravDokument(journalpostId, true, LocalDate.now().minusMonths(5), "asd");
 
         var avklarteVurderteSegmenter = vurderer.vurderPeriode(kravDokument, timeline, Optional.of(avklartKravDokument));
 
