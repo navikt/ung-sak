@@ -10,6 +10,8 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -25,20 +27,18 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 /**
  * Kjører tilbakehopp til starten av prosessen. Brukes til rekjøring av saker som må gjøre alt på nytt.
  */
 @ApplicationScoped
-@ProsessTask(TilbakeTilStartBehandlingTask.TASKNAME)
+@ProsessTask(TilbakeTilStartBehandlingTask.TASKTYPE)
 // gruppeSekvens = false for å kunne hoppe tilbake ved feilende fortsettBehandling task
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
 
     private static final Logger log = LoggerFactory.getLogger(TilbakeTilStartBehandlingTask.class);
-    public static final String TASKNAME = "behandlingskontroll.tilbakeTilStart";
+    public static final String TASKTYPE = "behandlingskontroll.tilbakeTilStart";
     public static final String PROPERTY_MANUELT_OPPRETTET = "manueltOpprettet";
     public static final String PROPERTY_START_STEG = "startSteg";
     private BehandlingRepository behandlingRepository;

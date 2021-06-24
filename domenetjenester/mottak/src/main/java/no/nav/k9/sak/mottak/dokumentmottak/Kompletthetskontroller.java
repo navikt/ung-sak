@@ -17,7 +17,6 @@ import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.domene.registerinnhenting.impl.Endringskontroller;
 import no.nav.k9.sak.kompletthet.KompletthetModell;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 /**
  * Denne klassen evaluerer hvilken effekt en ekstern hendelse (dokument, forretningshendelse) har på en åpen behandlings
@@ -26,24 +25,18 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 @Dependent
 public class Kompletthetskontroller {
 
-    private DokumentmottakerFelles dokumentmottakerFelles;
     private KompletthetModell kompletthetModell;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     public Kompletthetskontroller() {
         // For CDI proxy
     }
 
     @Inject
-    public Kompletthetskontroller(DokumentmottakerFelles dokumentmottakerFelles,
-                                  KompletthetModell kompletthetModell,
-                                  BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
-        this.dokumentmottakerFelles = dokumentmottakerFelles;
+    public Kompletthetskontroller(KompletthetModell kompletthetModell,
+                                  BehandlingProsesseringTjeneste behandlingProsesseringTjeneste) {
         this.kompletthetModell = kompletthetModell;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 
     public ProsessTaskData asynkVurderKompletthet(Behandling behandling) {
