@@ -159,7 +159,13 @@ public class MapInputTilUttakTjeneste {
             return perioder;
         }
         
-        final LocalDateTimeline<EtablertTilsynPeriode> etablertTilsynTidslinje = new LocalDateTimeline<>(perioder.stream().map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p)).collect(Collectors.toList()));
+        final LocalDateTimeline<EtablertTilsynPeriode> etablertTilsynTidslinje = new LocalDateTimeline<>(perioder.stream()
+                .map(p -> new LocalDateSegment<>(
+                    p.getPeriode().getFomDato(),
+                    p.getPeriode().getTomDato(),
+                    p
+                ))
+                .collect(Collectors.toList()));
         final LocalDateTimeline<Boolean> innleggelseTidslinje = new LocalDateTimeline<>(pleiebehov.get()
                 .getPleieperioder()
                 .getPerioder()
