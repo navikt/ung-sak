@@ -22,7 +22,7 @@ public class AvklartSøknadsfristRepository {
 
     public void lagreAvklaring(Long behandlingId, Set<AvklartKravDokument> avklartKravDokumenter) {
         var avklartSøknadsfristResultat = hentEksisterendeResultat(behandlingId);
-        var overstyrtHolder = avklartSøknadsfristResultat.map(AvklartSøknadsfristResultat::getOverstyrtHolder)
+        var overstyrtHolder = avklartSøknadsfristResultat.flatMap(AvklartSøknadsfristResultat::getOverstyrtHolder)
             .orElse(null);
 
         var nyttResultat = new AvklartSøknadsfristResultat(overstyrtHolder, new KravDokumentHolder(avklartKravDokumenter));
@@ -38,7 +38,7 @@ public class AvklartSøknadsfristRepository {
     public void lagreOverstyring(Long behandlingId, Set<AvklartKravDokument> overstyrtKravDokumenter) {
         var avklartSøknadsfristResultat = hentEksisterendeResultat(behandlingId);
 
-        var avklartKravDokuments = avklartSøknadsfristResultat.map(AvklartSøknadsfristResultat::getAvklartHolder)
+        var avklartKravDokuments = avklartSøknadsfristResultat.flatMap(AvklartSøknadsfristResultat::getAvklartHolder)
             .orElse(null);
 
         var nyttResultat = new AvklartSøknadsfristResultat(new KravDokumentHolder(overstyrtKravDokumenter), avklartKravDokuments);
@@ -78,16 +78,16 @@ public class AvklartSøknadsfristRepository {
 
     public void kopierGrunnlagFraEksisterendeBehandling(Long originalBehandlingId, Long nyBehandlingId) {
         var grunnlag = hentEksisterendeResultat(originalBehandlingId);
-        grunnlag.ifPresent(entitet -> lagre(nyBehandlingId, new AvklartSøknadsfristResultat(entitet.getOverstyrtHolder(), entitet.getAvklartHolder())));
+        grunnlag.ifPresent(entitet -> lagre(nyBehandlingId, new AvklartSøknadsfristResultat(entitet.getOverstyrtHolder().orElse(null), entitet.getAvklartHolder().orElse(null))));
     }
 
     private void lagre(Long nyBehandlingId, AvklartSøknadsfristResultat avklartSøknadsfristResultat) {
         avklartSøknadsfristResultat.setBehandlingId(nyBehandlingId);
-        if (avklartSøknadsfristResultat.getAvklartHolder() != null) {
-            entityManager.persist(avklartSøknadsfristResultat.getAvklartHolder());
+        if (avklartSøknadsfristResultat.getAvklartHolder().isPresent()) {
+            entityManager.persist(avklartSøknadsfristResultat.getAvklartHolder().get());
         }
-        if (avklartSøknadsfristResultat.getOverstyrtHolder() != null) {
-            entityManager.persist(avklartSøknadsfristResultat.getOverstyrtHolder());
+        if (avklartSøknadsfristResultat.getOverstyrtHolder().isPresent()) {
+            entityManager.persist(avklartSøknadsfristResultat.getOverstyrtHolder().get());
         }
         entityManager.persist(avklartSøknadsfristResultat);
         entityManager.flush();

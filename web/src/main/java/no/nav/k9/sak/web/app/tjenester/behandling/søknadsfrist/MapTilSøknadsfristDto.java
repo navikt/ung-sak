@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristResultat;
+import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.KravDokumentHolder;
 import no.nav.k9.sak.kontrakt.søknadsfrist.AvklarteOpplysninger;
 import no.nav.k9.sak.kontrakt.søknadsfrist.KravDokumenType;
 import no.nav.k9.sak.kontrakt.søknadsfrist.KravDokumentStatus;
@@ -33,7 +35,8 @@ public class MapTilSøknadsfristDto {
 
     private AvklarteOpplysninger hentOverstyrteOpplysninger(KravDokument key, Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultat) {
         return avklartSøknadsfristResultat.flatMap(søknadsfristResultat -> søknadsfristResultat.getOverstyrtHolder()
-            .getDokumenter()
+            .map(KravDokumentHolder::getDokumenter)
+            .orElse(Set.of())
             .stream()
             .filter(it -> Objects.equals(it.getJournalpostId(), key.getJournalpostId()))
             .findFirst()
@@ -43,7 +46,8 @@ public class MapTilSøknadsfristDto {
 
     private AvklarteOpplysninger hentAvklarteOpplysninger(KravDokument key, Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultat) {
         return avklartSøknadsfristResultat.flatMap(søknadsfristResultat -> søknadsfristResultat.getAvklartHolder()
-            .getDokumenter()
+            .map(KravDokumentHolder::getDokumenter)
+            .orElse(Set.of())
             .stream()
             .filter(it -> Objects.equals(it.getJournalpostId(), key.getJournalpostId()))
             .findFirst()

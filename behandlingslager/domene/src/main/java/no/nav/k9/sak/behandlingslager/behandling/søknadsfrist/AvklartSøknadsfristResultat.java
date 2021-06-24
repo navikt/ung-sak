@@ -59,12 +59,12 @@ public class AvklartSøknadsfristResultat extends BaseEntitet {
         this.avklartHolder = avklartHolder;
     }
 
-    public KravDokumentHolder getOverstyrtHolder() {
-        return overstyrtHolder;
+    public Optional<KravDokumentHolder> getOverstyrtHolder() {
+        return Optional.ofNullable(overstyrtHolder);
     }
 
-    public KravDokumentHolder getAvklartHolder() {
-        return avklartHolder;
+    public Optional<KravDokumentHolder> getAvklartHolder() {
+        return Optional.ofNullable(avklartHolder);
     }
 
     void setBehandlingId(Long behandlingId) {
