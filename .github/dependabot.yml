@@ -62,7 +62,7 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
     registries:
-      - "*"
+      - *
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
