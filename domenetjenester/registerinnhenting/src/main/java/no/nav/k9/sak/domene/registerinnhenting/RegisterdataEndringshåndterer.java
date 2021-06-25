@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -23,7 +24,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.registerinnhenting.impl.Endringskontroller;
 import no.nav.k9.sak.domene.registerinnhenting.impl.RegisterinnhentingHistorikkinnslagTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 /**
  * Oppdaterer registeropplysninger for engangsstønader og skrur behandlingsprosessen tilbake
@@ -50,13 +50,13 @@ public class RegisterdataEndringshåndterer {
      */
     @Inject
     public RegisterdataEndringshåndterer( // NOSONAR jobber med å redusere
-                                         BehandlingRepositoryProvider repositoryProvider,
-                                         @KonfigVerdi(value = "oppdatere.registerdata.tidspunkt", defaultVerdi = "PT10H") String oppdaterRegisterdataEtterPeriode,
-                                         Endringskontroller endringskontroller,
-                                         EndringsresultatSjekker endringsresultatSjekker,
-                                         RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste,
-                                         BehandlingÅrsakTjeneste behandlingÅrsakTjeneste,
-                                         SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                                          BehandlingRepositoryProvider repositoryProvider,
+                                          @KonfigVerdi(value = "oppdatere.registerdata.tidspunkt", defaultVerdi = "PT10H") String oppdaterRegisterdataEtterPeriode,
+                                          Endringskontroller endringskontroller,
+                                          EndringsresultatSjekker endringsresultatSjekker,
+                                          RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste,
+                                          BehandlingÅrsakTjeneste behandlingÅrsakTjeneste,
+                                          SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
 
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -144,6 +144,10 @@ public class RegisterdataEndringshåndterer {
             return;
         }
         if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_YTELSER)) {
+            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_YTELSER);
+            return;
+        }
+        if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON)) {
             historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_YTELSER);
             return;
         }
