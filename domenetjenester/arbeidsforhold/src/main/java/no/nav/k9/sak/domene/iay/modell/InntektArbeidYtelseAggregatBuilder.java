@@ -168,7 +168,9 @@ public class InntektArbeidYtelseAggregatBuilder {
             .filter(r2 -> !Objects.equals(nyRef, r2.getInternReferanse()))
             .findFirst()
             .ifPresent(mismatch -> {
-                throw new IllegalStateException(String.format("Har ulike internreferanser for samme eksternreferanse [%s], arbeidsgiver=%s, ny=%s vs. tidligere=%s", eksternReferanse, arbeidsgiver,
+                throw new IllegalStateException(String.format("Har ulike internreferanser for samme eksternreferanse [%s], arbeidsgiver=%s, ny=%s vs. tidligere=%s", eksternReferanse,
+                    arbeidsgiver,
+                    nyRef,
                     mismatch.getInternReferanse()));
             });
 
