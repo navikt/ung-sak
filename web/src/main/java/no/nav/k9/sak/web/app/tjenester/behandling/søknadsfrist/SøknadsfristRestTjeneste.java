@@ -5,8 +5,6 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -26,7 +24,6 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
-import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristResultat;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.søknadsfrist.SøknadsfristTilstandDto;
 import no.nav.k9.sak.perioder.KravDokument;

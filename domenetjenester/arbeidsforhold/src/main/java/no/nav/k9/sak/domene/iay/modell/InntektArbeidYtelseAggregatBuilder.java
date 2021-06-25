@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
