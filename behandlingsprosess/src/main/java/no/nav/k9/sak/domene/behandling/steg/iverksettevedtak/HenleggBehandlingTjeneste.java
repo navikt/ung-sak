@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -54,6 +56,7 @@ public class HenleggBehandlingTjeneste {
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private Boolean henleggDokumenterLansert;
+    private Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester;
 
     public HenleggBehandlingTjeneste() {
         // for CDI proxy
@@ -66,6 +69,7 @@ public class HenleggBehandlingTjeneste {
                                      FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                      ProsessTaskRepository prosessTaskRepository,
                                      MottatteDokumentRepository mottatteDokumentRepository,
+                                     @Any Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester,
                                      @KonfigVerdi(value = "HENLEGG_DOKUMENTER", defaultVerdi = "true") Boolean henleggDokumenterLansert) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -77,6 +81,7 @@ public class HenleggBehandlingTjeneste {
         this.historikkRepository = repositoryProvider.getHistorikkRepository();
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.henleggDokumenterLansert = henleggDokumenterLansert;
+        this.henleggelsePostopsTjenester = henleggelsePostopsTjenester;
     }
 
     public void henleggBehandlingAvSaksbehandler(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
@@ -117,6 +122,11 @@ public class HenleggBehandlingTjeneste {
             opprettOppgaveTilInfotrygd(behandling);
         }
         lagHistorikkinnslagForHenleggelse(behandling.getId(), årsakKode, begrunnelse, historikkAktør);
+
+        if (henleggDokumenterLansert) {
+            HenleggelsePostopsTjeneste.finnTjeneste(henleggelsePostopsTjenester, behandling.getFagsakYtelseType())
+                .ifPresent(postOps -> postOps.utfør(behandling));
+        }
     }
 
     private void henleggDokumenter(Behandling behandling) {
