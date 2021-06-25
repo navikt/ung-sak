@@ -47,6 +47,10 @@ public class ArbeidsforholdInformasjonBuilder {
         kladd.fjernOverstyringerSomGjelder(arbeidsgiver);
     }
 
+    /**
+     * @deprecate Kun Test!!
+     */
+    @Deprecated(forRemoval = true)
     public void leggTil(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef internReferanse, EksternArbeidsforholdRef eksternReferanse) {
         kladd.leggTilNyReferanse(new ArbeidsforholdReferanse(arbeidsgiver, internReferanse, eksternReferanse));
     }

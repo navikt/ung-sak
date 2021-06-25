@@ -3,9 +3,11 @@ package no.nav.k9.sak.domene.iay.modell;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
@@ -159,15 +161,32 @@ public class InntektArbeidYtelseAggregatBuilder {
     }
 
     public void medNyInternArbeidsforholdRef(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef nyRef, EksternArbeidsforholdRef eksternReferanse) {
+
+        nyeInternArbeidsforholdReferanser.stream()
+            .filter(r0 -> Objects.equals(arbeidsgiver, r0.getArbeidsgiver()))
+            .filter(r1 -> Objects.equals(eksternReferanse, r1.getEksternReferanse()))
+            .filter(r2 -> !Objects.equals(nyRef, r2.getInternReferanse()))
+            .findFirst()
+            .ifPresent(mismatch -> {
+                throw new IllegalStateException(String.format("Har ulike internreferanser for samme eksternreferanse [%s], arbeidsgiver=%s, ny=%s vs. tidligere=%s", eksternReferanse, arbeidsgiver,
+                    mismatch.getInternReferanse()));
+            });
+
         nyeInternArbeidsforholdReferanser.add(new ArbeidsforholdReferanse(arbeidsgiver, nyRef, eksternReferanse));
     }
 
+    /**
+     * Test only.
+     *
+     * @deprecated bør fjernes
+     */
+    @Deprecated(forRemoval = true)
     public InternArbeidsforholdRef medNyInternArbeidsforholdRef(Arbeidsgiver arbeidsgiver, EksternArbeidsforholdRef eksternReferanse) {
         if (eksternReferanse == null || eksternReferanse.getReferanse() == null) {
             return InternArbeidsforholdRef.nullRef();
         }
         InternArbeidsforholdRef nyRef = InternArbeidsforholdRef.nyRef();
-        nyeInternArbeidsforholdReferanser.add(new ArbeidsforholdReferanse(arbeidsgiver, nyRef, eksternReferanse));
+        medNyInternArbeidsforholdRef(arbeidsgiver, nyRef, eksternReferanse);
         return nyRef;
     }
 

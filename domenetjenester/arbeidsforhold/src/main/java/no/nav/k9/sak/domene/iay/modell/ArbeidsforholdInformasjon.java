@@ -44,15 +44,27 @@ public class ArbeidsforholdInformasjon {
     }
 
     public EksternArbeidsforholdRef finnEkstern(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef internReferanse) {
-        if (internReferanse.getReferanse() == null)
-            return EksternArbeidsforholdRef.nullRef();
+        return validerOgFinnEksternReferanse(arbeidsgiver, internReferanse);
+    }
 
-        return referanser.stream()
-            .filter(r -> Objects.equals(r.getInternReferanse(), internReferanse) && Objects.equals(r.getArbeidsgiver(), arbeidsgiver))
-            .findFirst()
+    private EksternArbeidsforholdRef validerOgFinnEksternReferanse(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef internReferanse) {
+        if (internReferanse.getReferanse() == null) {
+            return EksternArbeidsforholdRef.nullRef();
+        }
+
+        List<EksternArbeidsforholdRef> eksternReferanser = referanser.stream()
+            .filter(r0 -> Objects.equals(r0.getArbeidsgiver(), arbeidsgiver))
+            .filter(r1 -> Objects.equals(r1.getInternReferanse(), internReferanse))
             .map(ArbeidsforholdReferanse::getEksternReferanse)
-            .orElseThrow(
-                () -> new IllegalStateException("Mangler eksternReferanse for internReferanse: " + internReferanse + ", arbeidsgiver: " + arbeidsgiver));
+            .toList();
+
+        if (eksternReferanser.isEmpty()) {
+            throw new IllegalStateException("Mangler eksternReferanse for internReferanse: " + internReferanse + ", arbeidsgiver: " + arbeidsgiver);
+        } else if (eksternReferanser.size() > 1) {
+            throw new IllegalStateException("Har mer enn 1 eksternReferanse for internReferanse: " + internReferanse + ", arbeidsgiver: " + arbeidsgiver + ": " + eksternReferanser);
+        } else {
+            return eksternReferanser.get(0);
+        }
     }
 
     /**
@@ -61,14 +73,18 @@ public class ArbeidsforholdInformasjon {
     @Deprecated(forRemoval = true)
     public ArbeidsforholdReferanse opprettNyReferanse(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef internReferanse,
                                                       EksternArbeidsforholdRef eksternReferanse) {
-        final ArbeidsforholdReferanse arbeidsforholdReferanse = new ArbeidsforholdReferanse(arbeidsgiver,
-            internReferanse, eksternReferanse);
-        referanser.add(arbeidsforholdReferanse);
+        var arbeidsforholdReferanse = new ArbeidsforholdReferanse(arbeidsgiver, internReferanse, eksternReferanse);
+        leggTilNyReferanse(arbeidsforholdReferanse);
         return arbeidsforholdReferanse;
     }
 
     void leggTilNyReferanse(ArbeidsforholdReferanse arbeidsforholdReferanse) {
+        var arbeidsgiver = arbeidsforholdReferanse.getArbeidsgiver();
+        var nyRef = arbeidsforholdReferanse.getInternReferanse();
         referanser.add(arbeidsforholdReferanse);
+
+        // valider etter å ha lagt til ny
+        validerOgFinnEksternReferanse(arbeidsgiver, nyRef);
     }
 
     ArbeidsforholdOverstyringBuilder getOverstyringBuilderFor(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef ref) {
