@@ -1,28 +1,24 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.task.ÅrskvantumDeaktiveringTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.task.ÅrskvantumDeaktiveringTask;
 
-@ApplicationScoped
-public class ÅrskvantumDeaktiveringTjenesteImpl {
+@Dependent
+public class ÅrskvantumDeaktiveringTjeneste {
 
     private ProsessTaskRepository prosessTaskRepository;
 
-    ÅrskvantumDeaktiveringTjenesteImpl() {
-        // CDI
-    }
-
     @Inject
-    public ÅrskvantumDeaktiveringTjenesteImpl(ProsessTaskRepository prosessTaskRepository) {
+    public ÅrskvantumDeaktiveringTjeneste(ProsessTaskRepository prosessTaskRepository) {
         this.prosessTaskRepository = prosessTaskRepository;
     }
 
-    public void meldIfraOmIverksetting(Behandling behandling) {
+    public void meldFraDersomDeaktivering(Behandling behandling) {
         if (ÅrskvantumDeaktiveringTask.skalDeaktivere(behandling)) {
             ProsessTaskData prosessTaskData = new ProsessTaskData(ÅrskvantumDeaktiveringTask.TASKTYPE);
 

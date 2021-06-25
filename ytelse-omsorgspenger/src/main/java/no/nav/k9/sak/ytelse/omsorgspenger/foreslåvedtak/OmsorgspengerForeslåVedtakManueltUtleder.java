@@ -6,7 +6,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -50,8 +49,7 @@ public class OmsorgspengerForeslåVedtakManueltUtleder implements ForeslåVedtak
     }
 
     private boolean trengerManueltBrev(Behandling behandling) {
-        InformasjonsbehovListeDto informasjonsbehov = formidlingKlient.hentInformasjonsbehov(behandling.getUuid(), behandling.getFagsakYtelseType());
-        return !informasjonsbehov.getInformasjonsbehov().isEmpty();
+        return false;
     }
 
     private boolean harSøknad(Behandling behandling) {

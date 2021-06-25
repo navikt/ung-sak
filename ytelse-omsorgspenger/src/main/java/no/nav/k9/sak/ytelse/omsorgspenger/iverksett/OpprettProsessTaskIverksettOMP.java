@@ -9,23 +9,23 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettTilkjentYtelseFelles;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumDeaktiveringTjenesteImpl;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumDeaktiveringTjeneste;
 
 @FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
-public class OpprettProsessTaskIverksettOMPImpl extends OpprettProsessTaskIverksettTilkjentYtelseFelles {
+public class OpprettProsessTaskIverksettOMP extends OpprettProsessTaskIverksettTilkjentYtelseFelles {
 
-    private ÅrskvantumDeaktiveringTjenesteImpl årskvantumDeaktiveringTjeneste;
+    private ÅrskvantumDeaktiveringTjeneste årskvantumDeaktiveringTjeneste;
 
-    OpprettProsessTaskIverksettOMPImpl() {
+    OpprettProsessTaskIverksettOMP() {
         // for CDI proxy
     }
 
     @Inject
-    public OpprettProsessTaskIverksettOMPImpl(FagsakProsessTaskRepository prosessTaskRepository,
-                                              OppgaveTjeneste oppgaveTjeneste,
-                                              InfotrygdFeedService infotrygdFeedService,
-                                              ÅrskvantumDeaktiveringTjenesteImpl årskvantumDeaktiveringTjeneste) {
+    public OpprettProsessTaskIverksettOMP(FagsakProsessTaskRepository prosessTaskRepository,
+                                          OppgaveTjeneste oppgaveTjeneste,
+                                          InfotrygdFeedService infotrygdFeedService,
+                                          ÅrskvantumDeaktiveringTjeneste årskvantumDeaktiveringTjeneste) {
         super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService);
         this.årskvantumDeaktiveringTjeneste = årskvantumDeaktiveringTjeneste;
 
@@ -33,6 +33,6 @@ public class OpprettProsessTaskIverksettOMPImpl extends OpprettProsessTaskIverks
 
     @Override
     public void opprettYtelsesSpesifikkeTasks(Behandling behandling) {
-        årskvantumDeaktiveringTjeneste.meldIfraOmIverksetting(behandling);
+        årskvantumDeaktiveringTjeneste.meldFraDersomDeaktivering(behandling);
     }
 }
