@@ -22,14 +22,14 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class DokumentMedUstrukturerteDataDto {
 
-    @JsonProperty(value = "id")
+    @JsonProperty(value = "id", required = true)
     @Size(max = 50)
     @NotNull
     @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String id;
 
-    @JsonProperty(value = "type")
+    @JsonProperty(value = "type", required = true)
     @Valid
     private SykdomDokumentType type;
 
