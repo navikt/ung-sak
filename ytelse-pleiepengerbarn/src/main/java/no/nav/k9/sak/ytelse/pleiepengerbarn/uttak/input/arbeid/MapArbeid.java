@@ -115,7 +115,7 @@ public class MapArbeid {
         return opptjening.get().getOpptjeningAktivitet()
             .stream()
             .filter(it -> OpptjeningAktivitetType.DAGPENGER.equals(it.getAktivitetType()))
-            .anyMatch(it -> DatoIntervallEntitet.fraOgMedTilOgMed(vilkårPeriode.getSkjæringstidspunkt().minusDays(1), vilkårPeriode.getSkjæringstidspunkt().minusDays(1)).overlapper(it.getTom(), it.getTom()));
+            .anyMatch(it -> DatoIntervallEntitet.fraOgMedTilOgMed(vilkårPeriode.getSkjæringstidspunkt().minusDays(1), vilkårPeriode.getSkjæringstidspunkt().minusDays(1)).overlapper(it.getFom(), it.getTom()));
     }
 
     private HashSet<DatoIntervallEntitet> mapInaktivePerioder(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, List<VilkårPeriode> vilkårPerioder) {
