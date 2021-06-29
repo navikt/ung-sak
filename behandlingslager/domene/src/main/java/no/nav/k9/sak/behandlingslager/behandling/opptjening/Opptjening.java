@@ -112,7 +112,7 @@ public class Opptjening extends BaseEntitet {
         return Collections.unmodifiableList(opptjeningAktivitet);
     }
 
-    void setOpptjeningAktivitet(Collection<OpptjeningAktivitet> opptjeningAktivitet) {
+    public void setOpptjeningAktivitet(Collection<OpptjeningAktivitet> opptjeningAktivitet) {
         this.opptjeningAktivitet.clear();
         this.opptjeningAktivitet.addAll(opptjeningAktivitet);
     }
@@ -161,8 +161,8 @@ public class Opptjening extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" + 
-            "id=" + id + ", " 
+        return getClass().getSimpleName() + "<" +
+            "id=" + id + ", "
             + "opptjeningsperiodeFom=" + opptjeningPeriode.getFomDato() + ", "
             + "opptjeningsperiodeTom=" + opptjeningPeriode.getTomDato()
             + (opptjentPeriode == null ? "" : ", opptjentPeriode=" + opptjentPeriode)

@@ -1,9 +1,15 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -32,7 +38,8 @@ public class InputParametere {
     private NavigableSet<DatoIntervallEntitet> utvidetRevurderingPerioder;
     private List<EtablertTilsynPeriode> etablertTilsynPerioder;
     private LocalDateTimeline<List<Kravprioritet>> kravprioritet;
-    private Optional<RettPleiepengerVedDødGrunnlag> rettPleiepengerVedDødGrunnlag;
+    private OpptjeningResultat opptjeningResultat;
+    private RettPleiepengerVedDødGrunnlag rettPleiepengerVedDødGrunnlag;
 
     public InputParametere() {
     }
@@ -96,7 +103,7 @@ public class InputParametere {
         return this;
     }
 
-    public InputParametere medRettPleiepengerVedDødGrunnlag(Optional<RettPleiepengerVedDødGrunnlag> rettPleiepengerVedDødGrunnlag) {
+    public InputParametere medRettPleiepengerVedDødGrunnlag(RettPleiepengerVedDødGrunnlag rettPleiepengerVedDødGrunnlag) {
         this.rettPleiepengerVedDødGrunnlag = rettPleiepengerVedDødGrunnlag;
         return this;
     }
@@ -151,6 +158,15 @@ public class InputParametere {
     }
 
     public Optional<RettPleiepengerVedDødGrunnlag> getRettPleiepengerVedDødGrunnlag() {
-        return rettPleiepengerVedDødGrunnlag;
+        return Optional.ofNullable(rettPleiepengerVedDødGrunnlag);
+    }
+
+    public InputParametere medOpptjeningsresultat(OpptjeningResultat opptjeningResultat) {
+        this.opptjeningResultat = opptjeningResultat;
+        return this;
+    }
+
+    public Optional<OpptjeningResultat> getOpptjeningResultat() {
+        return Optional.of(opptjeningResultat);
     }
 }

@@ -221,7 +221,7 @@ public class KompletthetForBeregningTjeneste {
         var kravDokumenter = input.getVurderteSøknadsperioder().keySet();
         var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.toLocalDateInterval(), true)));
 
-        var arbeidIPeriode = new MapArbeid(this).map(kravDokumenter, perioderFraSøknadene, timeline, Set.of(), null, behandlingReferanse);
+        var arbeidIPeriode = new MapArbeid(this).map(kravDokumenter, perioderFraSøknadene, timeline, Set.of(), null, null, behandlingReferanse);
 
         return harFraværFraArbeidsgiverIPerioden(arbeidIPeriode, manglendeVedlegg);
     }

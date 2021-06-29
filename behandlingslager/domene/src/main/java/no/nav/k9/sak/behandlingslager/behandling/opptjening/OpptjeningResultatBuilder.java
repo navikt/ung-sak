@@ -13,17 +13,17 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-class OpptjeningResultatBuilder {
+public class OpptjeningResultatBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(OpptjeningResultatBuilder.class);
     private final OpptjeningResultat kladd;
     private boolean built = false;
 
-    OpptjeningResultatBuilder(OpptjeningResultat kladd) {
+    public OpptjeningResultatBuilder(OpptjeningResultat kladd) {
         this.kladd = (kladd != null) ? new OpptjeningResultat(kladd) : new OpptjeningResultat();
     }
 
-    OpptjeningResultatBuilder leggTil(Opptjening opptjening) {
+    public OpptjeningResultatBuilder leggTil(Opptjening opptjening) {
         validerState();
         Objects.requireNonNull(opptjening);
         kladd.deaktiver(opptjening.getOpptjeningPeriode());
@@ -96,7 +96,7 @@ class OpptjeningResultatBuilder {
         return this;
     }
 
-    OpptjeningResultat build() {
+    public OpptjeningResultat build() {
         validerState();
         this.built = true;
 
