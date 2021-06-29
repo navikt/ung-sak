@@ -23,6 +23,9 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
+import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
+import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
@@ -450,5 +453,11 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         var ytelseTypeKode = ytelseType.getKode();
         return FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ytelseTypeKode).orElseThrow(
             () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ytelseTypeKode));
+    }
+
+    public Map<UUID, GrunnbeløpReguleringStatus> kontrollerBehovForGregulering(List<UUID> koblingerÅSpørreMot, Saksnummer saksnummer) {
+        KontrollerGrunnbeløpRequest request = new KontrollerGrunnbeløpRequest(koblingerÅSpørreMot, saksnummer.getVerdi());
+        GrunnbeløpReguleringRespons respons = restTjeneste.kontrollerBehovForGRegulering(request);
+        return respons.getResultat();
     }
 }
