@@ -74,19 +74,25 @@ public class AvklartSøknadsfristResultat extends BaseEntitet {
     }
 
     public Optional<AvklartKravDokument> finnAvklaring(JournalpostId journalpostId) {
-        var overstyrtStatus = overstyrtHolder.getDokumenter()
-            .stream()
-            .filter(it -> it.getJournalpostId().equals(journalpostId))
-            .findAny();
 
-        if (overstyrtStatus.isPresent()) {
-            return overstyrtStatus;
+        if (overstyrtHolder != null) {
+            var overstyrtStatus = overstyrtHolder.getDokumenter()
+                .stream()
+                .filter(it -> it.getJournalpostId().equals(journalpostId))
+                .findAny();
+
+            if (overstyrtStatus.isPresent()) {
+                return overstyrtStatus;
+            }
         }
 
-        return avklartHolder.getDokumenter()
-            .stream()
-            .filter(it -> it.getJournalpostId().equals(journalpostId))
-            .findAny();
+        if (avklartHolder != null) {
+            return avklartHolder.getDokumenter()
+                .stream()
+                .filter(it -> it.getJournalpostId().equals(journalpostId))
+                .findAny();
+        }
+        return Optional.empty();
     }
 
     void deaktiver() {
