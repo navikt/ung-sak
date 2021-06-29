@@ -26,7 +26,6 @@ import javax.inject.Inject;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
 import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
-import org.jboss.weld.exceptions.UnsupportedOperationException;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.FraKalkulusMapper;
