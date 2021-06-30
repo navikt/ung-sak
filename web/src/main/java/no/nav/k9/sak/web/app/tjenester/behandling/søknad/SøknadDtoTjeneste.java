@@ -132,7 +132,7 @@ public class SøknadDtoTjeneste {
     }
 
     private Optional<Fagsak> finnSisteFagsakPå(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengendeAktørId) {
-        final List<Fagsak> fagsaker = repositoryProvider.getFagsakRepository().finnFagsakRelatertTil(ytelseType, pleietrengendeAktørId, null, null, null);
+        final List<Fagsak> fagsaker = repositoryProvider.getFagsakRepository().finnFagsakRelatertTil(ytelseType, bruker, pleietrengendeAktørId, null, null, null);
         if (fagsaker.isEmpty()) {
             return Optional.empty();
         }
@@ -249,7 +249,7 @@ public class SøknadDtoTjeneste {
                 utlandsopphold.getPeriodeTom()))
             .collect(Collectors.toList());
     }
-    
+
     private VilkårsPerioderTilVurderingTjeneste finnVilkårsPerioderTilVurderingTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
         return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, ytelseType, behandlingType);
     }

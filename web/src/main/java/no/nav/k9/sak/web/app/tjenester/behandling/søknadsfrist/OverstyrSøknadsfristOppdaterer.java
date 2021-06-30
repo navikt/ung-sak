@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartKravDokument;
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
+import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristResultat;
+import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.KravDokumentHolder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.søknadsfrist.aksjonspunkt.OverstyrtSøknadsfristDto;
 
@@ -42,8 +45,7 @@ public class OverstyrSøknadsfristOppdaterer extends AbstractOverstyringshåndte
 
     @Override
     public OppdateringResultat håndterOverstyring(OverstyrtSøknadsfristDto dto, Behandling behandling, BehandlingskontrollKontekst kontekst) {
-        Set<AvklartKravDokument> overstyringer = mapTilOverstyrteKrav(dto);
-        // NB! Merger ikke listene her med det som er lagret tidligere, så GUI må p.d.d. sende med alle overstyringer på saken
+        Set<AvklartKravDokument> overstyringer = mapTilOverstyrteKrav(behandling.getId(), dto);
         avklartSøknadsfristRepository.lagreOverstyring(kontekst.getBehandlingId(), overstyringer);
 
         var builder = OppdateringResultat.utenTransisjon()
@@ -53,11 +55,20 @@ public class OverstyrSøknadsfristOppdaterer extends AbstractOverstyringshåndte
         return builder;
     }
 
-    private Set<AvklartKravDokument> mapTilOverstyrteKrav(OverstyrtSøknadsfristDto dto) {
+    private Set<AvklartKravDokument> mapTilOverstyrteKrav(Long behandlingId, OverstyrtSøknadsfristDto dto) {
+        var eksisterendeKrav = avklartSøknadsfristRepository.hentHvisEksisterer(behandlingId)
+            .flatMap(AvklartSøknadsfristResultat::getOverstyrtHolder)
+            .map(KravDokumentHolder::getDokumenter)
+            .orElse(Set.of());
+
         var avklarteKravDokumenter = dto.getAvklarteKrav()
             .stream()
             .map(it -> new AvklartKravDokument(it.getJournalpostId(), it.getGodkjent(), it.getFraDato(), it.getBegrunnelse()))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(HashSet::new));
+
+        avklarteKravDokumenter.addAll(eksisterendeKrav.stream()
+            .filter(it -> avklarteKravDokumenter.stream().noneMatch(at -> it.getJournalpostId().equals(at.getJournalpostId())))
+            .collect(Collectors.toSet()));
 
         return avklarteKravDokumenter;
     }
