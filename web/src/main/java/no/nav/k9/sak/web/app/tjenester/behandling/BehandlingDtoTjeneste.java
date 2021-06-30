@@ -40,7 +40,6 @@ import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ResourceLink;
-import no.nav.k9.sak.kontrakt.ResourceLink.HttpMethod;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftedeAksjonspunkterDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
@@ -63,6 +62,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRes
 import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.BeregningsgrunnlagRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.død.RettVedDødRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.kompletthet.KompletthetForBeregningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
@@ -71,6 +71,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.RammevedtakRestT
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.ÅrskvantumRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PleietrengendeRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentRestTjeneste;
@@ -309,6 +310,8 @@ public class BehandlingDtoTjeneste {
         leggTilYtelsespesifikkResourceLinks(behandling, dto);
 
         dto.leggTil(get(FagsakRestTjeneste.PATH, "fagsak", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
+        dto.leggTil(getFraMap(FagsakRestTjeneste.RELATERTE_SAKER_PATH, "fagsak-relaterte-saker", uuidQueryParams));
+
         dto.leggTil(get(HistorikkRestTjeneste.PATH, "historikk", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
 
         dto.leggTil(getFraMap(AksjonspunktRestTjeneste.AKSJONSPUNKT_V2_PATH, "aksjonspunkter", uuidQueryParams));
@@ -394,6 +397,8 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
                 dto.leggTil(getFraMap(VurderTilsynRestTjeneste.BASEPATH, "pleiepenger-sykt-barn-tilsyn", uuidQueryParams));
+                dto.leggTil(getFraMap(RettVedDødRestTjeneste.BASEPATH, "rett-ved-dod", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeRestTjeneste.BASE_PATH, "om-pleietrengende", uuidQueryParams));
                 dto.leggTil(getFraMap(DokumenterMedUstrukturerteDataRestTjeneste.FRITEKSTDOKUMENTER_PATH, "pleiepenger-fritekstdokumenter", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
                 break;

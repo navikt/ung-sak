@@ -19,7 +19,6 @@ import org.jboss.weld.context.unbound.UnboundLiteral;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.loginmodule.ContainerLogin;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.kalkulus.KalkulusDump;
 import no.nav.k9.sikkerhet.oidc.token.impl.ContextTokenProvider;
 
 /**
@@ -34,7 +33,7 @@ public class ContainerContextRunner {
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r);
         t.setDaemon(true);
-        t.setName(KalkulusDump.class.getSimpleName() + "-thread");
+        t.setName(ContainerContextRunner.class.getSimpleName() + "-thread");
         return t;
     });
 

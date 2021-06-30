@@ -40,7 +40,15 @@ class Triggere extends BaseEntitet {
         this.triggere = triggere;
     }
 
+    public Triggere() {
+    }
+
     public Set<Trigger> getTriggere() {
         return triggere;
+    }
+
+    @Override
+    public String toString() {
+        return "Triggere{}";
     }
 }

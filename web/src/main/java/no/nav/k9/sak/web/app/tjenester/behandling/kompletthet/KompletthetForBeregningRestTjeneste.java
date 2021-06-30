@@ -70,25 +70,27 @@ public class KompletthetForBeregningRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public KompletthetsVurderingDto utledStatusForKompletthet(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        var manglendeVedleggForPeriode = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(BehandlingReferanse.fra(behandling));
+        var ref = BehandlingReferanse.fra(behandling);
+        var manglendeVedleggForPeriode = kompletthetForBeregningTjeneste.utledAllePåkrevdeVedleggFraGrunnlag(ref);
         var unikeInntektsmeldingerForFagsak = kompletthetForBeregningTjeneste.hentAlleUnikeInntektsmeldingerForFagsak(behandling.getFagsak().getSaksnummer());
 
         var status = manglendeVedleggForPeriode.entrySet()
             .stream()
-            .map(it -> new KompletthetsTilstandPåPeriodeDto(new Periode(it.getKey().getFomDato(), it.getKey().getTomDato()), mapStatusPåInntektsmeldinger(it, unikeInntektsmeldingerForFagsak)))
+            .map(it -> new KompletthetsTilstandPåPeriodeDto(new Periode(it.getKey().getFomDato(), it.getKey().getTomDato()), mapStatusPåInntektsmeldinger(it, unikeInntektsmeldingerForFagsak, ref)))
             .collect(Collectors.toList());
 
         return new KompletthetsVurderingDto(status);
     }
 
-    private List<ArbeidsgiverArbeidsforholdStatus> mapStatusPåInntektsmeldinger(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak) {
+    private List<ArbeidsgiverArbeidsforholdStatus> mapStatusPåInntektsmeldinger(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, BehandlingReferanse behandlingReferanse) {
         var resultat = it.getValue()
             .stream()
             .map(at -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(at.getArbeidsgiver(), at.getArbeidsforholdId()), Status.MANGLER, null))
             .collect(Collectors.toCollection(ArrayList::new));
 
-        resultat.addAll(kompletthetForBeregningTjeneste.utledRelevanteInntektsmeldingerForPeriode(unikeInntektsmeldingerForFagsak, it.getKey())
-            .stream().map(im -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(im.getArbeidsgiver().getIdentifikator(),
+        resultat.addAll(kompletthetForBeregningTjeneste.utledInntektsmeldingerSomBenytteMotBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
+            .stream()
+            .map(im -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(im.getArbeidsgiver().getIdentifikator(),
                 im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), Status.MOTTATT, im.getJournalpostId()))
             .collect(Collectors.toList()));
 

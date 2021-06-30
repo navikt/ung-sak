@@ -21,9 +21,10 @@ import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
-import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.SøktPeriode;
@@ -45,31 +46,34 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
 
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private AvklartSøknadsfristRepository avklartSøknadsfristRepository;
 
     PSBVurdererSøknadsfristTjeneste() {
         // CDI
     }
 
     @Inject
-    public PSBVurdererSøknadsfristTjeneste(SøknadsperiodeRepository søknadsperiodeRepository, MottatteDokumentRepository mottatteDokumentRepository) {
+    public PSBVurdererSøknadsfristTjeneste(SøknadsperiodeRepository søknadsperiodeRepository,
+                                           MottatteDokumentRepository mottatteDokumentRepository,
+                                           AvklartSøknadsfristRepository avklartSøknadsfristRepository) {
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.avklartSøknadsfristRepository = avklartSøknadsfristRepository;
     }
 
     @Override
     public Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> vurderSøknadsfrist(BehandlingReferanse referanse) {
         var søktePerioder = hentPerioderTilVurdering(referanse);
 
-        return vurderSøknadsfrist(søktePerioder);
+        return vurderSøknadsfrist(referanse.getBehandlingId(), søktePerioder);
     }
 
     @Override
     public Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
         var result = new HashMap<KravDokument, List<SøktPeriode<Søknadsperiode>>>();
 
-        var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(referanse.getFagsakId())
+        var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(referanse.getFagsakId())
             .stream()
-            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
             .filter(it -> Brevkode.PLEIEPENGER_BARN_SOKNAD.equals(it.getType()))
             .collect(Collectors.toSet());
 
@@ -106,7 +110,8 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
     }
 
     @Override
-    public Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> vurderSøknadsfrist(Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> søknaderMedPerioder) {
+    public Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> vurderSøknadsfrist(Long behandlingId, Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> søknaderMedPerioder) {
+        var avklartSøknadsfristResultatOpt = avklartSøknadsfristRepository.hentHvisEksisterer(behandlingId);
         var result = new HashMap<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>>();
         var sortedKeys = søknaderMedPerioder.keySet()
             .stream()
@@ -115,7 +120,8 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
         sortedKeys.forEach(key -> {
             var value = søknaderMedPerioder.get(key);
             var timeline = new LocalDateTimeline<>(value.stream().map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), it)).collect(Collectors.toList()));
-            var vurdertTimeline = vurderer.vurderPeriode(key, timeline);
+            var avklartKravDokument = avklartSøknadsfristResultatOpt.flatMap(it -> it.finnAvklaring(key.getJournalpostId()));
+            var vurdertTimeline = vurderer.vurderPeriode(key, timeline, avklartKravDokument);
 
             if (vurdertTimeline.stream().anyMatch(it -> EnumSet.of(Utfall.IKKE_OPPFYLT, Utfall.IKKE_VURDERT).contains(it.getValue().getUtfall()))) {
                 var skalEndresUtfallPå = utledAvslåttePerioderSomHarTidligereVærtInnvilget(result, key, vurdertTimeline);

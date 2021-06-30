@@ -25,13 +25,13 @@ public class NaturalYtelse implements IndexKey {
     }
 
     public NaturalYtelse(LocalDate fom, LocalDate tom, BigDecimal beloepPerMnd, NaturalYtelseType type) {
-        this.beloepPerMnd = new Beløp(beloepPerMnd);
+        this.beloepPerMnd = beloepPerMnd == null ? Beløp.ZERO : new Beløp(beloepPerMnd);
         this.type = type;
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
     }
 
     public NaturalYtelse(DatoIntervallEntitet datoIntervall, BigDecimal beloepPerMnd, NaturalYtelseType type) {
-        this.beloepPerMnd = new Beløp(beloepPerMnd);
+        this.beloepPerMnd = beloepPerMnd == null ? Beløp.ZERO : new Beløp(beloepPerMnd);
         this.type = type;
         this.periode = datoIntervall;
     }

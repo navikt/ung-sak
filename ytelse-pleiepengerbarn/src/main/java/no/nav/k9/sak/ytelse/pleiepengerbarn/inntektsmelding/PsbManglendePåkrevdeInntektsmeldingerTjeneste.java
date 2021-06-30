@@ -93,7 +93,7 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
                 flatMapping(im -> Stream.of(im.getArbeidsforholdRef()), Collectors.toSet())));
 
         for (DatoIntervallEntitet periode : periodeTilVurdering) {
-            var arbeidsforholdSøktOmFravær = kompletthetForBeregningTjeneste.utledRelevanteInntektsmeldingerForPeriode(unikeInntektsmeldingerForFagsak, periode)
+            var arbeidsforholdSøktOmFravær = kompletthetForBeregningTjeneste.utledInntektsmeldingerSomBenytteMotBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, periode)
                 .stream()
                 .map(it -> new ArbeidsgiverArbeidsforhold(it.getArbeidsgiver(), it.getArbeidsforholdRef() == null ? InternArbeidsforholdRef.nullRef() : it.getArbeidsforholdRef()))
                 .collect(Collectors.toSet());

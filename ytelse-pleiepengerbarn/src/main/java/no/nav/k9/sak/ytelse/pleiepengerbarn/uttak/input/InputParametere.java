@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -18,6 +20,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
@@ -35,6 +38,8 @@ public class InputParametere {
     private NavigableSet<DatoIntervallEntitet> utvidetRevurderingPerioder;
     private List<EtablertTilsynPeriode> etablertTilsynPerioder;
     private LocalDateTimeline<List<Kravprioritet>> kravprioritet;
+    private OpptjeningResultat opptjeningResultat;
+    private RettPleiepengerVedDødGrunnlag rettPleiepengerVedDødGrunnlag;
 
     public InputParametere() {
     }
@@ -98,6 +103,11 @@ public class InputParametere {
         return this;
     }
 
+    public InputParametere medRettPleiepengerVedDødGrunnlag(RettPleiepengerVedDødGrunnlag rettPleiepengerVedDødGrunnlag) {
+        this.rettPleiepengerVedDødGrunnlag = rettPleiepengerVedDødGrunnlag;
+        return this;
+    }
+
     public List<EtablertPleieperiode> getPleiebehov() {
         return pleiebehov;
     }
@@ -124,12 +134,12 @@ public class InputParametere {
         this.utvidetRevurderingPerioder = utvidetRevurderingPerioder;
         return this;
     }
-    
+
     public InputParametere medEtablertTilsynPerioder(List<EtablertTilsynPeriode> utledetEtablertTilsyn) {
         this.etablertTilsynPerioder = utledetEtablertTilsyn;
         return this;
     }
-    
+
     public List<EtablertTilsynPeriode> getEtablertTilsynPerioder() {
         return etablertTilsynPerioder;
     }
@@ -137,13 +147,26 @@ public class InputParametere {
     public NavigableSet<DatoIntervallEntitet> getUtvidetRevurderingPerioder() {
         return utvidetRevurderingPerioder;
     }
-    
+
     public InputParametere medKravprioritet(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
         this.kravprioritet = kravprioritet;
         return this;
     }
-    
+
     public LocalDateTimeline<List<Kravprioritet>> getKravprioritet() {
         return kravprioritet;
+    }
+
+    public Optional<RettPleiepengerVedDødGrunnlag> getRettPleiepengerVedDødGrunnlag() {
+        return Optional.ofNullable(rettPleiepengerVedDødGrunnlag);
+    }
+
+    public InputParametere medOpptjeningsresultat(OpptjeningResultat opptjeningResultat) {
+        this.opptjeningResultat = opptjeningResultat;
+        return this;
+    }
+
+    public Optional<OpptjeningResultat> getOpptjeningResultat() {
+        return Optional.of(opptjeningResultat);
     }
 }

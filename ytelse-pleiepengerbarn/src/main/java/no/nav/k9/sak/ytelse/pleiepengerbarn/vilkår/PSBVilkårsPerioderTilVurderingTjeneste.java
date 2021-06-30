@@ -38,7 +38,7 @@ import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
@@ -60,7 +60,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private BehandlingRepository behandlingRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
-    private EtablertTilsynTjeneste etablertTilsynTjeneste;
+    private ErEndringPåEtablertTilsynTjeneste etablertTilsynTjeneste;
 
     private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
 
@@ -74,7 +74,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   BehandlingRepository behandlingRepository,
                                                   SykdomGrunnlagService sykdomGrunnlagService,
-                                                  EtablertTilsynTjeneste etablertTilsynTjeneste,
+                                                  ErEndringPåEtablertTilsynTjeneste etablertTilsynTjeneste,
                                                   BasisPersonopplysningTjeneste basisPersonopplysningsTjeneste,
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   PersoninfoAdapter personinfoAdapter) {
@@ -189,13 +189,17 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                 .collect(Collectors.toSet()));
         }
         periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggereMedÅrsak(referanse));
+        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse)
+            .stream()
+            .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING))
+            .collect(Collectors.toSet()));
 
         return periodeMedÅrsaks;
     }
 
     private NavigableSet<DatoIntervallEntitet> utledUtvidetPeriode(BehandlingReferanse referanse) {
         LocalDateTimeline<Boolean> utvidedePerioder = utledUtvidetPeriodeForSykdom(referanse);
-        utvidedePerioder = utvidedePerioder.union(utledUtvidetPeriodeForEtablertTilsyn(referanse), StandardCombinators::alwaysTrueForMatch);
+        utvidedePerioder = utvidedePerioder.union(etablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
 
         return utvidedePerioder.toSegments()
             .stream()
@@ -203,15 +207,6 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private LocalDateTimeline<Boolean> utledUtvidetPeriodeForEtablertTilsyn(BehandlingReferanse referanse) {
-        LocalDateTimeline<Boolean> resultat = etablertTilsynTjeneste.finnForskjellerSidenForrigeBehandling(referanse);
-        resultat = SykdomUtils.kunPerioderSomIkkeFinnesI(resultat, SykdomUtils.toLocalDateTimeline(sykdomGrunnlagService.hentManglendeOmsorgenForPerioder(referanse.getBehandlingId())));
-        //resultat = SykdomUtils.kunPerioderSomIkkeFinnesI(resultat, SykdomUtils.toLocalDateTimeline(utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)));
-        resultat = resultat.intersection(SykdomUtils.toLocalDateTimeline(utledFullstendigePerioder(referanse.getBehandlingId())));
-        
-        return resultat;
-    }
-    
     private LocalDateTimeline<Boolean> utledUtvidetPeriodeForSykdom(BehandlingReferanse referanse) {
         var forrigeVedtatteBehandling = behandlingRepository.hentBehandling(referanse.getOriginalBehandlingId().orElseThrow()).getUuid();
         var vedtattSykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(forrigeVedtatteBehandling);

@@ -48,7 +48,9 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentOpprettelseDto;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentOversikt;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomInnleggelseDto;
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomInnleggelseOppdateringResultatDto;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
@@ -168,7 +170,7 @@ public class SykdomDokumentRestTjeneste {
                         description = "Dokumentet har blitt opprettet.")
         })
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
-    public void oppdaterSykdomInnleggelse(
+    public SykdomInnleggelseOppdateringResultatDto oppdaterSykdomInnleggelse(
             @Parameter
             @NotNull
             @Valid
@@ -179,10 +181,22 @@ public class SykdomDokumentRestTjeneste {
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
-
+        
+        for (Periode periode : sykdomInnleggelse.getPerioder()) {
+            if (periode.getFom() == null || periode.getTom() == null) {
+                throw new IllegalArgumentException("fom/tom kan ikke være null");
+            }
+        }
+        
+        if (sykdomInnleggelse.isDryRun()) {
+            return new SykdomInnleggelseOppdateringResultatDto(false); // TODO: Sett riktig verdi.
+        }
+        
         final SykdomInnleggelser innleggelser = sykdomDokumentOversiktMapper.toSykdomInnleggelser(sykdomInnleggelse, SubjectHandler.getSubjectHandler().getUid());
 
         sykdomDokumentRepository.opprettEllerOppdaterInnleggelser(innleggelser, behandling.getFagsak().getPleietrengendeAktørId());
+        
+        return new SykdomInnleggelseOppdateringResultatDto(false); // TODO: Sett riktig verdi.
     }
 
     @GET

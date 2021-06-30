@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.Charsets;
@@ -33,7 +34,7 @@ public class TrekkUtFraværTjenesteTest {
 
         var trekkUt = new TrekkUtOppgittFraværPeriode(new VurderSøknadsfrist(true), new InntektsmeldingSøktePerioderMapper());
 
-        var kravPerioder = trekkUt.mapFra(new LinkedHashSet<>(inntektsmeldinger), Map.of());
+        var kravPerioder = trekkUt.mapFra(new LinkedHashSet<>(inntektsmeldinger), Map.of(), Optional.empty());
 
         var fravær = trekkUt.trekkUtFravær(kravPerioder);
 

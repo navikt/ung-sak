@@ -10,18 +10,24 @@
 	<sequence-generator name="SEQ_UP_TILSYNSORDNING" allocation-size="50" sequence-name="SEQ_UP_TILSYNSORDNING" />
 	<sequence-generator name="SEQ_UP_TILSYNSORDNING_PERIODE" allocation-size="50" sequence-name="SEQ_UP_TILSYNSORDNING_PERIODE" />
 	<sequence-generator name="SEQ_UP_FERIE_PERIODE" allocation-size="50" sequence-name="SEQ_UP_FERIE_PERIODE" />
+	<sequence-generator name="SEQ_UP_BEREDSKAP_PERIODE" allocation-size="50" sequence-name="SEQ_UP_BEREDSKAP_PERIODE" />
+	<sequence-generator name="SEQ_UP_NATTEVAAK_PERIODE" allocation-size="50" sequence-name="SEQ_UP_NATTEVAAK_PERIODE" />
 	<sequence-generator name="SEQ_UP_ARBEID_PERIODE" allocation-size="50" sequence-name="SEQ_UP_ARBEID_PERIODE" />
 	<sequence-generator name="SEQ_PSB_GR_UNNTAK_ETABLERT_TILSYN" allocation-size="50" sequence-name="SEQ_PSB_GR_UNNTAK_ETABLERT_TILSYN" />
 	<sequence-generator name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE" allocation-size="50" sequence-name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE" />
 	<sequence-generator name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN" allocation-size="50" sequence-name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN" />
 	<sequence-generator name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN_PERIODE" allocation-size="50" sequence-name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN_PERIODE" />
 	<sequence-generator name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN_BESKRIVELSE" allocation-size="50" sequence-name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN_BESKRIVELSE" />
+	<sequence-generator name="SEQ_PSB_GR_RETT_PLEIEPENGER_VED_DOED" allocation-size="50" sequence-name="SEQ_PSB_GR_RETT_PLEIEPENGER_VED_DOED" />
+	<sequence-generator name="SEQ_PSB_RETT_PLEIEPENGER_VED_DOED" allocation-size="50" sequence-name="SEQ_PSB_RETT_PLEIEPENGER_VED_DOED" />
 
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderHolder" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.FeriePeriode" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.BeredskapPeriode" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.NattevåkPeriode" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.Tilsynsordning" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.TilsynsordningPeriode" />
@@ -30,5 +36,7 @@
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynPeriode" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynBeskrivelse" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødGrunnlag" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDød" />
 
 </entity-mappings>

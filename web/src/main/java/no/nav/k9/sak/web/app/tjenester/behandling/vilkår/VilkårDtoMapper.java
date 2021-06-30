@@ -45,6 +45,7 @@ class VilkårDtoMapper {
         dto.setVilkarStatus(it.getGjeldendeUtfall());
         dto.setMerknadParametere(it.getMerknadParametere());
         dto.setBegrunnelse(it.getBegrunnelse());
+        dto.setMerknad(it.getMerknad());
         dto.setVurderesIBehandlingen(vurdersIBehandlingen(it, aktuelleVilkårsperioder, vilkårType));
 
         if (medVilkårkjøring) {

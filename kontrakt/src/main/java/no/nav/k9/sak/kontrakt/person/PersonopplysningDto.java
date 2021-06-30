@@ -2,6 +2,8 @@ package no.nav.k9.sak.kontrakt.person;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
@@ -27,19 +29,31 @@ public class PersonopplysningDto extends PersonIdentDto {
     @Size(max = 100)
     private List<PersonadresseDto> adresser = new ArrayList<>();
 
+    /** Angitt annen part (dersom ytelse er knyttet til søker&lt;-&gt;annen part */
+    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "annenPart")
     @Valid
     private PersonopplysningDto annenPart;
+
+    /** Angitt pleietrengende part (dersom ytelse er knyttet til søker&lt;-&gt;pleietrengende part */
+    @JsonInclude(value = Include.NON_EMPTY)
+    @JsonProperty(value = "pleietrengendePart")
+    @Valid
+    private PersonopplysningDto pleietrengendePart;
 
     @JsonProperty(value = "avklartPersonstatus")
     @Valid
     private AvklartPersonstatus avklartPersonstatus;
 
+    /** Registrerte barn og fosterbarn. */
+    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "barn")
     @Valid
     @Size(max = 30)
     private List<PersonopplysningDto> barn = new ArrayList<>();
 
+    /** Barn søkt for. */
+    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "barnSoktFor")
     @Valid
     @Size(max = 10)
@@ -104,6 +118,10 @@ public class PersonopplysningDto extends PersonIdentDto {
 
     public PersonopplysningDto getAnnenPart() {
         return annenPart;
+    }
+
+    public PersonopplysningDto getPleietrengendePart() {
+        return pleietrengendePart;
     }
 
     public AvklartPersonstatus getAvklartPersonstatus() {
@@ -224,5 +242,9 @@ public class PersonopplysningDto extends PersonIdentDto {
 
     public void setStatsborgerskap(Landkoder statsborgerskap) {
         this.statsborgerskap = statsborgerskap;
+    }
+
+    public void setPleietrengendePart(PersonopplysningDto dto) {
+        this.pleietrengendePart = dto;
     }
 }

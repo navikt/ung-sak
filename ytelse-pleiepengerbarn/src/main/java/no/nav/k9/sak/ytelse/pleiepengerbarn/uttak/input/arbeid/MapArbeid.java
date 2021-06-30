@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,8 +14,11 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -43,7 +47,9 @@ public class MapArbeid {
                             Set<PerioderFraSøknad> perioderFraSøknader,
                             LocalDateTimeline<Boolean> tidslinjeTilVurdering,
                             Set<Inntektsmelding> sakInntektsmeldinger,
-                            Vilkår vilkår) {
+                            Vilkår vilkår,
+                            OpptjeningResultat opptjeningResultat,
+                            BehandlingReferanse behandlingReferanse) {
 
         final Map<DatoIntervallEntitet, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>> arbeidsforholdPerPeriode = new HashMap<>();
 
@@ -54,43 +60,113 @@ public class MapArbeid {
             .collect(Collectors.toSet());
 
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            var identifikatorerFraInntektsmelding = utledRelevanteKeys(periode, sakInntektsmeldinger);
+            var identifikatorerFraInntektsmelding = utledRelevanteKeys(periode, sakInntektsmeldinger, behandlingReferanse);
             final Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold = new HashMap<>();
 
-            var vilkårPerioder = vilkår.getPerioder().stream()
+            List<VilkårPeriode> midlertidigInaktivVilkårsperioder = vilkår != null ? vilkår.getPerioder().stream()
                 .filter(it -> it.getPeriode().overlapper(periode))
-                .collect(Collectors.toList());
-            if (erInnaktivVedPerioden(vilkårPerioder)) {
-                arbeidsforhold.put(new AktivitetIdentifikator(UttakArbeidType.INAKTIV, null, null),
-                    new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), new WrappedArbeid(new ArbeidPeriode(periode, UttakArbeidType.INAKTIV, null, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))))));
-            } else {
-                kravDokumenter.stream()
-                    .sorted(KravDokument::compareTo)
-                    .forEachOrdered(at -> {
-                        var dokumenter = perioderFraSøknader.stream()
-                            .filter(it -> it.getJournalpostId().equals(at.getJournalpostId()))
-                            .collect(Collectors.toSet());
-                        if (dokumenter.size() == 1) {
-                            dokumenter.stream()
-                                .map(PerioderFraSøknad::getArbeidPerioder)
-                                .flatMap(Collection::stream)
-                                .forEach(p -> {
-                                    var keys = utledRelevanteKeys(p, identifikatorerFraInntektsmelding);
-                                    for (AktivitetIdentifikator key : keys) {
-                                        var perioder = arbeidsforhold.getOrDefault(key, new LocalDateTimeline<>(List.of()));
-                                        var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), new WrappedArbeid(p))));
-                                        perioder = perioder.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-                                        arbeidsforhold.put(key, perioder.intersection(periode.toLocalDateInterval()));
-                                    }
-                                });
-                        } else {
-                            throw new IllegalStateException("Fant " + dokumenter.size() + " for dokumentet : " + at);
-                        }
-                    });
-            }
+                .filter(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()))
+                .collect(Collectors.toList()) : List.of();
+
+            List<VilkårPeriode> dagpengerPåSkjæringstidspunktet = vilkår != null ? vilkår.getPerioder().stream()
+                .filter(it -> it.getPeriode().overlapper(periode))
+                .filter(it -> harDagpengerPåSkjæringstidspunktet(it, opptjeningResultat))
+                .collect(Collectors.toList()) : List.of();
+
+            var midlertidigInaktivPeriode = mapInaktivePerioder(arbeidsforhold, midlertidigInaktivVilkårsperioder);
+            mapPerioderMedDagpenger(arbeidsforhold, dagpengerPåSkjæringstidspunktet);
+
+            kravDokumenter.stream()
+                .sorted(KravDokument::compareTo)
+                .forEachOrdered(at -> prosesserDokument(perioderFraSøknader, periode, identifikatorerFraInntektsmelding, arbeidsforhold, midlertidigInaktivPeriode, at));
             arbeidsforholdPerPeriode.put(periode, arbeidsforhold);
         }
 
+        var arbeidsforhold = slåSammenOpplysningerForSammeArbeidsforhold(arbeidsforholdPerPeriode);
+
+        return arbeidsforhold.keySet()
+            .stream()
+            .map(key -> mapArbeidsgiver(arbeidsforhold, key))
+            .collect(Collectors.toList());
+    }
+
+    private void mapPerioderMedDagpenger(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, List<VilkårPeriode> dagpengerPåSkjæringstidspunktet) {
+        var tidslinje = new LocalDateTimeline<WrappedArbeid>(List.of());
+        for (VilkårPeriode vilkårPeriode : dagpengerPåSkjæringstidspunktet) {
+            var vp = vilkårPeriode.getPeriode();
+            var other = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vp.getFomDato(), vp.getTomDato(), new WrappedArbeid(new ArbeidPeriode(vp, UttakArbeidType.DAGPENGER, null, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO)))));
+            tidslinje = tidslinje.combine(other, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+        if (!dagpengerPåSkjæringstidspunktet.isEmpty()) {
+            arbeidsforhold.put(new AktivitetIdentifikator(UttakArbeidType.DAGPENGER, null, null), tidslinje.compress());
+        }
+    }
+
+    private boolean harDagpengerPåSkjæringstidspunktet(VilkårPeriode vilkårPeriode, OpptjeningResultat opptjeningResultat) {
+        if (opptjeningResultat == null) {
+            return false;
+        }
+        var opptjening = opptjeningResultat.finnOpptjening(vilkårPeriode.getSkjæringstidspunkt());
+
+        if (opptjening.isEmpty()) {
+            return false;
+        }
+
+        return opptjening.get().getOpptjeningAktivitet()
+            .stream()
+            .filter(it -> OpptjeningAktivitetType.DAGPENGER.equals(it.getAktivitetType()))
+            .anyMatch(it -> DatoIntervallEntitet.fraOgMedTilOgMed(vilkårPeriode.getSkjæringstidspunkt().minusDays(1), vilkårPeriode.getSkjæringstidspunkt().minusDays(1)).overlapper(it.getFom(), it.getTom()));
+    }
+
+    private HashSet<DatoIntervallEntitet> mapInaktivePerioder(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, List<VilkårPeriode> vilkårPerioder) {
+        var midlertidigInaktivPeriode = new HashSet<DatoIntervallEntitet>();
+
+        var tidslinje = new LocalDateTimeline<WrappedArbeid>(List.of());
+        for (VilkårPeriode vilkårPeriode : vilkårPerioder) {
+            var vp = vilkårPeriode.getPeriode();
+            var other = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vp.getFomDato(), vp.getTomDato(), new WrappedArbeid(new ArbeidPeriode(vp, UttakArbeidType.INAKTIV, null, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO)))));
+            tidslinje = tidslinje.combine(other, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            midlertidigInaktivPeriode.add(vp);
+        }
+        if (!vilkårPerioder.isEmpty()) {
+            arbeidsforhold.put(new AktivitetIdentifikator(UttakArbeidType.INAKTIV, null, null), tidslinje.compress());
+        }
+
+        return midlertidigInaktivPeriode;
+    }
+
+    private void prosesserDokument(Set<PerioderFraSøknad> perioderFraSøknader, DatoIntervallEntitet periode, Set<AktivitetIdentifikator> identifikatorerFraInntektsmelding, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, HashSet<DatoIntervallEntitet> midlertidigInaktivPeriode, KravDokument at) {
+        var dokumenter = perioderFraSøknader.stream()
+            .filter(it -> it.getJournalpostId().equals(at.getJournalpostId()))
+            .collect(Collectors.toSet());
+        if (dokumenter.size() == 1) {
+            dokumenter.stream()
+                .map(PerioderFraSøknad::getArbeidPerioder)
+                .flatMap(Collection::stream)
+                .forEach(p -> mapArbeidsopplysningerFraDokument(periode, identifikatorerFraInntektsmelding, arbeidsforhold, midlertidigInaktivPeriode, p));
+        } else {
+            throw new IllegalStateException("Fant " + dokumenter.size() + " for dokumentet : " + at);
+        }
+    }
+
+    private void mapArbeidsopplysningerFraDokument(DatoIntervallEntitet periode, Set<AktivitetIdentifikator> identifikatorerFraInntektsmelding, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, HashSet<DatoIntervallEntitet> midlertidigInaktivPeriode, ArbeidPeriode p) {
+        var keys = utledRelevanteKeys(p, identifikatorerFraInntektsmelding);
+        for (AktivitetIdentifikator key : keys) {
+            var perioder = arbeidsforhold.getOrDefault(key, new LocalDateTimeline<>(List.of()));
+            var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), new WrappedArbeid(p))));
+            perioder = perioder.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            if (!midlertidigInaktivPeriode.isEmpty()) {
+                // Passe på at periodene ikke overlapper med innaktive perioder
+                var midlerTidigInaktivTimeline = new LocalDateTimeline<>(midlertidigInaktivPeriode.stream()
+                    .map(it -> new LocalDateSegment<WrappedArbeid>(it.toLocalDateInterval(), null))
+                    .collect(Collectors.toList()));
+                perioder = perioder.combine(midlerTidigInaktivTimeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
+            arbeidsforhold.put(key, perioder.intersection(periode.toLocalDateInterval()));
+        }
+    }
+
+    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> slåSammenOpplysningerForSammeArbeidsforhold(Map<DatoIntervallEntitet, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>> arbeidsforholdPerPeriode) {
         var arbeidsforhold = new HashMap<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>();
 
         for (Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> aktiviteterIPeriode : arbeidsforholdPerPeriode.values()) {
@@ -102,28 +178,32 @@ public class MapArbeid {
             }
         }
 
-        return arbeidsforhold.entrySet()
-            .stream()
-            .map(arbeidPeriodes -> {
-                var perioder = new HashMap<LukketPeriode, ArbeidsforholdPeriodeInfo>();
-                arbeidPeriodes.getValue()
-                    .compress()
-                    .toSegments()
-                    .forEach(p -> {
-                        var periode = p.getValue().getPeriode();
-                        var antallLinjerPerArbeidsgiver = arbeidsforhold.keySet().stream().filter(it -> Objects.equals(periode.getAktivitetType(), it.getAktivitetType()) && periode.getArbeidsgiver() != null && Objects.equals(it.getArbeidsgiver(), periode.getArbeidsgiver())).count();
-                        var jobberNormalt = justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Optional.ofNullable(periode.getJobberNormaltTimerPerDag()).orElse(justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Duration.ZERO)));
-                        var jobberFaktisk = justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Optional.ofNullable(periode.getFaktiskArbeidTimerPerDag()).orElse(justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Duration.ZERO)));
-                        perioder.put(new LukketPeriode(p.getFom(), p.getTom()),
-                            new ArbeidsforholdPeriodeInfo(jobberNormalt, jobberFaktisk));
-                    });
-
-                return new Arbeid(mapArbeidsforhold(arbeidPeriodes.getKey()), perioder);
-            })
-            .collect(Collectors.toList());
+        return arbeidsforhold;
     }
 
-    private Set<AktivitetIdentifikator> utledRelevanteKeys(ArbeidPeriode p, Set<AktivitetIdentifikator> identifikatorerFraInntektsmelding) {
+    private Arbeid mapArbeidsgiver(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, AktivitetIdentifikator key) {
+        var perioder = new HashMap<LukketPeriode, ArbeidsforholdPeriodeInfo>();
+        arbeidsforhold.get(key)
+            .compress()
+            .toSegments()
+            .stream()
+            .filter(it -> Objects.nonNull(it.getValue()))
+            .forEach(p -> mapArbeidForPeriode(arbeidsforhold, perioder, p));
+
+        return new Arbeid(mapArbeidsforhold(key), perioder);
+    }
+
+    private void mapArbeidForPeriode(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, HashMap<LukketPeriode, ArbeidsforholdPeriodeInfo> perioder, LocalDateSegment<WrappedArbeid> p) {
+        var periode = p.getValue().getPeriode();
+        var antallLinjerPerArbeidsgiver = arbeidsforhold.keySet().stream().filter(it -> Objects.equals(periode.getAktivitetType(), it.getAktivitetType()) && periode.getArbeidsgiver() != null && Objects.equals(it.getArbeidsgiver(), periode.getArbeidsgiver())).count();
+        var jobberNormalt = justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Optional.ofNullable(periode.getJobberNormaltTimerPerDag()).orElse(justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Duration.ZERO)));
+        var jobberFaktisk = justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Optional.ofNullable(periode.getFaktiskArbeidTimerPerDag()).orElse(justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Duration.ZERO)));
+        perioder.put(new LukketPeriode(p.getFom(), p.getTom()),
+            new ArbeidsforholdPeriodeInfo(jobberNormalt, jobberFaktisk));
+    }
+
+    private Set<AktivitetIdentifikator> utledRelevanteKeys(ArbeidPeriode p,
+                                                           Set<AktivitetIdentifikator> identifikatorerFraInntektsmelding) {
         var relevanteKeys = identifikatorerFraInntektsmelding.stream()
             .filter(it -> Objects.equals(p.getArbeidsgiver(), it.getArbeidsgiver()))
             .map(AktivitetIdentifikator::getArbeidsforhold)
@@ -139,18 +219,11 @@ public class MapArbeid {
         }
     }
 
-    private Set<AktivitetIdentifikator> utledRelevanteKeys(DatoIntervallEntitet periode, Set<Inntektsmelding> sakInntektsmeldinger) {
-        return kompletthetForBeregningTjeneste.utledRelevanteInntektsmeldingerForPeriode(sakInntektsmeldinger, periode)
+    private Set<AktivitetIdentifikator> utledRelevanteKeys(DatoIntervallEntitet periode, Set<Inntektsmelding> sakInntektsmeldinger, BehandlingReferanse behandlingReferanse) {
+        return kompletthetForBeregningTjeneste.utledInntektsmeldingerSomBenytteMotBeregningForPeriode(behandlingReferanse, sakInntektsmeldinger, periode)
             .stream()
             .map(it -> new AktivitetIdentifikator(UttakArbeidType.ARBEIDSTAKER, it.getArbeidsgiver(), it.getArbeidsforholdRef()))
             .collect(Collectors.toSet());
-    }
-
-    private boolean erInnaktivVedPerioden(List<VilkårPeriode> perioderTilVurdering) {
-        if (perioderTilVurdering.size() > 1) {
-            throw new IllegalStateException("Forventer at perioden bare overlapper med en vurdering");
-        }
-        return perioderTilVurdering.stream().anyMatch(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()));
     }
 
     private Duration justerIHenholdTilAntallet(long antallLinjerPerArbeidsgiver, Duration duration) {
@@ -161,10 +234,21 @@ public class MapArbeid {
     }
 
     private Arbeidsforhold mapArbeidsforhold(AktivitetIdentifikator identifikator) {
-        return new Arbeidsforhold(identifikator.getAktivitetType().getKode(),
+        var arbeidsforhold = new Arbeidsforhold(identifikator.getAktivitetType().getKode(),
             Optional.ofNullable(identifikator.getArbeidsgiver()).map(Arbeidsgiver::getArbeidsgiverOrgnr).orElse(null),
             Optional.ofNullable(identifikator.getArbeidsgiver()).map(Arbeidsgiver::getArbeidsgiverAktørId).map(AktørId::getId).orElse(null),
             Optional.ofNullable(identifikator.getArbeidsforhold()).map(InternArbeidsforholdRef::getReferanse).orElse(null)
         );
+        valider(arbeidsforhold);
+        return arbeidsforhold;
+    }
+
+    private void valider(Arbeidsforhold arbeidsforhold) {
+        var arbeidType = UttakArbeidType.fraKode(arbeidsforhold.getType());
+        if (UttakArbeidType.ARBEIDSTAKER.equals(arbeidType)) {
+            if (arbeidsforhold.getOrganisasjonsnummer() == null && arbeidsforhold.getAktørId() == null) {
+                throw new IllegalStateException("Arbeidsforhold må ha identifikator");
+            }
+        }
     }
 }

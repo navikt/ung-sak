@@ -75,7 +75,7 @@ public class KalkulatorInputTjeneste {
                                                                Collection<Inntektsmelding> inntektsmeldinger,
                                                                OppgittOpptjening oppgittOpptjening,
                                                                InntektsmeldingerRelevantForBeregning imTjeneste) {
-        return new TilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, inntektsmeldinger, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening, imTjeneste);
+        return new TilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, inntektsmeldinger, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening, imTjeneste, referanse);
     }
 
     protected LocalDate finnSkjæringstidspunkt(DatoIntervallEntitet vilkårsperiode) {

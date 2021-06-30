@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,7 +23,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @ApplicationScoped
@@ -65,17 +63,11 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
         var årskvantumResultat = årskvantumTjeneste.beregnÅrskvantumUttak(ref);
 
-        var årskvantumAksjonspunkt = skalDetLagesAksjonspunkt(årskvantumResultat);
+        var årskvantumAksjonspunkter = oversettTilAksjonspunkter(årskvantumResultat);
 
-        if (!årskvantumAksjonspunkt.isEmpty()) {
-            try {
-                if (log.isDebugEnabled()) { log.debug("Setter behandling på vent etter følgende respons fra årskvantum" +
-                    "\nrespons='{}'", JsonObjectMapper.getJson(årskvantumResultat)); }
-            } catch (IOException e) {
-                log.info("Feilet i serialisering av årskvantum respons='{}' og exception='{}'", årskvantumResultat, e);
-            }
-            opprettAksjonspunktForÅrskvantum(årskvantumAksjonspunkt);
-            return BehandleStegResultat.utførtMedAksjonspunkter(årskvantumAksjonspunkt);
+        if (!årskvantumAksjonspunkter.isEmpty()) {
+            opprettAksjonspunktForÅrskvantum(årskvantumAksjonspunkter);
+            return BehandleStegResultat.utførtMedAksjonspunkter(årskvantumAksjonspunkter);
         } else {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
@@ -97,7 +89,7 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
         return aksjonspunktResultat;
     }
 
-    public List<AksjonspunktDefinisjon> skalDetLagesAksjonspunkt(ÅrskvantumResultat årskvantumResultat) {
+    public List<AksjonspunktDefinisjon> oversettTilAksjonspunkter(ÅrskvantumResultat årskvantumResultat) {
         var aksjonspunkter = årskvantumResultat.getUttaksplan().getAksjonspunkter();
         if (!aksjonspunkter.isEmpty()) {
             var aksjonspunktDefinisjoner = new ArrayList<AksjonspunktDefinisjon>();

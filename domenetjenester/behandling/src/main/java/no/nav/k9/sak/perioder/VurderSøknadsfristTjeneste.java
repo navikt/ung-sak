@@ -18,11 +18,13 @@ public interface VurderSøknadsfristTjeneste<T extends SøktPeriodeData> {
      * Kjøres på nytt etter løsing av aksjonspunkt for å sikre at alle periodene er tatt hensyn til.
      * NB! Husk å sjekk om periodene har blitt satt til OK eller IKKE OK av saksbehandler og sett status i henhold
      *
+     *
+     * @param behandlingId
      * @param søknaderMedPerioder periodene
      *
      * @return resultatet
      */
-    Map<KravDokument, List<VurdertSøktPeriode<T>>> vurderSøknadsfrist(Map<KravDokument, List<SøktPeriode<T>>> søknaderMedPerioder);
+    Map<KravDokument, List<VurdertSøktPeriode<T>>> vurderSøknadsfrist(Long behandlingId, Map<KravDokument, List<SøktPeriode<T>>> søknaderMedPerioder);
 
     /**
      * Henter ut kravdokumenter som har tilkommet i denne behandlingen

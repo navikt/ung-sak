@@ -189,7 +189,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             VurderingspunktType.UT, VilkårType.SØKERSOPPLYSNINGSPLIKT, SkjermlenkeType.OPPLYSNINGSPLIKT, ENTRINN, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av medlemskapsvilkåret",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, VurderingspunktType.UT, VilkårType.MEDLEMSKAPSVILKÅRET,
-            SkjermlenkeType.PUNKT_FOR_MEDISINSK, TOTRINN, EnumSet.of(OMP, PSB)),
+            SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, TOTRINN, EnumSet.of(OMP, PSB)),
+    OVERSTYRING_AV_SØKNADSFRISTVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av Søknadsfrist",
+            BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST, VurderingspunktType.UT, VilkårType.SØKNADSFRIST,
+            SkjermlenkeType.SOEKNADSFRIST, TOTRINN, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_MEDISINSKESVILKÅRET_UNDER_18(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_MEDISINSKVILKÅR_UNDER_18_KODE, AksjonspunktType.OVERSTYRING,
             "Overstyring av medisinskvilkår for pleietrengende under 18 år",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKVILKÅR, VurderingspunktType.UT, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR,
@@ -286,7 +289,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             AksjonspunktType.MANUELL, "Årskvantum", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT,
             UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, ENTRINN, TILBAKE, null, EnumSet.of(OMSORGSPENGER)),
     VURDER_ÅRSKVANTUM_DOK(AksjonspunktKodeDefinisjon.VURDER_ÅRSKVANTUM_DOK,
-            AksjonspunktType.MANUELL, "Årskvantum dokumentasjon", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT,
+            AksjonspunktType.MANUELL, "Årskvantum dokumentasjon", BehandlingStatus.UTREDES, BehandlingStegType.BEKREFT_UTTAK, VurderingspunktType.INN,
             UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, TOTRINN, TILBAKE, null, EnumSet.of(OMSORGSPENGER)),
     VURDER_OMS_UTVIDET_RETT(AksjonspunktKodeDefinisjon.VURDER_OMS_UTVIDET_RETT,
             AksjonspunktType.MANUELL, "Utvidet Rett", BehandlingStatus.UTREDES, BehandlingStegType.MANUELL_VILKÅRSVURDERING, VurderingspunktType.UT,
@@ -299,6 +302,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_BEREDSKAP(AksjonspunktKodeDefinisjon.VURDER_BEREDSKAP, AksjonspunktType.MANUELL,
         "Vurder nattevåk og beredskap", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
         VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_BEREDSKAP, TOTRINN, TILBAKE, null, EnumSet.of(PSB)),
+    VURDER_RETT_ETTER_PLEIETRENGENDES_DØD(AksjonspunktKodeDefinisjon.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD, AksjonspunktType.MANUELL,
+        "Vurder rett etter pleietrengendes død", BehandlingStatus.UTREDES,  BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD, TOTRINN, TILBAKE, null, EnumSet.of(PSB)),
+
 
     // Gruppe : 999x
     AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",

@@ -48,6 +48,7 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.TemaUnderkategori;
 import no.nav.folketrygdloven.kalkulus.kodeverk.VirksomhetType;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.*;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -115,6 +116,7 @@ public class TilKalkulusMapper {
             oppgittEgenNæring.getVarigEndring(),
             oppgittEgenNæring.getEndringDato(),
             oppgittEgenNæring.getNyIArbeidslivet(),
+            oppgittEgenNæring.getBegrunnelse(),
             oppgittEgenNæring.getBruttoInntekt());
     }
 
@@ -126,14 +128,15 @@ public class TilKalkulusMapper {
         return frilansoppdrag -> new OppgittFrilansInntekt(mapPeriode(frilansoppdrag.getPeriode()), frilansoppdrag.getInntekt());
     }
 
-    private static InntektsmeldingerDto mapTilDto(InntektsmeldingerRelevantForBeregning imTjeneste, Optional<InntektsmeldingAggregat> inntektsmeldingerOpt, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
+    private static InntektsmeldingerDto mapTilDto(InntektsmeldingerRelevantForBeregning imTjeneste, Optional<InntektsmeldingAggregat> inntektsmeldingerOpt, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode, BehandlingReferanse referanse) {
         if (inntektsmeldingerOpt.isEmpty()) {
             return null;
         }
 
         // TODO: Skal vi ta hensyn til endringer i refusjonskrav så må dette konstrueres fra alle inntektsmeldingene som overlapper med perioden
         // Da denne informasjonen ikke er periodisert for IM for OMP så må det mappes fra inntektsmeldingene i kronologisk rekkefølge
-        List<Inntektsmelding> inntektsmeldingerForPerioden = imTjeneste.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsPeriode);
+        var inntektsmeldinger = imTjeneste.begrensSakInntektsmeldinger(referanse, sakInntektsmeldinger, vilkårsPeriode);
+        List<Inntektsmelding> inntektsmeldingerForPerioden = imTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldinger, vilkårsPeriode);
 
         List<InntektsmeldingDto> inntektsmeldingDtoer = inntektsmeldingerForPerioden.stream().map(inntektsmelding -> {
             Aktør aktør = mapTilAktør(inntektsmelding.getArbeidsgiver());
@@ -313,7 +316,7 @@ public class TilKalkulusMapper {
                                                     AktørId aktørId,
                                                     DatoIntervallEntitet vilkårsPeriode,
                                                     OppgittOpptjening oppgittOpptjening,
-                                                    InntektsmeldingerRelevantForBeregning imTjeneste) {
+                                                    InntektsmeldingerRelevantForBeregning imTjeneste, BehandlingReferanse referanse) {
 
         var skjæringstidspunktBeregning = vilkårsPeriode.getFomDato();
         var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(skjæringstidspunktBeregning);
@@ -329,7 +332,7 @@ public class TilKalkulusMapper {
         inntektArbeidYtelseGrunnlagDto.medArbeidDto(mapArbeidDto(yrkesaktiviteterForBeregning));
         inntektArbeidYtelseGrunnlagDto.medInntekterDto(mapInntektDto(alleRelevanteInntekter));
         inntektArbeidYtelseGrunnlagDto.medYtelserDto(mapYtelseDto(ytelseFilter.getAlleYtelser()));
-        inntektArbeidYtelseGrunnlagDto.medInntektsmeldingerDto(mapTilDto(imTjeneste, inntektsmeldinger, sakInntektsmeldinger, vilkårsPeriode));
+        inntektArbeidYtelseGrunnlagDto.medInntektsmeldingerDto(mapTilDto(imTjeneste, inntektsmeldinger, sakInntektsmeldinger, vilkårsPeriode, referanse));
         inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon().map(TilKalkulusMapper::mapTilArbeidsforholdInformasjonDto).orElse(null));
         inntektArbeidYtelseGrunnlagDto.medOppgittOpptjeningDto(mapTilOppgittOpptjeningDto(oppgittOpptjening));
 

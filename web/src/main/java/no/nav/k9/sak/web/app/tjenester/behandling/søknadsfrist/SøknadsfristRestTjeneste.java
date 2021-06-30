@@ -5,7 +5,6 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 
 import java.util.List;
 import java.util.Map;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -24,6 +23,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.søknadsfrist.SøknadsfristTilstandDto;
 import no.nav.k9.sak.perioder.KravDokument;
@@ -41,15 +41,18 @@ public class SøknadsfristRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private SøknadsfristTjenesteProvider søknadsfristTjenesteProvider;
+    private AvklartSøknadsfristRepository avklartSøknadsfristRepository;
 
     public SøknadsfristRestTjeneste() {
     }
 
     @Inject
     public SøknadsfristRestTjeneste(BehandlingRepository behandlingRepository,
-                                    SøknadsfristTjenesteProvider søknadsfristTjenesteProvider) {
+                                    SøknadsfristTjenesteProvider søknadsfristTjenesteProvider,
+                                    AvklartSøknadsfristRepository avklartSøknadsfristRepository) {
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
+        this.avklartSøknadsfristRepository = avklartSøknadsfristRepository;
     }
 
     @GET
@@ -64,8 +67,9 @@ public class SøknadsfristRestTjeneste {
         var vurderSøknadsfristTjeneste = søknadsfristTjenesteProvider.finnVurderSøknadsfristTjeneste(referanse);
 
         Map<KravDokument, List<VurdertSøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> relevanteVurderteKravdokumentMedPeriodeForBehandling = vurderSøknadsfristTjeneste.relevanteVurderteKravdokumentMedPeriodeForBehandling(referanse);
+        var avklartSøknadsfristResultat = avklartSøknadsfristRepository.hentHvisEksisterer(referanse.getBehandlingId());
 
-        return new MapTilSøknadsfristDto().mapTil(relevanteVurderteKravdokumentMedPeriodeForBehandling);
+        return new MapTilSøknadsfristDto().mapTil(relevanteVurderteKravdokumentMedPeriodeForBehandling, avklartSøknadsfristResultat);
     }
 
 }

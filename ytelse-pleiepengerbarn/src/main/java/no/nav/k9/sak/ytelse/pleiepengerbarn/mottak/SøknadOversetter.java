@@ -159,20 +159,34 @@ class SøknadOversetter {
 
     private void lagreBeredskapOgNattevåk(Søknad søknad, final Long behandlingId) {
         var ytelse = (PleiepengerSyktBarn) søknad.getYtelse();
+        
+        if (ytelse.getBeredskap().getPerioder().isEmpty()
+                && (ytelse.getBeredskap().getPerioderSomSkalSlettes() == null || ytelse.getBeredskap().getPerioderSomSkalSlettes().isEmpty())
+                && ytelse.getNattevåk().getPerioder().isEmpty()
+                && (ytelse.getNattevåk().getPerioderSomSkalSlettes() == null || ytelse.getNattevåk().getPerioderSomSkalSlettes().isEmpty())) {
+            // Ingen endringer.
+            return;
+        }
+        
 
         var pleietrengendePersonIdent = søknad.getYtelse().getPleietrengende().getPersonIdent();
         var søkerPersonIdent = søknad.getSøker().getPersonIdent();
         var pleietrengendeAktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(pleietrengendePersonIdent.getVerdi())).orElseThrow();
         var søkerAktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(søkerPersonIdent.getVerdi())).orElseThrow();
 
-        var eksisterendeGrunnlag = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandlingId);
+        var eksisterendeGrunnlag = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(pleietrengendeAktørId);
         var eksisterendeBeredskap = eksisterendeGrunnlag.map(
-            it -> it.getUnntakEtablertTilsynForPleietrengende().getBeredskap()
+            it -> it.getBeredskap()
         ).orElse(null);
         var eksisterendeNattevåk = eksisterendeGrunnlag.map(
-            it -> it.getUnntakEtablertTilsynForPleietrengende().getNattevåk()
+            it -> it.getNattevåk()
         ).orElse(null);
 
+        /*
+         * TODO: Data bør ikke mappes direkte inn her, men heller legges i tabeller der
+         *       informasjonen er knyttet til kravdokument. Ved behandling av steget
+         *       kan man da utlede hva som gjelder basert på rekkefølge osv. 
+         */
         var unntakEtablertTilsynBeredskap =
             tilUnntakEtablertTilsynForPleietrengende(
                 eksisterendeBeredskap,

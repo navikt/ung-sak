@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.repo;
+package no.nav.k9.sak.behandlingslager.behandling.motattdokument;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -315,12 +315,12 @@ public class MottattDokument extends BaseEntitet {
             mottatteDokumentMal.type = type;
             return this;
         }
-        
+
         public Builder medSystemnavn(String systemnavn) {
             mottatteDokumentMal.kildesystem=systemnavn;
             return this;
         }
-        
+
         public Builder medSystemnavn(LocalDateTime innsendingstidspunkt) {
             mottatteDokumentMal.innsendingstidspunkt=innsendingstidspunkt;
             return this;

@@ -8,7 +8,9 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -19,12 +21,12 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.perioder.SøknadsfristTjeneste;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @BehandlingStegRef(kode = "VURDER_SØKNADSFRIST")
 @BehandlingTypeRef
@@ -33,6 +35,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 public class VurderSøknadsfristSteg implements BehandlingSteg {
 
     private BehandlingRepository behandlingRepository;
+    private AksjonspunktKontrollRepository kontrollRepository;
     private Instance<SøknadsfristTjeneste> vurderSøknadsfristTjenester;
     private VilkårResultatRepository vilkårResultatRepository;
     private boolean vurderSøknadsfrist;
@@ -44,10 +47,12 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
     @Inject
     public VurderSøknadsfristSteg(BehandlingRepository behandlingRepository,
                                   VilkårResultatRepository vilkårResultatRepository,
+                                  AksjonspunktKontrollRepository kontrollRepository,
                                   @Any Instance<SøknadsfristTjeneste> vurderSøknadsfristTjenester,
                                   @KonfigVerdi(value = "VURDER_SOKNADSFRIST", required = false, defaultVerdi = "false") boolean vurderSøknadsfrist) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.kontrollRepository = kontrollRepository;
         this.vurderSøknadsfristTjenester = vurderSøknadsfristTjenester;
         this.vurderSøknadsfrist = vurderSøknadsfrist;
     }
@@ -57,6 +62,10 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
 
         if (vurderSøknadsfrist) {
             var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+
+            var aksjonspunktFor = behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE);
+            aksjonspunktFor.ifPresent(this::settÅpentAksjonspunktTilUtført);
+
             var vilkårene = vilkårResultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
 
             var tjeneste = hentVurderingsTjeneste(behandling);
@@ -77,6 +86,12 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
         }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private void settÅpentAksjonspunktTilUtført(no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt aksjonspunkt) {
+        if (aksjonspunkt.erÅpentAksjonspunkt()) {
+            kontrollRepository.setTilUtført(aksjonspunkt, aksjonspunkt.getBegrunnelse());
+        }
     }
 
     private boolean kreverManuellAvklaring(Optional<Vilkår> vurdertePerioder) {

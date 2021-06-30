@@ -51,7 +51,8 @@ public enum SkjermlenkeType implements Kodeverdi {
     VEDTAK("VEDTAK", "Vedtak"),
     VURDER_FARESIGNALER("VURDER_FARESIGNALER", "Vurder faresignaler"),
     VURDER_NATTEVÅK("VURDER_NATTEVÅK", "Vurder nattevåk"),
-    VURDER_BEREDSKAP("VURDER_BEREDSKAP", "Vurder beredskap")
+    VURDER_BEREDSKAP("VURDER_BEREDSKAP", "Vurder beredskap"),
+    VURDER_RETT_ETTER_PLEIETRENGENDES_DØD("VURDER_RETT_ETTER_PLEIETRENGENDES_DØD", "Vurder rett etter pleietrengendes død")
     ;
 
     private static final Map<String, SkjermlenkeType> KODER = new LinkedHashMap<>();

@@ -3,11 +3,17 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
+import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
+import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -58,6 +64,7 @@ public class KalkulusRestKlient {
     private final ObjectReader tilstandReader = kalkulusMapper.readerFor(TilstandListeResponse.class);
     private final ObjectReader oppdaterListeReader = kalkulusMapper.readerFor(OppdateringListeRespons.class);
     private final ObjectReader dtoListeReader = kalkulusMapper.readerFor(BeregningsgrunnlagListe.class);
+    private final ObjectReader behovForGreguleringReader = kalkulusMapper.readerFor(GrunnbeløpReguleringRespons.class);
     private final ObjectReader grunnlagListReader = kalkulusMapper.readerFor(new TypeReference<List<BeregningsgrunnlagGrunnlagDto>>() {
     });
     private final ObjectReader grunnbeløpReader = kalkulusMapper.readerFor(Grunnbeløp.class);
@@ -72,6 +79,8 @@ public class KalkulusRestKlient {
     private URI beregningsgrunnlagGrunnlagBolkEndpoint;
     private URI deaktiverBeregningsgrunnlag;
     private URI grunnbeløp;
+
+    private URI kontrollerGrunnbeløp;
 
     protected KalkulusRestKlient() {
         // cdi
@@ -99,6 +108,7 @@ public class KalkulusRestKlient {
         this.beregningsgrunnlagListeDtoEndpoint = toUri("/api/kalkulus/v1/beregningsgrunnlagListe");
         this.beregningsgrunnlagGrunnlagBolkEndpoint = toUri("/api/kalkulus/v1/grunnlag/bolk");
         this.grunnbeløp = toUri("/api/kalkulus/v1/grunnbelop");
+        this.kontrollerGrunnbeløp = toUri("/api/kalkulus/v1/kontrollerGregulering");
     }
 
     public List<TilstandResponse> startBeregning(StartBeregningListeRequest request) {
@@ -165,6 +175,15 @@ public class KalkulusRestKlient {
 
         try {
             return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), grunnbeløpReader);
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
+
+    public GrunnbeløpReguleringRespons kontrollerBehovForGRegulering(KontrollerGrunnbeløpRequest request) {
+        var endpoint = kontrollerGrunnbeløp;
+        try {
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), behovForGreguleringReader);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }

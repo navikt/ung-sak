@@ -48,7 +48,7 @@ public class PSBVurderSøknadsfristTjeneste implements SøknadsfristTjeneste {
     public VilkårResultatBuilder vurderSøknadsfrist(BehandlingReferanse referanse, VilkårResultatBuilder vilkårResultatBuilder) {
 
         var søktePerioder = vurderSøknadsfristTjeneste.hentPerioderTilVurdering(referanse);
-        var vurdertePerioder = vurderSøknadsfristTjeneste.vurderSøknadsfrist(søktePerioder);
+        var vurdertePerioder = vurderSøknadsfristTjeneste.vurderSøknadsfrist(referanse.getBehandlingId(), søktePerioder);
 
         return mapVurderingerTilVilkårsresultat(vilkårResultatBuilder, søktePerioder, vurdertePerioder, referanse.getFagsakPeriode());
     }

@@ -89,7 +89,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
 
         var revurderingPerioderFraAndreParter = perioderTilVurderingTjeneste.utledRevurderingPerioder(ref);
 
-        var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering, revurderingPerioderFraAndreParter);
+        var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(behandling, kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering, revurderingPerioderFraAndreParter);
 
         return statusForPerioderPåBehandling;
     }

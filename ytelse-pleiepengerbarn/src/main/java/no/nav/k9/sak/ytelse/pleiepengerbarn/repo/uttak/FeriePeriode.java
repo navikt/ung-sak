@@ -57,6 +57,7 @@ public class FeriePeriode extends BaseEntitet implements IndexKey {
 
     public FeriePeriode(FeriePeriode feriePeriode) {
         this.periode = feriePeriode.getPeriode();
+        this.skalHaFerie = feriePeriode.isSkalHaFerie();
     }
 
     public DatoIntervallEntitet getPeriode() {

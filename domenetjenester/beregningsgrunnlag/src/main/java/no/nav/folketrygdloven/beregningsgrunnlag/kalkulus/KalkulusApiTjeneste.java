@@ -15,6 +15,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
+import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -86,5 +87,7 @@ public interface KalkulusApiTjeneste {
      * @return Sats-objekt med verdi og periode for grunnbeløp
      */
     Grunnbeløp hentGrunnbeløp(LocalDate dato);
+
+    Map<UUID, GrunnbeløpReguleringStatus> kontrollerBehovForGregulering(List<UUID> koblingerÅSpørreMot, Saksnummer saksnummer);
 
 }

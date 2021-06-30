@@ -45,7 +45,7 @@ import no.nav.k9.sak.typer.PersonIdent;
 public class AktørTjeneste {
     private static final Logger log = LoggerFactory.getLogger(AktørTjeneste.class);
     private static final int DEFAULT_CACHE_SIZE = 1000;
-    private static final long DEFAULT_CACHE_TIMEOUT = TimeUnit.MILLISECONDS.convert(1, TimeUnit.HOURS);
+    private static final long DEFAULT_CACHE_TIMEOUT = TimeUnit.MILLISECONDS.convert(10, TimeUnit.MINUTES);
 
     private LRUCache<AktørId, PersonIdent> cacheAktørIdTilIdent;
     private LRUCache<PersonIdent, AktørId> cacheIdentTilAktørId;

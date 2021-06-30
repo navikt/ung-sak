@@ -34,11 +34,11 @@ public class ProsessTriggereRepository {
             deaktiver(it);
         });
 
-        var oppdatert = new ProsessTriggere(new Triggere(result.stream()
+        var oppdatert = new ProsessTriggere(behandlingId, new Triggere(result.stream()
             .map(Trigger::new)
             .collect(Collectors.toSet())));
 
-        entityManager.persist(oppdatert.getTriggere());
+        entityManager.persist(oppdatert.getTriggereEntity());
         entityManager.persist(oppdatert);
         entityManager.flush();
     }

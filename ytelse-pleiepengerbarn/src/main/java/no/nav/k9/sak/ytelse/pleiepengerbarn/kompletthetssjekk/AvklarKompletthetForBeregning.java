@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -54,7 +55,7 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
         } else {
             var resultat = OppdateringResultat.utenOveropp();
             resultat.skalRekjøreSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
-
+            resultat.setSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING);
             return resultat;
         }
     }

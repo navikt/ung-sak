@@ -20,9 +20,9 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
-import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
@@ -80,7 +80,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
             uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandlingId, uttaksPerioderGrunnlag.getOppgitteSøknadsperioder());
         } else {
             var kravDokumenterMedPerioder = søknadsfristTjeneste.hentPerioderTilVurdering(referanse);
-            var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
+            var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
                 .stream()
                 .filter(it -> it.getBehandlingId().equals(behandlingId))
                 .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))

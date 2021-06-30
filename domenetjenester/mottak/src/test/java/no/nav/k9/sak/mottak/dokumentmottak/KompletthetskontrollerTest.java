@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -29,7 +30,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -38,13 +38,13 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.kompletthet.KompletthetModell;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
@@ -83,10 +83,10 @@ public class KompletthetskontrollerTest {
         KompletthetModell modell = new KompletthetModell(behandlingskontrollTjeneste);
         SkjæringstidspunktTjeneste skjæringstidspunktTjeneste = Mockito.mock(SkjæringstidspunktTjeneste.class);
 
-        kompletthetskontroller = new Kompletthetskontroller(dokumentmottakerFelles,
-            modell,
-            behandlingProsesseringTjeneste,
-            skjæringstidspunktTjeneste);
+        kompletthetskontroller = new Kompletthetskontroller(
+                modell,
+            behandlingProsesseringTjeneste
+        );
 
         mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), null, Brevkode.INNTEKTSMELDING);
 
@@ -162,43 +162,6 @@ public class KompletthetskontrollerTest {
         assertThat(prosessTaskData.getTaskType()).isEqualTo(KompletthetskontrollerVurderKompletthetTask.TASKTYPE);
         prosessTaskRepository.lagre(prosessTaskData);
         verify(behandlingProsesseringTjeneste).opprettTasksForFortsettBehandling(behandling);
-    }
-
-    @Test
-    public void skal_opprette_historikkinnslag_for_tidlig_mottatt_søknad() {
-        // Arrange
-        LocalDateTime frist = LocalDateTime.now().minusSeconds(30);
-        when(kompletthetsjekker.vurderSøknadMottattForTidlig(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.FOR_TIDLIG_SOKNAD));
-        when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.FOR_TIDLIG_SOKNAD));
-        when(behandlingskontrollTjeneste.inneholderSteg(any(), any(), any())).thenReturn(true);
-
-        // Act
-        mottatteDokumentTjeneste.persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
-        kompletthetskontroller.vurderKompletthetForKøetBehandling(behandling);
-
-        // Assert
-        verify(mottatteDokumentTjeneste).persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
-        verify(dokumentmottakerFelles).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
-            Venteårsak.FOR_TIDLIG_SOKNAD);
-    }
-
-    @Test
-    public void skal_opprette_historikkinnslag_ikke_komplett() {
-        // Arrange
-        LocalDateTime frist = LocalDateTime.now();
-        when(kompletthetsjekker.vurderSøknadMottattForTidlig(any())).thenReturn(KompletthetResultat.oppfylt());
-        when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK));
-        when(kompletthetsjekker.vurderEtterlysningInntektsmelding(any())).thenReturn(KompletthetResultat.oppfylt());
-        when(behandlingskontrollTjeneste.inneholderSteg(any(), any(), any())).thenReturn(true);
-        mottatteDokumentTjeneste.persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
-
-        // Act
-        kompletthetskontroller.vurderKompletthetForKøetBehandling(behandling);
-
-        // Assert
-        verify(mottatteDokumentTjeneste).persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
-        verify(dokumentmottakerFelles).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
-            Venteårsak.AVV_DOK);
     }
 
     @ApplicationScoped

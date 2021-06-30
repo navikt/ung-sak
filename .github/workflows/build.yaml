@@ -71,7 +71,7 @@ jobs:
           mvn verify -e --batch-mode -DtrimStackTrace=false --file pom.xml -Dchangelist= -Dsha1=-$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7) -Dfile.encoding=UTF-8
           echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GHCR_PUSH_TOKEN }}
           DATASOURCE_HOST: localhost
           DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
       

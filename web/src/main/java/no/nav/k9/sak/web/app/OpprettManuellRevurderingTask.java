@@ -11,6 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
@@ -21,10 +25,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
 @ApplicationScoped
 @ProsessTask(OpprettManuellRevurderingTask.TASKTYPE)
@@ -86,7 +86,7 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
                 return;
             }
 
-            final ProsessTaskData prosessTaskData = new ProsessTaskData(TilbakeTilStartBehandlingTask.TASKNAME);
+            final ProsessTaskData prosessTaskData = new ProsessTaskData(TilbakeTilStartBehandlingTask.TASKTYPE);
             prosessTaskData.setCallIdFraEksisterende();
             prosessTaskData.setBehandling(fagsak.getId(), behandling.getId(), fagsak.getAktørId().getId());
             prosessTaskData.setProperty(TilbakeTilStartBehandlingTask.PROPERTY_MANUELT_OPPRETTET, Boolean.TRUE.toString());

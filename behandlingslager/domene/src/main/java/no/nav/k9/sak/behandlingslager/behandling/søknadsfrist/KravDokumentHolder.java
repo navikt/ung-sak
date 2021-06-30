@@ -30,7 +30,7 @@ public class KravDokumentHolder extends BaseEntitet {
 
     @ChangeTracked
     @BatchSize(size = 20)
-    @JoinColumn(name = "holder_id", nullable = false)
+    @JoinColumn(name = "dokumenter_id", nullable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private Set<AvklartKravDokument> dokumenter;
 

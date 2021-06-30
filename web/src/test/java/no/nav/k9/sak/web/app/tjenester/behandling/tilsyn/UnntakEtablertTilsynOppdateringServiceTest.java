@@ -28,20 +28,22 @@ class UnntakEtablertTilsynOppdateringServiceTest {
 
     private static final DatoIntervallEntitet PERIODE1 =  DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-31"));
     private static final Long BEHANDLING1 = 123L;
+    private static final AktørId søker = AktørId.dummy();
+    private static final AktørId pleietrengende = AktørId.dummy();
     private static final String BESKRIVELSE1 = "Jeg trenger beredskap.";
     private static final String BEGRUNNELSE1 = "Alt skal være ok.";
 
     @Test
     public void beredskap_skal_oppdateres() {
         opprettGrunnlag(BEHANDLING1);
-        var opprinneligGrunnlag = repo.hent(BEHANDLING1);
-        sjekkUnntakEtablertTilsyn(opprinneligGrunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap(), "", Resultat.IKKE_VURDERT);
-        assertThat(opprinneligGrunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk()).isNull();
+        var opprinneligGrunnlag = repo.hentHvisEksistererUnntakPleietrengende(pleietrengende).get();
+        sjekkUnntakEtablertTilsyn(opprinneligGrunnlag.getBeredskap(), "", Resultat.IKKE_VURDERT);
+        assertThat(opprinneligGrunnlag.getNattevåk()).isNull();
 
         godkjennBeredskap(BEHANDLING1);
-        var oppdaterGrunnlag = repo.hent(BEHANDLING1);
-        sjekkUnntakEtablertTilsyn(oppdaterGrunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap(), BEGRUNNELSE1, Resultat.OPPFYLT);
-        assertThat(oppdaterGrunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk()).isNull();
+        var oppdaterGrunnlag = repo.hentHvisEksistererUnntakPleietrengende(pleietrengende).get();
+        sjekkUnntakEtablertTilsyn(oppdaterGrunnlag.getBeredskap(), BEGRUNNELSE1, Resultat.OPPFYLT);
+        assertThat(oppdaterGrunnlag.getNattevåk()).isNull();
     }
 
 
@@ -64,7 +66,7 @@ class UnntakEtablertTilsynOppdateringServiceTest {
                     PERIODE1,
                     "",
                     Resultat.IKKE_VURDERT,
-                    AktørId.dummy(),
+                    pleietrengende,
                     123L
                 )
             ),
@@ -73,18 +75,18 @@ class UnntakEtablertTilsynOppdateringServiceTest {
                     PERIODE1,
                     LocalDate.now(),
                     BESKRIVELSE1,
-                    AktørId.dummy(),
+                    pleietrengende,
                     123L
                 )
             )
         );
-        var unntakForPleietrengende = new UnntakEtablertTilsynForPleietrengende(AktørId.dummy(), beredskap, null);
+        var unntakForPleietrengende = new UnntakEtablertTilsynForPleietrengende(pleietrengende, beredskap, null);
         repo.lagre(behandlingId, unntakForPleietrengende);
     }
 
     private void godkjennBeredskap(Long behandlingId) {
         var vurderinger = List.of(new VurderingDto("Alt skal være ok.", Resultat.OPPFYLT, PERIODE1.tilPeriode()));
-        service.oppdater(vurderinger, Vurderingstype.BEREDSKAP, behandlingId, AktørId.dummy());
+        service.oppdater(vurderinger, Vurderingstype.BEREDSKAP, behandlingId, søker, pleietrengende);
     }
 
 

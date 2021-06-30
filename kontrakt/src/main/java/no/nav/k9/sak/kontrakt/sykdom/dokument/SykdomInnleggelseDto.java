@@ -43,6 +43,10 @@ public class SykdomInnleggelseDto {
     @Valid
     private List<Periode> perioder = new ArrayList<>();
     
+    @JsonProperty(value = "dryRun")
+    @Valid
+    private boolean dryRun = false;
+    
     @JsonProperty(value = "links")
     @Size(max = 100)
     @Valid
@@ -80,6 +84,10 @@ public class SykdomInnleggelseDto {
 
     public List<Periode> getPerioder() {
         return perioder;
+    }
+    
+    public boolean isDryRun() {
+        return dryRun;
     }
     
     @AssertFalse(message = "Det er ikke tillatt med overlappende perioder.")

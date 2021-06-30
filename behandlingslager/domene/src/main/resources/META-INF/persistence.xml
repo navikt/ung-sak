@@ -38,6 +38,9 @@
             <!-- timeout for venting på locking før aborter operasjon -->
             <property name="javax.persistence.lock.timeout" value="30000" />
 
+            <!-- ikke lekk sql statements og sensitive verider til logger etc. ved feil -->
+            <property name="hibernate.connection.logServerErrorDetail" value="false" />
+            
 		</properties>
 	</persistence-unit>
 

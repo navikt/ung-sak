@@ -15,7 +15,7 @@ public class AktivitetIdentifikator {
     public AktivitetIdentifikator(UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforhold) {
         this.aktivitetType = Objects.requireNonNull(aktivitetType);
         this.arbeidsgiver = UttakArbeidType.ARBEIDSTAKER.equals(aktivitetType) ? Objects.requireNonNull(arbeidsgiver) : arbeidsgiver;
-        this.arbeidsforhold = arbeidsforhold;
+        this.arbeidsforhold = UttakArbeidType.ARBEIDSTAKER.equals(aktivitetType) && arbeidsforhold == null ? InternArbeidsforholdRef.nullRef() : arbeidsforhold;
     }
 
     public Arbeidsgiver getArbeidsgiver() {
@@ -28,17 +28,6 @@ public class AktivitetIdentifikator {
 
     public UttakArbeidType getAktivitetType() {
         return aktivitetType;
-    }
-
-    public boolean identifisererSamme(AktivitetIdentifikator arbeidsforhold) {
-        if(!aktivitetType.equals(arbeidsforhold.getAktivitetType())) {
-            return false;
-        }
-        if (!arbeidsgiver.equals(arbeidsforhold.getArbeidsgiver())) {
-            return false;
-        }
-
-        return this.arbeidsforhold.gjelderFor(arbeidsforhold.getArbeidsforhold());
     }
 
     @Override

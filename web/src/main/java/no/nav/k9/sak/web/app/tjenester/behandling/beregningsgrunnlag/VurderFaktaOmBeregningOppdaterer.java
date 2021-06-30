@@ -37,7 +37,7 @@ public class VurderFaktaOmBeregningOppdaterer implements AksjonspunktOppdaterer<
     @Override
     public OppdateringResultat oppdater(VurderFaktaOmBeregningDtoer dtoer, AksjonspunktOppdaterParameter param) {
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
-            .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), MapDtoTilRequest::map));
+            .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto1 -> MapDtoTilRequest.map(dto1, dtoer.getBegrunnelse())));
         var resultatListe = oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
         faktaOmBeregningHistorikkTjeneste.lagHistorikk(param.getBehandlingId(), resultatListe, dtoer.getBegrunnelse());
         return OppdateringResultat.utenOveropp();

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingslager.behandling.søknadsfrist;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.persistence.Column;
@@ -20,7 +21,6 @@ import no.nav.k9.sak.typer.JournalpostId;
 
 @Entity(name = "AvklartSøknadsfristResultat")
 @Table(name = "RS_SOKNADSFRIST")
-@Immutable
 public class AvklartSøknadsfristResultat extends BaseEntitet {
 
     @Id
@@ -33,13 +33,13 @@ public class AvklartSøknadsfristResultat extends BaseEntitet {
     @ChangeTracked
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "overstyrt_dokument_holder", updatable = false, unique = true)
+    @JoinColumn(name = "overstyrt_id", updatable = false, unique = true)
     private KravDokumentHolder overstyrtHolder;
 
     @ChangeTracked
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "avklart_dokument_holder", updatable = false, unique = true)
+    @JoinColumn(name = "avklart_id", updatable = false, unique = true)
     private KravDokumentHolder avklartHolder;
 
     @Column(name = "aktiv", nullable = false)
@@ -58,27 +58,44 @@ public class AvklartSøknadsfristResultat extends BaseEntitet {
         this.avklartHolder = avklartHolder;
     }
 
-    public KravDokumentHolder getOverstyrtHolder() {
-        return overstyrtHolder;
+    public Optional<KravDokumentHolder> getOverstyrtHolder() {
+        return Optional.ofNullable(overstyrtHolder);
     }
 
-    public KravDokumentHolder getAvklartHolder() {
-        return avklartHolder;
+    public Optional<KravDokumentHolder> getAvklartHolder() {
+        return Optional.ofNullable(avklartHolder);
+    }
+
+    void setBehandlingId(Long behandlingId) {
+        if (this.behandlingId != null) {
+            throw new IllegalStateException("Forsøker å endre behandlingId på persistert grunnlag");
+        }
+        this.behandlingId = Objects.requireNonNull(behandlingId);
     }
 
     public Optional<AvklartKravDokument> finnAvklaring(JournalpostId journalpostId) {
-        var overstyrtStatus = overstyrtHolder.getDokumenter()
-            .stream()
-            .filter(it -> it.getJournalpostId().equals(journalpostId))
-            .findAny();
 
-        if (overstyrtStatus.isPresent()) {
-            return overstyrtStatus;
+        if (overstyrtHolder != null) {
+            var overstyrtStatus = overstyrtHolder.getDokumenter()
+                .stream()
+                .filter(it -> it.getJournalpostId().equals(journalpostId))
+                .findAny();
+
+            if (overstyrtStatus.isPresent()) {
+                return overstyrtStatus;
+            }
         }
 
-        return avklartHolder.getDokumenter()
-            .stream()
-            .filter(it -> it.getJournalpostId().equals(journalpostId))
-            .findAny();
+        if (avklartHolder != null) {
+            return avklartHolder.getDokumenter()
+                .stream()
+                .filter(it -> it.getJournalpostId().equals(journalpostId))
+                .findAny();
+        }
+        return Optional.empty();
+    }
+
+    void deaktiver() {
+        this.aktiv = false;
     }
 }

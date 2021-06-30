@@ -116,9 +116,12 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
     public Optional<LocalDate> getFørsteFraværsdag() {
         var arbeidsforhold = getSkjemaInnhold().getArbeidsforhold();
         if (arbeidsforhold != null) {
-            return Optional.ofNullable(arbeidsforhold.getValue())
+            var førsteFraværsdag = Optional.ofNullable(arbeidsforhold.getValue())
                 .map(Arbeidsforhold::getFoersteFravaersdag)
                 .map(JAXBElement::getValue);
+            if (førsteFraværsdag.isPresent()) {
+                return førsteFraværsdag;
+            }
         }
         var pleiepengerPerioder = getSkjemaInnhold().getPleiepengerPerioder();
         if (pleiepengerPerioder != null) {

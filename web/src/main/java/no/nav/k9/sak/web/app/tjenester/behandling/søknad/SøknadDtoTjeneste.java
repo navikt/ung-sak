@@ -3,20 +3,20 @@ package no.nav.k9.sak.web.app.tjenester.behandling.søknad;
 import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
-import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -32,6 +32,7 @@ import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.søknad.AngittPersonDto;
@@ -40,7 +41,7 @@ import no.nav.k9.sak.kontrakt.søknad.ManglendeVedleggDto;
 import no.nav.k9.sak.kontrakt.søknad.OppgittTilknytningDto;
 import no.nav.k9.sak.kontrakt.søknad.SøknadDto;
 import no.nav.k9.sak.kontrakt.søknad.UtlandsoppholdDto;
-import no.nav.k9.sak.perioder.SøktPeriode;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -48,7 +49,6 @@ import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristTjenesteProvider;
 
 @Dependent
 public class SøknadDtoTjeneste {
@@ -58,7 +58,7 @@ public class SøknadDtoTjeneste {
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private MedlemTjeneste medlemTjeneste;
     private PersoninfoAdapter personinfoAdapter;
-    private SøknadsfristTjenesteProvider provider;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     protected SøknadDtoTjeneste() {
         // for CDI proxy
@@ -70,14 +70,14 @@ public class SøknadDtoTjeneste {
                              PersoninfoAdapter personinfoAdapter,
                              ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                              MedlemTjeneste medlemTjeneste,
-                             SøknadsfristTjenesteProvider provider) {
+                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
 
         this.repositoryProvider = repositoryProvider;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.personinfoAdapter = personinfoAdapter;
         this.medlemTjeneste = medlemTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
-        this.provider = provider;
+        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
 
     public Optional<SøknadDto> mapFra(Behandling behandling) {
@@ -120,35 +120,19 @@ public class SøknadDtoTjeneste {
         AktørId aktørId = finnAktørId(ident);
         AktørId pleietrengendeAktør = finnAktørId(pleietrengendeAktørIdent);
 
-        return finnSisteFagsakPå(ytelsetype, aktørId, List.of(pleietrengendeAktør))
+        return finnSisteFagsakPå(ytelsetype, aktørId, pleietrengendeAktør)
             .flatMap(fagsak -> repositoryProvider.getBehandlingRepository().hentSisteBehandlingForFagsakId(fagsak.getId()))
-            .map(behandling ->
-                {
-                    BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
-                    List<LocalDateTimeline<Boolean>> tidslinjer = provider.finnVurderSøknadsfristTjeneste(referanse).hentPerioderTilVurdering(referanse)
-                        .values().stream().flatMap(p -> p.stream().map(SøktPeriode::getPeriode))
-                        .map(dato -> new LocalDateTimeline<>(dato.toLocalDateInterval(), true)).collect(Collectors.toList());
-
-                    return slårSammenPerioderMedHensynTilOverlapp(tidslinjer);
+            .map(behandling -> {
+                    final var vilkårsPerioderTilVurderingTjeneste = finnVilkårsPerioderTilVurderingTjeneste(behandling.getFagsak().getYtelseType(), behandling.getType());
+                    final NavigableSet<DatoIntervallEntitet> søknadsperioder = vilkårsPerioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId());
+                    return søknadsperioder.stream().map(p -> new Periode(p.getFomDato(), p.getTomDato())).collect(Collectors.toList());
                 }
             )
             .orElse(Collections.emptyList());
     }
 
-    static List<Periode> slårSammenPerioderMedHensynTilOverlapp(List<LocalDateTimeline<Boolean>> tidslinjer) {
-        @SuppressWarnings("unchecked")
-        LocalDateTimeline<Boolean> resultat = LocalDateTimeline.EMPTY_TIMELINE;
-
-        for (LocalDateTimeline<Boolean> localDateSegments : tidslinjer) {
-            resultat = localDateSegments.combine(resultat, StandardCombinators::coalesceRightHandSide, JoinStyle.CROSS_JOIN);
-        }
-        return resultat
-            .compress().toSegments().stream()
-            .map(segment -> new Periode(segment.getFom(), segment.getTom())).collect(Collectors.toList());
-    }
-
-    private Optional<Fagsak> finnSisteFagsakPå(FagsakYtelseType ytelseType, AktørId bruker, Collection<AktørId> pleietrengendeAktørId) {
-        List<Fagsak> fagsaker = repositoryProvider.getFagsakRepository().finnFagsakRelatertTilEnAvAktører(ytelseType, bruker, pleietrengendeAktørId, Collections.emptyList(), null, null);
+    private Optional<Fagsak> finnSisteFagsakPå(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengendeAktørId) {
+        final List<Fagsak> fagsaker = repositoryProvider.getFagsakRepository().finnFagsakRelatertTil(ytelseType, bruker, pleietrengendeAktørId, null, null, null);
         if (fagsaker.isEmpty()) {
             return Optional.empty();
         }
@@ -264,5 +248,9 @@ public class SøknadDtoTjeneste {
                 utlandsopphold.getPeriodeFom(),
                 utlandsopphold.getPeriodeTom()))
             .collect(Collectors.toList());
+    }
+
+    private VilkårsPerioderTilVurderingTjeneste finnVilkårsPerioderTilVurderingTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, ytelseType, behandlingType);
     }
 }

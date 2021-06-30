@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -59,6 +60,15 @@ public class Brevkode implements Kodeverdi {
     public static final Brevkode UDEFINERT = new Brevkode("-", null, VEDLEGG_RANGERING);
     public static final String KODEVERK = "DOKUMENT_TYPE_ID";
     private String offisiellKode;
+
+    public static final Set<Brevkode> SØKNAD_TYPER = Set.of(
+        PLEIEPENGER_BARN_SOKNAD,
+        SØKNAD_UTBETALING_OMS,
+        SØKNAD_UTBETALING_OMS_AT,
+        SØKNAD_OMS_UTVIDETRETT_KS,
+        SØKNAD_OMS_UTVIDETRETT_MA,
+        SØKNAD_OMS_UTVIDETRETT_AO,
+        INNTEKTKOMP_FRILANS);
 
     @JsonValue
     private String kode;

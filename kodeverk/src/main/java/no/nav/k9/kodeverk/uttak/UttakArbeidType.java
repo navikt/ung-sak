@@ -25,15 +25,15 @@ public enum UttakArbeidType implements Kodeverdi {
     SELVSTENDIG_NÆRINGSDRIVENDE(AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE, "Selvstendig næringsdrivende"),
     FRILANSER(AktivitetStatus.FRILANSER, "Frilans"),
 
+    DAGPENGER(AktivitetStatus.DAGPENGER, "Dagpenger"),
+
     INAKTIV(AktivitetStatus.MIDLERTIDIG_INAKTIV, "Inaktiv"),
     ANNET("ANNET", "Annet"),
     ;
 
     public static final EnumSet<UttakArbeidType> ATFL = EnumSet.of(ARBEIDSTAKER, FRILANSER);
-
-    private static final Map<String, UttakArbeidType> KODER = new LinkedHashMap<>();
-
     public static final String KODEVERK = "UTTAK_ARBEID_TYPE";
+    private static final Map<String, UttakArbeidType> KODER = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
@@ -80,6 +80,19 @@ public enum UttakArbeidType implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
 
+    public static UttakArbeidType mapFra(AktivitetStatus aktivitetStatus) {
+        for (var ut : values()) {
+            if (ut.aktivitetStatus != null && ut.aktivitetStatus.equals(aktivitetStatus)) {
+                return ut;
+            }
+        }
+        if (Inntektskategori.UDEFINERT.equals(aktivitetStatus.getInntektskategori())) {
+            throw new IllegalArgumentException(AktivitetStatus.class.getSimpleName() + "AktivitetStatus " + aktivitetStatus + " mangler mapping til " + UttakArbeidType.class.getSimpleName());
+        } else {
+            return UttakArbeidType.ANNET;
+        }
+    }
+
     @Override
     public String getNavn() {
         return navn;
@@ -110,19 +123,6 @@ public enum UttakArbeidType implements Kodeverdi {
 
     public boolean matcher(AktivitetStatus aktivitetStatus) {
         return Objects.equals(this.kode, aktivitetStatus.getKode());
-    }
-
-    public static UttakArbeidType mapFra(AktivitetStatus aktivitetStatus) {
-        for (var ut : values()) {
-            if (ut.aktivitetStatus != null && ut.aktivitetStatus.equals(aktivitetStatus)) {
-                return ut;
-            }
-        }
-        if (Inntektskategori.UDEFINERT.equals(aktivitetStatus.getInntektskategori())) {
-            throw new IllegalArgumentException(AktivitetStatus.class.getSimpleName() + "AktivitetStatus " + aktivitetStatus + " mangler mapping til " + UttakArbeidType.class.getSimpleName());
-        } else {
-            return UttakArbeidType.ANNET;
-        }
     }
 
 }

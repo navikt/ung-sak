@@ -17,6 +17,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Immutable;
 
 import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
@@ -36,11 +37,14 @@ public class AvklartKravDokument extends BaseEntitet implements IndexKey {
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
     private JournalpostId journalpostId;
 
-    @Column(name = "godkjent")
+    @Column(name = "godkjent", nullable = false)
     private boolean godkjent;
 
-    @Column(name = "godkjent_fra_dato")
-    private LocalDate godkjentFraDato;
+    @Column(name = "gyldig_fra", nullable = false)
+    private LocalDate fraDato;
+
+    @Column(name = "begrunnelse", nullable = false)
+    private String begrunnelse;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -50,14 +54,11 @@ public class AvklartKravDokument extends BaseEntitet implements IndexKey {
         // hibernate
     }
 
-    AvklartKravDokument(AvklartKravDokument periode) {
-        this.journalpostId = periode.getJournalpostId();
-    }
-
-    public AvklartKravDokument(JournalpostId journalpostId, Boolean godkjent, LocalDate godkjentFraDato) {
+    public AvklartKravDokument(JournalpostId journalpostId, Boolean godkjent, LocalDate fraDato, String begrunnelse) {
         this.journalpostId = journalpostId;
         this.godkjent = godkjent;
-        this.godkjentFraDato = godkjentFraDato;
+        this.fraDato = fraDato;
+        this.begrunnelse = begrunnelse;
     }
 
     public Long getId() {
@@ -72,8 +73,20 @@ public class AvklartKravDokument extends BaseEntitet implements IndexKey {
         return godkjent;
     }
 
-    public LocalDate getGodkjentFraDato() {
-        return godkjentFraDato;
+    public Utfall getUtfall() {
+        if (godkjent) {
+            return Utfall.OPPFYLT;
+        } else {
+            return Utfall.IKKE_OPPFYLT;
+        }
+    }
+
+    public LocalDate getFraDato() {
+        return fraDato;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
     }
 
     @Override

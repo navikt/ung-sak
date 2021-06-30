@@ -1,8 +1,9 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,23 +13,15 @@ import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakAktivitet;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
-import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 class MapFraUttaksplan {
 
-    private static UttakResultatPeriode toUttakResultatPeriode(LocalDate fom, LocalDate tom, UttaksperiodeInfo uttak) {
-        switch (uttak.getUtfall()) {
-            case OPPFYLT:
-                return new UttakResultatPeriode(fom, tom, toUttakAktiviteter(uttak), false);
-            case IKKE_OPPFYLT:
-                return new UttakResultatPeriode(fom, tom, null, true); // TODO: indikerer opphold,bør ha med avslagsårsaker?
-            default:
-                throw new UnsupportedOperationException("Støtter ikke uttaksplanperiode av type: " + uttak);
-        }
-    }
+    private static final Comparator<UttakResultatPeriode> COMP_PERIODE = Comparator.comparing(UttakResultatPeriode::getPeriode,
+        Comparator.nullsFirst(Comparator.naturalOrder()));
 
     private static List<UttakAktivitet> toUttakAktiviteter(UttaksperiodeInfo uttaksplanperiode) {
         return uttaksplanperiode.getUtbetalingsgrader().stream()
@@ -56,6 +49,7 @@ class MapFraUttaksplan {
                 } else if (arb.getAktørId() != null) {
                     arbeidsforholdBuilder.medAktørId(arb.getAktørId());
                 }
+                arbeidsforholdBuilder.medArbeidsforholdId(arb.getArbeidsforholdId());
                 return arbeidsforholdBuilder.build();
             case FRILANSER:
                 return Arbeidsforhold.frilansArbeidsforhold();
@@ -64,21 +58,33 @@ class MapFraUttaksplan {
         }
     }
 
-    private static LocalDateTimeline<UttaksperiodeInfo> getTimeline(Uttaksplan uttaksplan) {
-        return new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> toSegment(e.getKey(), e.getValue())).collect(Collectors.toList()));
-    }
+    private static List<UttakResultatPeriode> getTimeline(Uttaksplan uttaksplan, Utfall utfall) {
+        var segmenter = uttaksplan.getPerioder()
+            .entrySet()
+            .stream()
+            .filter(it -> utfall.equals(it.getValue().getUtfall()))
+            .map(e -> e.getValue().getUtbetalingsgrader().stream().map(it -> new LocalDateSegment<>(e.getKey().getFom(), e.getKey().getTom(), mapTilUttaksAktiviteter(it))).collect(Collectors.toList()))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
 
-    private static LocalDateSegment<UttaksperiodeInfo> toSegment(LukketPeriode periode, UttaksperiodeInfo value) {
-        return new LocalDateSegment<>(periode.getFom(), periode.getTom(), value);
+        var timeline = LocalDateTimeline.buildGroupOverlappingSegments(segmenter);
+
+        List<UttakResultatPeriode> res = new ArrayList<>();
+        timeline.toSegments().forEach(seg -> {
+            res.add(new UttakResultatPeriode(seg.getFom(), seg.getTom(), seg.getValue(), !Utfall.OPPFYLT.equals(utfall)));
+        });
+        return res;
     }
 
     List<UttakResultatPeriode> mapFra(Uttaksplan uttaksplan) {
-        var uttakTimeline = getTimeline(uttaksplan);
-        List<UttakResultatPeriode> res = new ArrayList<>();
+        var innvilgetTimeline = getTimeline(uttaksplan, Utfall.OPPFYLT);
+        var avslåttTimeline = getTimeline(uttaksplan, Utfall.IKKE_OPPFYLT);
 
-        uttakTimeline.toSegments().forEach(seg -> {
-            res.add(toUttakResultatPeriode(seg.getFom(), seg.getTom(), seg.getValue()));
-        });
+        List<UttakResultatPeriode> res = new ArrayList<>();
+        res.addAll(innvilgetTimeline);
+        res.addAll(avslåttTimeline);
+        res.sort(COMP_PERIODE);
+
         return res;
     }
 

@@ -23,6 +23,18 @@ public class PeriodeMedÅrsak implements Comparable<PeriodeMedÅrsak> {
         return årsak;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PeriodeMedÅrsak that = (PeriodeMedÅrsak) o;
+        return Objects.equals(periode, that.periode) && årsak == that.årsak;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(periode, årsak);
+    }
 
     @Override
     public int compareTo(PeriodeMedÅrsak o) {

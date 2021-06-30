@@ -17,16 +17,16 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
-import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
@@ -50,6 +50,7 @@ public class TrekkUtFraværTjeneste {
     private SøknadPerioderTjeneste søknadPerioderTjeneste;
 
     private TrekkUtOppgittFraværPeriode mapOppgittFravær;
+    private AvklartSøknadsfristRepository avklartSøknadsfristRepository;
 
     @Inject
     public TrekkUtFraværTjeneste(OmsorgspengerGrunnlagRepository grunnlagRepository,
@@ -58,7 +59,8 @@ public class TrekkUtFraværTjeneste {
                                  InntektArbeidYtelseTjeneste iayTjeneste,
                                  @FagsakYtelseTypeRef("OMP") VurderSøknadsfristTjeneste<OppgittFraværPeriode> søknadsfristTjeneste,
                                  SøknadPerioderTjeneste søknadPerioderTjeneste,
-                                 TrekkUtOppgittFraværPeriode mapOppgittFravær) {
+                                 TrekkUtOppgittFraværPeriode mapOppgittFravær,
+                                 AvklartSøknadsfristRepository avklartSøknadsfristRepository) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
@@ -66,6 +68,7 @@ public class TrekkUtFraværTjeneste {
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.søknadPerioderTjeneste = søknadPerioderTjeneste;
         this.mapOppgittFravær = mapOppgittFravær;
+        this.avklartSøknadsfristRepository = avklartSøknadsfristRepository;
     }
 
     OppgittFravær samleSammenOppgittFravær(Long behandlingId) {
@@ -103,19 +106,22 @@ public class TrekkUtFraværTjeneste {
 
     private List<OppgittFraværPeriode> fraværPåBehandling(Behandling behandling) {
         LinkedHashSet<Inntektsmelding> inntektsmeldingerPåBehandling = inntektsmeldingerPåBehandling(behandling);
-        var vurderteKravOgPerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåBehandling, fraværMedInnsendingstidspunktFraSøknaderPåBehandling(behandling));
+        var avklartSøknadsfristResultat = avklartSøknadsfristRepository.hentHvisEksisterer(behandling.getId());
+        var vurderteKravOgPerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåBehandling, fraværMedInnsendingstidspunktFraSøknaderPåBehandling(behandling), avklartSøknadsfristResultat);
         return trekkUtFravær(vurderteKravOgPerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
     }
 
     public List<OppgittFraværPeriode> fraværFraInntektsmeldingerPåFagsak(Behandling behandling) {
         var inntektsmeldingerPåFagsak = inntektsmeldingerPåFagsak(behandling.getFagsak());
-        var vurderteKravOgPerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåFagsak, Map.of());
+        var avklartSøknadsfristResultat = avklartSøknadsfristRepository.hentHvisEksisterer(behandling.getId());
+        var vurderteKravOgPerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåFagsak, Map.of(), avklartSøknadsfristResultat);
         return trekkUtFravær(vurderteKravOgPerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
     }
 
     public List<OppgittFraværPeriode> fraværPåFagsak(Behandling behandling) {
         var inntektsmeldingerPåFagsak = inntektsmeldingerPåFagsak(behandling.getFagsak());
-        var vurdertePerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåFagsak, fraværMedInnsendingstidspunktFraSøknaderPåFagsak(behandling));
+        var avklartSøknadsfristResultat = avklartSøknadsfristRepository.hentHvisEksisterer(behandling.getId());
+        var vurdertePerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåFagsak, fraværMedInnsendingstidspunktFraSøknaderPåFagsak(behandling), avklartSøknadsfristResultat);
 
         // TBD: hvofor bruker ikke denne #trekkUtFravær som de andre over?
         return vurdertePerioder.values().stream()
@@ -125,10 +131,9 @@ public class TrekkUtFraværTjeneste {
     }
 
     private LinkedHashSet<Inntektsmelding> inntektsmeldingerPåBehandling(Behandling behandling) {
-        var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
+        var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
             .stream()
             .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
-            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
             .filter(it -> it.getBehandlingId() != null && it.getBehandlingId().equals(behandling.getId()))
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
@@ -139,10 +144,9 @@ public class TrekkUtFraværTjeneste {
     }
 
     private LinkedHashSet<Inntektsmelding> inntektsmeldingerPåFagsak(Fagsak fagsak) {
-        var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsak.getId())
+        var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(fagsak.getId())
             .stream()
             .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
-            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
             .filter(it -> it.getBehandlingId() != null)
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());

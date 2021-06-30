@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -23,6 +24,7 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
 
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
+    private MidlertidigAleneVilkårsVurderingTjeneste vilkårsVurderingTjeneste;
 
     MidlertidigAleneSøknadMottaker() {
         // proxy
@@ -30,7 +32,9 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
 
     @Inject
     public MidlertidigAleneSøknadMottaker(SaksnummerRepository saksnummerRepository,
+                                          @Any MidlertidigAleneVilkårsVurderingTjeneste vilkårsVurderingTjeneste,
                                           FagsakTjeneste fagsakTjeneste) {
+        this.vilkårsVurderingTjeneste = vilkårsVurderingTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.saksnummerRepository = saksnummerRepository;
     }
@@ -39,7 +43,7 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato) {
         ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
         Objects.requireNonNull(startDato);
-        var datoIntervall = DatoIntervallEntitet.fraOgMed(startDato);
+        var datoIntervall = vilkårsVurderingTjeneste.utledMaksPeriode(DatoIntervallEntitet.fra(startDato, sluttDato));
         var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, datoIntervall.getFomDato(), datoIntervall.getTomDato());
         if (fagsak.isPresent()) {
             return fagsak.get();
@@ -47,7 +51,7 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
 
         var saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
 
-        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, startDato, datoIntervall.getTomDato());
+        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, datoIntervall.getFomDato(), datoIntervall.getTomDato());
     }
 
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {

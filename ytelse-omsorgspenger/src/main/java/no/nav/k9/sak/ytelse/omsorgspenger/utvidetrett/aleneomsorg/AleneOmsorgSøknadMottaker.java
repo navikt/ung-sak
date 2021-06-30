@@ -43,16 +43,15 @@ public class AleneOmsorgSøknadMottaker implements SøknadMottakTjeneste<Innsend
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato) {
         ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
         Objects.requireNonNull(startDato);
-        var datoIntervall = DatoIntervallEntitet.fraOgMed(startDato);
+        var datoIntervall = vilkårsVurderingTjeneste.utledMaksPeriode(DatoIntervallEntitet.fra(startDato, sluttDato), pleietrengendeAktørId);
         var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, datoIntervall.getFomDato(), datoIntervall.getTomDato());
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
 
         var saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        var fagsakPeriode = vilkårsVurderingTjeneste.utledMaksPeriode(DatoIntervallEntitet.fra(startDato, sluttDato), pleietrengendeAktørId);
 
-        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato());
+        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, datoIntervall.getFomDato(), datoIntervall.getTomDato());
     }
 
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {

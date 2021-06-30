@@ -4,36 +4,66 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBeregningTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
 public class PSBInntektsmeldingerRelevantForBeregning implements InntektsmeldingerRelevantForBeregning {
 
-    @Override
-    public List<Inntektsmelding> utledInntektsmeldingerSomGjelderForPeriode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
-        var inntektsmeldingene = new ArrayList<Inntektsmelding>();
+    private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
 
-        var sortedIms = sakInntektsmeldinger.stream()
+    public PSBInntektsmeldingerRelevantForBeregning() {
+    }
+
+    @Inject
+    public PSBInntektsmeldingerRelevantForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
+                                                    VilkårResultatRepository vilkårResultatRepository) {
+        this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
+        this.vilkårResultatRepository = vilkårResultatRepository;
+    }
+
+    @Override
+    public Collection<Inntektsmelding> begrensSakInntektsmeldinger(BehandlingReferanse referanse, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
+        var relevantPeriode = kompletthetForBeregningTjeneste.utledRelevantPeriode(referanse, vilkårsPeriode);
+        return kompletthetForBeregningTjeneste.utledRelevanteInntektsmeldinger(new HashSet<>(sakInntektsmeldinger), relevantPeriode);
+    }
+
+    @Override
+    public List<Inntektsmelding> utledInntektsmeldingerSomGjelderForPeriode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet relevantPeriode) {
+        var sortedIms = sakInntektsmeldinger
+            .stream()
             .sorted(Inntektsmelding.COMP_REKKEFØLGE)
             .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        return sorterOgPlukkUtPrioritert(relevantPeriode, sortedIms);
+    }
+
+    ArrayList<Inntektsmelding> sorterOgPlukkUtPrioritert(DatoIntervallEntitet relevantPeriode, Set<Inntektsmelding> sortedIms) {
+        var inntektsmeldingene = new ArrayList<Inntektsmelding>();
 
         for (Inntektsmelding inntektsmelding : sortedIms) {
             if (harIngenInntektsmeldingerForArbeidsforholdIdentifikatoren(inntektsmeldingene, inntektsmelding)
                 && inntektsmelding.getStartDatoPermisjon().isPresent()) {
                 inntektsmeldingene.add(inntektsmelding);
             } else if (harInntektsmeldingSomMatcherArbeidsforhold(inntektsmeldingene, inntektsmelding)
-                && skalErstatteEksisterendeInntektsmelding(inntektsmelding, inntektsmeldingene, vilkårsPeriode)) {
+                && skalErstatteEksisterendeInntektsmelding(inntektsmelding, inntektsmeldingene, relevantPeriode)) {
                 inntektsmeldingene.removeIf(arbeidsforholdMatcher(inntektsmelding));
                 inntektsmeldingene.add(inntektsmelding);
             }
