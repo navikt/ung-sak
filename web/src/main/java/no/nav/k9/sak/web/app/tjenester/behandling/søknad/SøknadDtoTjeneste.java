@@ -214,9 +214,6 @@ public class SøknadDtoTjeneste {
         dto.setFødselsdato(opplysninger.getFødselsdato());
         dto.setAktørId(aktørId);
 
-        // Dette må gjøres for å ikke knekke frontend, kan fjernes når frontend er rettet.
-        dto.setOrganisasjonsnummer(new OrgNummer(opplysninger.getIdentifikator()));
-
         return dto;
     }
 
