@@ -11,8 +11,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -21,13 +19,11 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
-import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
@@ -77,41 +73,32 @@ public class InitierPerioderSteg implements BehandlingSteg {
 
         if (behandling.erManueltOpprettet()) {
             var kravDokumenterMedPerioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
-            var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
-                .stream()
-                .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
-                .filter(it -> Brevkode.PLEIEPENGER_BARN_SOKNAD.equals(it.getType()))
-                .map(MottattDokument::getJournalpostId)
-                .collect(Collectors.toSet());
 
-            log.info("Fant {} dokumenter knyttet til fagsaken", mottatteDokumenter);
+            log.info("Fant {} dokumenter knyttet til fagsaken", kravDokumenterMedPerioder.size());
 
-            var søknadsperioderHolder = mapRelevanteSøknadsperioder(kravDokumenterMedPerioder, mottatteDokumenter);
+            var søknadsperioderHolder = mapRelevanteSøknadsperioder(kravDokumenterMedPerioder);
             søknadsperiodeRepository.lagreRelevanteSøknadsperioder(behandlingId, søknadsperioderHolder);
 
             uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandlingId, uttaksPerioderGrunnlag.getOppgitteSøknadsperioder());
         } else {
-            var kravDokumenterMedPerioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
-            var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
-                .stream()
-                .filter(it -> it.getBehandlingId().equals(behandlingId))
-                .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
-                .filter(it -> Brevkode.PLEIEPENGER_BARN_SOKNAD.equals(it.getType()))
-                .map(MottattDokument::getJournalpostId)
-                .collect(Collectors.toSet());
+            var kravDokumenterMedPerioder = søknadsfristTjeneste.relevanteVurderteKravdokumentMedPeriodeForBehandling(referanse);
 
-            log.info("Fant {} dokumenter knyttet til behandlingen", mottatteDokumenter);
+            log.info("Fant {} dokumenter knyttet til behandlingen", kravDokumenterMedPerioder.size());
 
-            var søknadsperioderHolder = mapRelevanteSøknadsperioder(kravDokumenterMedPerioder, mottatteDokumenter);
+            var søknadsperioderHolder = mapRelevanteSøknadsperioder(kravDokumenterMedPerioder);
             søknadsperiodeRepository.lagreRelevanteSøknadsperioder(behandlingId, søknadsperioderHolder);
 
-            var uttakPerioderHolder = mapUttaksPerioderRelevantForBehandlingen(uttaksPerioderGrunnlag, mottatteDokumenter);
+            var uttakPerioderHolder = mapUttaksPerioderRelevantForBehandlingen(uttaksPerioderGrunnlag, kravDokumenterMedPerioder.keySet());
             uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandlingId, uttakPerioderHolder);
         }
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private UttakPerioderHolder mapUttaksPerioderRelevantForBehandlingen(UttaksPerioderGrunnlag grunnlag, Set<JournalpostId> mottatteDokumenter) {
+    private UttakPerioderHolder mapUttaksPerioderRelevantForBehandlingen(UttaksPerioderGrunnlag grunnlag, Set<KravDokument> kravdokumenter) {
+        var mottatteDokumenter = kravdokumenter.stream()
+            .map(KravDokument::getJournalpostId)
+            .collect(Collectors.toSet());
+
         var perioderFraSøknader = grunnlag.getOppgitteSøknadsperioder()
             .getPerioderFraSøknadene()
             .stream()
@@ -127,23 +114,21 @@ public class InitierPerioderSteg implements BehandlingSteg {
         return new UttakPerioderHolder(perioderFraSøknader);
     }
 
-    private SøknadsperioderHolder mapRelevanteSøknadsperioder(Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> kravDokumenterMedPerioder,
-                                                              Set<JournalpostId> mottatteDokumenter) {
-        var entries = kravDokumenterMedPerioder.entrySet()
-            .stream()
-            .filter(it -> mottatteDokumenter.contains(it.getKey().getJournalpostId()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    private SøknadsperioderHolder mapRelevanteSøknadsperioder(Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> kravDokumenterMedPerioder) {
 
-        var relevanteDokumenter = entries.entrySet().stream()
+        var relevanteDokumenter = kravDokumenterMedPerioder.entrySet().stream()
             .map(this::mapTilSøknadsPerioder)
             .collect(Collectors.toSet());
+
+        log.info("Fant {} dokumenter knyttet til fagsaken", kravDokumenterMedPerioder.size());
 
         return new SøknadsperioderHolder(relevanteDokumenter);
     }
 
     private Søknadsperioder mapTilSøknadsPerioder(Map.Entry<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> entry) {
         var perioder = entry.getValue()
-            .stream().filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
+            .stream()
+            .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
             .map(VurdertSøktPeriode::getRaw)
             .collect(Collectors.toSet());
         return new Søknadsperioder(entry.getKey().getJournalpostId(), perioder);
