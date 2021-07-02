@@ -77,7 +77,7 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
             .map(it -> new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING))
             .collect(Collectors.toCollection(HashSet::new));
 
-        var søktePerioderFraSøknad = søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåFagsak(referanse);
+        var søktePerioderFraSøknad = søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåBehandling(referanse);
         kravDokumenter.addAll(søktePerioderFraSøknad.keySet());
 
         return kravDokumenter;
