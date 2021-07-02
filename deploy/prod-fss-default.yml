@@ -208,7 +208,7 @@ spec:
     - name: VURDER_SOKNADSFRIST
       value: "true"
     - name: HENLEGG_DOKUMENTER
-      value: "false"
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
