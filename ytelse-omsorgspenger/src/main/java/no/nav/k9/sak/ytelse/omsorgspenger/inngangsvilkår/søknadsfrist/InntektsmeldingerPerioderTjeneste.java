@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,11 +51,38 @@ public class InntektsmeldingerPerioderTjeneste {
             .collect(Collectors.toSet());
     }
 
+    public Set<Inntektsmelding> hentUtInntektsmeldingerKnyttetTilBehandling(BehandlingReferanse referanse) {
+        Behandling behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
+
+        Set<JournalpostId> inntektsmeldingerJournalposter = hentUtDokumenterKnyttetTilBehandling(behandling);
+
+        if (inntektsmeldingerJournalposter.isEmpty()) {
+            return Set.of();
+        }
+
+        return iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer(), referanse.getAktørId(), referanse.getFagsakYtelseType())
+            .stream()
+            .filter(it -> inntektsmeldingerJournalposter
+                .stream()
+                .anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())))
+            .collect(Collectors.toSet());
+    }
+
     private Set<JournalpostId> hentUtRelevanteJournalposter(Behandling behandling) {
         return mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
             .stream()
             .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
             .filter(it -> it.getBehandlingId() != null)
+            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
+            .map(MottattDokument::getJournalpostId)
+            .collect(Collectors.toSet());
+    }
+
+    private Set<JournalpostId> hentUtDokumenterKnyttetTilBehandling(Behandling behandling) {
+        return mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
+            .stream()
+            .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
+            .filter(it -> Objects.equals(it.getBehandlingId(), behandling.getId()))
             .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
