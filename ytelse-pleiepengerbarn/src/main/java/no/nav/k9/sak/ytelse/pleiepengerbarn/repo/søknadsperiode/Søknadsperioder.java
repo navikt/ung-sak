@@ -71,9 +71,7 @@ public class Søknadsperioder extends BaseEntitet {
 
     public Søknadsperioder(JournalpostId journalpostId, Collection<Søknadsperiode> perioder) {
         this.journalpostId = journalpostId;
-        this.perioder = Objects.requireNonNull(perioder).stream()
-            .map(Søknadsperiode::new)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+        this.perioder = new LinkedHashSet<>(Objects.requireNonNull(perioder));
     }
 
     public Long getId() {
