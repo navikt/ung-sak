@@ -2,6 +2,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.tilsyn;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -35,15 +36,13 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
     }
 
     public EtablertTilsynNattevåkOgBeredskapDto tilDto(BehandlingReferanse behandlingRef,
-            UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
-        var beredskap = unntakEtablertTilsynForPleietrengende.getBeredskap();
-        var nattevåk = unntakEtablertTilsynForPleietrengende.getNattevåk();
-
-        return new EtablertTilsynNattevåkOgBeredskapDto(
-            tilEtablertTilsyn(behandlingRef),
-            tilNattevåk(nattevåk, behandlingRef.getAktørId()),
-            tilBeredskap(beredskap, behandlingRef.getAktørId())
-        );
+            Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende) {
+        var etablertTilsyn = tilEtablertTilsyn(behandlingRef);
+        return unntakEtablertTilsynForPleietrengende.map(etablertTilsynForPleietrengende -> new EtablertTilsynNattevåkOgBeredskapDto(
+            etablertTilsyn,
+            tilNattevåk(etablertTilsynForPleietrengende.getNattevåk(), behandlingRef.getAktørId()),
+            tilBeredskap(etablertTilsynForPleietrengende.getBeredskap(), behandlingRef.getAktørId())
+        )).orElseGet(() -> new EtablertTilsynNattevåkOgBeredskapDto(etablertTilsyn, null, null));
     }
 
     private List<EtablertTilsynPeriodeDto> tilEtablertTilsyn(BehandlingReferanse behandlingRef) {

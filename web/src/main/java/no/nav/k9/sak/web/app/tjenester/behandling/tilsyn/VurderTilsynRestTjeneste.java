@@ -28,7 +28,10 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.tilsyn.EtablertTilsynNattevåkOgBeredskapDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
+
+import java.util.Optional;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -73,12 +76,13 @@ public class VurderTilsynRestTjeneste {
                                                 @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
                                                     BehandlingUuidDto behandlingUuidDto) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuidDto.getBehandlingUuid());
-        
-        final UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende;
+
+        final Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende;
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
-            unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId()).map(g -> g.getUnntakEtablertTilsynForPleietrengende()).orElseThrow();
+            var unntakEtablertTilsynGrunnlag = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId());
+            unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlag.map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
         } else {
-            unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(behandling.getFagsak().getPleietrengendeAktørId()).orElseThrow();
+            unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(behandling.getFagsak().getPleietrengendeAktørId());
         }
 
         var behandlingRef = BehandlingReferanse.fra(behandling);
