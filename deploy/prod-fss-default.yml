@@ -209,6 +209,8 @@ spec:
       value: "true"
     - name: HENLEGG_DOKUMENTER
       value: "true"
+    - name: VISNING_DUPLIKAT_ARB_FORHOLD
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
