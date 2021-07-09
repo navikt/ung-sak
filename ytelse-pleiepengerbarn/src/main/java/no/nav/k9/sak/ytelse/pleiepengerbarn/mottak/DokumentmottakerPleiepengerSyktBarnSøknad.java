@@ -133,6 +133,11 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                 journalpostHarMedisinskeOpplysninger = journalpost.getInneholderMedisinskeOpplysninger();
             }
 
+            // TODO: Fjern hack som retter feilinnsending fra k9-punsj:
+            if ("508249437".equals(journalpostId.getVerdi())) {
+                continue;
+            }
+            
             sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
                 behandling,
                 journalpostId,
