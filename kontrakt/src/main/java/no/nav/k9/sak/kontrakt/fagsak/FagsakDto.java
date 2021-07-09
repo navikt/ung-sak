@@ -174,6 +174,10 @@ public class FagsakDto {
     public void setStatus(FagsakStatus status) {
         this.status = status;
     }
+    
+    public AktørId getPleietrengendeAktørId() {
+        return pleietrengendeAktørId;
+    }
 
     @Override
     public String toString() {
