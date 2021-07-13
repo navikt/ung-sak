@@ -44,7 +44,6 @@ import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.jpa.TomtResultatException;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -105,7 +104,6 @@ public class BehandlingRestTjeneste {
     private HenleggBehandlingTjeneste henleggBehandlingTjeneste;
     private BehandlingDtoTjeneste behandlingDtoTjeneste;
     private SjekkProsessering sjekkProsessering;
-    private Boolean unntaksbehandlingTogglet;
 
     BehandlingRestTjeneste() {
         // for proxy
@@ -118,8 +116,7 @@ public class BehandlingRestTjeneste {
                                   FagsakTjeneste fagsakTjeneste,
                                   HenleggBehandlingTjeneste henleggBehandlingTjeneste,
                                   BehandlingDtoTjeneste behandlingDtoTjeneste,
-                                  SjekkProsessering sjekkProsessering,
-                                  @KonfigVerdi(value = "UNNTAKSBEHANDLING", defaultVerdi = "true") Boolean unntaksbehandlingTogglet) {
+                                  SjekkProsessering sjekkProsessering) {
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
@@ -127,7 +124,6 @@ public class BehandlingRestTjeneste {
         this.henleggBehandlingTjeneste = henleggBehandlingTjeneste;
         this.behandlingDtoTjeneste = behandlingDtoTjeneste;
         this.sjekkProsessering = sjekkProsessering;
-        this.unntaksbehandlingTogglet = unntaksbehandlingTogglet;
     }
 
     @POST
@@ -385,9 +381,6 @@ public class BehandlingRestTjeneste {
     public Response opprettNyUnntaksbehandling(@Context HttpServletRequest request,
                                                @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyBehandlingDto dto)
         throws URISyntaxException {
-        if (!unntaksbehandlingTogglet) {
-            throw new UnsupportedOperationException("Unntaksbehandling er ikke aktivert");
-        }
         Saksnummer saksnummer = dto.getSaksnummer();
         Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
         BehandlingType kode = BehandlingType.fraKode(dto.getBehandlingType().getKode());
