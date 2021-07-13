@@ -192,8 +192,6 @@ spec:
       value: "true"
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
       value: "true"
-    - name: MOTTAK_SOKNAD_UTBETALING_OMS
-      value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "true"
     - name: TOTRINN_TEMP_DEAKTIVERT

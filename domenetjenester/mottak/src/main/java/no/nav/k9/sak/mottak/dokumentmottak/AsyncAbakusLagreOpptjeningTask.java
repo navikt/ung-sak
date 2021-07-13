@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -42,7 +41,6 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
 
     private AbakusTjeneste abakusTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private Boolean lansert;
 
     AsyncAbakusLagreOpptjeningTask() {
         // for proxy
@@ -52,12 +50,10 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
     AsyncAbakusLagreOpptjeningTask(BehandlingRepository behandlingRepository,
                                    BehandlingLåsRepository behandlingLåsRepository,
                                    AbakusTjeneste abakusTjeneste,
-                                   MottatteDokumentRepository mottatteDokumentRepository,
-                                   @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
+                                   MottatteDokumentRepository mottatteDokumentRepository) {
         super(behandlingRepository, behandlingLåsRepository);
         this.abakusTjeneste = abakusTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.lansert = lansert;
     }
 
     @Override
@@ -95,7 +91,7 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
 
         try {
             OppgittOpptjeningMottattRequest request = jsonReader.readValue(Objects.requireNonNull(input.getPayloadAsString(), "mangler payload"));
-            if (!lansert || erFrisinn) {
+            if (erFrisinn) {
                 abakusTjeneste.lagreOppgittOpptjening(request);
             } else {
                 abakusTjeneste.lagreOppgittOpptjeningV2(request);
