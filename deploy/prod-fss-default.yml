@@ -201,8 +201,6 @@ spec:
       value: "true"
     - name: K9TILBAKE_AKTIVERT
       value: "true"
-    - name: UNNTAKSBEHANDLING
-      value: "true"
     - name: VURDER_SOKNADSFRIST
       value: "true"
     - name: HENLEGG_DOKUMENTER
