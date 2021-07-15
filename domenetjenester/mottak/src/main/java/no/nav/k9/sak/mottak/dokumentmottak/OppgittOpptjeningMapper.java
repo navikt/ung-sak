@@ -13,11 +13,14 @@ import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
@@ -46,8 +49,11 @@ public class OppgittOpptjeningMapper {
             builder.leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
                 .build());
         }
-        if (opptjeningAktiviteter.getArbeidstaker() != null) {
-            // TODO: Lagring av utenlands arbeidsforhold
+        if (opptjeningAktiviteter.getUtenlandskeArbeidsforhold() != null) {
+            var utenlandskArbeidsforholdBuilders = opptjeningAktiviteter.getUtenlandskeArbeidsforhold().stream()
+                .map(this::mapOppgittArbeidsforhold)
+                .collect(Collectors.toList());
+            builder.leggTilOppgittArbeidsforhold(utenlandskArbeidsforholdBuilders);
         }
         builder.leggTilJournalpostId(dokument.getJournalpostId());
         builder.leggTilInnsendingstidspunkt(dokument.getInnsendingstidspunkt());
@@ -109,5 +115,18 @@ public class OppgittOpptjeningMapper {
         var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(builder);
         var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
         return request;
+    }
+
+    private OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder mapOppgittArbeidsforhold(no.nav.k9.søknad.felles.opptjening.UtenlandskArbeidsforhold arbeidsforhold) {
+        var arbeidsforholdBuilder = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny()
+            .medArbeidType(ArbeidType.UTENLANDSK_ARBEIDSFORHOLD)
+            .medUtenlandskVirksomhet(new OppgittUtenlandskVirksomhet(
+                Landkoder.fraKode(arbeidsforhold.getLand().getLandkode()),
+                arbeidsforhold.getArbeidsgiversnavn()))
+            .medPeriode(DatoIntervallEntitet.fra(
+                arbeidsforhold.getAnsettelsePeriode().getFraOgMed(),
+                arbeidsforhold.getAnsettelsePeriode().getTilOgMed())
+            );
+        return arbeidsforholdBuilder;
     }
 }
