@@ -161,28 +161,19 @@ public class InntektArbeidYtelseAggregatBuilder {
 
     public void medNyInternArbeidsforholdRef(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef nyRef, EksternArbeidsforholdRef eksternReferanse) {
 
-        // FIXME: Fjernes etter feilsøking i Q
-        if (!skalViseDuplikatArbeidsforhold()) {
-            nyeInternArbeidsforholdReferanser.stream()
-                .filter(r0 -> Objects.equals(arbeidsgiver, r0.getArbeidsgiver()))
-                .filter(r1 -> Objects.equals(eksternReferanse, r1.getEksternReferanse()))
-                .filter(r2 -> !Objects.equals(nyRef, r2.getInternReferanse()))
-                .findFirst()
-                .ifPresent(mismatch -> {
-                    throw new IllegalStateException(String.format("Har ulike internreferanser for samme eksternreferanse [%s], arbeidsgiver=%s, ny=%s vs. tidligere=%s", eksternReferanse,
-                        arbeidsgiver,
-                        nyRef,
-                        mismatch.getInternReferanse()));
-                });
-        }
+        nyeInternArbeidsforholdReferanser.stream()
+            .filter(r0 -> Objects.equals(arbeidsgiver, r0.getArbeidsgiver()))
+            .filter(r1 -> Objects.equals(eksternReferanse, r1.getEksternReferanse()))
+            .filter(r2 -> !Objects.equals(nyRef, r2.getInternReferanse()))
+            .findFirst()
+            .ifPresent(mismatch -> {
+                throw new IllegalStateException(String.format("Har ulike internreferanser for samme eksternreferanse [%s], arbeidsgiver=%s, ny=%s vs. tidligere=%s", eksternReferanse,
+                    arbeidsgiver,
+                    nyRef,
+                    mismatch.getInternReferanse()));
+            });
 
         nyeInternArbeidsforholdReferanser.add(new ArbeidsforholdReferanse(arbeidsgiver, nyRef, eksternReferanse));
-    }
-
-    // FIXME: Fjernes etter feilsøking i Q
-    static boolean skalViseDuplikatArbeidsforhold() {
-        String skalVises = System.getenv("VISNING_DUPLIKAT_ARB_FORHOLD");
-        return skalVises != null ? Boolean.valueOf(skalVises) : false;
     }
 
     /**

@@ -203,8 +203,6 @@ spec:
       value: "true"
     - name: VURDER_SOKNADSFRIST
       value: "true"
-    - name: VISNING_DUPLIKAT_ARB_FORHOLD
-      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
