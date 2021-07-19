@@ -12,7 +12,7 @@ select nextval('seq_prosess_task'), 'behandlingskontroll.fortsettBehandling',
        nextval('seq_prosess_task_gruppe'), null,
        'fagsakId=' || f.id || '
                 behandlingId=' || b.id from fagsak f
-inner join behandling b on f.id = b.fagsak_id
+                                                                              inner join behandling b on f.id = b.fagsak_id
 where f.saksnummer IN ('9W0o0', 'A5oGU')
   and b.behandling_status = 'FVED'
   and exists (select 1 from behandling_steg_tilstand bst
