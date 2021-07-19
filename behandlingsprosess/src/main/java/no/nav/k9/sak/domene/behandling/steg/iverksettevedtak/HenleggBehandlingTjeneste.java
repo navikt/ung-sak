@@ -128,7 +128,7 @@ public class HenleggBehandlingTjeneste {
 
         List<MottattDokument> gyldigeDokumenterFagsak = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId());
         List<MottattDokument> gyldigeKravdokumenterBehandling = gyldigeDokumenterFagsak.stream()
-            .filter(dok -> dok.getBehandlingId().equals(behandling.getId()))
+            .filter(dok -> behandling.getId().equals(dok.getBehandlingId()))
             .filter(dok -> kravdokumentTyper.contains(dok.getType()))
             .collect(Collectors.toList());
 
