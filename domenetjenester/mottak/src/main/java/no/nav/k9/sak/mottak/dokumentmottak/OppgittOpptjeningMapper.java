@@ -1,7 +1,6 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -43,10 +42,8 @@ public class OppgittOpptjeningMapper {
         var builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), LocalDateTime.now());
         if (opptjeningAktiviteter.getSelvstendigNæringsdrivende() != null) {
             var snAktiviteter = opptjeningAktiviteter.getSelvstendigNæringsdrivende();
-            var egenNæringBuilders = snAktiviteter.stream()
-                .flatMap(sn -> this.mapEgenNæring(sn).stream())
-                .collect(Collectors.toList());
-            builder.leggTilEgneNæringer(egenNæringBuilders);
+            var snBuilders = snAktiviteter.stream().map(this::mapEgenNæring).collect(Collectors.toList());
+            builder.leggTilEgneNæringer(snBuilders);
         }
         if (opptjeningAktiviteter.getFrilanser() != null) {
             builder.leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
@@ -67,7 +64,7 @@ public class OppgittOpptjeningMapper {
     }
 
 
-    private List<EgenNæringBuilder> mapEgenNæring(no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende sn) {
+    private EgenNæringBuilder mapEgenNæring(SelvstendigNæringsdrivende sn) {
         Map.Entry<Periode, SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo> entry = getSnPeriodeInfo(sn);
         var periode = entry.getKey();
         var info = entry.getValue();
@@ -75,7 +72,7 @@ public class OppgittOpptjeningMapper {
         var orgnummer = sn.getOrganisasjonsnummer();
 
         var egenNæringBuilder = mapNæringForVirksomhetType(periode, info, virksomhetType, orgnummer);
-        return List.of(egenNæringBuilder);
+        return egenNæringBuilder;
     }
 
     private Map.Entry<Periode, SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo> getSnPeriodeInfo(SelvstendigNæringsdrivende sn) {
