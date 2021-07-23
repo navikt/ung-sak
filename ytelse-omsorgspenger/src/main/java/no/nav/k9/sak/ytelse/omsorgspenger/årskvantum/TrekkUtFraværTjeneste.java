@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -77,13 +76,15 @@ public class TrekkUtFraværTjeneste {
 
         List<OppgittFraværPeriode> fravær; // Tar med eventuelle perioder som tilkommer en åpen manuelt opprettet behandling
         if (behandling.erManueltOpprettet()) {
-            fravær = fraværPåFagsak(behandling);
+            fravær = alleFraværsperioderPåFagsak(behandling);
         } else {
             var fraværFraKravDokument = fraværPåBehandling(behandling);
             log.info("Legger til totalt {} perioder fra inntektsmeldinger og søknader", fraværFraKravDokument.size());
             if (fraværFraKravDokument.isEmpty()) {
-                log.warn("Forventer ny periode til behandling fra IM eller søknad, siden dette ikke er manuell revurdering.");
-                var oppgittOpt = annetOppgittFravær(behandling);
+                // Kan inntreffe dersom IM er av variant ikkeFravaer eller ikke refusjon. Da brukes fraværsperioder kopiert fra forrige behandling
+                // TODO: Logg heller dokumenter tilknyttet behandling
+                log.warn("Kun kravdokument uten fraværsperioder er knyttet til behandling. Fraværsperioder fra tidligere behandlinger brukes, forventer noop for ytelse.");
+                var oppgittOpt = grunnlagRepository.hentOppittFraværHvisEksisterer(behandling.getUuid());
                 fravær = new ArrayList<>(oppgittOpt.orElseThrow().getPerioder());
             } else {
                 fravær = fraværFraKravDokument;
@@ -100,34 +101,33 @@ public class TrekkUtFraværTjeneste {
         return new OppgittFravær(fravær);
     }
 
-    Optional<OppgittFravær> annetOppgittFravær(Behandling behandling) {
-        return grunnlagRepository.hentOppittFraværHvisEksisterer(behandling.getUuid());
-    }
-
     private List<OppgittFraværPeriode> fraværPåBehandling(Behandling behandling) {
-        LinkedHashSet<Inntektsmelding> inntektsmeldingerPåBehandling = inntektsmeldingerPåBehandling(behandling);
+        var inntektsmeldingerPåBehandling = inntektsmeldingerPåBehandling(behandling);
+        var søknaderPåBehandling = fraværFraSøknaderPåBehandling(behandling);
         var avklartSøknadsfristResultat = avklartSøknadsfristRepository.hentHvisEksisterer(behandling.getId());
-        var vurderteKravOgPerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåBehandling, fraværMedInnsendingstidspunktFraSøknaderPåBehandling(behandling), avklartSøknadsfristResultat);
+
+        var vurderteKravOgPerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåBehandling, søknaderPåBehandling, avklartSøknadsfristResultat);
         return trekkUtFravær(vurderteKravOgPerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
     }
 
     public List<OppgittFraværPeriode> fraværFraInntektsmeldingerPåFagsak(Behandling behandling) {
         var inntektsmeldingerPåFagsak = inntektsmeldingerPåFagsak(behandling.getFagsak());
         var avklartSøknadsfristResultat = avklartSøknadsfristRepository.hentHvisEksisterer(behandling.getId());
+
         var vurderteKravOgPerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåFagsak, Map.of(), avklartSøknadsfristResultat);
         return trekkUtFravær(vurderteKravOgPerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
     }
 
-    public List<OppgittFraværPeriode> fraværPåFagsak(Behandling behandling) {
+    // Hent alle fraværsperioder på fagsak, uten sammenslåing av overlappende perioder
+    public List<OppgittFraværPeriode> alleFraværsperioderPåFagsak(Behandling behandling) {
         var inntektsmeldingerPåFagsak = inntektsmeldingerPåFagsak(behandling.getFagsak());
+        var søknaderPåFagsak = fraværFraSøknaderPåFagsak(behandling);
         var avklartSøknadsfristResultat = avklartSøknadsfristRepository.hentHvisEksisterer(behandling.getId());
-        var vurdertePerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåFagsak, fraværMedInnsendingstidspunktFraSøknaderPåFagsak(behandling), avklartSøknadsfristResultat);
 
-        // TBD: hvofor bruker ikke denne #trekkUtFravær som de andre over?
-        return vurdertePerioder.values().stream()
-            .flatMap(Collection::stream)
-            .map(VurdertSøktPeriode::getRaw)
-            .collect(Collectors.toList());
+        var vurdertePerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåFagsak, søknaderPåFagsak, avklartSøknadsfristResultat);
+
+        // Returnerer alle søknadsperioder rått, uten sammenslåing av overlappende perioder
+        return vurdertePerioder.values().stream().flatMap(Collection::stream).map(VurdertSøktPeriode::getRaw).collect(Collectors.toList());
     }
 
     private LinkedHashSet<Inntektsmelding> inntektsmeldingerPåBehandling(Behandling behandling) {
@@ -156,16 +156,17 @@ public class TrekkUtFraværTjeneste {
         return hentInntektsmeldinger(fagsak, inntektsmeldingerJournalposter);
     }
 
-    private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> fraværMedInnsendingstidspunktFraSøknaderPåFagsak(Behandling behandling) {
+    private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> fraværFraSøknaderPåFagsak(Behandling behandling) {
         return søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåFagsak(BehandlingReferanse.fra(behandling));
     }
 
-    private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> fraværMedInnsendingstidspunktFraSøknaderPåBehandling(Behandling behandling) {
+    private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> fraværFraSøknaderPåBehandling(Behandling behandling) {
         return søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåBehandling(BehandlingReferanse.fra(behandling));
     }
 
     public List<WrappedOppgittFraværPeriode> fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(Behandling behandling) {
-        return trekkUtFravær(søknadsfristTjeneste.vurderSøknadsfrist(BehandlingReferanse.fra(behandling)));
+        var kravdokumenterMedFraværsperioder = søknadsfristTjeneste.vurderSøknadsfrist(BehandlingReferanse.fra(behandling));
+        return trekkUtFravær(kravdokumenterMedFraværsperioder);
     }
 
     private LinkedHashSet<Inntektsmelding> hentInntektsmeldinger(Fagsak fagsak, Set<JournalpostId> inntektsmeldingerJournalposter) {
@@ -209,6 +210,7 @@ public class TrekkUtFraværTjeneste {
         }
     }
 
+    // Slår sammen overlappende perioder fra kravdokumenter (IM-er, søknader)
     public List<WrappedOppgittFraværPeriode> trekkUtFravær(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværPerKravdokument) {
         return mapOppgittFravær.trekkUtFravær(fraværPerKravdokument);
     }
