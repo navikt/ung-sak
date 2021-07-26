@@ -42,7 +42,7 @@ public class OpptjeningsresultatDump implements DebugDumpFagsak {
             + ", oa.opptjeningsperiode_id "
             + ", oa.fom as opp_akt_fom "
             + ", oa.tom as opp_akt_tom "
-            + ", oa.aktivitet_type "
+            + ", oa.aktivitet "
             + ", cast(oa.aktivitet_referanse as varchar) aktivitet_referanse"
             + ", oa.klassifisering "
             + ", oa.referanse_type "
