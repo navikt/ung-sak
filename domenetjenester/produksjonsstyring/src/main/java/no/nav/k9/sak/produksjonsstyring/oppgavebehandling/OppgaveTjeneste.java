@@ -39,7 +39,7 @@ public class OppgaveTjeneste {
     private static final String SAK_MÅ_FLYTTES_TIL_INFOTRYGD = "Sak må flyttes til Infotrygd";
 
     private static final String NØS_ANSVARLIG_ENHETID = "4151";
-    private static final String NØS_BEH_TEMA = "ab0273";
+    private static final String NØS_BEH_TEMA = "ab0271";
     private static final String NØS_TEMA = "STO";
 
     private FagsakRepository fagsakRepository;
@@ -225,7 +225,7 @@ public class OppgaveTjeneste {
     }
 
     public String opprettOppgaveStopUtbetalingAvARENAYtelse(long behandlingId, LocalDate førsteUttaksdato) {
-        final String BESKRIVELSE = "Samordning arenaytelse. Vedtak foreldrepenger fra %s";
+        final String BESKRIVELSE = "Samordning arenaytelse. Vedtak i K9 (Omsorgspenger, Pleiepenger og opplæringspenger) fra %s";
         var beskrivelse = String.format(BESKRIVELSE, førsteUttaksdato);
 
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);

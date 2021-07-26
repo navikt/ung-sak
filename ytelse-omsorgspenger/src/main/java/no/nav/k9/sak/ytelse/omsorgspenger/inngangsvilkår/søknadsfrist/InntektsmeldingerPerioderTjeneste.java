@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -7,7 +8,6 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -36,7 +36,7 @@ public class InntektsmeldingerPerioderTjeneste {
     public Set<Inntektsmelding> hentUtInntektsmeldingerRelevantForBehandling(BehandlingReferanse referanse) {
         Behandling behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
 
-        Set<JournalpostId> inntektsmeldingerJournalposter = hentUtRelevanteJournalposter(behandling);
+        Set<JournalpostId> inntektsmeldingerJournalposter = hentUtIMJournalposterKnyttetTilFagsak(behandling);
 
         if (inntektsmeldingerJournalposter.isEmpty()) {
             return Set.of();
@@ -50,12 +50,37 @@ public class InntektsmeldingerPerioderTjeneste {
             .collect(Collectors.toSet());
     }
 
-    private Set<JournalpostId> hentUtRelevanteJournalposter(Behandling behandling) {
+    public Set<Inntektsmelding> hentUtInntektsmeldingerKnyttetTilBehandling(BehandlingReferanse referanse) {
+        Behandling behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
+
+        Set<JournalpostId> inntektsmeldingerJournalposter = hentUtIMJournalposterKnyttetTilBehandling(behandling);
+
+        if (inntektsmeldingerJournalposter.isEmpty()) {
+            return Set.of();
+        }
+
+        return iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer(), referanse.getAktørId(), referanse.getFagsakYtelseType())
+            .stream()
+            .filter(it -> inntektsmeldingerJournalposter
+                .stream()
+                .anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())))
+            .collect(Collectors.toSet());
+    }
+
+    private Set<JournalpostId> hentUtIMJournalposterKnyttetTilFagsak(Behandling behandling) {
         return mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
             .stream()
             .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
             .filter(it -> it.getBehandlingId() != null)
-            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
+            .map(MottattDokument::getJournalpostId)
+            .collect(Collectors.toSet());
+    }
+
+    private Set<JournalpostId> hentUtIMJournalposterKnyttetTilBehandling(Behandling behandling) {
+        return mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
+            .stream()
+            .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
+            .filter(it -> Objects.equals(it.getBehandlingId(), behandling.getId()))
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
     }

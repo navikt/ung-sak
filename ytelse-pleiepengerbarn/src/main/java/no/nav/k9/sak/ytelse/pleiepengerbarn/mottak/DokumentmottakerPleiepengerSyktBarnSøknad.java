@@ -132,7 +132,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             if (journalpost.getInneholderMedisinskeOpplysninger() != null) {
                 journalpostHarMedisinskeOpplysninger = journalpost.getInneholderMedisinskeOpplysninger();
             }
-
+            
             sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
                 behandling,
                 journalpostId,

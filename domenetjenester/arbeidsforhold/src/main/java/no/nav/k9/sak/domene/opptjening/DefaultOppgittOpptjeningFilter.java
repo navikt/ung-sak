@@ -19,7 +19,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -44,7 +43,6 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     private VilkårTjeneste vilkårTjeneste;
     private BehandlingRepository behandlingRepository;
     private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
-    private Boolean lansert;
 
     DefaultOppgittOpptjeningFilter() {
         // For CDI
@@ -53,12 +51,10 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     @Inject
     public DefaultOppgittOpptjeningFilter(VilkårTjeneste vilkårTjeneste,
                                           BehandlingRepository behandlingRepository,
-                                          @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester,
-                                          @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
+                                          @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjenester = søknadsfristTjenester;
-        this.lansert = lansert;
     }
 
     /**
@@ -68,10 +64,6 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
      */
     @Override
     public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
-        if (!lansert) {
-            return iayGrunnlag.getOppgittOpptjening();
-        }
-
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
         var vilkårsperiode = finnVilkårsperiodeForOpptjening(ref, stp);
         @SuppressWarnings("unchecked")
@@ -86,10 +78,6 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
      */
     @Override
     public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
-        if (!lansert) {
-            return iayGrunnlag.getOppgittOpptjening();
-        }
-
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
         @SuppressWarnings("unchecked")
         Map<KravDokument, List<SøktPeriode<?>>> kravdokMedFravær = finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);

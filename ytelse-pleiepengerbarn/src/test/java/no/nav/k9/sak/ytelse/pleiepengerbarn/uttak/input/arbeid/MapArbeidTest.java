@@ -108,6 +108,35 @@ class MapArbeidTest {
     }
 
     @Test
+    void skal_mappe_lage_uttak_for_KUN_YTELSE_på_skjæringstidspunktet() {
+        var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now());
+        var tidlinjeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato(), true)));
+
+        var journalpostId = new JournalpostId(1L);
+        var kravDokumenter = Set.of(new KravDokument(journalpostId, LocalDateTime.now(), KravDokumentType.SØKNAD));
+        var perioderFraSøknader = Set.of(new PerioderFraSøknad(journalpostId,
+            List.of(new UttakPeriode(periodeTilVurdering, Duration.ZERO)),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of()));
+
+        var opptjeningResultat = new OpptjeningResultatBuilder(null);
+        var opptjeningStp = periodeTilVurdering.getFomDato().minusDays(1);
+        var fomOpptjeningPeriode = opptjeningStp.minusDays(28);
+        var opptjening = new Opptjening(fomOpptjeningPeriode, opptjeningStp);
+        opptjening.setOpptjeningAktivitet(List.of(new OpptjeningAktivitet(fomOpptjeningPeriode, opptjeningStp.plusDays(10), OpptjeningAktivitetType.FORELDREPENGER, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT)));
+        opptjeningResultat.leggTil(opptjening);
+
+        var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, Set.of(), opprettVilkår(tidlinjeTilVurdering), opptjeningResultat.build(), null);
+
+        assertThat(result).hasSize(1);
+        assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.KUN_YTELSE.getKode(), null, null, null),
+                Map.of(new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofMinutes((long)(7.5 * 60)), Duration.ZERO))));
+    }
+
+    @Test
     void skal_mappe_arbeid_innenfor_periode_til_vurdering_2() {
         var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now());
         var tidlinjeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato(), true)));

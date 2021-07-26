@@ -179,7 +179,7 @@ public class OppgaveTjenesteTest {
         assertThat((String) Whitebox.getInternalState(request, "oppgavetype")).isEqualTo(OppgaveÅrsak.SETTVENT.getKode());
         assertThat((String) Whitebox.getInternalState(request, "tema")).isEqualTo("STO");
         assertThat((LocalDate) Whitebox.getInternalState(request, "fristFerdigstillelse")).isEqualTo(forventetFrist);
-        assertThat((String) Whitebox.getInternalState(request, "beskrivelse")).isEqualTo("Samordning arenaytelse. Vedtak foreldrepenger fra " + førsteAugust);
+        assertThat((String) Whitebox.getInternalState(request, "beskrivelse")).isEqualTo("Samordning arenaytelse. Vedtak i K9 (Omsorgspenger, Pleiepenger og opplæringspenger) fra " + førsteAugust);
         assertThat(oppgaveId).isEqualTo(OPPGAVE.getId().toString());
     }
 }
