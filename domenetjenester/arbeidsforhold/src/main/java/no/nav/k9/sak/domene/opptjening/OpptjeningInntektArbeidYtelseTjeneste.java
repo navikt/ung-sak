@@ -85,7 +85,7 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
 
         for (var periode : new TreeSet<>(vilkårsPerioder)) {
             LocalDate stp = periode.getFomDato();
-            var opptjening = opptjeningsresultat.flatMap(it -> it.finnOpptjening(stp)).orElseThrow();
+            var opptjening = opptjeningsresultat.flatMap(it -> it.finnOpptjening(stp)).orElseThrow(() -> new IllegalStateException("Finner ikke opptjening for vilkårsperiode, stp=" + stp));
             var perioderForSaksbehandling = opptjeningsperioderTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, iayGrunnlag, opptjening, stp);
             var opptjeningAktivitetPerioder = perioderForSaksbehandling.stream().map(this::mapTilPerioder).collect(Collectors.toList());
             alle.put(periode, opptjeningAktivitetPerioder);
