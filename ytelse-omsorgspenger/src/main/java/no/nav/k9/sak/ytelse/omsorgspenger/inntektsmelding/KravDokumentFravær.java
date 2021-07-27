@@ -36,19 +36,19 @@ public class KravDokumentFravær {
                     var aktivitetGruppe = utledGruppe(vurdertSøktPerioder, aktivitetType);
                     var vurdertSøktPeriodePerAKtivitet = vurdertSøktPerioder.stream().filter(pa -> equalsGruppe(pa, aktivitetGruppe)).collect(Collectors.toList());
 
-                    var aktiviteter = mapByAktivitet.getOrDefault(aktivitetGruppe, new ArrayList<>());
-                    var aktivitetListe = vurdertSøktPeriodePerAKtivitet.stream()
+                    var aktiviteterSammenslåtte = mapByAktivitet.getOrDefault(aktivitetGruppe, new ArrayList<>());
+                    var aktiviteterNye = vurdertSøktPeriodePerAKtivitet.stream()
                         .map(pa -> new WrappedOppgittFraværPeriode(pa.getRaw(), dok.getInnsendingsTidspunkt(), utledUtfall(pa)))
                         .collect(Collectors.toList());
 
-                    var timeline = mapTilTimeline(aktiviteter);
-                    var imTidslinje = mapTilTimeline(aktivitetListe);
+                    var timelinjeSammenslåtte = mapTilTimeline(aktiviteterSammenslåtte);
+                    var tidslinjeNye = mapTilTimeline(aktiviteterNye);
 
-                    ryddOppIBerørteTidslinjer(mapByAktivitet, aktivitetGruppe, imTidslinje);
+                    mapByAktivitet = ryddOppIBerørteArbeidsforhold(mapByAktivitet, aktivitetGruppe, tidslinjeNye);
 
-                    timeline = timeline.combine(imTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                    timelinjeSammenslåtte = timelinjeSammenslåtte.combine(tidslinjeNye, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-                    var oppdatertAktivitetListe = timeline.compress()
+                    var oppdatertAktivitetListe = timelinjeSammenslåtte.compress()
                         .toSegments()
                         .stream()
                         .filter(it -> it.getValue() != null)
@@ -69,19 +69,25 @@ public class KravDokumentFravær {
             .collect(Collectors.toList());
     }
 
-    private void ryddOppIBerørteTidslinjer(Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> mapByAktivitet,
-                                           AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold gruppe,
-                                           LocalDateTimeline<WrappedOppgittFraværPeriode> imTidslinje) {
-        var entries = mapByAktivitet.entrySet()
+    /**
+     * Rydd opp i arbeidsforhold for samme arbeidsgiver, men annet arbeidsforhold
+     */
+    private Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> ryddOppIBerørteArbeidsforhold(
+        Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> mapByAktivitet,
+        AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold gruppe,
+        LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNye) {
+
+        var entriesBerørteArbeidsforhold = mapByAktivitet.entrySet()
             .stream()
+            // Samme arbeidsgiver, men annet arbeidsforhold
             .filter(it -> !it.getKey().equals(gruppe) && it.getKey().gjelderSamme(gruppe))
             .collect(Collectors.toList());
 
-        for (Map.Entry<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> entry : entries) {
-            var timeline = mapTilTimeline(entry.getValue());
+        for (Map.Entry<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> entry : entriesBerørteArbeidsforhold) {
+            var tidslinjeBerørt = mapTilTimeline(entry.getValue());
 
-            timeline = timeline.disjoint(imTidslinje);
-            var oppdatertListe = timeline.compress()
+            tidslinjeBerørt = tidslinjeBerørt.disjoint(tidslinjeNye);
+            var oppdatertListe = tidslinjeBerørt.compress()
                 .toSegments()
                 .stream()
                 .filter(it -> it.getValue() != null)
@@ -91,6 +97,7 @@ public class KravDokumentFravær {
 
             mapByAktivitet.put(entry.getKey(), oppdatertListe);
         }
+        return mapByAktivitet;
     }
 
     private LocalDateTimeline<WrappedOppgittFraværPeriode> mapTilTimeline(List<WrappedOppgittFraværPeriode> aktiviteter) {
