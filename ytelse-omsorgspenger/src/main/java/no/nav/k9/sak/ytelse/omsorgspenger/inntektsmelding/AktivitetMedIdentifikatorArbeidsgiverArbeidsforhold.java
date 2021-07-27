@@ -3,17 +3,20 @@ package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 import java.util.Objects;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.perioder.SøktPeriode;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
-class AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold {
+public class AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold {
 
     private UttakArbeidType aktivitetType;
     private ArbeidsgiverArbeidsforhold arbeidsgiverArbeidsforhold;
 
-    public AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(UttakArbeidType aktivitetType) {
+    private AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(UttakArbeidType aktivitetType) {
         this(aktivitetType, null);
     }
 
-    public AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(UttakArbeidType aktivitetType, ArbeidsgiverArbeidsforhold arbeidsgiverArbeidsforhold) {
+    private AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(UttakArbeidType aktivitetType, ArbeidsgiverArbeidsforhold arbeidsgiverArbeidsforhold) {
         this.aktivitetType = Objects.requireNonNull(aktivitetType);
         this.arbeidsgiverArbeidsforhold = arbeidsgiverArbeidsforhold;
         if (aktivitetType == UttakArbeidType.ARBEIDSTAKER) {
@@ -23,6 +26,23 @@ class AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold {
             throw new IllegalArgumentException("Skal ikke sette arbeidsforhold for FRILANSER her");
         }
     }
+
+    public static AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold lagAktivitetIdentifikator(SøktPeriode<OppgittFraværPeriode> søktPeriode) {
+        if (søktPeriode.getArbeidsgiver() != null) {
+            return new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(søktPeriode.getType(), new ArbeidsgiverArbeidsforhold(søktPeriode.getArbeidsgiver(), søktPeriode.getArbeidsforholdRef()));
+        } else {
+            return new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(søktPeriode.getType());
+        }
+    }
+
+    public static AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold lagAktivitetIdentifikator(VurdertSøktPeriode<OppgittFraværPeriode> vurdertSøktPeriode) {
+        if (vurdertSøktPeriode.getArbeidsgiver() != null) {
+            return new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(vurdertSøktPeriode.getType(), new ArbeidsgiverArbeidsforhold(vurdertSøktPeriode.getArbeidsgiver(), vurdertSøktPeriode.getArbeidsforholdRef()));
+        } else {
+            return new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(vurdertSøktPeriode.getType());
+        }
+    }
+
 
     public UttakArbeidType getAktivitetType() {
         return aktivitetType;
