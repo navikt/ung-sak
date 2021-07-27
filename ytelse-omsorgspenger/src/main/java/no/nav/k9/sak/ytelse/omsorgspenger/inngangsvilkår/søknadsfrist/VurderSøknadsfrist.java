@@ -65,13 +65,8 @@ public class VurderSøknadsfrist {
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         for (var dok : sortedKravdokumenterMedPerioder) {
-            var søktePerioder = kravdokumentMedPerioder.get(dok);
-            var vurdertePerioderMedaktivitetIdent = søktePerioder.stream()
-                .collect(Collectors.toMap(e -> e, e -> lagAktivitetIdentifikator(e)));
-
-            for (var entry : vurdertePerioderMedaktivitetIdent.entrySet()) {
-                var søktPeriode = entry.getKey();
-                var aktivitetIdent = entry.getValue();
+            for (var søktPeriode : kravdokumentMedPerioder.get(dok)) {
+                var aktivitetIdent = lagAktivitetIdentifikator(søktPeriode);
 
                 List<VurdertSøktPeriode<OppgittFraværPeriode>> vurderteSøktePerioder = new ArrayList<>();
                 if (vurderSøknadsfrist && dok.getInnsendingsTidspunkt().isAfter(startDatoValidering.atStartOfDay())) {

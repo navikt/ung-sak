@@ -26,13 +26,8 @@ public class KravDokumentFravær {
 
         Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
         for (var dok : sorterteKravdokumenter) {
-            var vurdertePerioder = fraværFraKravdokumenter.get(dok);
-            var vurdertePerioderMedAktivitetIdent = vurdertePerioder.stream()
-                .collect(Collectors.toMap(e -> e, e -> lagAktivitetIdentifikator(e)));
-
-            for (var entry : vurdertePerioderMedAktivitetIdent.entrySet()) {
-                var vurdertPeriode = entry.getKey();
-                var aktivitetIdent = entry.getValue();
+            for (var vurdertPeriode : fraværFraKravdokumenter.get(dok)) {
+                var aktivitetIdent = lagAktivitetIdentifikator(vurdertPeriode);
 
                 var fraværsperiodeNy = new WrappedOppgittFraværPeriode(vurdertPeriode.getRaw(), dok.getInnsendingsTidspunkt(), utledUtfall(vurdertPeriode));
                 var fraværsperioderSammenslåtte = mapByAktivitet.getOrDefault(aktivitetIdent, new ArrayList<>());
