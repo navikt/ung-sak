@@ -8,7 +8,6 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -38,7 +37,6 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
     private AksjonspunktKontrollRepository kontrollRepository;
     private Instance<SøknadsfristTjeneste> vurderSøknadsfristTjenester;
     private VilkårResultatRepository vilkårResultatRepository;
-    private boolean vurderSøknadsfrist;
 
     VurderSøknadsfristSteg() {
         // CDI
@@ -48,43 +46,34 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
     public VurderSøknadsfristSteg(BehandlingRepository behandlingRepository,
                                   VilkårResultatRepository vilkårResultatRepository,
                                   AksjonspunktKontrollRepository kontrollRepository,
-                                  @Any Instance<SøknadsfristTjeneste> vurderSøknadsfristTjenester,
-                                  @KonfigVerdi(value = "VURDER_SOKNADSFRIST", required = false, defaultVerdi = "false") boolean vurderSøknadsfrist) {
+                                  @Any Instance<SøknadsfristTjeneste> vurderSøknadsfristTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.kontrollRepository = kontrollRepository;
         this.vurderSøknadsfristTjenester = vurderSøknadsfristTjenester;
-        this.vurderSøknadsfrist = vurderSøknadsfrist;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+        var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var aksjonspunktFor = behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE);
+        aksjonspunktFor.ifPresent(this::settÅpentAksjonspunktTilUtført);
 
-        if (vurderSøknadsfrist) {
-            var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
 
-            var aksjonspunktFor = behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE);
-            aksjonspunktFor.ifPresent(this::settÅpentAksjonspunktTilUtført);
+        var tjeneste = hentVurderingsTjeneste(behandling);
+        var referanse = BehandlingReferanse.fra(behandling);
 
-            var vilkårene = vilkårResultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
+        // Henter søkte perioder
+        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene.orElse(null));
+        var resultatBuilder = tjeneste.vurderSøknadsfrist(referanse, vilkårResultatBuilder);
 
-            var tjeneste = hentVurderingsTjeneste(behandling);
-            var referanse = BehandlingReferanse.fra(behandling);
+        Vilkårene oppdatertVilkår = resultatBuilder.build();
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdatertVilkår, behandling.getFagsak().getPeriode());
 
-            // Henter søkte perioder
-            var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene.orElse(null));
-            var resultatBuilder = tjeneste.vurderSøknadsfrist(referanse, vilkårResultatBuilder);
-
-            Vilkårene oppdatertVilkår = resultatBuilder.build();
-            vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdatertVilkår, behandling.getFagsak().getPeriode());
-
-            if (kreverManuellAvklaring(oppdatertVilkår.getVilkår(VilkårType.SØKNADSFRIST))) {
-                // Legg til aksjonspunkt
-                return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST));
-            }
-
+        if (kreverManuellAvklaring(oppdatertVilkår.getVilkår(VilkårType.SØKNADSFRIST))) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST));
         }
-
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
