@@ -1,6 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 
-import static no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold.lagAktivitetIdentifikator;
+import static no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetIdentifikator.lagAktivitetIdentifikator;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.TimelineMerger;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
-import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetIdentifikator;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 @Dependent
@@ -35,24 +35,12 @@ public class VurderSøknadsfrist {
 
     private final Map<LocalDateInterval, SøknadsfristPeriodeVurderer<OppgittFraværPeriode>> avviksVurderere;
     private final SøknadsfristPeriodeVurderer<OppgittFraværPeriode> søknadsfristVurderer = new DefaultSøknadsfristPeriodeVurderer();
-    private boolean vurderSøknadsfrist;
-    private LocalDate startDatoValidering = LocalDate.of(2021, 1, 1);
-
-    VurderSøknadsfrist() {
-        var utvidetVurderer = new KoronaUtvidetSøknadsfristVurderer();
-        this.avviksVurderere = Map.of(utvidetVurderer.periodeSomVurderes(), utvidetVurderer);
-    }
-
-    public VurderSøknadsfrist(boolean vurderSøknadsfrist) {
-        this();
-        this.vurderSøknadsfrist = vurderSøknadsfrist;
-    }
+    private LocalDate startDatoValidering;
 
     @Inject
-    public VurderSøknadsfrist(@KonfigVerdi(value = "VURDER_SOKNADSFRIST", required = false, defaultVerdi = "false") boolean vurderSøknadsfrist,
-                              @KonfigVerdi(value = "enable_søknadsfrist_fradato", defaultVerdi = "2021-01-01") LocalDate startDatoValidering) {
-        this(vurderSøknadsfrist);
-        this.vurderSøknadsfrist = vurderSøknadsfrist;
+    public VurderSøknadsfrist(@KonfigVerdi(value = "enable_søknadsfrist_fradato", defaultVerdi = "2021-01-01") LocalDate startDatoValidering) {
+        var utvidetVurderer = new KoronaUtvidetSøknadsfristVurderer();
+        this.avviksVurderere = Map.of(utvidetVurderer.periodeSomVurderes(), utvidetVurderer);
         this.startDatoValidering = startDatoValidering;
     }
 
@@ -69,7 +57,7 @@ public class VurderSøknadsfrist {
                 var aktivitetIdent = lagAktivitetIdentifikator(søktPeriode);
 
                 List<VurdertSøktPeriode<OppgittFraværPeriode>> vurderteSøktePerioder = new ArrayList<>();
-                if (vurderSøknadsfrist && dok.getInnsendingsTidspunkt().isAfter(startDatoValidering.atStartOfDay())) {
+                if (dok.getInnsendingsTidspunkt().isAfter(startDatoValidering.atStartOfDay())) {
                     var avklartKravDokument = avklartSøknadsfristResultat.flatMap(it -> it.finnAvklaring(dok.getJournalpostId()));
                     var søktTimeline = new LocalDateTimeline<>(new LocalDateInterval(søktPeriode.getPeriode().getFomDato(), søktPeriode.getPeriode().getTomDato()), søktPeriode);
                     var vurdertTimeline = søknadsfristVurderer.vurderPeriode(dok, søktTimeline, avklartKravDokument);
@@ -115,7 +103,7 @@ public class VurderSøknadsfrist {
         Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> result,
         KravDokument kravDokument,
         LocalDateTimeline<VurdertSøktPeriode<OppgittFraværPeriode>> vurdertTimeline,
-        AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold aktivitetIdent) {
+        AktivitetIdentifikator aktivitetIdent) {
 
         var tidligereGodkjentTimeline = hentUtTidligereGodkjent(result, kravDokument, aktivitetIdent);
 
@@ -137,7 +125,7 @@ public class VurderSøknadsfrist {
 
     private LocalDateTimeline<VurdertSøktPeriode<OppgittFraværPeriode>> hentUtTidligereGodkjent(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> result,
                                                                                                 KravDokument kravDokument,
-                                                                                                AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold aktivitetIdent) {
+                                                                                                AktivitetIdentifikator aktivitetIdent) {
         var tidligereGodkjentTimeline = new LocalDateTimeline<VurdertSøktPeriode<OppgittFraværPeriode>>(List.of());
         var godkjentePerioder = result.entrySet()
             .stream()

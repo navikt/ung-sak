@@ -1,6 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 
-import static no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold.lagAktivitetIdentifikator;
+import static no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetIdentifikator.lagAktivitetIdentifikator;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class KravDokumentFravær {
     public List<WrappedOppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
         var sorterteKravdokumenter = fraværFraKravdokumenter.keySet().stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new));
 
-        Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
+        Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
         for (var dok : sorterteKravdokumenter) {
             for (var vurdertPeriode : fraværFraKravdokumenter.get(dok)) {
                 var aktivitetIdent = lagAktivitetIdentifikator(vurdertPeriode);
@@ -62,9 +62,9 @@ public class KravDokumentFravær {
     /**
      * Rydd opp i arbeidsforhold for samme arbeidsgiver, men annet arbeidsforhold
      */
-    private Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> ryddOppIBerørteArbeidsforhold(
-        Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> mapByAktivitet,
-        AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold aktivitetIdent,
+    private Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> ryddOppIBerørteArbeidsforhold(
+        Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> mapByAktivitet,
+        AktivitetIdentifikator aktivitetIdent,
         LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNye) {
 
         var entriesBerørteArbeidsforhold = mapByAktivitet.entrySet()
@@ -73,7 +73,7 @@ public class KravDokumentFravær {
             .filter(it -> !it.getKey().equals(aktivitetIdent) && it.getKey().gjelderSamme(aktivitetIdent))
             .collect(Collectors.toList());
 
-        for (Map.Entry<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> entry : entriesBerørteArbeidsforhold) {
+        for (Map.Entry<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> entry : entriesBerørteArbeidsforhold) {
             var tidslinjeBerørt = mapTilTimeline(entry.getValue());
 
             tidslinjeBerørt = tidslinjeBerørt.disjoint(tidslinjeNye);
@@ -104,7 +104,7 @@ public class KravDokumentFravær {
     }
 
 
-    private void validerOverlapp(Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> mapByAktivitet) {
+    private void validerOverlapp(Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> mapByAktivitet) {
         mapByAktivitet.forEach((key, value) -> {
             var segments = value.stream().map(ofp -> new LocalDateSegment<>(ofp.getPeriode().getFom(), ofp.getPeriode().getTom(), ofp)).collect(Collectors.toList());
             new LocalDateTimeline<>(segments);

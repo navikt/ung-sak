@@ -7,16 +7,16 @@ import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
-public class AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold {
+public class AktivitetIdentifikator {
 
     private UttakArbeidType aktivitetType;
     private ArbeidsgiverArbeidsforhold arbeidsgiverArbeidsforhold;
 
-    private AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(UttakArbeidType aktivitetType) {
+    private AktivitetIdentifikator(UttakArbeidType aktivitetType) {
         this(aktivitetType, null);
     }
 
-    private AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(UttakArbeidType aktivitetType, ArbeidsgiverArbeidsforhold arbeidsgiverArbeidsforhold) {
+    private AktivitetIdentifikator(UttakArbeidType aktivitetType, ArbeidsgiverArbeidsforhold arbeidsgiverArbeidsforhold) {
         this.aktivitetType = Objects.requireNonNull(aktivitetType);
         this.arbeidsgiverArbeidsforhold = arbeidsgiverArbeidsforhold;
         if (aktivitetType == UttakArbeidType.ARBEIDSTAKER) {
@@ -27,19 +27,19 @@ public class AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold {
         }
     }
 
-    public static AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold lagAktivitetIdentifikator(SøktPeriode<OppgittFraværPeriode> søktPeriode) {
+    public static AktivitetIdentifikator lagAktivitetIdentifikator(SøktPeriode<OppgittFraværPeriode> søktPeriode) {
         if (søktPeriode.getArbeidsgiver() != null) {
-            return new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(søktPeriode.getType(), new ArbeidsgiverArbeidsforhold(søktPeriode.getArbeidsgiver(), søktPeriode.getArbeidsforholdRef()));
+            return new AktivitetIdentifikator(søktPeriode.getType(), new ArbeidsgiverArbeidsforhold(søktPeriode.getArbeidsgiver(), søktPeriode.getArbeidsforholdRef()));
         } else {
-            return new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(søktPeriode.getType());
+            return new AktivitetIdentifikator(søktPeriode.getType());
         }
     }
 
-    public static AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold lagAktivitetIdentifikator(VurdertSøktPeriode<OppgittFraværPeriode> vurdertSøktPeriode) {
+    public static AktivitetIdentifikator lagAktivitetIdentifikator(VurdertSøktPeriode<OppgittFraværPeriode> vurdertSøktPeriode) {
         if (vurdertSøktPeriode.getArbeidsgiver() != null) {
-            return new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(vurdertSøktPeriode.getType(), new ArbeidsgiverArbeidsforhold(vurdertSøktPeriode.getArbeidsgiver(), vurdertSøktPeriode.getArbeidsforholdRef()));
+            return new AktivitetIdentifikator(vurdertSøktPeriode.getType(), new ArbeidsgiverArbeidsforhold(vurdertSøktPeriode.getArbeidsgiver(), vurdertSøktPeriode.getArbeidsforholdRef()));
         } else {
-            return new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(vurdertSøktPeriode.getType());
+            return new AktivitetIdentifikator(vurdertSøktPeriode.getType());
         }
     }
 
@@ -52,19 +52,19 @@ public class AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold {
         return arbeidsgiverArbeidsforhold;
     }
 
-    public boolean gjelderSamme(AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold aktivitet) {
+    public boolean gjelderSamme(AktivitetIdentifikator aktivitet) {
         if (!aktivitetType.equals(aktivitet.getAktivitetType())) {
             return false;
         }
 
-        return arbeidsgiverArbeidsforhold == aktivitet.getArbeidsgiverArbeidsforhold() || arbeidsgiverArbeidsforhold.identifisererSamme(aktivitet.getArbeidsgiverArbeidsforhold());
+        return Objects.equals(arbeidsgiverArbeidsforhold, aktivitet.getArbeidsgiverArbeidsforhold()) || arbeidsgiverArbeidsforhold.identifisererSamme(aktivitet.getArbeidsgiverArbeidsforhold());
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        var that = (AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold) o;
+        var that = (AktivitetIdentifikator) o;
         return aktivitetType == that.aktivitetType &&
             Objects.equals(arbeidsgiverArbeidsforhold, that.arbeidsgiverArbeidsforhold);
     }
