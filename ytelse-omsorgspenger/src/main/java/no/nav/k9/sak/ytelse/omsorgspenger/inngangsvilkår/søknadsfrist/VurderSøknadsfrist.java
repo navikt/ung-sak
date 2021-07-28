@@ -116,7 +116,7 @@ public class VurderSøknadsfrist {
             .toSegments()
             .stream()
             .map(this::konsistens)
-            .peek(it -> it.justerUtfall(Utfall.OPPFYLT))
+            .map(it -> it.justerUtfall(Utfall.OPPFYLT))
             .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), it))
             .collect(Collectors.toSet());
 

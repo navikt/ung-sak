@@ -68,8 +68,8 @@ public class VurdertSøktPeriode<T extends SøktPeriodeData> {
         return raw;
     }
 
-    public void justerUtfall(Utfall utfall) {
-        this.utfall = utfall;
+    public VurdertSøktPeriode<T> justerUtfall(Utfall oppdatertUtfall) {
+        return new VurdertSøktPeriode<>(periode, type, arbeidsgiver, arbeidsforholdRef, oppdatertUtfall, raw);
     }
 
     @SuppressWarnings("rawtypes")
