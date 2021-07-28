@@ -75,10 +75,6 @@ public class Periode implements Comparable<Periode> {
         return tom;
     }
 
-    public boolean starterFørEllerSamtidigSom(Periode periode) {
-        return fom.isEqual(periode.getFom()) || fom.isBefore(periode.getFom());
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == this)

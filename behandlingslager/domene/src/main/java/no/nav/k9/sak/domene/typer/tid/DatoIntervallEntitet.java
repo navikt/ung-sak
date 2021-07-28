@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.typer.tid;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.NavigableSet;
 import java.util.TreeSet;
@@ -121,15 +120,6 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
         LocalDate fom = ld.isOpenStart() ? null : ld.getFomDato();
         LocalDate tom = ld.isOpenEnd() ? null : ld.getTomDato();
         return DatoIntervallEntitet.fra(fom, tom);
-    }
-
-    public static DatoIntervallEntitet minmax(Collection<DatoIntervallEntitet> perioder) {
-        if (perioder.isEmpty()) {
-            return null;
-        }
-        var min = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElseThrow();
-        var max = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElseThrow();
-        return DatoIntervallEntitet.fraOgMedTilOgMed(min, max);
     }
 
     public LocalDateInterval toLocalDateInterval() {

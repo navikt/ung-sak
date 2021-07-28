@@ -39,11 +39,6 @@ public enum AppAbacAttributtType implements AbacAttributtType {
     private final boolean maskerOutput;
     private final String sporingsloggEksternKode;
 
-    AppAbacAttributtType() {
-        sporingsloggEksternKode = null;
-        maskerOutput = false;
-    }
-
     AppAbacAttributtType(String sporingsloggEksternKode) {
         this.sporingsloggEksternKode = sporingsloggEksternKode;
         this.maskerOutput = false;
