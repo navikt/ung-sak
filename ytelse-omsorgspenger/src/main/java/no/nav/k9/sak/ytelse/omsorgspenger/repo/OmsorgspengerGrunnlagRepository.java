@@ -21,18 +21,10 @@ public class OmsorgspengerGrunnlagRepository {
 
     private EntityManager entityManager;
 
-    OmsorgspengerGrunnlagRepository() {
-        // CDI
-    }
-
     @Inject
     public OmsorgspengerGrunnlagRepository(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
-    }
-
-    public OppgittFravær hentOppgittFravær(UUID behandlingId) {
-        return hentOppittFraværHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt uttak for behandlingId=" + behandlingId));
     }
 
     public Optional<OppgittFravær> hentOppittFraværHvisEksisterer(UUID behandlingId) {

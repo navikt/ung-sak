@@ -18,12 +18,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
-import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
 import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -37,7 +36,6 @@ import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKobli
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.web.app.tjenester.behandling.SjekkProsessering;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -59,12 +57,6 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
 
     @Mock
     private OppgaveTjeneste oppgaveTjenesteMock;
-
-    @Mock
-    private BehandlingModellRepository behandlingModellRepositoryMock;
-
-    @Mock
-    private RevurderingTjeneste revurderingTjenesteMock;
 
     @Mock
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;

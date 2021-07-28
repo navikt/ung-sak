@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 @Dependent
 public class SøknadPerioderTjeneste {
 
-    private final static KravDokumentType KRAVDOKUMENTTYPE_SØKNAD = KravDokumentType.SØKNAD;
+    private static final KravDokumentType KRAVDOKUMENTTYPE_SØKNAD = KravDokumentType.SØKNAD;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
 
@@ -55,7 +54,6 @@ public class SøknadPerioderTjeneste {
         for (MottattDokument dok : mottatteDokumenter) {
             var kravDokument = new KravDokument(dok.getJournalpostId(), dok.getMottattTidspunkt(), KRAVDOKUMENTTYPE_SØKNAD);
             var fraværPerioder = grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(dok.getBehandlingId())
-                .filter(Objects::nonNull)
                 .map(OppgittFravær::getPerioder)
                 .orElse(Set.of());
             var søktePerioderPåJp = fraværPerioder.stream()
@@ -68,11 +66,10 @@ public class SøknadPerioderTjeneste {
     }
 
     private List<MottattDokument> hentMottatteDokument(long fagsakId) {
-        var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsakId, DokumentStatus.GYLDIG)
+        return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsakId, DokumentStatus.GYLDIG)
             .stream()
             .filter(dok -> List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT).contains(dok.getType()))
             .filter(dok -> dok.getBehandlingId() != null)
             .collect(Collectors.toList());
-        return mottatteDokumenter;
     }
 }

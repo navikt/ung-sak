@@ -386,9 +386,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     private VurderingspunktType vurderingspunktType;
 
     @JsonIgnore
-    private Set<String> utelukkendeAksjonspunkter = Collections.emptySet();
-
-    @JsonIgnore
     private boolean erUtgått = false;
 
     private String kode;
@@ -532,7 +529,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
         }
 
-        System.out.println(sb.toString());
+        System.out.println(sb);
     }
 
     /**
@@ -555,10 +552,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     public boolean getDefaultTotrinnBehandling() {
         return defaultTotrinnBehandling;
-    }
-
-    public String getFristPeriode() {
-        return fristPeriode;
     }
 
     public Period getFristPeriod() {

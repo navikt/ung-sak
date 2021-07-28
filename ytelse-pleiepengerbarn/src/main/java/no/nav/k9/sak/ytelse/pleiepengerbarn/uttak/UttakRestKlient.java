@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -32,9 +31,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
@@ -44,6 +40,8 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ApplicationScoped
 public class UttakRestKlient {
@@ -123,7 +121,7 @@ public class UttakRestKlient {
 
     private <T> T utførOgHent(HttpUriRequest request, @SuppressWarnings("unused") String jsonInput, OidcRestClientResponseHandler<T> responseHandler) throws IOException {
         request.setHeader("NAV_PSB_UTTAK_TOKEN", psbUttakToken);
-        
+
         try (var httpResponse = restKlient.execute(request)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (isOk(responseCode)) {
@@ -170,7 +168,7 @@ public class UttakRestKlient {
     }
 
     interface RestTjenesteFeil extends DeklarerteFeil {
-        static final RestTjenesteFeil FEIL = FeilFactory.create(RestTjenesteFeil.class);
+        RestTjenesteFeil FEIL = FeilFactory.create(RestTjenesteFeil.class);
 
         @TekniskFeil(feilkode = "K9SAK-UT-1000011", feilmelding = "Feil ved kall til K9Uttak: %s", logLevel = LogLevel.ERROR)
         Feil feilVedKallTilUttak(String feilmelding);
@@ -178,17 +176,8 @@ public class UttakRestKlient {
         @TekniskFeil(feilkode = "K9SAK-UT-1000012", feilmelding = "Feil ved kall til K9Uttak: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilUttak(String feilmelding);
 
-        @TekniskFeil(feilkode = "K9SAK-UT-1000013", feilmelding = "Feil ved kall til K9Uttak: %s", logLevel = LogLevel.WARN)
-        Feil feilVedJsonParsing(String feilmelding);
-
         @TekniskFeil(feilkode = "K9SAK-UT-1000014", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilUttak(UUID behandlingUuid, Throwable t);
-
-        @TekniskFeil(feilkode = "K9SAK-UT-1000015", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplaner for behandlinger: %s", logLevel = LogLevel.WARN)
-        Feil feilKallTilUttakForPlaner(Collection<UUID> behandlingUuid, Throwable t);
-
-        @TekniskFeil(feilkode = "K9SAK-UT-1000016", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplaner for saker: %s", logLevel = LogLevel.WARN)
-        Feil feilKallTilUttakForPlanerForSaker(Collection<Saksnummer> saksnummere, Throwable t);
 
         @TekniskFeil(feilkode = "K9SAK-UT-1000017", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke slette uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
         Feil feilKallSlettingAvUttaksplan(UUID behandlingUuid, Throwable t);

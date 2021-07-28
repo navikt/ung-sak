@@ -67,8 +67,6 @@ public class InnhentDokumentTjenesteTest {
     @Mock
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     @Mock
-    private MottatteDokumentTjeneste mottatteDokumentTjeneste;
-    @Mock
     private Kompletthetskontroller kompletthetskontroller;
     @Mock
     private Behandlingsoppretter behandlingsoppretter;

@@ -20,7 +20,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.typer.AktørId;
 
@@ -90,23 +89,6 @@ public class BehandlingRevurderingRepository {
         query.setParameter("henlagtKoder", BehandlingResultatType.getAlleHenleggelseskoder());
         query.setParameter("etterTidspunkt", sisteInnvilgede.getOpprettetDato());
         return query.getResultList();
-    }
-
-    public Optional<LocalDate> finnSøknadsdatoFraHenlagtBehandling(Behandling behandling) {
-        List<Behandling> henlagteBehandlinger = finnHenlagteBehandlingerEtterSisteInnvilgedeIkkeHenlagteBehandling(behandling.getFagsak().getId());
-        Optional<SøknadEntitet> søknad = finnFørsteSøknadBlantBehandlinger(henlagteBehandlinger);
-        if (søknad.isPresent()) {
-            return Optional.ofNullable(søknad.get().getSøknadsdato());
-        }
-        return Optional.empty();
-    }
-
-    private Optional<SøknadEntitet> finnFørsteSøknadBlantBehandlinger(List<Behandling> behandlinger) {
-        return behandlinger.stream()
-            .map(behandling -> søknadRepository.hentSøknadHvisEksisterer(behandling.getId()))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .findFirst();
     }
 
     /** Liste av fagsakId, aktørId for saker som trenger G-regulering og det ikke finnes åpen behandling */

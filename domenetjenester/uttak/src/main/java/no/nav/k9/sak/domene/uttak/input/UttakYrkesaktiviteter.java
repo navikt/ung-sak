@@ -89,14 +89,6 @@ public class UttakYrkesaktiviteter {
         return taMed;
     }
 
-    public BigDecimal finnStillingsprosentOrdinærtArbeid(String arbeidsgiverIdentifikator,
-                                                         InternArbeidsforholdRef arbeidsforholdId,
-                                                         LocalDate dato) {
-        List<Yrkesaktivitet> yrkesAktiviteter = hentYrkesAktiviteterOrdinærtArbeidsforhold(input);
-        var ref = input.getBehandlingReferanse();
-        return finnStillingsprosentOrdinærtArbeid(arbeidsgiverIdentifikator, arbeidsforholdId, yrkesAktiviteter, dato, ref.getSkjæringstidspunkt());
-    }
-
     private BigDecimal finnStillingsprosentOrdinærtArbeid(String arbeidsgiverIdentifikator,
                                                           InternArbeidsforholdRef arbeidsforholdId,
                                                           List<Yrkesaktivitet> yrkesaktivitetList,
