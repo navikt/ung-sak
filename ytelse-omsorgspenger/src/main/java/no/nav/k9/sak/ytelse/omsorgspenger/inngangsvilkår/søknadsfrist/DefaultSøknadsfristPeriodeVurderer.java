@@ -10,6 +10,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartKravDokument;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.TimelineMerger;
@@ -44,8 +45,8 @@ public class DefaultSøknadsfristPeriodeVurderer implements SøknadsfristPeriode
 
     private LocalDateSegment<VurdertSøktPeriode<OppgittFraværPeriode>> vurderEnkeltPeriode(LocalDateSegment<SøktPeriode<OppgittFraværPeriode>> segment, Utfall utfall) {
         SøktPeriode<OppgittFraværPeriode> value = segment.getValue();
-        value.justerPeriode(segment);
+        DatoIntervallEntitet justertPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom());
 
-        return new LocalDateSegment<>(segment.getLocalDateInterval(), new VurdertSøktPeriode<>(value.getPeriode(), value.getType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), utfall, value.getRaw()));
+        return new LocalDateSegment<>(segment.getLocalDateInterval(), new VurdertSøktPeriode<>(justertPeriode, value.getType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), utfall, value.getRaw()));
     }
 }
