@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -17,7 +17,6 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEnt
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.felles.exception.TekniskException;
 
 public class SjekkOmPerioderInneholderSammeAndelerImplTest {
 
@@ -277,7 +276,7 @@ public class SjekkOmPerioderInneholderSammeAndelerImplTest {
             Inntektskategori.ARBEIDSTAKER, ORGNR1, 1000, BigDecimal.valueOf(80), BigDecimal.valueOf(80), 1000, OpptjeningAktivitetType.FORELDREPENGER);
 
         // Assert
-        Assertions.assertThrows(TekniskException.class, () -> {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
 
             // Act
             sjekkOmPerioderInneholderSammeAndeler.sjekk(nyPeriode, gammelPeriode);
