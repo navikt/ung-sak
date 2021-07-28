@@ -1,8 +1,5 @@
 package no.nav.k9.sak.behandlingslager.behandling.personopplysning;
 
-import java.util.List;
-import java.util.Objects;
-
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
@@ -20,7 +17,4 @@ public class AdresseTypeKodeverdiConverter implements AttributeConverter<Adresse
         return dbData == null ? null : AdresseType.fraKode(dbData);
     }
 
-    public static AdresseType finnForKodeverkEiersKode(String offisiellDokumentType) {
-        return List.of(AdresseType.values()).stream().filter(k -> Objects.equals(k.getOffisiellKode(), offisiellDokumentType)).findFirst().orElse(AdresseType.UKJENT_ADRESSE);
-    }
 }

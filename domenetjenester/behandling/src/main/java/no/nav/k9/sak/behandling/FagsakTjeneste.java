@@ -14,10 +14,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.Journalpost;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
@@ -25,10 +22,6 @@ public class FagsakTjeneste {
 
     private FagsakRepository fagsakRepository;
     private FagsakStatusEventPubliserer fagsakStatusEventPubliserer;
-
-    FagsakTjeneste() {
-        // for CDI proxy
-    }
 
     @Inject
     public FagsakTjeneste(BehandlingRepositoryProvider repositoryProvider,
@@ -59,22 +52,6 @@ public class FagsakTjeneste {
         return fagsakRepository.hentForBruker(aktørId);
     }
 
-    public Fagsak finnEksaktFagsak(long fagsakId) {
-        return fagsakRepository.finnEksaktFagsak(fagsakId);
-    }
-
-    public Fagsak finnEksaktFagsak(long fagsakId, boolean taSkriveLås) {
-        return fagsakRepository.finnEksaktFagsak(fagsakId, taSkriveLås);
-    }
-
-    public void lagreJournalPost(Journalpost journalpost) {
-        fagsakRepository.lagre(journalpost);
-    }
-
-    public Optional<Journalpost> hentJournalpost(JournalpostId journalpostId) {
-        return fagsakRepository.hentJournalpost(journalpostId);
-    }
-
     public Optional<Fagsak> finnesEnFagsakSomOverlapper(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
         var potensielleFagsaker = fagsakRepository.finnFagsakRelatertTil(ytelseType, bruker, pleietrengende, relatertPersonAktørId, fom, tom);
         if (potensielleFagsaker.isEmpty()) {
@@ -82,7 +59,7 @@ public class FagsakTjeneste {
         }
         return potensielleFagsaker.stream().max(Comparator.comparing(Fagsak::getPeriode));
     }
-    
+
     public boolean finnesEnFagsakForMinstEnAvAktørene(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
         if (bruker != null) {
             final var fagSakerPåBruker = fagsakRepository.finnFagsakRelatertTil(ytelseType, bruker, null, null, fom, tom);
@@ -102,12 +79,8 @@ public class FagsakTjeneste {
                 return true;
             }
         }
-        
-        return false;
-    }
 
-    public void oppdaterFagsak(Fagsak fagsak, DatoIntervallEntitet periode) {
-        fagsakRepository.oppdaterPeriode(fagsak.getId(), periode.getFomDato(), periode.getTomDato());
+        return false;
     }
 
 }

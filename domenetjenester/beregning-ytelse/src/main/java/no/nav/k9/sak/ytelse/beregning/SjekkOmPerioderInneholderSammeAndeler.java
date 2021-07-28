@@ -21,10 +21,11 @@ public class SjekkOmPerioderInneholderSammeAndeler {
      * Hvis periodene har samme antall andeler, sjekk hver enkel andel for en korresponderende andel med samme verdi.
      * Return true hvis alle andelene har en korresponderende verdi, false ellers.
      * Hvis en andel har mer enn en korresponderende andel har det skjedd en feil og en exception blir kastet.
-     * @param nyPeriode Periode for revurdering
+     *
+     * @param nyPeriode     Periode for revurdering
      * @param gammelPeriode Periode for førstegangsbehandling
      * @return True hvis det har skjedd en endring
-     *         False hvis det ikke har skjedd en endring
+     * False hvis det ikke har skjedd en endring
      */
     public boolean sjekk(BeregningsresultatPeriode nyPeriode, BeregningsresultatPeriode gammelPeriode) {
         List<BeregningsresultatAndel> nyeAndeler = nyPeriode.getBeregningsresultatAndelList();
@@ -42,7 +43,7 @@ public class SjekkOmPerioderInneholderSammeAndeler {
                 Objects.equals(nyAndelNøkkel, gammelAndel.getAktivitetsnøkkel()) &&
                 Objects.equals(nyAndel.getDagsats(), gammelAndel.getDagsats())).count();
         if (antallAndelerSomKorresponderer > 1) {
-            throw FinnEndringsdatoFeil.FACTORY.fantFlereKorresponderendeAndelerFeil(nyAndel.getId()).toException();
+            throw new IllegalArgumentException("Fant flere korresponderende andeler for andel med id " + nyAndel.getId());
         }
         return antallAndelerSomKorresponderer == 1;
     }

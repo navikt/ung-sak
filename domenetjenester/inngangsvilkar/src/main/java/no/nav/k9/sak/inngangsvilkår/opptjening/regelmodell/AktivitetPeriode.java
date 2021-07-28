@@ -13,7 +13,7 @@ public class AktivitetPeriode implements Comparable<AktivitetPeriode> {
 
     @JsonProperty("datoIntervall")
     private LocalDateInterval datoIntervall;
-    
+
     @JsonProperty("aktivitet")
     private Aktivitet opptjeningAktivitet;
 
@@ -23,7 +23,7 @@ public class AktivitetPeriode implements Comparable<AktivitetPeriode> {
     @JsonCreator
     protected AktivitetPeriode() {
     }
-    
+
     public AktivitetPeriode(LocalDateInterval datoIntervall, Aktivitet opptjeningAktivitet, VurderingsStatus vurderingsStatus) {
         this.datoIntervall = datoIntervall;
         this.opptjeningAktivitet = opptjeningAktivitet;
@@ -41,12 +41,6 @@ public class AktivitetPeriode implements Comparable<AktivitetPeriode> {
 
     public VurderingsStatus getVurderingsStatus() {
         return vurderingsStatus;
-    }
-
-    public boolean dekkerHeleMåneder() {
-        LocalDate månedStart = getFomDato().withDayOfMonth(1);
-        LocalDate månedSlutt = getTomDato().withDayOfMonth(getTomDato().lengthOfMonth());
-        return Objects.equals(månedStart, getFomDato()) && Objects.equals(månedSlutt, getTomDato());
     }
 
     public LocalDate getTomDato() {
