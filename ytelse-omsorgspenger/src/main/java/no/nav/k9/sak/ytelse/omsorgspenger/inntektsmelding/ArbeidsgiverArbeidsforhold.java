@@ -5,7 +5,7 @@ import java.util.Objects;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
-class ArbeidsgiverArbeidsforhold {
+public class ArbeidsgiverArbeidsforhold {
 
     private Arbeidsgiver arbeidsgiver;
     private InternArbeidsforholdRef arbeidsforhold;

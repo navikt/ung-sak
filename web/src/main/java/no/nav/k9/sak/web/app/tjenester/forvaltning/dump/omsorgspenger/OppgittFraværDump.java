@@ -39,7 +39,7 @@ public class OppgittFraværDump implements DebugDumpFagsak {
                     ,omp.fom
                     ,omp.tom
                     ,omp.fravaer_per_dag
-                    ,omp.aktivitet_type
+                    ,omp.aktivitet
                     ,omp.arbeidsgiver_aktor_id
                     ,omp.arbeidsgiver_orgnr
                     ,cast(omp.arbeidsforhold_intern_id as varchar) arbeidsforhold_intern_id

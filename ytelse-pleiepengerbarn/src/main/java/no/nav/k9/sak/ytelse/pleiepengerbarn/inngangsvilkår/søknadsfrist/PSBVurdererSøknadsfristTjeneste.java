@@ -145,7 +145,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
             .collect(Collectors.toSet());
     }
 
-    private LocalDateTimeline<VurdertSøktPeriode<Søknadsperiode>> utledAvslåttePerioderSomHarTidligereVærtInnvilget(HashMap<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> result,
+    private LocalDateTimeline<VurdertSøktPeriode<Søknadsperiode>> utledAvslåttePerioderSomHarTidligereVærtInnvilget(Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> result,
                                                                                                                     KravDokument key,
                                                                                                                     LocalDateTimeline<VurdertSøktPeriode<Søknadsperiode>> vurdertTimeline) {
 
@@ -160,14 +160,14 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
             .toSegments()
             .stream()
             .map(this::konsistens)
-            .peek(it -> it.justerUtfall(Utfall.OPPFYLT))
+            .map(it -> it.justerUtfall(Utfall.OPPFYLT))
             .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), it))
             .collect(Collectors.toSet());
 
         return new LocalDateTimeline<>(skalGodkjennes);
     }
 
-    private LocalDateTimeline<VurdertSøktPeriode<Søknadsperiode>> hentUtTidligereGodkjent(HashMap<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> result,
+    private LocalDateTimeline<VurdertSøktPeriode<Søknadsperiode>> hentUtTidligereGodkjent(Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> result,
                                                                                           KravDokument key) {
         var tidligereGodkjentTimeline = new LocalDateTimeline<VurdertSøktPeriode<Søknadsperiode>>(List.of());
         var godkjentePerioder = result.entrySet()

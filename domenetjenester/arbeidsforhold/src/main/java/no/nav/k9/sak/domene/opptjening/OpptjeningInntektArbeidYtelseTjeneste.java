@@ -78,14 +78,14 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
         if (grunnlagOpt.isEmpty()) {
             return Collections.emptyNavigableMap();
         }
-        var opptjeningsresultat = opptjeningRepository.finnOpptjening(behandlingId);
+        var opptjeningsresultat = opptjeningRepository.finnOpptjening(behandlingId).orElseThrow(() -> new IllegalStateException("Kan ikke finne opptjening for behandling"));
         var iayGrunnlag = grunnlagOpt.get();
         NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> alle = new TreeMap<>();
 
 
         for (var periode : new TreeSet<>(vilkårsPerioder)) {
             LocalDate stp = periode.getFomDato();
-            var opptjening = opptjeningsresultat.flatMap(it -> it.finnOpptjening(stp)).orElseThrow();
+            var opptjening = opptjeningsresultat.finnOpptjening(stp).orElseThrow(() -> new IllegalStateException("Finner ikke opptjening for vilkårsperiode, stp=" + stp));
             var perioderForSaksbehandling = opptjeningsperioderTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, iayGrunnlag, opptjening, stp);
             var opptjeningAktivitetPerioder = perioderForSaksbehandling.stream().map(this::mapTilPerioder).collect(Collectors.toList());
             alle.put(periode, opptjeningAktivitetPerioder);

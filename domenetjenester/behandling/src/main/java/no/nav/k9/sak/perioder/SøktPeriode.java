@@ -2,7 +2,6 @@ package no.nav.k9.sak.perioder;
 
 import java.util.Objects;
 
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -53,10 +52,6 @@ public class SøktPeriode<T> {
 
     public T getRaw() {
         return raw;
-    }
-
-    public void justerPeriode(LocalDateSegment<SøktPeriode<T>> segment) {
-        this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom());
     }
 
     public static <T> SøktPeriode<T> arbeid(DatoIntervallEntitet periode, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, T raw) {
