@@ -1,9 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.NavigableSet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -21,9 +19,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.InngangsvilkårFellesTjeneste;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderBekreftetOpptjening;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderOppgittOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -42,6 +38,7 @@ public class OpptjeningFaktaSteg implements BehandlingSteg {
     private AksjonspunktutlederForVurderOppgittOpptjening aksjonspunktutlederOppgitt;
     private AksjonspunktutlederForVurderBekreftetOpptjening aksjonspunktutlederBekreftet;
     private OpptjeningsVilkårTjeneste opptjeningsVilkårTjeneste;
+    private InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste;
 
     OpptjeningFaktaSteg() {
         // CDI
@@ -51,11 +48,13 @@ public class OpptjeningFaktaSteg implements BehandlingSteg {
     public OpptjeningFaktaSteg(BehandlingRepositoryProvider repositoryProvider,
                                AksjonspunktutlederForVurderBekreftetOpptjening aksjonspunktutlederBekreftet,
                                AksjonspunktutlederForVurderOppgittOpptjening aksjonspunktutlederOppgitt,
-                               @FagsakYtelseTypeRef OpptjeningsVilkårTjeneste opptjeningsVilkårTjeneste) {
+                               @FagsakYtelseTypeRef OpptjeningsVilkårTjeneste opptjeningsVilkårTjeneste,
+                               InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste) {
         this.repositoryProvider = repositoryProvider;
         this.aksjonspunktutlederBekreftet = aksjonspunktutlederBekreftet;
         this.aksjonspunktutlederOppgitt = aksjonspunktutlederOppgitt;
         this.opptjeningsVilkårTjeneste = opptjeningsVilkårTjeneste;
+        this.inngangsvilkårFellesTjeneste = inngangsvilkårFellesTjeneste;
     }
 
     @Override
@@ -91,19 +90,7 @@ public class OpptjeningFaktaSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private List<DatoIntervallEntitet> perioderTilVurdering(Long behandlingId) {
-        Optional<Vilkårene> resultatOpt = repositoryProvider.getVilkårResultatRepository().hentHvisEksisterer(behandlingId);
-        if (resultatOpt.isPresent()) {
-            Vilkårene vilkårene = resultatOpt.get();
-            return vilkårene.getVilkårene()
-                .stream()
-                .filter(vilkår -> VilkårType.OPPTJENINGSVILKÅRET.equals(vilkår.getVilkårType()))
-                .map(Vilkår::getPerioder)
-                .flatMap(Collection::stream)
-                .filter(vp -> Utfall.IKKE_VURDERT.equals(vp.getGjeldendeUtfall()))
-                .map(VilkårPeriode::getPeriode)
-                .collect(Collectors.toList());
-        }
-        return List.of();
+    private NavigableSet<DatoIntervallEntitet> perioderTilVurdering(Long behandlingId) {
+        return inngangsvilkårFellesTjeneste.utledPerioderTilVurdering(behandlingId, VilkårType.OPPTJENINGSVILKÅRET);
     }
 }
