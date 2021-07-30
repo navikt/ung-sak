@@ -31,7 +31,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetIdentifikator
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 @Dependent
-public class VurderSøknadsfrist {
+class VurderSøknadsfrist {
 
     private final Map<LocalDateInterval, SøknadsfristPeriodeVurderer<OppgittFraværPeriode>> avviksVurderere;
     private final SøknadsfristPeriodeVurderer<OppgittFraværPeriode> søknadsfristVurderer = new DefaultSøknadsfristPeriodeVurderer();
@@ -44,7 +44,7 @@ public class VurderSøknadsfrist {
         this.startDatoValidering = startDatoValidering;
     }
 
-    public Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurderSøknadsfrist(Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> kravdokumentMedPerioder, Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultat) {
+    Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurderSøknadsfrist(Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> kravdokumentMedPerioder, Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultat) {
 
         var result = new HashMap<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>>();
         var sortedKravdokumenterMedPerioder = kravdokumentMedPerioder.keySet()
