@@ -38,7 +38,7 @@ public class Beregningsgrunnlag {
         return beregningsgrunnlagPerioder
             .stream()
             .sorted(Comparator.comparing(BeregningsgrunnlagPeriode::getBeregningsgrunnlagPeriodeFom))
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
     }
 
     public Sammenligningsgrunnlag getSammenligningsgrunnlag() {
@@ -85,7 +85,7 @@ public class Beregningsgrunnlag {
         return faktaOmBeregningTilfeller
             .stream()
             .map(BeregningsgrunnlagFaktaOmBeregningTilfelle::getFaktaOmBeregningTilfelle)
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
     }
 
     public List<SammenligningsgrunnlagPrStatus> getSammenligningsgrunnlagPrStatusListe() {

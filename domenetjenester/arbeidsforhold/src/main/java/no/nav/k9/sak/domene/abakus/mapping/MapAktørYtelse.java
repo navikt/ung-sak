@@ -19,6 +19,7 @@ import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelserDto;
 import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvistBuilder;
@@ -27,7 +28,6 @@ import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlagBuilder;
 import no.nav.k9.sak.domene.iay.modell.YtelseStørrelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseStørrelseBuilder;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Beløp;
@@ -36,14 +36,14 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
 public class MapAktørYtelse {
-    
+
     private static final Comparator<YtelseDto> COMP_YTELSE = Comparator
             .comparing((YtelseDto dto) -> dto.getSaksnummer(), Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(dto -> dto.getYtelseType() == null ? null : dto.getYtelseType().getKode(), Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(dto -> dto.getTemaUnderkategori() == null ? null : dto.getTemaUnderkategori().getKode(), Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(dto -> dto.getPeriode().getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
             .thenComparing(dto -> dto.getPeriode().getTom(), Comparator.nullsLast(Comparator.naturalOrder()));
-    
+
     private MapAktørYtelse() {
         // skjul public constructor
     }
@@ -63,7 +63,7 @@ public class MapAktørYtelse {
             if (dtos == null || dtos.isEmpty()) {
                 return Collections.emptyList();
             }
-            return dtos.stream().map(this::mapAktørYtelse).collect(Collectors.toUnmodifiableList());
+            return dtos.stream().map(this::mapAktørYtelse).toList();
         }
 
         private AktørYtelseBuilder mapAktørYtelse(YtelserDto dto) {
@@ -143,7 +143,7 @@ public class MapAktørYtelse {
     static class MapTilDto {
 
         private List<FordelingDto> mapFordeling(List<YtelseStørrelse> ytelseStørrelse) {
-            return ytelseStørrelse.stream().map(this::tilFordeling).collect(Collectors.toUnmodifiableList());
+            return ytelseStørrelse.stream().map(this::tilFordeling).toList();
         }
 
         private YtelserDto mapTilYtelser(AktørYtelse ay) {
@@ -223,7 +223,7 @@ public class MapAktørYtelse {
          * De dataene er som er dårlig kan finnes vha <code>select * from IAY_RELATERT_YTELSE where TOM < FOM</code>
          * Sakene avdekkes gjennom:
          * <code>
-            select iyt.*, gr.*, f.* from iay_aktoer_ytelse iyt 
+            select iyt.*, gr.*, f.* from iay_aktoer_ytelse iyt
             inner join gr_arbeid_inntekt gr on gr.register_id = iyt.inntekt_arbeid_ytelser_id
             inner join behandling b on b.id = gr.behandling_id
             inner join fagsak f on f.id = b.fagsak_id

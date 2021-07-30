@@ -184,8 +184,7 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
      */
     public Optional<LocalDateTime> getInnsendingstidspunkt() {
         return Optional.ofNullable(getSkjemaInnhold().getAvsendersystem().getInnsendingstidspunkt())
-            .map(JAXBElement::getValue)
-            .map(e -> e);
+            .map(JAXBElement::getValue);
     }
 
     public String getAvsendersystem() {

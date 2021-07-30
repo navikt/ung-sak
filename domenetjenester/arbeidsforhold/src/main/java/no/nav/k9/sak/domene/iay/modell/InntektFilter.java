@@ -124,7 +124,7 @@ public class InntektFilter {
     public List<Inntekt> getAlleInntekter(InntektsKilde kilde) {
         return inntekter.stream()
             .filter(it -> kilde == null || kilde.equals(it.getInntektsKilde()))
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
     }
 
     public List<Inntekt> getAlleInntekter() {

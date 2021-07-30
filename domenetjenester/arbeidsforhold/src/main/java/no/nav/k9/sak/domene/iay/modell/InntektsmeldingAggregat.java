@@ -46,7 +46,7 @@ public class InntektsmeldingAggregat {
      *         Merk denne filtrerer inntektsmeldinger ifht hva som skal brukes.
      */
     public List<Inntektsmelding> getInntektsmeldingerSomSkalBrukes() {
-        return inntektsmeldinger.stream().filter(this::skalBrukes).collect(Collectors.toUnmodifiableList());
+        return inntektsmeldinger.stream().filter(this::skalBrukes).toList();
     }
 
     /**
