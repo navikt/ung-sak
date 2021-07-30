@@ -176,7 +176,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         }
 
         boolean erÅpenPeriode(Periode periode) {
-            return periode == null || !erLukketPeriode(periode);
+            return !erLukketPeriode(periode);
         }
 
         boolean erLukketPeriode(Periode periode) {

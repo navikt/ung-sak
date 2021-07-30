@@ -10,14 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
-import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.felles.util.Tuple;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
+import no.nav.k9.sak.typer.AktørId;
 
 /**
  * Batchservice som finner alle behandlinger som skal gjenopptas, og lager en ditto prosess task for hver.
@@ -51,7 +51,7 @@ public class AutomatiskGrunnbelopReguleringBatchTask implements ProsessTaskHandl
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         final var dryRunProperty = prosessTaskData.getPropertyValue(KEY_DRY_RUN);
-        final boolean dryRun = dryRunProperty != null && Boolean.parseBoolean(dryRunProperty);
+        final boolean dryRun = Boolean.parseBoolean(dryRunProperty);
 
         var gjeldende = kalkulusTjeneste.hentGrunnbeløp(LocalDate.now());
         var forrige = kalkulusTjeneste.hentGrunnbeløp(gjeldende.getPeriode().getFomDato().minusDays(1));

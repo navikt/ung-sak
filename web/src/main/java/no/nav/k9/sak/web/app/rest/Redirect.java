@@ -26,7 +26,7 @@ public final class Redirect {
     }
 
     public static Response tilBehandlingPollStatus(HttpServletRequest request, UUID behandlingUuid, Optional<String> gruppeOpt)
-            throws URISyntaxException {
+        throws URISyntaxException {
         UriBuilder uriBuilder = getUriBuilder(request);
         uriBuilder.path(BehandlingRestTjeneste.STATUS_PATH);
         uriBuilder.queryParam(BehandlingUuidDto.NAME, behandlingUuid);
@@ -105,9 +105,8 @@ public final class Redirect {
      */
     private static String getXForwardedProtoHeader(HttpServletRequest httpRequest) {
         String xForwardedProto = httpRequest.getHeader("X-Forwarded-Proto");
-        if (xForwardedProto != null &&
-            ("https".equalsIgnoreCase(xForwardedProto) ||
-                "http".equalsIgnoreCase(xForwardedProto))) {
+        if ("https".equalsIgnoreCase(xForwardedProto) ||
+            "http".equalsIgnoreCase(xForwardedProto)) {
             return xForwardedProto;
         }
         return null;

@@ -10,14 +10,14 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
-import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.felles.util.Tuple;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
+import no.nav.k9.sak.typer.AktørId;
 
 @Deprecated(since = "Kalkulus skal eie satsregulering")
 @ApplicationScoped
@@ -43,7 +43,7 @@ public class AutomatiskArenaReguleringBatchTask implements ProsessTaskHandler {
     public void doTask(ProsessTaskData taskData) {
         final var satsDatoProperty = taskData.getPropertyValue(KEY_SATS_DATO);
         final var dryRunProperty = taskData.getPropertyValue(KEY_DRY_RUN);
-        final boolean dryRun = dryRunProperty != null && Boolean.parseBoolean(dryRunProperty);
+        final boolean dryRun = Boolean.parseBoolean(dryRunProperty);
         final LocalDate satsDato = LocalDate.parse(satsDatoProperty, DATE_FORMATTER);
 
         List<Tuple<Long, AktørId>> tilVurdering = behandlingRevurderingRepository.finnSakerMedBehovForArenaRegulering(DATO, satsDato);

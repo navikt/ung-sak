@@ -46,7 +46,14 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.PermisjonsbeskrivelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.RelatertYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.TemaUnderkategori;
 import no.nav.folketrygdloven.kalkulus.kodeverk.VirksomhetType;
-import no.nav.folketrygdloven.kalkulus.opptjening.v1.*;
+import no.nav.folketrygdloven.kalkulus.opptjening.v1.MidlertidigInaktivType;
+import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittArbeidsforholdDto;
+import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittEgenNæringDto;
+import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansDto;
+import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
+import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
+import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningAktiviteterDto;
+import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningPeriodeDto;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
@@ -365,6 +372,6 @@ public class TilKalkulusMapper {
             .stream()
             .map(mapFrilansOppdrag())
             .collect(Collectors.toList());
-        return new OppgittFrilansDto(oppgittFrilans.getErNyoppstartet() == null ? false : oppgittFrilans.getErNyoppstartet(), oppdrag);
+        return new OppgittFrilansDto(Boolean.TRUE.equals(oppgittFrilans.getErNyoppstartet()), oppdrag);
     }
 }

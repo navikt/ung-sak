@@ -475,7 +475,7 @@ public class BeregningsgrunnlagPrStatusOgAndel {
 
         public Builder medLagtTilAvSaksbehandler(Boolean lagtTilAvSaksbehandler) {
             verifiserKanModifisere();
-            kladd.lagtTilAvSaksbehandler = lagtTilAvSaksbehandler==null?false: lagtTilAvSaksbehandler;
+            kladd.lagtTilAvSaksbehandler = Boolean.TRUE.equals(lagtTilAvSaksbehandler);
             return this;
         }
 
