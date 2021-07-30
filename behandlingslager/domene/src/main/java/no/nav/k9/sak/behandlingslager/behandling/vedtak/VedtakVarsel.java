@@ -140,7 +140,7 @@ public class VedtakVarsel extends BaseEntitet {
     }
 
     public boolean getErVarselOmRevurderingSendt() {
-        return harSendtVarselOmRevurdering == null ? false : harSendtVarselOmRevurdering;
+        return Boolean.TRUE.equals(harSendtVarselOmRevurdering);
     }
 
     public Set<String> getRedusertUtbetalingÅrsaker() {

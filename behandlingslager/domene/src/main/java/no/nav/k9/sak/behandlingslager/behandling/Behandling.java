@@ -41,6 +41,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Where;
 
+import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -66,7 +67,6 @@ import no.nav.k9.sak.behandlingslager.kodeverk.FagsystemKodeverkConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.StartpunktTypeKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.felles.feil.FeilFactory;
 
 @SqlResultSetMappings(value = {
     @SqlResultSetMapping(name = "PipDataResult", classes = {
@@ -268,9 +268,7 @@ public class Behandling extends BaseEntitet {
         if (erAvsluttet() && erHenlagt()) {
             throw new IllegalStateException("Utvikler-feil: kan ikke legge til årsaker på en behandling som er avsluttet.");
         }
-        behandlingÅrsaker.forEach(bå -> {
-            this.behandlingÅrsaker.add(bå);
-        });
+        this.behandlingÅrsaker.addAll(behandlingÅrsaker);
     }
 
     public boolean harBehandlingÅrsak(BehandlingÅrsakType behandlingÅrsak) {

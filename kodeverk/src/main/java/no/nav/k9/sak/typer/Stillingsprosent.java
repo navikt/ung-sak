@@ -39,7 +39,7 @@ public class Stillingsprosent implements IndexKey {
 
     @JsonCreator
     public Stillingsprosent(BigDecimal verdi) {
-        this.verdi = verdi == null ? null : verdi;
+        this.verdi = verdi;
     }
 
     // Beleilig å kunne opprette gjennom int

@@ -194,7 +194,7 @@ public class PipRepository {
         }
         return aksjonspunktKoder.stream()
             .map(ak -> AksjonspunktDefinisjon.fraKode(ak).getAksjonspunktType().getOffisiellKode())
-            .distinct().sorted()
+            .sorted()
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 

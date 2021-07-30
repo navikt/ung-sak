@@ -10,6 +10,8 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -18,8 +20,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsReposi
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 /**
  * Kjører behandlingskontroll automatisk fra der prosessen står.
@@ -66,7 +66,7 @@ public class FortsettBehandlingTask extends UnderBehandlingProsessTask {
         } else {
             String utført = data.getPropertyValue(FortsettBehandlingTask.AKSJONSPUNKT_STATUS_TIL_UTFORT);
             if (utført != null) {
-                var aksjonspunkter = Arrays.asList(utført.split(",\\s*")).stream().map(v -> AksjonspunktDefinisjon.fraKode(v)).collect(Collectors.toList());
+                var aksjonspunkter = Arrays.stream(utført.split(",\\s*")).map(AksjonspunktDefinisjon::fraKode).collect(Collectors.toList());
                 behandlingskontrollTjeneste.settAutopunktTilUtført(behandling, kontekst, aksjonspunkter);
             }
         }

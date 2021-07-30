@@ -118,7 +118,7 @@ public class TotrinnskontrollAktivitetDtoTjeneste {
             return null;
         }
         Optional<Virksomhet> virksomhet = virksomhetTjeneste.finnOrganisasjon(orgnr);
-        if (!virksomhet.isPresent()) {
+        if (virksomhet.isEmpty()) {
             virksomhet = virksomhetTjeneste.finnOrganisasjon(orgnr);
         }
         return virksomhet.map(Virksomhet::getNavn)

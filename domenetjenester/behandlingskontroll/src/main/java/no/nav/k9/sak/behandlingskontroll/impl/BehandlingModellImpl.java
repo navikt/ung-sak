@@ -208,8 +208,7 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
 
     @Override
     public BehandlingStegModell finnFørsteSteg(BehandlingStegType... behandlingStegTyper) {
-        Set<BehandlingStegType> stegTyper = new LinkedHashSet<>(Arrays.asList(behandlingStegTyper).stream().filter(bs -> bs != null)
-            .collect(Collectors.toList()));
+        Set<BehandlingStegType> stegTyper = Arrays.stream(behandlingStegTyper).filter(Objects::nonNull).collect(Collectors.toSet());
 
         for (BehandlingStegModellImpl stegModell : steg) {
             BehandlingStegType sjekkSteg = stegModell.getBehandlingStegType();
@@ -220,18 +219,18 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
 
         throw new IllegalArgumentException(
             "Utvikler-feil: Ingen av forespurte steg er kjent i BehandlingModell: behandlingType=" + behandlingType //$NON-NLS-1$
-                + ", forspurteSteg=" + Arrays.asList(stegTyper) // NOSONAR //$NON-NLS-1$
+                + ", forspurteSteg=" + stegTyper // NOSONAR //$NON-NLS-1$
         );
     }
 
     @Override
     public Stream<BehandlingStegModell> hvertSteg() {
-        return steg.stream().map(m -> (BehandlingStegModell) m);
+        return steg.stream().map(m -> m);
     }
 
     @Override
     public List<BehandlingStegType> getAlleBehandlingStegTyper() {
-        return steg.stream().map(s -> s.getBehandlingStegType()).collect(Collectors.toList());
+        return steg.stream().map(BehandlingStegModellImpl::getBehandlingStegType).collect(Collectors.toList());
     }
 
     @Override

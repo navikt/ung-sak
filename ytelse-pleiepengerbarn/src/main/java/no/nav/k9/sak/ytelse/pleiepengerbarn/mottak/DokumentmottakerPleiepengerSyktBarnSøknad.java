@@ -132,7 +132,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             if (journalpost.getInneholderMedisinskeOpplysninger() != null) {
                 journalpostHarMedisinskeOpplysninger = journalpost.getInneholderMedisinskeOpplysninger();
             }
-            
+
             sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
                 behandling,
                 journalpostId,
@@ -147,7 +147,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             .filter(j -> j.getJournalpostId().equals(journalpostId.getVerdi()))
             .findFirst();
 
-        if (!journalpost.isPresent()) {
+        if (journalpost.isEmpty()) {
             sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling,
                 journalpostId,
                 behandling.getFagsak().getPleietrengendeAktørId(),

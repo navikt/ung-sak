@@ -139,7 +139,7 @@ public @interface StartpunktRef {
         }
 
         private static List<String> coalesce(String... vals) {
-            return Arrays.asList(vals).stream().filter(v -> v != null).distinct().collect(Collectors.toList());
+            return Arrays.stream(vals).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         }
 
     }

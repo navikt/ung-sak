@@ -298,7 +298,7 @@ public class MapInntektsmeldinger {
                 .medRefusjon(dto.getRefusjonsBeløpPerMnd(), dto.getRefusjonOpphører())
                 .medKanalreferanse(dto.getKanalreferanse())
                 .medInntektsmeldingaarsak(innsendingsårsak)
-                .medNærRelasjon(dto.isNærRelasjon() == null ? false : dto.isNærRelasjon())
+                .medNærRelasjon(Boolean.TRUE.equals(dto.isNærRelasjon()))
                 .medKildesystem(dto.getKildesystem())
                 .medMottattDato(dto.getMottattDato());
 

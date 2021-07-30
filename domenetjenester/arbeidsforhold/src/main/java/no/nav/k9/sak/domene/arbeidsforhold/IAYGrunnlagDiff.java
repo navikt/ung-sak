@@ -37,7 +37,7 @@ public class IAYGrunnlagDiff {
         // quick check
         if (eksisterende.isPresent() != nye.isPresent()) {
             return true;
-        } else if (!eksisterende.isPresent() && !nye.isPresent()) {
+        } else if (eksisterende.isEmpty() && nye.isEmpty()) {
             return false;
         } else {
             if (eksisterende.get().getAlleInntektsmeldinger().size() != nye.get().getAlleInntektsmeldinger().size()) {
@@ -56,7 +56,7 @@ public class IAYGrunnlagDiff {
         // quick check
         if (eksisterendeAktørArbeid.isPresent() != nyAktørArbeid.isPresent()) {
             return true;
-        } else if (!eksisterendeAktørArbeid.isPresent() && !nyAktørArbeid.isPresent()) {
+        } else if (eksisterendeAktørArbeid.isEmpty() && nyAktørArbeid.isEmpty()) {
             return false;
         } else {
             var eksisterendeFilter = new YrkesaktivitetFilter(null, eksisterendeAktørArbeid).før(skjæringstidspunkt);
@@ -80,7 +80,7 @@ public class IAYGrunnlagDiff {
         // quick check
         if (eksisterende.isPresent() != nye.isPresent()) {
             return true;
-        } else if (!eksisterende.isPresent() && !nye.isPresent()) {
+        } else if (eksisterende.isEmpty() && nye.isEmpty()) {
             return false;
         } else {
             var eksisterendeInntektFilter = new InntektFilter(eksisterende).før(skjæringstidspunkt);

@@ -29,7 +29,7 @@ class InfotrygdHendelseMapper {
 
         Optional<Meldingstype> meldingstype = Arrays.stream(Meldingstype.values()).filter(e -> e.getType().equals(feedElement.getType())).findFirst();
 
-        if (!meldingstype.isPresent()) {
+        if (meldingstype.isEmpty()) {
             return InfotrygdHendelse.builder().build();
         }
         Innhold innhold = JsonMapper.fromJson(payload, meldingstype.get().getMeldingsDto());

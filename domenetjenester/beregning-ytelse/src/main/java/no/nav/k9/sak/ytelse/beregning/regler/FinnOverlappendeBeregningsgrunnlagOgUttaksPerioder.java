@@ -130,7 +130,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             return;
         }
         Optional<UttakAktivitet> uttakAktivitetOpt = matchUttakAktivitetMedBeregningsgrunnlagPrStatus(beregningsgrunnlagPrStatus, uttakResultatPeriode.getUttakAktiviteter());
-        if (!uttakAktivitetOpt.isPresent()) {
+        if (uttakAktivitetOpt.isEmpty()) {
             return;
         }
         UttakAktivitet uttakAktivitet = uttakAktivitetOpt.get();
@@ -177,7 +177,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             return;
         }
         Optional<UttakAktivitet> uttakAktivitetOpt = matchUttakAktivitetMedArbeidsforhold(uttakResultatPeriode.getUttakAktiviteter(), arbeidsforhold);
-        if (!uttakAktivitetOpt.isPresent()) {
+        if (uttakAktivitetOpt.isEmpty()) {
             return;
         }
         UttakAktivitet uttakAktivitet = uttakAktivitetOpt.get();

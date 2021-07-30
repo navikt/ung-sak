@@ -24,7 +24,7 @@ public class RegisterdataDiffsjekker {
         traverseGraph = TraverseEntityGraphFactory.build(onlyCheckTrackedFields);
         diffEntity = new DiffEntity(traverseGraph);
     }
-    
+
     public  <T extends Comparable<? super T>> boolean erForskjellPå(List<T> list1, List<T> list2) {
         Map<Node, Pair> leafDifferences = finnForskjellerPåLister(list1, list2);
         return leafDifferences.size() > 0;
@@ -35,7 +35,7 @@ public class RegisterdataDiffsjekker {
         Collections.sort(list2);
         return finnForskjellerPå(list1, list2);
     }
-    
+
     public boolean erForskjellPå(Object object1, Object object2) {
         return !finnForskjellerPå(object1, object2).isEmpty();
     }
@@ -50,13 +50,13 @@ public class RegisterdataDiffsjekker {
     }
 
     public static Optional<Boolean> eksistenssjekkResultat(Optional<?> eksisterende, Optional<?> nytt) {
-        if (!eksisterende.isPresent() && !nytt.isPresent()) {
+        if (eksisterende.isEmpty() && nytt.isEmpty()) {
             return Optional.of(Boolean.FALSE);
         }
-        if (eksisterende.isPresent() && !nytt.isPresent()) {
+        if (eksisterende.isPresent() && nytt.isEmpty()) {
             return Optional.of(Boolean.TRUE);
         }
-        if (!eksisterende.isPresent() && nytt.isPresent()) { // NOSONAR - "redundant" her er false pos.
+        if (eksisterende.isEmpty() && nytt.isPresent()) { // NOSONAR - "redundant" her er false pos.
             return Optional.of(Boolean.TRUE);
         }
         return Optional.empty();

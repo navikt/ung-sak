@@ -162,14 +162,14 @@ public class FagsakApplikasjonTjeneste {
     /** Returnerer samling med kun en fagsak. */
     public FagsakSamlingForBruker hentFagsakForSaksnummer(Saksnummer saksnummer) {
         Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
-        if (!fagsak.isPresent()) {
+        if (fagsak.isEmpty()) {
             return FagsakSamlingForBruker.emptyView();
         }
         List<Fagsak> fagsaker = Collections.singletonList(fagsak.get());
         AktørId aktørId = fagsak.get().getAktørId();
 
         Optional<Personinfo> funnetNavBruker = tpsTjeneste.hentBrukerForAktør(aktørId);
-        if (!funnetNavBruker.isPresent()) {
+        if (funnetNavBruker.isEmpty()) {
             return FagsakSamlingForBruker.emptyView();
         }
 
@@ -178,7 +178,7 @@ public class FagsakApplikasjonTjeneste {
 
     private FagsakSamlingForBruker hentSakerForFnr(PersonIdent fnr) {
         Optional<Personinfo> funnetNavBruker = tpsTjeneste.hentBrukerForFnr(fnr);
-        if (!funnetNavBruker.isPresent()) {
+        if (funnetNavBruker.isEmpty()) {
             return FagsakSamlingForBruker.emptyView();
         }
         List<Fagsak> fagsaker = fagsakRepository.hentForBruker(funnetNavBruker.get().getAktørId());

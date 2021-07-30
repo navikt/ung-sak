@@ -63,7 +63,7 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
     private static Arbeidsforhold mapArbeidsforhold(no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel andel) {
         if (andel.getAktivitetStatus().erFrilanser()) {
             return Arbeidsforhold.frilansArbeidsforhold();
-        } else if (!andel.getArbeidsgiver().isPresent()) {
+        } else if (andel.getArbeidsgiver().isEmpty()) {
             return null;
         } else {
             return lagArbeidsforholdHosArbeidsgiver(andel.getArbeidsgiver().get(), andel.getArbeidsforholdRef());

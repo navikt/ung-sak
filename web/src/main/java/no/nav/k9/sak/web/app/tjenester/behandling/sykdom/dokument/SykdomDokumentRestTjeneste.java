@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -181,21 +182,21 @@ public class SykdomDokumentRestTjeneste {
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
-        
+
         for (Periode periode : sykdomInnleggelse.getPerioder()) {
             if (periode.getFom() == null || periode.getTom() == null) {
                 throw new IllegalArgumentException("fom/tom kan ikke være null");
             }
         }
-        
+
         if (sykdomInnleggelse.isDryRun()) {
             return new SykdomInnleggelseOppdateringResultatDto(false); // TODO: Sett riktig verdi.
         }
-        
+
         final SykdomInnleggelser innleggelser = sykdomDokumentOversiktMapper.toSykdomInnleggelser(sykdomInnleggelse, SubjectHandler.getSubjectHandler().getUid());
 
         sykdomDokumentRepository.opprettEllerOppdaterInnleggelser(innleggelser, behandling.getFagsak().getPleietrengendeAktørId());
-        
+
         return new SykdomInnleggelseOppdateringResultatDto(false); // TODO: Sett riktig verdi.
     }
 
@@ -326,7 +327,7 @@ public class SykdomDokumentRestTjeneste {
 
 
     private boolean harMinstEnAnnenGodkjentLegeerklæring(SykdomDokument sykdomDokument, final AktørId pleietrengende) {
-        return sykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).stream().anyMatch(d -> d.getId() != sykdomDokument.getId());
+        return sykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).stream().anyMatch(d -> !Objects.equals(d.getId(), sykdomDokument.getId()));
     }
 
     /**
