@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -118,16 +117,13 @@ public class TrekkUtFraværTjeneste {
         return trekkUtFravær(vurderteKravOgPerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
     }
 
-    // Hent alle fraværsperioder på fagsak, uten sammenslåing av overlappende perioder
     public List<OppgittFraværPeriode> alleFraværsperioderPåFagsak(Behandling behandling) {
         var inntektsmeldingerPåFagsak = inntektsmeldingerPåFagsak(behandling.getFagsak());
         var søknaderPåFagsak = fraværFraSøknaderPåFagsak(behandling);
         var avklartSøknadsfristResultat = avklartSøknadsfristRepository.hentHvisEksisterer(behandling.getId());
 
         var vurdertePerioder = mapOppgittFravær.mapFra(inntektsmeldingerPåFagsak, søknaderPåFagsak, avklartSøknadsfristResultat);
-
-        // Returnerer alle søknadsperioder rått, uten sammenslåing av overlappende perioder
-        return vurdertePerioder.values().stream().flatMap(Collection::stream).map(VurdertSøktPeriode::getRaw).collect(Collectors.toList());
+        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
     }
 
     private LinkedHashSet<Inntektsmelding> inntektsmeldingerPåBehandling(Behandling behandling) {
