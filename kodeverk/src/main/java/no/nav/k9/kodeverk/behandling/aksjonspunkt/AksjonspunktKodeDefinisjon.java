@@ -129,7 +129,7 @@ public class AksjonspunktKodeDefinisjon {
         // lag liste av alle koder definert, brukes til konsistensjsekk mot AksjonspunktDefinisjon i tilfelle ubrukte/utgåtte koder.
         var cls = AksjonspunktKodeDefinisjon.class;
         var map = new TreeMap<String, String>();
-        Arrays.asList(cls.getDeclaredFields()).stream()
+        Arrays.stream(cls.getDeclaredFields())
             .filter(f -> Modifier.isPublic(f.getModifiers()) && f.getType() == String.class && Modifier.isStatic(f.getModifiers()))
             .filter(f -> getValue(f) != null)
             .forEach(f -> {

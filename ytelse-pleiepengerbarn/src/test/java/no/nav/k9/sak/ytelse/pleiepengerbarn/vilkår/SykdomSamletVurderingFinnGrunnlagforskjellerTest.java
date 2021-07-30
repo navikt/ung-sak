@@ -277,7 +277,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
     private SykdomInnleggelser innleggelserMock(Periode... perioder) {
         return new SykdomInnleggelser(
             0L,
-            Arrays.asList(perioder).stream().map(p -> { return new SykdomInnleggelsePeriode(p.getFom(), p.getTom(), "", LocalDateTime.now()); }).collect(Collectors.toList()),
+            Arrays.stream(perioder).map(p -> new SykdomInnleggelsePeriode(p.getFom(), p.getTom(), "", LocalDateTime.now())).collect(Collectors.toList()),
             "",
             LocalDateTime.now()
         );
