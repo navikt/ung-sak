@@ -42,7 +42,7 @@ public class VurderFaresignalerOppdaterer implements AksjonspunktOppdaterer<Vurd
     public OppdateringResultat oppdater(VurderFaresignalerDto dto, AksjonspunktOppdaterParameter param) {
         Long behandlingId = param.getBehandlingId();
         Optional<RisikoklassifiseringEntitet> risikoklassifiseringEntitet = risikovurderingTjeneste.hentRisikoklassifiseringForBehandling(behandlingId);
-        if (!risikoklassifiseringEntitet.isPresent() || !Objects.equals(risikoklassifiseringEntitet.get().getKontrollresultat(), Kontrollresultat.HØY)) {
+        if (risikoklassifiseringEntitet.isEmpty() || !Objects.equals(risikoklassifiseringEntitet.get().getKontrollresultat(), Kontrollresultat.HØY)) {
             throw new IllegalStateException("Skal ikke kunne vurdere faresignaler for behandling med id " + behandlingId);
         }
 

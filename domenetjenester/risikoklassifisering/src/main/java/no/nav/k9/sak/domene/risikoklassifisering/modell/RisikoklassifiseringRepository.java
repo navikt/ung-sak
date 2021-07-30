@@ -32,7 +32,7 @@ public class RisikoklassifiseringRepository {
 
         Optional<RisikoklassifiseringEntitet> gammelEntitetOpt = hentRisikoklassifiseringForBehandling(behandlingId);
 
-        if (!gammelEntitetOpt.isPresent()) {
+        if (gammelEntitetOpt.isEmpty()) {
             throw new IllegalStateException("Finner ikke risikoklassifisering for behandling med id " + behandlingId);
         }
 

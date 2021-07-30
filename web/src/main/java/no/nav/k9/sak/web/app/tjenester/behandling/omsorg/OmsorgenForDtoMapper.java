@@ -69,9 +69,9 @@ class OmsorgenForDtoMapper {
             return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), tvingManuellVurdering, true, List.of());
         }
         final boolean ikkeVurdertBlirOppfylt = systemdata.isRegistrertForeldrerelasjon() && !tvingManuellVurdering ;
-        
+
         final var omsorgenForListe = toOmsorgenForDtoListe(grunnlagOpt.get().getOmsorgenFor().getPerioder(), ikkeVurdertBlirOppfylt, tidslinjeTilVurdering);
-        final boolean kanLøseAksjonspunkt = omsorgenForListe.stream().allMatch(o -> o.getResultatEtterAutomatikk() != Resultat.IKKE_VURDERT); 
+        final boolean kanLøseAksjonspunkt = omsorgenForListe.stream().allMatch(o -> o.getResultatEtterAutomatikk() != Resultat.IKKE_VURDERT);
         return new OmsorgenForOversiktDto(
             systemdata.isRegistrertForeldrerelasjon(),
             systemdata.isRegistrertSammeBosted(),
@@ -100,7 +100,7 @@ class OmsorgenForDtoMapper {
         var periode = mapTilPeriode(søknadsperioder.getPerioder());
 
         var optAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, periode);
-        if (!optAggregat.isPresent()) {
+        if (optAggregat.isEmpty()) {
             return new Systemdata(false, false);
         }
         var aggregat = optAggregat.get();

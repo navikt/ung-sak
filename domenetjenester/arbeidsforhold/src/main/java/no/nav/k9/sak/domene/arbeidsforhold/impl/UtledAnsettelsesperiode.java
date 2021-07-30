@@ -22,13 +22,13 @@ final class UtledAnsettelsesperiode {
 
     static Optional<DatoIntervallEntitet> utled(YrkesaktivitetFilter filter, Collection<Yrkesaktivitet> yrkesaktiviteter, LocalDate skjæringstidspunkt, boolean medOverstyrtPeriode){
         Optional<DatoIntervallEntitet> anssettelsesperiode = finnSenesteAnsettelsesperiodeSomOverlapperStp(filter, yrkesaktiviteter, skjæringstidspunkt, medOverstyrtPeriode);
-        if (!medOverstyrtPeriode && !anssettelsesperiode.isPresent()) {
+        if (!medOverstyrtPeriode && anssettelsesperiode.isEmpty()) {
             anssettelsesperiode = finnTidligsteAnsettelsesperiodeSomStarterEtterStp(filter, yrkesaktiviteter, skjæringstidspunkt);
         }
         return anssettelsesperiode;
     }
 
-    private static Optional<DatoIntervallEntitet> finnSenesteAnsettelsesperiodeSomOverlapperStp(YrkesaktivitetFilter filter, 
+    private static Optional<DatoIntervallEntitet> finnSenesteAnsettelsesperiodeSomOverlapperStp(YrkesaktivitetFilter filter,
                                                                                                 Collection<Yrkesaktivitet> yrkesaktiviteter,
                                                                                                 LocalDate skjæringstidspunkt,
                                                                                                 boolean medOverstyrtPeriode) {

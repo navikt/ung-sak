@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -16,7 +17,6 @@ import no.nav.k9.sak.kontrakt.produksjonsstyring.OppgaveIdDto;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKobling;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKoblingRepository;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.felles.feil.Feil;
 
 public class OppgaveRedirectData {
 
@@ -39,7 +39,7 @@ public class OppgaveRedirectData {
 
         Saksnummer saksnummer = saksnummerDto.getVerdi();
         Optional<Fagsak> sak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
-        if (!sak.isPresent()) {
+        if (sak.isEmpty()) {
             return OppgaveRedirectData.medFeilmelding(logg(OppgaveRedirectServletFeil.FACTORY.detFinnesIngenFagsak(saksnummer.getVerdi())));
         }
 
