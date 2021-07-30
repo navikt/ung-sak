@@ -506,8 +506,8 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     private void lagrePersoninfo(Behandling behandling, PersonInformasjon personInformasjon, PersonopplysningRepository repository) {
-        Objects.nonNull(behandling);
-        Objects.nonNull(personInformasjon);
+        Objects.requireNonNull(behandling);
+        Objects.requireNonNull(personInformasjon);
 
         if (personInformasjon.getType().equals(PersonopplysningVersjonType.REGISTRERT)) {
             lagreRegisterPersoninfo(behandling, personInformasjon, repository);
@@ -854,7 +854,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     @SuppressWarnings("unchecked")
     public S medRegisterOpplysninger(PersonInformasjon personinfo) {
-        Objects.nonNull(personinfo);
+        Objects.requireNonNull(personinfo);
         if (!personinfo.getType().equals(PersonopplysningVersjonType.REGISTRERT)) {
             throw new IllegalStateException("Feil versjontype, må være PersonopplysningVersjonType.REGISTRERT");
         }
