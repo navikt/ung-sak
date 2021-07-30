@@ -6,6 +6,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -55,6 +57,7 @@ public class OmsorgspengerGrunnlagRepository {
         return grunnlag.map(OmsorgspengerGrunnlag::getOppgittFraværFraSøknad);
     }
 
+    // Henter alle sammenslåtte kravperioder fra IM-er og søknader
     public Set<OppgittFraværPeriode> hentAlleFraværPerioder(Long behandlingId) {
         if (behandlingId == null) {
             return Set.of();
@@ -66,12 +69,26 @@ public class OmsorgspengerGrunnlagRepository {
         return grunnlag.getOppgittFravær().getPerioder();
     }
 
+    // Henter alle kravperioder fra søknader (rått, uten sammenslåing)
+    private Set<OppgittFraværPeriode> hentAlleFraværPerioderFraSøknad(Long behandlingId) {
+        if (behandlingId == null) {
+            return Set.of();
+        }
+        final var grunnlag = hentGrunnlag(behandlingId).orElse(null);
+        if (grunnlag == null || grunnlag.getOppgittFraværFraSøknad() == null) {
+            return Set.of();
+        }
+        return grunnlag.getOppgittFraværFraSøknad().getPerioder();
+    }
+
     public Optional<DatoIntervallEntitet> hentMaksPeriode(Long behandlingId) {
-        var perioder = hentAlleFraværPerioder(behandlingId);
-        if (perioder.isEmpty()) {
+        var perioderSammenslåtte = hentAlleFraværPerioder(behandlingId);
+        var perioderSøknad = hentAlleFraværPerioderFraSøknad(behandlingId);
+        if (perioderSammenslåtte.isEmpty() && perioderSøknad.isEmpty()) {
             return Optional.empty();
         }
 
+        var perioder = Stream.concat(perioderSammenslåtte.stream(), perioderSøknad.stream()).collect(Collectors.toSet());
         var fom = perioder.stream()
             .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))
             .map(OppgittFraværPeriode::getPeriode)
