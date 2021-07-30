@@ -125,11 +125,9 @@ public class TrekkUtFraværTjeneste {
         søkteFraværsperioder.putAll(søktFraværFraImPåFagsak(behandling.getFagsak()));
         søkteFraværsperioder.putAll(fraværFraSøknaderPåFagsak(behandling));
 
-        // Del_2_bruk - terminal
         var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), søkteFraværsperioder);
         log.info("Fant {} inntektsmeldinger og {} søknader knyttet til fagsaken:", countIm(vurdertePerioder), countSøknad(vurdertePerioder));
 
-        // Del_3_bruk , Stegbruk: INIT_PERIODER - terminal
         return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
     }
 
