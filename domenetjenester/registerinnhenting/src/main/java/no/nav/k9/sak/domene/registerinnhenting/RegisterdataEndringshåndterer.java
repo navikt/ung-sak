@@ -148,7 +148,7 @@ public class RegisterdataEndringshåndterer {
             return;
         }
         if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON)) {
-            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_YTELSER);
+            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON);
             return;
         }
         historikkinnslagTjeneste.opprettHistorikkinnslagForNyeRegisteropplysninger(behandling);
