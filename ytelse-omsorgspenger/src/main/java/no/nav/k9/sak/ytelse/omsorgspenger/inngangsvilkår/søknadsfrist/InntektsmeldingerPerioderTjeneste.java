@@ -44,9 +44,7 @@ public class InntektsmeldingerPerioderTjeneste {
 
         return iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer(), referanse.getAktørId(), referanse.getFagsakYtelseType())
             .stream()
-            .filter(it -> inntektsmeldingerJournalposter
-                .stream()
-                .anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())))
+            .filter(it -> inntektsmeldingerJournalposter.contains(it.getJournalpostId()))
             .collect(Collectors.toSet());
     }
 
@@ -61,9 +59,7 @@ public class InntektsmeldingerPerioderTjeneste {
 
         return iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer(), referanse.getAktørId(), referanse.getFagsakYtelseType())
             .stream()
-            .filter(it -> inntektsmeldingerJournalposter
-                .stream()
-                .anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())))
+            .filter(it -> inntektsmeldingerJournalposter.contains(it.getJournalpostId()))
             .collect(Collectors.toSet());
     }
 
