@@ -64,7 +64,7 @@ public class HistorikkInnslagKonverter {
         Optional<ArkivJournalPost> aktivJournalPost = aktivJournalPost(lenke.getJournalpostId(), journalPosterForSak);
         HistorikkInnslagDokumentLinkDto dto = new HistorikkInnslagDokumentLinkDto();
         dto.setTag(lenke.getLinkTekst());
-        dto.setUtgått(!aktivJournalPost.isPresent());
+        dto.setUtgått(aktivJournalPost.isEmpty());
         dto.setDokumentId(lenke.getDokumentId());
         dto.setJournalpostId(lenke.getJournalpostId().getVerdi());
         return dto;
@@ -77,7 +77,7 @@ public class HistorikkInnslagKonverter {
     private String medStorBokstav(String opprettetAv) {
         return opprettetAv.substring(0, 1).toUpperCase() + opprettetAv.substring(1);
     }
-    
+
     static List<HistorikkinnslagDelDto> mapFra(List<HistorikkinnslagDel> historikkinnslagDelList) {
         List<HistorikkinnslagDelDto> historikkinnslagDelDtoList = new ArrayList<>();
         for (var historikkinnslagDel : historikkinnslagDelList) {
@@ -139,7 +139,7 @@ public class HistorikkInnslagKonverter {
         }
         return Optional.ofNullable(kodeverdiMap.get(aarsakVerdi));
     }
-    
+
     static HistorikkInnslagTemaDto mapFra(HistorikkinnslagFelt felt) {
         HistorikkInnslagTemaDto dto = new HistorikkInnslagTemaDto();
         HistorikkEndretFeltType endretFeltNavn = HistorikkEndretFeltType.fraKode(felt.getNavn());
@@ -148,12 +148,12 @@ public class HistorikkInnslagKonverter {
         dto.setKlNavn(felt.getKlNavn());
         return dto;
     }
-    
+
 
     public static HistorikkinnslagHendelseDto mapFraHendelse(HistorikkinnslagFelt hendelse) {
         return new HistorikkinnslagHendelseDto(HistorikkinnslagType.fraKode(hendelse.getNavn()), hendelse.getTilVerdi());
     }
-    
+
     static List<HistorikkinnslagTotrinnsVurderingDto> mapFraTotrinn(List<HistorikkinnslagTotrinnsvurdering> aksjonspunkter) {
         return aksjonspunkter.stream()
             .map(HistorikkInnslagKonverter::mapFraTotrinn)
@@ -167,7 +167,7 @@ public class HistorikkInnslagKonverter {
         dto.setGodkjent(totrinnsvurdering.erGodkjent());
         return dto;
     }
-    
+
     static List<HistorikkinnslagOpplysningDto> mapFraOpplysning(List<HistorikkinnslagFelt> opplysninger) {
         return opplysninger.stream().map(o -> mapFraOpplysning(o)).collect(Collectors.toList());
     }
@@ -180,7 +180,7 @@ public class HistorikkInnslagKonverter {
         return dto;
     }
 
-    
+
     static List<HistorikkinnslagEndretFeltDto> mapFraEndretFelt(List<HistorikkinnslagFelt> endretFeltList) {
         List<HistorikkinnslagEndretFeltDto> dto = new ArrayList<>();
         for (var felt : endretFeltList) {
@@ -211,7 +211,7 @@ public class HistorikkInnslagKonverter {
         }
         return verdi;
     }
-    
+
 
     static HistorikkinnslagSoeknadsperiodeDto mapFraSøknadsperiode(HistorikkinnslagFelt soeknadsperiode) {
         HistorikkinnslagSoeknadsperiodeDto dto = new HistorikkinnslagSoeknadsperiodeDto();

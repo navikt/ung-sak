@@ -70,10 +70,6 @@ public class Periode implements Comparable<Periode>{
         return tom;
     }
 
-    public boolean starterFørEllerSamtidigSom(Periode periode) {
-        return fom.isEqual(periode.getFom()) || fom.isBefore(periode.getFom());
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == this)
@@ -94,12 +90,12 @@ public class Periode implements Comparable<Periode>{
     public String toString() {
         return getClass().getSimpleName() + "<fom=" + getFom() + ", tom=" + getTom() + ">";
     }
-    
+
     @Override
     public int compareTo(Periode o) {
         return COMP.compare(this, o);
     }
-    
+
     public static final Comparator<Periode> COMP = Comparator
             .comparing((Periode dto) -> dto.getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
             .thenComparing(dto -> dto.getTom(), Comparator.nullsFirst(Comparator.naturalOrder()));

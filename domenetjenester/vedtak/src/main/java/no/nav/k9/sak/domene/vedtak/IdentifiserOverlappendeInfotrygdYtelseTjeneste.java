@@ -75,7 +75,7 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
         }
 
         if (!VedtakResultatType.INNVILGET.equals(behandlingVedtak.getVedtakResultatType())
-            || !periodeVLOpt.isPresent()) {
+            || periodeVLOpt.isEmpty()) {
             return Optional.empty();
         }
         ÅpenDatoIntervallEntitet periodeVL = periodeVLOpt.get();

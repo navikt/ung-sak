@@ -97,7 +97,7 @@ public class LagreMottattInntektsmeldingerTask extends UnderBehandlingProsessTas
 
         // TODO fjern denne - skal alltid lese fra mottatt_dokument status BEHANDLER
         Collection<JournalpostId> journalpostIder = dokumenter == null || dokumenter.isEmpty() ? Collections.emptyList()
-            : Arrays.asList(dokumenter.split(",")).stream().map(s -> new JournalpostId(s)).collect(Collectors.toCollection(LinkedHashSet::new));
+            : Arrays.stream(dokumenter.split(",")).map(JournalpostId::new).collect(Collectors.toCollection(LinkedHashSet::new));
         mottatteDokumenter.addAll(mottatteDokumentRepository.hentMottatteDokument(fagsakId, journalpostIder, DokumentStatus.MOTTATT, DokumentStatus.GYLDIG));
     }
 

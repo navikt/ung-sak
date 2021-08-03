@@ -2,11 +2,12 @@ package no.nav.k9.sak.ytelse.omsorgspenger.repo;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -21,18 +22,10 @@ public class OmsorgspengerGrunnlagRepository {
 
     private EntityManager entityManager;
 
-    OmsorgspengerGrunnlagRepository() {
-        // CDI
-    }
-
     @Inject
     public OmsorgspengerGrunnlagRepository(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
-    }
-
-    public OppgittFravær hentOppgittFravær(UUID behandlingId) {
-        return hentOppittFraværHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt uttak for behandlingId=" + behandlingId));
     }
 
     public Optional<OppgittFravær> hentOppittFraværHvisEksisterer(UUID behandlingId) {
@@ -44,6 +37,7 @@ public class OmsorgspengerGrunnlagRepository {
         return grunnlag.map(OmsorgspengerGrunnlag::getOppgittFravær);
     }
 
+    // Henter sammenslåtte kravperioder fra IM-er og søknader
     Optional<OppgittFravær> hentOppgittFraværHvisEksisterer(Long behandlingId) {
         if (behandlingId == null) {
             return Optional.empty();
@@ -53,6 +47,7 @@ public class OmsorgspengerGrunnlagRepository {
         return grunnlag.map(OmsorgspengerGrunnlag::getOppgittFravær);
     }
 
+    // Henter kravperioder fra søknader (rått, uten sammenslåing)
     public Optional<OppgittFravær> hentOppgittFraværFraSøknadHvisEksisterer(Long behandlingId) {
         if (behandlingId == null) {
             return Optional.empty();
@@ -62,31 +57,38 @@ public class OmsorgspengerGrunnlagRepository {
         return grunnlag.map(OmsorgspengerGrunnlag::getOppgittFraværFraSøknad);
     }
 
-    /**
-     * Henter alle fraværsperioder fra begge mulige kilder (IM og søknad)
-     */
+    // Henter alle sammenslåtte kravperioder fra IM-er og søknader
     public Set<OppgittFraværPeriode> hentAlleFraværPerioder(Long behandlingId) {
         if (behandlingId == null) {
             return Set.of();
         }
         final var grunnlag = hentGrunnlag(behandlingId).orElse(null);
-        if (grunnlag == null) {
+        if (grunnlag == null || grunnlag.getOppgittFravær() == null) {
             return Set.of();
         }
-        Set<OppgittFraværPeriode> fraværPerioder = new HashSet<>();
-        var fraværPerioderIm = Optional.ofNullable(grunnlag.getOppgittFravær()).map(OppgittFravær::getPerioder);
-        fraværPerioderIm.ifPresent(fraværPerioder::addAll);
-        var fraværPerioderSøknad = Optional.ofNullable(grunnlag.getOppgittFraværFraSøknad()).map(OppgittFravær::getPerioder);
-        fraværPerioderSøknad.ifPresent(fraværPerioder::addAll);
-        return fraværPerioder;
+        return grunnlag.getOppgittFravær().getPerioder();
+    }
+
+    // Henter alle kravperioder fra søknader (rått, uten sammenslåing)
+    private Set<OppgittFraværPeriode> hentAlleFraværPerioderFraSøknad(Long behandlingId) {
+        if (behandlingId == null) {
+            return Set.of();
+        }
+        final var grunnlag = hentGrunnlag(behandlingId).orElse(null);
+        if (grunnlag == null || grunnlag.getOppgittFraværFraSøknad() == null) {
+            return Set.of();
+        }
+        return grunnlag.getOppgittFraværFraSøknad().getPerioder();
     }
 
     public Optional<DatoIntervallEntitet> hentMaksPeriode(Long behandlingId) {
-        var perioder = hentAlleFraværPerioder(behandlingId);
-        if (perioder.isEmpty()) {
+        var perioderSammenslåtte = hentAlleFraværPerioder(behandlingId);
+        var perioderSøknad = hentAlleFraværPerioderFraSøknad(behandlingId);
+        if (perioderSammenslåtte.isEmpty() && perioderSøknad.isEmpty()) {
             return Optional.empty();
         }
 
+        var perioder = Stream.concat(perioderSammenslåtte.stream(), perioderSøknad.stream()).collect(Collectors.toSet());
         var fom = perioder.stream()
             .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))
             .map(OppgittFraværPeriode::getPeriode)
@@ -116,6 +118,7 @@ public class OmsorgspengerGrunnlagRepository {
         return hentEksisterendeGrunnlagBasertPåGrunnlagId(grunnlagId);
     }
 
+    // Lagre sammenslåtte kravperioder fra IM-er og søknader
     public void lagreOgFlushOppgittFravær(Long behandlingId, OppgittFravær input) {
         var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
         var eksisterendeFraværFraSøknad = eksisterendeGrunnlag.map(OmsorgspengerGrunnlag::getOppgittFraværFraSøknad).orElse(null);
@@ -124,6 +127,7 @@ public class OmsorgspengerGrunnlagRepository {
         lagreOgFlushNyttGrunnlag(new OmsorgspengerGrunnlag(behandlingId, input, eksisterendeFraværFraSøknad));
     }
 
+    // Lagre kravperioder (uten sammenslåing) fra søknad
     public void lagreOgFlushOppgittFraværFraSøknad(Long behandlingId, OppgittFravær input) {
         var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
         var eksisterendeFravær = eksisterendeGrunnlag.map(OmsorgspengerGrunnlag::getOppgittFravær).orElse(null);

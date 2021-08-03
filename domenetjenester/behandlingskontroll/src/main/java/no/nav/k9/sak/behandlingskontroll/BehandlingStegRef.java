@@ -80,7 +80,7 @@ public @interface BehandlingStegRef {
 
     @SuppressWarnings("unchecked")
     public final static class Lookup {
-        
+
         private Lookup() {
         }
 
@@ -136,7 +136,7 @@ public @interface BehandlingStegRef {
                 ? instances.select(cls, anno)
                 : instances.select(anno);
         }
-        
+
         private static <I> I getInstance(Instance<I> inst) {
             var i = inst.get();
             if (i.getClass().isAnnotationPresent(Dependent.class)) {
@@ -147,14 +147,14 @@ public @interface BehandlingStegRef {
         }
 
         private static List<String> coalesce(String... vals) {
-            return Arrays.asList(vals).stream().filter(v -> v != null).distinct().collect(Collectors.toList());
+            return Arrays.stream(vals).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         }
 
     }
-    
+
     /**
      * container for repeatable annotations.
-     * 
+     *
      * @see https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html
      */
     @Inherited

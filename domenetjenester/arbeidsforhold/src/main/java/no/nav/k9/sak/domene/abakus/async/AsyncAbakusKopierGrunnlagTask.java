@@ -14,14 +14,14 @@ import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.abakus.iaygrunnlag.request.KopierGrunnlagRequest;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(AsyncAbakusKopierGrunnlagTask.TASKTYPE)
@@ -74,7 +74,7 @@ class AsyncAbakusKopierGrunnlagTask extends UnderBehandlingProsessTask {
 
     private static Set<Dataset> getDataset(String datasetStr) {
         if (datasetStr != null && !(datasetStr = datasetStr.trim()).isEmpty()) {
-            return Arrays.asList(datasetStr.split(",\\s*")).stream().map(Dataset::valueOf).collect(Collectors.toSet());
+            return Arrays.stream(datasetStr.split(",\\s*")).map(Dataset::valueOf).collect(Collectors.toSet());
         } else {
             return EnumSet.allOf(Dataset.class);
         }

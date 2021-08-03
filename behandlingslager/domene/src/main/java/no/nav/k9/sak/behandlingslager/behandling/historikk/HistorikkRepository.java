@@ -51,7 +51,7 @@ public class HistorikkRepository {
         Long fagsakId = getFagsakId(behandlingId);
 
         return entityManager.createQuery(
-            "select h from Historikkinnslag h where (h.behandlingId = :behandlingId OR h.behandlingId = NULL) AND h.fagsakId = :fagsakId ", //$NON-NLS-1$
+            "select h from Historikkinnslag h where (h.behandlingId = :behandlingId OR h.behandlingId is null) AND h.fagsakId = :fagsakId ", //$NON-NLS-1$
             Historikkinnslag.class)
             .setParameter("fagsakId", fagsakId)// NOSONAR //$NON-NLS-1$
             .setParameter("behandlingId", behandlingId) //$NON-NLS-1$

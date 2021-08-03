@@ -30,7 +30,7 @@ public class KontrollDtoTjeneste {
     public Optional<KontrollresultatDto> lagKontrollresultatForBehandling(Behandling behandling) {
         Optional<RisikoklassifiseringEntitet> risikoklassifiseringEntitet = risikovurderingTjeneste.hentRisikoklassifiseringForBehandling(behandling.getId());
 
-        if (!risikoklassifiseringEntitet.isPresent()) {
+        if (risikoklassifiseringEntitet.isEmpty()) {
             return Optional.of(KontrollresultatDto.ikkeKlassifisert());
         }
 

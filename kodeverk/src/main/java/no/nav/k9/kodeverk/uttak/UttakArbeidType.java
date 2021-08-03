@@ -26,6 +26,7 @@ public enum UttakArbeidType implements Kodeverdi {
     FRILANSER(AktivitetStatus.FRILANSER, "Frilans"),
 
     DAGPENGER(AktivitetStatus.DAGPENGER, "Dagpenger"),
+    KUN_YTELSE(AktivitetStatus.BRUKERS_ANDEL, "Kun ytelse"),
 
     INAKTIV(AktivitetStatus.MIDLERTIDIG_INAKTIV, "Inaktiv"),
     ANNET("ANNET", "Annet"),

@@ -28,11 +28,11 @@ import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder;
 import no.nav.k9.sak.domene.iay.modell.Permisjon;
 import no.nav.k9.sak.domene.iay.modell.PermisjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -74,7 +74,7 @@ public class MapAktørArbeid {
             if (dtos == null || dtos.isEmpty()) {
                 return Collections.emptyList();
             }
-            return dtos.stream().map(this::mapAktørArbeid).collect(Collectors.toUnmodifiableList());
+            return dtos.stream().map(this::mapAktørArbeid).toList();
         }
 
         private AktørArbeidBuilder mapAktørArbeid(ArbeidDto dto) {

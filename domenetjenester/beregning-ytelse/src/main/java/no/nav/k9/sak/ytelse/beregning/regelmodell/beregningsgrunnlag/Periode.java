@@ -32,30 +32,12 @@ public class Periode {
         return MAX_DATO.equals(tom) ? null : tom;
     }
 
-    public static Periode månederFør(LocalDate dato, long måneder) {
-        if (måneder < 1) {
-            throw new IllegalArgumentException("Perioden må inneholde minst 1 måned");
-        }
-        LocalDate tom = dato.withDayOfMonth(1).minusDays(1);
-        LocalDate fom = tom.withDayOfMonth(1).minusMonths(måneder - 1);
-        return new Periode(fom, tom);
-    }
-
     public boolean inneholder(LocalDate dato) {
         Objects.requireNonNull(dato, "inneholder dato");
         return (!(dato.isBefore(fom) || dato.isAfter(tom)));
     }
 
     public static Periode of(LocalDate fom, LocalDate tom) {
-        return new Periode(fom, tom);
-    }
-
-    public static Periode heleÅrFør(LocalDate date, long år) {
-        if (år < 1) {
-            throw new IllegalArgumentException("Perioden må inneholde minst 1 år");
-        }
-        LocalDate fom = date.minusYears(år).withDayOfYear(1);
-        LocalDate tom = fom.plusYears(år - 1).withMonth(12).withDayOfMonth(31);
         return new Periode(fom, tom);
     }
 
@@ -82,21 +64,4 @@ public class Periode {
         return (MIN_DATO.equals(dato) || MAX_DATO.equals(dato)) ? "ubegrenset" : dato.toString();
     }
 
-    public boolean slutterEtter(Periode annen) {
-        return this.tom.isAfter(annen.tom);
-    }
-
-    public long getVarighetDager() {
-        return tom.toEpochDay() - fom.toEpochDay();
-    }
-
-    public int antallMåneder() {
-        int antall = 0;
-        LocalDate fra = fom;
-        while (fra.isBefore(tom)) {
-            antall++;
-            fra = fra.plusMonths(1);
-        }
-        return antall;
-    }
 }

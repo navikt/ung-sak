@@ -13,18 +13,18 @@ public abstract class MedlemEndringssjekker {
 
     public boolean erEndret(Optional<MedlemskapAggregat> medlemskap, List<MedlemskapPerioderEntitet> list1, List<MedlemskapPerioderEntitet> list2) {
         RegisterdataDiffsjekker differ = opprettNyDiffer();
-        return !medlemskap.isPresent() || differ.erForskjellPå(list1, list2);
+        return medlemskap.isEmpty() || differ.erForskjellPå(list1, list2);
     }
 
     public boolean erEndring(Optional<MedlemskapAggregat> nyttMedlemskap, Optional<MedlemskapAggregat> eksisterendeMedlemskap) {
 
-        if (!eksisterendeMedlemskap.isPresent() && !nyttMedlemskap.isPresent()) {
+        if (eksisterendeMedlemskap.isEmpty() && nyttMedlemskap.isEmpty()) {
             return false;
         }
-        if (eksisterendeMedlemskap.isPresent() && !nyttMedlemskap.isPresent()) {
+        if (eksisterendeMedlemskap.isPresent() && nyttMedlemskap.isEmpty()) {
             return true;
         }
-        if (!eksisterendeMedlemskap.isPresent() && nyttMedlemskap.isPresent()) { // NOSONAR - "redundant" her er false pos.
+        if (eksisterendeMedlemskap.isEmpty() && nyttMedlemskap.isPresent()) { // NOSONAR - "redundant" her er false pos.
             return true;
         }
 

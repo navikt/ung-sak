@@ -63,7 +63,7 @@ public class DiagnostikkRestTjeneste {
 
         var saksnummer = Objects.requireNonNull(saksnummerDto.getVerdi());
         var fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
-        if (!fagsakOpt.isPresent()) {
+        if (fagsakOpt.isEmpty()) {
             return Response.status(Status.BAD_REQUEST.getStatusCode(), "Fant ikke fagsak for angitt saksnummer").build();
         }
         var fagsak = fagsakOpt.get();

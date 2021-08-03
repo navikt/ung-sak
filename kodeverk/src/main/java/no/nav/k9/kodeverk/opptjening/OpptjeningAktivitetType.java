@@ -27,91 +27,98 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 public enum OpptjeningAktivitetType implements Kodeverdi {
 
     ARBEIDSAVKLARING("AAP", "Arbeidsavklaringspenger",
-            Set.of(),
-            Set.of(FagsakYtelseType.ARBEIDSAVKLARINGSPENGER),
-            Set.of()),
+        Set.of(),
+        Set.of(FagsakYtelseType.ARBEIDSAVKLARINGSPENGER),
+        Set.of()),
     ARBEID("ARBEID", "Arbeid",
-            Set.of(ArbeidType.FORENKLET_OPPGJØRSORDNING, ArbeidType.MARITIMT_ARBEIDSFORHOLD, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD),
-            Set.of(),
-            Set.of()),
+        Set.of(ArbeidType.FORENKLET_OPPGJØRSORDNING, ArbeidType.MARITIMT_ARBEIDSFORHOLD, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD),
+        Set.of(),
+        Set.of()),
     DAGPENGER("DAGPENGER", "Dagpenger",
-            Set.of(),
-            Set.of(FagsakYtelseType.DAGPENGER),
-            Set.of()),
+        Set.of(),
+        Set.of(FagsakYtelseType.DAGPENGER),
+        Set.of()),
     FORELDREPENGER("FORELDREPENGER", "Foreldrepenger",
-            Set.of(),
-            Set.of(FagsakYtelseType.FORELDREPENGER),
-            Set.of()),
+        Set.of(),
+        Set.of(FagsakYtelseType.FORELDREPENGER),
+        Set.of()),
     FRILANS("FRILANS", "Frilans",
-            Set.of(ArbeidType.FRILANSER),
-            Set.of(),
-            Set.of()),
+        Set.of(ArbeidType.FRILANSER),
+        Set.of(),
+        Set.of()),
     MILITÆR_ELLER_SIVILTJENESTE("MILITÆR_ELLER_SIVILTJENESTE", "Militær- eller siviltjeneste",
-            Set.of(ArbeidType.MILITÆR_ELLER_SIVILTJENESTE),
-            Set.of(),
-            Set.of()),
+        Set.of(ArbeidType.MILITÆR_ELLER_SIVILTJENESTE),
+        Set.of(),
+        Set.of()),
     NÆRING("NÆRING", "Næring",
-            Set.of(ArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE),
-            Set.of(),
-            Set.of()),
+        Set.of(ArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE),
+        Set.of(),
+        Set.of()),
     OMSORGSPENGER("OMSORGSPENGER", "Omsorgspenger",
-            Set.of(),
-            Set.of(FagsakYtelseType.OMSORGSPENGER),
-            Set.of(TemaUnderkategori.PÅRØRENDE_OMSORGSPENGER)),
+        Set.of(),
+        Set.of(FagsakYtelseType.OMSORGSPENGER),
+        Set.of(TemaUnderkategori.PÅRØRENDE_OMSORGSPENGER)),
     OPPLÆRINGSPENGER("OPPLÆRINGSPENGER", "Opplæringspenger",
-            Set.of(),
-            Set.of(FagsakYtelseType.OPPLÆRINGSPENGER),
-            Set.of(TemaUnderkategori.PÅRØRENDE_OPPLÆRINGSPENGER)),
+        Set.of(),
+        Set.of(FagsakYtelseType.OPPLÆRINGSPENGER),
+        Set.of(TemaUnderkategori.PÅRØRENDE_OPPLÆRINGSPENGER)),
     PLEIEPENGER("PLEIEPENGER", "Pleiepenger",
-            Set.of(),
-            Set.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE),
-            Set.of(TemaUnderkategori.PÅRØRENDE_PLEIETRENGENDE_SYKT_BARN, TemaUnderkategori.PÅRØRENDE_PLEIETRENGENDE,
-                TemaUnderkategori.PÅRØRENDE_PLEIETRENGENDE_PÅRØRENDE, TemaUnderkategori.PÅRØRENDE_PLEIEPENGER)),
+        Set.of(),
+        Set.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE),
+        Set.of(TemaUnderkategori.PÅRØRENDE_PLEIETRENGENDE_SYKT_BARN, TemaUnderkategori.PÅRØRENDE_PLEIETRENGENDE,
+            TemaUnderkategori.PÅRØRENDE_PLEIETRENGENDE_PÅRØRENDE, TemaUnderkategori.PÅRØRENDE_PLEIEPENGER)),
     ETTERLØNN_SLUTTPAKKE("ETTERLØNN_SLUTTPAKKE", "Etterlønn eller sluttpakke",
-            Set.of(ArbeidType.ETTERLØNN_SLUTTPAKKE),
-            Set.of(),
-            Set.of()),
+        Set.of(ArbeidType.ETTERLØNN_SLUTTPAKKE),
+        Set.of(),
+        Set.of()),
     SVANGERSKAPSPENGER("SVANGERSKAPSPENGER", "Svangerskapspenger",
-            Set.of(),
-            Set.of(FagsakYtelseType.SVANGERSKAPSPENGER),
-            Set.of()),
+        Set.of(),
+        Set.of(FagsakYtelseType.SVANGERSKAPSPENGER),
+        Set.of()),
     SYKEPENGER("SYKEPENGER", "Sykepenger",
-            Set.of(),
-            Set.of(FagsakYtelseType.SYKEPENGER),
-            Set.of()),
+        Set.of(),
+        Set.of(FagsakYtelseType.SYKEPENGER),
+        Set.of()),
     VENTELØNN_VARTPENGER("VENTELØNN_VARTPENGER", "Ventelønn eller vartpenger",
-            Set.of(ArbeidType.VENTELØNN_VARTPENGER),
-            Set.of(),
-            Set.of()),
+        Set.of(ArbeidType.VENTELØNN_VARTPENGER),
+        Set.of(),
+        Set.of()),
     VIDERE_ETTERUTDANNING("VIDERE_ETTERUTDANNING", "Videre- og etterutdanning",
-            Set.of(ArbeidType.LØNN_UNDER_UTDANNING),
-            Set.of(),
-            Set.of()),
+        Set.of(ArbeidType.LØNN_UNDER_UTDANNING),
+        Set.of(),
+        Set.of()),
     UTENLANDSK_ARBEIDSFORHOLD("UTENLANDSK_ARBEIDSFORHOLD", "Arbeid i utlandet",
-            Set.of(ArbeidType.UTENLANDSK_ARBEIDSFORHOLD),
-            Set.of(),
-            Set.of()),
+        Set.of(ArbeidType.UTENLANDSK_ARBEIDSFORHOLD),
+        Set.of(),
+        Set.of()),
     FRISINN("FRISINN", "FRISINN",
         Set.of(),
         Set.of(FagsakYtelseType.FRISINN),
         Set.of()),
     UTDANNINGSPERMISJON("UTDANNINGSPERMISJON", "Utdanningspermisjon",
-            Set.of(), Set.of(), Set.of()),
+        Set.of(), Set.of(), Set.of()),
     MELLOM_ARBEID("MELLOM_ARBEID", "Mellom arbeidsforhold",
-            Set.of(), Set.of(), Set.of()),
+        Set.of(), Set.of(), Set.of()),
     UDEFINERT("-", "UDEFINERT",
-            Set.of(),
-            Set.of(),
-            Set.of()),
-            ;
+        Set.of(),
+        Set.of(),
+        Set.of()),
+    ;
 
+    public static final Set<OpptjeningAktivitetType> YTELSE = Set.of(SYKEPENGER,
+        FORELDREPENGER,
+        PLEIEPENGER,
+        SVANGERSKAPSPENGER,
+        OPPLÆRINGSPENGER,
+        FRISINN,
+        OMSORGSPENGER);
+    public static final String KODEVERK = "OPPTJENING_AKTIVITET_TYPE";
+    public static final Set<OpptjeningAktivitetType> ANNEN_OPPTJENING = Set.of(VENTELØNN_VARTPENGER, MILITÆR_ELLER_SIVILTJENESTE, ETTERLØNN_SLUTTPAKKE,
+        VIDERE_ETTERUTDANNING, UTENLANDSK_ARBEIDSFORHOLD, FRILANS);
     private static final Map<String, OpptjeningAktivitetType> KODER = new LinkedHashMap<>();
-
     private static final Map<OpptjeningAktivitetType, Set<ArbeidType>> INDEKS_OPPTJ_ARBEID = new LinkedHashMap<>();
     private static final Map<OpptjeningAktivitetType, Set<FagsakYtelseType>> INDEKS_OPPTJ_RELYT = new LinkedHashMap<>();
     private static final Map<OpptjeningAktivitetType, Set<TemaUnderkategori>> INDEKS_OPPTJ_TEMAUN = new LinkedHashMap<>();
-
-    public static final String KODEVERK = "OPPTJENING_AKTIVITET_TYPE";
 
     static {
         for (var v : values()) {
@@ -124,9 +131,6 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
 
         }
     }
-
-    public static final Set<OpptjeningAktivitetType> ANNEN_OPPTJENING = Set.of(VENTELØNN_VARTPENGER, MILITÆR_ELLER_SIVILTJENESTE, ETTERLØNN_SLUTTPAKKE,
-        VIDERE_ETTERUTDANNING, UTENLANDSK_ARBEIDSFORHOLD, FRILANS);
 
     private String kode;
 
@@ -155,7 +159,7 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static OpptjeningAktivitetType  fraKode(Object node)  {
+    public static OpptjeningAktivitetType fraKode(Object node) {
         if (node == null) {
             return null;
         }
@@ -169,28 +173,6 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
 
     public static Map<String, OpptjeningAktivitetType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
-    }
-
-    @Override
-    public String getNavn() {
-        return navn;
-    }
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @Override
-    public String getKodeverk() {
-        return KODEVERK;
-    }
-
-    @JsonProperty
-    @Override
-    public String getKode() {
-        return kode;
-    }
-
-    @Override
-    public String getOffisiellKode() {
-        return getKode();
     }
 
     public static Map<OpptjeningAktivitetType, Set<ArbeidType>> hentTilArbeidTypeRelasjoner() {
@@ -224,6 +206,28 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
             .flatMap(entry -> entry.getValue().stream()
                 .map(v -> new AbstractMap.SimpleEntry<>(v, entry.getKey())))
             .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toSet())));
+    }
+
+    @Override
+    public String getNavn() {
+        return navn;
+    }
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Override
+    public String getKodeverk() {
+        return KODEVERK;
+    }
+
+    @JsonProperty
+    @Override
+    public String getKode() {
+        return kode;
+    }
+
+    @Override
+    public String getOffisiellKode() {
+        return getKode();
     }
 
 }

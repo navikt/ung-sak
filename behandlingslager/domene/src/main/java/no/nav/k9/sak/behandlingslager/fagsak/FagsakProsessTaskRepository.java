@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskEvent;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
@@ -36,7 +37,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.impl.ProsessTaskEntitet;
 import no.nav.k9.prosesstask.impl.TaskManager;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 /**
  * Repository for å håndtere kobling mellom Fagsak (og Behandling) mot Prosess Tasks.
@@ -167,7 +167,7 @@ public class FagsakProsessTaskRepository {
                 .filter(t -> currentTaskData == null || !Objects.equals(t.getId(), currentTaskData.getId())) // se bort fra oss selv (hvis vi kjører i en task
                 .map(t -> t.getTaskType()).collect(Collectors.toSet());
 
-            if (!feilet.isPresent()) {
+            if (feilet.isEmpty()) {
                 var rest = new HashSet<>(eksisterendeTaskTyper);
                 rest.retainAll(nyeTaskTyper);
 

@@ -98,7 +98,7 @@ public class FrisinnTilKalkulusMapper {
             .filter(frilansoppdrag -> frilansoppdrag.getPeriode().overlapper(vilkårsPeriode))
             .map(TilKalkulusMapper.mapFrilansOppdrag())
             .collect(Collectors.toList());
-        return new OppgittFrilansDto(oppgittFrilans.getErNyoppstartet() == null ? false : oppgittFrilans.getErNyoppstartet(), oppdrag);
+        return new OppgittFrilansDto(Boolean.TRUE.equals(oppgittFrilans.getErNyoppstartet()), oppdrag);
     }
 
 

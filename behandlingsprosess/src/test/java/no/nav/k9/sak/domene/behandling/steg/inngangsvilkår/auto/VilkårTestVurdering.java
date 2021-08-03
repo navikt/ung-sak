@@ -27,6 +27,7 @@ import no.nav.fpsak.nare.RuleService;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSummary;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.inngangsvilkår.medlemskap.regelmodell.Medlemskapsvilkår;
@@ -37,7 +38,6 @@ import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsperiodeGr
 import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Opptjeningsvilkår;
 import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsvilkårResultat;
 import no.nav.k9.sak.inngangsvilkår.opptjeningsperiode.regelmodell.RegelFastsettOpptjeningsperiode;
-import no.nav.k9.felles.util.Tuple;
 
 class VilkårTestVurdering {
 
@@ -55,10 +55,6 @@ class VilkårTestVurdering {
         final File vilkårMappe = new File("src/test/testscript/vilkår/" + vilkår.getKode() + "/");
         final File[] files = vilkårMappe.listFiles();
         return Arrays.asList(files);
-    }
-
-    void vurderVilkår(ErrorCollector collector, VilkårType vilkår) {
-        vurderVilkår(collector, vilkår, DO_NOTHING);
     }
 
     private void vurderCaser(ErrorCollector collector, VilkårType vilkår, BiConsumer<VilkårTestResultat, Object> extraDataValidering, Collection<File> files) {

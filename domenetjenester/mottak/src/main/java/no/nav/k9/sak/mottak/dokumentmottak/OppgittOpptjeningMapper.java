@@ -1,7 +1,6 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -13,15 +12,21 @@ import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.domene.abakus.mapping.IAYTilDtoMapper;
+import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.søknad.felles.opptjening.AnnenAktivitet;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende;
+import no.nav.k9.søknad.felles.opptjening.UtenlandskArbeidsforhold;
 import no.nav.k9.søknad.felles.type.Organisasjonsnummer;
 import no.nav.k9.søknad.felles.type.Periode;
 
@@ -37,17 +42,20 @@ public class OppgittOpptjeningMapper {
         var builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), LocalDateTime.now());
         if (opptjeningAktiviteter.getSelvstendigNæringsdrivende() != null) {
             var snAktiviteter = opptjeningAktiviteter.getSelvstendigNæringsdrivende();
-            var egenNæringBuilders = snAktiviteter.stream()
-                .flatMap(sn -> this.mapEgenNæring(sn).stream())
-                .collect(Collectors.toList());
-            builder.leggTilEgneNæringer(egenNæringBuilders);
+            var snBuilders = snAktiviteter.stream().map(this::mapEgenNæring).collect(Collectors.toList());
+            builder.leggTilEgneNæringer(snBuilders);
         }
         if (opptjeningAktiviteter.getFrilanser() != null) {
             builder.leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
                 .build());
         }
-        if (opptjeningAktiviteter.getArbeidstaker() != null) {
-            // TODO: Lagring av utenlands arbeidsforhold
+        if (opptjeningAktiviteter.getUtenlandskeArbeidsforhold() != null) {
+            opptjeningAktiviteter.getUtenlandskeArbeidsforhold().forEach(arbforhold ->
+                builder.leggTilOppgittArbeidsforhold(mapOppgittArbeidsforhold(arbforhold)));
+        }
+        if (opptjeningAktiviteter.getAndreAktiviteter() != null) {
+            opptjeningAktiviteter.getAndreAktiviteter().forEach(aktivitet ->
+                builder.leggTilAnnenAktivitet(mapAnnenAktivitet(aktivitet)));
         }
         builder.leggTilJournalpostId(dokument.getJournalpostId());
         builder.leggTilInnsendingstidspunkt(dokument.getInnsendingstidspunkt());
@@ -56,7 +64,7 @@ public class OppgittOpptjeningMapper {
     }
 
 
-    private List<EgenNæringBuilder> mapEgenNæring(no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende sn) {
+    private EgenNæringBuilder mapEgenNæring(SelvstendigNæringsdrivende sn) {
         Map.Entry<Periode, SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo> entry = getSnPeriodeInfo(sn);
         var periode = entry.getKey();
         var info = entry.getValue();
@@ -64,7 +72,7 @@ public class OppgittOpptjeningMapper {
         var orgnummer = sn.getOrganisasjonsnummer();
 
         var egenNæringBuilder = mapNæringForVirksomhetType(periode, info, virksomhetType, orgnummer);
-        return List.of(egenNæringBuilder);
+        return egenNæringBuilder;
     }
 
     private Map.Entry<Periode, SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo> getSnPeriodeInfo(SelvstendigNæringsdrivende sn) {
@@ -109,5 +117,24 @@ public class OppgittOpptjeningMapper {
         var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(builder);
         var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
         return request;
+    }
+
+    private OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder mapOppgittArbeidsforhold(UtenlandskArbeidsforhold arbeidsforhold) {
+        var arbeidsforholdBuilder = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny()
+            .medArbeidType(ArbeidType.UTENLANDSK_ARBEIDSFORHOLD)
+            .medUtenlandskVirksomhet(new OppgittUtenlandskVirksomhet(
+                Landkoder.fraKode(arbeidsforhold.getLand().getLandkode()),
+                arbeidsforhold.getArbeidsgiversnavn()))
+            .medPeriode(DatoIntervallEntitet.fra(
+                arbeidsforhold.getAnsettelsePeriode().getFraOgMed(),
+                arbeidsforhold.getAnsettelsePeriode().getTilOgMed())
+            );
+        return arbeidsforholdBuilder;
+    }
+
+    private OppgittAnnenAktivitet mapAnnenAktivitet(AnnenAktivitet annenAktivitet) {
+        var aktivitetPeriode = DatoIntervallEntitet.fra(annenAktivitet.getPeriode().getFraOgMed(), annenAktivitet.getPeriode().getTilOgMed());
+        var arbeidType = ArbeidType.fraKode(annenAktivitet.getAnnenAktivitetType().getKode());
+        return new OppgittAnnenAktivitet(aktivitetPeriode, arbeidType);
     }
 }

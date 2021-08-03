@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -55,7 +54,6 @@ public class HenleggBehandlingTjeneste {
     private HistorikkRepository historikkRepository;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private Boolean henleggDokumenterLansert;
     private Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester;
 
     public HenleggBehandlingTjeneste() {
@@ -69,8 +67,7 @@ public class HenleggBehandlingTjeneste {
                                      FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                      ProsessTaskRepository prosessTaskRepository,
                                      MottatteDokumentRepository mottatteDokumentRepository,
-                                     @Any Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester,
-                                     @KonfigVerdi(value = "HENLEGG_DOKUMENTER", defaultVerdi = "true") Boolean henleggDokumenterLansert) {
+                                     @Any Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -80,7 +77,6 @@ public class HenleggBehandlingTjeneste {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.historikkRepository = repositoryProvider.getHistorikkRepository();
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.henleggDokumenterLansert = henleggDokumenterLansert;
         this.henleggelsePostopsTjenester = henleggelsePostopsTjenester;
     }
 
@@ -111,9 +107,7 @@ public class HenleggBehandlingTjeneste {
 
         behandlingskontrollTjeneste.henleggBehandling(kontekst, årsakKode);
 
-        if (henleggDokumenterLansert) {
-            henleggDokumenter(behandling);
-        }
+        henleggDokumenter(behandling);
 
         if (BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET.equals(årsakKode)) {
             sendHenleggelsesbrev(behandling.getId(), HistorikkAktør.VEDTAKSLØSNINGEN);
@@ -123,10 +117,8 @@ public class HenleggBehandlingTjeneste {
         }
         lagHistorikkinnslagForHenleggelse(behandling.getId(), årsakKode, begrunnelse, historikkAktør);
 
-        if (henleggDokumenterLansert) {
-            HenleggelsePostopsTjeneste.finnTjeneste(henleggelsePostopsTjenester, behandling.getFagsakYtelseType())
-                .ifPresent(postOps -> postOps.utfør(behandling));
-        }
+        HenleggelsePostopsTjeneste.finnTjeneste(henleggelsePostopsTjenester, behandling.getFagsakYtelseType())
+            .ifPresent(postOps -> postOps.utfør(behandling));
     }
 
     private void henleggDokumenter(Behandling behandling) {
@@ -136,7 +128,7 @@ public class HenleggBehandlingTjeneste {
 
         List<MottattDokument> gyldigeDokumenterFagsak = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId());
         List<MottattDokument> gyldigeKravdokumenterBehandling = gyldigeDokumenterFagsak.stream()
-            .filter(dok -> dok.getBehandlingId().equals(behandling.getId()))
+            .filter(dok -> behandling.getId().equals(dok.getBehandlingId()))
             .filter(dok -> kravdokumentTyper.contains(dok.getType()))
             .collect(Collectors.toList());
 

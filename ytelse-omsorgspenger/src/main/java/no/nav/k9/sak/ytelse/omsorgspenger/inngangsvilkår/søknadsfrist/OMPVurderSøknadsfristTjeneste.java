@@ -72,12 +72,12 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
 
     @Override
     public Set<KravDokument> relevanteKravdokumentForBehandling(BehandlingReferanse referanse) {
-        var inntektsmeldinger = inntektsmeldingerPerioderTjeneste.hentUtInntektsmeldingerRelevantForBehandling(referanse);
+        var inntektsmeldinger = inntektsmeldingerPerioderTjeneste.hentUtInntektsmeldingerKnyttetTilBehandling(referanse);
         var kravDokumenter = inntektsmeldinger.stream()
             .map(it -> new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING))
             .collect(Collectors.toCollection(HashSet::new));
 
-        var søktePerioderFraSøknad = søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåFagsak(referanse);
+        var søktePerioderFraSøknad = søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåBehandling(referanse);
         kravDokumenter.addAll(søktePerioderFraSøknad.keySet());
 
         return kravDokumenter;

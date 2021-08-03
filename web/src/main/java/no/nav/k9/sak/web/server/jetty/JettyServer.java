@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.security.auth.message.config.AuthConfigFactory;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
@@ -73,6 +72,7 @@ public class JettyServer {
     };
     static final Logger log = LoggerFactory.getLogger(JettyServer.class);
     private AppKonfigurasjon appKonfigurasjon;
+
     public JettyServer() {
         this(new JettyWebKonfigurasjon());
     }
@@ -275,7 +275,7 @@ public class JettyServer {
     }
 
     @SuppressWarnings("resource")
-    protected ResourceCollection createResourceCollection() throws IOException {
+    protected ResourceCollection createResourceCollection() {
         return new ResourceCollection(
             Resource.newClassPathResource("META-INF/resources/webjars/"),
             Resource.newClassPathResource("/web"));
@@ -287,7 +287,7 @@ public class JettyServer {
      */
     static final class ResetLogContextHandler extends AbstractHandler {
         @Override
-        public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) {
             MDC.clear();
         }
     }

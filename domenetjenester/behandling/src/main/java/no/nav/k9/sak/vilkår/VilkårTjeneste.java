@@ -30,7 +30,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårPeriodeResultatDto;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -64,10 +63,6 @@ public class VilkårTjeneste {
 
     public Vilkårene hentVilkårResultat(Long behandlingId) {
         return vilkårResultatRepository.hent(behandlingId);
-    }
-
-    public List<VilkårPeriodeResultatDto> hentVilkårResultater(Long behandlingId) {
-        return vilkårResultatRepository.hentVilkårResultater(behandlingId);
     }
 
     public void lagreAvslåttVilkårresultat(BehandlingskontrollKontekst kontekst,
@@ -164,14 +159,6 @@ public class VilkårTjeneste {
         Behandling behandling = hentBehandling(behandlingId);
         var vilkårsPerioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling);
         vilkårResultatRepository.tilbakestillPerioder(behandlingId, vilkårType, vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer(), vilkårsPerioder);
-    }
-
-    public void settVilkårutfallTilIkkeVurdert(Long behandlingId, VilkårType vilkårType, DatoIntervallEntitet periode) {
-        settVilkårutfallTilIkkeVurdert(behandlingId, vilkårType, new TreeSet<>(Set.of(periode)));
-    }
-
-    public void settVilkårutfallTilIkkeVurdert(Long behandlingId, VilkårType vilkårType, LocalDate fom) {
-        settVilkårutfallTilIkkeVurdert(behandlingId, vilkårType, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMed(fom))));
     }
 
     private void nullstillBehandlingsresultat(BehandlingskontrollKontekst kontekst) {

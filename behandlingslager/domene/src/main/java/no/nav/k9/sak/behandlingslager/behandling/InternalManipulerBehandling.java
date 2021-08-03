@@ -17,7 +17,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
  */
 @Dependent
 public class InternalManipulerBehandling {
-    
+
     private static final Logger log = LoggerFactory.getLogger(InternalManipulerBehandling.class);
 
     @Inject
@@ -46,7 +46,7 @@ public class InternalManipulerBehandling {
 
         // finn riktig mapping av kodeverk slik at vi får med dette når Behandling brukes videre.
         Optional<BehandlingStegTilstand> eksisterendeTilstand = behandling.getSisteBehandlingStegTilstand();
-        if (!eksisterendeTilstand.isPresent() || erUlikeSteg(stegType, eksisterendeTilstand)) {
+        if (eksisterendeTilstand.isEmpty() || erUlikeSteg(stegType, eksisterendeTilstand)) {
             if (eksisterendeTilstand.isPresent() && !BehandlingStegStatus.erSluttStatus(eksisterendeTilstand.get().getBehandlingStegStatus())) {
                 if (!BehandlingStegStatus.erSluttStatus(ikkeFerdigStegStatus)) {
                     throw new IllegalStateException("Tidligere steg må avsluttes riktig, fikk " + ikkeFerdigStegStatus + "for " + eksisterendeTilstand

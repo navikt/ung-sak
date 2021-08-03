@@ -41,9 +41,9 @@ public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<Ple
             sluttDato = startDato;
         }
         
-        if (sluttDato.isAfter(LocalDate.now().plusYears(2))) {
+        if (sluttDato.isAfter(LocalDate.now().plusYears(5))) {
             // Hvis dette skulle bli nødvendig i fremtiden kan denne sjekken fjernes.
-            throw new IllegalArgumentException("Fagsak kan ikke være mer enn 2 år inn i fremtiden.");
+            throw new IllegalArgumentException("Fagsak kan ikke være mer enn 5 år inn i fremtiden.");
         }
         
         /*
