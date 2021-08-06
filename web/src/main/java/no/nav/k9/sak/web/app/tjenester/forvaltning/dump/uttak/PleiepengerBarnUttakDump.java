@@ -15,6 +15,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
@@ -23,7 +24,8 @@ public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpF
 
     private UttakRestKlient restKlient;
     private BehandlingRepository behandlingRepository;
-    private final String fileName = "pleiepenger-barn-uttaksplan.json";
+    private final String fileNameBehandlingPrefix = "pleiepenger-barn-uttaksplan-";
+    private final String fileNameBehandlingPosfix = ".json";
     private final ObjectWriter ow = DefaultJsonMapper.getObjectMapper().writerWithDefaultPrettyPrinter();
 
     PleiepengerBarnUttakDump() {
@@ -41,28 +43,33 @@ public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpF
         try {
             var uttaksplan = restKlient.hentUttaksplan(behandling.getUuid());
             var content = ow.writeValueAsString(uttaksplan);
-            return List.of(new DumpOutput(fileName, content));
+            return List.of(new DumpOutput(fileNameBehandlingPrefix + behandling.getUuid().toString() + fileNameBehandlingPosfix, content));
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
-            return List.of(new DumpOutput(fileName + "-ERROR", sw.toString()));
+            return List.of(new DumpOutput(fileNameBehandlingPrefix + "-ERROR", sw.toString()));
         }
     }
 
     @Override
     public List<DumpOutput> dump(Fagsak fagsak) {
-        var behandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId());
-        try {
-            var uttaksplan = restKlient.hentUttaksplan(behandling.get().getUuid());
-            var content = ow.writeValueAsString(uttaksplan);
-            return List.of(new DumpOutput(fileName, content));
-        } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            return List.of(new DumpOutput(fileName + "-ERROR", sw.toString()));
+        var behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId());
+        var outputListe = new ArrayList<DumpOutput>();
+        for (var behandling : behandlinger) {
+            var dumpFileName = fileNameBehandlingPrefix + behandling.getUuid().toString() + fileNameBehandlingPosfix;
+            try {
+                var uttaksplan = restKlient.hentUttaksplan(behandling.getUuid());
+                var content = ow.writeValueAsString(uttaksplan);
+                outputListe.add(new DumpOutput(dumpFileName, content));
+            } catch (Exception e) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                outputListe.add(new DumpOutput(dumpFileName + "-ERROR", sw.toString()));
+            }
         }
+        return outputListe;
     }
 
 }
