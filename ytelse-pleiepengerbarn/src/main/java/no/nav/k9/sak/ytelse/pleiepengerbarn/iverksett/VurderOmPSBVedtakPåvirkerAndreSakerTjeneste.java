@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -28,10 +31,13 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
 public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVedtakPåvirkerSakerTjeneste {
+
+    private static final Logger log = LoggerFactory.getLogger(VurderOmPSBVedtakPåvirkerAndreSakerTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
@@ -40,6 +46,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
     private SykdomVurderingRepository sykdomVurderingRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
+    private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
 
     VurderOmPSBVedtakPåvirkerAndreSakerTjeneste() {
     }
@@ -51,7 +58,8 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
                                                        SykdomGrunnlagRepository sykdomGrunnlagRepository,
                                                        SykdomVurderingRepository sykdomVurderingRepository,
                                                        SykdomGrunnlagService sykdomGrunnlagService,
-                                                       ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste) {
+                                                       ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
+                                                       EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -59,6 +67,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
+        this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
     }
 
     @Override
@@ -75,13 +84,25 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
                 var kandidatFagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
                 var sisteBehandlingPåKandidat = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(kandidatFagsak.getId()).orElseThrow();
                 boolean skalRevurderesPgaSykdom = vurderBehovForRevurderingPgaSykdom(pleietrengende, kandidatsaksnummer, sisteBehandlingPåKandidat);
-                if (skalRevurderesPgaSykdom || erEndringPåEtablertTilsynTjeneste.erUhåndterteEndringerFraForrigeBehandling(BehandlingReferanse.fra(sisteBehandlingPåKandidat))) {
+                var referanse = BehandlingReferanse.fra(sisteBehandlingPåKandidat);
+                var skalRevurderesPgaEtablertTilsyn = skalRevurderesPgaEtablertTilsyn(referanse);
+                var skalRevurderesPgaNattevåkOgBeredskap = skalRevurderesPgaNattevåkOgBeredskap(referanse);
+                if (skalRevurderesPgaSykdom || skalRevurderesPgaEtablertTilsyn || skalRevurderesPgaNattevåkOgBeredskap) {
                     result.add(kandidatsaksnummer);
+                    log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}", kandidatsaksnummer, skalRevurderesPgaSykdom, skalRevurderesPgaEtablertTilsyn, skalRevurderesPgaNattevåkOgBeredskap);
                 }
             }
         }
 
         return result;
+    }
+
+    private boolean skalRevurderesPgaNattevåkOgBeredskap(BehandlingReferanse referanse) {
+        return endringUnntakEtablertTilsynTjeneste.harEndringerSidenForrigeBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId());
+    }
+
+    private boolean skalRevurderesPgaEtablertTilsyn(BehandlingReferanse referanse) {
+        return erEndringPåEtablertTilsynTjeneste.erUhåndterteEndringerFraForrigeBehandling(referanse);
     }
 
     private boolean vurderBehovForRevurderingPgaSykdom(AktørId pleietrengende, Saksnummer kandidatsaksnummer, Behandling sisteBehandlingPåKandidat) {

@@ -26,6 +26,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtab
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 
 @ApplicationScoped
 @GrunnlagRef("SykdomGrunnlag")
@@ -38,6 +39,7 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
     private SykdomGrunnlagService sykdomGrunnlagService;
     private VilkårResultatRepository vilkårResultatRepository;
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
+    private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
 
     StartpunktUtlederPleiepengerSyktBarn() {
         // For CDI
@@ -47,11 +49,13 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
     StartpunktUtlederPleiepengerSyktBarn(SykdomGrunnlagRepository sykdomGrunnlagRepository,
                                          SykdomGrunnlagService sykdomGrunnlagService,
                                          VilkårResultatRepository vilkårResultatRepository,
-                                         ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste) {
+                                         ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
+                                         EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste) {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
+        this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
     }
 
     @Override
@@ -60,13 +64,22 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
         StartpunktType sykdomStartpunk = utledStartpunktForSykdom(ref);
         result.add(sykdomStartpunk);
         log.info("Kjører diff av sykdom, funnet følgende resultat = {}", sykdomStartpunk);
+
         StartpunktType tilsynStartpunkt = utledStartpunktForEtablertTilsyn(ref);
         result.add(tilsynStartpunkt);
         log.info("Kjører diff av etablertTilsyn, funnet følgende resultat = {}", tilsynStartpunkt);
 
+        StartpunktType nattevåkBeredskapStartpunkt = utledStartpunktForNattevåkOgBeredskap(ref);
+        result.add(nattevåkBeredskapStartpunkt);
+        log.info("Kjører diff av nattevåk & beredskap, funnet følgende resultat = {}", tilsynStartpunkt);
+
         return result.stream()
             .min(Comparator.comparing(StartpunktType::getRangering))
             .orElse(StartpunktType.UDEFINERT);
+    }
+
+    private StartpunktType utledStartpunktForNattevåkOgBeredskap(BehandlingReferanse ref) {
+        return endringUnntakEtablertTilsynTjeneste.harEndringerSidenForrigeBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId()) ? StartpunktType.UTTAKSVILKÅR : StartpunktType.UDEFINERT;
     }
 
     private StartpunktType utledStartpunktForEtablertTilsyn(BehandlingReferanse referanse) {
