@@ -49,7 +49,7 @@ public class SykdomDokumentRepository {
     public boolean isDokumentBruktIVurdering(Long dokumentId) {
         final TypedQuery<SykdomVurderingVersjon> q = entityManager.createQuery(
             "SELECT vv From SykdomVurderingVersjon as vv "
-                + "inner join d.dokumenter as d "
+                + "inner join vv.dokumenter as d "
                 + "where d.id = :dokumentId", SykdomVurderingVersjon.class);
         q.setParameter("dokumentId", dokumentId);
 
