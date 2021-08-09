@@ -2,7 +2,7 @@ apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
   name: k9-sak
-  namespace: default
+  namespace: k9saksbehandling
   labels:
     team: k9saksbehandling
 spec:
@@ -46,7 +46,7 @@ spec:
       - mountPath: /var/run/secrets/nais.io/ldap
         kvPath: /serviceuser/data/dev/srvssolinux
       - mountPath: /var/run/secrets/nais.io/vault
-        kvPath: /kv/preprod/fss/k9-sak/default
+        kvPath: /kv/preprod/fss/k9-sak/k9saksbehandling
   sidecar: true
   env:
     - name: TZ
@@ -136,13 +136,13 @@ spec:
     - name: INFOTRYGD_HENDELSER_API_URL
       value: http://infotrygd-hendelse-api.default/infotrygd/hendelser
     - name: FPABAKUS_URL
-      value: http://fpabakus/fpabakus
+      value: http://fpabakus.default/fpabakus
     - name: FTKALKULUS_URL
-      value: http://ftkalkulus/ftkalkulus
+      value: http://ftkalkulus.default/ftkalkulus
     - name: ABAKUS_CALLBACK_URL
-      value: http://k9-sak.default/k9/sak/api/registerdata/iay/callback
+      value: http://k9-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
-      value: http://abac-k9/application/authorize
+      value: http://abac-k9.default/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
       value: https://app-q1.adeo.no/k9/oppdrag/api
     - name: ARBEIDSFORDELING_RS_URL
@@ -160,13 +160,13 @@ spec:
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
-      value: http://k9-aarskvantum
+      value: http://k9-aarskvantum.default
     - name: K9_OMS_UTVIDETRETT_URL
       value: https://omsorgsdager.dev.intern.nav.no/api
 
     # Restservice PSB spesifikt
     - name: K9_PSB_UTTAK_URL
-      value: http://pleiepenger-barn-uttak/pleiepenger-barn-uttak
+      value: http://pleiepenger-barn-uttak.default/pleiepenger-barn-uttak
 
     # Graphql services
     - name: SAF_BASE_URL
