@@ -148,9 +148,16 @@ public class RegisterdataEndringshåndterer {
             return;
         }
         if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON)) {
-            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON);
+            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, utledEndringFraAnnenSak(behandlingÅrsakTyper));
             return;
         }
         historikkinnslagTjeneste.opprettHistorikkinnslagForNyeRegisteropplysninger(behandling);
+    }
+
+    private BehandlingÅrsakType utledEndringFraAnnenSak(Set<BehandlingÅrsakType> behandlingÅrsakTyper) {
+        return behandlingÅrsakTyper.stream()
+            .filter(BehandlingÅrsakType.ANNEN_OMSORGSPERSON_TYPER::contains)
+            .findAny()
+            .orElse(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON);
     }
 }

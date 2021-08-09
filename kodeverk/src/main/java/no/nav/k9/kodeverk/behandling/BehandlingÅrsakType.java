@@ -63,6 +63,13 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_TILSTØTENDE_YTELSE_OPPHØRT("RE-TILST-YT-OPPH", "Tilstøtende ytelse opphørt"),
 
     RE_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK", "Nye opplysninger fra annen omsorgsperson"),
+    RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_ET", "Nye opplysninger om etablert tilsyn fra annen omsorgsperson"),
+    RE_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_NB", "Nye opplysninger om nattevåk/beredskap fra annen omsorgsperson"),
+    RE_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_S", "Nye opplysninger om sykdom fra annen omsorgsperson"),
+    RE_NATTEVÅKBEREDSKAP_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_NB_ET", "Nye opplysninger om etablert tilsyn og nattevåk/beredskap fra annen omsorgsperson"),
+    RE_SYKDOM_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_S_ET", "Nye opplysninger om sykdom og etablert tilsyn fra annen omsorgsperson"),
+    RE_SYKDOM_NATTEVÅK_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_S_NB", "Nye opplysninger om sykdom og nattevåk/beredskap fra annen omsorgsperson"),
+    RE_SYKDOM_ETABLERT_TILSYN_NATTVÅK_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_S_ET_NB", "Nye opplysninger om sykdom, nattevåk/beredskap og etablert tilsyn fra annen omsorgsperson"),
 
     // Unntaksbehandling
     UNNT_GENERELL("UNNT_GENERELL", "Manuell saksbehandling"),
@@ -74,6 +81,14 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     public static final String KODEVERK = "BEHANDLING_AARSAK"; //$NON-NLS-1$
 
     private static final Map<String, BehandlingÅrsakType> KODER = new LinkedHashMap<>();
+
+    public static final Set<BehandlingÅrsakType> ANNEN_OMSORGSPERSON_TYPER = Set.of(BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON,
+        RE_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON,
+        RE_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON,
+        RE_NATTEVÅKBEREDSKAP_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON,
+        RE_SYKDOM_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON,
+        RE_SYKDOM_NATTEVÅK_ENDRING_FRA_ANNEN_OMSORGSPERSON,
+        RE_SYKDOM_ETABLERT_TILSYN_NATTVÅK_ENDRING_FRA_ANNEN_OMSORGSPERSON);
 
     @JsonIgnore
     private String navn;
