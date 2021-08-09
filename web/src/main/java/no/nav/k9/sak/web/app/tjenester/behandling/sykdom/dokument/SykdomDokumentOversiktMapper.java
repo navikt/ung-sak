@@ -46,6 +46,7 @@ public class SykdomDokumentOversiktMapper {
                         d.getMottattDato(),
                         d.getMottattTidspunkt(),
                         d.getType() != SykdomDokumentType.UKLASSIFISERT,  // TODO: Sette riktig verdi.
+                        (d.getDuplikatAvDokument() != null) ? "" + d.getDuplikatAvDokument().getId() : null,
                         Arrays.asList(
                             linkForGetDokumentinnhold(behandlingUuid, "" + d.getId()),
                             linkForEndreDokument(behandlingUuid, "" + d.getId(), d.getVersjon().toString())
@@ -129,6 +130,7 @@ public class SykdomDokumentOversiktMapper {
 
     public List<SykdomDokumentDto> mapSykdomsdokumenter(AktørId aktørId, UUID behandlingUuid, List<SykdomDokument> dokumenter, Set<Long> ids) {
         return dokumenter.stream()
+                .filter(d -> d.getDuplikatAvDokument() == null)
                 .filter(d -> d.getType().isRelevantForSykdom() || ids.contains(d.getId()))
                 .map(d -> new SykdomDokumentDto(
                     "" + d.getId(),

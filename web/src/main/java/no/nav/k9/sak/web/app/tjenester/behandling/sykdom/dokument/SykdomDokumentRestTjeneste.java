@@ -300,8 +300,21 @@ public class SykdomDokumentRestTjeneste {
         SykdomDokumentInformasjon gmlInformasjon = dokument.getInformasjon();
         verifiserKanEndreType(sykdomDokumentEndringDto, behandling, gmlInformasjon);
 
+        final SykdomDokument duplikatAvDokument;
+        if (sykdomDokumentEndringDto.getDuplikatAvId() != null) {
+            final Long duplikatAvId = Long.valueOf(sykdomDokumentEndringDto.getDuplikatAvId());
+            verifiserKanSettesTilDupliat(duplikatAvId);
+            duplikatAvDokument = sykdomDokumentRepository.hentDokument(duplikatAvId, behandling.getFagsak().getPleietrengendeAktørId()).get();
+            if (duplikatAvDokument != null && duplikatAvDokument.getDuplikatAvDokument() != null) {
+                throw new IllegalStateException("Kan ikke sette at et dokument er duplikat av et annet duplikat dokument.");
+            }
+        } else {
+            duplikatAvDokument = null;
+        }
+        
         dokument.setInformasjon(new SykdomDokumentInformasjon(
             dokument,
+            duplikatAvDokument,
             sykdomDokumentEndringDto.getType(),
             gmlInformasjon.isHarInfoSomIkkeKanPunsjes(),
             sykdomDokumentEndringDto.getDatert(),
@@ -314,9 +327,17 @@ public class SykdomDokumentRestTjeneste {
     }
 
 
+    private void verifiserKanSettesTilDupliat(Long duplikatAvId) {
+        if (sykdomDokumentRepository.isDokumentBruktIVurdering(duplikatAvId)) {
+            throw new IllegalStateException("Kan ikke sette som duplikat siden dokumentet har blitt brukt i en vurdering.");
+        }
+    }
+
     private void verifiserKanEndreType(SykdomDokumentEndringDto sykdomDokumentEndringDto, final Behandling behandling, SykdomDokumentInformasjon gmlInformasjon) {
         final boolean varGodkjentLegeerklæring = gmlInformasjon.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS;
-        final boolean harBlittEndret = gmlInformasjon.getType() != sykdomDokumentEndringDto.getType();
+        final boolean harEndretType = gmlInformasjon.getType() != sykdomDokumentEndringDto.getType();
+        final boolean harBlittSattSomDuplikat = gmlInformasjon.getDuplikatAvDokument() == null && sykdomDokumentEndringDto.getDuplikatAvId() != null;
+        final boolean harBlittEndret = harEndretType || harBlittSattSomDuplikat;
         final boolean harIngenAnnenGodkjentLegeerklæring = !harMinstEnAnnenGodkjentLegeerklæring(gmlInformasjon.getDokument(), behandling.getFagsak().getPleietrengendeAktørId());
         final boolean harTidligereHattRelevantGodkjentLegeerklæring = sykdomGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
 

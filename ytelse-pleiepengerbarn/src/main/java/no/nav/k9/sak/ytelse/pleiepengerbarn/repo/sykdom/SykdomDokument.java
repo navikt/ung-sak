@@ -122,6 +122,13 @@ public class SykdomDokument {
         }
         return informasjon.getVersjon();
     }
+    
+    public SykdomDokument getDuplikatAvDokument() {
+        if (informasjon == null) {
+            throw new IllegalStateException("Dokument er ikke riktig initialisert!");
+        }
+        return informasjon.getDuplikatAvDokument();
+    }
 
     public UUID getBehandlingUuid() {
         return behandlingUuid;
