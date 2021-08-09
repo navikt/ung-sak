@@ -82,11 +82,11 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
     }
 
     private boolean harEndringerForNattevåkOgBeredskap(BehandlingReferanse ref) {
-        return endringUnntakEtablertTilsynTjeneste.harEndringerSidenForrigeBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId());
+        return endringUnntakEtablertTilsynTjeneste.harEndringerSidenBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId());
     }
 
     private boolean harEndringerForEtablertTilsyn(BehandlingReferanse referanse) {
-        return erEndringPåEtablertTilsynTjeneste.erUhåndterteEndringerFraForrigeVersjon(referanse);
+        return erEndringPåEtablertTilsynTjeneste.erEndringerSidenBehandling(referanse);
     }
 
     private boolean harEndringerForSykdom(BehandlingReferanse ref) {
