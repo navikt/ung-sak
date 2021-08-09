@@ -204,7 +204,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private NavigableSet<DatoIntervallEntitet> utledUtvidetPeriode(BehandlingReferanse referanse) {
         LocalDateTimeline<Boolean> utvidedePerioder = utledUtvidetPeriodeForSykdom(referanse);
         utvidedePerioder = utvidedePerioder.union(etablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
-        utvidedePerioder = utvidedePerioder.union(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId()), StandardCombinators::alwaysTrueForMatch);
+        utvidedePerioder = utvidedePerioder.union(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId()), StandardCombinators::alwaysTrueForMatch);
 
         return utvidedePerioder.toSegments()
             .stream()

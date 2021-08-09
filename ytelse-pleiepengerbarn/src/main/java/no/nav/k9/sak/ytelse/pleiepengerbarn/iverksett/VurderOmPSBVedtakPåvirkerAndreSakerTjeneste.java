@@ -98,11 +98,11 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
     }
 
     private boolean skalRevurderesPgaNattevåkOgBeredskap(BehandlingReferanse referanse) {
-        return endringUnntakEtablertTilsynTjeneste.harEndringerSidenForrigeBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId());
+        return endringUnntakEtablertTilsynTjeneste.harEndringerSidenBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId());
     }
 
     private boolean skalRevurderesPgaEtablertTilsyn(BehandlingReferanse referanse) {
-        return erEndringPåEtablertTilsynTjeneste.erUhåndterteEndringerFraForrigeBehandling(referanse);
+        return erEndringPåEtablertTilsynTjeneste.erEndringerSidenBehandling(referanse);
     }
 
     private boolean vurderBehovForRevurderingPgaSykdom(AktørId pleietrengende, Saksnummer kandidatsaksnummer, Behandling sisteBehandlingPåKandidat) {

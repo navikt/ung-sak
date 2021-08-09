@@ -27,17 +27,12 @@ public class ErEndringPåEtablertTilsynTjeneste {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
 
-    public boolean erUhåndterteEndringerFraForrigeBehandling(BehandlingReferanse referanse) {
-        LocalDateTimeline<Boolean> resultat = perioderMedEndringerFraForrigeBehandling(referanse);
-        return !resultat.isEmpty();
-    }
-
     /**
      * Differ mot det som er trukket inn på den aktuelle behandlingen, hvis ikke det er trukket inn noe sjekkes det mot forrige behandling
      * @param referanse referansen
      * @return true / false om det endringer som må tas hensyn til
      */
-    public boolean erUhåndterteEndringerFraForrigeVersjon(BehandlingReferanse referanse) {
+    public boolean erEndringerSidenBehandling(BehandlingReferanse referanse) {
         LocalDateTimeline<Boolean> resultat = perioderMedEndringerFraEksisterendeVersjon(referanse);
         return !resultat.isEmpty();
     }

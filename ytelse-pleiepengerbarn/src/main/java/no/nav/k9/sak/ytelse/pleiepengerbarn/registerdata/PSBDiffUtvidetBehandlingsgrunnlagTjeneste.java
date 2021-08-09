@@ -75,7 +75,7 @@ public class PSBDiffUtvidetBehandlingsgrunnlagTjeneste implements DiffUtvidetBeh
     }
 
     private List<DatoIntervallEntitet> diffNattevåkBeredskap(BehandlingReferanse ref) {
-        return endringUnntakEtablertTilsynTjeneste.utledRelevanteEndringerSidenForrigeBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId());
+        return endringUnntakEtablertTilsynTjeneste.utledRelevanteEndringerSidenBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId());
     }
 
     private LocalDateTimeline<Boolean> diffEtablertTilsyn(BehandlingReferanse referanse) {

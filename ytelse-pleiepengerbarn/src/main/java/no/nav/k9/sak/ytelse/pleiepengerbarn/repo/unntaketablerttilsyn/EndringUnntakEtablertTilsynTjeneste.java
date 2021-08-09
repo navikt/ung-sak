@@ -25,20 +25,20 @@ public class EndringUnntakEtablertTilsynTjeneste {
     }
 
 
-    public List<DatoIntervallEntitet> utledRelevanteEndringerSidenForrigeBehandling(Long behandlingId, AktørId pleietrengende) {
+    public List<DatoIntervallEntitet> utledRelevanteEndringerSidenBehandling(Long behandlingId, AktørId pleietrengende) {
         final Optional<UnntakEtablertTilsynGrunnlag> eksisterendeGrunnlag = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandlingId);
         final Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(pleietrengende);
         return utledEndringer(eksisterendeGrunnlag.map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende), unntakEtablertTilsynForPleietrengende);
     }
 
-    public boolean harEndringerSidenForrigeBehandling(Long behandlingId, AktørId pleietrengende) {
-        var endringer = utledRelevanteEndringerSidenForrigeBehandling(behandlingId, pleietrengende);
+    public boolean harEndringerSidenBehandling(Long behandlingId, AktørId pleietrengende) {
+        var endringer = utledRelevanteEndringerSidenBehandling(behandlingId, pleietrengende);
 
         return !endringer.isEmpty();
     }
 
-    public LocalDateTimeline<Boolean> perioderMedEndringerFraForrigeBehandling(Long behandlingId, AktørId pleietrengende) {
-        var perioder = utledRelevanteEndringerSidenForrigeBehandling(behandlingId, pleietrengende)
+    public LocalDateTimeline<Boolean> perioderMedEndringerSidenBehandling(Long behandlingId, AktørId pleietrengende) {
+        var perioder = utledRelevanteEndringerSidenBehandling(behandlingId, pleietrengende)
             .stream()
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
             .collect(Collectors.toList());

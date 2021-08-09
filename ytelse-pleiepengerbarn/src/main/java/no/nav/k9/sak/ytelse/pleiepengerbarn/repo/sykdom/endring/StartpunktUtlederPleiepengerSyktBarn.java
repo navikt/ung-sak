@@ -79,11 +79,11 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
     }
 
     private StartpunktType utledStartpunktForNattevåkOgBeredskap(BehandlingReferanse ref) {
-        return endringUnntakEtablertTilsynTjeneste.harEndringerSidenForrigeBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId()) ? StartpunktType.UTTAKSVILKÅR : StartpunktType.UDEFINERT;
+        return endringUnntakEtablertTilsynTjeneste.harEndringerSidenBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId()) ? StartpunktType.UTTAKSVILKÅR : StartpunktType.UDEFINERT;
     }
 
     private StartpunktType utledStartpunktForEtablertTilsyn(BehandlingReferanse referanse) {
-        var erUhåndterteEndringer = erEndringPåEtablertTilsynTjeneste.erUhåndterteEndringerFraForrigeVersjon(referanse);
+        var erUhåndterteEndringer = erEndringPåEtablertTilsynTjeneste.erEndringerSidenBehandling(referanse);
 
         if (erUhåndterteEndringer) {
             return StartpunktType.UTTAKSVILKÅR;
