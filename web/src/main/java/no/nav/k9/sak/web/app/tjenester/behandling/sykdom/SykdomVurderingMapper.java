@@ -8,6 +8,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import no.nav.k9.sak.kontrakt.sykdom.SykdomPeriodeMedEndringDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingAnnenInformasjon;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingDto;
@@ -26,13 +29,15 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
+@Dependent
 public class SykdomVurderingMapper {
 
-    private SykdomDokumentOversiktMapper dokumentMapper = new SykdomDokumentOversiktMapper();
+    private SykdomDokumentOversiktMapper dokumentMapper;
 
 
-    public SykdomVurderingMapper() {
-
+    @Inject
+    public SykdomVurderingMapper(SykdomDokumentOversiktMapper dokumentMapper) {
+        this.dokumentMapper = dokumentMapper;
     }
 
 

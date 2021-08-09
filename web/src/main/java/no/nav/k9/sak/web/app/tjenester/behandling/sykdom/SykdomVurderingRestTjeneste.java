@@ -82,7 +82,7 @@ public class SykdomVurderingRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper = new SykdomVurderingOversiktMapper();
-    private SykdomVurderingMapper sykdomVurderingMapper = new SykdomVurderingMapper();
+    private SykdomVurderingMapper sykdomVurderingMapper;
     private SykdomVurderingRepository sykdomVurderingRepository;
     private SykdomDokumentRepository sykdomDokumentRepository;
     private SykdomVurderingService sykdomVurderingService;
@@ -94,11 +94,13 @@ public class SykdomVurderingRestTjeneste {
 
     @Inject
     public SykdomVurderingRestTjeneste(BehandlingRepository behandlingRepository, SykdomVurderingRepository sykdomVurderingRepository,
-            SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingService sykdomVurderingService) {
+            SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingService sykdomVurderingService,
+            SykdomVurderingMapper sykdomVurderingMapper) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.sykdomVurderingService = sykdomVurderingService;
+        this.sykdomVurderingMapper = sykdomVurderingMapper;
     }
 
     @GET

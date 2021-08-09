@@ -50,6 +50,7 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
             null,
             repo,
             null,
+            null,
             null);
     }
 
