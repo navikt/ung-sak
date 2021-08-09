@@ -12,13 +12,13 @@ import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomGrunnlagSammenlikningsresultat;
 
-public class SyktBarnGrunnlagDiff extends DiffResult {
+public class PSBGrunnlagDiff extends DiffResult {
 
     private SykdomGrunnlagSammenlikningsresultat grunnlagSammenlikningsresultat;
     private LocalDateTimeline<Boolean> perioderMedEndringIEtablertTilsyn;
     private List<DatoIntervallEntitet> nattevåkBeredskap;
 
-    public SyktBarnGrunnlagDiff(SykdomGrunnlagSammenlikningsresultat grunnlagSammenlikningsresultat, LocalDateTimeline<Boolean> perioderMedEndringIEtablertTilsyn, List<DatoIntervallEntitet> nattevåkBeredskap) {
+    public PSBGrunnlagDiff(SykdomGrunnlagSammenlikningsresultat grunnlagSammenlikningsresultat, LocalDateTimeline<Boolean> perioderMedEndringIEtablertTilsyn, List<DatoIntervallEntitet> nattevåkBeredskap) {
         super(null, null, null);
         this.grunnlagSammenlikningsresultat = grunnlagSammenlikningsresultat;
         this.perioderMedEndringIEtablertTilsyn = perioderMedEndringIEtablertTilsyn;
@@ -29,7 +29,7 @@ public class SyktBarnGrunnlagDiff extends DiffResult {
     public Map<Node, Pair> getLeafDifferences() {
         if (areDifferent()) {
             return new DiffEntity(TraverseEntityGraphFactory.build())
-                .diff(null, new SykdomDiffData(grunnlagSammenlikningsresultat, perioderMedEndringIEtablertTilsyn, nattevåkBeredskap))
+                .diff(null, new PSBDiffData(grunnlagSammenlikningsresultat, perioderMedEndringIEtablertTilsyn, nattevåkBeredskap))
                 .getLeafDifferences();
         }
         return Map.of();

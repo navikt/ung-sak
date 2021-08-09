@@ -71,7 +71,7 @@ public class PSBDiffUtvidetBehandlingsgrunnlagTjeneste implements DiffUtvidetBeh
         var etablertTilsyn = diffEtablertTilsyn(ref);
         var nattevåkBeredskap = diffNattevåkBeredskap(ref);
 
-        return new SyktBarnGrunnlagDiff(sykdomGrunnlagSammenlikningsresultat, etablertTilsyn, nattevåkBeredskap);
+        return new PSBGrunnlagDiff(sykdomGrunnlagSammenlikningsresultat, etablertTilsyn, nattevåkBeredskap);
     }
 
     private List<DatoIntervallEntitet> diffNattevåkBeredskap(BehandlingReferanse ref) {

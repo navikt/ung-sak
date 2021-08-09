@@ -7,9 +7,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -62,17 +60,13 @@ public class EndringUnntakEtablertTilsynTjeneste {
 
     private LocalDateTimeline<Boolean> utledEndringerMedTidslinje(LocalDateTimeline<UnntakEtablertTilsynPeriode> eksisterende,
                                                                   LocalDateTimeline<UnntakEtablertTilsynPeriode> ny) {
-        return eksisterende.combine(ny, new LocalDateSegmentCombinator<UnntakEtablertTilsynPeriode, UnntakEtablertTilsynPeriode, Boolean>() {
-            @Override
-            public LocalDateSegment<Boolean> combine(LocalDateInterval datoInterval, LocalDateSegment<UnntakEtablertTilsynPeriode> datoSegment,
-                                                     LocalDateSegment<UnntakEtablertTilsynPeriode> datoSegment2) {
-                if (datoSegment == null
-                    || datoSegment2 == null
-                    || datoSegment.getValue().getResultat() == datoSegment2.getValue().getResultat()) {
-                    return new LocalDateSegment<>(datoInterval, Boolean.TRUE);
-                }
-                return null;
+        return eksisterende.combine(ny, (datoInterval, datoSegment, datoSegment2) -> {
+            if (datoSegment == null
+                || datoSegment2 == null
+                || datoSegment.getValue().getResultat() == datoSegment2.getValue().getResultat()) {
+                return new LocalDateSegment<>(datoInterval, Boolean.TRUE);
             }
+            return null;
         }, JoinStyle.CROSS_JOIN).compress();
     }
 
