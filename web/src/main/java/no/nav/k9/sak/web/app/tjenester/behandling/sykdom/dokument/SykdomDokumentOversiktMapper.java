@@ -10,6 +10,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -28,10 +31,20 @@ import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelsePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
 
+@Dependent
 public class SykdomDokumentOversiktMapper {
+    
+    private SykdomDokumentRepository sykdomDokumentRepository;
+    
+    @Inject
+    public SykdomDokumentOversiktMapper(SykdomDokumentRepository sykdomDokumentRepository) {
+        this.sykdomDokumentRepository = sykdomDokumentRepository;
+    }
+    
 
     public SykdomDokumentOversikt map(AktørId aktørId, String behandlingUuid, Collection<SykdomDokument> dokumenter) {
         final List<SykdomDokumentOversiktElement> elementer = dokumenter
@@ -47,6 +60,7 @@ public class SykdomDokumentOversiktMapper {
                         d.getMottattTidspunkt(),
                         d.getType() != SykdomDokumentType.UKLASSIFISERT,  // TODO: Sette riktig verdi.
                         (d.getDuplikatAvDokument() != null) ? "" + d.getDuplikatAvDokument().getId() : null,
+                        sykdomDokumentRepository.hentDuplikaterAv(d.getId()).stream().map(dup -> "" + dup.getId()).collect(Collectors.toList()),
                         Arrays.asList(
                             linkForGetDokumentinnhold(behandlingUuid, "" + d.getId()),
                             linkForEndreDokument(behandlingUuid, "" + d.getId(), d.getVersjon().toString())
