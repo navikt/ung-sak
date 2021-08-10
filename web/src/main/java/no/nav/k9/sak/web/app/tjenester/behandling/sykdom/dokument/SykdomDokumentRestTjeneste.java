@@ -328,7 +328,7 @@ public class SykdomDokumentRestTjeneste {
             if (duplikatAvDokument != null && duplikatAvDokument.getDuplikatAvDokument() != null) {
                 throw new IllegalStateException("Kan ikke sette at et dokument er duplikat av et annet duplikat dokument.");
             }
-            if (duplikatAvDokument != null && !duplikatAvDokument.getPerson().getAktørId().equals(behandling.getFagsak().getPleietrengendeAktørId())) {
+            if (duplikatAvDokument != null && !duplikatAvDokument.getSykdomVurderinger().getPerson().getAktørId().equals(behandling.getFagsak().getPleietrengendeAktørId())) {
                 throw new IllegalStateException("Kan ikke sette duplikatdokumenter på tvers av pleietrengende.");
             }
         } else {
