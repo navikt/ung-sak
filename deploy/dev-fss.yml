@@ -172,7 +172,7 @@ spec:
 
     # Restservice PSB spesifikt
     - name: K9_PSB_UTTAK_URL
-      value: http://pleiepenger-barn-uttak.default/pleiepenger-barn-uttak
+      value: http://pleiepenger-barn-uttak.k9saksbehandling/pleiepenger-barn-uttak
 
     # Graphql services
     - name: SAF_BASE_URL
