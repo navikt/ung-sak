@@ -159,6 +159,10 @@ spec:
       value: http://k9-formidling-dokumentdata.k9saksbehandling/k9/formidling/dokumentdata
     - name: K9_OPPDRAG_DIREKTE_URL
       value: http://k9-oppdrag.default/k9/oppdrag/api
+    - name: K9_TILBAKE_DIREKTE_URL
+      value: http://k9-tilbake.default/k9/tilbake/api
+    - name: K9_FORMIDLING_URL
+      value: http://k9-formidling.default/k9/formidling
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
