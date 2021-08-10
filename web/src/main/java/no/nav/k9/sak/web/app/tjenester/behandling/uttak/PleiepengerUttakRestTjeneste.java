@@ -51,7 +51,7 @@ public class PleiepengerUttakRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Uttaksplan getUttaksplan(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
-        return uttakRestKlient.hentUttaksplan(behandlingIdDto.getBehandlingUuid(), false);
+        return uttakRestKlient.hentUttaksplan(behandlingIdDto.getBehandlingUuid(), true);
     }
 
 }
