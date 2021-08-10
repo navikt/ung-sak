@@ -41,7 +41,7 @@ public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpF
     @Override
     public List<DumpOutput> dump(Behandling behandling) {
         try {
-            var uttaksplan = restKlient.hentUttaksplan(behandling.getUuid());
+            var uttaksplan = restKlient.hentUttaksplan(behandling.getUuid(), false);
             var content = ow.writeValueAsString(uttaksplan);
             return List.of(new DumpOutput(fileNameBehandlingPrefix + behandling.getUuid().toString() + fileNameBehandlingPosfix, content));
         } catch (Exception e) {
@@ -59,7 +59,7 @@ public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpF
         for (var behandling : behandlinger) {
             var dumpFileName = fileNameBehandlingPrefix + behandling.getUuid().toString() + fileNameBehandlingPosfix;
             try {
-                var uttaksplan = restKlient.hentUttaksplan(behandling.getUuid());
+                var uttaksplan = restKlient.hentUttaksplan(behandling.getUuid(), false);
                 var content = ow.writeValueAsString(uttaksplan);
                 outputListe.add(new DumpOutput(dumpFileName, content));
             } catch (Exception e) {

@@ -40,7 +40,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
     private final Map<Object, Uttaksplan> uttaksplaner = new LinkedHashMap<>();
 
     @Override
-    public Uttaksplan hentUttaksplan(UUID behandlingUuid) {
+    public Uttaksplan hentUttaksplan(UUID behandlingUuid, boolean slåSammenLikePerioder) {
         return hentUttaksplaner(behandlingUuid).values().stream().findFirst().orElseThrow();
     }
 

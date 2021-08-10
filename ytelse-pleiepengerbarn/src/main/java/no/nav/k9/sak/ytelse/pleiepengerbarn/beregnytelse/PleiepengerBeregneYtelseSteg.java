@@ -65,7 +65,7 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
         var ref = BehandlingReferanse.fra(behandling);
         UUID behandlingUuid = ref.getBehandlingUuid();
 
-        var uttaksplan = uttakTjeneste.hentUttaksplan(behandlingUuid);
+        var uttaksplan = uttakTjeneste.hentUttaksplan(behandlingUuid, false);
 
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(ref);
 

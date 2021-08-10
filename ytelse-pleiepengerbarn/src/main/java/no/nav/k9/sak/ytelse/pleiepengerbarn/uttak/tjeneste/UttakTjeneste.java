@@ -7,7 +7,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 public interface UttakTjeneste {
 
-    Uttaksplan hentUttaksplan(UUID behandlingId);
+    Uttaksplan hentUttaksplan(UUID behandlingId, boolean slåSammenLikePerioder);
 
     Uttaksplan opprettUttaksplan(Uttaksgrunnlag request);
 
