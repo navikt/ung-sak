@@ -44,7 +44,7 @@ public class PsbYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtel
 
     @Override
     public PleiepengerSyktBarnGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
-        var uttaksplan = uttakRestKlient.hentUttaksplan(ref.getBehandlingUuid());
+        var uttaksplan = uttakRestKlient.hentUttaksplan(ref.getBehandlingUuid(), false);
 
         var utbetalingsgrader = uttaksplan.getPerioder()
             .entrySet()

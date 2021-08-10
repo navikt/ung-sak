@@ -22,8 +22,8 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
     }
 
     @Override
-    public Uttaksplan hentUttaksplan(UUID behandlingId) {
-        return restKlient.hentUttaksplan(behandlingId);
+    public Uttaksplan hentUttaksplan(UUID behandlingId, boolean slåSammenLikePerioder) {
+        return restKlient.hentUttaksplan(behandlingId, slåSammenLikePerioder);
     }
 
     @Override

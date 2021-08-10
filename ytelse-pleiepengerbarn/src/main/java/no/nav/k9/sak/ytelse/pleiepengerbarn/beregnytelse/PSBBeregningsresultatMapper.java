@@ -81,7 +81,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
     @Override
     public BeregningsresultatDto map(Behandling behandling,
                                      BehandlingBeregningsresultatEntitet beregningsresultatAggregat) {
-        final Uttaksplan uttakResultat = uttakKlient.hentUttaksplan(behandling.getUuid());
+        final Uttaksplan uttakResultat = uttakKlient.hentUttaksplan(behandling.getUuid(), false);
         var ref = BehandlingReferanse.fra(behandling);
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatDto.build()
@@ -93,7 +93,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
 
     @Override
     public BeregningsresultatMedUtbetaltePeriodeDto mapMedUtbetaltePerioder(Behandling behandling, BehandlingBeregningsresultatEntitet bresAggregat) {
-        final Uttaksplan uttakResultat = uttakKlient.hentUttaksplan(behandling.getUuid());
+        final Uttaksplan uttakResultat = uttakKlient.hentUttaksplan(behandling.getUuid(), false);
         var ref = BehandlingReferanse.fra(behandling);
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatMedUtbetaltePeriodeDto.build()

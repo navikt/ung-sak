@@ -95,10 +95,11 @@ public class UttakRestKlient {
         }
     }
 
-    public Uttaksplan hentUttaksplan(UUID behandlingUuid) {
+    public Uttaksplan hentUttaksplan(UUID behandlingUuid, boolean slåSammenLikePerioder) {
         Objects.requireNonNull(behandlingUuid);
         URIBuilder builder = new URIBuilder(endpointUttaksplan);
         builder.addParameter("behandlingUUID", behandlingUuid.toString());
+        builder.addParameter("slåSammenLikePerioder", Boolean.valueOf(slåSammenLikePerioder).toString());
         try {
             HttpGet kall = new HttpGet(builder.build());
             return utførOgHent(kall, null, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
