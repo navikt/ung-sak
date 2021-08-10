@@ -8,11 +8,11 @@ import java.util.UUID;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.oppdrag.kontrakt.BehandlingReferanse;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
-import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @Dependent
 public class K9OppdragRestKlient {
@@ -26,7 +26,7 @@ public class K9OppdragRestKlient {
     }
 
     @Inject
-    public K9OppdragRestKlient(OidcRestClient restClient, @KonfigVerdi(value = "k9.oppdrag.direkte.url", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api") String urlK9Oppdrag) {
+    public K9OppdragRestKlient(OidcRestClient restClient, @KonfigVerdi(value = "k9.oppdrag.direkte.url", defaultVerdi = "http://k9-oppdrag.default/k9/oppdrag/api") String urlK9Oppdrag) {
         this.restClient = restClient;
         this.uriIverksett = tilUri(urlK9Oppdrag, "iverksett/start");
         this.uriSimulering = tilUri(urlK9Oppdrag, "simulering/start");
