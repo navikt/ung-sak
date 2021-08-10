@@ -97,6 +97,7 @@ public class MapperForTilkjentYtelse {
                 andelV1.medArbeidsgiverAktørId(arbeidsgiverOpt.get().getIdentifikator());
             } else {
                 andelV1.medArbeidsgiverOrgNr(arbeidsgiverOpt.get().getIdentifikator());
+                andelV1.medArbeidsforholdId(andel.getArbeidsforholdRef().getReferanse());
             }
         }
         return andelV1;
