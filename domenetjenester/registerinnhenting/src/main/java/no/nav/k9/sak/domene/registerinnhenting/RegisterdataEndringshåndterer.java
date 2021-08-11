@@ -149,7 +149,7 @@ public class RegisterdataEndringshåndterer {
             historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_YTELSER);
             return;
         }
-        if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON) && behandlingÅrsakTyper.stream().anyMatch(BehandlingÅrsakType.ANNEN_OMSORGSPERSON_TYPER::contains)) {
+        if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON) && harEnÅrsakSomIndikererHvaViHarInnhentet(behandlingÅrsakTyper)) {
             historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, utledEndringFraAnnenSak(behandlingÅrsakTyper));
             return;
         }
@@ -161,6 +161,10 @@ public class RegisterdataEndringshåndterer {
             return;
         }
         historikkinnslagTjeneste.opprettHistorikkinnslagForNyeRegisteropplysninger(behandling);
+    }
+
+    private boolean harEnÅrsakSomIndikererHvaViHarInnhentet(Set<BehandlingÅrsakType> behandlingÅrsakTyper) {
+        return behandlingÅrsakTyper.stream().anyMatch(BehandlingÅrsakType.ANNEN_OMSORGSPERSON_TYPER::contains);
     }
 
     private BehandlingÅrsakType utledEndringFraAnnenSak(Set<BehandlingÅrsakType> behandlingÅrsakTyper) {
