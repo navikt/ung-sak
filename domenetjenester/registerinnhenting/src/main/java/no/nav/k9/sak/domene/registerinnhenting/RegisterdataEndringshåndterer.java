@@ -6,8 +6,10 @@ import java.time.LocalDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -147,8 +149,15 @@ public class RegisterdataEndringshåndterer {
             historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_YTELSER);
             return;
         }
-        if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON)) {
+        if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON) && behandlingÅrsakTyper.stream().anyMatch(BehandlingÅrsakType.ANNEN_OMSORGSPERSON_TYPER::contains)) {
             historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, utledEndringFraAnnenSak(behandlingÅrsakTyper));
+            return;
+        }
+        var redusert = behandlingÅrsakTyper.stream()
+            .filter(it -> !BehandlingÅrsakType.ANNEN_OMSORGSPERSON_TYPER.contains(it))
+            .filter(it -> !Objects.equals(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON, it))
+            .collect(Collectors.toList());
+        if (redusert.isEmpty()) {
             return;
         }
         historikkinnslagTjeneste.opprettHistorikkinnslagForNyeRegisteropplysninger(behandling);
