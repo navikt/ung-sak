@@ -3,16 +3,21 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.endring;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -30,6 +35,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnn
 @FagsakYtelseTypeRef("PSB")
 class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
 
+    private BehandlingRepository behandlingRepository;
+    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -41,11 +48,15 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
     }
 
     @Inject
-    BehandlingÅrsakUtlederSykdomGrunnlag(SykdomGrunnlagRepository sykdomGrunnlagRepository,
+    BehandlingÅrsakUtlederSykdomGrunnlag(BehandlingRepository behandlingRepository,
+                                         BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+                                         SykdomGrunnlagRepository sykdomGrunnlagRepository,
                                          SykdomGrunnlagService sykdomGrunnlagService,
                                          VilkårResultatRepository vilkårResultatRepository,
                                          ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
                                          EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste) {
+        this.behandlingRepository = behandlingRepository;
+        this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -82,11 +93,11 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
     }
 
     private boolean harEndringerForNattevåkOgBeredskap(BehandlingReferanse ref) {
-        return endringUnntakEtablertTilsynTjeneste.harEndringerSidenBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId());
+        return endringUnntakEtablertTilsynTjeneste.harEndringerSidenBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId()) && skalGiÅrsak(ref, BehandlingStegType.KONTROLLER_FAKTA_UTTAK);
     }
 
     private boolean harEndringerForEtablertTilsyn(BehandlingReferanse referanse) {
-        return erEndringPåEtablertTilsynTjeneste.erEndringerSidenBehandling(referanse);
+        return erEndringPåEtablertTilsynTjeneste.erEndringerSidenBehandling(referanse) && skalGiÅrsak(referanse, BehandlingStegType.VURDER_UTTAK);
     }
 
     private boolean harEndringerForSykdom(BehandlingReferanse ref) {
@@ -97,7 +108,17 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
         var utledGrunnlag = sykdomGrunnlagService.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
         var sykdomGrunnlagSammenlikningsresultat = sykdomGrunnlagService.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
-        return !sykdomGrunnlagSammenlikningsresultat.getDiffPerioder().isEmpty();
+        return !sykdomGrunnlagSammenlikningsresultat.getDiffPerioder().isEmpty() && skalGiÅrsak(ref, BehandlingStegType.VURDER_MEDISINSKVILKÅR);
+    }
+
+    private boolean skalGiÅrsak(BehandlingReferanse ref, BehandlingStegType stegType) {
+        if (BehandlingStatus.UTREDES.equals(ref.getBehandlingStatus()) && behandlingskontrollTjeneste.erIStegEllerSenereSteg(ref.getBehandlingId(), stegType)) {
+            return true;
+        }
+        if (BehandlingStatus.UTREDES.equals(ref.getBehandlingStatus()) && Objects.equals(behandlingRepository.hentBehandling(ref.getBehandlingId()).getAktivtBehandlingSteg(), stegType)) {
+            return true;
+        }
+        return BehandlingStatus.OPPRETTET.equals(ref.getBehandlingStatus());
     }
 
     private List<Periode> utledVurderingsperiode(Long behandlingId) {
