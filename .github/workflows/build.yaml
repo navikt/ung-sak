@@ -113,7 +113,7 @@ jobs:
                  owner: context.issue.owner,
                  repo: context.issue.repo,
                  labels: ['deployment'],
-                 body: 'Kommenter enten "/promote dev-fss default" eller "/promote prod-fss default"',
+                 body: 'Kommenter enten "/promote dev-fss" eller "/promote prod-fss"',
                  title: 'Deploy av ${{ env.TAG }}'})
                .then(response => {
                        core.setOutput('number', response.data.number);
