@@ -138,7 +138,7 @@ spec:
     - name: FPABAKUS_URL
       value: http://fpabakus.default/fpabakus
     - name: FTKALKULUS_URL
-      value: http://ftkalkulus.default/ftkalkulus
+      value: http://ftkalkulus.k9saksbehandling/ftkalkulus
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
