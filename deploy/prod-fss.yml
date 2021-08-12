@@ -2,7 +2,7 @@ apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
   name: k9-sak
-  namespace: default
+  namespace: k9saksbehandling
   labels:
     team: k9saksbehandling
 spec:
@@ -46,7 +46,7 @@ spec:
       - mountPath: /var/run/secrets/nais.io/ldap
         kvPath: /serviceuser/data/prod/srvssolinux
       - mountPath: /var/run/secrets/nais.io/vault
-        kvPath: /kv/prod/fss/k9-sak/default
+        kvPath: /kv/prod/fss/k9-sak/k9saksbehandling
   sidecar: true
   env:
     - name: TZ
@@ -140,7 +140,7 @@ spec:
     - name: FTKALKULUS_URL
       value: http://ftkalkulus.default/ftkalkulus
     - name: ABAKUS_CALLBACK_URL
-      value: http://k9-sak.default/k9/sak/api/registerdata/iay/callback
+      value: http://k9-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
       value: http://abac-k9.default/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
@@ -162,7 +162,7 @@ spec:
     - name: K9_TILBAKE_DIREKTE_URL
       value: http://k9-tilbake.default/k9/tilbake/api
     - name: K9_FORMIDLING_URL
-      value: http://k9-formidling.default/k9/formidling
+      value: http://k9-formidling.k9saksbehandling/k9/formidling
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
