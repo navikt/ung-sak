@@ -85,7 +85,7 @@ public class SykdomDokumentRestTjeneste {
     public static final String DOKUMENT_LISTE_PATH = BASE_PATH + DOKUMENT_LISTE;
 
     private BehandlingRepository behandlingRepository;
-    private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper = new SykdomDokumentOversiktMapper();
+    private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper;
     private SykdomDokumentRepository sykdomDokumentRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
@@ -97,7 +97,8 @@ public class SykdomDokumentRestTjeneste {
 
 
     @Inject
-    public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingRepository sykdomVurderingRepository, DokumentArkivTjeneste dokumentArkivTjeneste, SykdomGrunnlagRepository sykdomGrunnlagRepository) {
+    public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper, SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingRepository sykdomVurderingRepository, DokumentArkivTjeneste dokumentArkivTjeneste, SykdomGrunnlagRepository sykdomGrunnlagRepository) {
+        this.sykdomDokumentOversiktMapper = sykdomDokumentOversiktMapper;
         this.behandlingRepository = behandlingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
@@ -296,12 +297,16 @@ public class SykdomDokumentRestTjeneste {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
 
-        final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(sykdomDokumentEndringDto.getId()), behandling.getFagsak().getPleietrengendeAktørId()).get();
+        final Long dokumentId = Long.valueOf(sykdomDokumentEndringDto.getId());
+        final var dokument = sykdomDokumentRepository.hentDokument(dokumentId, behandling.getFagsak().getPleietrengendeAktørId()).get();
         SykdomDokumentInformasjon gmlInformasjon = dokument.getInformasjon();
         verifiserKanEndreType(sykdomDokumentEndringDto, behandling, gmlInformasjon);
 
+        final SykdomDokument duplikatAvDokument = hentSattDuplikatDokument(sykdomDokumentEndringDto, behandling, dokumentId);
+        
         dokument.setInformasjon(new SykdomDokumentInformasjon(
             dokument,
+            duplikatAvDokument,
             sykdomDokumentEndringDto.getType(),
             gmlInformasjon.isHarInfoSomIkkeKanPunsjes(),
             sykdomDokumentEndringDto.getDatert(),
@@ -314,9 +319,39 @@ public class SykdomDokumentRestTjeneste {
     }
 
 
+    private SykdomDokument hentSattDuplikatDokument(SykdomDokumentEndringDto sykdomDokumentEndringDto, final Behandling behandling, final Long dokumentId) {
+        if (sykdomDokumentEndringDto.getDuplikatAvId() == null) {
+            return null;
+        }
+        
+        final Long duplikatAvId = Long.valueOf(sykdomDokumentEndringDto.getDuplikatAvId());
+        verifiserKanSettesTilDuplikat(dokumentId, duplikatAvId);
+        final SykdomDokument duplikatAvDokument = sykdomDokumentRepository.hentDokument(duplikatAvId, behandling.getFagsak().getPleietrengendeAktørId()).get();
+        
+        if (duplikatAvDokument != null && duplikatAvDokument.getDuplikatAvDokument() != null) {
+            throw new IllegalStateException("Kan ikke sette at et dokument er duplikat av et annet duplikat dokument.");
+        }
+        if (duplikatAvDokument != null && !duplikatAvDokument.getSykdomVurderinger().getPerson().getAktørId().equals(behandling.getFagsak().getPleietrengendeAktørId())) {
+            throw new IllegalStateException("Kan ikke sette duplikatdokumenter på tvers av pleietrengende.");
+        }
+
+        return duplikatAvDokument;
+    }
+
+    private void verifiserKanSettesTilDuplikat(Long duplikatDokumentId, Long duplikatAvDokumentId) {
+        if (sykdomDokumentRepository.isDokumentBruktIVurdering(duplikatAvDokumentId)) {
+            throw new IllegalStateException("Kan ikke sette som duplikat siden dokumentet har blitt brukt i en vurdering.");
+        }
+        if (!sykdomDokumentRepository.hentDuplikaterAv(duplikatDokumentId).isEmpty()) {
+            throw new IllegalStateException("Kan ikke sette som duplikat siden andre dokumenter er duplikat av dette dokumentet.");
+        }
+    }
+
     private void verifiserKanEndreType(SykdomDokumentEndringDto sykdomDokumentEndringDto, final Behandling behandling, SykdomDokumentInformasjon gmlInformasjon) {
         final boolean varGodkjentLegeerklæring = gmlInformasjon.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS;
-        final boolean harBlittEndret = gmlInformasjon.getType() != sykdomDokumentEndringDto.getType();
+        final boolean harEndretType = gmlInformasjon.getType() != sykdomDokumentEndringDto.getType();
+        final boolean harBlittSattSomDuplikat = gmlInformasjon.getDuplikatAvDokument() == null && sykdomDokumentEndringDto.getDuplikatAvId() != null;
+        final boolean harBlittEndret = harEndretType || harBlittSattSomDuplikat;
         final boolean harIngenAnnenGodkjentLegeerklæring = !harMinstEnAnnenGodkjentLegeerklæring(gmlInformasjon.getDokument(), behandling.getFagsak().getPleietrengendeAktørId());
         final boolean harTidligereHattRelevantGodkjentLegeerklæring = sykdomGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
 

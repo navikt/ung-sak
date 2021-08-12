@@ -84,6 +84,38 @@ class SykdomDokumentRepositoryTest {
         assertThat(repo.hentDokument(dokumenter.get(0).getId(), pleietrengendeAktørId).isPresent());
         assertThat(repo.hentAlleDokumenterFor(pleietrengendeAktørId).size()).isEqualTo(1);
     }
+    
+    @Test
+    void lagreDokumentSomDuplikat() {
+        final String endretAv = "saksbehandler";
+        final LocalDateTime nå = LocalDateTime.now();
+        final JournalpostId journalpostId = new JournalpostId("journalpostId");
+        final JournalpostId duplikatJournalpostId = new JournalpostId("duplikatJournalpostId");
+
+        final AktørId pleietrengendeAktørId = new AktørId("lala");
+        final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
+        SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
+        repo.lagre(dokument, pleietrengendeAktørId);
+
+        final List<SykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
+        assertThat(dokumenter.size()).isEqualTo(1);
+        assertThat(repo.hentDokument(dokumenter.get(0).getId(), pleietrengendeAktørId).isPresent());
+        assertThat(repo.hentAlleDokumenterFor(pleietrengendeAktørId).size()).isEqualTo(1);
+
+        dokument = dokumenter.get(0);
+
+        final SykdomDokumentInformasjon duplikatInformasjon = new SykdomDokumentInformasjon(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
+        duplikatInformasjon.setDuplikatAvDokument(dokument);
+        SykdomDokument duplikatDokument = new SykdomDokument(duplikatJournalpostId, null, duplikatInformasjon, null, null, null, endretAv, nå);
+        repo.lagre(duplikatDokument, pleietrengendeAktørId);
+      
+        List<SykdomDokument> oppdaterteDokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
+        assertThat(oppdaterteDokumenter.size()).isEqualTo(2);
+        assertThat(oppdaterteDokumenter.get(1).getDuplikatAvDokument()).isNotNull();
+        
+        assertThat(repo.isDokumentBruktIVurdering(dokument.getId())).isFalse();
+        assertThat(repo.hentDuplikaterAv(dokument.getId())).isNotEmpty();
+    }
 
     @Test
     void lagreHentOgOppdaterDiagnosekoder() {

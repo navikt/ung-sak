@@ -29,6 +29,10 @@ public class SykdomDokumentInformasjon {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SYKDOM_DOKUMENT_ID")
     private SykdomDokument dokument;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DUPLIKAT_AV_SYKDOM_DOKUMENT_ID")
+    private SykdomDokument duplikatAvDokument;
 
     @Column(name = "VERSJON", nullable = false)
     private Long versjon;
@@ -59,24 +63,8 @@ public class SykdomDokumentInformasjon {
     }
 
     public SykdomDokumentInformasjon(
-            SykdomDokumentType type,
-            boolean harInfoSomIkkeKanPunsjes,
-            LocalDate datert,
-            LocalDateTime mottatt,
-            Long versjon,
-            String opprettetAv,
-            LocalDateTime opprettetTidspunkt) {
-        this.type = Objects.requireNonNull(type, "type");
-        this.datert = datert;
-        this.mottatt = mottatt;
-        this.versjon = versjon;
-        this.harInfoSomIkkeKanPunsjes = harInfoSomIkkeKanPunsjes;
-        this.opprettetAv = Objects.requireNonNull(opprettetAv, "opprettetAv");
-        this.opprettetTidspunkt = Objects.requireNonNull(opprettetTidspunkt, "opprettetTidspunkt");
-    }
-
-    public SykdomDokumentInformasjon(
             SykdomDokument dokument,
+            SykdomDokument duplikatAvDokument,
             SykdomDokumentType type,
             boolean harInfoSomIkkeKanPunsjes,
             LocalDate datert,
@@ -85,8 +73,26 @@ public class SykdomDokumentInformasjon {
             String opprettetAv,
             LocalDateTime opprettetTidspunkt
             ) {
-        this(type, harInfoSomIkkeKanPunsjes, datert, mottatt, versjon,  opprettetAv, opprettetTidspunkt);
+        this.type = Objects.requireNonNull(type, "type");
+        this.datert = datert;
+        this.mottatt = mottatt;
+        this.versjon = versjon;
+        this.harInfoSomIkkeKanPunsjes = harInfoSomIkkeKanPunsjes;
+        this.opprettetAv = Objects.requireNonNull(opprettetAv, "opprettetAv");
+        this.opprettetTidspunkt = Objects.requireNonNull(opprettetTidspunkt, "opprettetTidspunkt");
         this.dokument = dokument;
+        this.duplikatAvDokument = duplikatAvDokument;
+    }
+    
+    public SykdomDokumentInformasjon(
+            SykdomDokumentType type,
+            boolean harInfoSomIkkeKanPunsjes,
+            LocalDate datert,
+            LocalDateTime mottatt,
+            Long versjon,
+            String opprettetAv,
+            LocalDateTime opprettetTidspunkt) {
+        this(null, null, type, harInfoSomIkkeKanPunsjes, datert, mottatt, versjon,  opprettetAv, opprettetTidspunkt);
     }
 
     public Long getId() {
@@ -127,6 +133,14 @@ public class SykdomDokumentInformasjon {
 
     public SykdomDokument getDokument() {
         return dokument;
+    }
+    
+    public SykdomDokument getDuplikatAvDokument() {
+        return duplikatAvDokument;
+    }
+    
+    public void setDuplikatAvDokument(SykdomDokument duplikatAvDokument) {
+        this.duplikatAvDokument = duplikatAvDokument;
     }
 
     public Long getVersjon() {

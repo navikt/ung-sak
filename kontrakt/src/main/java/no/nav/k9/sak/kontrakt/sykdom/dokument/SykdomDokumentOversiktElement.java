@@ -60,6 +60,17 @@ public class SykdomDokumentOversiktElement {
     @JsonProperty(value = "behandlet")
     @Valid
     private boolean behandlet;
+    
+    @JsonProperty(value = "duplikatAvId")
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String duplikatAvId;
+    
+    @JsonProperty(value = "duplikater")
+    @Size(max = 1000)
+    @Valid
+    private List<String> duplikater;
 
     @JsonProperty(value = "links")
     @Size(max = 100)
@@ -79,6 +90,8 @@ public class SykdomDokumentOversiktElement {
             LocalDate mottattDato,
             LocalDateTime mottattTidspunkt,
             boolean behandlet,
+            String duplikatAvId,
+            List<String> duplikater,
             List<ResourceLink> links) {
         this.id = id;
         this.versjon = versjon;
@@ -88,6 +101,8 @@ public class SykdomDokumentOversiktElement {
         this.mottattDato = mottattDato;
         this.mottattTidspunkt = mottattTidspunkt;
         this.behandlet = behandlet;
+        this.duplikatAvId = duplikatAvId;
+        this.duplikater = duplikater;
         this.links = links;
     }
 

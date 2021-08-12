@@ -45,6 +45,16 @@ public class SykdomDokumentRepository {
 
         return dokuments;
     }
+    
+    public boolean isDokumentBruktIVurdering(Long dokumentId) {
+        final TypedQuery<SykdomVurderingVersjon> q = entityManager.createQuery(
+            "SELECT vv From SykdomVurderingVersjon as vv "
+                + "inner join vv.dokumenter as d "
+                + "where d.id = :dokumentId", SykdomVurderingVersjon.class);
+        q.setParameter("dokumentId", dokumentId);
+
+        return q.getResultList().size() > 0;
+    }
 
     public List<SykdomDokument> hentDokumenterSomErRelevanteForSykdom(AktørId pleietrengende) {
         return hentAlleDokumenterFor(pleietrengende)
@@ -52,9 +62,20 @@ public class SykdomDokumentRepository {
             .filter(d -> d.getType().isRelevantForSykdom())
             .collect(Collectors.toList());
     }
+    
+    public List<SykdomDokument> hentDuplikaterAv(Long dokumentId) {
+        final TypedQuery<SykdomDokument> q = entityManager.createQuery(
+            "SELECT d From SykdomDokument as d "
+                + "inner join d.informasjon as i "
+                + "inner join i.duplikatAvDokument as dd "
+                + "where dd.id = :dokumentId", SykdomDokument.class);
+
+        q.setParameter("dokumentId", dokumentId);
+        return q.getResultList();
+    }
 
     public List<SykdomDokument> hentGodkjenteLegeerklæringer(AktørId pleietrengende) {
-        return hentAlleDokumenterFor(pleietrengende).stream().filter(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS).collect(Collectors.toList());
+        return hentAlleDokumenterFor(pleietrengende).stream().filter(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS && d.getDuplikatAvDokument() == null).collect(Collectors.toList());
     }
 
     public Optional<SykdomDokument> hentDokument(Long dokumentId, AktørId pleietrengende) {

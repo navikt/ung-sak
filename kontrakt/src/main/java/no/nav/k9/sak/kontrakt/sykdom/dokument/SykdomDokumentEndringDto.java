@@ -50,7 +50,12 @@ public class SykdomDokumentEndringDto {
     @NotNull
     private LocalDate datert;
 
-
+    @JsonProperty(value = "duplikatAvId", required = true)
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String duplikatAvId;
+    
     public SykdomDokumentEndringDto() {
 
     }
@@ -85,6 +90,10 @@ public class SykdomDokumentEndringDto {
 
     public LocalDate getDatert() {
         return datert;
+    }
+    
+    public String getDuplikatAvId() {
+        return duplikatAvId;
     }
 
     public SykdomDokumentEndringDto medType(SykdomDokumentType type) {
