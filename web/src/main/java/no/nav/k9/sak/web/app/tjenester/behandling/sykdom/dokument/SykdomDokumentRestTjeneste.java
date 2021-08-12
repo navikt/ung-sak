@@ -320,28 +320,29 @@ public class SykdomDokumentRestTjeneste {
 
 
     private SykdomDokument hentSattDuplikatDokument(SykdomDokumentEndringDto sykdomDokumentEndringDto, final Behandling behandling, final Long dokumentId) {
-        final SykdomDokument duplikatAvDokument;
-        if (sykdomDokumentEndringDto.getDuplikatAvId() != null) {
-            final Long duplikatAvId = Long.valueOf(sykdomDokumentEndringDto.getDuplikatAvId());
-            verifiserKanSettesTilDuplikat(dokumentId, duplikatAvId);
-            duplikatAvDokument = sykdomDokumentRepository.hentDokument(duplikatAvId, behandling.getFagsak().getPleietrengendeAktørId()).get();
-            if (duplikatAvDokument != null && duplikatAvDokument.getDuplikatAvDokument() != null) {
-                throw new IllegalStateException("Kan ikke sette at et dokument er duplikat av et annet duplikat dokument.");
-            }
-            if (duplikatAvDokument != null && !duplikatAvDokument.getSykdomVurderinger().getPerson().getAktørId().equals(behandling.getFagsak().getPleietrengendeAktørId())) {
-                throw new IllegalStateException("Kan ikke sette duplikatdokumenter på tvers av pleietrengende.");
-            }
-        } else {
-            duplikatAvDokument = null;
+        if (sykdomDokumentEndringDto.getDuplikatAvId() == null) {
+            return null;
         }
+        
+        final Long duplikatAvId = Long.valueOf(sykdomDokumentEndringDto.getDuplikatAvId());
+        verifiserKanSettesTilDuplikat(dokumentId, duplikatAvId);
+        final SykdomDokument duplikatAvDokument = sykdomDokumentRepository.hentDokument(duplikatAvId, behandling.getFagsak().getPleietrengendeAktørId()).get();
+        
+        if (duplikatAvDokument != null && duplikatAvDokument.getDuplikatAvDokument() != null) {
+            throw new IllegalStateException("Kan ikke sette at et dokument er duplikat av et annet duplikat dokument.");
+        }
+        if (duplikatAvDokument != null && !duplikatAvDokument.getSykdomVurderinger().getPerson().getAktørId().equals(behandling.getFagsak().getPleietrengendeAktørId())) {
+            throw new IllegalStateException("Kan ikke sette duplikatdokumenter på tvers av pleietrengende.");
+        }
+
         return duplikatAvDokument;
     }
 
-    private void verifiserKanSettesTilDuplikat(Long dokumentId, Long duplikatAvId) {
-        if (sykdomDokumentRepository.isDokumentBruktIVurdering(duplikatAvId)) {
+    private void verifiserKanSettesTilDuplikat(Long duplikatDokumentId, Long duplikatAvDokumentId) {
+        if (sykdomDokumentRepository.isDokumentBruktIVurdering(duplikatAvDokumentId)) {
             throw new IllegalStateException("Kan ikke sette som duplikat siden dokumentet har blitt brukt i en vurdering.");
         }
-        if (!sykdomDokumentRepository.hentDuplikaterAv(dokumentId).isEmpty()) {
+        if (!sykdomDokumentRepository.hentDuplikaterAv(duplikatDokumentId).isEmpty()) {
             throw new IllegalStateException("Kan ikke sette som duplikat siden andre dokumenter er duplikat av dette dokumentet.");
         }
     }

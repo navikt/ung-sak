@@ -123,6 +123,11 @@ public class SykdomDokument {
         return informasjon.getVersjon();
     }
     
+    /**
+     * Henter dokumentet dette dokumentet er et duplikat av.
+     * @return Dokumentet som skal brukes fremfor dette dokumentet, eller {@code null} hvis dette
+     *  dokumentet ikke er et duplikat.
+     */
     public SykdomDokument getDuplikatAvDokument() {
         if (informasjon == null) {
             throw new IllegalStateException("Dokument er ikke riktig initialisert!");
