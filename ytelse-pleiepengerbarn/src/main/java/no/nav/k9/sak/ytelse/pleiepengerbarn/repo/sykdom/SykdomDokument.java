@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -16,7 +17,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
@@ -37,7 +37,6 @@ public class SykdomDokument {
     private SykdomVurderinger sykdomVurderinger;
 
     @OneToMany(mappedBy = "dokument", cascade = CascadeType.PERSIST)
-    @OrderBy(value = "versjon desc")
     private List<SykdomDokumentInformasjon> informasjoner = new ArrayList<>();
 
     @Column(name = "JOURNALPOST_ID", nullable = false)
@@ -163,7 +162,7 @@ public class SykdomDokument {
     }
 
     public SykdomDokumentInformasjon getInformasjon() {
-        return informasjoner.stream().findFirst().orElse(null);
+        return informasjoner.stream().max(Comparator.naturalOrder()).orElse(null);
     }
 
     public String getOpprettetAv() {

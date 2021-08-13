@@ -20,7 +20,7 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 
 @Entity(name = "SykdomDokumentInformasjon")
 @Table(name = "SYKDOM_DOKUMENT_INFORMASJON")
-public class SykdomDokumentInformasjon {
+public class SykdomDokumentInformasjon implements Comparable<SykdomDokumentInformasjon> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_DOKUMENT_INFORMASJON")
@@ -149,5 +149,10 @@ public class SykdomDokumentInformasjon {
 
     public void setType(SykdomDokumentType type) {
         this.type = type;
+    }
+    
+    @Override
+    public int compareTo(SykdomDokumentInformasjon o) {
+        return Long.valueOf(versjon).compareTo(o.versjon);
     }
 }
