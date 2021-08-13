@@ -66,9 +66,14 @@ public class SykdomDokumentRepository {
     public List<SykdomDokument> hentDuplikaterAv(Long dokumentId) {
         final TypedQuery<SykdomDokument> q = entityManager.createQuery(
             "SELECT d From SykdomDokument as d "
-                + "inner join d.informasjon as i "
+                + "inner join d.informasjoner as i "
                 + "inner join i.duplikatAvDokument as dd "
-                + "where dd.id = :dokumentId", SykdomDokument.class);
+                + "where dd.id = :dokumentId"
+                + "  and i.versjon = ("
+                + "    select max(i2.versjon) "
+                + "    From SykdomDokumentInformasjon as i2 "
+                + "    where i2.dokument = i.dokument"
+                + "  )", SykdomDokument.class);
 
         q.setParameter("dokumentId", dokumentId);
         return q.getResultList();
@@ -95,11 +100,13 @@ public class SykdomDokumentRepository {
     }
 
     public void lagre(SykdomDokument dokument, AktørId pleietrengende) {
+        if (dokument.getId() != null) {
+            throw new IllegalStateException("Dokumentet har allerede blitt lagret.");
+        }
         final SykdomVurderinger sykdomVurderinger = sykdomVurderingRepository.hentEllerLagreSykdomVurderinger(pleietrengende, dokument.getEndretAv(), dokument.getEndretTidspunkt());
         dokument.setSykdomVurderinger(sykdomVurderinger);
 
         entityManager.persist(dokument);
-        entityManager.persist(dokument.getInformasjon());
         entityManager.flush();
     }
 

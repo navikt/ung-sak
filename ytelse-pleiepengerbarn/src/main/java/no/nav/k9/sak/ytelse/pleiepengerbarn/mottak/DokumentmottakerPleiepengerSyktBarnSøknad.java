@@ -135,7 +135,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
 
             sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
                 behandling,
-                journalpostId,
+                new JournalpostId(journalpost.getJournalpostId()),
                 behandling.getFagsak().getPleietrengendeAktørId(),
                 søknad.getMottattDato().toLocalDateTime(),
                 journalpostHarInformasjonSomIkkeKanPunsjes,
