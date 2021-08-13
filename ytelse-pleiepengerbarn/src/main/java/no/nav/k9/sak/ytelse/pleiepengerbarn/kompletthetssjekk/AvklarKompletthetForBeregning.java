@@ -33,8 +33,6 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
 
     @Override
     public OppdateringResultat oppdater(AvklarKompletthetForBeregningDto dto, AksjonspunktOppdaterParameter param) {
-        lagHistorikkinnslag(param, dto);
-
         var perioderMedManglendeGrunnlag = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(param.getRef());
 
         var kanFortsette = perioderMedManglendeGrunnlag.entrySet()
@@ -47,8 +45,9 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .findFirst()
                 .orElse(false));
 
-
         if (kanFortsette) {
+            lagHistorikkinnslag(param, dto);
+
             return OppdateringResultat.utenTransisjon()
                 .medTotrinn()
                 .build();
@@ -63,7 +62,7 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
     private void lagHistorikkinnslag(AksjonspunktOppdaterParameter param, AvklarKompletthetForBeregningDto dto) {
         historikkTjenesteAdapter.tekstBuilder()
             .medSkjermlenke(SkjermlenkeType.BEREGNING) // TODO: Sette noe fornuftig avhengig av hvor frontend plasserer dette
-            .medBegrunnelse("Kompletthet avklart: " + dto.getBegrunnelse());
+            .medBegrunnelse("Behov for inntektsmelding avklart: " + dto.getBegrunnelse());
         historikkTjenesteAdapter.opprettHistorikkInnslag(param.getBehandlingId(), HistorikkinnslagType.FAKTA_ENDRET);
     }
 
