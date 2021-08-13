@@ -95,11 +95,13 @@ public class SykdomDokumentRepository {
     }
 
     public void lagre(SykdomDokument dokument, AktørId pleietrengende) {
+        if (dokument.getId() != null) {
+            throw new IllegalStateException("Dokumentet har allerede blitt lagret.");
+        }
         final SykdomVurderinger sykdomVurderinger = sykdomVurderingRepository.hentEllerLagreSykdomVurderinger(pleietrengende, dokument.getEndretAv(), dokument.getEndretTidspunkt());
         dokument.setSykdomVurderinger(sykdomVurderinger);
 
         entityManager.persist(dokument);
-        entityManager.persist(dokument.getInformasjon());
         entityManager.flush();
     }
 

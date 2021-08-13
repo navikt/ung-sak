@@ -2,9 +2,11 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,9 +14,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.JoinFormula;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
@@ -33,9 +35,9 @@ public class SykdomDokument {
     @JoinColumn(name = "SYKDOM_VURDERINGER_ID", nullable = false, updatable = false, unique = true) //TODO:modifiers
     private SykdomVurderinger sykdomVurderinger;
 
-    @ManyToOne
-    @JoinFormula("(SELECT i.id FROM SYKDOM_DOKUMENT_INFORMASJON i where i.SYKDOM_DOKUMENT_ID = id ORDER BY i.VERSJON DESC LIMIT 1)")
-    private SykdomDokumentInformasjon informasjon;
+    @OneToMany(mappedBy = "dokument", cascade = CascadeType.PERSIST)
+    @OrderBy(value = "versjon desc")
+    private List<SykdomDokumentInformasjon> informasjoner;
 
     @Column(name = "JOURNALPOST_ID", nullable = false)
     private JournalpostId journalpostId;
@@ -76,11 +78,7 @@ public class SykdomDokument {
             LocalDateTime opprettetTidspunkt) {
         this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");
         this.dokumentInfoId = dokumentInfoId;
-        if (informasjon.getDokument() != null && informasjon.getDokument() != this) {
-            throw new IllegalStateException("Potensiell krysskobling av dokumentInformasjon fra andre dokumenter!");
-        }
-        informasjon.setDokument(this);
-        this.informasjon = informasjon;
+        setInformasjon(informasjon);
         this.behandlingUuid = behandlingUuid;
         this.saksnummer = saksnummer;
         this.person = person;
@@ -89,38 +87,23 @@ public class SykdomDokument {
     }
 
     public SykdomDokumentType getType() {
-        if (informasjon == null) {
-            throw new IllegalStateException("Dokument er ikke riktig initialisert!");
-        }
-        return informasjon.getType();
+        return getInformasjon().getType();
     }
 
     public LocalDate getDatert() {
-        if (informasjon == null) {
-            throw new IllegalStateException("Dokument er ikke riktig initialisert!");
-        }
-        return informasjon.getDatert();
+        return getInformasjon().getDatert();
     }
 
     public LocalDate getMottattDato() {
-        if (informasjon == null) {
-            throw new IllegalStateException("Dokument er ikke riktig initialisert!");
-        }
-        return informasjon.getMottattDato();
+        return getInformasjon().getMottattDato();
     }
 
     public LocalDateTime getMottattTidspunkt() {
-        if (informasjon == null) {
-            throw new IllegalStateException("Dokument er ikke riktig initialisert!");
-        }
-        return informasjon.getMottattTidspunkt();
+        return getInformasjon().getMottattTidspunkt();
     }
 
     public Long getVersjon() {
-        if (informasjon == null) {
-            throw new IllegalStateException("Dokument er ikke riktig initialisert!");
-        }
-        return informasjon.getVersjon();
+        return getInformasjon().getVersjon();
     }
     
     /**
@@ -129,10 +112,7 @@ public class SykdomDokument {
      *  dokumentet ikke er et duplikat.
      */
     public SykdomDokument getDuplikatAvDokument() {
-        if (informasjon == null) {
-            throw new IllegalStateException("Dokument er ikke riktig initialisert!");
-        }
-        return informasjon.getDuplikatAvDokument();
+        return getInformasjon().getDuplikatAvDokument();
     }
 
     public UUID getBehandlingUuid() {
@@ -169,15 +149,20 @@ public class SykdomDokument {
     }
 
     public void setInformasjon(SykdomDokumentInformasjon informasjon) {
+        Objects.requireNonNull(informasjon, "'informasjon' kan ikke være null.");
+        
+        if (informasjon.getId() != null) {
+            throw new IllegalStateException("'informasjon' har allerede blitt lagret og kan derfor ikke settes på dette dokumentet.");
+        }
         if (informasjon.getDokument() != null && informasjon.getDokument() != this) {
             throw new IllegalStateException("Potensiell krysskobling av dokumentInformasjon fra andre dokumenter!");
         }
         informasjon.setDokument(this);
-        this.informasjon = informasjon;
+        informasjoner.add(informasjon);
     }
 
     public SykdomDokumentInformasjon getInformasjon() {
-        return informasjon;
+        return informasjoner.stream().findFirst().orElse(null);
     }
 
     public String getOpprettetAv() {
@@ -189,10 +174,10 @@ public class SykdomDokument {
     }
 
     public String getEndretAv() {
-        return informasjon.getOpprettetAv();
+        return getInformasjon().getOpprettetAv();
     }
 
     public LocalDateTime getEndretTidspunkt() {
-        return informasjon.getOpprettetTidspunkt();
+        return getInformasjon().getOpprettetTidspunkt();
     }
 }
