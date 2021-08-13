@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -37,7 +38,7 @@ public class SykdomDokument {
 
     @OneToMany(mappedBy = "dokument", cascade = CascadeType.PERSIST)
     @OrderBy(value = "versjon desc")
-    private List<SykdomDokumentInformasjon> informasjoner;
+    private List<SykdomDokumentInformasjon> informasjoner = new ArrayList<>();
 
     @Column(name = "JOURNALPOST_ID", nullable = false)
     private JournalpostId journalpostId;
