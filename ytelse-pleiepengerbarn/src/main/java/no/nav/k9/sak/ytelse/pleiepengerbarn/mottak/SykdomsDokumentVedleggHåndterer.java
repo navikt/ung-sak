@@ -47,7 +47,7 @@ public class SykdomsDokumentVedleggHåndterer {
         this.sykdomVurderingRepository = sykdomVurderingRepository;
     }
 
-    void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger, boolean erHovedjournalpost) {
+    void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger) {
         var query = new JournalpostQueryRequest();
         query.setJournalpostId(journalpostId.getVerdi());
         var projection = new JournalpostResponseProjection()
@@ -69,17 +69,16 @@ public class SykdomsDokumentVedleggHåndterer {
                 .dato()
                 .datotype());
         var journalpost = safTjeneste.hentJournalpostInfo(query, projection);
-
-        if (erHovedjournalpost && journalpost.getKanal() != Kanal.NAV_NO) {
-            // Oppsummeringsjournalpost fra punsj skal ikke klassifiseres under sykdom.
-            return;
-        }
-        
         final LocalDateTime mottattDato = utledMottattDato(journalpost);
 
         log.info("Fant {} vedlegg på søknad", journalpost.getDokumenter().size());
         boolean hoveddokument = true;
         for (DokumentInfo dokumentInfo : journalpost.getDokumenter()) {
+            if (dokumentInfo.getBrevkode() != null && dokumentInfo.getBrevkode().equals("K9_PUNSJ_INNSENDING")) {
+               // Oppsummerings-PDFen fra punsj skal ikke klassifiseres under sykdom.
+                continue;
+            }
+            
             final boolean erDigitalPleiepengerSyktBarnSøknad = hoveddokument
                     && journalpost.getKanal() == Kanal.NAV_NO
                     && Brevkode.PLEIEPENGER_BARN_SOKNAD.getOffisiellKode().equals(dokumentInfo.getBrevkode());
