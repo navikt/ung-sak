@@ -47,7 +47,7 @@ public class SykdomsDokumentVedleggHåndterer {
         this.sykdomVurderingRepository = sykdomVurderingRepository;
     }
 
-    void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger) {
+    void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger, boolean erHovedjournalpost) {
         var query = new JournalpostQueryRequest();
         query.setJournalpostId(journalpostId.getVerdi());
         var projection = new JournalpostResponseProjection()
@@ -70,6 +70,11 @@ public class SykdomsDokumentVedleggHåndterer {
                 .datotype());
         var journalpost = safTjeneste.hentJournalpostInfo(query, projection);
 
+        if (erHovedjournalpost && journalpost.getKanal() != Kanal.NAV_NO) {
+            // Oppsummeringsjournalpost fra punsj skal ikke klassifiseres under sykdom.
+            return;
+        }
+        
         final LocalDateTime mottattDato = utledMottattDato(journalpost);
 
         log.info("Fant {} vedlegg på søknad", journalpost.getDokumenter().size());

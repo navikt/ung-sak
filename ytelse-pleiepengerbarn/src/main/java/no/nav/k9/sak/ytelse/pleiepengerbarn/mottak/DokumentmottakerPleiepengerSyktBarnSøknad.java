@@ -139,7 +139,8 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                 behandling.getFagsak().getPleietrengendeAktørId(),
                 søknad.getMottattDato().toLocalDateTime(),
                 journalpostHarInformasjonSomIkkeKanPunsjes,
-                journalpostHarMedisinskeOpplysninger);
+                journalpostHarMedisinskeOpplysninger,
+                false);
         }
 
         Optional<Journalpost> journalpost = søknad.getJournalposter()
@@ -153,6 +154,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                 behandling.getFagsak().getPleietrengendeAktørId(),
                 søknad.getMottattDato().toLocalDateTime(),
                 false,
+                true,
                 true);
         }
     }
