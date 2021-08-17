@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAnd
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class MapperForTilkjentYtelse {
 
@@ -54,7 +55,7 @@ public class MapperForTilkjentYtelse {
 
     private List<TilkjentYtelseAndelV1> mapAndeler(List<BeregningsresultatAndel> brAndeler) {
         //unngår å sende arbeidsgiver-id når det kan unngås, siden det er delvis lokaliserende informasjon
-        boolean sendArbeidsgiverIdForBrukersAndeler = harAndelerTilBrukerForskjelligeArbeidsgivere(brAndeler);
+        boolean sendArbeidsgiverIdForBrukersAndeler = harAndelerTilBrukerForskjelligeArbeidsforhold(brAndeler);
 
         return brAndeler.stream()
             .map(brAndel -> mapAndel(brAndel, sendArbeidsgiverIdForBrukersAndeler))
@@ -62,12 +63,15 @@ public class MapperForTilkjentYtelse {
             .collect(Collectors.toList());
     }
 
-    private boolean harAndelerTilBrukerForskjelligeArbeidsgivere(Collection<BeregningsresultatAndel> andeler) {
+    private boolean harAndelerTilBrukerForskjelligeArbeidsforhold(Collection<BeregningsresultatAndel> andeler) {
         return andeler.stream()
             .filter(BeregningsresultatAndel::erBrukerMottaker)
-            .map(BeregningsresultatAndel::getArbeidsgiver)
+            .map(andel -> new ArbeidsgiverArbeidsforhold(andel.getArbeidsforholdIdentifikator(), andel.getArbeidsforholdRef()))
             .distinct()
             .count() > 1;
+    }
+
+    private record ArbeidsgiverArbeidsforhold(String arbeidsgiverId, InternArbeidsforholdRef arbeidsforholdId) {
     }
 
     private TilkjentYtelseAndelV1 mapAndel(BeregningsresultatAndel andel, boolean sendArbeidsgiverIdForBrukersAndeler) {
