@@ -29,12 +29,14 @@ import java.util.function.Function;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -211,6 +213,43 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             idx++;
         }
 
+    }
+    
+    @GET
+    @Path("/saker-med-feil")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response hentSakerMedFeil() {
+        final Query q = entityManager.createNativeQuery("SELECT DISTINCT u.saksnummer FROM (("
+                + "  SELECT f.saksnummer AS saksnummer"
+                + "  FROM TMP_FIKS_AKTIV_ET_1 t1 INNER JOIN PSB_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE p ON ("
+                + "    t1.id = p.id"
+                + "  ) INNER JOIN PSB_GR_UNNTAK_ETABLERT_TILSYN g ON ("
+                + "    g.psb_unntak_etablert_tilsyn_pleietrengende_id = p.id"
+                + "  ) INNER JOIN BEHANDLING b ON ("
+                + "    b.id = g.behandling_id"
+                + "  ) INNER JOIN FAGSAK f ON ("
+                + "    F.id = b.fagsak_id"
+                + "  ) "
+                + ")  UNION ("
+                + "  SELECT f.saksnummer AS saksnummer"
+                + "  FROM TMP_FIKS_AKTIV_ET_2 t2 INNER JOIN PSB_GR_UNNTAK_ETABLERT_TILSYN g ON ("
+                + "    g.id = t2.id"
+                + "  ) INNER JOIN BEHANDLING b ON ("
+                + "    b.id = g.behandling_id"
+                + "  ) INNER JOIN FAGSAK f ON ("
+                + "    F.id = b.fagsak_id"
+                + "  )"
+                + ")) u");
+        
+        @SuppressWarnings("unchecked")
+        //final List<Saksnummer> result = q.getResultList();
+        //final String saksnummerliste = result.stream().map(Saksnummer::getVerdi).reduce((a, b) -> a + ", " + b).orElse("");
+        final List<String> result = q.getResultList();
+        final String saksnummerliste = result.stream().reduce((a, b) -> a + ", " + b).orElse("");
+        
+        return Response.ok(saksnummerliste).build();
     }
 
     @POST
