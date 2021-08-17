@@ -76,7 +76,6 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
         pleiebehovResultatRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         beregningPerioderGrunnlagRepository.kopier(originalBehandlingId, nyBehandlingId, true);
         omsorgenForGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
-        unntakEtablertTilsynGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         rettPleiepengerVedDødRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         avklartSøknadsfristRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
 

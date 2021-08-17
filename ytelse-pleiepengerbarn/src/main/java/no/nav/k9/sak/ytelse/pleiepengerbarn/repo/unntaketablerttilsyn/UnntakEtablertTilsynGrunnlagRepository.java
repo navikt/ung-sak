@@ -33,7 +33,7 @@ public class UnntakEtablertTilsynGrunnlagRepository {
 
         return hentEksisterendeGrunnlag(behandlingId);
     }
-    
+
     public Optional<UnntakEtablertTilsynForPleietrengende> hentHvisEksistererUnntakPleietrengende(AktørId pleietrengende) {
         final TypedQuery<UnntakEtablertTilsynForPleietrengende> query = entityManager.createQuery(
             "SELECT s FROM UnntakEtablertTilsynForPleietrengende s " +
@@ -43,17 +43,10 @@ public class UnntakEtablertTilsynGrunnlagRepository {
 
         return HibernateVerktøy.hentUniktResultat(query);
     }
-    
+
     public void lagre(Long behandlingId, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
         final Optional<UnntakEtablertTilsynForPleietrengende> eksisterendeGrunnlag = hentHvisEksistererUnntakPleietrengende(unntakEtablertTilsynForPleietrengende.getPleietrengendeAktørId());
         lagre(behandlingId, unntakEtablertTilsynForPleietrengende, eksisterendeGrunnlag);
-    }
-
-    public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
-        Optional<UnntakEtablertTilsynGrunnlag> grunnlag = hentEksisterendeGrunnlag(gammelBehandlingId);
-        grunnlag.ifPresent(entitet -> {
-            lagre(nyBehandlingId, entitet.getUnntakEtablertTilsynForPleietrengende());
-        });
     }
 
     private void lagre(Long behandlingId, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Optional<UnntakEtablertTilsynForPleietrengende> eksisterendeGrunnlag) {
@@ -68,8 +61,7 @@ public class UnntakEtablertTilsynGrunnlagRepository {
         entityManager.persist(unntakEtablertTilsynForPleietrengende);
         entityManager.flush();
     }
-    
-    
+
     public void lagreGrunnlag(Long behandlingId, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
         final Optional<UnntakEtablertTilsynGrunnlag> eksisterendeGrunnlag = hentHvisEksisterer(behandlingId);
         lagreGrunnlag(behandlingId, unntakEtablertTilsynForPleietrengende, eksisterendeGrunnlag);
