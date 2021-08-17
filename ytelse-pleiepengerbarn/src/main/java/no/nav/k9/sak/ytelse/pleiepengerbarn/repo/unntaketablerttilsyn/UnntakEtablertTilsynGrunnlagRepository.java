@@ -50,7 +50,7 @@ public class UnntakEtablertTilsynGrunnlagRepository {
     }
 
     private void lagre(Long behandlingId, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Optional<UnntakEtablertTilsynForPleietrengende> eksisterendeGrunnlag) {
-        if (eksisterendeGrunnlag.isPresent()) {
+        if (eksisterendeGrunnlag.isPresent() && unntakEtablertTilsynForPleietrengende.erAktiv()) {
             // deaktiver eksisterende grunnlag
             final UnntakEtablertTilsynForPleietrengende eksisterendeGrunnlagEntitet = eksisterendeGrunnlag.get();
             eksisterendeGrunnlagEntitet.setAktiv(false);

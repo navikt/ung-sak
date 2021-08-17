@@ -1,10 +1,23 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 
+import java.util.Objects;
+
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.typer.AktørId;
-
-import javax.persistence.*;
-import java.util.Objects;
 
 @Entity(name = "UnntakEtablertTilsynForPleietrengende")
 @Table(name = "psb_unntak_etablert_tilsyn_pleietrengende")
@@ -25,7 +38,7 @@ public class UnntakEtablertTilsynForPleietrengende extends BaseEntitet {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "nattevaak_id", nullable = true, updatable = false, unique = true)
     private UnntakEtablertTilsyn nattevåk;
-    
+
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
@@ -74,7 +87,11 @@ public class UnntakEtablertTilsynForPleietrengende extends BaseEntitet {
         this.nattevåk = nattevåk;
         return this;
     }
-    
+
+    public boolean erAktiv() {
+        return aktiv;
+    }
+
     void setAktiv(boolean aktiv) {
         this.aktiv = aktiv;
     }
