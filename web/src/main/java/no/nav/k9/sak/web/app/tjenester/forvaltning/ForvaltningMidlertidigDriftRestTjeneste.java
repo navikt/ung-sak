@@ -244,8 +244,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 + ")) u");
         
         @SuppressWarnings("unchecked")
-        //final List<Saksnummer> result = q.getResultList();
-        //final String saksnummerliste = result.stream().map(Saksnummer::getVerdi).reduce((a, b) -> a + ", " + b).orElse("");
         final List<String> result = q.getResultList();
         final String saksnummerliste = result.stream().reduce((a, b) -> a + ", " + b).orElse("");
         
