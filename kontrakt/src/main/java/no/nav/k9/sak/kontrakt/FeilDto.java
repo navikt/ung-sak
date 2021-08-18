@@ -33,13 +33,24 @@ public class FeilDto implements Serializable {
     @Size(max = 20)
     private Collection<FeltFeilDto> feltFeil;
 
+    @JsonProperty(value = "feilkode")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String feilkode;
+    
     @JsonProperty(value = "type", required = true)
     @Valid
     private FeilType type;
 
+    
     public FeilDto(FeilType type, String feilmelding) {
+        this(type, feilmelding, null);
+    }
+    
+    public FeilDto(FeilType type, String feilmelding, String feilkode) {
         this.type = type;
         this.feilmelding = feilmelding;
+        this.feilkode = feilkode;
     }
 
     public FeilDto(String feilmelding) {
@@ -57,6 +68,10 @@ public class FeilDto implements Serializable {
 
     public String getFeilmelding() {
         return feilmelding;
+    }
+    
+    public String getFeilkode() {
+        return feilkode;
     }
 
     public Collection<FeltFeilDto> getFeltFeil() {

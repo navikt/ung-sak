@@ -29,7 +29,7 @@ public class VLExceptionMapper implements ExceptionMapper<VLException> {
         String feilmelding = getVLExceptionFeilmelding(callId, feil);
         try {
             return Response.serverError()
-                .entity(new FeilDto(FeilType.GENERELL_FEIL, feilmelding))
+                .entity(new FeilDto(FeilType.GENERELL_FEIL, feilmelding, feil.getKode()))
                 .type(MediaType.APPLICATION_JSON)
                 .build();
         } finally {
