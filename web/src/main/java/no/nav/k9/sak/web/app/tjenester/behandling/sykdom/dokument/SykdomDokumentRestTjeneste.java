@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.exception.FunksjonellException;
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
@@ -329,10 +330,10 @@ public class SykdomDokumentRestTjeneste {
         final SykdomDokument duplikatAvDokument = sykdomDokumentRepository.hentDokument(duplikatAvId, behandling.getFagsak().getPleietrengendeAktørId()).get();
         
         if (duplikatAvDokument != null && duplikatAvDokument.getDuplikatAvDokument() != null) {
-            throw new IllegalStateException("Kan ikke sette at et dokument er duplikat av et annet duplikat dokument.");
+            throw new FunksjonellException("K9-6701", "Kan ikke sette at et dokument er duplikat av et annet duplikat dokument.");
         }
         if (duplikatAvDokument != null && !duplikatAvDokument.getSykdomVurderinger().getPerson().getAktørId().equals(behandling.getFagsak().getPleietrengendeAktørId())) {
-            throw new IllegalStateException("Kan ikke sette duplikatdokumenter på tvers av pleietrengende.");
+            throw new FunksjonellException("K9-6702", "Kan ikke sette duplikatdokumenter på tvers av pleietrengende.");
         }
 
         return duplikatAvDokument;
@@ -340,10 +341,10 @@ public class SykdomDokumentRestTjeneste {
 
     private void verifiserKanSettesTilDuplikat(Long duplikatDokumentId, Long duplikatAvDokumentId) {
         if (sykdomDokumentRepository.isDokumentBruktIVurdering(duplikatAvDokumentId)) {
-            throw new IllegalStateException("Kan ikke sette som duplikat siden dokumentet har blitt brukt i en vurdering.");
+            throw new FunksjonellException("K9-6703", "Kan ikke sette som duplikat siden dokumentet har blitt brukt i en vurdering.");
         }
         if (!sykdomDokumentRepository.hentDuplikaterAv(duplikatDokumentId).isEmpty()) {
-            throw new IllegalStateException("Kan ikke sette som duplikat siden andre dokumenter er duplikat av dette dokumentet.");
+            throw new FunksjonellException("K9-6704", "Kan ikke sette som duplikat siden andre dokumenter er duplikat av dette dokumentet.");
         }
     }
 
