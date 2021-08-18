@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEnt
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 class MapperForTilkjentYtelseTest {
     LocalDate idag = LocalDate.now();
@@ -67,6 +68,21 @@ class MapperForTilkjentYtelseTest {
         assertThat(feriepenger.get(0).getOpptjeningsår()).isEqualTo(idag.getYear());
     }
 
+    @Test
+    void skal_ikke_ha_med_orgnr_når_bruker_har_andel_hos_kun_en_arbeidsgiver_siden_det_ikke_er_nødvendig_å_skille() {
+        BeregningsresultatPeriode brPeriode = BeregningsresultatPeriode.builder()
+            .medBeregningsresultatPeriodeFomOgTom(idag, idag)
+            .build(beregningsresultat);
+
+        forhåndsutfylltBuilder().medArbeidsgiver(virksomhet1).buildFor(brPeriode);
+
+        List<TilkjentYtelsePeriodeV1> resultat = mapperOMP.mapTilkjentYtelse(beregningsresultat);
+
+        assertThat(resultat).hasSize(1);
+        TilkjentYtelsePeriodeV1 periode = resultat.get(0);
+        assertThat(periode.getAndeler()).hasSize(1);
+        assertThat(periode.getAndeler().iterator().next().getArbeidsgiverOrgNr()).isNull();
+    }
 
     @Test
     void skal_ha_med_orgnr_når_bruker_har_andel_hos_to_arbeidsgivere_i_samme_periode() {
@@ -88,19 +104,28 @@ class MapperForTilkjentYtelseTest {
     }
 
     @Test
-    void skal_ikke_ha_med_orgnr_når_bruker_har_andel_hos_kun_en_arbeidsgiver_siden_det_ikke_er_nødvendig_å_skille() {
+    void skal_ha_med_orgnr_og_arbeidsgiverId_når_bruker_har_flere_andel_hos_samme_arbeidsgiver_i_samme_perioe() {
         BeregningsresultatPeriode brPeriode = BeregningsresultatPeriode.builder()
             .medBeregningsresultatPeriodeFomOgTom(idag, idag)
             .build(beregningsresultat);
 
-        forhåndsutfylltBuilder().medArbeidsgiver(virksomhet1).buildFor(brPeriode);
+        //må ha named ref for stabil test siden mapper sorterer basert på disse
+        InternArbeidsforholdRef ref1 = InternArbeidsforholdRef.namedRef("1");
+        InternArbeidsforholdRef ref2 = InternArbeidsforholdRef.namedRef("2");
+
+        forhåndsutfylltBuilder().medArbeidsgiver(virksomhet1).medArbeidsforholdRef(ref1).buildFor(brPeriode);
+        forhåndsutfylltBuilder().medArbeidsgiver(virksomhet1).medArbeidsforholdRef(ref2).buildFor(brPeriode);
 
         List<TilkjentYtelsePeriodeV1> resultat = mapperOMP.mapTilkjentYtelse(beregningsresultat);
 
         assertThat(resultat).hasSize(1);
         TilkjentYtelsePeriodeV1 periode = resultat.get(0);
-        assertThat(periode.getAndeler()).hasSize(1);
-        assertThat(periode.getAndeler().iterator().next().getArbeidsgiverOrgNr()).isNull();
+        assertThat(periode.getAndeler()).hasSize(2);
+        List<TilkjentYtelseAndelV1> andeler = new ArrayList<>(periode.getAndeler());
+        assertThat(andeler.get(0).getArbeidsgiverOrgNr()).isEqualTo(virksomhet1.getIdentifikator());
+        assertThat(andeler.get(1).getArbeidsgiverOrgNr()).isEqualTo(virksomhet1.getIdentifikator());
+        assertThat(andeler.get(0).getArbeidsforholdId()).isEqualTo(ref1.getIndexKey());
+        assertThat(andeler.get(1).getArbeidsforholdId()).isEqualTo(ref2.getIndexKey());
     }
 
     private BeregningsresultatAndel.Builder forhåndsutfylltBuilder() {
