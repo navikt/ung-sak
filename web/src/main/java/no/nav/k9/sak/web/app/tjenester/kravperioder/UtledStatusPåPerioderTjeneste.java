@@ -56,12 +56,11 @@ public class UtledStatusPåPerioderTjeneste {
         for (LocalDateTimeline<ÅrsakerTilVurdering> linje : endringFraBruker) {
             tidslinje = tidslinje.combine(linje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-        var endringFraAndreParter = new LocalDateTimeline<>(revurderingPerioderFraAndreParter.stream()
-            .map(entry -> new LocalDateSegment<>(entry.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.mapFra(entry.getÅrsak())))))
-            .collect(Collectors.toList()));
-
-        tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN)
-            .compress();
+        for (PeriodeMedÅrsak entry : revurderingPerioderFraAndreParter) {
+            var endringFraAndreParter = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(entry.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.mapFra(entry.getÅrsak()))))));
+            tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN)
+                .compress();
+        }
 
         var perioder = tidslinje.toSegments()
             .stream()
@@ -87,9 +86,9 @@ public class UtledStatusPåPerioderTjeneste {
 
     private List<KravDokumentMedSøktePerioder> mapKravTilDto(Set<Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>>> relevanteDokumenterMedPeriode) {
         return relevanteDokumenterMedPeriode.stream().map(it -> new KravDokumentMedSøktePerioder(it.getKey().getJournalpostId(),
-            it.getKey().getInnsendingsTidspunkt(),
-            KravDokumentType.fraKode(it.getKey().getType().name()),
-            it.getValue().stream().map(at -> new no.nav.k9.sak.kontrakt.krav.SøktPeriode(at.getPeriode().tilPeriode(), at.getType(), at.getArbeidsgiver(), at.getArbeidsforholdRef())).collect(Collectors.toList())))
+                it.getKey().getInnsendingsTidspunkt(),
+                KravDokumentType.fraKode(it.getKey().getType().name()),
+                it.getValue().stream().map(at -> new no.nav.k9.sak.kontrakt.krav.SøktPeriode(at.getPeriode().tilPeriode(), at.getType(), at.getArbeidsgiver(), at.getArbeidsforholdRef())).collect(Collectors.toList())))
             .collect(Collectors.toList());
 
     }
