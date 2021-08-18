@@ -12,12 +12,12 @@ import javax.persistence.TypedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
 import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
-import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @Dependent
 public class BeregningPerioderGrunnlagRepository {
@@ -49,6 +49,15 @@ public class BeregningPerioderGrunnlagRepository {
         } else {
             log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
         }
+    }
+
+    public void ryddMotVilkår(Long behandlingId) {
+        var grunnlagOptional = hentGrunnlag(behandlingId);
+        var aktivtGrunnlag = grunnlagOptional.orElse(new BeregningsgrunnlagPerioderGrunnlag());
+
+        var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(aktivtGrunnlag);
+
+        lagre(builder, behandlingId, true);
     }
 
     private DiffEntity differ() {

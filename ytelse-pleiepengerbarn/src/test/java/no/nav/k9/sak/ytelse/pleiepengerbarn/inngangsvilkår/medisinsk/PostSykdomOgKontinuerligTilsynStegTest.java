@@ -21,11 +21,13 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 
 class PostSykdomOgKontinuerligTilsynStegTest {
 
     private BehandlingRepositoryProvider mockProvider = mock(BehandlingRepositoryProvider.class); // Brukes ikke, men kan ikke være null
-    private PostSykdomOgKontinuerligTilsynSteg steg = new PostSykdomOgKontinuerligTilsynSteg(mockProvider, new VilkårsPerioderTilVurderingTjeneste() {
+    private BeregningPerioderGrunnlagRepository mockrep = mock(BeregningPerioderGrunnlagRepository.class); // Brukes ikke, men kan ikke være null
+    private PostSykdomOgKontinuerligTilsynSteg steg = new PostSykdomOgKontinuerligTilsynSteg(mockProvider, mockrep, new VilkårsPerioderTilVurderingTjeneste() {
         @Override
         public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
             return null;
@@ -61,7 +63,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
             VilkårType.OPPTJENINGSPERIODEVILKÅR,
             VilkårType.OPPTJENINGSVILKÅRET);
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(oppfyltPeriode)
-            .medUtfall(Utfall.OPPFYLT))
+                .medUtfall(Utfall.OPPFYLT))
             .leggTil(vilkårBuilder.hentBuilderFor(avslåttPeriode)
                 .medUtfall(Utfall.IKKE_OPPFYLT));
         builder.leggTil(vilkårBuilder);
@@ -102,7 +104,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
             VilkårType.OPPTJENINGSPERIODEVILKÅR,
             VilkårType.OPPTJENINGSVILKÅRET);
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(oppfyltPeriode)
-            .medUtfall(Utfall.OPPFYLT))
+                .medUtfall(Utfall.OPPFYLT))
             .leggTil(vilkårBuilder.hentBuilderFor(avslåttPeriode)
                 .medUtfall(Utfall.IKKE_OPPFYLT));
         builder.leggTil(vilkårBuilder);
@@ -169,7 +171,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
     }
 
     @Test
-    void skal_IKKE_justere_utfall_ved_fullstendig_avslag_på_medisinsk() {
+    void skal_justere_utfall_ved_fullstendig_avslag_på_medisinsk() {
         var builder = Vilkårene.builder();
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         var avslåttPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(32), LocalDate.now().minusDays(29));
@@ -201,8 +203,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
             } else if (VilkårType.MEDISINSKEVILKÅR_18_ÅR.equals(vilkår.getVilkårType())) {
                 assertThat(vilkår.getPerioder()).isEmpty();
             } else {
-                assertThat(vilkår.getPerioder()).hasSize(1);
-                assertThat(vilkår.getPerioder().get(0).getPeriode()).isEqualTo(periodeTilVurdering);
+                assertThat(vilkår.getPerioder()).isEmpty();
             }
         }
     }

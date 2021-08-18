@@ -27,6 +27,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 
 @BehandlingStegRef(kode = "POST_MEDISINSK")
 @BehandlingTypeRef
@@ -34,6 +35,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 @ApplicationScoped
 public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
+    private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
@@ -43,8 +45,10 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
     @Inject
     public PostSykdomOgKontinuerligTilsynSteg(BehandlingRepositoryProvider repositoryProvider,
+                                              BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                               @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
+        this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
 
@@ -57,6 +61,10 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         var oppdatertResultatBuilder = justerVilkårsperioderEtterSykdom(vilkårene, perioderVurdertISykdom);
 
         vilkårResultatRepository.lagre(behandlingId, oppdatertResultatBuilder.build());
+
+        // Rydder bort grunnlag som ikke lenger er relevant siden perioden ikke skal vurderes
+        // Disse blir da ikke lenger med til tilkjent ytelse, slik at det vedtaket blir inkosistent
+        beregningPerioderGrunnlagRepository.ryddMotVilkår(behandlingId);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
@@ -118,10 +126,6 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     }
 
     private void justerPeriodeForOpptjeningOgBeregning(Set<VilkårPeriode> avslåttePerioder, Set<VilkårPeriode> innvilgedePerioder, VilkårResultatBuilder resultatBuilder) {
-        if (innvilgedePerioder.isEmpty()) {
-            return;
-        }
-
         for (VilkårType vilkårType : Set.of(VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.OPPTJENINGSVILKÅRET, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET)) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
             for (VilkårPeriode avslåttPeriode : avslåttePerioder) {
