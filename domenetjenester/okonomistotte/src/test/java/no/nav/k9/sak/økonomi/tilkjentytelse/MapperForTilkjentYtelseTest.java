@@ -109,8 +109,10 @@ class MapperForTilkjentYtelseTest {
             .medBeregningsresultatPeriodeFomOgTom(idag, idag)
             .build(beregningsresultat);
 
-        InternArbeidsforholdRef ref1 = InternArbeidsforholdRef.nyRef();
-        InternArbeidsforholdRef ref2 = InternArbeidsforholdRef.nyRef();
+        //må ha named ref for stabil test siden mapper sorterer basert på disse
+        InternArbeidsforholdRef ref1 = InternArbeidsforholdRef.namedRef("1");
+        InternArbeidsforholdRef ref2 = InternArbeidsforholdRef.namedRef("2");
+
         forhåndsutfylltBuilder().medArbeidsgiver(virksomhet1).medArbeidsforholdRef(ref1).buildFor(brPeriode);
         forhåndsutfylltBuilder().medArbeidsgiver(virksomhet1).medArbeidsforholdRef(ref2).buildFor(brPeriode);
 
