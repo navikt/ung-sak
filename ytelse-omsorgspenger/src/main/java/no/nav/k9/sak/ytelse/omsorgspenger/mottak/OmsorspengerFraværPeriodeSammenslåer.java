@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -37,7 +38,7 @@ public class OmsorspengerFraværPeriodeSammenslåer {
         for (FraværPeriode fp : søknadsperioder) {
             var perioderMinusHelgdager = fjernHelgdager(fp.getPeriode());
             for (Periode periode : perioderMinusHelgdager) {
-                fraværsPerioderUtenHelgdager.add(new FraværPeriode(periode, fp.getDuration(), fp.getÅrsak(), fp.getAktivitetFravær()));
+                fraværsPerioderUtenHelgdager.add(new FraværPeriode(periode, fp.getDuration(), fp.getÅrsak(), fp.getAktivitetFravær(), fp.getArbeidsgiverOrgNr()));
             }
         }
         return fraværsPerioderUtenHelgdager;
@@ -59,7 +60,8 @@ public class OmsorspengerFraværPeriodeSammenslåer {
             if (periodenLiggerInntilForrigePeriode &&
                 Optional.ofNullable(søknadPeriode.getDuration()).equals(Optional.ofNullable(sammenslåttPeriode.getDuration())) &&
                 søknadPeriode.getÅrsak().equals(sammenslåttPeriode.getÅrsak()) &&
-                søknadPeriode.getAktivitetFravær().equals(sammenslåttPeriode.getAktivitetFravær())) {
+                søknadPeriode.getAktivitetFravær().equals(sammenslåttPeriode.getAktivitetFravær()) &&
+                Objects.equals(søknadPeriode.getArbeidsgiverOrgNr(), sammenslåttPeriode.getArbeidsgiverOrgNr())) {
 
                 sammenslåttePerioder.removeLast();
                 sammenslåttePerioder.add(new FraværPeriode(
@@ -68,7 +70,8 @@ public class OmsorspengerFraværPeriodeSammenslåer {
                         søknadPeriode.getPeriode().getTilOgMed()),
                     søknadPeriode.getDuration(),
                     søknadPeriode.getÅrsak(),
-                    søknadPeriode.getAktivitetFravær()
+                    søknadPeriode.getAktivitetFravær(),
+                    søknadPeriode.getArbeidsgiverOrgNr()
                 ));
             } else {
                 sammenslåttePerioder.add(søknadPeriode);

@@ -13,6 +13,9 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
@@ -22,7 +25,6 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.søknad.felles.fravær.AktivitetFravær;
 import no.nav.k9.søknad.felles.fravær.FraværPeriode;
-import no.nav.k9.søknad.felles.opptjening.Arbeidstaker;
 import no.nav.k9.søknad.felles.opptjening.Frilanser;
 import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
@@ -34,26 +36,22 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 @Dependent
 class SøknadOppgittFraværMapper {
 
-    private AktørTjeneste aktørTjeneste;
+    private static final Logger logger = LoggerFactory.getLogger(SøknadOppgittFraværMapper.class);
 
-    public SøknadOppgittFraværMapper() {
-        // CDI
-    }
+    private AktørTjeneste aktørTjeneste;
 
     @Inject
     public SøknadOppgittFraværMapper(AktørTjeneste aktørTjeneste) {
         this.aktørTjeneste = aktørTjeneste;
     }
 
-
     Set<OppgittFraværPeriode> map(OmsorgspengerUtbetaling søknadsinnhold, Søker søker, JournalpostId journalpostId) {
         var opptj = Objects.requireNonNull(søknadsinnhold.getAktivitet());
 
-        var atAktiviteter = Optional.ofNullable(opptj.getArbeidstaker()).orElse(Collections.emptyList());
         var snAktiviteter = Optional.ofNullable(opptj.getSelvstendigNæringsdrivende()).orElse(Collections.emptyList());
         var frilanser = opptj.getFrilanser();
 
-        Set<OppgittFraværPeriode> oppgittFraværPerioder = new LinkedHashSet<>();
+        Set<OppgittFraværPeriode> resultat = new LinkedHashSet<>();
         for (FraværPeriode fp : OmsorspengerFraværPeriodeSammenslåer.fjernHelgOgSlåSammen(søknadsinnhold.getFraværsperioder())) {
             LocalDate fom = fp.getPeriode().getFraOgMed();
             LocalDate tom = fp.getPeriode().getTilOgMed();
@@ -61,18 +59,24 @@ class SøknadOppgittFraværMapper {
             FraværÅrsak fraværÅrsak = FraværÅrsak.fraKode(fp.getÅrsak().getKode());
             List<AktivitetFravær> aktivitetFravær = Objects.requireNonNull(fp.getAktivitetFravær());
 
+            Set<OppgittFraværPeriode> mappedePerioder = new LinkedHashSet<>();
             if (aktivitetFravær.contains(AktivitetFravær.SELVSTENDIG_VIRKSOMHET)) {
-                oppgittFraværPerioder.addAll(mapSn(snAktiviteter, søker, journalpostId, fom, tom, varighet, fraværÅrsak));
+                mappedePerioder.addAll(mapSn(snAktiviteter, søker, journalpostId, fom, tom, varighet, fraværÅrsak));
             }
             if (aktivitetFravær.contains(AktivitetFravær.ARBEIDSTAKER)) {
-                oppgittFraværPerioder.addAll(mapAt(atAktiviteter, søker, journalpostId, fom, tom, varighet, fraværÅrsak));
+                mappedePerioder.add(mapAt(fp.getArbeidsgiverOrgNr(), journalpostId, fom, tom, varighet, fraværÅrsak));
             }
             if (aktivitetFravær.contains(AktivitetFravær.FRILANSER)) {
-                oppgittFraværPerioder.addAll(mapFl(frilanser, journalpostId, fom, tom, varighet, fraværÅrsak));
+                mappedePerioder.addAll(mapFl(frilanser, journalpostId, fom, tom, varighet, fraværÅrsak));
             }
+            if (mappedePerioder.isEmpty()) {
+                logger.warn("Klarte ikke koble fraværsperioden {} til {} til aktivitet. Gjelder journalpostId {}", fom, tom, journalpostId.getVerdi());
+            }
+
+            resultat.addAll(mappedePerioder);
         }
 
-        return oppgittFraværPerioder;
+        return resultat;
     }
 
     private Set<OppgittFraværPeriode> mapSn(List<SelvstendigNæringsdrivende> snAktiviteter, Søker søker, JournalpostId journalpostId, LocalDate fom, LocalDate tom, Duration varighet, FraværÅrsak fraværÅrsak) {
@@ -86,16 +90,11 @@ class SøknadOppgittFraværMapper {
             .collect(Collectors.toSet());
     }
 
-    private Set<OppgittFraværPeriode> mapAt(List<Arbeidstaker> atAktiviteter, Søker søker, JournalpostId journalpostId, LocalDate fom, LocalDate tom, Duration varighet, FraværÅrsak fraværÅrsak) {
-        return atAktiviteter.stream()
-            .map(arbeidstaker -> {
-                Arbeidsgiver arbeidsgiver = byggArbeidsgiver(arbeidstaker.getOrganisasjonsnummer(), søker.getPersonIdent());
-                InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her
-                return new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.ARBEIDSTAKER,
-                    arbeidsgiver, arbeidsforholdRef, varighet, fraværÅrsak);
-
-            })
-            .collect(Collectors.toSet());
+    private OppgittFraværPeriode mapAt(Organisasjonsnummer arbeidsgiverOrgNr, JournalpostId journalpostId, LocalDate fom, LocalDate tom, Duration varighet, FraværÅrsak fraværÅrsak) {
+        Organisasjonsnummer organisasjonsnummer = Objects.requireNonNull(arbeidsgiverOrgNr, "mangler orgnummer for arbeidsgiver i søknaden");
+        Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet(organisasjonsnummer.getVerdi());
+        InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her
+        return new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet, fraværÅrsak);
     }
 
     private Set<OppgittFraværPeriode> mapFl(Frilanser frilanser, JournalpostId journalpostId, LocalDate fom, LocalDate tom, Duration varighet, FraværÅrsak fraværÅrsak) {
