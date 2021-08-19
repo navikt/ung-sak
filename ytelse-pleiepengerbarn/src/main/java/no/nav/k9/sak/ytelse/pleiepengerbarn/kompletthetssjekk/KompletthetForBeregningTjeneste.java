@@ -176,6 +176,9 @@ public class KompletthetForBeregningTjeneste {
             return orginalRelevantPeriode;
         }
         var intersection = tidslinje.intersection(new LocalDateInterval(periode.getFomDato().minusWeeks(4), periode.getTomDato().plusWeeks(4)));
+        if (intersection.isEmpty()) {
+            return orginalRelevantPeriode;
+        }
         var relevantPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(intersection.getMinLocalDate().minusWeeks(4), intersection.getMaxLocalDate().plusWeeks(4));
 
         if (orginalRelevantPeriode.equals(relevantPeriode)) {
