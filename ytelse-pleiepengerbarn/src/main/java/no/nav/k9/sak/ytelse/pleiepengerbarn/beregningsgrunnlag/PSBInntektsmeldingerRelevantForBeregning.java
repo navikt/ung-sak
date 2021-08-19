@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBeregningTjeneste;
@@ -27,16 +26,13 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBere
 public class PSBInntektsmeldingerRelevantForBeregning implements InntektsmeldingerRelevantForBeregning {
 
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
-    private VilkårResultatRepository vilkårResultatRepository;
 
     public PSBInntektsmeldingerRelevantForBeregning() {
     }
 
     @Inject
-    public PSBInntektsmeldingerRelevantForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
-                                                    VilkårResultatRepository vilkårResultatRepository) {
+    public PSBInntektsmeldingerRelevantForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
-        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     @Override
