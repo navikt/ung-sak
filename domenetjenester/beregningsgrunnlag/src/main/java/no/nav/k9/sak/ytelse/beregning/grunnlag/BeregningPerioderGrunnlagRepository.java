@@ -57,6 +57,7 @@ public class BeregningPerioderGrunnlagRepository {
 
         var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(aktivtGrunnlag);
 
+        grunnlagOptional.ifPresent(this::deaktiverEksisterende);
         lagre(builder, behandlingId, true);
     }
 
@@ -99,8 +100,8 @@ public class BeregningPerioderGrunnlagRepository {
     public Optional<BeregningsgrunnlagPerioderGrunnlag> getInitiellVersjon(Long behandlingId) {
         // må også sortere på id da opprettetTidspunkt kun er til nærmeste millisekund og ikke satt fra db.
         TypedQuery<BeregningsgrunnlagPerioderGrunnlag> query = entityManager.createQuery(
-            "SELECT mbg FROM BeregningsgrunnlagPerioderGrunnlag mbg WHERE mbg.behandlingId = :behandling_id ORDER BY mbg.opprettetTidspunkt, mbg.id", //$NON-NLS-1$
-            BeregningsgrunnlagPerioderGrunnlag.class)
+                "SELECT mbg FROM BeregningsgrunnlagPerioderGrunnlag mbg WHERE mbg.behandlingId = :behandling_id ORDER BY mbg.opprettetTidspunkt, mbg.id", //$NON-NLS-1$
+                BeregningsgrunnlagPerioderGrunnlag.class)
             .setParameter("behandling_id", behandlingId)
             .setMaxResults(1); // $NON-NLS-1$
 
@@ -109,11 +110,11 @@ public class BeregningPerioderGrunnlagRepository {
 
     public Optional<BeregningsgrunnlagPerioderGrunnlag> hentGrunnlag(Long behandlingId) {
         var query = entityManager.createQuery(
-            "SELECT bg " +
-                "FROM BeregningsgrunnlagPerioderGrunnlag bg " +
-                "WHERE bg.behandlingId=:id " +
-                "AND bg.aktiv = true",
-            BeregningsgrunnlagPerioderGrunnlag.class)
+                "SELECT bg " +
+                    "FROM BeregningsgrunnlagPerioderGrunnlag bg " +
+                    "WHERE bg.behandlingId=:id " +
+                    "AND bg.aktiv = true",
+                BeregningsgrunnlagPerioderGrunnlag.class)
             .setParameter("id", behandlingId);
 
         return HibernateVerktøy.hentUniktResultat(query);
