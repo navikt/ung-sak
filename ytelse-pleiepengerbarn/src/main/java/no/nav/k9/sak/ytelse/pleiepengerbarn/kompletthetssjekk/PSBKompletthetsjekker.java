@@ -185,6 +185,10 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
             return KompletthetResultat.oppfylt();
         }
 
+        if (ref.erRevurdering()) {
+            return KompletthetResultat.oppfylt();
+        }
+
         var result = new ArrayList<LocalDateTime>();
         // Kalles fra KOARB (flere ganger) som setter autopunkt 7030 + fra KompletthetsKontroller (dokument på åpen behandling, hendelser)
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
