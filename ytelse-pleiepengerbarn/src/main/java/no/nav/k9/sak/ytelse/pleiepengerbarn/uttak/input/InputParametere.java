@@ -167,6 +167,6 @@ public class InputParametere {
     }
 
     public Optional<OpptjeningResultat> getOpptjeningResultat() {
-        return Optional.of(opptjeningResultat);
+        return Optional.ofNullable(opptjeningResultat);
     }
 }
