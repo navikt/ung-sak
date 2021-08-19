@@ -9,16 +9,16 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class KalkulusResultat {
 
-    private List<BeregningAksjonspunktResultat> beregningAksjonspunktResultat;
+    private List<BeregningAvklaringsbehovResultat> beregningAvklaringsbehovResultat;
     private Boolean vilkårOppfylt;
     private Avslagsårsak avslagsårsak;
     private Map<DatoIntervallEntitet, BeregningVilkårResultat> vilkårResultatPrPeriode = new HashMap<>();
 
-    public KalkulusResultat(List<BeregningAksjonspunktResultat> beregningAksjonspunktResultat) {
-        this.beregningAksjonspunktResultat = beregningAksjonspunktResultat;
+    public KalkulusResultat(List<BeregningAvklaringsbehovResultat> beregningAvklaringsbehovResultat) {
+        this.beregningAvklaringsbehovResultat = beregningAvklaringsbehovResultat;
     }
 
-    public KalkulusResultat medVilkårResulatat(boolean vilkårOppfylt) {
+    public KalkulusResultat medVilkårResultat(boolean vilkårOppfylt) {
         this.vilkårOppfylt = vilkårOppfylt;
         return this;
     }
@@ -34,8 +34,8 @@ public class KalkulusResultat {
         return this;
     }
 
-    public List<BeregningAksjonspunktResultat> getBeregningAksjonspunktResultat() {
-        return beregningAksjonspunktResultat;
+    public List<BeregningAvklaringsbehovResultat> getBeregningAksjonspunktResultat() {
+        return beregningAvklaringsbehovResultat;
     }
 
     public Map<DatoIntervallEntitet, BeregningVilkårResultat> getVilkårResultatPrPeriode() {
@@ -54,7 +54,7 @@ public class KalkulusResultat {
     public String toString() {
         return getClass().getSimpleName() + "<vilkårOppfylt=" + vilkårOppfylt +
             ", avslagsårsak=" + avslagsårsak +
-            ", beregningAksjonspunktResultat=" + beregningAksjonspunktResultat +
+            ", beregningAksjonspunktResultat=" + beregningAvklaringsbehovResultat +
             ">";
     }
 

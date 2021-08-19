@@ -1,6 +1,6 @@
 package no.nav.k9.kodeverk.beregningsgrunnlag;
 
-class BeregningAksjonspunktKodeDefinition {
+class BeregningAvklaringsbehovKodeDefinition {
 
     static final String AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST_KODE = "7014";
     static final String AUTO_VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT_KODE = "7020";
@@ -28,6 +28,6 @@ class BeregningAksjonspunktKodeDefinition {
 
 
 
-    private BeregningAksjonspunktKodeDefinition() {
+    private BeregningAvklaringsbehovKodeDefinition() {
     }
 }

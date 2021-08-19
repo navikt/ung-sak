@@ -32,7 +32,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.FraKalkulusMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningAksjonspunktResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningAvklaringsbehovResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.MapEndringsresultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
@@ -67,7 +67,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.Beregn
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvslagsårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningVenteårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
@@ -408,16 +408,16 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
         Map<UUID, KalkulusResultat> resultater = new LinkedHashMap<>();
         for (var tilstandResponse : response) {
-            List<BeregningAksjonspunktResultat> aksjonspunktResultatList = tilstandResponse.getAksjonspunktMedTilstandDto().stream()
-                .map(dto -> BeregningAksjonspunktResultat.opprettMedFristFor(BeregningAksjonspunktDefinisjon.fraKode(dto.getBeregningAksjonspunktDefinisjon().getKode()),
+            var avklaringsbehovResultatList = tilstandResponse.getAvklaringsbehovMedTilstandDto().stream()
+                .map(dto -> BeregningAvklaringsbehovResultat.opprettMedFristFor(BeregningAvklaringsbehovDefinisjon.fraKode(dto.getBeregningAvklaringsbehovDefinisjon().getKode()),
                     dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist()))
                 .collect(Collectors.toList());
-            KalkulusResultat kalkulusResultat = new KalkulusResultat(aksjonspunktResultatList);
+            KalkulusResultat kalkulusResultat = new KalkulusResultat(avklaringsbehovResultatList);
             if (tilstandResponse.getVilkarOppfylt() != null) {
                 if (tilstandResponse.getVilkårsavslagsårsak() != null && !tilstandResponse.getVilkarOppfylt()) {
                     kalkulusResultat = kalkulusResultat.medAvslåttVilkår(mapTilAvslagsårsak(tilstandResponse.getVilkårsavslagsårsak()));
                 } else {
-                    kalkulusResultat = kalkulusResultat.medVilkårResulatat(tilstandResponse.getVilkarOppfylt());
+                    kalkulusResultat = kalkulusResultat.medVilkårResultat(tilstandResponse.getVilkarOppfylt());
                 }
             }
             resultater.put(tilstandResponse.getEksternReferanse(), kalkulusResultat);
