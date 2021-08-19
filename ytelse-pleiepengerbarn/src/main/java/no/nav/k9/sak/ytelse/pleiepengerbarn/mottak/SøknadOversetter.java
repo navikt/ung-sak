@@ -134,7 +134,7 @@ class SøknadOversetter {
 
         lagreOmsorg(ytelse.getOmsorg(), søknadsperioder, behandling);
     }
-    
+
     private List<Periode> hentAlleSøknadsperioder(PleiepengerSyktBarn ytelse) {
         final LocalDateTimeline<Boolean> kompletteSøknadsperioderTidslinje = tilTidslinje(ytelse.getSøknadsperiodeList());
         final LocalDateTimeline<Boolean> endringssøknadsperioderTidslinje = tilTidslinje(ytelse.getEndringsperiode());
@@ -159,7 +159,7 @@ class SøknadOversetter {
 
     private void lagreBeredskapOgNattevåk(Søknad søknad, final Long behandlingId) {
         var ytelse = (PleiepengerSyktBarn) søknad.getYtelse();
-        
+
         if (ytelse.getBeredskap().getPerioder().isEmpty()
                 && (ytelse.getBeredskap().getPerioderSomSkalSlettes() == null || ytelse.getBeredskap().getPerioderSomSkalSlettes().isEmpty())
                 && ytelse.getNattevåk().getPerioder().isEmpty()
@@ -167,7 +167,7 @@ class SøknadOversetter {
             // Ingen endringer.
             return;
         }
-        
+
 
         var pleietrengendePersonIdent = søknad.getYtelse().getPleietrengende().getPersonIdent();
         var søkerPersonIdent = søknad.getSøker().getPersonIdent();
@@ -175,17 +175,17 @@ class SøknadOversetter {
         var søkerAktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(søkerPersonIdent.getVerdi())).orElseThrow();
 
         var eksisterendeGrunnlag = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(pleietrengendeAktørId);
-        var eksisterendeBeredskap = eksisterendeGrunnlag.map(
-            it -> it.getBeredskap()
-        ).orElse(null);
-        var eksisterendeNattevåk = eksisterendeGrunnlag.map(
-            it -> it.getNattevåk()
-        ).orElse(null);
+        var eksisterendeBeredskap = eksisterendeGrunnlag
+            .map(UnntakEtablertTilsynForPleietrengende::getBeredskap)
+            .orElse(null);
+        var eksisterendeNattevåk = eksisterendeGrunnlag
+            .map(UnntakEtablertTilsynForPleietrengende::getNattevåk)
+            .orElse(null);
 
         /*
          * TODO: Data bør ikke mappes direkte inn her, men heller legges i tabeller der
          *       informasjonen er knyttet til kravdokument. Ved behandling av steget
-         *       kan man da utlede hva som gjelder basert på rekkefølge osv. 
+         *       kan man da utlede hva som gjelder basert på rekkefølge osv.
          */
         var unntakEtablertTilsynBeredskap =
             tilUnntakEtablertTilsynForPleietrengende(

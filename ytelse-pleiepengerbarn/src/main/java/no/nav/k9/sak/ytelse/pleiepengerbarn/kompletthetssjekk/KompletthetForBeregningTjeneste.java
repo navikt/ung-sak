@@ -150,10 +150,10 @@ public class KompletthetForBeregningTjeneste {
         var vilkåret = vilkårene.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
         return vilkåret.map(vilkår -> new LocalDateTimeline<>(vilkår.getPerioder().stream()
-            .map(VilkårPeriode::getPeriode)
-            .map(DatoIntervallEntitet::toLocalDateInterval)
-            .map(it -> new LocalDateSegment<>(it, true))
-            .collect(Collectors.toList())))
+                .map(VilkårPeriode::getPeriode)
+                .map(DatoIntervallEntitet::toLocalDateInterval)
+                .map(it -> new LocalDateSegment<>(it, true))
+                .collect(Collectors.toList())))
             .orElseGet(() -> new LocalDateTimeline<>(List.of(new LocalDateSegment<>(referanse.getFagsakPeriode().toLocalDateInterval(), true))));
     }
 
@@ -190,9 +190,7 @@ public class KompletthetForBeregningTjeneste {
                                                                                               DatoIntervallEntitet relevantPeriode,
                                                                                               Set<DatoIntervallEntitet> vilkårsPerioder,
                                                                                               InputForKompletthetsvurdering input,
-                                                                                              BiFunction<BehandlingReferanse, LocalDate, Map<Arbeidsgiver,
-                                                                                                  Set<EksternArbeidsforholdRef>>> finnArbeidsforholdForIdentPåDagFunction) {
-
+                                                                                              BiFunction<BehandlingReferanse, LocalDate, Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>>> finnArbeidsforholdForIdentPåDagFunction) {
         var result = new HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>>();
         var relevanteInntektsmeldinger = utledRelevanteInntektsmeldinger(inntektsmeldinger, relevantPeriode);
         var tilnternArbeidsforhold = new FinnEksternReferanse(iayTjeneste, ref.getBehandlingId());
