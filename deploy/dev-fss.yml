@@ -137,8 +137,8 @@ spec:
       value: http://infotrygd-hendelse-api.default/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.default/fpabakus
-    - name: FTKALKULUS_URL
-      value: http://ftkalkulus.default/ftkalkulus
+    -   name: FTKALKULUS_URL
+      value: http://ftkalkulus.k9saksbehandling/ftkalkulus
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
@@ -161,8 +161,8 @@ spec:
       value: http://k9-oppdrag.default/k9/oppdrag/api
     - name: K9_TILBAKE_DIREKTE_URL
       value: http://k9-tilbake.default/k9/tilbake/api
-    - name: K9_FORMIDLING_URL
-      value: http://k9-formidling.default/k9/formidling
+    -   name: K9_FORMIDLING_URL
+        value: http://k9-formidling.k9saksbehandling/k9/formidling
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
