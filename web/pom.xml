@@ -56,6 +56,11 @@
 
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
+            <artifactId>punsj</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
             <artifactId>kontrakt</artifactId>
         </dependency>
         <dependency>
@@ -161,7 +166,7 @@
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
         </dependency>
-        
+
         <!-- CDI -->
         <dependency>
             <groupId>org.jboss.weld.servlet</groupId>

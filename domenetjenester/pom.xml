@@ -33,6 +33,7 @@
         <module>vedtak</module>
         <module>uttak</module>
         <module>skjaeringstidspunkt</module>
+        <module>punsj</module>
         <module>bom</module>
 
         <module>behandlingskontroll</module>
