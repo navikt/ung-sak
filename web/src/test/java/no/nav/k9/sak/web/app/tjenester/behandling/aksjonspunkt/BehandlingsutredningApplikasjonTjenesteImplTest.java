@@ -106,12 +106,12 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
 
         // Act
         behandlingsutredningApplikasjonTjeneste.settBehandlingPaVent(behandlingId, LocalDate.now(), Venteårsak.AVV_DOK, null);
-        behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, toUkerFrem, Venteårsak.AVV_FODSEL, null);
+        behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, toUkerFrem, Venteårsak.VENTER_SVAR_TEAMS, null);
 
         // Assert
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         assertThat(behandling.getFristDatoBehandlingPåVent()).isEqualTo(toUkerFrem);
-        assertThat(behandling.getVenteårsak()).isEqualTo(Venteårsak.AVV_FODSEL);
+        assertThat(behandling.getVenteårsak()).isEqualTo(Venteårsak.VENTER_SVAR_TEAMS);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
             LocalDate toUkerFrem = LocalDate.now().plusWeeks(2);
 
             // Act
-            behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, toUkerFrem, Venteårsak.AVV_FODSEL, null);
+            behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, toUkerFrem, Venteårsak.VENTER_SVAR_TEAMS, null);
         });
     }
 

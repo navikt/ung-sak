@@ -100,7 +100,7 @@ public class KompletthetskontrollerTest {
         Behandling behandling = scenario.lagre(repositoryProvider); // Skulle gjerne mocket, men da funker ikke AP_DEF
         LocalDateTime ventefrist = LocalDateTime.now().plusDays(1);
 
-        when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(ventefrist, Venteårsak.AVV_FODSEL));
+        when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(ventefrist, Venteårsak.AVV_DOK));
 
         var prosessTaskData = kompletthetskontroller.asynkVurderKompletthet(behandling);
         prosessTaskRepository.lagre(prosessTaskData);
@@ -116,7 +116,7 @@ public class KompletthetskontrollerTest {
         Behandling behandling = scenario.lagre(repositoryProvider); // Skulle gjerne mocket, men da funker ikke AP_DEF
         LocalDateTime ventefrist = LocalDateTime.now().plusDays(1);
 
-        when(kompletthetsjekker.vurderEtterlysningInntektsmelding(any())).thenReturn(KompletthetResultat.ikkeOppfylt(ventefrist, Venteårsak.AVV_FODSEL));
+        when(kompletthetsjekker.vurderEtterlysningInntektsmelding(any())).thenReturn(KompletthetResultat.ikkeOppfylt(ventefrist, Venteårsak.AVV_DOK));
         when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.VURDER_UTLAND)).thenReturn(true);
 
         // Act
