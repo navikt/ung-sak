@@ -93,6 +93,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             input.getBehandlingUUID(),
             input.getAndrePartersSaksnummer().isEmpty() ? AnnenPart.ALENE : AnnenPart.MED_ANDRE,
             null,
+            null,
             null);
     }
 
