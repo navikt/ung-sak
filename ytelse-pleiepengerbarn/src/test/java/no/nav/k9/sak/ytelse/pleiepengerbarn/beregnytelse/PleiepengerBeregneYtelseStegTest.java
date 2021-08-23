@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +26,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMemoryTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -54,8 +57,6 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.felles.util.Tuple;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -109,7 +110,7 @@ public class PleiepengerBeregneYtelseStegTest {
     public void skalUtførStegForFørstegangsbehandling() {
         // Arrange
 
-        when(fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(any(List.class), Mockito.any())).thenReturn(beregningsresultat);
+        when(fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(any(List.class), Mockito.any(), anyBoolean())).thenReturn(beregningsresultat);
 
         Tuple<Behandling, BehandlingskontrollKontekst> behandlingKontekst = byggGrunnlag(true, true);
         Behandling behandling = behandlingKontekst.getElement1();
