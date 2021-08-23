@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
@@ -29,7 +30,6 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectRea
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIderDto;
-import no.nav.k9.sak.typer.AktørId;
 
 
 @ApplicationScoped
@@ -58,6 +58,7 @@ public class PunsjRestKlient {
         // cdi
     }
 
+    @Inject
     public PunsjRestKlient(SystemUserOidcRestClient restClient,
                            @KonfigVerdi(value = "k9.punsj.url") URI endpoint) {
         this(endpoint);
@@ -69,10 +70,10 @@ public class PunsjRestKlient {
     }
 
 
-    public Optional<JournalpostIderDto> getUferdigJournalpostIderPåAktør(AktørId aktørId) {
+    public Optional<JournalpostIderDto> getUferdigJournalpostIderPåAktør(String aktørId) {
         Objects.requireNonNull(aktørId);
         URIBuilder builder = new URIBuilder();
-        builder.setPathSegments(punsjEndpoint.getPath(), "/journalpost", "/uferdig/", "/" + aktørId.getAktørId());
+        builder.setPathSegments(punsjEndpoint.getPath(), "/journalpost", "/uferdig/", "/" + aktørId);
 
         try {
             HttpGet kall = new HttpGet(builder.build());
