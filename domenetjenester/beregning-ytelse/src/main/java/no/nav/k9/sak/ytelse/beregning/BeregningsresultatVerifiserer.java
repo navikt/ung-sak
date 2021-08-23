@@ -1,18 +1,18 @@
 package no.nav.k9.sak.ytelse.beregning;
 
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.k9.sak.typer.Arbeidsgiver;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public final class BeregningsresultatVerifiserer {
 
@@ -37,10 +37,13 @@ public final class BeregningsresultatVerifiserer {
         Objects.requireNonNull(periode.getBeregningsresultatPeriodeTom(), "beregningsresultatperiodeTom");
         verifiserDagsats(periode.getDagsats(), "beregningsresultatperiode");
         verifiserAndeler(periode.getBeregningsresultatAndelList());
+        if (periode.getDagsats() > 0 && periode.getBeregningsresultatAndelList().isEmpty()) {
+            throw new IllegalStateException("Beregningsresultatperiode " + periode.getPeriode() + " har dagsats > 0, men har ingen andeler");
+        }
     }
 
     private static void verifiserAndeler(List<BeregningsresultatAndel> beregningsresultatAndelList) {
-            beregningsresultatAndelList.forEach(BeregningsresultatVerifiserer::verifiserAndel);
+        beregningsresultatAndelList.forEach(BeregningsresultatVerifiserer::verifiserAndel);
     }
 
     private static void verifiserAndel(BeregningsresultatAndel andel) {
