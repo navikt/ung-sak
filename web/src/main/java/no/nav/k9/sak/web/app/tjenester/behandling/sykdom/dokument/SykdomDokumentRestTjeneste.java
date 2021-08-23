@@ -340,7 +340,7 @@ public class SykdomDokumentRestTjeneste {
     }
 
     private void verifiserKanSettesTilDuplikat(Long duplikatDokumentId, Long duplikatAvDokumentId) {
-        if (sykdomDokumentRepository.isDokumentBruktIVurdering(duplikatAvDokumentId)) {
+        if (sykdomDokumentRepository.isDokumentBruktIVurdering(duplikatDokumentId)) {
             throw new FunksjonellException("K9-6703", "Kan ikke sette som duplikat siden dokumentet har blitt brukt i en vurdering.");
         }
         if (!sykdomDokumentRepository.hentDuplikaterAv(duplikatDokumentId).isEmpty()) {
