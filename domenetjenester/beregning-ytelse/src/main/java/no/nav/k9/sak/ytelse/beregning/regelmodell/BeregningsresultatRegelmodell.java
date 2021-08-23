@@ -9,15 +9,17 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Beregningsg
 public class BeregningsresultatRegelmodell {
     private List<Beregningsgrunnlag> beregningsgrunnlag;
     private UttakResultat uttakResultat;
+    private boolean skalVurdereOmArbeidsforholdGjelderFor;
 
     public BeregningsresultatRegelmodell(Beregningsgrunnlag beregningsgrunnlag, UttakResultat uttakResultat) {
         this.beregningsgrunnlag = List.of(beregningsgrunnlag);
         this.uttakResultat = uttakResultat;
     }
 
-    public BeregningsresultatRegelmodell(List<Beregningsgrunnlag> beregningsgrunnlag, UttakResultat uttakResultat) {
+    public BeregningsresultatRegelmodell(List<Beregningsgrunnlag> beregningsgrunnlag, UttakResultat uttakResultat, boolean skalVurdereOmArbeidsforholdGjelderFor) {
         this.beregningsgrunnlag = beregningsgrunnlag;
         this.uttakResultat = uttakResultat;
+        this.skalVurdereOmArbeidsforholdGjelderFor = skalVurdereOmArbeidsforholdGjelderFor;
     }
 
     public List<Beregningsgrunnlag> getBeregningsgrunnlag() {
@@ -26,5 +28,9 @@ public class BeregningsresultatRegelmodell {
 
     public UttakResultat getUttakResultat() {
         return uttakResultat;
+    }
+
+    public boolean getSkalVurdereGjelderFor() {
+        return skalVurdereOmArbeidsforholdGjelderFor;
     }
 }

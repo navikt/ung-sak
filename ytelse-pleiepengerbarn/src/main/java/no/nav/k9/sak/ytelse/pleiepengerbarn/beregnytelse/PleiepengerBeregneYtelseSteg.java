@@ -71,7 +71,7 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
 
         var uttakResultat = new UttakResultat(ref.getFagsakYtelseType(), new MapFraUttaksplan().mapFra(uttaksplan));
         // Kalle regeltjeneste
-        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat);
+        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat, true);
 
         // Verifiser beregningsresultat
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);

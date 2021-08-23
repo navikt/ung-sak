@@ -33,12 +33,10 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Beregningsg
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPrStatus;
 
 class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecification<BeregningsresultatRegelmodellMellomregning> {
-    private static final Period MAKS_FREMTID = Period.parse("P1Y");
-    private static final Period SPLITT_PERIODE = Period.parse("P1Y");
-
     public static final String ID = "FP_BR 20_1";
     public static final String BESKRIVELSE = "FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder";
-
+    private static final Period MAKS_FREMTID = Period.parse("P1Y");
+    private static final Period SPLITT_PERIODE = Period.parse("P1Y");
     private static final String BRUKER_ANDEL = ".brukerAndel";
     private static final String ARBEIDSGIVERS_ANDEL = ".arbeidsgiverAndel";
     private static final String DAGSATS_BRUKER = ".dagsatsBruker";
@@ -63,22 +61,22 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         List<Beregningsgrunnlag> grunnlagene = regelmodell.getBeregningsgrunnlag();
         UttakResultat uttakResultat = regelmodell.getUttakResultat();
 
-        List<BeregningsresultatPeriode> periodeListe = mapPerioder(grunnlagene, uttakResultat, resultater);
+        List<BeregningsresultatPeriode> periodeListe = mapPerioder(grunnlagene, uttakResultat, resultater, mellomregning.getInput().getSkalVurdereGjelderFor());
         periodeListe.forEach(p -> mellomregning.getOutput().addBeregningsresultatPeriode(p));
         return beregnet(resultater);
     }
 
-    private List<BeregningsresultatPeriode> mapPerioder(List<Beregningsgrunnlag> grunnlag, UttakResultat uttakResultat, Map<String, Object> resultater) {
+    private List<BeregningsresultatPeriode> mapPerioder(List<Beregningsgrunnlag> grunnlag, UttakResultat uttakResultat, Map<String, Object> resultater, boolean skalVurdereGjelderFor) {
         LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline = mapGrunnlagTimeline(grunnlag);
         LocalDateTimeline<List<UttakResultatPeriode>> uttakTimeline = uttakResultat.getUttakPeriodeTimelineMedOverlapp();
-        LocalDateTimeline<BeregningsresultatPeriode> resultatTimeline = intersectTimelines(grunnlagTimeline, uttakTimeline, resultater)
+        LocalDateTimeline<BeregningsresultatPeriode> resultatTimeline = intersectTimelines(grunnlagTimeline, uttakTimeline, resultater, skalVurdereGjelderFor)
             .compress();
         return resultatTimeline.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
     private LocalDateTimeline<BeregningsresultatPeriode> intersectTimelines(LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline, LocalDateTimeline<List<UttakResultatPeriode>> uttakTimeline,
-                                                                            Map<String, Object> resultater) {
+                                                                            Map<String, Object> resultater, boolean skalVurdereGjelderFor) {
 
         if (grunnlagTimeline.isEmpty() || uttakTimeline.isEmpty()) {
             return LocalDateTimeline.EMPTY_TIMELINE;
@@ -98,7 +96,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
         var grunnlagTimelinePeriodisertÅr = grunnlagTimeline.splitAtRegular(startFørsteÅr, minsteMaksDato, SPLITT_PERIODE);
 
-        final int[] i = { 0 }; // Periode-teller til regelsporing
+        final int[] i = {0}; // Periode-teller til regelsporing
         return grunnlagTimelinePeriodisertÅr.intersection(uttakTimeline, (dateInterval, grunnlagSegment, uttakSegment) -> {
             BeregningsresultatPeriode resultatPeriode = new BeregningsresultatPeriode(dateInterval);
 
@@ -113,7 +111,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             grunnlag.getBeregningsgrunnlagPrStatus(AktivitetStatus.ATFL).forEach(gbps -> {
                 // for hver arbeidstaker andel: map fra grunnlag til 1-2 resultatAndel
                 List<BeregningsgrunnlagPrArbeidsforhold> arbeidsforholdList = gbps.getArbeidsforhold();
-                arbeidsforholdList.forEach(a -> uttakResultatPeriode.forEach(up -> opprettBeregningsresultatAndelerATFL(a, resultatPeriode, resultater, periodeNavn, up)));
+                arbeidsforholdList.forEach(a -> uttakResultatPeriode.forEach(up -> opprettBeregningsresultatAndelerATFL(a, resultatPeriode, resultater, periodeNavn, up, skalVurdereGjelderFor)));
             });
             grunnlag.getBeregningsgrunnlagPrStatus().stream()
                 .filter(bgps -> !AktivitetStatus.ATFL.equals(bgps.getAktivitetStatus()))
@@ -172,11 +170,11 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
     }
 
     private void opprettBeregningsresultatAndelerATFL(BeregningsgrunnlagPrArbeidsforhold arbeidsforhold, BeregningsresultatPeriode resultatPeriode,
-                                                      Map<String, Object> resultater, String periodeNavn, UttakResultatPeriode uttakResultatPeriode) {
+                                                      Map<String, Object> resultater, String periodeNavn, UttakResultatPeriode uttakResultatPeriode, boolean skalVurdereGjelderFor) {
         if (uttakResultatPeriode.getErOppholdsPeriode()) {
             return;
         }
-        Optional<UttakAktivitet> uttakAktivitetOpt = matchUttakAktivitetMedArbeidsforhold(uttakResultatPeriode.getUttakAktiviteter(), arbeidsforhold);
+        Optional<UttakAktivitet> uttakAktivitetOpt = matchUttakAktivitetMedArbeidsforhold(uttakResultatPeriode.getUttakAktiviteter(), arbeidsforhold, skalVurdereGjelderFor);
         if (uttakAktivitetOpt.isEmpty()) {
             return;
         }
@@ -224,11 +222,28 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         }
     }
 
-    private Optional<UttakAktivitet> matchUttakAktivitetMedArbeidsforhold(List<UttakAktivitet> uttakAktiviteter, BeregningsgrunnlagPrArbeidsforhold arbeidsforhold) {
-        return uttakAktiviteter
+    private Optional<UttakAktivitet> matchUttakAktivitetMedArbeidsforhold(List<UttakAktivitet> uttakAktiviteter, BeregningsgrunnlagPrArbeidsforhold arbeidsforhold, boolean skalVurdereGjelderFor) {
+        var relevanteAktiviteterFraUttak = uttakAktiviteter
             .stream()
-            .filter(uttakAktivitet -> Objects.equals(uttakAktivitet.getArbeidsforhold(), arbeidsforhold.getArbeidsforhold()))
+            .filter(uttakAktivitet -> matcher(arbeidsforhold, uttakAktivitet, skalVurdereGjelderFor))
+            .collect(Collectors.toList());
+
+        if (relevanteAktiviteterFraUttak.size() > 1) {
+            throw new IllegalStateException("Fant flere relevante uttakaktiviteter enn forventet: " + relevanteAktiviteterFraUttak);
+        }
+
+        return relevanteAktiviteterFraUttak
+            .stream()
             .findFirst();
+    }
+
+    private boolean matcher(BeregningsgrunnlagPrArbeidsforhold arbeidsforhold, UttakAktivitet uttakAktivitet, boolean skalVurdereGjelderFor) {
+        var uttakArbeidsforhold = uttakAktivitet.getArbeidsforhold();
+        var beregningArbeidsforhold = arbeidsforhold.getArbeidsforhold();
+        if (skalVurdereGjelderFor && uttakArbeidsforhold != null && beregningArbeidsforhold != null) {
+            return beregningArbeidsforhold.gjelderFor(uttakArbeidsforhold);
+        }
+        return Objects.equals(uttakArbeidsforhold, beregningArbeidsforhold);
     }
 
     private LocalDateTimeline<BeregningsgrunnlagPeriode> mapGrunnlagTimeline(List<Beregningsgrunnlag> grunnlag) {

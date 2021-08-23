@@ -29,7 +29,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
@@ -38,7 +37,6 @@ import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
@@ -81,8 +79,6 @@ public class MapInputTilUttakTjeneste {
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private OpptjeningRepository opptjeningRepository;
-    private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
-    private InntektArbeidYtelseTjeneste iayTjeneste;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
     private EtablertTilsynRepository etablertTilsynRepository;
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
@@ -95,8 +91,6 @@ public class MapInputTilUttakTjeneste {
                                     PersonopplysningTjeneste personopplysningTjeneste,
                                     BehandlingRepository behandlingRepository,
                                     FagsakRepository fagsakRepository,
-                                    KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
-                                    InntektArbeidYtelseTjeneste iayTjeneste,
                                     PleietrengendeKravprioritet pleietrengendeKravprioritet,
                                     EtablertTilsynRepository etablertTilsynRepository,
                                     OpptjeningRepository opptjeningRepository,
@@ -110,8 +104,6 @@ public class MapInputTilUttakTjeneste {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
-        this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
-        this.iayTjeneste = iayTjeneste;
         this.pleietrengendeKravprioritet = pleietrengendeKravprioritet;
         this.etablertTilsynRepository = etablertTilsynRepository;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
@@ -129,15 +121,14 @@ public class MapInputTilUttakTjeneste {
         var perioderTilVurdering = finnSykdomsperioder(referanse);
         var utvidetRevurderingPerioder = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(referanse);
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
-        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
         var opptjeningsresultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
         var fagsak = behandling.getFagsak();
         var fagsakPeriode = fagsak.getPeriode();
         var relaterteFagsaker = fagsakRepository.finnFagsakRelatertTil(behandling.getFagsakYtelseType(),
-            fagsak.getPleietrengendeAktørId(),
-            null,
-            fagsakPeriode.getFomDato().minusWeeks(25),
-            fagsakPeriode.getTomDato().plusWeeks(25))
+                fagsak.getPleietrengendeAktørId(),
+                null,
+                fagsakPeriode.getFomDato().minusWeeks(25),
+                fagsakPeriode.getTomDato().plusWeeks(25))
             .stream().map(Fagsak::getSaksnummer)
             .filter(it -> !fagsak.getSaksnummer().equals(it))
             .collect(Collectors.toSet());
@@ -153,7 +144,6 @@ public class MapInputTilUttakTjeneste {
             .medPerioderTilVurdering(perioderTilVurdering)
             .medUtvidetPerioderRevurdering(utvidetRevurderingPerioder)
             .medVurderteSøknadsperioder(vurderteSøknadsperioder)
-            .medInntektsmeldinger(sakInntektsmeldinger)
             .medPersonopplysninger(personopplysningerAggregat)
             .medRelaterteSaker(relaterteFagsaker)
             .medUttaksGrunnlag(uttakGrunnlag)
@@ -237,13 +227,11 @@ public class MapInputTilUttakTjeneste {
         final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
         // TODO: Se kommentarer/TODOs under denne:
-        final List<Arbeid> arbeid = new MapArbeid(kompletthetForBeregningTjeneste).map(kravDokumenter,
+        final List<Arbeid> arbeid = new MapArbeid().map(kravDokumenter,
             perioderFraSøknader,
             tidslinjeTilVurdering,
-            input.getSakInntektsmeldinger(),
             input.getVilkårene().getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow(),
-            input.getOpptjeningResultat().orElse(null),
-            BehandlingReferanse.fra(behandling));
+            input.getOpptjeningResultat().orElse(null));
 
         final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehov());
 

@@ -42,6 +42,7 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
@@ -154,17 +155,25 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
     }
 
     private boolean matcherAndel(BeregningsresultatPeriodeAndelDto andel, Arbeidsforhold arbeidsforhold) {
-        if (andel.getArbeidsgiverOrgnr() != null) {
-            return Objects.equals(andel.getArbeidsgiverOrgnr().getOrgNummer(), arbeidsforhold.getOrganisasjonsnummer())
-                && Objects.equals(andel.getArbeidsforholdId(), arbeidsforhold.getArbeidsforholdId())
-                && matcherAktitivetStatus(arbeidsforhold, andel);
-        }
-        if (andel.getAktørId() != null) {
-            return Objects.equals(andel.getAktørId().getAktørId(), arbeidsforhold.getAktørId())
-                && Objects.equals(andel.getArbeidsforholdId(), arbeidsforhold.getArbeidsforholdId())
+        if (andel.getArbeidsgiver() != null) {
+            return matcherArbeidsforhold(arbeidsforhold, andel)
                 && matcherAktitivetStatus(arbeidsforhold, andel);
         }
         return matcherAktitivetStatus(arbeidsforhold, andel);
+    }
+
+    private boolean matcherArbeidsforhold(Arbeidsforhold arbeidsforhold, BeregningsresultatPeriodeAndelDto brukersAndel) {
+        var arbeidsgiver = brukersAndel.getArbeidsgiver();
+        var arbeidsforholdRef = InternArbeidsforholdRef.ref(brukersAndel.getArbeidsforholdId());
+        if (arbeidsgiver.getIdentifikator() != null && !OrganisasjonsNummerValidator.erGyldig(arbeidsgiver.getIdentifikator())) {
+            return arbeidsforhold.getAktørId() != null
+                && arbeidsgiver.getIdentifikator().equals(arbeidsforhold.getAktørId())
+                && InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()).gjelderFor(arbeidsforholdRef);
+        } else if (arbeidsgiver.getIdentifikator() != null && OrganisasjonsNummerValidator.erGyldig(arbeidsgiver.getIdentifikator())) {
+            return Objects.equals(arbeidsgiver.getIdentifikator(), arbeidsforhold.getOrganisasjonsnummer())
+                && InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()).gjelderFor(arbeidsforholdRef);
+        }
+        return false;
     }
 
     private boolean matcherAktitivetStatus(Arbeidsforhold it, BeregningsresultatPeriodeAndelDto brukersAndel) {
