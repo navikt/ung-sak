@@ -72,8 +72,7 @@ public class PunsjRestKlient {
 
     public Optional<JournalpostIderDto> getUferdigJournalpostIderPåAktør(String aktørId) {
         Objects.requireNonNull(aktørId);
-        URIBuilder builder = new URIBuilder();
-        builder.setPathSegments(punsjEndpoint.getPath(), "/journalpost", "/uferdig/", "/" + aktørId);
+        URIBuilder builder = new URIBuilder(toUri(punsjEndpoint, "/journalpost/uferdig/"+aktørId));
 
         try {
             HttpGet kall = new HttpGet(builder.build());
@@ -98,5 +97,14 @@ public class PunsjRestKlient {
     private boolean isOk(int responseCode) {
         return responseCode == HttpStatus.SC_OK
             || responseCode == HttpStatus.SC_CREATED;
+    }
+
+    private URI toUri(URI baseUri, String relativeUri) {
+        String uri = baseUri.toString() + relativeUri;
+        try {
+            return new URI(uri);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Ugyldig uri: " + uri, e);
+        }
     }
 }
