@@ -71,7 +71,7 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
 
         StartpunktType nattevåkBeredskapStartpunkt = utledStartpunktForNattevåkOgBeredskap(ref);
         result.add(nattevåkBeredskapStartpunkt);
-        log.info("Kjører diff av nattevåk & beredskap, funnet følgende resultat = {}", tilsynStartpunkt);
+        log.info("Kjører diff av nattevåk & beredskap, funnet følgende resultat = {}", nattevåkBeredskapStartpunkt);
 
         return result.stream()
             .min(Comparator.comparing(StartpunktType::getRangering))
