@@ -105,7 +105,7 @@ public class SykdomDokument {
     public Long getVersjon() {
         return getInformasjon().getVersjon();
     }
-    
+
     /**
      * Henter dokumentet dette dokumentet er et duplikat av.
      * @return Dokumentet som skal brukes fremfor dette dokumentet, eller {@code null} hvis dette
@@ -150,7 +150,7 @@ public class SykdomDokument {
 
     public void setInformasjon(SykdomDokumentInformasjon informasjon) {
         Objects.requireNonNull(informasjon, "'informasjon' kan ikke være null.");
-        
+
         if (informasjon.getId() != null) {
             throw new IllegalStateException("'informasjon' har allerede blitt lagret og kan derfor ikke settes på dette dokumentet.");
         }
@@ -182,6 +182,6 @@ public class SykdomDokument {
     }
 
     public boolean isHarInfoSomIkkeKanPunsjes() {
-        return informasjon.isHarInfoSomIkkeKanPunsjes();
+        return getInformasjon().isHarInfoSomIkkeKanPunsjes();
     }
 }
