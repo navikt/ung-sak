@@ -12,7 +12,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
@@ -33,7 +32,6 @@ public class InputParametere {
     private Vilkårene vilkårene;
     private UttaksPerioderGrunnlag uttaksGrunnlag;
     private List<EtablertPleieperiode> pleiebehov;
-    private Set<Inntektsmelding> sakInntektsmeldinger;
     private Set<Saksnummer> relaterteSaker;
     private NavigableSet<DatoIntervallEntitet> utvidetRevurderingPerioder;
     private List<EtablertTilsynPeriode> etablertTilsynPerioder;
@@ -110,15 +108,6 @@ public class InputParametere {
 
     public List<EtablertPleieperiode> getPleiebehov() {
         return pleiebehov;
-    }
-
-    public InputParametere medInntektsmeldinger(Set<Inntektsmelding> inntektsmeldinger) {
-        this.sakInntektsmeldinger = Objects.requireNonNull(inntektsmeldinger);
-        return this;
-    }
-
-    public Set<Inntektsmelding> getSakInntektsmeldinger() {
-        return sakInntektsmeldinger;
     }
 
     public InputParametere medRelaterteSaker(Set<Saksnummer> relaterteSaker) {

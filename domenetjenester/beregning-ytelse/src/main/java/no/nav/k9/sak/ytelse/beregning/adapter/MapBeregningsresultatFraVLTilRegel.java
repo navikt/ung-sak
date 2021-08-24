@@ -23,10 +23,10 @@ public class MapBeregningsresultatFraVLTilRegel {
         return new BeregningsresultatRegelmodell(regelBeregningsgrunnlag, resultat);
     }
 
-    public BeregningsresultatRegelmodell mapFra(List<Beregningsgrunnlag> beregningsgrunnlag, UttakResultat resultat) {
+    public BeregningsresultatRegelmodell mapFra(List<Beregningsgrunnlag> beregningsgrunnlag, UttakResultat resultat, boolean skalVurdereOmArbeidsforholdGjelderFor) {
 
         var regelBeregningsgrunnlag = beregningsgrunnlag.stream().map(MapBeregningsgrunnlagFraVLTilRegel::map).collect(Collectors.toList());
-        return new BeregningsresultatRegelmodell(regelBeregningsgrunnlag, resultat);
+        return new BeregningsresultatRegelmodell(regelBeregningsgrunnlag, resultat, skalVurdereOmArbeidsforholdGjelderFor);
     }
 
 }

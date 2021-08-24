@@ -70,9 +70,7 @@ class MapFraUttaksplan {
         var timeline = LocalDateTimeline.buildGroupOverlappingSegments(segmenter);
 
         List<UttakResultatPeriode> res = new ArrayList<>();
-        timeline.toSegments().forEach(seg -> {
-            res.add(new UttakResultatPeriode(seg.getFom(), seg.getTom(), seg.getValue(), !Utfall.OPPFYLT.equals(utfall)));
-        });
+        timeline.toSegments().forEach(seg -> res.add(new UttakResultatPeriode(seg.getFom(), seg.getTom(), seg.getValue(), !Utfall.OPPFYLT.equals(utfall))));
         return res;
     }
 

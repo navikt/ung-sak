@@ -212,7 +212,7 @@ public class KompletthetForBeregningTjeneste {
 
     private boolean harFraværFraArbeidetIPerioden(InputForKompletthetsvurdering input,
                                                   DatoIntervallEntitet periode,
-                                                  ManglendeVedlegg manglendeVedlegg, BehandlingReferanse behandlingReferanse) {
+                                                  ManglendeVedlegg manglendeVedlegg) {
 
         if (input.getSkalHoppeOverVurderingMotArbeid()) {
             return true;
@@ -222,7 +222,7 @@ public class KompletthetForBeregningTjeneste {
         var kravDokumenter = input.getVurderteSøknadsperioder().keySet();
         var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.toLocalDateInterval(), true)));
 
-        var arbeidIPeriode = new MapArbeid(this).map(kravDokumenter, perioderFraSøknadene, timeline, Set.of(), null, null, behandlingReferanse);
+        var arbeidIPeriode = new MapArbeid().map(kravDokumenter, perioderFraSøknadene, timeline, null, null);
 
         return harFraværFraArbeidsgiverIPerioden(arbeidIPeriode, manglendeVedlegg);
     }
@@ -288,7 +288,7 @@ public class KompletthetForBeregningTjeneste {
                     .map(it -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, entry.getKey().getIdentifikator(), it != null ? it.getReferanse() : null, false))
                     .collect(Collectors.toList()))
                 .flatMap(Collection::stream)
-                .filter(it -> harFraværFraArbeidetIPerioden(input, periode, it, referanse))
+                .filter(it -> harFraværFraArbeidetIPerioden(input, periode, it))
                 .collect(Collectors.toList());
             return manglendeInntektsmeldinger;
         }
