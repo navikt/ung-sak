@@ -29,21 +29,25 @@ public class SykdomDokumentOpprettelseDto {
     @Digits(integer = 18, fraction = 0)
     private String journalpostId;
 
+    @JsonProperty(value = "harInfoSomIkkeKanPunsjes", required = false)
+    private Boolean harInfoSomIkkeKanPunsjes;
 
     public SykdomDokumentOpprettelseDto() {
-     
+
     }
-    
-    public SykdomDokumentOpprettelseDto(String behandlingUuid, String journalpostId) {
+
+    public SykdomDokumentOpprettelseDto(String behandlingUuid, String journalpostId, Boolean harInfoSomIkkeKanPunsjes) {
         this.behandlingUuid = UUID.fromString(behandlingUuid);
         this.journalpostId = Objects.requireNonNull(journalpostId);
+        this.harInfoSomIkkeKanPunsjes = harInfoSomIkkeKanPunsjes;
     }
-    
-    public SykdomDokumentOpprettelseDto(UUID behandlingUuid, JournalpostId journalpostId) {
+
+    public SykdomDokumentOpprettelseDto(UUID behandlingUuid, JournalpostId journalpostId, Boolean harInfoSomIkkeKanPunsjes) {
         this.behandlingUuid = behandlingUuid;
         this.journalpostId = journalpostId.getVerdi();
+        this.harInfoSomIkkeKanPunsjes = harInfoSomIkkeKanPunsjes;
     }
-    
+
     @AbacAttributt("behandlingUuid")
     public UUID getBehandlingUuid() {
         return behandlingUuid;
@@ -52,5 +56,9 @@ public class SykdomDokumentOpprettelseDto {
     @AbacAttributt("journalpostId")
     public JournalpostId getJournalpostId() {
         return new JournalpostId(journalpostId);
+    }
+
+    public Boolean getHarInfoSomIkkeKanPunsjes() {
+        return harInfoSomIkkeKanPunsjes;
     }
 }

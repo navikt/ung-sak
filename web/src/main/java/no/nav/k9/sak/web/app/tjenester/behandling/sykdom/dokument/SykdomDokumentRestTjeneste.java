@@ -394,7 +394,7 @@ public class SykdomDokumentRestTjeneste {
         final LocalDateTime nå = LocalDateTime.now();
         final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
             SykdomDokumentType.UKLASSIFISERT,
-            false,
+            sykdomDokumentOpprettelseDto.getHarInfoSomIkkeKanPunsjes(),
             nå.toLocalDate(),
             nå,
             0L,

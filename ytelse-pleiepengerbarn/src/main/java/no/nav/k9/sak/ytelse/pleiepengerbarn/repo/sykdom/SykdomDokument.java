@@ -180,4 +180,8 @@ public class SykdomDokument {
     public LocalDateTime getEndretTidspunkt() {
         return getInformasjon().getOpprettetTidspunkt();
     }
+
+    public boolean isHarInfoSomIkkeKanPunsjes() {
+        return informasjon.isHarInfoSomIkkeKanPunsjes();
+    }
 }
