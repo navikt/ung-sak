@@ -35,7 +35,7 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Beregningsg
 class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecification<BeregningsresultatRegelmodellMellomregning> {
     public static final String ID = "FP_BR 20_1";
     public static final String BESKRIVELSE = "FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder";
-    private static final Period MAKS_FREMTID = Period.parse("P1Y");
+    private static final Period MAKS_FREMTID = Period.parse("P5Y");
     private static final Period SPLITT_PERIODE = Period.parse("P1Y");
     private static final String BRUKER_ANDEL = ".brukerAndel";
     private static final String ARBEIDSGIVERS_ANDEL = ".arbeidsgiverAndel";
