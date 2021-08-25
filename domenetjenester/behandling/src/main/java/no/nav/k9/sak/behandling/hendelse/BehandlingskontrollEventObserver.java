@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.hendelse.EventHendelse;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandling.PubliserEventTask;
 import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
@@ -24,8 +26,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingProsessHendelse;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
 @ApplicationScoped
 public class BehandlingskontrollEventObserver {
@@ -126,6 +126,7 @@ public class BehandlingskontrollEventObserver {
             .medFagsakPeriode(fagsak.getPeriode().tilPeriode())
             .medPleietrengendeAktørId(fagsak.getPleietrengendeAktørId())
             .medRelatertPartAktørId(fagsak.getRelatertPersonAktørId())
+            .medAnsvarligBeslutterForTotrinn(behandling.getAnsvarligBeslutter())
             .build();
     }
 }
