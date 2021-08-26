@@ -21,35 +21,17 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.geografisk.AdresseType;
-import no.nav.k9.kodeverk.geografisk.Landkoder;
-import no.nav.k9.kodeverk.geografisk.Region;
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.kodeverk.person.PersonstatusType;
-import no.nav.k9.kodeverk.person.RelasjonsRolleType;
-import no.nav.k9.kodeverk.person.SivilstandType;
-import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
-import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
-import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
-import no.nav.k9.sak.behandlingslager.aktør.historikk.AdressePeriode;
-import no.nav.k9.sak.behandlingslager.aktør.historikk.Gyldighetsperiode;
-import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
-import no.nav.k9.sak.behandlingslager.aktør.historikk.PersonstatusPeriode;
-import no.nav.k9.sak.behandlingslager.aktør.historikk.StatsborgerskapPeriode;
-import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.felles.integrasjon.pdl.Bostedsadresse;
 import no.nav.k9.felles.integrasjon.pdl.BostedsadresseResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Doedsfall;
 import no.nav.k9.felles.integrasjon.pdl.DoedsfallResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.FamilierelasjonResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Familierelasjonsrolle;
 import no.nav.k9.felles.integrasjon.pdl.Foedsel;
 import no.nav.k9.felles.integrasjon.pdl.FoedselResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.FolkeregistermetadataResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Folkeregisterpersonstatus;
 import no.nav.k9.felles.integrasjon.pdl.FolkeregisterpersonstatusResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.ForelderBarnRelasjonResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.HentPersonQueryRequest;
 import no.nav.k9.felles.integrasjon.pdl.InnflyttingTilNorgeResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Kjoenn;
@@ -64,6 +46,7 @@ import no.nav.k9.felles.integrasjon.pdl.NavnResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.OppholdResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Oppholdsadresse;
 import no.nav.k9.felles.integrasjon.pdl.OppholdsadresseResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 import no.nav.k9.felles.integrasjon.pdl.Person;
 import no.nav.k9.felles.integrasjon.pdl.PersonBostedsadresseParametrizedInput;
 import no.nav.k9.felles.integrasjon.pdl.PersonFolkeregisterpersonstatusParametrizedInput;
@@ -90,8 +73,25 @@ import no.nav.k9.felles.integrasjon.pdl.UtenlandskAdresseResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.UtflyttingFraNorgeResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Vegadresse;
 import no.nav.k9.felles.integrasjon.pdl.VegadresseResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
+import no.nav.k9.kodeverk.geografisk.AdresseType;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.geografisk.Region;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.k9.kodeverk.person.SivilstandType;
+import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
+import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
+import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.AdressePeriode;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.Gyldighetsperiode;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.PersonstatusPeriode;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.StatsborgerskapPeriode;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.typer.PersonIdent;
 
 @ApplicationScoped
 public class PersoninfoTjeneste {
@@ -176,10 +176,10 @@ public class PersoninfoTjeneste {
         return alleLand.stream().anyMatch(Landkoder.NOR::equals) ? Landkoder.NOR : alleLand.stream().findFirst().orElse(Landkoder.UOPPGITT_UKJENT);
     }
 
-    private static Set<Familierelasjon> mapFamilierelasjoner(List<no.nav.k9.felles.integrasjon.pdl.Familierelasjon> familierelasjoner, List<Sivilstand> sivilstandliste) {
+    private static Set<Familierelasjon> mapFamilierelasjoner(List<no.nav.k9.felles.integrasjon.pdl.ForelderBarnRelasjon> forelderBarnRelasjoner, List<Sivilstand> sivilstandliste) {
         Set<Familierelasjon> relasjoner = new HashSet<>();
 
-        familierelasjoner.stream()
+        forelderBarnRelasjoner.stream()
             .map(r -> new Familierelasjon(
                     new PersonIdent(r.getRelatertPersonsIdent()),
                     mapRelasjonsrolle(r.getRelatertPersonsRolle())
@@ -234,7 +234,7 @@ public class PersoninfoTjeneste {
             .kjoenn(new KjoennResponseProjection().kjoenn())
             .sivilstand(new SivilstandResponseProjection().relatertVedSivilstand().type())
             .statsborgerskap(new StatsborgerskapResponseProjection().land())
-            .familierelasjoner(new FamilierelasjonResponseProjection().relatertPersonsRolle().relatertPersonsIdent().minRolleForPerson())
+            .forelderBarnRelasjon(new ForelderBarnRelasjonResponseProjection().relatertPersonsRolle().relatertPersonsIdent().minRolleForPerson())
             .bostedsadresse(new BostedsadresseResponseProjection().gyldigFraOgMed().angittFlyttedato()
                 .vegadresse(new VegadresseResponseProjection().matrikkelId().adressenavn().husnummer().husbokstav().postnummer())
                 .matrikkeladresse(new MatrikkeladresseResponseProjection().matrikkelId().bruksenhetsnummer().tilleggsnavn().postnummer())
@@ -269,7 +269,7 @@ public class PersoninfoTjeneste {
             .map(st -> SIVSTAND_FRA_FREG.getOrDefault(st, SivilstandType.UOPPGITT))
             .findFirst().orElse(SivilstandType.UOPPGITT);
         var statsborgerskap = mapStatsborgerskap(personFraPdl.getStatsborgerskap());
-        var familierelasjoner = mapFamilierelasjoner(personFraPdl.getFamilierelasjoner(), personFraPdl.getSivilstand());
+        var familierelasjoner = mapFamilierelasjoner(personFraPdl.getForelderBarnRelasjon(), personFraPdl.getSivilstand());
         var adresser = mapAdresser(personFraPdl.getBostedsadresse(), personFraPdl.getKontaktadresse(), personFraPdl.getOppholdsadresse());
 
         return new Personinfo.Builder()
