@@ -3,19 +3,11 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.core.Response;
 
-import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
-import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
-import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -38,8 +30,11 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListe
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.StartBeregningListeRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
+import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
@@ -53,8 +48,8 @@ import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
-import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
+import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
@@ -199,11 +194,9 @@ public class KalkulusRestKlient {
         var endpoint = migrerAksjonspunkter;
 
         try {
-            getResponse(endpoint,
-                kalkulusJsonWriter.writeValueAsString(request),
-                JsonMapper.getMapper().readerFor(Response.class));
-        } catch (JsonProcessingException e) {
-            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+            utfør(endpoint, kalkulusJsonWriter.writeValueAsString(request));
+        } catch (IOException e) {
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
     }
 
