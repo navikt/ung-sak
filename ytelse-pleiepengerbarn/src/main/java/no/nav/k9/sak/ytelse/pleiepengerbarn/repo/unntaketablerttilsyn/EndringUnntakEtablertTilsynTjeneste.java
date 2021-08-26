@@ -46,7 +46,7 @@ public class EndringUnntakEtablertTilsynTjeneste {
         return new LocalDateTimeline<>(perioder);
     }
 
-    private List<DatoIntervallEntitet> utledEndringer(Optional<UnntakEtablertTilsynForPleietrengende> eksisterendeGrunnlag,
+    List<DatoIntervallEntitet> utledEndringer(Optional<UnntakEtablertTilsynForPleietrengende> eksisterendeGrunnlag,
                                                       Optional<UnntakEtablertTilsynForPleietrengende> nyttGrunnlag) {
 
         final LocalDateTimeline<Boolean> nattevåkendringer = utledEndringerMedTidslinje(toNattevåkTidslinje(eksisterendeGrunnlag), toNattevåkTidslinje(nyttGrunnlag));
