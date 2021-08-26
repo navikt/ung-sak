@@ -28,6 +28,7 @@ public enum UttakArbeidType implements Kodeverdi {
     DAGPENGER(AktivitetStatus.DAGPENGER, "Dagpenger"),
     KUN_YTELSE(AktivitetStatus.BRUKERS_ANDEL, "Kun ytelse"),
 
+    // 8-47 opptjening gir inaktiv
     INAKTIV(AktivitetStatus.MIDLERTIDIG_INAKTIV, "Inaktiv"),
     ANNET("ANNET", "Annet"),
     ;

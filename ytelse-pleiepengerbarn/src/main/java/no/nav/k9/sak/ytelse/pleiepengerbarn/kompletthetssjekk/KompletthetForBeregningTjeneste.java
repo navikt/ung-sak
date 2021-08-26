@@ -41,6 +41,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidstidMappingInput;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.MapArbeid;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
 import no.nav.pleiepengerbarn.uttak.kontrakter.ArbeidsforholdPeriodeInfo;
@@ -222,7 +223,12 @@ public class KompletthetForBeregningTjeneste {
         var kravDokumenter = input.getVurderteSøknadsperioder().keySet();
         var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.toLocalDateInterval(), true)));
 
-        var arbeidIPeriode = new MapArbeid().map(kravDokumenter, perioderFraSøknadene, timeline, null, null);
+        var arbeidstidInput = new ArbeidstidMappingInput(kravDokumenter,
+            perioderFraSøknadene,
+            timeline,
+            null,
+            null);
+        var arbeidIPeriode = new MapArbeid().map(arbeidstidInput);
 
         return harFraværFraArbeidsgiverIPerioden(arbeidIPeriode, manglendeVedlegg);
     }
