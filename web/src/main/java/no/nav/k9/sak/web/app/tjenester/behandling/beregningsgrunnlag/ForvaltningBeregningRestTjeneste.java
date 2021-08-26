@@ -1,11 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,10 +13,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -32,30 +26,18 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelseKalkulator;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagKobling;
-import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
-import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktRequest;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
-import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @ApplicationScoped
 @Transactional
@@ -71,9 +53,6 @@ public class ForvaltningBeregningRestTjeneste {
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     private BeregningsgrunnlagYtelseKalkulator forvaltningBeregning;
-    private AksjonspunktRepository aksjonspunktRepository;
-    private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
-    private KalkulusRestKlient kalkulusRestKlient;
 
     public ForvaltningBeregningRestTjeneste() {
     }
@@ -82,14 +61,11 @@ public class ForvaltningBeregningRestTjeneste {
     public ForvaltningBeregningRestTjeneste(BeregningsgrunnlagYtelseKalkulator forvaltningBeregning,
                                             BehandlingRepository behandlingRepository,
                                             InntektArbeidYtelseTjeneste iayTjeneste,
-                                            BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste, AksjonspunktRepository aksjonspunktRepository, BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste, KalkulusRestKlient kalkulusRestKlient) {
+                                            BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
         this.forvaltningBeregning = forvaltningBeregning;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
-        this.aksjonspunktRepository = aksjonspunktRepository;
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
-        this.kalkulusRestKlient = kalkulusRestKlient;
     }
 
     @GET
@@ -169,41 +145,6 @@ public class ForvaltningBeregningRestTjeneste {
 
         return Response.ok(fordeltInntektsmelding, JSON).cacheControl(cc).build();
     }
-
-    @POST
-    @Path("migrerAksjonspunkterKalkulus")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Migrerer aksjonspunkt til kalkulus", tags = "beregning")
-    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response migrerAksjonspunkt(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BeregningAvklaringsbehovDefinisjon aksjonspunktDef,
-                                       @NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) Periode periode) { // NOSONAR
-        Map<Behandling, Aksjonspunkt> behandlingerMedAksjonspunkt = aksjonspunktRepository.hentAksjonspunkterForKode(periode.getFom(), periode.getTom(), aksjonspunktDef.getKode());
-        List<MigrerAksjonspunktRequest> aksjonspunktData = behandlingerMedAksjonspunkt.entrySet().stream().map(e -> lagAksjonspunktData(e.getKey(), e.getValue())).collect(Collectors.toList());
-        MigrerAksjonspunktListeRequest migrerAksjonspunktListeRequest = new MigrerAksjonspunktListeRequest(aksjonspunktData, aksjonspunktDef.getKode());
-        kalkulusRestKlient.migrerAksjonspunkter(migrerAksjonspunktListeRequest);
-        return Response.ok().build();
-    }
-
-    private MigrerAksjonspunktRequest lagAksjonspunktData(Behandling behandling, Aksjonspunkt aksjonspunkt) {
-        var ref = BehandlingReferanse.fra(behandling);
-        var stpTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true).stream()
-            .map(DatoIntervallEntitet::getFomDato)
-            .collect(Collectors.toList());
-        var bgReferanser = beregningsgrunnlagTjeneste.hentKoblinger(ref)
-            .stream()
-            .filter(kobling -> stpTilVurdering.contains(kobling.getSkjæringstidspunkt()))
-            .map(BeregningsgrunnlagKobling::getReferanse)
-            .collect(Collectors.toSet());
-        return new MigrerAksjonspunktRequest(
-            ref.getSaksnummer().getVerdi(),
-            YtelseTyperKalkulusStøtterKontrakt.fraKode(ref.getFagsakYtelseType().getKode()),
-            bgReferanser,
-            aksjonspunkt.getStatus().getKode(),
-            aksjonspunkt.getBegrunnelse()
-        );
-    }
-
 
     private boolean periodeErUtenforFagsaksIntervall(DatoIntervallEntitet vilkårPeriode, DatoIntervallEntitet fagsakPeriode) {
         return !vilkårPeriode.overlapper(fagsakPeriode);

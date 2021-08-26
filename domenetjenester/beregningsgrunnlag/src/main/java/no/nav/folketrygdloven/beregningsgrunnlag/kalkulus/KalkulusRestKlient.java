@@ -10,11 +10,9 @@ import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.core.Response;
 
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
 import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
@@ -84,9 +82,6 @@ public class KalkulusRestKlient {
 
     private URI kontrollerGrunnbeløp;
 
-    private URI migrerAksjonspunkter;
-
-
     protected KalkulusRestKlient() {
         // cdi
     }
@@ -114,7 +109,6 @@ public class KalkulusRestKlient {
         this.beregningsgrunnlagGrunnlagBolkEndpoint = toUri("/api/kalkulus/v1/grunnlag/bolk");
         this.grunnbeløp = toUri("/api/kalkulus/v1/grunnbelop");
         this.kontrollerGrunnbeløp = toUri("/api/kalkulus/v1/kontrollerGregulering");
-        this.migrerAksjonspunkter = toUri("/api/kalkulus/v1/migrerAksjonspunkter");
     }
 
     public List<TilstandResponse> startBeregning(StartBeregningListeRequest request) {
@@ -194,19 +188,6 @@ public class KalkulusRestKlient {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
-
-    public void migrerAksjonspunkter(MigrerAksjonspunktListeRequest request) {
-        var endpoint = migrerAksjonspunkter;
-
-        try {
-            getResponse(endpoint,
-                kalkulusJsonWriter.writeValueAsString(request),
-                JsonMapper.getMapper().readerFor(Response.class));
-        } catch (JsonProcessingException e) {
-            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
-        }
-    }
-
 
     private <T> T getResponse(URI endpoint, String json, ObjectReader reader) {
         try {
