@@ -63,7 +63,7 @@ public class EndringUnntakEtablertTilsynTjeneste {
         return eksisterende.combine(ny, (datoInterval, datoSegment, datoSegment2) -> {
             if (datoSegment == null
                 || datoSegment2 == null
-                || datoSegment.getValue().getResultat() == datoSegment2.getValue().getResultat()) {
+                || datoSegment.getValue().getResultat() != datoSegment2.getValue().getResultat()) {
                 return new LocalDateSegment<>(datoInterval, Boolean.TRUE);
             }
             return null;
