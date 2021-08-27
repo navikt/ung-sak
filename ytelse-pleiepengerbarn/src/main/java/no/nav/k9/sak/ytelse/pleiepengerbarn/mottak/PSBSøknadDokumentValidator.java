@@ -11,7 +11,7 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidator;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
-import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
+import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnSøknadValidator;
 
 @ApplicationScoped
 @DokumentGruppeRef(Brevkode.PLEIEPENGER_BARN_SOKNAD_KODE)
@@ -43,6 +43,6 @@ public class PSBSøknadDokumentValidator implements DokumentValidator {
         }
         var søknad = søknadParser.parseSøknad(mottattDokument);
 
-        new PleiepengerSyktBarnValidator().forsikreValidert(søknad.getYtelse());
+        new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad.getYtelse());
     }
 }
