@@ -25,12 +25,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.uttak.FraværÅrsak;
+import no.nav.k9.kodeverk.uttak.SøknadÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.FraværÅrsakKodeConverter;
+import no.nav.k9.sak.domene.uttak.repo.SøknadÅrsakKodeConverter;
 import no.nav.k9.sak.domene.uttak.repo.UttakArbeidTypeKodeConverter;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -73,6 +75,11 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, Søk
     @Column(name = "fravaer_arsak", nullable = false, updatable = false)
     private FraværÅrsak fraværÅrsak;
 
+    @Convert(converter = SøknadÅrsakKodeConverter.class)
+    @ChangeTracked
+    @Column(name = "soknad_arsak", nullable = false, updatable = false)
+    private SøknadÅrsak søknadÅrsak;
+
     @ChangeTracked
     @Embedded
     private Arbeidsgiver arbeidsgiver;
@@ -102,18 +109,19 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, Søk
         this.fraværPerDag = fraværPerDag;
     }
 
-    public OppgittFraværPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag, FraværÅrsak fraværÅrsak) {
+    public OppgittFraværPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag, FraværÅrsak fraværÅrsak, SøknadÅrsak søknadÅrsak) {
         this.journalpostId = journalpostId;
         this.arbeidsgiver = arbeidsgiver;
         this.arbeidsforholdRef = arbeidsforholdRef;
         this.fraværPerDag = fraværPerDag;
         this.aktivitet = Objects.requireNonNull(aktivitetType, "aktivitetType");
+        this.søknadÅrsak = søknadÅrsak;
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
         this.fraværÅrsak = fraværÅrsak;
     }
 
     public OppgittFraværPeriode(LocalDate fom, LocalDate tom, OppgittFraværPeriode fra) {
-        this(fra.getJournalpostId(), fom, tom, fra.getAktivitetType(), fra.getArbeidsgiver(), fra.getArbeidsforholdRef(), fra.getFraværPerDag(), fra.getFraværÅrsak());
+        this(fra.getJournalpostId(), fom, tom, fra.getAktivitetType(), fra.getArbeidsgiver(), fra.getArbeidsforholdRef(), fra.getFraværPerDag(), fra.getFraværÅrsak(), fra.getSøknadÅrsak());
     }
 
     public OppgittFraværPeriode(OppgittFraværPeriode periode) {
@@ -124,6 +132,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, Søk
         this.aktivitet = Objects.requireNonNull(periode.aktivitet, "aktivitetType");
         this.periode = periode.periode;
         this.fraværÅrsak = periode.fraværÅrsak;
+        this.søknadÅrsak = periode.søknadÅrsak;
     }
 
 
@@ -170,6 +179,10 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, Søk
 
     public FraværÅrsak getFraværÅrsak() {
         return fraværÅrsak;
+    }
+
+    public SøknadÅrsak getSøknadÅrsak() {
+        return søknadÅrsak;
     }
 
     @SuppressWarnings("unchecked")
