@@ -86,7 +86,8 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         var grunnlagMaksDato = grunnlagTimeline.getMaxLocalDate();
         var uttakMaksDato = uttakTimeline.getMaxLocalDate();
 
-        if (uttakMaksDato.isAfter(LocalDate.now().plus(MAKS_FREMTID))) {
+        var nyttårsaftenEtÅrFremITid = LocalDate.now().withMonth(12).withDayOfMonth(31).plus(MAKS_FREMTID);
+        if (uttakMaksDato.isAfter(nyttårsaftenEtÅrFremITid)) {
             throw new IllegalArgumentException("Uttaksplan kan ikke være åpen eller for langt frem i tid. Uttak maksdato:'"+ uttakMaksDato + "', utbetaling maksdato: '" + LocalDate.now().plus(MAKS_FREMTID) + "'");
         }
 
