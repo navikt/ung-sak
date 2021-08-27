@@ -409,20 +409,7 @@ public class BehandlingDtoTjeneste {
     }
 
     private void leggTilUttakEndepunkt(Behandling behandling, BehandlingDto dto) {
-
-        UUID behandlingUuid = behandling.getUuid();
-        var behandlingUuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandlingUuid.toString());
-
-        var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingUuid).map(Søknadsperioder::getMaksPeriode);
-
-        Fagsak fagsak = behandling.getFagsak();
-        var fom = søknadsperioder.map(DatoIntervallEntitet::getFomDato).orElse(fagsak.getPeriode().getFomDato());
-        var tom = søknadsperioder.map(DatoIntervallEntitet::getTomDato).orElse(fagsak.getPeriode().getTomDato());
-
-        var andreSaker = fagsakRepository.finnFagsakRelatertTil(fagsak.getYtelseType(), fagsak.getBrukerAktørId(), fagsak.getPleietrengendeAktørId(), fagsak.getRelatertPersonAktørId(), fom, tom)
-            .stream().map(Fagsak::getSaksnummer)
-            .collect(Collectors.toList());
-
+        final var behandlingUuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
         dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_FASTSATT, "uttak-fastsatt", behandlingUuidQueryParams));
         dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_OPPGITT, "uttak-oppgitt", behandlingUuidQueryParams));
     }
