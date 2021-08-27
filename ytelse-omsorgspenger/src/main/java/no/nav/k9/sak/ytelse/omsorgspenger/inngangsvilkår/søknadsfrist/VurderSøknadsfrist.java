@@ -154,7 +154,7 @@ class VurderSøknadsfrist {
         var raw = value.getRaw();
         var fraværPeriode = new OppgittFraværPeriode(raw.getJournalpostId(), segment.getFom(), segment.getTom(),
             raw.getAktivitetType(), raw.getArbeidsgiver(), raw.getArbeidsforholdRef(), raw.getFraværPerDag(),
-            raw.getFraværÅrsak());
+            raw.getFraværÅrsak(), raw.getSøknadÅrsak());
 
         return new VurdertSøktPeriode<>(periode, value.getType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), value.getUtfall(), fraværPeriode);
     }

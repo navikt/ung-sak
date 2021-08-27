@@ -38,7 +38,7 @@ public class OmsorspengerFraværPeriodeSammenslåer {
         for (FraværPeriode fp : søknadsperioder) {
             var perioderMinusHelgdager = fjernHelgdager(fp.getPeriode());
             for (Periode periode : perioderMinusHelgdager) {
-                fraværsPerioderUtenHelgdager.add(new FraværPeriode(periode, fp.getDuration(), fp.getÅrsak(), fp.getAktivitetFravær(), fp.getArbeidsgiverOrgNr()));
+                fraværsPerioderUtenHelgdager.add(new FraværPeriode(periode, fp.getDuration(), fp.getÅrsak(), fp.getSøknadÅrsak(), fp.getAktivitetFravær(), fp.getArbeidsgiverOrgNr()));
             }
         }
         return fraværsPerioderUtenHelgdager;
@@ -70,6 +70,7 @@ public class OmsorspengerFraværPeriodeSammenslåer {
                         søknadPeriode.getPeriode().getTilOgMed()),
                     søknadPeriode.getDuration(),
                     søknadPeriode.getÅrsak(),
+                    søknadPeriode.getSøknadÅrsak(),
                     søknadPeriode.getAktivitetFravær(),
                     søknadPeriode.getArbeidsgiverOrgNr()
                 ));
