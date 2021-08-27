@@ -99,10 +99,10 @@ public class MapArbeid {
         var segmenter = inaktivPerioder.toSegments()
             .stream()
             .map(it -> new LocalDateSegment<>(it.getLocalDateInterval(),
-                new WrappedArbeid(new ArbeidPeriode(DatoIntervallEntitet.fra(it.getLocalDateInterval()), UttakArbeidType.KUN_YTELSE, null, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))))
+                new WrappedArbeid(new ArbeidPeriode(DatoIntervallEntitet.fra(it.getLocalDateInterval()), UttakArbeidType.IKKE_YRKESAKTIV, null, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))))
             .collect(Collectors.toList());
 
-        arbeidsforhold.put(new AktivitetIdentifikator(UttakArbeidType.KUN_YTELSE, null, null), new LocalDateTimeline<>(segmenter));
+        arbeidsforhold.put(new AktivitetIdentifikator(UttakArbeidType.IKKE_YRKESAKTIV, null, null), new LocalDateTimeline<>(segmenter));
     }
 
     private LocalDateTimeline<Boolean> finnPerioderHvorAnsettSomInaktivOgIkkeSøktOmAnnet(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, LocalDateTimeline<Boolean> inaktivTidslinje) {
