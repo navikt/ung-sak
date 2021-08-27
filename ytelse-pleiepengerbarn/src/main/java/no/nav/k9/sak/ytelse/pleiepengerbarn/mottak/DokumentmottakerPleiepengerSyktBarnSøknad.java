@@ -119,7 +119,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     }
 
     private void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {
-        new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad.getYtelse());
+        new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad);
 
         pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
 

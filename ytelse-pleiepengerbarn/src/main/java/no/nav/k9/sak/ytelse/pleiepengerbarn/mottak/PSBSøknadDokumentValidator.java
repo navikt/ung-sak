@@ -43,6 +43,6 @@ public class PSBSøknadDokumentValidator implements DokumentValidator {
         }
         var søknad = søknadParser.parseSøknad(mottattDokument);
 
-        new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad.getYtelse());
+        new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad);
     }
 }
