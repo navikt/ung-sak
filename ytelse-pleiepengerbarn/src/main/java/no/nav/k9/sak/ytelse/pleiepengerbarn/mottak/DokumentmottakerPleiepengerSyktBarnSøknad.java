@@ -32,7 +32,7 @@ import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.felles.type.Journalpost;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
-import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
+import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnSøknadValidator;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
@@ -119,7 +119,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     }
 
     private void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {
-        new PleiepengerSyktBarnValidator().forsikreValidert(søknad.getYtelse());
+        new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad.getYtelse());
 
         pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
 
