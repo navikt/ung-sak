@@ -219,7 +219,10 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                                                                            Collection<BgRef> bgReferanser,
                                                                            Map<UUID, HåndterBeregningDto> håndterberegningMap) {
         List<HåndterBeregningRequest> requestListe = håndterberegningMap.entrySet().stream().map(e -> new HåndterBeregningRequest(e.getValue(), e.getKey())).collect(Collectors.toList());
-        var oppdateringRespons = restTjeneste.oppdaterBeregningListe(new HåndterBeregningListeRequest(requestListe, behandlingReferanse.getBehandlingUuid()));
+        var oppdateringRespons = restTjeneste.oppdaterBeregningListe(new HåndterBeregningListeRequest(requestListe,
+            null, // Sender null fordi inputen ligger lagret i kalkulus, settes ulik null når kalkulus svarer med trengerNyInput = true
+            behandlingReferanse.getSaksnummer().getVerdi(),
+            behandlingReferanse.getBehandlingUuid()));
         if (oppdateringRespons.trengerNyInput()) {
             oppdateringRespons = oppdaterMedOppdatertInput(requestListe, bgReferanser, behandlingReferanse);
         }
