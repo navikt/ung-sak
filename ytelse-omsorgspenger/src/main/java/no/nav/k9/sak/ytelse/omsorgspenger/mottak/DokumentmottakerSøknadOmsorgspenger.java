@@ -15,7 +15,6 @@ import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -70,7 +69,6 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
 
     private SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator;
-    private Boolean lansertFosterbarn;
 
     DokumentmottakerSøknadOmsorgspenger() {
         // for CDI proxy
@@ -84,8 +82,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
                                         SøknadParser søknadParser,
                                         MottatteDokumentRepository mottatteDokumentRepository,
                                         SøknadOppgittFraværMapper mapper,
-                                        @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator,
-                                        @KonfigVerdi(value = "OMP_FOSTERBARN", defaultVerdi = "true") Boolean lansertFosterbarn) {
+                                        @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
@@ -96,7 +93,6 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.mapper = mapper;
         this.dokumentValidator = dokumentValidator;
-        this.lansertFosterbarn = lansertFosterbarn;
     }
 
     @Override
@@ -159,17 +155,9 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         var søker = søknad.getSøker();
         var forsendelseMottatt = søknad.getMottattDato().toLocalDate();
 
-        validerStøttetVariant(søknadInnhold);
-
         lagreSøknad(behandlingId, journalpostId, søknad, søknadInnhold);
         lagreMedlemskapinfo(behandlingId, søknadInnhold, forsendelseMottatt);
         lagreUttakOgUtvidPeriode(behandling, journalpostId, søknadInnhold, søker);
-    }
-
-    private void validerStøttetVariant(OmsorgspengerUtbetaling søknadInnhold) {
-        if (!lansertFosterbarn && søknadInnhold.getFosterbarn() != null && !søknadInnhold.getFosterbarn().isEmpty()) {
-            throw new UnsupportedOperationException("Variant ikke støttet ennå for søknad omsorgspenger: Fosterbarn");
-        }
     }
 
     private void lagreSøknad(Long behandlingId, JournalpostId journalpostId, Søknad søknad, OmsorgspengerUtbetaling søknadInnhold) {

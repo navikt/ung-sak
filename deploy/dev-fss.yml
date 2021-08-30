@@ -196,8 +196,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: OMP_FOSTERBARN
-      value: "true"
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
       value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
