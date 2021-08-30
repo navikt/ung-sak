@@ -159,38 +159,6 @@ public class AksjonspunktRepository {
         return stream.map(a -> new AktørId(a)).collect(Collectors.toList());
     }
 
-    /** Returnerer alle behandlinger med aksjonspunkt som er opprettet innenfor periode. */
-    @SuppressWarnings("unchecked")
-    public Map<Behandling, Aksjonspunkt> hentAksjonspunkterForKode(LocalDate fom, LocalDate tom, String kode) {
-        String sql = "select distinct b.* from behandling b"
-            + " inner join aksjonspunkt a on a.behandling_id=b.id"
-            + " where a.aksjonspunkt_definisjon = (:def) and a.opprettet_tid between :fom and :tom";
-        List<Behandling> list = em
-            .createNativeQuery(sql, Behandling.class)
-            .setParameter("fom", fom)
-            .setParameter("tom", tom)
-            .setParameter("def", kode)
-            .getResultList();
-
-
-        Map<Behandling, Aksjonspunkt> map = new LinkedHashMap<>();
-        for (Behandling b : list) {
-            if (skipBehandling(b)) {
-                continue;
-            }
-            var aksjonspunkt = b.getAksjonspunkter()
-                .stream()
-                .filter(a -> a.getOpprettetTidspunkt().isAfter(fom.atStartOfDay())
-                    && a.getOpprettetTidspunkt().isBefore(tom.atStartOfDay()))
-                .filter(a -> kode == a.getAksjonspunktDefinisjon().getKode())
-                .findFirst();
-            aksjonspunkt.ifPresent(ap -> map.put(b, ap));
-        }
-
-        return map;
-    }
-
-
     private boolean skipBehandling(Behandling beh) {
         return beh.getFagsakYtelseType() == FagsakYtelseType.OBSOLETE;
     }
