@@ -164,7 +164,7 @@ public class AksjonspunktRepository {
     public Map<Behandling, Aksjonspunkt> hentAksjonspunkterForKode(LocalDate fom, LocalDate tom, String kode) {
         String sql = "select distinct b.* from behandling b"
             + " inner join aksjonspunkt a on a.behandling_id=b.id"
-            + " where a.aksjonspunkt_definisjon = (:def) and a.opprettet_tid between :fom and :tom";
+            + " where a.aksjonspunkt_def = :def and a.opprettet_tid between :fom and :tom";
         List<Behandling> list = em
             .createNativeQuery(sql, Behandling.class)
             .setParameter("fom", fom)
