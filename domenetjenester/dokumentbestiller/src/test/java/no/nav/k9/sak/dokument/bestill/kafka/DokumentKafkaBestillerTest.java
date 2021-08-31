@@ -12,8 +12,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.impl.ProsessTaskEventPubliserer;
+import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -21,12 +26,8 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.dokument.bestill.BrevHistorikkinnslag;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
+import no.nav.k9.sak.kontrakt.dokument.FritekstbrevinnholdDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.prosesstask.impl.ProsessTaskEventPubliserer;
-import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -64,7 +65,7 @@ public class DokumentKafkaBestillerTest {
     @Test
     public void skal_opprette_historikkinnslag_og_lagre_prosesstask() {
         var innhentDok = DokumentMalType.INNHENT_DOK;
-        BestillBrevDto bestillBrevDto = lagBestillBrevDto(innhentDok, null);
+        BestillBrevDto bestillBrevDto = lagBestillBrevDto(innhentDok, null, null);
         HistorikkAktør aktør = HistorikkAktør.SAKSBEHANDLER;
         dokumentKafkaBestiller.bestillBrevFraKafka(bestillBrevDto, aktør);
         Mockito.verify(brevHistorikkinnslag, Mockito.times(1)).opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, innhentDok);
@@ -80,7 +81,7 @@ public class DokumentKafkaBestillerTest {
     public void skal_opprette_historikkinnslag_og_lagre_prosesstask_med_fritekst() {
         var innhentDok = DokumentMalType.INNHENT_DOK;
         String fritekst = "FRITEKST";
-        BestillBrevDto bestillBrevDto = lagBestillBrevDto(innhentDok, fritekst);
+        BestillBrevDto bestillBrevDto = lagBestillBrevDto(innhentDok, fritekst, null);
         HistorikkAktør aktør = HistorikkAktør.SAKSBEHANDLER;
         dokumentKafkaBestiller.bestillBrevFraKafka(bestillBrevDto, aktør);
         Mockito.verify(brevHistorikkinnslag, Mockito.times(1)).opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, innhentDok);
@@ -92,8 +93,27 @@ public class DokumentKafkaBestillerTest {
         });
     }
 
-    private BestillBrevDto lagBestillBrevDto(DokumentMalType dokumentMalType, String fritekst) {
-        return new BestillBrevDto(behandling.getId(), no.nav.k9.kodeverk.dokument.DokumentMalType.fraKode(dokumentMalType.getKode()), fritekst, null);
+    @Test
+    public void skal_lagre_prosesstask_med_fritekst_brev() {
+        var generellFritekstbrev = DokumentMalType.GENERELL_FRITEKSTBREV;
+        String brødtekst = "FRITEKST";
+        String tittel = "EN TITTEL";
+        BestillBrevDto bestillBrevDto = lagBestillBrevDto(generellFritekstbrev, null, new FritekstbrevinnholdDto(tittel, brødtekst));
+        HistorikkAktør aktør = HistorikkAktør.SAKSBEHANDLER;
+        dokumentKafkaBestiller.bestillBrevFraKafka(bestillBrevDto, aktør);
+        Mockito.verify(brevHistorikkinnslag, Mockito.times(1)).opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, generellFritekstbrev);
+        List<ProsessTaskData> prosessTaskDataListe = prosessTaskRepository.finnIkkeStartet();
+        assertThat(prosessTaskDataListe).anySatisfy(taskData -> {
+            assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID)).isEqualTo(behandling.getId().toString());
+            assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE)).isEqualTo(generellFritekstbrev.getKode());
+            FritekstbrevinnholdDto fritekstbrevinnhold = JsonObjectMapper.fromJson(taskData.getPayloadAsString(), FritekstbrevinnholdDto.class);
+            assertThat(fritekstbrevinnhold.brødtekst()).isEqualTo(brødtekst);
+            assertThat(fritekstbrevinnhold.overskrift()).isEqualTo(tittel);
+        });
+    }
+
+    private BestillBrevDto lagBestillBrevDto(DokumentMalType dokumentMalType, String fritekst, FritekstbrevinnholdDto fritekstbrev) {
+        return new BestillBrevDto(behandling.getId(), no.nav.k9.kodeverk.dokument.DokumentMalType.fraKode(dokumentMalType.getKode()), fritekst, null, fritekstbrev);
     }
 
 }

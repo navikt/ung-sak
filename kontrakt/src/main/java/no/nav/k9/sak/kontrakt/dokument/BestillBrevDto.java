@@ -47,26 +47,31 @@ public class BestillBrevDto {
     @Valid
     private MottakerDto overstyrtMottaker;
 
+    @JsonProperty(value = "fritekstbrev")
+    @Valid
+    private FritekstbrevinnholdDto fritekstbrev;
+
     public BestillBrevDto() { // NOSONAR
     }
 
     public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType) {
-        this(behandlingId, dokumentMalType, null, null);
+        this(behandlingId, dokumentMalType, null, null, null);
     }
 
     public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, String fritekst) {
-        this(behandlingId, dokumentMalType, fritekst, null);
+        this(behandlingId, dokumentMalType, fritekst, null, null);
     }
 
     public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, MottakerDto mottakerDto) {
-        this(behandlingId, dokumentMalType, null, mottakerDto);
+        this(behandlingId, dokumentMalType, null, mottakerDto, null);
     }
 
-    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, String fritekst, MottakerDto overstyrtMottaker) { // NOSONAR
+    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, String fritekst, MottakerDto overstyrtMottaker, FritekstbrevinnholdDto fritekstbrev) { // NOSONAR
         this.behandlingId = behandlingId;
         this.brevmalkode = dokumentMalType == null ? null : dokumentMalType.getKode();
         this.fritekst = fritekst;
         this.overstyrtMottaker = overstyrtMottaker;
+        this.fritekstbrev = fritekstbrev;
     }
 
     @AbacAttributt("behandlingId")
@@ -84,6 +89,10 @@ public class BestillBrevDto {
 
     public MottakerDto getOverstyrtMottaker() {
         return overstyrtMottaker;
+    }
+
+    public FritekstbrevinnholdDto getFritekstbrev() {
+        return fritekstbrev;
     }
 
     public void setArsakskode(String arsakskode) {
@@ -110,4 +119,7 @@ public class BestillBrevDto {
         this.overstyrtMottaker = overstyrtMottaker;
     }
 
+    public void setFritekstbrev(FritekstbrevinnholdDto fritekstbrev) {
+        this.fritekstbrev = fritekstbrev;
+    }
 }
