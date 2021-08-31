@@ -22,7 +22,7 @@ class OpptjeningsaktiviteterPerYtelseTest {
         oppgitt.leggTilEgneNæringer(List.of(OppgittOpptjeningBuilder.EgenNæringBuilder.ny().medVirksomhet("000000000").medVirksomhetType(VirksomhetType.FISKE)));
         var oppgittOpptjening = oppgitt.build();
 
-        var relevantAktivitet = tjeneste.erRelevantAktivitet(OpptjeningAktivitetType.FRILANS, oppgittOpptjening);
+        var relevantAktivitet = tjeneste.erRelevantAktivitet(OpptjeningAktivitetType.FRILANS);
 
         assertThat(oppgittOpptjening.getFrilans()).isEmpty();
         assertThat(relevantAktivitet).isTrue();
@@ -34,28 +34,15 @@ class OpptjeningsaktiviteterPerYtelseTest {
         oppgitt.leggTilFrilansOpplysninger(oppgitt.getFrilansBuilder().build());
         var oppgittOpptjening = oppgitt.build();
 
-        var relevantAktivitet = tjeneste.erRelevantAktivitet(OpptjeningAktivitetType.FRILANS, oppgittOpptjening);
+        var relevantAktivitet = tjeneste.erRelevantAktivitet(OpptjeningAktivitetType.FRILANS);
 
         assertThat(oppgittOpptjening.getFrilans()).isPresent();
         assertThat(relevantAktivitet).isTrue();
     }
 
     @Test
-    void skal_ikke_få_med_frilans_hvis_ikke_frilans_og_ikke_oppgitt_næring() {
-        OppgittOpptjeningBuilder oppgitt = OppgittOpptjeningBuilder.ny();
-        var oppgittOpptjening = oppgitt.build();
-
-        var relevantAktivitet = tjeneste.erRelevantAktivitet(OpptjeningAktivitetType.FRILANS, oppgittOpptjening);
-
-        assertThat(oppgittOpptjening.getFrilans()).isEmpty();
-        assertThat(oppgittOpptjening.getEgenNæring()).isEmpty();
-        assertThat(relevantAktivitet).isFalse();
-    }
-
-    @Test
-    void skal_ikke_få_med_frilans_hvis_ingen_oppgitt_opptjening() {
-        var relevantAktivitet = tjeneste.erRelevantAktivitet(OpptjeningAktivitetType.FRILANS, null);
-
-        assertThat(relevantAktivitet).isFalse();
+    void skal_få_med_frilans_hvis_ingen_oppgitt_opptjening() {
+        var relevantAktivitet = tjeneste.erRelevantAktivitet(OpptjeningAktivitetType.FRILANS);
+        assertThat(relevantAktivitet).isTrue();
     }
 }
