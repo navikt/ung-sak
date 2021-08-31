@@ -1,9 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.hendelsemottak;
 
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -35,12 +34,19 @@ public class PSBDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
     @Override
     public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(AktørId aktørId, Hendelse hendelse) {
         List<AktørId> dødsfallAktører = hendelse.getHendelseInfo().getAktørIder();
+        var periode = hendelse.getHendelsePeriode();
 
-        // TODO - oppdatere logikk iht PSBs behov
-        return dødsfallAktører.stream()
-            .map(aktør -> fagsakRepository.hentForBruker(aktør))
-            .flatMap(Collection::stream)
-            .filter(it -> it.getYtelseType().equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN))
-            .collect(Collectors.toMap(e -> e, e -> BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER));
+        var fagsaker = new HashMap<Fagsak, BehandlingÅrsakType>();
+
+        for (AktørId aktør : dødsfallAktører) {
+            for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, aktør, null, null, periode.getFom(), periode.getTom())) {
+                fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER);
+            }
+            for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, null, aktør, null, periode.getFom(), periode.getTom())) {
+                fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
+            }
+        }
+
+        return fagsaker;
     }
 }
