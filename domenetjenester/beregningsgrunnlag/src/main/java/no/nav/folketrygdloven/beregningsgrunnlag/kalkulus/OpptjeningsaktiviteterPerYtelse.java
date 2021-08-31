@@ -1,7 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -15,10 +14,7 @@ public class OpptjeningsaktiviteterPerYtelse {
         this.ekskluderteAktiviteter = Objects.requireNonNull(ekskluderteAktiviteter, "ekskluderteAktiviteter");
     }
 
-    public boolean erRelevantAktivitet(OpptjeningAktivitetType opptjeningAktivitetType, OppgittOpptjening oppgittOpptjening) {
-        if (OpptjeningAktivitetType.FRILANS.equals(opptjeningAktivitetType)) {
-            return harOppgittNæringEllerFrilans(oppgittOpptjening);
-        }
+    public boolean erRelevantAktivitet(OpptjeningAktivitetType opptjeningAktivitetType) {
         return erInkludert(opptjeningAktivitetType);
     }
 
@@ -26,8 +22,4 @@ public class OpptjeningsaktiviteterPerYtelse {
         return !ekskluderteAktiviteter.contains(opptjeningAktivitetType);
     }
 
-    private boolean harOppgittNæringEllerFrilans(OppgittOpptjening oppgittOpptjening) {
-        return Optional.ofNullable(oppgittOpptjening).flatMap(OppgittOpptjening::getFrilans).isPresent()
-            || Optional.ofNullable(oppgittOpptjening).map(OppgittOpptjening::getEgenNæring).map(it -> 0 < it.size()).orElse(false);
-    }
 }
