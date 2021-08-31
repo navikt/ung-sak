@@ -192,7 +192,6 @@ public class KalkulusRestKlient {
 
     public void migrerAksjonspunkter(MigrerAksjonspunktListeRequest request) {
         var endpoint = migrerAksjonspunkter;
-
         try {
             utfør(endpoint, kalkulusJsonWriter.writeValueAsString(request));
         } catch (IOException e) {
