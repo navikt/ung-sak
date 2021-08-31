@@ -84,7 +84,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
         var startFørsteÅr = grunnlagTimeline.getMinLocalDate().withDayOfYear(1);
         var grunnlagMaksDato = grunnlagTimeline.getMaxLocalDate();
-        var uttakMaksDato = uttakTimeline.getMaxLocalDate();
+        var uttakMaksDato = sisteDagMedUtbetaling(uttakTimeline);
 
         var nyttårsaftenEtÅrFremITid = LocalDate.now().withMonth(12).withDayOfMonth(31).plus(MAKS_FREMTID);
         if (uttakMaksDato.isAfter(nyttårsaftenEtÅrFremITid)) {
@@ -123,6 +123,18 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         });
     }
 
+    
+    private LocalDate sisteDagMedUtbetaling(LocalDateTimeline<List<UttakResultatPeriode>> uttakTimeline) {
+        var maksUtbetalingsDato = uttakTimeline.stream()
+            .filter(it -> it.getValue()
+                .stream()
+                .noneMatch(at -> at.getUttakAktiviteter().stream().allMatch(ad -> BigDecimal.ZERO.compareTo(ad.getUtbetalingsgrad()) == 0)))
+            .map(LocalDateSegment::getTom)
+            .max(LocalDate::compareTo)
+            .orElse(uttakTimeline.getMaxLocalDate());
+        return maksUtbetalingsDato;
+    }
+    
     private void opprettBeregningsresultatAndelerGenerell(BeregningsgrunnlagPrStatus beregningsgrunnlagPrStatus, BeregningsresultatPeriode resultatPeriode,
                                                           Map<String, Object> resultater, String periodeNavn, UttakResultatPeriode uttakResultatPeriode) {
         if (uttakResultatPeriode.getErOppholdsPeriode()) {
