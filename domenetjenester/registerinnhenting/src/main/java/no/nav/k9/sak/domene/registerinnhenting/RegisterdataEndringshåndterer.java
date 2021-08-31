@@ -127,10 +127,8 @@ public class RegisterdataEndringshåndterer {
     }
 
     private void lagBehandlingÅrsakerOgHistorikk(Behandling behandling, EndringsresultatDiff endringsresultat) {
-        Set<BehandlingÅrsakType> behandlingÅrsakTyper = new HashSet<>();
-        behandlingÅrsakTyper.add(BehandlingÅrsakType.RE_REGISTEROPPLYSNING);
         var ref = BehandlingReferanse.fra(behandling, this.skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()));
-        behandlingÅrsakTyper.addAll(behandlingÅrsakTjeneste.utledBehandlingÅrsakerBasertPåDiff(ref, endringsresultat));
+        Set<BehandlingÅrsakType> behandlingÅrsakTyper = new HashSet<>(behandlingÅrsakTjeneste.utledBehandlingÅrsakerBasertPåDiff(ref, endringsresultat));
         leggTilBehandlingsårsaker(behandling, behandlingÅrsakTyper);
         lagHistorikkinnslag(behandling, behandlingÅrsakTyper);
     }
