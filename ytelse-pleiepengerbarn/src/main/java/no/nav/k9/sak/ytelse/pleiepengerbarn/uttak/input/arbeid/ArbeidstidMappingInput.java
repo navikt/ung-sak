@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 
+import java.util.Map;
 import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -15,7 +16,7 @@ public class ArbeidstidMappingInput {
     private LocalDateTimeline<Boolean> tidslinjeTilVurdering;
     private Vilkår vilkår;
     private OpptjeningResultat opptjeningResultat;
-    private LocalDateTimeline<Boolean> inaktivTidslinje;
+    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivTidslinje;
 
     public ArbeidstidMappingInput() {
     }
@@ -47,7 +48,7 @@ public class ArbeidstidMappingInput {
         return this;
     }
 
-    public ArbeidstidMappingInput medInaktivTidslinje(LocalDateTimeline<Boolean> inaktivTidslinje) {
+    public ArbeidstidMappingInput medInaktivTidslinje(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivTidslinje) {
         this.inaktivTidslinje = inaktivTidslinje;
         return this;
     }
@@ -82,7 +83,7 @@ public class ArbeidstidMappingInput {
         return opptjeningResultat;
     }
 
-    public LocalDateTimeline<Boolean> getInaktivTidslinje() {
-        return inaktivTidslinje != null ? inaktivTidslinje : LocalDateTimeline.EMPTY_TIMELINE;
+    public Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> getInaktivTidslinje() {
+        return inaktivTidslinje != null ? inaktivTidslinje : Map.of();
     }
 }

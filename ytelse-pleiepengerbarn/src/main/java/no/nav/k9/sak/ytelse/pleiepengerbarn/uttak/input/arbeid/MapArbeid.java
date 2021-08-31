@@ -81,9 +81,8 @@ public class MapArbeid {
         }
 
         var arbeidsforhold = slåSammenOpplysningerForSammeArbeidsforhold(arbeidsforholdPerPeriode);
-        var inaktivPerioder = finnPerioderHvorAnsettSomInaktivOgIkkeSøktOmAnnet(arbeidsforhold, input.getInaktivTidslinje());
 
-        leggTilAnsettSomInaktivPerioder(arbeidsforhold, inaktivPerioder);
+        leggTilAnsettSomInaktivPerioder(arbeidsforhold, input.getInaktivTidslinje());
 
         return arbeidsforhold.keySet()
             .stream()
@@ -91,29 +90,25 @@ public class MapArbeid {
             .collect(Collectors.toList());
     }
 
-    private void leggTilAnsettSomInaktivPerioder(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, LocalDateTimeline<Boolean> inaktivPerioder) {
+    private void leggTilAnsettSomInaktivPerioder(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivPerioder) {
         if (inaktivPerioder.isEmpty()) {
             return;
         }
 
-        var segmenter = inaktivPerioder.toSegments()
-            .stream()
-            .map(it -> new LocalDateSegment<>(it.getLocalDateInterval(),
-                new WrappedArbeid(new ArbeidPeriode(DatoIntervallEntitet.fra(it.getLocalDateInterval()), UttakArbeidType.IKKE_YRKESAKTIV, null, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))))
-            .collect(Collectors.toList());
 
-        arbeidsforhold.put(new AktivitetIdentifikator(UttakArbeidType.IKKE_YRKESAKTIV, null, null), new LocalDateTimeline<>(segmenter));
-    }
+        for (Map.Entry<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivArbeidsforhold : inaktivPerioder.entrySet()) {
+            var relevanteAktiviteter = arbeidsforhold.entrySet()
+                .stream()
+                .filter(it -> new AktivitetIdentifikator(UttakArbeidType.ARBEIDSTAKER, inaktivArbeidsforhold.getKey().getArbeidsgiver(), null).equals(it.getKey()))
+                .collect(Collectors.toSet());
 
-    private LocalDateTimeline<Boolean> finnPerioderHvorAnsettSomInaktivOgIkkeSøktOmAnnet(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, LocalDateTimeline<Boolean> inaktivTidslinje) {
-        if (inaktivTidslinje.isEmpty()) {
-            return inaktivTidslinje;
+            var inaktivTimeline = inaktivArbeidsforhold.getValue();
+            for (Map.Entry<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> aktivitet : relevanteAktiviteter) {
+                inaktivTimeline = inaktivTimeline.disjoint(aktivitet.getValue());
+            }
+
+            arbeidsforhold.put(inaktivArbeidsforhold.getKey(), inaktivTimeline.compress());
         }
-        var resultat = new LocalDateTimeline<>(inaktivTidslinje.toSegments());
-        for (LocalDateTimeline<WrappedArbeid> arbeidTidslinje : arbeidsforhold.values()) {
-            resultat = resultat.disjoint(arbeidTidslinje);
-        }
-        return resultat;
     }
 
     private boolean harKunYtelsePåSkjæringstidspunktet(VilkårPeriode vilkårPeriode, OpptjeningResultat opptjeningResultat) {

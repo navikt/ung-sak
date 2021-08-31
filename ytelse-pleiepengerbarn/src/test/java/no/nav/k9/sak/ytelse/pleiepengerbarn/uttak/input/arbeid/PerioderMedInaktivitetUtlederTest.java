@@ -60,6 +60,51 @@ class PerioderMedInaktivitetUtlederTest {
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(1);
-        assertThat(utledetTidslinje).containsOnly(new LocalDateSegment<>(tom.minusDays(2), tom, true));
+    }
+
+    @Test
+    void skal_ikke_utlede_aktivitet_hvis_ikke_aktiv_på_stp() {
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(14);
+        var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var brukerAktørId = AktørId.dummy();
+        iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
+            .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom.plusDays(2), tom.minusDays(3))))
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom.plusDays(5), tom.minusDays(8)))))));
+        var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
+
+        var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag);
+        var utledetTidslinje = utleder.utled(input);
+
+        assertThat(utledetTidslinje).hasSize(0);
+    }
+
+    @Test
+    void skal_utlede_aktivitet_hvis_ikke_periode_med_ikke_aktiv_midt_inne_i_ytelse() {
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(14);
+        var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var brukerAktørId = AktørId.dummy();
+        iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
+            .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom.minusDays(2), fom.plusDays(3))))
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom.plusDays(5), tom))))));
+        var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
+
+        var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag);
+        var utledetTidslinje = utleder.utled(input);
+
+        assertThat(utledetTidslinje).hasSize(1);
     }
 }

@@ -344,13 +344,13 @@ class MapArbeidTest {
                 List.of()));
 
         var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
-        input.medInaktivTidslinje(new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeTilVurdering.toLocalDateInterval(), true))));
+        input.medInaktivTidslinje(Map.of(new AktivitetIdentifikator(UttakArbeidType.IKKE_YRKESAKTIV, virksomhet, null), new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeTilVurdering.toLocalDateInterval(), new WrappedArbeid(new ArbeidPeriode(periodeTilVurdering, UttakArbeidType.IKKE_YRKESAKTIV, virksomhet, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ofHours(0))))) )));
         var result = mapper.map(input);
 
         assertThat(result).hasSize(2);
         assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
                 Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7)))),
-            new Arbeid(new Arbeidsforhold(UttakArbeidType.IKKE_YRKESAKTIV.getKode(), null, null, null),
+            new Arbeid(new Arbeidsforhold(UttakArbeidType.IKKE_YRKESAKTIV.getKode(), arbeidsgiverOrgnr, null, null),
                 Map.of(new LukketPeriode(periodeTilVurdering.getFomDato(), arbeidsperiode.getFomDato().minusDays(1)), new ArbeidsforholdPeriodeInfo(Duration.ofMinutes((long) (7.5 * 60)), Duration.ofHours(0)))));
     }
 
