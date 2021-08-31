@@ -128,7 +128,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         var maksUtbetalingsDato = uttakTimeline.stream()
             .filter(it -> it.getValue()
                 .stream()
-                .noneMatch(UttakResultatPeriode::getErOppholdsPeriode))
+                .noneMatch(at -> at.getUttakAktiviteter().stream().allMatch(ad -> BigDecimal.ZERO.compareTo(ad.getUtbetalingsgrad()) == 0)))
             .map(LocalDateSegment::getTom)
             .max(LocalDate::compareTo)
             .orElse(uttakTimeline.getMaxLocalDate());
