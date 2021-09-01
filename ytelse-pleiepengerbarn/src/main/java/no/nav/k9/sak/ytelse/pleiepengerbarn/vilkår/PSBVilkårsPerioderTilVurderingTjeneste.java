@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
@@ -80,7 +81,8 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                                   BasisPersonopplysningTjeneste basisPersonopplysningsTjeneste,
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
-                                                  PersoninfoAdapter personinfoAdapter) {
+                                                  PersoninfoAdapter personinfoAdapter,
+                                                  MottatteDokumentRepository mottatteDokumentRepository) {
         this.vilkårUtleder = vilkårUtleder;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.behandlingRepository = behandlingRepository;
@@ -88,14 +90,14 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
-        var maksSøktePeriode = new MaksSøktePeriode(this.søknadsperiodeRepository);
         this.vilkårResultatRepository = vilkårResultatRepository;
-
-        søktePerioder = new SøktePerioder(søknadsperiodeRepository);
+        
+        søktePerioder = new SøktePerioder(behandlingRepository, søknadsperiodeRepository, mottatteDokumentRepository);
+        var maksSøktePeriode = new MaksSøktePeriode(søktePerioder);
 
         vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, maksSøktePeriode);
-        vilkårsPeriodisering.put(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, PleietrengendeAlderPeriode.under18(søknadsperiodeRepository, basisPersonopplysningsTjeneste, behandlingRepository, personinfoAdapter));
-        vilkårsPeriodisering.put(VilkårType.MEDISINSKEVILKÅR_18_ÅR, PleietrengendeAlderPeriode.overEllerLik18(søknadsperiodeRepository, basisPersonopplysningsTjeneste, behandlingRepository, personinfoAdapter));
+        vilkårsPeriodisering.put(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, PleietrengendeAlderPeriode.under18(basisPersonopplysningsTjeneste, behandlingRepository, personinfoAdapter, søktePerioder));
+        vilkårsPeriodisering.put(VilkårType.MEDISINSKEVILKÅR_18_ÅR, PleietrengendeAlderPeriode.overEllerLik18(basisPersonopplysningsTjeneste, behandlingRepository, personinfoAdapter, søktePerioder));
     }
 
     @Override
@@ -120,6 +122,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse));
+        //perioderTilVurdering.addAll(perioderSomSkalTilbakestilles(behandlingId));
 
         return vilkår.getPerioder()
             .stream()
@@ -170,7 +173,9 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             .map(SøknadsperioderHolder::getPerioder)
             .orElse(Set.of());
 
-        return søktePerioder.utledVurderingsperioderFraSøknadsperioder(alleSøknadsperioder);
+        final var behandling = behandlingRepository.hentBehandling(behandlingId);
+        
+        return søktePerioder.utledVurderingsperioderFraSøknadsperioder(behandling.getFagsakId(), alleSøknadsperioder);
     }
 
     @Override
@@ -237,6 +242,16 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public Set<VilkårType> definerendeVilkår() {
         return Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+    }
+    
+    @Override
+    public NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(Long behandlingId) {
+        final var behandling = behandlingRepository.hentBehandling(behandlingId);
+        return søktePerioder.hentKravperioder(behandling.getFagsakId(), behandlingId)
+            .stream()
+            .filter(kp -> kp.isHarTrukketKrav() && kp.getBehandlingId() == behandlingId)
+            .map(kp -> kp.getPeriode())
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private List<Periode> utledVurderingsperiode(Vilkårene vilkårene) {

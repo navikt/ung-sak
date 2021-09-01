@@ -1,50 +1,44 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.NavigableSet;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 
 public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjon {
     
     public static final int ALDER_FOR_STRENGERE_PSB_VURDERING = 18;
 
     private static final int MAKSÅR = 200;
-    private SøknadsperiodeRepository søknadsperiodeRepository;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
     private BehandlingRepository behandlingRepository;
     private PersoninfoAdapter personinfoAdapter;
+    
+    private SøktePerioder søktePerioder;
     private int fomAlder;
     private int toAlder;
 
     
-    private PleietrengendeAlderPeriode(SøknadsperiodeRepository søknadsperiodeRepository,
-            BasisPersonopplysningTjeneste personopplysningTjeneste,
+    private PleietrengendeAlderPeriode(BasisPersonopplysningTjeneste personopplysningTjeneste,
             BehandlingRepository behandlingRepository,
             PersoninfoAdapter personinfoAdapter,
+            SøktePerioder søktePerioder,
             int fomAlder,
             int toAlder) {
-        this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.personinfoAdapter = personinfoAdapter;
+        this.søktePerioder = søktePerioder;
         this.fomAlder = fomAlder;
         this.toAlder = toAlder;
     }
@@ -52,16 +46,12 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {        
-        final var søknadsperioder = søknadsperiodeRepository.hentGrunnlag(behandlingId).map(SøknadsperiodeGrunnlag::getOppgitteSøknadsperioder);
-        if (søknadsperioder.isEmpty() || søknadsperioder.get().getPerioder().isEmpty()) {
-            return Collections.emptyNavigableSet();
-        }
+        final var perioder = søktePerioder.utledPeriode(behandlingId);
         
-        final var perioder = søknadsperioder.get().getPerioder();
         final var fødselsdato = finnPleietrengendesFødselsdato(behandlingId);
         final var periodeSomKanUtledes = new LocalDateInterval(fødselsdato.plusYears(fomAlder), fødselsdato.plusYears(toAlder).minusDays(1));
         
-        final var tidslinje = tilTidslinje(perioder);
+        final var tidslinje = SykdomUtils.toLocalDateTimeline(perioder);
         final var resultat = tidslinje.intersection(periodeSomKanUtledes);
         return tilNavigableSet(resultat);
     }
@@ -90,21 +80,6 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
         return personinfo.getFødselsdato();
     }
     
-    @SuppressWarnings("unchecked")
-    private LocalDateTimeline<Boolean> tilTidslinje(Set<Søknadsperioder> perioder) {
-        return perioder.stream()
-                .map(Søknadsperioder::getPerioder)
-                .map(p -> new LocalDateTimeline<Boolean>(
-                        p.stream()
-                        .map(Søknadsperiode::getPeriode)
-                        .map(d -> new LocalDateSegment<Boolean>(d.getFomDato(), d.getTomDato(), Boolean.TRUE))
-                        .collect(Collectors.toList())
-                    )
-                )
-                .reduce((a, b) -> a.union(b, StandardCombinators::coalesceLeftHandSide))
-                .orElse(LocalDateTimeline.EMPTY_TIMELINE);
-    }
-    
     private TreeSet<DatoIntervallEntitet> tilNavigableSet(LocalDateTimeline<Boolean> resultat) {
         return resultat
           .stream()
@@ -112,17 +87,19 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
           .collect(Collectors.toCollection(TreeSet::new));
     }
     
-    public static final PleietrengendeAlderPeriode under18(SøknadsperiodeRepository søknadsperiodeRepository,
+    public static final PleietrengendeAlderPeriode under18(
             BasisPersonopplysningTjeneste personopplysningTjeneste,
             BehandlingRepository behandlingRepository,
-            PersoninfoAdapter personinfoAdapter) {
-        return new PleietrengendeAlderPeriode(søknadsperiodeRepository, personopplysningTjeneste, behandlingRepository, personinfoAdapter, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
+            PersoninfoAdapter personinfoAdapter,
+            SøktePerioder søktePerioder) {
+        return new PleietrengendeAlderPeriode(personopplysningTjeneste, behandlingRepository, personinfoAdapter, søktePerioder, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
     }
     
-    public static final PleietrengendeAlderPeriode overEllerLik18(SøknadsperiodeRepository søknadsperiodeRepository,
+    public static final PleietrengendeAlderPeriode overEllerLik18(
             BasisPersonopplysningTjeneste personopplysningTjeneste,
             BehandlingRepository behandlingRepository,
-            PersoninfoAdapter personinfoAdapter) {
-        return new PleietrengendeAlderPeriode(søknadsperiodeRepository, personopplysningTjeneste, behandlingRepository, personinfoAdapter, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
+            PersoninfoAdapter personinfoAdapter,
+            SøktePerioder søktePerioder) {
+        return new PleietrengendeAlderPeriode(personopplysningTjeneste, behandlingRepository, personinfoAdapter, søktePerioder, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
     }
 }
