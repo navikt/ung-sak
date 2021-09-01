@@ -1,11 +1,14 @@
 package no.nav.k9.sak.dokument.bestill.kafka;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9;
+import no.nav.k9.formidling.kontrakt.dokumentdataparametre.FritekstbrevinnholdDto;
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -40,10 +43,24 @@ public class DokumentKafkaBestiller {
         Behandling behandling = behandlingRepository.hentBehandling(bestillBrevDto.getBehandlingId());
         DokumentMalType dokumentMalType = DokumentMalType.fraKode(bestillBrevDto.getBrevmalkode());
 
-        var payload = dokumentMalType == DokumentMalType.GENERELL_FRITEKSTBREV ? bestillBrevDto.getFritekstbrev() : bestillBrevDto.getFritekst();
+        var payload = mapDokumentdataParametre(bestillBrevDto);
 
         opprettKafkaTask(behandling, dokumentMalType, bestillBrevDto.getOverstyrtMottaker(), tilJson(payload));
         brevHistorikkinnslag.opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, dokumentMalType);
+    }
+
+    private DokumentdataParametreK9 mapDokumentdataParametre(BestillBrevDto bestillBrevDto) {
+        var params = new DokumentdataParametreK9();
+        params.setFritekst(bestillBrevDto.getFritekst());
+        Optional.ofNullable(bestillBrevDto.getFritekstbrev()).ifPresent(f -> {
+            FritekstbrevinnholdDto fritekstbrev = new FritekstbrevinnholdDto();
+            fritekstbrev.setBrødtekst(f.brødtekst());
+            fritekstbrev.setOverskrift(f.overskrift());
+            params.setFritekstbrev(fritekstbrev);
+        });
+
+        return params;
+
     }
 
     private String tilJson(Object payload) {
@@ -69,7 +86,7 @@ public class DokumentKafkaBestiller {
 
         if (overstyrtMottaker != null) {
             prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER,
-                overstyrtMottaker.id+DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_SEPARATOR+overstyrtMottaker.type);
+                overstyrtMottaker.id + DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_SEPARATOR + overstyrtMottaker.type);
         }
         prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID, UUID.randomUUID().toString());
         prosessTaskData.setCallIdFraEksisterende();

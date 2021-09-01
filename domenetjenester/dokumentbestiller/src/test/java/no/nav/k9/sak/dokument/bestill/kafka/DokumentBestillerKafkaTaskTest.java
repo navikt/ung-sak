@@ -14,19 +14,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9;
+import no.nav.k9.formidling.kontrakt.dokumentdataparametre.FritekstbrevinnholdDto;
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling;
 import no.nav.k9.formidling.kontrakt.kodeverk.AvsenderApplikasjon;
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -51,12 +52,12 @@ public class DokumentBestillerKafkaTaskTest {
     }
 
     @Test
-    public void skal_mappe_riktige_felter_til_formidling() {
+    public void skal_mappe_riktige_felter_til_formidling() throws IOException {
         var behandling = lagBehandling();
         String bestillingUuid = UUID.randomUUID().toString();
         ArgumentCaptor<String> kafkaJson = ArgumentCaptor.forClass(String.class);
 
-        ProsessTaskData prosessTaskData = dokumentbestillingProsessTask(behandling, bestillingUuid);
+        ProsessTaskData prosessTaskData = dokumentbestillingProsessTask(behandling, bestillingUuid, JsonObjectMapper.getJson("en fritekst"), DokumentMalType.INNVILGELSE_DOK);
 
         dokumentBestillerKafkaTask.doTask(prosessTaskData);
 
@@ -74,13 +75,39 @@ public class DokumentBestillerKafkaTaskTest {
         DokumentdataParametreK9 dokumentdata = JsonObjectMapper.OM.convertValue(dokumentbestilling.getDokumentdata(), DokumentdataParametreK9.class);
         assertThat(dokumentdata.getFritekst()).isEqualTo("en fritekst");
     }
+    @Test
+    public void skal_mappe_fritekstbrev_til_formidling() throws IOException {
+        var behandling = lagBehandling();
+        String bestillingUuid = UUID.randomUUID().toString();
+        ArgumentCaptor<String> kafkaJson = ArgumentCaptor.forClass(String.class);
+
+        var dokumentdataParams = new DokumentdataParametreK9();
+        FritekstbrevinnholdDto fritekstbrev = new FritekstbrevinnholdDto();
+        fritekstbrev.setOverskrift("tittel");
+        fritekstbrev.setBrødtekst("en fritekst");
+        dokumentdataParams.setFritekstbrev(fritekstbrev);
+
+        String payload = JsonObjectMapper.getJson(dokumentdataParams);
+        ProsessTaskData prosessTaskData = dokumentbestillingProsessTask(behandling, bestillingUuid, payload, DokumentMalType.GENERELL_FRITEKSTBREV);
+
+        dokumentBestillerKafkaTask.doTask(prosessTaskData);
+
+        Mockito.verify(dokumentbestillingProducer).publiserDokumentbestillingJson(kafkaJson.capture());
+        Dokumentbestilling dokumentbestilling = JsonObjectMapper.fromJson(kafkaJson.getValue(), Dokumentbestilling.class);
+
+        assertThat(dokumentbestilling.getDokumentMal()).isEqualTo(DokumentMalType.GENERELL_FRITEKSTBREV.getKode());
+
+        DokumentdataParametreK9 dokumentdata = JsonObjectMapper.OM.convertValue(dokumentbestilling.getDokumentdata(), DokumentdataParametreK9.class);
+        assertThat(dokumentdata.getFritekstbrev().getBrødtekst()).isEqualTo("en fritekst");
+        assertThat(dokumentdata.getFritekstbrev().getOverskrift()).isEqualTo("tittel");
+    }
 
     @Test
-    public void skal_mappe_OMP_til_OMSORGSPENGER() {
+    public void skal_mappe_OMP_til_OMSORGSPENGER() throws IOException {
         var behandling = lagOMP_behandling();
         ArgumentCaptor<String> kafkaJson = ArgumentCaptor.forClass(String.class);
 
-        ProsessTaskData prosessTaskData = dokumentbestillingProsessTask(behandling, UUID.randomUUID().toString());
+        ProsessTaskData prosessTaskData = dokumentbestillingProsessTask(behandling, UUID.randomUUID().toString(), null, DokumentMalType.INNVILGELSE_DOK);
 
         dokumentBestillerKafkaTask.doTask(prosessTaskData);
 
@@ -91,17 +118,13 @@ public class DokumentBestillerKafkaTaskTest {
 
     }
 
-    private ProsessTaskData dokumentbestillingProsessTask(Behandling behandling, String bestillingUuid) {
+    private ProsessTaskData dokumentbestillingProsessTask(Behandling behandling, String bestillingUuid, String payload, DokumentMalType dokumentMalType) {
         ProsessTaskData prosessTaskData = new ProsessTaskData(DokumentbestillerKafkaTaskProperties.TASKTYPE);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID, behandling.getId().toString());
-        prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE, DokumentMalType.INNVILGELSE_DOK.getKode());
+        prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE, dokumentMalType.getKode());
         prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID, bestillingUuid);
-        try {
-            prosessTaskData.setPayload(JsonObjectMapper.getJson("en fritekst"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        prosessTaskData.setPayload(payload);
         return prosessTaskData;
     }
 

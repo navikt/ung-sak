@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9;
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -73,7 +74,7 @@ public class DokumentKafkaBestillerTest {
         assertThat(prosessTaskDataListe).anySatisfy(taskData -> {
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID)).isEqualTo(behandling.getId().toString());
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE)).isEqualTo(innhentDok.getKode());
-            assertThat(JsonObjectMapper.fromJson(taskData.getPayloadAsString(), String.class)).isNull();
+            assertThat(JsonObjectMapper.fromJson(taskData.getPayloadAsString(), DokumentdataParametreK9.class).getFritekst()).isNull();
         });
     }
 
@@ -89,7 +90,7 @@ public class DokumentKafkaBestillerTest {
         assertThat(prosessTaskDataListe).anySatisfy(taskData -> {
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID)).isEqualTo(behandling.getId().toString());
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE)).isEqualTo(innhentDok.getKode());
-            assertThat(JsonObjectMapper.fromJson(taskData.getPayloadAsString(), String.class)).isEqualTo(fritekst);
+            assertThat(JsonObjectMapper.fromJson(taskData.getPayloadAsString(), DokumentdataParametreK9.class).getFritekst()).isEqualTo(fritekst);
         });
     }
 
@@ -106,9 +107,9 @@ public class DokumentKafkaBestillerTest {
         assertThat(prosessTaskDataListe).anySatisfy(taskData -> {
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID)).isEqualTo(behandling.getId().toString());
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE)).isEqualTo(generellFritekstbrev.getKode());
-            FritekstbrevinnholdDto fritekstbrevinnhold = JsonObjectMapper.fromJson(taskData.getPayloadAsString(), FritekstbrevinnholdDto.class);
-            assertThat(fritekstbrevinnhold.brødtekst()).isEqualTo(brødtekst);
-            assertThat(fritekstbrevinnhold.overskrift()).isEqualTo(tittel);
+            no.nav.k9.formidling.kontrakt.dokumentdataparametre.FritekstbrevinnholdDto fritekstbrevinnhold = JsonObjectMapper.fromJson(taskData.getPayloadAsString(), DokumentdataParametreK9.class).getFritekstbrev();
+            assertThat(fritekstbrevinnhold.getBrødtekst()).isEqualTo(brødtekst);
+            assertThat(fritekstbrevinnhold.getOverskrift()).isEqualTo(tittel);
         });
     }
 
