@@ -115,7 +115,7 @@ class SøknadOversetter {
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
 
-        lagreSøknadsperioder(søknadsperioder, journalpostId, behandlingId);
+        lagreSøknadsperioder(søknadsperioder, ytelse.getTrekkKravPerioder(), journalpostId, behandlingId);
 
         // Utgår for K9-ytelsene?
         // .medBegrunnelseForSenInnsending(wrapper.getBegrunnelseForSenSoeknad())
@@ -142,11 +142,16 @@ class SøknadOversetter {
         return søknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
     }
 
-    private void lagreSøknadsperioder(List<Periode> søknadsperioder, JournalpostId journalpostId, Long behandlingId) {
-        final Søknadsperiode[] søknadsperioderArray = søknadsperioder.stream()
-                .map(s -> new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFraOgMed(), s.getTilOgMed())))
-                .toArray(Søknadsperiode[]::new);
-        søknadsperiodeRepository.lagre(behandlingId, new Søknadsperioder(journalpostId, søknadsperioderArray));
+    private void lagreSøknadsperioder(List<Periode> søknadsperioder, List<Periode> trekkKravPerioder, JournalpostId journalpostId, Long behandlingId) {
+        final List<Søknadsperiode> søknadsperiodeliste = new ArrayList<>();
+        søknadsperioder.stream()
+            .map(s -> new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFraOgMed(), s.getTilOgMed())))
+            .forEach(p -> søknadsperiodeliste.add(p));
+        trekkKravPerioder.stream()
+            .map(s -> new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFraOgMed(), s.getTilOgMed()), true))
+            .forEach(p -> søknadsperiodeliste.add(p));
+        
+        søknadsperiodeRepository.lagre(behandlingId, new Søknadsperioder(journalpostId, søknadsperiodeliste.toArray(new Søknadsperiode[0])));
     }
 
     private LocalDateTimeline<Boolean> tilTidslinje(List<Periode> perioder) {
