@@ -49,20 +49,32 @@ public class PerioderMedInaktivitetUtleder {
         var resultat = new HashMap<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>();
         for (LocalDateSegment<Boolean> periodeMedYtelse : ikkeAktivTidslinje.toSegments()) {
             for (Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktivitet : mellomregning.entrySet()) {
-                var arbeidsgiverTidslinje = aktivitet.getValue();
+                var arbeidsforholdUtenStartPåStp = aktivitet.getValue()
+                    .toSegments()
+                    .stream()
+                    .filter(it -> !Objects.equals(it.getFom(), periodeMedYtelse.getFom()))
+                    .collect(Collectors.toList());
+                var arbeidsgiverTidslinje = new LocalDateTimeline<>(arbeidsforholdUtenStartPåStp);
+
                 var yrkesaktivIPeriodeMedYtelse = arbeidsgiverTidslinje.intersection(periodeMedYtelse.getLocalDateInterval());
+
+                if (yrkesaktivIPeriodeMedYtelse.isEmpty()) {
+                    break;
+                }
 
                 var ikkeAktivPeriode = new LocalDateTimeline<>(List.of(periodeMedYtelse)).disjoint(yrkesaktivIPeriodeMedYtelse);
 
-                if (!ikkeAktivPeriode.isEmpty()) {
-                    if (ikkeAktivPeriode.toSegments().stream().noneMatch(it -> Objects.equals(it.getFom(), periodeMedYtelse.getFom()))) {
-                        var segmenter = ikkeAktivPeriode.toSegments()
-                            .stream()
-                            .map(it -> new LocalDateSegment<>(it.getLocalDateInterval(),
-                                new WrappedArbeid(new ArbeidPeriode(DatoIntervallEntitet.fra(it.getLocalDateInterval()), UttakArbeidType.IKKE_YRKESAKTIV, aktivitet.getKey().getArbeidsgiver(), null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))))
-                            .collect(Collectors.toList());
-                        resultat.put(aktivitet.getKey(), new LocalDateTimeline<>(segmenter));
-                    }
+                if (ikkeAktivPeriode.isEmpty()) {
+                    break;
+                }
+
+                if (ikkeAktivPeriode.toSegments().stream().noneMatch(it -> Objects.equals(it.getFom(), periodeMedYtelse.getFom()))) {
+                    var segmenter = ikkeAktivPeriode.toSegments()
+                        .stream()
+                        .map(it -> new LocalDateSegment<>(it.getLocalDateInterval(),
+                            new WrappedArbeid(new ArbeidPeriode(DatoIntervallEntitet.fra(it.getLocalDateInterval()), UttakArbeidType.IKKE_YRKESAKTIV, aktivitet.getKey().getArbeidsgiver(), null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))))
+                        .collect(Collectors.toList());
+                    resultat.put(aktivitet.getKey(), new LocalDateTimeline<>(segmenter));
                 }
             }
         }
