@@ -6,6 +6,7 @@ import java.util.NavigableSet;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -39,6 +40,7 @@ public class OpptjeningFaktaSteg implements BehandlingSteg {
     private AksjonspunktutlederForVurderBekreftetOpptjening aksjonspunktutlederBekreftet;
     private OpptjeningsVilkårTjeneste opptjeningsVilkårTjeneste;
     private InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste;
+    private Boolean overstyringFjernet;
 
     OpptjeningFaktaSteg() {
         // CDI
@@ -49,16 +51,22 @@ public class OpptjeningFaktaSteg implements BehandlingSteg {
                                AksjonspunktutlederForVurderBekreftetOpptjening aksjonspunktutlederBekreftet,
                                AksjonspunktutlederForVurderOppgittOpptjening aksjonspunktutlederOppgitt,
                                @FagsakYtelseTypeRef OpptjeningsVilkårTjeneste opptjeningsVilkårTjeneste,
-                               InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste) {
+                               InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste,
+                               @KonfigVerdi(value = "OVERSTYRING_OPPTJ_AKT_FJERNET", defaultVerdi = "true") Boolean overstyringFjernet) {
         this.repositoryProvider = repositoryProvider;
         this.aksjonspunktutlederBekreftet = aksjonspunktutlederBekreftet;
         this.aksjonspunktutlederOppgitt = aksjonspunktutlederOppgitt;
         this.opptjeningsVilkårTjeneste = opptjeningsVilkårTjeneste;
         this.inngangsvilkårFellesTjeneste = inngangsvilkårFellesTjeneste;
+        this.overstyringFjernet = overstyringFjernet;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+        if (overstyringFjernet) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
+
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = repositoryProvider.getBehandlingRepository().hentBehandling(behandlingId);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
