@@ -12,6 +12,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
@@ -38,6 +39,7 @@ public class InputParametere {
     private LocalDateTimeline<List<Kravprioritet>> kravprioritet;
     private OpptjeningResultat opptjeningResultat;
     private RettPleiepengerVedDødGrunnlag rettPleiepengerVedDødGrunnlag;
+    private InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag;
 
     public InputParametere() {
     }
@@ -157,5 +159,14 @@ public class InputParametere {
 
     public Optional<OpptjeningResultat> getOpptjeningResultat() {
         return Optional.ofNullable(opptjeningResultat);
+    }
+
+    public InputParametere medIAYGrunnlag(InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag) {
+        this.inntektArbeidYtelseGrunnlag = inntektArbeidYtelseGrunnlag;
+        return this;
+    }
+
+    public InntektArbeidYtelseGrunnlag getInntektArbeidYtelseGrunnlag() {
+        return inntektArbeidYtelseGrunnlag;
     }
 }
