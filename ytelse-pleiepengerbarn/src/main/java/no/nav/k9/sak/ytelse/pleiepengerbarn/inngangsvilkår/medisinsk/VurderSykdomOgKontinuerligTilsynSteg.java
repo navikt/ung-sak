@@ -131,11 +131,6 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         vurder(kontekst, sykdomGrunnlagBehandling, builder, VilkårType.MEDISINSKEVILKÅR_18_ÅR, perioder18år, perioder18årUtenOmsorgenFor);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
 
-        if (harAvbruttAksjonspunktIDenneBehandlingen(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)) {
-            var aksjonspunktFor = behandling.getAksjonspunktFor(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
-            aksjonspunktKontrollRepository.setReåpnetMedTotrinn(aksjonspunktFor, true);
-        }
-
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
