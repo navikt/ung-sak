@@ -57,7 +57,12 @@ public class DokumentBestillerKafkaTaskTest {
         String bestillingUuid = UUID.randomUUID().toString();
         ArgumentCaptor<String> kafkaJson = ArgumentCaptor.forClass(String.class);
 
-        ProsessTaskData prosessTaskData = dokumentbestillingProsessTask(behandling, bestillingUuid, JsonObjectMapper.getJson("en fritekst"), DokumentMalType.INNVILGELSE_DOK);
+        var dokumentdataParams = new DokumentdataParametreK9();
+        dokumentdataParams.setFritekst("en fritekst");
+
+        String payload = JsonObjectMapper.getJson(dokumentdataParams);
+
+        ProsessTaskData prosessTaskData = dokumentbestillingProsessTask(behandling, bestillingUuid, payload, DokumentMalType.INNVILGELSE_DOK);
 
         dokumentBestillerKafkaTask.doTask(prosessTaskData);
 
@@ -75,6 +80,24 @@ public class DokumentBestillerKafkaTaskTest {
         DokumentdataParametreK9 dokumentdata = JsonObjectMapper.OM.convertValue(dokumentbestilling.getDokumentdata(), DokumentdataParametreK9.class);
         assertThat(dokumentdata.getFritekst()).isEqualTo("en fritekst");
     }
+
+    @Test
+    public void skal_mappe_string_payload_som_fritekst_for_bakoverkompatiblitet() throws IOException {
+        var behandling = lagBehandling();
+        String bestillingUuid = UUID.randomUUID().toString();
+        ArgumentCaptor<String> kafkaJson = ArgumentCaptor.forClass(String.class);
+
+        String payload = JsonObjectMapper.getJson("en fritekst");
+        ProsessTaskData prosessTaskData = dokumentbestillingProsessTask(behandling, bestillingUuid, payload, DokumentMalType.INNVILGELSE_DOK);
+
+        dokumentBestillerKafkaTask.doTask(prosessTaskData);
+
+        Mockito.verify(dokumentbestillingProducer).publiserDokumentbestillingJson(kafkaJson.capture());
+        Dokumentbestilling dokumentbestilling = JsonObjectMapper.fromJson(kafkaJson.getValue(), Dokumentbestilling.class);
+        DokumentdataParametreK9 dokumentdata = JsonObjectMapper.OM.convertValue(dokumentbestilling.getDokumentdata(), DokumentdataParametreK9.class);
+        assertThat(dokumentdata.getFritekst()).isEqualTo("en fritekst");
+    }
+
     @Test
     public void skal_mappe_fritekstbrev_til_formidling() throws IOException {
         var behandling = lagBehandling();
