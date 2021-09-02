@@ -83,7 +83,7 @@ public class BehandlingskontrollTransisjonTilbakeføringEventObserver {
     }
 
     private List<Aksjonspunkt> håndterAksjonspunkter(Behandling behandling, Set<String> mellomliggendeAksjonspunkt,
-                                                     BehandlingStegTilbakeføringEvent event, 
+                                                     BehandlingStegTilbakeføringEvent event,
                                                      BehandlingStegType førsteSteg, BehandlingModell modell,
                                                      boolean tilInngangFørsteSteg) {
         List<Aksjonspunkt> endredeAksjonspunkter = behandling.getAksjonspunkter().stream()
@@ -147,7 +147,7 @@ public class BehandlingskontrollTransisjonTilbakeføringEventObserver {
         boolean erManueltOpprettet = a.erManueltOpprettet();
         boolean erOpprettetIFørsteSteg = erOpprettetIFørsteSteg(a, førsteSteg);
         boolean hensyntaÅpneOpprettetIFørste = erOpprettetIFørsteSteg && tilInngangFørsteSteg && a.erÅpentAksjonspunkt();
-        boolean avbryt = !erManueltOpprettet && erFunnetIFørsteStegEllerSenere && (hensyntaÅpneOpprettetIFørste || !erOpprettetIFørsteSteg);
+        boolean avbryt = !erManueltOpprettet && erFunnetIFørsteStegEllerSenere && (hensyntaÅpneOpprettetIFørste || !erOpprettetIFørsteSteg) && a.skalAvbrytesVedTilbakehopp();
         return avbryt;
     }
 

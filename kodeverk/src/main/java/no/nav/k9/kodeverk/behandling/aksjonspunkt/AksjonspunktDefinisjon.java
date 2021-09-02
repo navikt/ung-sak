@@ -6,6 +6,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PSB;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.ENTRINN;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.FORBLI;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.SKAL_IKKE_AVBRYTES;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TILBAKE;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TOTRINN;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.UTEN_FRIST;
@@ -298,13 +299,13 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     // Gruppe: 92xx - Pleiepenger
     VURDER_NATTEVÅK(AksjonspunktKodeDefinisjon.VURDER_NATTEVÅK, AksjonspunktType.MANUELL,
         "Vurder nattevåk og beredskap", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
-        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_NATTEVÅK, TOTRINN, TILBAKE, null, EnumSet.of(PSB)),
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_NATTEVÅK, TOTRINN, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
     VURDER_BEREDSKAP(AksjonspunktKodeDefinisjon.VURDER_BEREDSKAP, AksjonspunktType.MANUELL,
         "Vurder nattevåk og beredskap", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
-        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_BEREDSKAP, TOTRINN, TILBAKE, null, EnumSet.of(PSB)),
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_BEREDSKAP, TOTRINN, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
     VURDER_RETT_ETTER_PLEIETRENGENDES_DØD(AksjonspunktKodeDefinisjon.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD, AksjonspunktType.MANUELL,
         "Vurder rett etter pleietrengendes død", BehandlingStatus.UTREDES,  BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
-        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD, TOTRINN, TILBAKE, null, EnumSet.of(PSB)),
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD, TOTRINN, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
 
 
     // Gruppe : 999x
@@ -393,6 +394,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     @JsonIgnore
     private Set<BehandlingStatus> behandlingStatus;
 
+    private boolean skalAvbrytesVedTilbakeføring = true;
+
     AksjonspunktDefinisjon() {
         // for hibernate
     }
@@ -479,6 +482,31 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.skjermlenkeType = skjermlenkeType;
         this.tilbakehoppVedGjenopptakelse = tilbakehoppVedGjenopptakelse;
         this.fristPeriode = fristPeriode;
+    }
+
+    private AksjonspunktDefinisjon(String kode,
+                                   AksjonspunktType aksjonspunktType,
+                                   String navn,
+                                   BehandlingStatus behandlingStatus,
+                                   BehandlingStegType behandlingStegType,
+                                   VurderingspunktType vurderingspunktType,
+                                   VilkårType vilkårType,
+                                   SkjermlenkeType skjermlenkeType,
+                                   boolean defaultTotrinnBehandling,
+                                   boolean tilbakehoppVedGjenopptakelse,
+                                   boolean skalAvbrytesVedTilbakeføring, Set<FagsakYtelseType> ytelseTyper) {
+        this.kode = Objects.requireNonNull(kode);
+        this.navn = navn;
+        this.aksjonspunktType = aksjonspunktType;
+        this.behandlingStatus = Set.of(behandlingStatus);
+        this.behandlingStegType = behandlingStegType;
+        this.vurderingspunktType = vurderingspunktType;
+        this.ytelseTyper = ytelseTyper;
+        this.vilkårType = vilkårType;
+        this.defaultTotrinnBehandling = defaultTotrinnBehandling;
+        this.skjermlenkeType = skjermlenkeType;
+        this.tilbakehoppVedGjenopptakelse = tilbakehoppVedGjenopptakelse;
+        this.skalAvbrytesVedTilbakeføring = skalAvbrytesVedTilbakeføring;
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
@@ -597,6 +625,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     @Override
     public String getKode() {
         return kode;
+    }
+
+    public boolean getSkalAvbrytesVedTilbakeføring() {
+        return skalAvbrytesVedTilbakeføring;
     }
 
     public BehandlingStegType getBehandlingSteg() {
