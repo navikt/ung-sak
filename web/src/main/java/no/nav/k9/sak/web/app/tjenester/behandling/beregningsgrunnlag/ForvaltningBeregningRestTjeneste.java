@@ -26,6 +26,9 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -48,12 +51,14 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 
 @ApplicationScoped
@@ -62,6 +67,7 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 @Produces(MediaType.APPLICATION_JSON)
 public class ForvaltningBeregningRestTjeneste {
 
+    private static final Logger logger = LoggerFactory.getLogger(ForvaltningBeregningRestTjeneste.class);
     private static final MediaType JSON = MediaType.APPLICATION_JSON_TYPE;
 
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
@@ -74,6 +80,7 @@ public class ForvaltningBeregningRestTjeneste {
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     private KalkulusRestKlient kalkulusRestKlient;
     private KalkulusRestKlient kalkulusSystemRestKlient;
+
 
     public ForvaltningBeregningRestTjeneste() {
     }
@@ -185,6 +192,12 @@ public class ForvaltningBeregningRestTjeneste {
     public Response migrerAksjonspunkt(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @Parameter(description = "migrerAksjonspunktDto") no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.MigrerAksjonspunktRequest migrerAksjonspunktDto) { // NOSONAR
         Periode periode = migrerAksjonspunktDto.getPeriode();
         Map<Behandling, Aksjonspunkt> behandlingerMedAksjonspunkt = aksjonspunktRepository.hentAksjonspunkterForKode(periode.getFom(), periode.getTom(), migrerAksjonspunktDto.getAksjonspunktKode());
+        List<String> saksummer = behandlingerMedAksjonspunkt.keySet().stream()
+            .map(Behandling::getFagsak).map(Fagsak::getSaksnummer)
+            .map(Saksnummer::getVerdi)
+            .collect(Collectors.toList());
+        logger.info("Fant følgende saksnummer med aksjonspunkt " + migrerAksjonspunktDto.getAksjonspunktKode()
+            + ": " + saksummer);
         List<MigrerAksjonspunktRequest> aksjonspunktData = behandlingerMedAksjonspunkt.entrySet().stream().map(e -> lagAksjonspunktData(e.getKey(), e.getValue())).collect(Collectors.toList());
         MigrerAksjonspunktListeRequest migrerAksjonspunktListeRequest = new MigrerAksjonspunktListeRequest(aksjonspunktData, migrerAksjonspunktDto.getAksjonspunktKode());
         kalkulusSystemRestKlient.migrerAksjonspunkter(migrerAksjonspunktListeRequest);
