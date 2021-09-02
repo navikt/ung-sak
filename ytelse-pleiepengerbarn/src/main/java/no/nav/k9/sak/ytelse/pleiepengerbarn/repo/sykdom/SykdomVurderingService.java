@@ -63,7 +63,7 @@ public class SykdomVurderingService {
         this.personopplysningTjeneste = personopplysningTjeneste;
     }
 
-    
+
     public SykdomAksjonspunkt vurderAksjonspunkt(Behandling behandling) {
         // XXX: Denne er kastet sammen og bør trolig skrives enklere
         final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
@@ -71,6 +71,8 @@ public class SykdomVurderingService {
         final boolean harUklassifiserteDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
         final boolean manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring(pleietrengende);
         final boolean manglerDiagnosekode = sykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnosekoder().isEmpty();
+
+        final boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger = !sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(pleietrengende).isEmpty();
 
         final var ktp = hentVurderingerForKontinuerligTilsynOgPleie(behandling);
         final boolean manglerVurderingAvKontinuerligTilsynOgPleie = !ktp.getResterendeVurderingsperioder().isEmpty();
@@ -80,7 +82,14 @@ public class SykdomVurderingService {
 
         final boolean harDataSomIkkeHarBlittTattMedIBehandling = sykdomGrunnlagService.harDataSomIkkeHarBlittTattMedIBehandling(behandling);
 
-        return new SykdomAksjonspunkt(harUklassifiserteDokumenter, manglerDiagnosekode, manglerGodkjentLegeerklæring, manglerVurderingAvKontinuerligTilsynOgPleie, manglerVurderingAvToOmsorgspersoner, harDataSomIkkeHarBlittTattMedIBehandling);
+        return new SykdomAksjonspunkt(
+            harUklassifiserteDokumenter,
+            manglerDiagnosekode,
+            manglerGodkjentLegeerklæring,
+            manglerVurderingAvKontinuerligTilsynOgPleie,
+            manglerVurderingAvToOmsorgspersoner,
+            harDataSomIkkeHarBlittTattMedIBehandling,
+            nyttDokumentHarIkkekontrollertEksisterendeVurderinger);
     }
 
     private boolean manglerGodkjentLegeerklæring(final AktørId pleietrengende) {
@@ -160,7 +169,7 @@ public class SykdomVurderingService {
                 SykdomUtils.toPeriodeList(innleggelseUnder18årTidslinje)
             );
     }
-    
+
     public LocalDate finnPleietrengendesFødselsdato(Behandling behandling) {
         final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(
             behandling.getId(),
@@ -178,9 +187,9 @@ public class SykdomVurderingService {
         final NavigableSet<DatoIntervallEntitet> perioderTilVurdering = union(perioderTilVurderingUnder18, perioderTilVurdering18);
         final LocalDateTimeline<Boolean> perioderTilVurderingTidslinje = new LocalDateTimeline<Boolean>(perioderTilVurdering.stream()
                 .map(p -> new LocalDateSegment<Boolean>(p.getFomDato(), p.getTomDato(), Boolean.TRUE))
-                .collect(Collectors.toList()));  
+                .collect(Collectors.toList()));
         final LocalDateTimeline<VilkårPeriode> omsorgenForTidslinje = sykdomGrunnlagService.hentOmsorgenForTidslinje(behandling.getId()).filterValue(vp -> vp.getUtfall() == Utfall.IKKE_OPPFYLT);
-        
+
         return kunPerioderSomIkkeFinnesI(perioderTilVurderingTidslinje, omsorgenForTidslinje);
     }
 

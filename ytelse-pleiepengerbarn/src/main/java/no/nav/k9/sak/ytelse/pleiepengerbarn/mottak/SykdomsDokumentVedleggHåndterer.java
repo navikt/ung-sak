@@ -98,6 +98,7 @@ public class SykdomsDokumentVedleggHåndterer {
                 informasjon,
                 behandling.getUuid(),
                 behandling.getFagsak().getSaksnummer(),
+                null,
                 sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
                 "VL",
                 mottattidspunkt);

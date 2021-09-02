@@ -45,7 +45,7 @@ public class SykdomDokumentRepository {
 
         return dokuments;
     }
-    
+
     public boolean isDokumentBruktIVurdering(Long dokumentId) {
         final TypedQuery<SykdomVurderingVersjon> q = entityManager.createQuery(
             "SELECT vv From SykdomVurderingVersjon as vv "
@@ -74,7 +74,7 @@ public class SykdomDokumentRepository {
             .filter(d -> d.getType().isRelevantForSykdom())
             .collect(Collectors.toList());
     }
-    
+
     public List<SykdomDokument> hentDuplikaterAv(Long dokumentId) {
         final TypedQuery<SykdomDokument> q = entityManager.createQuery(
             "SELECT d From SykdomDokument as d "
@@ -89,6 +89,13 @@ public class SykdomDokumentRepository {
 
         q.setParameter("dokumentId", dokumentId);
         return q.getResultList();
+    }
+
+    public List<SykdomDokument> hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(AktørId pleietrengende) {
+        return hentDokumenterSomErRelevanteForSykdom(pleietrengende)
+            .stream()
+            .filter(d -> !d.isHarOppdatertEksisterendeVurderinger())
+            .collect(Collectors.toList());
     }
 
     public List<SykdomDokument> hentGodkjenteLegeerklæringer(AktørId pleietrengende) {
@@ -128,6 +135,11 @@ public class SykdomDokumentRepository {
         }
 
         entityManager.persist(dokumentInformasjon);
+        entityManager.flush();
+    }
+
+    public void kvitterDokumenterMedOppdatertEksisterendeVurderinger(SykdomDokumentHarOppdatertEksisterendeVurderinger utkvittering) {
+        entityManager.persist(utkvittering);
         entityManager.flush();
     }
 
