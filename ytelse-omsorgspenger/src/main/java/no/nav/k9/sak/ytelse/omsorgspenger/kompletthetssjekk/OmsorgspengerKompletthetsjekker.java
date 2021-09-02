@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
 import no.nav.k9.formidling.kontrakt.kodeverk.Mottaker;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -59,6 +60,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     private KompletthetsjekkerFelles fellesUtil;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    boolean etterlysInntektsmeldingerLansert;
 
     OmsorgspengerKompletthetsjekker() {
         // CDI
@@ -70,13 +72,15 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
                                            BehandlingRepository behandlingRepository,
                                            KompletthetsjekkerFelles fellesUtil,
                                            @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                           @FagsakYtelseTypeRef("OMP") SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                                           @FagsakYtelseTypeRef("OMP") SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                                           @KonfigVerdi(value = "OMP_ETTERLYS_IM", defaultVerdi = "true", required = false) boolean etterlysInntektsmeldingerLansert) {
         this.kompletthetssjekkerInntektsmelding = kompletthetssjekkerInntektsmelding;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.fellesUtil = fellesUtil;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
+        this.etterlysInntektsmeldingerLansert = etterlysInntektsmeldingerLansert;
     }
 
     @Override
@@ -96,7 +100,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         if (!manglendeInntektsmeldinger.isEmpty()) {
             int antallArbeidsgivere = manglendeInntektsmeldinger.stream().map(ManglendeVedlegg::getArbeidsgiver).collect(Collectors.toSet()).size();
             LOGGER.info("Behandling {} er ikke komplett - mangler {} IM fra {} arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size(), antallArbeidsgivere); // NOSONAR //$NON-NLS-1$
-            Optional<LocalDateTime> ventefristManglendeIM = finnVentefristTilManglendeInntektsmelding(ref, ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING_FØR_ETTERLYSNING);
+            Optional<LocalDateTime> ventefristManglendeIM = finnVentefristTilManglendeInntektsmelding(ref, etterlysInntektsmeldingerLansert ? ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING_FØR_ETTERLYSNING : ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING_TOTALT);
             return ventefristManglendeIM
                 .map(frist -> KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK))
                 .orElse(KompletthetResultat.fristUtløpt()); // Setter til oppfylt om fristen er passert
@@ -127,6 +131,10 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public KompletthetResultat vurderEtterlysningInntektsmelding(BehandlingReferanse ref) {
+        if (!etterlysInntektsmeldingerLansert){
+            return KompletthetResultat.oppfylt();
+        }
+
         Long behandlingId = ref.getBehandlingId();
 
         // Utled vilkårsperioder
