@@ -5,6 +5,7 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagKoblin
 import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
 import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktRequest;
+import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -70,6 +73,7 @@ public class ForvaltningBeregningRestTjeneste {
     private AksjonspunktRepository aksjonspunktRepository;
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     private KalkulusRestKlient kalkulusRestKlient;
+    private KalkulusRestKlient kalkulusSystemRestKlient;
 
     public ForvaltningBeregningRestTjeneste() {
     }
@@ -78,7 +82,12 @@ public class ForvaltningBeregningRestTjeneste {
     public ForvaltningBeregningRestTjeneste(BeregningsgrunnlagYtelseKalkulator forvaltningBeregning,
                                             BehandlingRepository behandlingRepository,
                                             InntektArbeidYtelseTjeneste iayTjeneste,
-                                            BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste, AksjonspunktRepository aksjonspunktRepository, BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste, KalkulusRestKlient kalkulusRestKlient) {
+                                            BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
+                                            AksjonspunktRepository aksjonspunktRepository,
+                                            BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
+                                            KalkulusRestKlient kalkulusRestKlient,
+                                            SystemUserOidcRestClient systemUserOidcRestClient,
+                                            @KonfigVerdi(value = "ftkalkulus.url") URI endpoint) {
         this.forvaltningBeregning = forvaltningBeregning;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
@@ -86,6 +95,7 @@ public class ForvaltningBeregningRestTjeneste {
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
         this.kalkulusRestKlient = kalkulusRestKlient;
+        this.kalkulusSystemRestKlient = new KalkulusRestKlient(systemUserOidcRestClient, endpoint);
     }
 
     @GET
@@ -177,7 +187,7 @@ public class ForvaltningBeregningRestTjeneste {
         Map<Behandling, Aksjonspunkt> behandlingerMedAksjonspunkt = aksjonspunktRepository.hentAksjonspunkterForKode(periode.getFom(), periode.getTom(), migrerAksjonspunktDto.getAksjonspunktKode());
         List<MigrerAksjonspunktRequest> aksjonspunktData = behandlingerMedAksjonspunkt.entrySet().stream().map(e -> lagAksjonspunktData(e.getKey(), e.getValue())).collect(Collectors.toList());
         MigrerAksjonspunktListeRequest migrerAksjonspunktListeRequest = new MigrerAksjonspunktListeRequest(aksjonspunktData, migrerAksjonspunktDto.getAksjonspunktKode());
-        kalkulusRestKlient.migrerAksjonspunkter(migrerAksjonspunktListeRequest);
+        kalkulusSystemRestKlient.migrerAksjonspunkter(migrerAksjonspunktListeRequest);
         return Response.ok().build();
     }
 
