@@ -112,7 +112,7 @@ public class SjekkMotAndreYtelserTjeneste {
             String formattert = overlappendeYtelser.keySet().stream()
                 .map(key -> key + "=" + overlappendeYtelser.get(key))
                 .collect(Collectors.joining(", ", "{", "}"));
-            logger.info("Behandling '{}' har overlappende ytelser '{}'", formattert);
+            logger.info("Behandlingen har overlappende ytelser '{}'", formattert);
         }
         return !overlappendeYtelser.isEmpty();
     }
