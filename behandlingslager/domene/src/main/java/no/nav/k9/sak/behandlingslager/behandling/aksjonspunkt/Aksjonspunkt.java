@@ -182,6 +182,10 @@ public class Aksjonspunkt extends BaseEntitet {
         return status.erÅpentAksjonspunkt();
     }
 
+    public boolean skalAvbrytesVedTilbakehopp() {
+        return aksjonspunktDefinisjon.getSkalAvbrytesVedTilbakeføring();
+    }
+
     static Optional<Aksjonspunkt> finnEksisterende(Behandling behandling, AksjonspunktDefinisjon ap) {
         return behandling.getAksjonspunktMedDefinisjonOptional(ap);
     }
