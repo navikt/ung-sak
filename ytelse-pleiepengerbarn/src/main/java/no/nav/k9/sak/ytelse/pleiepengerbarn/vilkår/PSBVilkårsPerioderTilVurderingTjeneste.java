@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -249,7 +250,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
         return søktePerioder.hentKravperioder(behandling.getFagsakId(), behandlingId)
             .stream()
-            .filter(kp -> kp.isHarTrukketKrav() && kp.getBehandlingId() == behandlingId)
+            .filter(kp -> kp.isHarTrukketKrav() && kp.getBehandlingId().equals(behandlingId))
             .map(kp -> kp.getPeriode())
             .collect(Collectors.toCollection(TreeSet::new));
     }
