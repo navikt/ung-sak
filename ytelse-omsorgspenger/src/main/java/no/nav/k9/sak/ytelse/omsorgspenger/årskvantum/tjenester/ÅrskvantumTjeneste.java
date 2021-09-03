@@ -18,10 +18,26 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
-import no.nav.k9.aarskvantum.kontrakter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
+import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
+import no.nav.k9.aarskvantum.kontrakter.Barn;
+import no.nav.k9.aarskvantum.kontrakter.BarnType;
+import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
+import no.nav.k9.aarskvantum.kontrakter.FraværÅrsak;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
+import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
+import no.nav.k9.aarskvantum.kontrakter.SøknadÅrsak;
+import no.nav.k9.aarskvantum.kontrakter.Utfall;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -31,6 +47,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -71,6 +88,7 @@ public class ÅrskvantumTjeneste {
     private VilkårResultatRepository vilkårResultatRepository;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste;
+    private MottatteDokumentRepository mottatteDokumentRepository;
 
     ÅrskvantumTjeneste() {
         // CDI
@@ -85,7 +103,8 @@ public class ÅrskvantumTjeneste {
                               TpsTjeneste tpsTjeneste,
                               @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                               TrekkUtFraværTjeneste trekkUtFraværTjeneste,
-                              OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste) {
+                              OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste,
+                              MottatteDokumentRepository mottatteDokumentRepository) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -95,6 +114,7 @@ public class ÅrskvantumTjeneste {
         this.trekkUtFraværTjeneste = trekkUtFraværTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.opptjeningTjeneste = opptjeningTjeneste;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
 
     public void deaktiverUttakForBehandling(UUID behandlingUuid) {
@@ -229,10 +249,16 @@ public class ÅrskvantumTjeneste {
             .stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
+        var mottattDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(ref.getFagsakId());
 
         for (WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode : fraværsPerioderMedUtfallOgPerArbeidsgiver) {
             var fraværPeriode = wrappedOppgittFraværPeriode.getPeriode();
             var periode = new LukketPeriode(fraværPeriode.getFom(), fraværPeriode.getTom());
+            var behandlingId = mottattDokumenter.stream()
+                .filter(it -> it.getJournalpostId().equals(fraværPeriode.getJournalpostId()))
+                .map(it -> it.getBehandlingId())
+                .findFirst()
+                .orElseThrow();
 
             Arbeidsgiver arb = fraværPeriode.getArbeidsgiver();
 
