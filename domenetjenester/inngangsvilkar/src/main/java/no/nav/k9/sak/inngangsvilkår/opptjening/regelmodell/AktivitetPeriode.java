@@ -76,7 +76,7 @@ public class AktivitetPeriode implements Comparable<AktivitetPeriode> {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<datoIntervall=" + datoIntervall + ", aktivitet=" + getOpptjeningAktivitet() + ">";
+        return getClass().getSimpleName() + "<datoIntervall=" + datoIntervall + ", aktivitet=" + getOpptjeningAktivitet() + ", status=" + getVurderingsStatus() + ">";
     }
 
      public enum VurderingsStatus {
