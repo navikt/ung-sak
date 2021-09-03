@@ -94,7 +94,7 @@ class OpptjeningsperioderTjenesteImplTest {
         aksjonspunktutlederForVurderOpptjening = new AksjonspunktutlederForVurderOppgittOpptjening(opptjeningRepository, iayTjeneste, virksomhetTjeneste, oppgittOpptjeningFilterProvider);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
         apbOpptjening = new AksjonspunktutlederForVurderBekreftetOpptjening(repositoryProvider.getOpptjeningRepository(), iayTjeneste, oppgittOpptjeningFilterProvider);
-        forSaksbehandlingTjeneste = new OpptjeningsperioderTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), aksjonspunktutlederForVurderOpptjening, apbOpptjening, oppgittOpptjeningFilterProvider);
+        forSaksbehandlingTjeneste = new OpptjeningsperioderTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), aksjonspunktutlederForVurderOpptjening, apbOpptjening, oppgittOpptjeningFilterProvider, false);
         when(oppgittOpptjeningFilterProvider.finnOpptjeningFilter(Mockito.anyLong())).thenReturn(new OppgittOpptjeningFilter() {
         });
 
