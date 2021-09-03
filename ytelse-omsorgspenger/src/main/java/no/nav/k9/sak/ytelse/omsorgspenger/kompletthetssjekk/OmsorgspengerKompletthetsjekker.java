@@ -51,8 +51,8 @@ import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 @FagsakYtelseTypeRef("OMP")
 public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     private static final Logger LOGGER = LoggerFactory.getLogger(OmsorgspengerKompletthetsjekker.class);
-    public static final int ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING_TOTALT = 3;
     public static final int ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING_FØR_ETTERLYSNING = 1;
+    public static final int ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING_ETTER_ETTERLYSNING = 2;
 
     private Instance<KompletthetssjekkerInntektsmelding> kompletthetssjekkerInntektsmelding;
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
@@ -100,7 +100,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         if (!manglendeInntektsmeldinger.isEmpty()) {
             int antallArbeidsgivere = manglendeInntektsmeldinger.stream().map(ManglendeVedlegg::getArbeidsgiver).collect(Collectors.toSet()).size();
             LOGGER.info("Behandling {} er ikke komplett - mangler {} IM fra {} arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size(), antallArbeidsgivere); // NOSONAR //$NON-NLS-1$
-            Optional<LocalDateTime> ventefristManglendeIM = finnVentefristTilManglendeInntektsmelding(ref, etterlysInntektsmeldingerLansert ? ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING_FØR_ETTERLYSNING : ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING_TOTALT);
+            Optional<LocalDateTime> ventefristManglendeIM = finnVentefristTilManglendeInntektsmelding(ref, etterlysInntektsmeldingerLansert ? ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING_FØR_ETTERLYSNING : ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING_ETTER_ETTERLYSNING);
             return ventefristManglendeIM
                 .map(frist -> KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK))
                 .orElse(KompletthetResultat.fristUtløpt()); // Setter til oppfylt om fristen er passert
@@ -131,7 +131,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public KompletthetResultat vurderEtterlysningInntektsmelding(BehandlingReferanse ref) {
-        if (!etterlysInntektsmeldingerLansert){
+        if (!etterlysInntektsmeldingerLansert) {
             return KompletthetResultat.oppfylt();
         }
 
@@ -158,7 +158,8 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
             .map(it -> (OrganisasjonsNummerValidator.erGyldig(it.getArbeidsgiver()) || OrgNummer.erKunstig(it.getArbeidsgiver())) ? Arbeidsgiver.virksomhet(it.getArbeidsgiver()) : Arbeidsgiver.fra(new AktørId(it.getArbeidsgiver())))
             .collect(Collectors.toSet());
         sendEtterlysningForManglendeInntektsmeldinger(ref, arbeidsgivere);
-        return finnVentefristTilManglendeInntektsmelding(ref, ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING_TOTALT)
+        int antallVentedagerTotalt = ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING_FØR_ETTERLYSNING + ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING_ETTER_ETTERLYSNING;
+        return finnVentefristTilManglendeInntektsmelding(ref, antallVentedagerTotalt)
             .map(frist -> KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK))
             .orElse(KompletthetResultat.fristUtløpt());
     }
