@@ -81,6 +81,7 @@ public class SykdomRestTjeneste {
                 aksjonspunkt.isManglerGodkjentLegeerklæring(),
                 aksjonspunkt.isManglerVurderingAvKontinuerligTilsynOgPleie(),
                 aksjonspunkt.isManglerVurderingAvToOmsorgspersoner(),
-                aksjonspunkt.isHarDataSomIkkeHarBlittTattMedIBehandling());
+                aksjonspunkt.isHarDataSomIkkeHarBlittTattMedIBehandling(),
+                aksjonspunkt.isNyttDokumentHarIkkekontrollertEksisterendeVurderinger());
     }
 }
