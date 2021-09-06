@@ -270,6 +270,7 @@ public class MapInputTilUttakTjeneste {
             behandling.getUuid().toString(),
             andrePartersSaksnummer,
             søktUttak,
+            List.of(/* TODO: legg til trukket uttak her */),
             arbeid,
             pleiebehov,
             lovbestemtFerie,
