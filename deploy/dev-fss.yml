@@ -196,6 +196,10 @@ spec:
       value: "3030"
 
     # Feature-flag
+    - name: OMP_ETTERLYS_IM
+      value: "true"
+    - name: OVERSTYRING_OPPTJ_AKT_FJERNET
+      value: "true"
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
       value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG

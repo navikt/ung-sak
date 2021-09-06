@@ -123,7 +123,7 @@ public class MapOppgittFraværOgVilkårsResultat {
     private Map<Aktivitet, List<OpptjeningAktivitetPeriode>> finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType opptjeningAktivitetType, UttakArbeidType uttakArbeidType, List<OpptjeningAktivitetPeriode> opptjeningPerioder, AktørId aktørId) {
         var perioderPerAktivitet = opptjeningPerioder.stream()
             .filter(akt -> akt.getOpptjeningAktivitetType().equals(opptjeningAktivitetType))
-            .filter(akt -> List.of(VurderingsStatus.GODKJENT, VurderingsStatus.FERDIG_VURDERT_GODKJENT).contains(akt.getVurderingsStatus()))
+            .filter(akt -> List.of(VurderingsStatus.GODKJENT, VurderingsStatus.FERDIG_VURDERT_GODKJENT, VurderingsStatus.TIL_VURDERING).contains(akt.getVurderingsStatus()))
             .collect(Collectors.groupingBy(aktivitetPeriode -> tilAktivitet(aktivitetPeriode, uttakArbeidType, aktørId)));
         return perioderPerAktivitet;
     }

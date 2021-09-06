@@ -18,25 +18,10 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
+import no.nav.k9.aarskvantum.kontrakter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
-import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
-import no.nav.k9.aarskvantum.kontrakter.Barn;
-import no.nav.k9.aarskvantum.kontrakter.BarnType;
-import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
-import no.nav.k9.aarskvantum.kontrakter.FraværÅrsak;
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
-import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
-import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
-import no.nav.k9.aarskvantum.kontrakter.Utfall;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -272,7 +257,8 @@ public class ÅrskvantumTjeneste {
                 kreverRefusjon,
                 utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode),
                 wrappedOppgittFraværPeriode.getInnsendingstidspunkt(),
-                utledFraværÅrsak(fraværPeriode));
+                utledFraværÅrsak(fraværPeriode),
+                utledSøknadÅrsak(fraværPeriode));
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
@@ -294,6 +280,19 @@ public class ÅrskvantumTjeneste {
             return FraværÅrsak.STENGT_SKOLE_ELLER_BARNEHAGE;
         }
         return FraværÅrsak.UDEFINERT;
+    }
+
+    private SøknadÅrsak utledSøknadÅrsak(OppgittFraværPeriode periode) {
+        if (no.nav.k9.kodeverk.uttak.SøknadÅrsak.ARBEIDSGIVER_KONKURS.equals(periode.getFraværÅrsak())) {
+            return SøknadÅrsak.ARBEIDSGIVER_KONKURS;
+        }
+        if (no.nav.k9.kodeverk.uttak.SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER.equals(periode.getFraværÅrsak())) {
+            return SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER;
+        }
+        if (no.nav.k9.kodeverk.uttak.SøknadÅrsak.KONFLIKT_MED_ARBEIDSGIVER.equals(periode.getFraværÅrsak())) {
+            return SøknadÅrsak.KONFLIKT_MED_ARBEIDSGIVER;
+        }
+        return SøknadÅrsak.UDEFINERT;
     }
 
     private ArbeidsforholdStatus utledArbeidsforholdStatus(WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode) {

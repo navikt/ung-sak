@@ -78,7 +78,7 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
-            .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType(), oppgittOpptjening))
+            .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType()))
             .collect(Collectors.toList());
     }
 

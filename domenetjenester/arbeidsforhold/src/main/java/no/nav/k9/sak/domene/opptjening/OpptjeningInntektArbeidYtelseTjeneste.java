@@ -75,7 +75,7 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
                                                                                                                                    Collection<DatoIntervallEntitet> vilkårsPerioder) {
         Long behandlingId = behandlingReferanse.getBehandlingId();
         var grunnlagOpt = iayTjeneste.finnGrunnlag(behandlingId);
-        if (grunnlagOpt.isEmpty()) {
+        if (grunnlagOpt.isEmpty() || vilkårsPerioder.isEmpty()) {
             return Collections.emptyNavigableMap();
         }
         var opptjeningsresultat = opptjeningRepository.finnOpptjening(behandlingId).orElseThrow(() -> new IllegalStateException("Kan ikke finne opptjening for behandling"));

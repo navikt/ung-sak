@@ -199,6 +199,7 @@ public class BehandlingProsessHendelse {
         this.fagsakPeriode = kopierFra.fagsakPeriode;
         this.pleietrengendeAktørId = kopierFra.pleietrengendeAktørId;
         this.relatertPartAktørId = kopierFra.relatertPartAktørId;
+        this.ansvarligBeslutterForTotrinn = kopierFra.ansvarligBeslutterForTotrinn;
     }
 
     public static Builder builder() {
@@ -326,6 +327,11 @@ public class BehandlingProsessHendelse {
 
         public Builder medBehandlendeEnhet(String behandlendeEnhet) {
             kladd.behandlendeEnhet = behandlendeEnhet;
+            return this;
+        }
+
+        public Builder medAnsvarligBeslutterForTotrinn(String ansvarligBeslutterForTotrinn) {
+            kladd.ansvarligBeslutterForTotrinn = ansvarligBeslutterForTotrinn;
             return this;
         }
 

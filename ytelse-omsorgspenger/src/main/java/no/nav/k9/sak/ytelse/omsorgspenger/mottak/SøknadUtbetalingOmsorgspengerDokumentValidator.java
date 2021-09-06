@@ -60,19 +60,12 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
         OmsorgspengerUtbetaling ytelse = søknad.getYtelse();
         defaultValidering(ytelse);
         sanityCheck(ytelse);
-        validerIkkeImplementertFunksjonalitet(ytelse);
     }
 
     private void sanityCheck(OmsorgspengerUtbetaling ytelse) {
         // TODO sanity check kan vurderes flyttet inn i kontrakt
         if (ytelse.getFraværsperioder().size() > 365) {
             throw valideringsfeil("Antallet fraværeperioder er " + ytelse.getFraværsperioder().size() + ", det gir ikke mening.");
-        }
-    }
-
-    private void validerIkkeImplementertFunksjonalitet(OmsorgspengerUtbetaling ytelse) {
-        if (ytelse.getFosterbarn() != null && !ytelse.getFosterbarn().isEmpty()) {
-            throw new IllegalArgumentException("Fosterbarn er ikke støttet i løsningen");
         }
     }
 

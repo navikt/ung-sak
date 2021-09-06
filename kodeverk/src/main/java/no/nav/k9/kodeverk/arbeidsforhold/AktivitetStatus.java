@@ -32,6 +32,7 @@ public enum AktivitetStatus implements Kodeverdi {
     KOMBINERT_FL_SN("FL_SN", "Kombinert frilanser og selvstendig næringsdrivende", Inntektskategori.UDEFINERT),
     KOMBINERT_AT_FL_SN("AT_FL_SN", "Kombinert arbeidstaker, frilanser og selvstendig næringsdrivende", Inntektskategori.UDEFINERT),
     BRUKERS_ANDEL("BA", "Brukers andel", Inntektskategori.UDEFINERT),
+    IKKE_YRKESAKTIV("IKKE_YRKESAKTIV", "Ikke yrkesaktiv", Inntektskategori.UDEFINERT),
     KUN_YTELSE("KUN_YTELSE", "Kun ytelse", Inntektskategori.UDEFINERT),
 
     TTLSTØTENDE_YTELSE("TY", "Tilstøtende ytelse", Inntektskategori.UDEFINERT),

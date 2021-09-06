@@ -93,7 +93,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
         // stopper periodisering her for å unngå 'evigvarende' ekspansjon -
         // tar første av potensielle maks datoer som berører intersection av de to tidslinjene.
-        var minsteMaksDato = Stream.of(grunnlagMaksDato, uttakMaksDato).sorted().findFirst().orElseThrow();
+        var minsteMaksDato = Stream.of(grunnlagMaksDato, uttakTimeline.getMaxLocalDate()).sorted().findFirst().orElseThrow();
 
         var grunnlagTimelinePeriodisertÅr = grunnlagTimeline.splitAtRegular(startFørsteÅr, minsteMaksDato, SPLITT_PERIODE);
 
@@ -123,7 +123,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         });
     }
 
-    
+
     private LocalDate sisteDagMedUtbetaling(LocalDateTimeline<List<UttakResultatPeriode>> uttakTimeline) {
         var maksUtbetalingsDato = uttakTimeline.stream()
             .filter(it -> it.getValue()
@@ -134,7 +134,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             .orElse(uttakTimeline.getMaxLocalDate());
         return maksUtbetalingsDato;
     }
-    
+
     private void opprettBeregningsresultatAndelerGenerell(BeregningsgrunnlagPrStatus beregningsgrunnlagPrStatus, BeregningsresultatPeriode resultatPeriode,
                                                           Map<String, Object> resultater, String periodeNavn, UttakResultatPeriode uttakResultatPeriode) {
         if (uttakResultatPeriode.getErOppholdsPeriode()) {

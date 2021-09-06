@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -41,6 +42,7 @@ import no.nav.k9.sak.domene.opptjening.aksjonspunkt.MapYrkesaktivitetTilOpptjeni
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.MapYtelseperioderTjeneste;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningAktivitetVurderingAksjonspunkt;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningAktivitetVurderingVilkår;
+import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.VurderStatusInput;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
@@ -56,6 +58,9 @@ public class OpptjeningsperioderTjeneste {
     private OpptjeningAktivitetVurdering vurderForVilkår;
     private MapYtelseperioderTjeneste mapYtelseperioderTjeneste;
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
+    private OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderUtenOverstyringTjeneste;
+    private OpptjeningAktivitetVurdering vurderForVilkårUtenOverstyring;
+    private boolean lansertFjernetOverstyring;
 
     OpptjeningsperioderTjeneste() {
         // CDI
@@ -65,13 +70,19 @@ public class OpptjeningsperioderTjeneste {
     public OpptjeningsperioderTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                        OpptjeningRepository opptjeningRepository,
                                        AksjonspunktutlederForVurderOppgittOpptjening vurderOppgittOpptjening,
-                                       AksjonspunktutlederForVurderBekreftetOpptjening vurderBekreftetOpptjening, OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
+                                       AksjonspunktutlederForVurderBekreftetOpptjening vurderBekreftetOpptjening,
+                                       OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider,
+                                       @KonfigVerdi(value = "OVERSTYRING_OPPTJ_AKT_FJERNET", defaultVerdi = "true") Boolean overstyringFjernet) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.opptjeningRepository = opptjeningRepository;
         this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
         this.vurderForSaksbehandling = new OpptjeningAktivitetVurderingAksjonspunkt(vurderOppgittOpptjening, vurderBekreftetOpptjening);
         this.vurderForVilkår = new OpptjeningAktivitetVurderingVilkår(vurderOppgittOpptjening, vurderBekreftetOpptjening);
         this.mapYtelseperioderTjeneste = new MapYtelseperioderTjeneste();
+
+        this.lansertFjernetOverstyring = overstyringFjernet;
+        this.vurderForVilkårUtenOverstyring = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
+        this.opptjeningsperioderUtenOverstyringTjeneste = new OpptjeningsperioderUtenOverstyringTjeneste(opptjeningRepository);
     }
 
     public List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningAktiveterForSaksbehandling(BehandlingReferanse behandlingReferanse,
@@ -105,6 +116,13 @@ public class OpptjeningsperioderTjeneste {
         AktørId aktørId = ref.getAktørId();
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
         var inntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
+        var optOppgittOpptjening = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId())
+            .hentOppgittOpptjening(ref.getBehandlingId(), grunnlag, skjæringstidspunkt);
+
+        if (lansertFjernetOverstyring) {
+            return opptjeningsperioderUtenOverstyringTjeneste.mapPerioderForSaksbehandling(ref, grunnlag, vurderForVilkårUtenOverstyring,
+                opptjening.getOpptjeningPeriode(), optOppgittOpptjening.orElse(null), inntektsmeldinger);
+        }
 
         var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(skjæringstidspunkt);
 
@@ -113,8 +131,6 @@ public class OpptjeningsperioderTjeneste {
             mapYrkesaktivitet(ref, perioder, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjening.getOpptjeningPeriode(), inntektsmeldinger);
         }
 
-        var optOppgittOpptjening = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId())
-            .hentOppgittOpptjening(ref.getBehandlingId(), grunnlag, skjæringstidspunkt);
         if (optOppgittOpptjening.isPresent()) {
             // map
             var oppgittOpptjening = optOppgittOpptjening.get();

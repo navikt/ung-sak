@@ -157,6 +157,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final boolean TOTRINN = true;
     public static final boolean ENTRINN = false;
     public static final boolean TILBAKE = true;
+    public static final boolean SKAL_IKKE_AVBRYTES = false;
     public static final boolean FORBLI = false;
 
     public static void main(String[] args) {

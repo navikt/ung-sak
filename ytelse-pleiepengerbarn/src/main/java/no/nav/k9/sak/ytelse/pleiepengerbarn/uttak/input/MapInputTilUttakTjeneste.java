@@ -29,6 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
@@ -51,7 +52,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtab
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidstidMappingInput;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.InaktivitetUtlederInput;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.MapArbeid;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.PerioderMedInaktivitetUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.ferie.MapFerie;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.tilsyn.MapTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.uttak.MapUttak;
@@ -77,6 +81,7 @@ public class MapInputTilUttakTjeneste {
     private PersonopplysningTjeneste personopplysningTjeneste;
     private BehandlingRepository behandlingRepository;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private OpptjeningRepository opptjeningRepository;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
@@ -95,6 +100,7 @@ public class MapInputTilUttakTjeneste {
                                     EtablertTilsynRepository etablertTilsynRepository,
                                     OpptjeningRepository opptjeningRepository,
                                     RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
+                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                     @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                     @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -107,6 +113,7 @@ public class MapInputTilUttakTjeneste {
         this.pleietrengendeKravprioritet = pleietrengendeKravprioritet;
         this.etablertTilsynRepository = etablertTilsynRepository;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
+        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.opptjeningRepository = opptjeningRepository;
@@ -133,6 +140,8 @@ public class MapInputTilUttakTjeneste {
             .filter(it -> !fagsak.getSaksnummer().equals(it))
             .collect(Collectors.toSet());
 
+        var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
+
         final List<EtablertTilsynPeriode> etablertTilsynPerioder = fjernInnleggelsesperioderFra(etablertTilsynRepository.hent(referanse.getBehandlingId()).getEtablertTilsyn().getPerioder(), pleiebehov);
         final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getFagsakId(), referanse.getPleietrengendeAktørId());
         var rettVedDød = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
@@ -149,6 +158,7 @@ public class MapInputTilUttakTjeneste {
             .medUttaksGrunnlag(uttakGrunnlag)
             .medEtablertTilsynPerioder(etablertTilsynPerioder)
             .medKravprioritet(kravprioritet)
+            .medIAYGrunnlag(inntektArbeidYtelseGrunnlag)
             .medOpptjeningsresultat(opptjeningsresultat.orElse(null))
             .medRettPleiepengerVedDødGrunnlag(rettVedDød.orElse(null));
 
@@ -226,12 +236,17 @@ public class MapInputTilUttakTjeneste {
 
         final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
-        // TODO: Se kommentarer/TODOs under denne:
-        final List<Arbeid> arbeid = new MapArbeid().map(kravDokumenter,
-            perioderFraSøknader,
-            tidslinjeTilVurdering,
-            input.getVilkårene().getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow(),
-            input.getOpptjeningResultat().orElse(null));
+        var inaktivitetUtlederInput = new InaktivitetUtlederInput(behandling.getAktørId(), tidslinjeTilVurdering, input.getInntektArbeidYtelseGrunnlag());
+        var inaktivTidslinje = new PerioderMedInaktivitetUtleder().utled(inaktivitetUtlederInput);
+
+        var arbeidstidInput = new ArbeidstidMappingInput()
+            .medKravDokumenter(kravDokumenter)
+            .medPerioderFraSøknader(perioderFraSøknader)
+            .medTidslinjeTilVurdering(tidslinjeTilVurdering)
+            .medVilkår(input.getVilkårene().getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow())
+            .medOpptjeningsResultat(input.getOpptjeningResultat().orElse(null))
+            .medInaktivTidslinje(inaktivTidslinje);
+        final List<Arbeid> arbeid = new MapArbeid().map(arbeidstidInput);
 
         final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehov());
 
@@ -255,6 +270,7 @@ public class MapInputTilUttakTjeneste {
             behandling.getUuid().toString(),
             andrePartersSaksnummer,
             søktUttak,
+            List.of(/* TODO: legg til trukket uttak her */),
             arbeid,
             pleiebehov,
             lovbestemtFerie,

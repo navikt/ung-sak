@@ -18,7 +18,6 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
@@ -37,11 +36,13 @@ public class MapArbeid {
     public MapArbeid() {
     }
 
-    public List<Arbeid> map(Set<KravDokument> kravDokumenter,
-                            Set<PerioderFraSøknad> perioderFraSøknader,
-                            LocalDateTimeline<Boolean> tidslinjeTilVurdering,
-                            Vilkår vilkår,
-                            OpptjeningResultat opptjeningResultat) {
+    public List<Arbeid> map(ArbeidstidMappingInput input) {
+
+        var tidslinjeTilVurdering = input.getTidslinjeTilVurdering();
+        var vilkår = input.getVilkår();
+        var opptjeningResultat = input.getOpptjeningResultat();
+        var kravDokumenter = input.getKravDokumenter();
+        var perioderFraSøknader = input.getPerioderFraSøknader();
 
         final Map<DatoIntervallEntitet, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>> arbeidsforholdPerPeriode = new HashMap<>();
 
@@ -81,10 +82,33 @@ public class MapArbeid {
 
         var arbeidsforhold = slåSammenOpplysningerForSammeArbeidsforhold(arbeidsforholdPerPeriode);
 
+        leggTilAnsettSomInaktivPerioder(arbeidsforhold, input.getInaktivTidslinje());
+
         return arbeidsforhold.keySet()
             .stream()
             .map(key -> mapArbeidsgiver(arbeidsforhold, key))
             .collect(Collectors.toList());
+    }
+
+    private void leggTilAnsettSomInaktivPerioder(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivPerioder) {
+        if (inaktivPerioder.isEmpty()) {
+            return;
+        }
+
+
+        for (Map.Entry<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivArbeidsforhold : inaktivPerioder.entrySet()) {
+            var relevanteAktiviteter = arbeidsforhold.entrySet()
+                .stream()
+                .filter(it -> new AktivitetIdentifikator(UttakArbeidType.ARBEIDSTAKER, inaktivArbeidsforhold.getKey().getArbeidsgiver(), null).equals(it.getKey()))
+                .collect(Collectors.toSet());
+
+            var inaktivTimeline = inaktivArbeidsforhold.getValue();
+            for (Map.Entry<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> aktivitet : relevanteAktiviteter) {
+                inaktivTimeline = inaktivTimeline.disjoint(aktivitet.getValue());
+            }
+
+            arbeidsforhold.put(inaktivArbeidsforhold.getKey(), inaktivTimeline.compress());
+        }
     }
 
     private boolean harKunYtelsePåSkjæringstidspunktet(VilkårPeriode vilkårPeriode, OpptjeningResultat opptjeningResultat) {
@@ -107,7 +131,7 @@ public class MapArbeid {
         var tidslinje = new LocalDateTimeline<WrappedArbeid>(List.of());
         for (VilkårPeriode vilkårPeriode : dagpengerPåSkjæringstidspunktet) {
             var vp = vilkårPeriode.getPeriode();
-            var other = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vp.getFomDato(), vp.getTomDato(), new WrappedArbeid(new ArbeidPeriode(vp, UttakArbeidType.DAGPENGER, null, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO)))));
+            var other = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vp.getFomDato(), vp.getTomDato(), new WrappedArbeid(new ArbeidPeriode(vp, type, null, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO)))));
             tidslinje = tidslinje.combine(other, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
         if (!dagpengerPåSkjæringstidspunktet.isEmpty()) {

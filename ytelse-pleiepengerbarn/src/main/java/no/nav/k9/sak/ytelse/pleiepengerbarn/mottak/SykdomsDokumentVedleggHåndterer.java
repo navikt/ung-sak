@@ -78,12 +78,13 @@ public class SykdomsDokumentVedleggHåndterer {
                // Oppsummerings-PDFen fra punsj skal ikke klassifiseres under sykdom.
                 continue;
             }
-            
+
             final boolean erDigitalPleiepengerSyktBarnSøknad = hoveddokument
                     && journalpost.getKanal() == Kanal.NAV_NO
                     && Brevkode.PLEIEPENGER_BARN_SOKNAD.getOffisiellKode().equals(dokumentInfo.getBrevkode());
             final SykdomDokumentType type = (erDigitalPleiepengerSyktBarnSøknad || !harMedisinskeOpplysninger) ? SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
-            final LocalDate datert = erDigitalPleiepengerSyktBarnSøknad ? mottattDato.toLocalDate() : null;
+            boolean skalAutodateres = erDigitalPleiepengerSyktBarnSøknad || type == SykdomDokumentType.ANNET;
+            final LocalDate datert = skalAutodateres ? mottattDato.toLocalDate() : null;
             final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
                 type,
                 harInfoSomIkkeKanPunsjes,

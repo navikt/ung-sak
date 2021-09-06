@@ -5,6 +5,7 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,9 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -38,6 +42,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagKoblin
 import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
 import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktRequest;
+import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -45,12 +51,14 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 
 @ApplicationScoped
@@ -59,6 +67,7 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 @Produces(MediaType.APPLICATION_JSON)
 public class ForvaltningBeregningRestTjeneste {
 
+    private static final Logger logger = LoggerFactory.getLogger(ForvaltningBeregningRestTjeneste.class);
     private static final MediaType JSON = MediaType.APPLICATION_JSON_TYPE;
 
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
@@ -70,6 +79,8 @@ public class ForvaltningBeregningRestTjeneste {
     private AksjonspunktRepository aksjonspunktRepository;
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     private KalkulusRestKlient kalkulusRestKlient;
+    private KalkulusRestKlient kalkulusSystemRestKlient;
+
 
     public ForvaltningBeregningRestTjeneste() {
     }
@@ -78,7 +89,12 @@ public class ForvaltningBeregningRestTjeneste {
     public ForvaltningBeregningRestTjeneste(BeregningsgrunnlagYtelseKalkulator forvaltningBeregning,
                                             BehandlingRepository behandlingRepository,
                                             InntektArbeidYtelseTjeneste iayTjeneste,
-                                            BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste, AksjonspunktRepository aksjonspunktRepository, BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste, KalkulusRestKlient kalkulusRestKlient) {
+                                            BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
+                                            AksjonspunktRepository aksjonspunktRepository,
+                                            BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
+                                            KalkulusRestKlient kalkulusRestKlient,
+                                            SystemUserOidcRestClient systemUserOidcRestClient,
+                                            @KonfigVerdi(value = "ftkalkulus.url") URI endpoint) {
         this.forvaltningBeregning = forvaltningBeregning;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
@@ -86,6 +102,7 @@ public class ForvaltningBeregningRestTjeneste {
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
         this.kalkulusRestKlient = kalkulusRestKlient;
+        this.kalkulusSystemRestKlient = new KalkulusRestKlient(systemUserOidcRestClient, endpoint);
     }
 
     @GET
@@ -175,9 +192,15 @@ public class ForvaltningBeregningRestTjeneste {
     public Response migrerAksjonspunkt(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @Parameter(description = "migrerAksjonspunktDto") no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.MigrerAksjonspunktRequest migrerAksjonspunktDto) { // NOSONAR
         Periode periode = migrerAksjonspunktDto.getPeriode();
         Map<Behandling, Aksjonspunkt> behandlingerMedAksjonspunkt = aksjonspunktRepository.hentAksjonspunkterForKode(periode.getFom(), periode.getTom(), migrerAksjonspunktDto.getAksjonspunktKode());
+        List<String> saksummer = behandlingerMedAksjonspunkt.keySet().stream()
+            .map(Behandling::getFagsak).map(Fagsak::getSaksnummer)
+            .map(Saksnummer::getVerdi)
+            .collect(Collectors.toList());
+        logger.info("Fant følgende saksnummer med aksjonspunkt " + migrerAksjonspunktDto.getAksjonspunktKode()
+            + ": " + saksummer);
         List<MigrerAksjonspunktRequest> aksjonspunktData = behandlingerMedAksjonspunkt.entrySet().stream().map(e -> lagAksjonspunktData(e.getKey(), e.getValue())).collect(Collectors.toList());
         MigrerAksjonspunktListeRequest migrerAksjonspunktListeRequest = new MigrerAksjonspunktListeRequest(aksjonspunktData, migrerAksjonspunktDto.getAksjonspunktKode());
-        kalkulusRestKlient.migrerAksjonspunkter(migrerAksjonspunktListeRequest);
+        kalkulusSystemRestKlient.migrerAksjonspunkter(migrerAksjonspunktListeRequest);
         return Response.ok().build();
     }
 
