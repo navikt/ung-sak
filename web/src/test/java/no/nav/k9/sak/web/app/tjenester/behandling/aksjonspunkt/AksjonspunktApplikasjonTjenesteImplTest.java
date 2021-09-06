@@ -68,7 +68,7 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
         // Arrange
         var behandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
 
-        var dto = new AvklarOpptjeningsvilkårDto(List.of(), List.of(), BEGRUNNELSE);
+        var dto = new AvklarOpptjeningsvilkårDto(List.of(), BEGRUNNELSE);
 
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto), behandling.getId());
@@ -103,7 +103,7 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
         Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
         aksjonspunktRepository.setTilUtført(førstegangsbehandling.getAksjonspunkter().iterator().next(), BEGRUNNELSE);
         Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
-        var dto = new AvklarOpptjeningsvilkårDto(List.of(), List.of(), BEGRUNNELSE);
+        var dto = new AvklarOpptjeningsvilkårDto(List.of(), BEGRUNNELSE);
 
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto), revurdering.getId());
@@ -118,11 +118,11 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     public void skal_sette_totrinn_når_revurdering_ap_har_endring_i_begrunnelse() {
         // Arrange
         Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
-        var dto1 = new AvklarOpptjeningsvilkårDto(List.of(), List.of(), BEGRUNNELSE);
+        var dto1 = new AvklarOpptjeningsvilkårDto(List.of(), BEGRUNNELSE);
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto1), førstegangsbehandling.getId());
 
         Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
-        var dto2 = new AvklarOpptjeningsvilkårDto(List.of(), List.of(), BEGRUNNELSE);
+        var dto2 = new AvklarOpptjeningsvilkårDto(List.of(), BEGRUNNELSE);
 
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto2), revurdering.getId());
@@ -137,11 +137,11 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     public void skal_sette_totrinn_når_revurdering_ap_verken_har_endring_i_grunnlag_eller_begrunnelse_men_et_bekreftet_ap_i_førstegangsbehandling() {
         // Arrange
         Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
-        var dto1 = new AvklarOpptjeningsvilkårDto(List.of(), List.of(), BEGRUNNELSE);
+        var dto1 = new AvklarOpptjeningsvilkårDto(List.of(), BEGRUNNELSE);
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto1), førstegangsbehandling.getId());
 
         Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
-        var dto2 = new AvklarOpptjeningsvilkårDto(List.of(), List.of(), BEGRUNNELSE);
+        var dto2 = new AvklarOpptjeningsvilkårDto(List.of(), BEGRUNNELSE);
 
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto2), revurdering.getId());

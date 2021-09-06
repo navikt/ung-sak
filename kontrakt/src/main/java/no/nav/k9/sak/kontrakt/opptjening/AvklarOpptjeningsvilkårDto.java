@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
-import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -30,25 +29,16 @@ public class AvklarOpptjeningsvilkårDto extends BekreftetAksjonspunktDto {
     @NotNull
     private List<VilkårPeriodeVurderingDto> vilkårPeriodeVurderinger;
 
-    @Valid
-    @Size(max = 100)
-    @JsonProperty(value = "opptjeningPerioder", required = true)
-    private List<Periode> opptjeningPerioder;
-
     public AvklarOpptjeningsvilkårDto() {
     }
 
-    public AvklarOpptjeningsvilkårDto(List<VilkårPeriodeVurderingDto> vilkårPeriodeVurderinger, List<Periode> opptjeningPerioder, String begrunnelse) {
+    public AvklarOpptjeningsvilkårDto(List<VilkårPeriodeVurderingDto> vilkårPeriodeVurderinger, String begrunnelse) {
         super(begrunnelse);
         this.vilkårPeriodeVurderinger = vilkårPeriodeVurderinger;
-        this.opptjeningPerioder = opptjeningPerioder;
     }
 
     public List<VilkårPeriodeVurderingDto> getVilkårPeriodeVurderinger() {
         return vilkårPeriodeVurderinger;
     }
 
-    public List<Periode> getOpptjeningPerioder() {
-        return opptjeningPerioder;
-    }
 }
