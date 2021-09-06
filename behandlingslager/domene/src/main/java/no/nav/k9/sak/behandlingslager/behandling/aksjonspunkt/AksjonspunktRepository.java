@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -172,6 +173,7 @@ public class AksjonspunktRepository {
             .setParameter("def", kode)
             .getResultList();
 
+        log.info("Fant " + list.size() + " behandlinger.");
 
         Map<Behandling, Aksjonspunkt> map = new LinkedHashMap<>();
         for (Behandling b : list) {
@@ -182,7 +184,7 @@ public class AksjonspunktRepository {
                 .stream()
                 .filter(a -> a.getOpprettetTidspunkt().isAfter(fom.atStartOfDay())
                     && a.getOpprettetTidspunkt().isBefore(tom.atStartOfDay()))
-                .filter(a -> kode == a.getAksjonspunktDefinisjon().getKode())
+                .filter(a -> Objects.equals(kode, a.getAksjonspunktDefinisjon().getKode()))
                 .findFirst();
             aksjonspunkt.ifPresent(ap -> map.put(b, ap));
         }
