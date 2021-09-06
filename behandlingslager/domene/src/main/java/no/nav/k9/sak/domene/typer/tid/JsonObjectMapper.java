@@ -60,6 +60,14 @@ public class JsonObjectMapper {
         return jsonNode == null ? null : jsonNode.asText();
     }
 
+    public static JsonNode readTree(String json) {
+        try {
+            return OM.readTree(json);
+        } catch (IOException e) {
+            throw JsonMapperFeil.FACTORY.ioExceptionVedLesing(e).toException();
+        }
+    }
+
     interface JsonMapperFeil extends DeklarerteFeil {
         JsonMapperFeil FACTORY = FeilFactory.create(JsonMapperFeil.class);
 

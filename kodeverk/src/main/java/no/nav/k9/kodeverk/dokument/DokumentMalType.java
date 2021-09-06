@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
@@ -27,6 +28,7 @@ public enum DokumentMalType implements Kodeverdi {
     AVSLAG__DOK("AVSLAG", "Avslagsbrev"),
     FRITEKST_DOK("FRITKS", "Fritekstbrev"),
     ETTERLYS_INNTEKTSMELDING_DOK("INNLYS", "Etterlys inntektsmelding"),
+    GENERELL_FRITEKSTBREV("GENERELL_FRITEKSTBREV", "Generell fritekstbrev"),
 
     ;
 

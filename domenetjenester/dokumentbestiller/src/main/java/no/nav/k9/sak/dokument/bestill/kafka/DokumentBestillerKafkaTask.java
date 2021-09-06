@@ -20,14 +20,14 @@ import no.nav.k9.formidling.kontrakt.kodeverk.AvsenderApplikasjon;
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType;
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
 import no.nav.k9.formidling.kontrakt.kodeverk.Mottaker;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
 @ProsessTask(DokumentbestillerKafkaTaskProperties.TASKTYPE)
@@ -83,12 +83,26 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
         dto.setDokumentbestillingId(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID));
         dto.setDokumentMal(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE));
         dto.setOverstyrtMottaker(mapMottaker(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER)));
-        dto.setDokumentdata(dokumentdataParametre(JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), String.class)));
+        dto.setDokumentdata(fraJson(prosessTaskData));
         dto.setYtelseType(mapYtelse(behandling.getFagsakYtelseType()));
         dto.setAvsenderApplikasjon(AvsenderApplikasjon.K9SAK);
         valider(dto);
 
         return dto;
+    }
+
+    private DokumentdataParametreK9 fraJson(ProsessTaskData prosessTaskData) {
+        String payloadAsString = prosessTaskData.getPayloadAsString();
+
+        if (payloadAsString == null) return new DokumentdataParametreK9();
+
+        if (JsonObjectMapper.readTree(payloadAsString).isObject()) {
+            return JsonObjectMapper.fromJson(payloadAsString, DokumentdataParametreK9.class);
+        }
+
+        var dokumentdataParametreK9 = new DokumentdataParametreK9();
+        dokumentdataParametreK9.setFritekst(JsonObjectMapper.fromJson(payloadAsString, String.class));
+        return dokumentdataParametreK9;
     }
 
     private Mottaker mapMottaker(String prosessDataProperty) {
@@ -98,12 +112,6 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
 
         var mottaker = prosessDataProperty.split(OVERSTYRT_MOTTAKER_SEPARATOR);
         return new Mottaker(mottaker[0], IdType.valueOf(mottaker[1]));
-    }
-
-    private DokumentdataParametreK9 dokumentdataParametre(String payloadAsString) {
-        var dokumentdataParametre = new DokumentdataParametreK9();
-        dokumentdataParametre.setFritekst(payloadAsString);
-        return dokumentdataParametre;
     }
 
     private void valider(Dokumentbestilling dokumentbestillingDto) {
