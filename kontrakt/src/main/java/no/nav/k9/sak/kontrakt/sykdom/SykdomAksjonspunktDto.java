@@ -15,23 +15,23 @@ public class SykdomAksjonspunktDto {
     @JsonProperty(value = "kanLøseAksjonspunkt")
     @Valid
     private final boolean kanLøseAksjonspunkt;
-    
+
     @JsonProperty(value = "harUklassifiserteDokumenter")
     @Valid
     private final boolean harUklassifiserteDokumenter;
-    
+
     @JsonProperty(value = "manglerDiagnosekode")
     @Valid
     private final boolean manglerDiagnosekode;
-    
+
     @JsonProperty(value = "manglerGodkjentLegeerklæring")
     @Valid
     private final boolean manglerGodkjentLegeerklæring;
-    
+
     @JsonProperty(value = "manglerVurderingAvKontinuerligTilsynOgPleie")
     @Valid
     private final boolean manglerVurderingAvKontinuerligTilsynOgPleie;
-    
+
     @JsonProperty(value = "manglerVurderingAvToOmsorgspersoner")
     @Valid
     private final boolean manglerVurderingAvToOmsorgspersoner;
@@ -39,15 +39,20 @@ public class SykdomAksjonspunktDto {
     @JsonProperty(value = "harDataSomIkkeHarBlittTattMedIBehandling")
     @Valid
     private final boolean harDataSomIkkeHarBlittTattMedIBehandling;
-    
-    
+
+    @JsonProperty(value = "nyttDokumentHarIkkekontrollertEksisterendeVurderinger")
+    @Valid
+    private final boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
+
+
     public SykdomAksjonspunktDto(boolean kanLøseAksjonspunkt,
-            boolean harUklassifiserteDokumenter,
-            boolean manglerDiagnosekode,
-            boolean manglerGodkjentLegeerklæring,
-            boolean manglerVurderingAvKontinuerligTilsynOgPleie,
-            boolean manglerVurderingAvToOmsorgspersoner,
-            boolean harDataSomIkkeHarBlittTattMedIBehandling) {
+                                 boolean harUklassifiserteDokumenter,
+                                 boolean manglerDiagnosekode,
+                                 boolean manglerGodkjentLegeerklæring,
+                                 boolean manglerVurderingAvKontinuerligTilsynOgPleie,
+                                 boolean manglerVurderingAvToOmsorgspersoner,
+                                 boolean harDataSomIkkeHarBlittTattMedIBehandling,
+                                 boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger) {
         this.kanLøseAksjonspunkt = kanLøseAksjonspunkt;
         this.harUklassifiserteDokumenter = harUklassifiserteDokumenter;
         this.manglerDiagnosekode = manglerDiagnosekode;
@@ -55,6 +60,7 @@ public class SykdomAksjonspunktDto {
         this.manglerVurderingAvKontinuerligTilsynOgPleie = manglerVurderingAvKontinuerligTilsynOgPleie;
         this.manglerVurderingAvToOmsorgspersoner = manglerVurderingAvToOmsorgspersoner;
         this.harDataSomIkkeHarBlittTattMedIBehandling = harDataSomIkkeHarBlittTattMedIBehandling;
+        this.nyttDokumentHarIkkekontrollertEksisterendeVurderinger = nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
     }
 
 
@@ -81,7 +87,7 @@ public class SykdomAksjonspunktDto {
     public boolean isManglerVurderingAvToOmsorgspersoner() {
         return manglerVurderingAvToOmsorgspersoner;
     }
-    
+
     public boolean isHarDataSomIkkeHarBlittTattMedIBehandling() {
         return harDataSomIkkeHarBlittTattMedIBehandling;
     }

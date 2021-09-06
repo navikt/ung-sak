@@ -49,6 +49,7 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentIdDto;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentOpprettelseDto;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentOversikt;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentUtkvitterEksisterendeVurderingerDto;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomInnleggelseDto;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomInnleggelseOppdateringResultatDto;
 import no.nav.k9.sak.typer.AktørId;
@@ -57,6 +58,7 @@ import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentHarOppdatertEksisterendeVurderinger;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
@@ -84,6 +86,8 @@ public class SykdomDokumentRestTjeneste {
     public static final String DOKUMENT_OVERSIKT_PATH = BASE_PATH + DOKUMENT_OVERSIKT;
     private static final String DOKUMENT_LISTE = "/liste";
     public static final String DOKUMENT_LISTE_PATH = BASE_PATH + DOKUMENT_LISTE;
+    private static final String DOKUMENTER_SOM_IKKE_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER = "/eksisterendevurderinger";
+    public static final String DOKUMENTER_SOM_IKKE_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER_PATH = BASE_PATH + "/eksisterendevurderinger";
 
     private BehandlingRepository behandlingRepository;
     private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper;
@@ -130,6 +134,61 @@ public class SykdomDokumentRestTjeneste {
 
         final List<SykdomDokument> dokumenter = sykdomDokumentRepository.hentDokumenterSomErRelevanteForSykdom(behandling.getFagsak().getPleietrengendeAktørId());
         return sykdomDokumentOversiktMapper.mapSykdomsdokumenter(behandling.getFagsak().getAktørId(), behandling.getUuid(), dokumenter, Collections.emptySet());
+    }
+
+    @GET
+    @Path(DOKUMENTER_SOM_IKKE_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER)
+    @Operation(description = "Henter en liste over dokumenter hvor saksbehandler ikke har tatt stilling til om de berører eksisterende vurderinger.",
+        summary = "Henter en liste over dokumenter som kanskje skal brukes til å oppdatere tidligere vurderinger.",
+        tags = "sykdom",
+        responses = {
+            @ApiResponse(responseCode = "200",
+                description = "",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = SykdomDokumentDto.class)))
+        })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public List<SykdomDokumentDto> hentSykdomsdokumenterSomIkkeHarOppdatertEksisterendeVurderinger(
+            @QueryParam(BehandlingUuidDto.NAME)
+            @Parameter(description = BehandlingUuidDto.DESC)
+            @NotNull
+            @Valid
+            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            BehandlingUuidDto behandlingUuid) {
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
+
+        final var dokumenter = sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(behandling.getFagsak().getPleietrengendeAktørId());
+        return sykdomDokumentOversiktMapper.mapSykdomsdokumenter(behandling.getFagsak().getAktørId(), behandling.getUuid(), dokumenter, Collections.emptySet());
+    }
+
+    @POST
+    @Path(DOKUMENTER_SOM_IKKE_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Kvitter ut at saksbehandler har tatt stilling til om dokumenter påvirker eksisterende vurderinger.",
+        summary = "Kvitter ut at saksbehandler har tatt stilling til om dokumenter påvirker eksisterende vurderinger.",
+        tags = "sykdom",
+        responses = {
+            @ApiResponse(responseCode = "200",
+                description = "Dokumentene har blitt utkvittert.")
+        })
+    @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
+    public void sykdomDokumentUtkvitterEksisterendeVurderinger(
+            @Parameter
+            @NotNull
+            @Valid
+            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            SykdomDokumentUtkvitterEksisterendeVurderingerDto utkvitteringer) {
+        var nå = LocalDateTime.now();
+
+        var behandling = behandlingRepository.hentBehandlingHvisFinnes(utkvitteringer.getBehandlingUuid()).orElseThrow();
+        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
+            throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
+        }
+
+        for (String dokumentId : utkvitteringer.getDokumenterSomSkalUtkvitteres()) {
+            final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(dokumentId), behandling.getFagsak().getPleietrengendeAktørId()).get();
+            sykdomDokumentRepository.kvitterDokumenterMedOppdatertEksisterendeVurderinger(new SykdomDokumentHarOppdatertEksisterendeVurderinger(dokument, getCurrentUserId(), nå));
+        }
     }
 
     @GET
@@ -288,10 +347,10 @@ public class SykdomDokumentRestTjeneste {
         })
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     public void oppdaterDokument(
-            @Parameter
-            @NotNull
-            @Valid
-            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        @Parameter
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SykdomDokumentEndringDto sykdomDokumentEndringDto) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDokumentEndringDto.getBehandlingUuid()).orElseThrow();
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
@@ -304,7 +363,7 @@ public class SykdomDokumentRestTjeneste {
         verifiserKanEndreType(sykdomDokumentEndringDto, behandling, gmlInformasjon);
 
         final SykdomDokument duplikatAvDokument = hentSattDuplikatDokument(sykdomDokumentEndringDto, behandling, dokumentId);
-        
+
         dokument.setInformasjon(new SykdomDokumentInformasjon(
             dokument,
             duplikatAvDokument,
@@ -314,7 +373,8 @@ public class SykdomDokumentRestTjeneste {
             gmlInformasjon.getMottattTidspunkt(),
             gmlInformasjon.getVersjon()+1,
             getCurrentUserId(),
-            LocalDateTime.now()));
+            LocalDateTime.now()
+        ));
 
         sykdomDokumentRepository.oppdater(dokument.getInformasjon());
     }
@@ -324,11 +384,11 @@ public class SykdomDokumentRestTjeneste {
         if (sykdomDokumentEndringDto.getDuplikatAvId() == null) {
             return null;
         }
-        
+
         final Long duplikatAvId = Long.valueOf(sykdomDokumentEndringDto.getDuplikatAvId());
         verifiserKanSettesTilDuplikat(dokumentId, duplikatAvId);
         final SykdomDokument duplikatAvDokument = sykdomDokumentRepository.hentDokument(duplikatAvId, behandling.getFagsak().getPleietrengendeAktørId()).get();
-        
+
         if (duplikatAvDokument != null && duplikatAvDokument.getDuplikatAvDokument() != null) {
             throw new FunksjonellException("K9-6701", "Kan ikke sette at et dokument er duplikat av et annet duplikat dokument.");
         }
@@ -406,6 +466,7 @@ public class SykdomDokumentRestTjeneste {
             informasjon,
             behandling.getUuid(),
             behandling.getFagsak().getSaksnummer(),
+            null,
             sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
             getCurrentUserId(),
             nå);
