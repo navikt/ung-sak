@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
@@ -30,6 +32,7 @@ public class SykdomDokument {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_DOKUMENT")
+    @Column(unique = true, nullable = false)
     private Long id;
 
     @ManyToOne
@@ -50,6 +53,9 @@ public class SykdomDokument {
 
     @Column(name = "SAKSNUMMER")
     private Saksnummer saksnummer;
+
+    @OneToOne(mappedBy = "dokument", cascade = CascadeType.PERSIST)
+    private SykdomDokumentHarOppdatertEksisterendeVurderinger harOppdatertEksisterendeVurderinger;
 
     @ManyToOne
     @JoinColumn(name = "PERSON_ID")
@@ -73,11 +79,21 @@ public class SykdomDokument {
             SykdomDokumentInformasjon informasjon,
             UUID behandlingUuid,
             Saksnummer saksnummer,
+            SykdomDokumentHarOppdatertEksisterendeVurderinger harOppdatertEksisterendeVurderinger,
             SykdomPerson person,
             String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
         this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");
         this.dokumentInfoId = dokumentInfoId;
+
+        if (harOppdatertEksisterendeVurderinger != null) {
+            if (harOppdatertEksisterendeVurderinger.getDokument() != null) {
+                throw new IllegalStateException("Potensiell krysskobling fra andre dokumenter!");
+            }
+            this.harOppdatertEksisterendeVurderinger = harOppdatertEksisterendeVurderinger;
+            harOppdatertEksisterendeVurderinger.setDokument(this);
+        }
+
         setInformasjon(informasjon);
         this.behandlingUuid = behandlingUuid;
         this.saksnummer = saksnummer;
@@ -127,6 +143,25 @@ public class SykdomDokument {
         return person;
     }
 
+    public boolean isHarOppdatertEksisterendeVurderinger() {
+        return this.harOppdatertEksisterendeVurderinger != null;
+    }
+
+    SykdomDokumentHarOppdatertEksisterendeVurderinger getHarOppdatertEksisterendeVurderinger() {
+        return this.harOppdatertEksisterendeVurderinger;
+    }
+
+    public void setHarOppdatertEksisterendeVurderinger(SykdomDokumentHarOppdatertEksisterendeVurderinger harOppdatertEksisterendeVurderinger) {
+        if (this.harOppdatertEksisterendeVurderinger != null) {
+            throw new IllegalStateException("Kan bare oppdateres en gang");
+        }
+
+        this.harOppdatertEksisterendeVurderinger = harOppdatertEksisterendeVurderinger;
+    }
+
+    public void setHarOppdatertEksisterendeVurderinger(String opprettetAv, LocalDateTime opprettetTidspunkt) {
+        this.setHarOppdatertEksisterendeVurderinger(new SykdomDokumentHarOppdatertEksisterendeVurderinger(this, opprettetAv, opprettetTidspunkt));
+    }
 
     public Long getId() {
         return id;

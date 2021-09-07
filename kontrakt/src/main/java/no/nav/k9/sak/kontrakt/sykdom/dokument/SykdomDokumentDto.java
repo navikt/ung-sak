@@ -53,6 +53,9 @@ public class SykdomDokumentDto {
     @Valid
     private List<ResourceLink> links = new ArrayList<>();
 
+    public SykdomDokumentDto() {
+    }
+
     public SykdomDokumentDto(String id, SykdomDokumentType type, boolean benyttet,
                              boolean annenPartErKilde, LocalDate datert, boolean fremhevet,
                              List<ResourceLink> links) {
@@ -65,5 +68,7 @@ public class SykdomDokumentDto {
         this.links = links;
     }
 
-
+    public String getId() {
+        return id;
+    }
 }

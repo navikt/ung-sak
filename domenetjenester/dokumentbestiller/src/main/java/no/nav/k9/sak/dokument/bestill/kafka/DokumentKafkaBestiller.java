@@ -1,21 +1,24 @@
 package no.nav.k9.sak.dokument.bestill.kafka;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9;
+import no.nav.k9.formidling.kontrakt.dokumentdataparametre.FritekstbrevinnholdDto;
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.bestill.BrevHistorikkinnslag;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
 @Dependent
 public class DokumentKafkaBestiller {
@@ -38,37 +41,55 @@ public class DokumentKafkaBestiller {
 
     public void bestillBrevFraKafka(BestillBrevDto bestillBrevDto, HistorikkAktør aktør) {
         Behandling behandling = behandlingRepository.hentBehandling(bestillBrevDto.getBehandlingId());
-        bestillBrevMedMottaker(behandling, DokumentMalType.fraKode(bestillBrevDto.getBrevmalkode()), bestillBrevDto.getFritekst(), bestillBrevDto.getOverstyrtMottaker(), aktør);
-    }
+        DokumentMalType dokumentMalType = DokumentMalType.fraKode(bestillBrevDto.getBrevmalkode());
 
-    public void bestillBrevMedMottaker(Behandling behandling, DokumentMalType dokumentMalType, String fritekst, MottakerDto overstyrtMottaker, HistorikkAktør aktør) {
-        opprettKafkaTask(behandling, dokumentMalType, overstyrtMottaker, fritekst);
+        var payload = mapDokumentdataParametre(bestillBrevDto);
+
+        opprettKafkaTask(behandling, dokumentMalType, bestillBrevDto.getOverstyrtMottaker(), tilJson(payload));
         brevHistorikkinnslag.opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, dokumentMalType);
     }
 
-    public void bestillBrev(Behandling behandling, DokumentMalType dokumentMalType, String fritekst, HistorikkAktør aktør) {
-        opprettKafkaTask(behandling, dokumentMalType, null, fritekst);
-        brevHistorikkinnslag.opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, dokumentMalType);
+    private DokumentdataParametreK9 mapDokumentdataParametre(BestillBrevDto bestillBrevDto) {
+        var params = new DokumentdataParametreK9();
+        params.setFritekst(bestillBrevDto.getFritekst());
+        Optional.ofNullable(bestillBrevDto.getFritekstbrev()).ifPresent(f -> {
+            FritekstbrevinnholdDto fritekstbrev = new FritekstbrevinnholdDto();
+            fritekstbrev.setBrødtekst(f.brødtekst());
+            fritekstbrev.setOverskrift(f.overskrift());
+            params.setFritekstbrev(fritekstbrev);
+        });
+
+        return params;
+
     }
 
-    private void opprettKafkaTask(Behandling behandling, DokumentMalType dokumentMalType, MottakerDto overstyrtMottaker, String fritekst) {
+    private String tilJson(Object payload) {
         try {
-            ProsessTaskData prosessTaskData = new ProsessTaskData(DokumentbestillerKafkaTaskProperties.TASKTYPE);
-            prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-
-            prosessTaskData.setPayload(JsonObjectMapper.getJson(fritekst));
-            prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID, behandling.getId().toString());
-            prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE, dokumentMalType.getKode());
-
-            if (overstyrtMottaker != null) {
-                prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER,
-                    overstyrtMottaker.id+DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_SEPARATOR+overstyrtMottaker.type);
-            }
-            prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID, UUID.randomUUID().toString());
-            prosessTaskData.setCallIdFraEksisterende();
-            prosessTaskRepository.lagre(prosessTaskData);
+            return JsonObjectMapper.getJson(payload);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void bestillBrev(Behandling behandling, DokumentMalType dokumentMalType, HistorikkAktør aktør) {
+        opprettKafkaTask(behandling, dokumentMalType, null, null);
+        brevHistorikkinnslag.opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, dokumentMalType);
+    }
+
+    private void opprettKafkaTask(Behandling behandling, DokumentMalType dokumentMalType, MottakerDto overstyrtMottaker, String payload) {
+        ProsessTaskData prosessTaskData = new ProsessTaskData(DokumentbestillerKafkaTaskProperties.TASKTYPE);
+        prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+
+        prosessTaskData.setPayload(payload);
+        prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID, behandling.getId().toString());
+        prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE, dokumentMalType.getKode());
+
+        if (overstyrtMottaker != null) {
+            prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER,
+                overstyrtMottaker.id + DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_SEPARATOR + overstyrtMottaker.type);
+        }
+        prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID, UUID.randomUUID().toString());
+        prosessTaskData.setCallIdFraEksisterende();
+        prosessTaskRepository.lagre(prosessTaskData);
     }
 }

@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -164,14 +165,17 @@ public class AksjonspunktRepository {
     public Map<Behandling, Aksjonspunkt> hentAksjonspunkterForKode(LocalDate fom, LocalDate tom, String kode) {
         String sql = "select distinct b.* from behandling b"
             + " inner join aksjonspunkt a on a.behandling_id=b.id"
-            + " where a.aksjonspunkt_def = :def and a.opprettet_tid between :fom and :tom";
+            + " where a.aksjonspunkt_def = :def and a.opprettet_tid between :fom and :tom" +
+            " and a.aksjonspunkt_status in (:statuser)";
         List<Behandling> list = em
             .createNativeQuery(sql, Behandling.class)
             .setParameter("fom", fom)
             .setParameter("tom", tom)
             .setParameter("def", kode)
+            .setParameter("statuser", Set.of(AksjonspunktStatus.OPPRETTET.getKode(), AksjonspunktStatus.UTFØRT.getKode()))
             .getResultList();
 
+        log.info("Fant " + list.size() + " behandlinger.");
 
         Map<Behandling, Aksjonspunkt> map = new LinkedHashMap<>();
         for (Behandling b : list) {
@@ -182,7 +186,7 @@ public class AksjonspunktRepository {
                 .stream()
                 .filter(a -> a.getOpprettetTidspunkt().isAfter(fom.atStartOfDay())
                     && a.getOpprettetTidspunkt().isBefore(tom.atStartOfDay()))
-                .filter(a -> kode == a.getAksjonspunktDefinisjon().getKode())
+                .filter(a -> Objects.equals(kode, a.getAksjonspunktDefinisjon().getKode()))
                 .findFirst();
             aksjonspunkt.ifPresent(ap -> map.put(b, ap));
         }

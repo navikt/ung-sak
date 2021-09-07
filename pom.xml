@@ -42,7 +42,7 @@
         <felles.version>0.2.18</felles.version>
         <swagger.version>2.1.10</swagger.version>
         <fp-kontrakter.version>6.0.4</fp-kontrakter.version>
-        <k9format.version>5.4.13</k9format.version>
+        <k9format.version>5.4.14</k9format.version>
     </properties>
 
     <repositories>
@@ -72,7 +72,7 @@
             <dependency>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
-                <version>7.14.1</version>
+                <version>7.15.0</version>
             </dependency>
 
             <dependency>
@@ -167,7 +167,7 @@
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>eksterne-kontrakter</artifactId>
-                <version>0.0.10</version>
+                <version>0.0.12</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
