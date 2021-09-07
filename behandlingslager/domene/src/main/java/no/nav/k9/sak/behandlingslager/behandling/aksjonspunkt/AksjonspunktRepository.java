@@ -165,12 +165,14 @@ public class AksjonspunktRepository {
     public Map<Behandling, Aksjonspunkt> hentAksjonspunkterForKode(LocalDate fom, LocalDate tom, String kode) {
         String sql = "select distinct b.* from behandling b"
             + " inner join aksjonspunkt a on a.behandling_id=b.id"
-            + " where a.aksjonspunkt_def = :def and a.opprettet_tid between :fom and :tom";
+            + " where a.aksjonspunkt_def = :def and a.opprettet_tid between :fom and :tom" +
+            " and a.aksjonspunkt_status in (:statuser)";
         List<Behandling> list = em
             .createNativeQuery(sql, Behandling.class)
             .setParameter("fom", fom)
             .setParameter("tom", tom)
             .setParameter("def", kode)
+            .setParameter("statuser", Set.of(AksjonspunktStatus.OPPRETTET.getKode(), AksjonspunktStatus.UTFØRT.getKode()))
             .getResultList();
 
         log.info("Fant " + list.size() + " behandlinger.");
