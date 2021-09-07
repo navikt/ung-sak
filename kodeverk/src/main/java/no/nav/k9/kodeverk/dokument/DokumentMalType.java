@@ -28,7 +28,7 @@ public enum DokumentMalType implements Kodeverdi {
     AVSLAG__DOK("AVSLAG", "Avslagsbrev"),
     FRITEKST_DOK("FRITKS", "Fritekstbrev"),
     ETTERLYS_INNTEKTSMELDING_DOK("INNLYS", "Etterlys inntektsmelding"),
-    GENERELL_FRITEKSTBREV("GENERELL_FRITEKSTBREV", "Generell fritekstbrev"),
+    GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt brev"),
 
     ;
 

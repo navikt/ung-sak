@@ -111,14 +111,14 @@ public class DokumentBestillerKafkaTaskTest {
         dokumentdataParams.setFritekstbrev(fritekstbrev);
 
         String payload = JsonObjectMapper.getJson(dokumentdataParams);
-        ProsessTaskData prosessTaskData = dokumentbestillingProsessTask(behandling, bestillingUuid, payload, DokumentMalType.GENERELL_FRITEKSTBREV);
+        ProsessTaskData prosessTaskData = dokumentbestillingProsessTask(behandling, bestillingUuid, payload, DokumentMalType.GENERELT_FRITEKSTBREV);
 
         dokumentBestillerKafkaTask.doTask(prosessTaskData);
 
         Mockito.verify(dokumentbestillingProducer).publiserDokumentbestillingJson(kafkaJson.capture());
         Dokumentbestilling dokumentbestilling = JsonObjectMapper.fromJson(kafkaJson.getValue(), Dokumentbestilling.class);
 
-        assertThat(dokumentbestilling.getDokumentMal()).isEqualTo(DokumentMalType.GENERELL_FRITEKSTBREV.getKode());
+        assertThat(dokumentbestilling.getDokumentMal()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV.getKode());
 
         DokumentdataParametreK9 dokumentdata = JsonObjectMapper.OM.convertValue(dokumentbestilling.getDokumentdata(), DokumentdataParametreK9.class);
         assertThat(dokumentdata.getFritekstbrev().getBrødtekst()).isEqualTo("en fritekst");

@@ -96,7 +96,7 @@ public class DokumentKafkaBestillerTest {
 
     @Test
     public void skal_lagre_prosesstask_med_fritekst_brev() {
-        var generellFritekstbrev = DokumentMalType.GENERELL_FRITEKSTBREV;
+        var generellFritekstbrev = DokumentMalType.GENERELT_FRITEKSTBREV;
         String brødtekst = "FRITEKST";
         String tittel = "EN TITTEL";
         BestillBrevDto bestillBrevDto = lagBestillBrevDto(generellFritekstbrev, null, new FritekstbrevinnholdDto(tittel, brødtekst));
