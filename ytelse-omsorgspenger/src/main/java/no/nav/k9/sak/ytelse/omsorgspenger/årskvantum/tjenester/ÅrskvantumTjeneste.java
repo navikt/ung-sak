@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Optional;
@@ -18,10 +19,26 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
-import no.nav.k9.aarskvantum.kontrakter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
+import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
+import no.nav.k9.aarskvantum.kontrakter.Barn;
+import no.nav.k9.aarskvantum.kontrakter.BarnType;
+import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
+import no.nav.k9.aarskvantum.kontrakter.FraværÅrsak;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
+import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
+import no.nav.k9.aarskvantum.kontrakter.SøknadÅrsak;
+import no.nav.k9.aarskvantum.kontrakter.Utfall;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -31,6 +48,8 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -42,11 +61,11 @@ import no.nav.k9.sak.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
@@ -71,6 +90,7 @@ public class ÅrskvantumTjeneste {
     private VilkårResultatRepository vilkårResultatRepository;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste;
+    private MottatteDokumentRepository mottatteDokumentRepository;
 
     ÅrskvantumTjeneste() {
         // CDI
@@ -85,7 +105,8 @@ public class ÅrskvantumTjeneste {
                               TpsTjeneste tpsTjeneste,
                               @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                               TrekkUtFraværTjeneste trekkUtFraværTjeneste,
-                              OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste) {
+                              OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste,
+                              MottatteDokumentRepository mottatteDokumentRepository) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -95,6 +116,7 @@ public class ÅrskvantumTjeneste {
         this.trekkUtFraværTjeneste = trekkUtFraværTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.opptjeningTjeneste = opptjeningTjeneste;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
 
     public void deaktiverUttakForBehandling(UUID behandlingUuid) {
@@ -229,10 +251,13 @@ public class ÅrskvantumTjeneste {
             .stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
+        var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(ref.getFagsakId()).stream()
+            .collect(Collectors.toMap(e -> e.getJournalpostId(), e -> e));
 
         for (WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode : fraværsPerioderMedUtfallOgPerArbeidsgiver) {
             var fraværPeriode = wrappedOppgittFraværPeriode.getPeriode();
             var periode = new LukketPeriode(fraværPeriode.getFom(), fraværPeriode.getTom());
+            Optional<UUID> opprinneligBehandlingUuid = hentBehandlingUuid(fraværPeriode.getJournalpostId(), mottatteDokumenter);
 
             Arbeidsgiver arb = fraværPeriode.getArbeidsgiver();
 
@@ -258,7 +283,8 @@ public class ÅrskvantumTjeneste {
                 utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode),
                 wrappedOppgittFraværPeriode.getInnsendingstidspunkt(),
                 utledFraværÅrsak(fraværPeriode),
-                utledSøknadÅrsak(fraværPeriode));
+                utledSøknadÅrsak(fraværPeriode),
+                opprinneligBehandlingUuid.map(UUID::toString).orElse(null));
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
@@ -357,16 +383,26 @@ public class ÅrskvantumTjeneste {
             .collect(Collectors.toSet());
     }
 
+    private Optional<UUID> hentBehandlingUuid(JournalpostId journalpostId, Map<JournalpostId, MottattDokument> mottatteDokumenter) {
+        if (journalpostId == null) {
+            // Journalposter er ikke tilgjengelig på IM før juni 2021
+            return Optional.empty();
+        }
+
+        var mottattDokument = mottatteDokumenter.get(journalpostId);
+        if (mottattDokument == null) {
+            return Optional.empty();
+        }
+        var behandlingUuid = behandlingRepository.hentBehandling(mottattDokument.getBehandlingId()).getUuid();
+        return Optional.of(behandlingUuid);
+    }
+
     public ÅrskvantumForbrukteDager hentÅrskvantumForBehandling(UUID behandlingUuid) {
         return årskvantumKlient.hentÅrskvantumForBehandling(behandlingUuid);
     }
 
     public FullUttaksplan hentFullUttaksplan(Saksnummer saksnummer) {
         return årskvantumKlient.hentFullUttaksplan(saksnummer);
-    }
-
-    public Periode hentPeriodeForFagsak(Saksnummer saksnummer) {
-        return årskvantumKlient.hentPeriodeForFagsak(saksnummer);
     }
 
     public FullUttaksplanForBehandlinger hentUttaksplanForBehandling(Saksnummer saksnummer, UUID behandlingUuid) {
