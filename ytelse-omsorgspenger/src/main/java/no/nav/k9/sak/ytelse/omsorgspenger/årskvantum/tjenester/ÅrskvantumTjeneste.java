@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Optional;
@@ -47,6 +48,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -59,11 +61,11 @@ import no.nav.k9.sak.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
@@ -249,16 +251,13 @@ public class ÅrskvantumTjeneste {
             .stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
-        var mottattDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(ref.getFagsakId());
+        var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(ref.getFagsakId()).stream()
+            .collect(Collectors.toMap(e -> e.getJournalpostId(), e -> e));
 
         for (WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode : fraværsPerioderMedUtfallOgPerArbeidsgiver) {
             var fraværPeriode = wrappedOppgittFraværPeriode.getPeriode();
             var periode = new LukketPeriode(fraværPeriode.getFom(), fraværPeriode.getTom());
-            var behandlingId = mottattDokumenter.stream()
-                .filter(it -> it.getJournalpostId().equals(fraværPeriode.getJournalpostId()))
-                .map(it -> it.getBehandlingId())
-                .findFirst()
-                .orElseThrow();
+            Optional<UUID> opprinneligBehandlingUuid = hentBehandlingUuid(fraværPeriode.getJournalpostId(), mottatteDokumenter);
 
             Arbeidsgiver arb = fraværPeriode.getArbeidsgiver();
 
@@ -284,7 +283,8 @@ public class ÅrskvantumTjeneste {
                 utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode),
                 wrappedOppgittFraværPeriode.getInnsendingstidspunkt(),
                 utledFraværÅrsak(fraværPeriode),
-                utledSøknadÅrsak(fraværPeriode));
+                utledSøknadÅrsak(fraværPeriode),
+                opprinneligBehandlingUuid.map(UUID::toString).orElse(null));
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
@@ -383,16 +383,26 @@ public class ÅrskvantumTjeneste {
             .collect(Collectors.toSet());
     }
 
+    private Optional<UUID> hentBehandlingUuid(JournalpostId journalpostId, Map<JournalpostId, MottattDokument> mottatteDokumenter) {
+        if (journalpostId == null) {
+            // Journalposter er ikke tilgjengelig på IM før juni 2021
+            return Optional.empty();
+        }
+
+        var mottattDokument = mottatteDokumenter.get(journalpostId);
+        if (mottattDokument == null) {
+            return Optional.empty();
+        }
+        var behandlingUuid = behandlingRepository.hentBehandling(mottattDokument.getBehandlingId()).getUuid();
+        return Optional.of(behandlingUuid);
+    }
+
     public ÅrskvantumForbrukteDager hentÅrskvantumForBehandling(UUID behandlingUuid) {
         return årskvantumKlient.hentÅrskvantumForBehandling(behandlingUuid);
     }
 
     public FullUttaksplan hentFullUttaksplan(Saksnummer saksnummer) {
         return årskvantumKlient.hentFullUttaksplan(saksnummer);
-    }
-
-    public Periode hentPeriodeForFagsak(Saksnummer saksnummer) {
-        return årskvantumKlient.hentPeriodeForFagsak(saksnummer);
     }
 
     public FullUttaksplanForBehandlinger hentUttaksplanForBehandling(Saksnummer saksnummer, UUID behandlingUuid) {
