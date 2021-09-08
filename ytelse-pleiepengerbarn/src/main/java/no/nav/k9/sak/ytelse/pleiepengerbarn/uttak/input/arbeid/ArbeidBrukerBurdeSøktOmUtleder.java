@@ -22,6 +22,7 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -47,7 +48,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
 
     @Inject
     public ArbeidBrukerBurdeSøktOmUtleder(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                          @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                          @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                           @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                           UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                                           VilkårResultatRepository vilkårResultatRepository) {
