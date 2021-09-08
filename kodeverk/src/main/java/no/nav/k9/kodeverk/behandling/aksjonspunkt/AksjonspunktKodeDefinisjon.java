@@ -106,6 +106,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_NATTEVÅK = "9200";
     public static final String VURDER_BEREDSKAP = "9201";
     public static final String VURDER_RETT_ETTER_PLEIETRENGENDES_DØD = "9202";
+    public static final String MANGLER_AKTIVITETER = "9203";
     public static final String AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9069";
 
     // OMS
@@ -158,6 +159,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final boolean ENTRINN = false;
     public static final boolean TILBAKE = true;
     public static final boolean SKAL_IKKE_AVBRYTES = false;
+    public static final boolean AVBRYTES = true;
     public static final boolean FORBLI = false;
 
     public static void main(String[] args) {

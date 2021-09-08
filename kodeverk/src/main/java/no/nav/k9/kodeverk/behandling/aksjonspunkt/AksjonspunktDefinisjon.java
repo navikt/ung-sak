@@ -4,6 +4,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMP;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PSB;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.AVBRYTES;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.ENTRINN;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.FORBLI;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.SKAL_IKKE_AVBRYTES;
@@ -306,6 +307,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_RETT_ETTER_PLEIETRENGENDES_DØD(AksjonspunktKodeDefinisjon.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD, AksjonspunktType.MANUELL,
         "Vurder rett etter pleietrengendes død", BehandlingStatus.UTREDES,  BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
         VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD, TOTRINN, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
+    MANGLER_AKTIVITETER(AksjonspunktKodeDefinisjon.MANGLER_AKTIVITETER, AksjonspunktType.MANUELL,
+        "Bruker har ikke oppgitt alle arbeidsgiverne sine", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, ENTRINN, FORBLI, AVBRYTES, EnumSet.of(PSB)),
 
 
     // Gruppe : 999x
