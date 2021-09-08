@@ -31,6 +31,15 @@ public class AktivitetIdentifikator {
     }
 
     @Override
+    public String toString() {
+        return "AktivitetIdentifikator{" +
+            "aktivitetType=" + aktivitetType +
+            ", arbeidsgiver=" + arbeidsgiver +
+            ", arbeidsforhold=" + arbeidsforhold +
+            '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
