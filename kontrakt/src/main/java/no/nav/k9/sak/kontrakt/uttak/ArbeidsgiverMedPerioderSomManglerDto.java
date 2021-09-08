@@ -3,6 +3,7 @@ package no.nav.k9.sak.kontrakt.uttak;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -20,6 +21,7 @@ public class ArbeidsgiverMedPerioderSomManglerDto {
 
     @JsonProperty(value = "manglendePerioder")
     @Valid
+    @Size
     private List<Periode> manglendePerioder;
 
     public ArbeidsgiverMedPerioderSomManglerDto() {
