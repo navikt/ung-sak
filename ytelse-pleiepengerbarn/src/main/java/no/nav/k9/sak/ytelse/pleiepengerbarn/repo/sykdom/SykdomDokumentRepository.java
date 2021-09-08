@@ -13,8 +13,10 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 
@@ -139,7 +141,18 @@ public class SykdomDokumentRepository {
     }
 
     public void kvitterDokumenterMedOppdatertEksisterendeVurderinger(SykdomDokumentHarOppdatertEksisterendeVurderinger utkvittering) {
-        entityManager.persist(utkvittering);
+
+        String sql = "INSERT INTO sykdom_dokument_har_oppdatert_eksisterende_vurderinger " +
+            "(sykdom_dokument_id, opprettet_av, opprettet_tid) " +
+            "VALUES(:id, :opprettetAv, :opprettetTidspunkt) " +
+            "ON CONFLICT DO NOTHING";
+
+        Query query = entityManager.createNativeQuery(sql)
+            .setParameter("id", utkvittering.getDokument().getId())
+            .setParameter("opprettetAv", utkvittering.getOpprettetAv())
+            .setParameter("opprettetTidspunkt", utkvittering.getOpprettetTidspunkt());
+
+        query.executeUpdate();
         entityManager.flush();
     }
 

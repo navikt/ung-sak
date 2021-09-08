@@ -51,4 +51,12 @@ public class SykdomDokumentHarOppdatertEksisterendeVurderinger implements Serial
     public void setDokument(SykdomDokument dokument) {
         this.dokument = dokument;
     }
+
+    public String getOpprettetAv() {
+        return opprettetAv;
+    }
+
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
+    }
 }
