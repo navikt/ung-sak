@@ -96,7 +96,7 @@ public class SykdomDokumentRepository {
     public List<SykdomDokument> hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(AktørId pleietrengende) {
         return hentDokumenterSomErRelevanteForSykdom(pleietrengende)
             .stream()
-            .filter(d -> !d.isHarOppdatertEksisterendeVurderinger())
+            .filter(d -> !harKvittertDokumentForEksisterendeVurderinger(d))
             .collect(Collectors.toList());
     }
 
@@ -138,6 +138,18 @@ public class SykdomDokumentRepository {
 
         entityManager.persist(dokumentInformasjon);
         entityManager.flush();
+    }
+
+    public boolean harKvittertDokumentForEksisterendeVurderinger(SykdomDokument dokument) {
+        TypedQuery<SykdomDokumentHarOppdatertEksisterendeVurderinger> q =
+            entityManager.createQuery(
+                "SELECT k " +
+                    "FROM SykdomDokumentHarOppdatertEksisterendeVurderinger as k " +
+                    "WHERE k.dokument = :dokument", SykdomDokumentHarOppdatertEksisterendeVurderinger.class);
+
+        q.setParameter("dokument", dokument);
+
+        return q.getResultList().stream().findFirst().isPresent();
     }
 
     public void kvitterDokumenterMedOppdatertEksisterendeVurderinger(SykdomDokumentHarOppdatertEksisterendeVurderinger utkvittering) {
