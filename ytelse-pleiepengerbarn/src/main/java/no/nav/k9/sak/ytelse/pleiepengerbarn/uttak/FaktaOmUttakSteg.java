@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -21,6 +22,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRe
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
 
 @ApplicationScoped
 @BehandlingStegRef(kode = "KOFAKUT")
@@ -33,6 +35,8 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     private PleiebehovResultatRepository pleiebehovResultatRepository;
     private BehandlingRepository behandlingRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
+    private Boolean stoppVedManglendeSøktePerioder = false;
+    private ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder;
 
     protected FaktaOmUttakSteg() {
         // for proxy
@@ -43,12 +47,16 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
                             RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
                             PleiebehovResultatRepository pleiebehovResultatRepository,
                             BehandlingRepository behandlingRepository,
-                            PersonopplysningTjeneste personopplysningTjeneste) {
+                            PersonopplysningTjeneste personopplysningTjeneste,
+                            @KonfigVerdi(value = "STOPP_VED_MANGLENDE_SOKTE_PERIODER", defaultVerdi = "false") Boolean stoppVedManglendeSøktePerioder,
+                            ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder) {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
+        this.stoppVedManglendeSøktePerioder = stoppVedManglendeSøktePerioder;
+        this.arbeidBrukerBurdeSøktOmUtleder = arbeidBrukerBurdeSøktOmUtleder;
     }
 
     @SuppressWarnings("unused")
@@ -72,6 +80,14 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         if (rettEtterPleietrengendesDødMåAvklares(behandlingId)) {
             aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD);
         }
+
+        if (stoppVedManglendeSøktePerioder) {
+            var manglendeAktiviteter = arbeidBrukerBurdeSøktOmUtleder.utledMangler(BehandlingReferanse.fra(behandling));
+            if (manglendeAktiviteter.entrySet().stream().anyMatch(it -> !it.getValue().isEmpty())) {
+                aksjonspunkter.add(AksjonspunktDefinisjon.MANGLER_AKTIVITETER);
+            }
+        }
+
         if (aksjonspunkter.isEmpty()) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }

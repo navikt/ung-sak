@@ -148,7 +148,7 @@ public class FagsakRepository {
     @SuppressWarnings("unchecked")
     public List<Fagsak> finnFagsakRelatertTil(
             FagsakYtelseType ytelseType,
-            AktørId bruker,
+            AktørId brukerId,
             AktørId pleietrengendeAktørId,
             AktørId relatertPersonAktørId,
             LocalDate fom,
@@ -157,22 +157,27 @@ public class FagsakRepository {
 
         String sqlString = """
                         select f.* from Fagsak f
-                          where f.bruker_aktoer_id = :brukerAktørId
-                             and f.ytelse_type = :ytelseType
+                          where f.ytelse_type = :ytelseType
                              and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
                 """
+            + (brukerId == null ? "" : "and f.bruker_aktoer_id = :brukerAktørId")
             + (pleietrengendeAktørId == null ? "" : " and f.pleietrengende_aktoer_id = :pleietrengendeAktørId")
             + (relatertPersonAktørId == null ? "" : " and f.relatert_person_aktoer_id = :relatertPersonAktørId"); // NOSONAR (avsjekket dynamisk sql)
 
         query = entityManager.createNativeQuery(sqlString, Fagsak.class); // NOSONAR
 
+        if (brukerId == null && pleietrengendeAktørId == null && relatertPersonAktørId == null) {
+            throw new IllegalArgumentException("Må minst spesifisere én aktørId for brukerId/pleietrengendeAktørId/relatertPersonAktørId");
+        }
+        if (brukerId != null) {
+            query.setParameter("brukerAktørId", brukerId.getId());
+        }
         if (pleietrengendeAktørId != null) {
             query.setParameter("pleietrengendeAktørId", pleietrengendeAktørId.getId());
         }
         if (relatertPersonAktørId != null) {
             query.setParameter("relatertPersonAktørId", relatertPersonAktørId.getId());
         }
-        query.setParameter("brukerAktørId", Objects.requireNonNull(bruker, "bruker").getId());
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", fom == null ? Tid.TIDENES_BEGYNNELSE : fom);
         query.setParameter("tom", tom == null ? Tid.TIDENES_ENDE : tom);

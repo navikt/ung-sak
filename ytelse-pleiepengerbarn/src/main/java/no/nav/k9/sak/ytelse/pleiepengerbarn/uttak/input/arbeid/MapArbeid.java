@@ -38,6 +38,15 @@ public class MapArbeid {
 
     public List<Arbeid> map(ArbeidstidMappingInput input) {
 
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold = mapTilRaw(input);
+
+        return arbeidsforhold.keySet()
+            .stream()
+            .map(key -> mapArbeidsgiver(arbeidsforhold, key))
+            .collect(Collectors.toList());
+    }
+
+    public Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> mapTilRaw(ArbeidstidMappingInput input) {
         var tidslinjeTilVurdering = input.getTidslinjeTilVurdering();
         var vilkår = input.getVilkår();
         var opptjeningResultat = input.getOpptjeningResultat();
@@ -84,10 +93,7 @@ public class MapArbeid {
 
         leggTilAnsettSomInaktivPerioder(arbeidsforhold, input.getInaktivTidslinje());
 
-        return arbeidsforhold.keySet()
-            .stream()
-            .map(key -> mapArbeidsgiver(arbeidsforhold, key))
-            .collect(Collectors.toList());
+        return arbeidsforhold;
     }
 
     private void leggTilAnsettSomInaktivPerioder(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivPerioder) {
