@@ -54,7 +54,7 @@ public class SykdomDokument {
     @Column(name = "SAKSNUMMER")
     private Saksnummer saksnummer;
 
-    @OneToOne(mappedBy = "dokument", cascade = CascadeType.PERSIST)
+    @OneToOne(mappedBy = "dokument")
     private SykdomDokumentHarOppdatertEksisterendeVurderinger harOppdatertEksisterendeVurderinger;
 
     @ManyToOne
