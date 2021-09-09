@@ -114,6 +114,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             var søktOm = søktArbeid.get(entry.getKey());
 
             var skulleVærtSøktOm = entry.getValue().disjoint(søktOm);
+            skulleVærtSøktOm = skulleVærtSøktOm.intersection(tidslinjeTilVurdering);
             skulleVærtSøktOm = skulleVærtSøktOm.disjoint(helgeTidslinje);
 
             if (!skulleVærtSøktOm.isEmpty()) {
