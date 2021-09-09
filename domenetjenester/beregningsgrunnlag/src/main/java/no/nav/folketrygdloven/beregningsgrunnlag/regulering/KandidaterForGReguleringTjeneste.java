@@ -1,5 +1,11 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.regulering;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -7,23 +13,11 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class KandidaterForGReguleringTjeneste {
@@ -51,7 +45,11 @@ public class KandidaterForGReguleringTjeneste {
         var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId).orElseThrow();
 
         if (sisteBehandling.erHenlagt()) {
-            sisteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId).orElseThrow();
+            var behandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
+            if (behandling.isEmpty()) {
+                return false;
+            }
+            sisteBehandling = behandling.orElseThrow();
         }
 
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(sisteBehandling.getId());

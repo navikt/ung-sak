@@ -58,12 +58,13 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         for (Tuple<VilkårPeriodeVurderingDto, Periode> periode : perioder) {
             var vilkårPeriodeVurdering = periode.getElement1();
             var opptjeningPeriode = periode.getElement2();
+            var innvilgelseMerknad = VilkårUtfallMerknad.fraKode(vilkårPeriodeVurdering.getInnvilgelseMerknadKode());
 
             Utfall nyttUtfall = vilkårPeriodeVurdering.isErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
 
             if (nyttUtfall.equals(Utfall.OPPFYLT)) {
-                sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId(), opptjeningPeriode);
+                sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId(), opptjeningPeriode, innvilgelseMerknad);
             }
             oppdaterUtfallOgLagre(nyttUtfall, vilkårPeriodeVurdering, vilkårBuilder);
         }
@@ -92,17 +93,35 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
             .medAvslagsårsak(!utfallType.equals(Utfall.OPPFYLT) ? Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING : null));
     }
 
-    private void sjekkOmVilkåretKanSettesTilOppfylt(Long behandlingId, Periode opptjeningPeriode) {
+    private void sjekkOmVilkåretKanSettesTilOppfylt(Long behandlingId, Periode opptjeningPeriode, VilkårUtfallMerknad innvilgelseMerknad) {
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode.getFom(), opptjeningPeriode.getTom());
-        var opptjening = opptjeningRepository.finnOpptjening(behandlingId).flatMap(it -> it.finnOpptjening(periode));
-        if (opptjening.isPresent()) {
-            long antall = opptjening.get().getOpptjeningAktivitet().stream()
-                .filter(oa -> !oa.getAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD)).count();
-            if (antall > 0) {
-                return;
+        var stp = periode.getTomDato().plusDays(1);
+        var opptjening = opptjeningRepository.finnOpptjening(behandlingId).flatMap(it -> it.finnOpptjening(periode))
+            .orElseThrow(() -> Opptjeningsfeil.FACTORY.opptjeningPreconditionFailed().toException());
+        var opptjeningAktiviteter = opptjening.getOpptjeningAktivitet();
+
+        // Validering før opptjening kan gå videre til beregningsvilkår
+        long antall = opptjeningAktiviteter.stream()
+            .filter(oa -> !oa.getAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD)).count();
+        if (antall == 0) {
+            throw new IllegalArgumentException("Må ha opptjeningsaktivitet for å kunne gå videre til beregingsvilkår. Skjæringstidspunkt=" + stp);
+        }
+        // Validering av 8-47 (dersom valgt)
+        if (innvilgelseMerknad != null) {
+            long antallAktiviteterPåStp = opptjeningAktiviteter.stream()
+                .filter(oa -> oa.getTom().plusDays(1).equals(stp))
+                .filter(oa -> !oa.getAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD))
+                .count();
+            if (antallAktiviteterPåStp == 0) {
+                if (innvilgelseMerknad != VilkårUtfallMerknad.VM_7847_A) {
+                    throw new IllegalArgumentException("Må velge 8-47 A når det IKKE finnes aktivitet på skjæringstidspunkt=" + stp);
+                }
+            } else {
+                if (innvilgelseMerknad != VilkårUtfallMerknad.VM_7847_B) {
+                    throw new IllegalArgumentException("Må velge 8-47 B når det finnes aktivitet på skjæringstidspunkt=" + stp);
+                }
             }
         }
-        throw Opptjeningsfeil.FACTORY.opptjeningPreconditionFailed().toException();
     }
 
     private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, Utfall nyVerdi, String begrunnelse) {

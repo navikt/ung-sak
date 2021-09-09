@@ -76,7 +76,7 @@ class ArbeidBrukerBurdeSøktOmUtlederTest {
                 .medArbeidsgiver(arbeidsgiver)
                 .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
                 .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
-                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato().minusDays(3)))))));
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periodeTilVurdering.getFomDato().minusYears(2), periodeTilVurdering.getTomDato().minusDays(3)))))));
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var manglendeAktivitereFraBruker = utleder.utledFraInput(timeline, input, grunnlag.getAktørArbeidFraRegister(brukerAktørId));
