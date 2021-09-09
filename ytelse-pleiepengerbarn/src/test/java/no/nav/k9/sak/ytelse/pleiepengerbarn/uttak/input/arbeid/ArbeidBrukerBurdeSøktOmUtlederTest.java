@@ -86,7 +86,6 @@ class ArbeidBrukerBurdeSøktOmUtlederTest {
         assertThat(identifikator.getArbeidsgiver()).isEqualTo(arbeidsgiver);
         var manglendeTimeline = manglendeAktivitereFraBruker.get(identifikator);
         assertThat(manglendeTimeline).isNotNull();
-        assertThat(manglendeTimeline).hasSize(1);
         assertThat(manglendeTimeline.stream().anyMatch(it -> it.overlapper(new LocalDateSegment<>(arbeidsperiode.getTomDato(), periodeTilVurdering.getTomDato(), true)))).isTrue();
     }
 
