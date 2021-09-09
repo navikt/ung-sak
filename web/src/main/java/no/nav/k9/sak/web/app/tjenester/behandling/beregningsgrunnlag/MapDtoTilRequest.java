@@ -79,12 +79,16 @@ class MapDtoTilRequest {
     public static HåndterBeregningDto mapOverstyring(OverstyringAksjonspunktDto dto) {
         if (dto instanceof OverstyrBeregningsaktiviteterDto) {
             OverstyrBeregningsaktiviteterDto overstyrBeregningsaktiviteterDto = (OverstyrBeregningsaktiviteterDto) dto;
-            return new no.nav.folketrygdloven.kalkulus.håndtering.v1.overstyring.OverstyrBeregningsaktiviteterDto(OppdatererDtoMapper.mapOverstyrBeregningsaktiviteterDto(overstyrBeregningsaktiviteterDto.getBeregningsaktivitetLagreDtoList()));
+            var mappetDto = new no.nav.folketrygdloven.kalkulus.håndtering.v1.overstyring.OverstyrBeregningsaktiviteterDto(OppdatererDtoMapper.mapOverstyrBeregningsaktiviteterDto(overstyrBeregningsaktiviteterDto.getBeregningsaktivitetLagreDtoList()));
+            mappetDto.setBegrunnelse(dto.getBegrunnelse());
+            return mappetDto;
         }
         if (dto instanceof OverstyrBeregningsgrunnlagDto) {
             OverstyrBeregningsgrunnlagDto overstyrBeregningsgrunnlagDto = (OverstyrBeregningsgrunnlagDto) dto;
-            return new OverstyrBeregningsgrunnlagHåndteringDto(OppdatererDtoMapper.mapTilFaktaOmBeregningLagreDto(overstyrBeregningsgrunnlagDto.getFakta()),
+            var mappetDto = new OverstyrBeregningsgrunnlagHåndteringDto(OppdatererDtoMapper.mapTilFaktaOmBeregningLagreDto(overstyrBeregningsgrunnlagDto.getFakta()),
                 OppdatererDtoMapper.mapFastsettBeregningsgrunnlagPeriodeAndeler(overstyrBeregningsgrunnlagDto.getOverstyrteAndeler()));
+            mappetDto.setBegrunnelse(dto.getBegrunnelse());
+            return mappetDto;
         }
         throw new IllegalStateException("Overstyringaksjonspunkt er ikke mappet i kalkulus");
 
