@@ -54,9 +54,6 @@ public class SykdomDokument {
     @Column(name = "SAKSNUMMER")
     private Saksnummer saksnummer;
 
-    @OneToOne(mappedBy = "dokument", cascade = CascadeType.PERSIST)
-    private SykdomDokumentHarOppdatertEksisterendeVurderinger harOppdatertEksisterendeVurderinger;
-
     @ManyToOne
     @JoinColumn(name = "PERSON_ID")
     private SykdomPerson person;
@@ -79,21 +76,11 @@ public class SykdomDokument {
             SykdomDokumentInformasjon informasjon,
             UUID behandlingUuid,
             Saksnummer saksnummer,
-            SykdomDokumentHarOppdatertEksisterendeVurderinger harOppdatertEksisterendeVurderinger,
             SykdomPerson person,
             String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
         this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");
         this.dokumentInfoId = dokumentInfoId;
-
-        if (harOppdatertEksisterendeVurderinger != null) {
-            if (harOppdatertEksisterendeVurderinger.getDokument() != null) {
-                throw new IllegalStateException("Potensiell krysskobling fra andre dokumenter!");
-            }
-            this.harOppdatertEksisterendeVurderinger = harOppdatertEksisterendeVurderinger;
-            harOppdatertEksisterendeVurderinger.setDokument(this);
-        }
-
         setInformasjon(informasjon);
         this.behandlingUuid = behandlingUuid;
         this.saksnummer = saksnummer;
@@ -141,26 +128,6 @@ public class SykdomDokument {
 
     public SykdomPerson getPerson() {
         return person;
-    }
-
-    public boolean isHarOppdatertEksisterendeVurderinger() {
-        return this.harOppdatertEksisterendeVurderinger != null;
-    }
-
-    SykdomDokumentHarOppdatertEksisterendeVurderinger getHarOppdatertEksisterendeVurderinger() {
-        return this.harOppdatertEksisterendeVurderinger;
-    }
-
-    public void setHarOppdatertEksisterendeVurderinger(SykdomDokumentHarOppdatertEksisterendeVurderinger harOppdatertEksisterendeVurderinger) {
-        if (this.harOppdatertEksisterendeVurderinger != null) {
-            throw new IllegalStateException("Kan bare oppdateres en gang");
-        }
-
-        this.harOppdatertEksisterendeVurderinger = harOppdatertEksisterendeVurderinger;
-    }
-
-    public void setHarOppdatertEksisterendeVurderinger(String opprettetAv, LocalDateTime opprettetTidspunkt) {
-        this.setHarOppdatertEksisterendeVurderinger(new SykdomDokumentHarOppdatertEksisterendeVurderinger(this, opprettetAv, opprettetTidspunkt));
     }
 
     public Long getId() {
