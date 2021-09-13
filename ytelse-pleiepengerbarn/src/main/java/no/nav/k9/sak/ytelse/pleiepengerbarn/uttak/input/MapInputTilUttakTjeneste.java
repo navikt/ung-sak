@@ -146,6 +146,8 @@ public class MapInputTilUttakTjeneste {
         final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getFagsakId(), referanse.getPleietrengendeAktørId());
         var rettVedDød = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
 
+        final NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(referanse.getBehandlingId());
+        
         var input = new InputParametere()
             .medBehandling(behandling)
             .medVilkårene(vilkårene)
@@ -153,6 +155,7 @@ public class MapInputTilUttakTjeneste {
             .medPerioderTilVurdering(perioderTilVurdering)
             .medUtvidetPerioderRevurdering(utvidetRevurderingPerioder)
             .medVurderteSøknadsperioder(vurderteSøknadsperioder)
+            .medPerioderSomSkalTilbakestilles(perioderSomSkalTilbakestilles)
             .medPersonopplysninger(personopplysningerAggregat)
             .medRelaterteSaker(relaterteFagsaker)
             .medUttaksGrunnlag(uttakGrunnlag)
@@ -262,7 +265,8 @@ public class MapInputTilUttakTjeneste {
         var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende);
         var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende);
         final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
-
+        final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
+        
         return new Uttaksgrunnlag(
             barn,
             søker,
@@ -270,7 +274,7 @@ public class MapInputTilUttakTjeneste {
             behandling.getUuid().toString(),
             andrePartersSaksnummer,
             søktUttak,
-            List.of(/* TODO: legg til trukket uttak her */),
+            perioderSomSkalTilbakestilles,
             arbeid,
             pleiebehov,
             lovbestemtFerie,

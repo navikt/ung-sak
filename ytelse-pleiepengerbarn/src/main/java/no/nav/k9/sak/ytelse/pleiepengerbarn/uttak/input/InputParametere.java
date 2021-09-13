@@ -35,6 +35,7 @@ public class InputParametere {
     private List<EtablertPleieperiode> pleiebehov;
     private Set<Saksnummer> relaterteSaker;
     private NavigableSet<DatoIntervallEntitet> utvidetRevurderingPerioder;
+    private NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles;
     private List<EtablertTilsynPeriode> etablertTilsynPerioder;
     private LocalDateTimeline<List<Kravprioritet>> kravprioritet;
     private OpptjeningResultat opptjeningResultat;
@@ -124,6 +125,15 @@ public class InputParametere {
     public InputParametere medUtvidetPerioderRevurdering(NavigableSet<DatoIntervallEntitet> utvidetRevurderingPerioder) {
         this.utvidetRevurderingPerioder = utvidetRevurderingPerioder;
         return this;
+    }
+    
+    public InputParametere medPerioderSomSkalTilbakestilles(NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles) {
+        this.perioderSomSkalTilbakestilles = perioderSomSkalTilbakestilles;
+        return this;
+    }
+    
+    public NavigableSet<DatoIntervallEntitet> getPerioderSomSkalTilbakestilles() {
+        return perioderSomSkalTilbakestilles;
     }
 
     public InputParametere medEtablertTilsynPerioder(List<EtablertTilsynPeriode> utledetEtablertTilsyn) {

@@ -96,7 +96,11 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
     private void mapTilKravDokumentOgPeriode(Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> result, Set<MottattDokument> mottatteDokumenter, SøknadsPeriodeDokumenter dokument) {
         var mottattTidspunkt = utledMottattTidspunkt(dokument, mottatteDokumenter);
         var kravDokument = new KravDokument(dokument.getJournalpostId(), mottattTidspunkt, KravDokumentType.SØKNAD);
-        var søktePerioder = dokument.getSøknadsperioder().stream().map(it -> new SøktPeriode<>(it.getPeriode(), it)).collect(Collectors.toList());
+        var søktePerioder = dokument.getSøknadsperioder()
+                .stream()
+                .filter(it -> !it.isHarTrukketKrav()) // Denne fjerner bare søkteperioder som kun har blitt sendt inn med harTrukketKrav
+                .map(it -> new SøktPeriode<>(it.getPeriode(), it))
+                .collect(Collectors.toList());
 
         result.put(kravDokument, søktePerioder);
     }

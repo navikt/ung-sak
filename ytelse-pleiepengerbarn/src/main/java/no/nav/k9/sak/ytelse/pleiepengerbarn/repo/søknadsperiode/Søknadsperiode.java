@@ -36,27 +36,40 @@ public class Søknadsperiode extends BaseEntitet implements SøktPeriodeData {
     })
     private DatoIntervallEntitet periode;
 
+    @Column(name = "har_trukket_krav")
+    private boolean harTrukketKrav;
+    
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
     Søknadsperiode() {
     }
-
-    public Søknadsperiode(DatoIntervallEntitet periode) {
+    
+    public Søknadsperiode(DatoIntervallEntitet periode, boolean harTrukketKrav) {
         this.periode = periode;
+        this.harTrukketKrav = harTrukketKrav;
     }
 
+    public Søknadsperiode(DatoIntervallEntitet periode) {
+        this(periode, false);
+    }
+    
     public Søknadsperiode(LocalDate fom, LocalDate tom) {
         this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
     }
 
     public Søknadsperiode(Søknadsperiode it) {
         this.periode = it.getPeriode();
+        this.harTrukketKrav = it.isHarTrukketKrav();
     }
 
     public DatoIntervallEntitet getPeriode() {
         return periode;
+    }
+    
+    public boolean isHarTrukketKrav() {
+        return harTrukketKrav;
     }
 
     @Override

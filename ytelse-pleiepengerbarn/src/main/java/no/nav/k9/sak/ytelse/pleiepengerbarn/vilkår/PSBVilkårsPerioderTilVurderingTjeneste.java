@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
@@ -43,6 +44,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
@@ -65,6 +67,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     PSBVilkårsPerioderTilVurderingTjeneste() {
         // CDI
@@ -80,7 +83,9 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                                   BasisPersonopplysningTjeneste basisPersonopplysningsTjeneste,
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
-                                                  PersoninfoAdapter personinfoAdapter) {
+                                                  PersoninfoAdapter personinfoAdapter,
+                                                  MottatteDokumentRepository mottatteDokumentRepository,
+                                                  SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.vilkårUtleder = vilkårUtleder;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.behandlingRepository = behandlingRepository;
@@ -88,14 +93,15 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
-        var maksSøktePeriode = new MaksSøktePeriode(this.søknadsperiodeRepository);
         this.vilkårResultatRepository = vilkårResultatRepository;
-
-        søktePerioder = new SøktePerioder(søknadsperiodeRepository);
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste; 
+        
+        søktePerioder = new SøktePerioder(søknadsperiodeTjeneste);
+        var maksSøktePeriode = new MaksSøktePeriode(søktePerioder);
 
         vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, maksSøktePeriode);
-        vilkårsPeriodisering.put(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, PleietrengendeAlderPeriode.under18(søknadsperiodeRepository, basisPersonopplysningsTjeneste, behandlingRepository, personinfoAdapter));
-        vilkårsPeriodisering.put(VilkårType.MEDISINSKEVILKÅR_18_ÅR, PleietrengendeAlderPeriode.overEllerLik18(søknadsperiodeRepository, basisPersonopplysningsTjeneste, behandlingRepository, personinfoAdapter));
+        vilkårsPeriodisering.put(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, PleietrengendeAlderPeriode.under18(basisPersonopplysningsTjeneste, behandlingRepository, personinfoAdapter, søktePerioder));
+        vilkårsPeriodisering.put(VilkårType.MEDISINSKEVILKÅR_18_ÅR, PleietrengendeAlderPeriode.overEllerLik18(basisPersonopplysningsTjeneste, behandlingRepository, personinfoAdapter, søktePerioder));
     }
 
     @Override
@@ -120,6 +126,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse));
+        perioderTilVurdering.addAll(perioderSomSkalTilbakestilles(behandlingId));
 
         return vilkår.getPerioder()
             .stream()
@@ -170,7 +177,9 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             .map(SøknadsperioderHolder::getPerioder)
             .orElse(Set.of());
 
-        return søktePerioder.utledVurderingsperioderFraSøknadsperioder(alleSøknadsperioder);
+        final var behandling = behandlingRepository.hentBehandling(behandlingId);
+        
+        return søknadsperiodeTjeneste.utledVurderingsperioderFraSøknadsperioder(behandling.getFagsakId(), alleSøknadsperioder);
     }
 
     @Override
@@ -237,6 +246,16 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public Set<VilkårType> definerendeVilkår() {
         return Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+    }
+    
+    @Override
+    public NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(Long behandlingId) {
+        final var behandling = behandlingRepository.hentBehandling(behandlingId);
+        return søknadsperiodeTjeneste.hentKravperioder(behandling.getFagsakId(), behandlingId)
+            .stream()
+            .filter(kp -> kp.isHarTrukketKrav() && kp.getBehandlingId().equals(behandlingId))
+            .map(kp -> kp.getPeriode())
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private List<Periode> utledVurderingsperiode(Vilkårene vilkårene) {
