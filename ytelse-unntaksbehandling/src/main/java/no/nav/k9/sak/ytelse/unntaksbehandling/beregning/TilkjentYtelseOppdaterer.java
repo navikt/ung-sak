@@ -40,6 +40,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BekreftTilkjentYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
@@ -125,19 +126,30 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     }
 
     private BeregningsresultatAndel.Builder byggAndel(TilkjentYtelseAndelDto tyAndel, Integer dagsats, Boolean erBrukerMottaker) {
+        Arbeidsgiver arbeidsgiver = hentArbeidsgiver(tyAndel, erBrukerMottaker).orElse(null);
+
         return BeregningsresultatAndel.builder()
             .medBrukerErMottaker(erBrukerMottaker)
             .medDagsats(dagsats)
             .medDagsatsFraBg(0) // Settes kun senere dersom aksjonspunkt for vurdering av tilbaketrekk
             .medUtbetalingsgrad(tyAndel.getUtbetalingsgrad())
-            .medArbeidsgiver(OrgNummer.erGyldigOrgnr(tyAndel.getArbeidsgiver().getIdentifikator())
-                ? Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiver().getIdentifikator())
-                : Arbeidsgiver.person(new AktørId(tyAndel.getArbeidsgiver().getIdentifikator())))
+            .medArbeidsgiver(arbeidsgiver)
             .medArbeidsforholdRef(InternArbeidsforholdRef.ref(tyAndel.getArbeidsforholdRef()))
             .medAktivitetStatus(aktivitetStatusFor(tyAndel.getInntektskategori()))
             .medInntektskategori(tyAndel.getInntektskategori())
             .medArbeidsforholdType(ARBEIDSFORHOLD_TYPE)
             .medStillingsprosent(STILLINGSPROSENT);
+    }
+
+    private Optional<Arbeidsgiver> hentArbeidsgiver(TilkjentYtelseAndelDto tyAndel, Boolean erBrukerMottaker) {
+        var arbeidsgiverIdentikator = Optional.ofNullable(tyAndel.getArbeidsgiver()).map(ArbeidsgiverDto::getIdentifikator);
+        if (arbeidsgiverIdentikator.isEmpty() && !erBrukerMottaker) {
+            throw new IllegalArgumentException("Må opggi arbeidstaker dersom andel er refusjon");
+        }
+        return arbeidsgiverIdentikator
+            .map(identitikator -> OrgNummer.erGyldigOrgnr(identitikator)
+                ? Arbeidsgiver.virksomhet(identitikator)
+                : Arbeidsgiver.person(new AktørId(identitikator)));
     }
 
     private void validerDto(BekreftTilkjentYtelseDto dto, Behandling behandling) {

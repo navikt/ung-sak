@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.beregning;
 
-import static no.nav.k9.sak.ytelse.unntaksbehandling.beregning.ArbeidsgiverValidator.ArbeidsgiverLookupFeil.FACTORY;
 import static no.nav.k9.felles.feil.LogLevel.INFO;
+import static no.nav.k9.sak.ytelse.unntaksbehandling.beregning.ArbeidsgiverValidator.ArbeidsgiverLookupFeil.FACTORY;
 
 import java.util.List;
 import java.util.Objects;
@@ -9,6 +9,10 @@ import java.util.Objects;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
@@ -16,10 +20,6 @@ import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
-import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
 
 @Dependent
 class ArbeidsgiverValidator {
@@ -44,6 +44,7 @@ class ArbeidsgiverValidator {
         perioder.stream()
             .flatMap(p -> p.getAndeler().stream())
             .map(TilkjentYtelseAndelDto::getArbeidsgiver)
+            .filter(Objects::nonNull)
             .forEach(arbeidsgiver -> validerArbeidsgiver(arbeidsgiver.getIdentifikator(), fagsakAktørId));
     }
 
