@@ -296,29 +296,21 @@ public class ÅrskvantumTjeneste {
     }
 
     private FraværÅrsak utledFraværÅrsak(OppgittFraværPeriode periode) {
-        if (no.nav.k9.kodeverk.uttak.FraværÅrsak.ORDINÆRT_FRAVÆR.equals(periode.getFraværÅrsak())) {
-            return FraværÅrsak.ORDINÆRT_FRAVÆR;
+        switch (periode.getFraværÅrsak()) {
+            case ORDINÆRT_FRAVÆR: return FraværÅrsak.ORDINÆRT_FRAVÆR;
+            case SMITTEVERNHENSYN: return FraværÅrsak.SMITTEVERNHENSYN;
+            case STENGT_SKOLE_ELLER_BARNEHAGE: return FraværÅrsak.STENGT_SKOLE_ELLER_BARNEHAGE;
+            default: return FraværÅrsak.UDEFINERT;
         }
-        if (no.nav.k9.kodeverk.uttak.FraværÅrsak.SMITTEVERNHENSYN.equals(periode.getFraværÅrsak())) {
-            return FraværÅrsak.SMITTEVERNHENSYN;
-        }
-        if (no.nav.k9.kodeverk.uttak.FraværÅrsak.STENGT_SKOLE_ELLER_BARNEHAGE.equals(periode.getFraværÅrsak())) {
-            return FraværÅrsak.STENGT_SKOLE_ELLER_BARNEHAGE;
-        }
-        return FraværÅrsak.UDEFINERT;
     }
 
     private SøknadÅrsak utledSøknadÅrsak(OppgittFraværPeriode periode) {
-        if (no.nav.k9.kodeverk.uttak.SøknadÅrsak.ARBEIDSGIVER_KONKURS.equals(periode.getSøknadÅrsak())) {
-            return SøknadÅrsak.ARBEIDSGIVER_KONKURS;
+        switch (periode.getSøknadÅrsak()) {
+            case ARBEIDSGIVER_KONKURS: return SøknadÅrsak.ARBEIDSGIVER_KONKURS;
+            case NYOPPSTARTET_HOS_ARBEIDSGIVER: return SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER;
+            case KONFLIKT_MED_ARBEIDSGIVER: return SøknadÅrsak.KONFLIKT_MED_ARBEIDSGIVER;
+            default: return SøknadÅrsak.UDEFINERT;
         }
-        if (no.nav.k9.kodeverk.uttak.SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER.equals(periode.getSøknadÅrsak())) {
-            return SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER;
-        }
-        if (no.nav.k9.kodeverk.uttak.SøknadÅrsak.KONFLIKT_MED_ARBEIDSGIVER.equals(periode.getSøknadÅrsak())) {
-            return SøknadÅrsak.KONFLIKT_MED_ARBEIDSGIVER;
-        }
-        return SøknadÅrsak.UDEFINERT;
     }
 
     private ArbeidsforholdStatus utledArbeidsforholdStatus(WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode) {
