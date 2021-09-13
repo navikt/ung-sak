@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -45,6 +44,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
@@ -67,6 +67,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     PSBVilkårsPerioderTilVurderingTjeneste() {
         // CDI
@@ -83,7 +84,8 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   BasisPersonopplysningTjeneste basisPersonopplysningsTjeneste,
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   PersoninfoAdapter personinfoAdapter,
-                                                  MottatteDokumentRepository mottatteDokumentRepository) {
+                                                  MottatteDokumentRepository mottatteDokumentRepository,
+                                                  SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.vilkårUtleder = vilkårUtleder;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.behandlingRepository = behandlingRepository;
@@ -92,8 +94,9 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste; 
         
-        søktePerioder = new SøktePerioder(behandlingRepository, søknadsperiodeRepository, mottatteDokumentRepository);
+        søktePerioder = new SøktePerioder(søknadsperiodeTjeneste);
         var maksSøktePeriode = new MaksSøktePeriode(søktePerioder);
 
         vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, maksSøktePeriode);
@@ -176,7 +179,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
         
-        return søktePerioder.utledVurderingsperioderFraSøknadsperioder(behandling.getFagsakId(), alleSøknadsperioder);
+        return søknadsperiodeTjeneste.utledVurderingsperioderFraSøknadsperioder(behandling.getFagsakId(), alleSøknadsperioder);
     }
 
     @Override
