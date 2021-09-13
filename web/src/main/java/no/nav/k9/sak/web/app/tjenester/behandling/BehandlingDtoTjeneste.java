@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -32,11 +31,8 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ResourceLink;
@@ -395,6 +391,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.SYKDOM_DIAGNOSEKODER_PATH, "sykdom-diagnosekoder", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_UTTAKSPLAN_PATH, "pleiepenger-sykt-barn-uttaksplan", uuidQueryParams));
+                dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_SKULLE_SØKT_OM_PATH, "psb-manglende-arbeidstid", uuidQueryParams));
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
                 dto.leggTil(getFraMap(VurderTilsynRestTjeneste.BASEPATH, "pleiepenger-sykt-barn-tilsyn", uuidQueryParams));

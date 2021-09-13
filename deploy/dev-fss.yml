@@ -196,8 +196,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: OMP_ETTERLYS_IM
-      value: "true"
     - name: STOPP_VED_MANGLENDE_SOKTE_PERIODER
       value: "true"
     - name: OVERSTYRING_OPPTJ_AKT_FJERNET

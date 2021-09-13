@@ -43,7 +43,7 @@ import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.dokument.arkiv.ArkivDokument;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
@@ -68,7 +68,7 @@ public class DokumentRestTjeneste {
     public static final String DOKUMENT_ID_PARAM = "dokumentId";
 
     private DokumentArkivTjeneste dokumentArkivTjeneste;
-    private InntektsmeldingTjeneste inntektsmeldingTjeneste;
+    private InntektArbeidYtelseTjeneste inntektsmeldingTjeneste;
     private FagsakRepository fagsakRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private VirksomhetTjeneste virksomhetTjeneste;
@@ -80,7 +80,7 @@ public class DokumentRestTjeneste {
 
     @Inject
     public DokumentRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste,
-                                InntektsmeldingTjeneste inntektsmeldingTjeneste,
+                                InntektArbeidYtelseTjeneste inntektsmeldingTjeneste,
                                 FagsakRepository fagsakRepository,
                                 MottatteDokumentRepository mottatteDokumentRepository,
                                 VirksomhetTjeneste virksomhetTjeneste,
@@ -120,7 +120,7 @@ public class DokumentRestTjeneste {
             List<ArkivJournalPost> journalPostList = dokumentArkivTjeneste.hentAlleDokumenterForVisning(saksnummer);
             List<DokumentDto> dokumentResultat = new ArrayList<>();
 
-            Map<JournalpostId, List<Inntektsmelding>> inntektsmeldinger = finnInntektsmeldinger(fagsak, åpneBehandlinger);
+            Map<JournalpostId, List<Inntektsmelding>> inntektsmeldinger = finnInntektsmeldinger(fagsak);
 
             journalPostList.forEach(arkivJournalPost -> {
                 dokumentResultat.addAll(mapFraArkivJournalPost(saksnummer, arkivJournalPost, mottattedokumenter, inntektsmeldinger));
@@ -133,12 +133,12 @@ public class DokumentRestTjeneste {
         }
     }
 
-    private Map<JournalpostId, List<Inntektsmelding>> finnInntektsmeldinger(Fagsak fagsak, Set<Long> åpneBehandlinger) {
+    private Map<JournalpostId, List<Inntektsmelding>> finnInntektsmeldinger(Fagsak fagsak) {
         var ytelseType = fagsak.getYtelseType();
         boolean harInntektsmeldinger = !ytelseType.erRammevedtak();
         return !harInntektsmeldinger
             ? Collections.emptyMap()
-            : inntektsmeldingTjeneste.hentAlleInntektsmeldingerForAngitteBehandlinger(åpneBehandlinger).stream()
+            : inntektsmeldingTjeneste.hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer()).stream()
             .collect(Collectors.groupingBy(Inntektsmelding::getJournalpostId));
     }
 
@@ -189,11 +189,7 @@ public class DokumentRestTjeneste {
 
         if (mottatteDokument.containsKey(arkivJournalPost.getJournalpostId())) {
             JournalpostId journalpostId = dto.getJournalpostId();
-            List<Long> behandlinger = mottatteDokument.get(journalpostId).stream()
-                .filter(imdok -> inntektsmeldinger.containsKey(journalpostId))
-                .map(MottattDokument::getBehandlingId)
-                .collect(Collectors.toList());
-            dto.setBehandlinger(behandlinger);
+            dto.setBehandlinger(List.of());
 
             var imForJournalpost = inntektsmeldinger.getOrDefault(journalpostId, Collections.emptyList());
             Optional<String> navn = hentGjelderFor(imForJournalpost);

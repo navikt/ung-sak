@@ -33,15 +33,10 @@ public class SykdomDokumentHarOppdatertEksisterendeVurderinger implements Serial
         // hibernate
     }
 
-    public SykdomDokumentHarOppdatertEksisterendeVurderinger(String opprettetAv, LocalDateTime opprettetTidspunkt) {
+    public SykdomDokumentHarOppdatertEksisterendeVurderinger(SykdomDokument dokument, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
-    }
-
-    public SykdomDokumentHarOppdatertEksisterendeVurderinger(SykdomDokument dokument, String opprettetAv, LocalDateTime opprettetTidspunkt) {
-        this(opprettetAv, opprettetTidspunkt);
         this.setDokument(dokument);
-        dokument.setHarOppdatertEksisterendeVurderinger(this);
     }
 
     public SykdomDokument getDokument() {
@@ -50,5 +45,13 @@ public class SykdomDokumentHarOppdatertEksisterendeVurderinger implements Serial
 
     public void setDokument(SykdomDokument dokument) {
         this.dokument = dokument;
+    }
+
+    public String getOpprettetAv() {
+        return opprettetAv;
+    }
+
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
     }
 }

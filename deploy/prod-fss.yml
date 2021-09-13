@@ -199,8 +199,6 @@ spec:
     # Feature-flag
     - name: STOPP_VED_MANGLENDE_SOKTE_PERIODER
       value: "false"
-    - name: OMP_ETTERLYS_IM
-      value: "false"
     - name: OVERSTYRING_OPPTJ_AKT_FJERNET
       value: "false"
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD

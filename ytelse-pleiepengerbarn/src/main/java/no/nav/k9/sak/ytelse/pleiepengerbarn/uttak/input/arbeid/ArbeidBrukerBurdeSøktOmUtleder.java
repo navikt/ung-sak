@@ -111,9 +111,10 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         var resultat = new HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>>();
         // Sjekk mot hva det skulle vært søkt om
         for (Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> entry : mellomregning.entrySet()) {
-            var søktOm = søktArbeid.get(entry.getKey());
+            var søktOm = søktArbeid.getOrDefault(entry.getKey(), new LocalDateTimeline<WrappedArbeid>(List.of()));
 
             var skulleVærtSøktOm = entry.getValue().disjoint(søktOm);
+            skulleVærtSøktOm = skulleVærtSøktOm.intersection(tidslinjeTilVurdering);
             skulleVærtSøktOm = skulleVærtSøktOm.disjoint(helgeTidslinje);
 
             if (!skulleVærtSøktOm.isEmpty()) {
