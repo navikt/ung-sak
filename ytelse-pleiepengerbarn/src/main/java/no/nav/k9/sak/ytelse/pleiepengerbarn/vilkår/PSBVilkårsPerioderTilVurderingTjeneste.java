@@ -251,7 +251,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(Long behandlingId) {
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
-        return søktePerioder.hentKravperioder(behandling.getFagsakId(), behandlingId)
+        return søknadsperiodeTjeneste.hentKravperioder(behandling.getFagsakId(), behandlingId)
             .stream()
             .filter(kp -> kp.isHarTrukketKrav() && kp.getBehandlingId().equals(behandlingId))
             .map(kp -> kp.getPeriode())
