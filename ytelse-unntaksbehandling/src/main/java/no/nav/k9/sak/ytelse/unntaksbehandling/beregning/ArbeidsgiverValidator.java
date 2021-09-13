@@ -1,14 +1,21 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.beregning;
 
-import static no.nav.k9.sak.ytelse.unntaksbehandling.beregning.ArbeidsgiverValidator.ArbeidsgiverLookupFeil.FACTORY;
 import static no.nav.k9.felles.feil.LogLevel.INFO;
+import static no.nav.k9.sak.ytelse.unntaksbehandling.beregning.ArbeidsgiverValidator.ArbeidsgiverLookupFeil.FACTORY;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
@@ -16,14 +23,11 @@ import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
-import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
 
 @Dependent
 class ArbeidsgiverValidator {
     static final int ORGNUMMER_LENGDE = 9;
+    private static final List<Inntektskategori> INNTEKTKATEGORI_UTEN_ARBEIDSGIVER = List.of(Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE, Inntektskategori.FRILANSER);
 
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
 
@@ -41,10 +45,24 @@ class ArbeidsgiverValidator {
      * Valider at ident finnes som arbeidsgiver i Enhetsregisteret (orgnummer), eller er bruker selv (aktørid)
      */
     void valider(List<TilkjentYtelsePeriodeDto> perioder, AktørId fagsakAktørId) {
-        perioder.stream()
-            .flatMap(p -> p.getAndeler().stream())
-            .map(TilkjentYtelseAndelDto::getArbeidsgiver)
-            .forEach(arbeidsgiver -> validerArbeidsgiver(arbeidsgiver.getIdentifikator(), fagsakAktørId));
+        var andeler = perioder.stream().flatMap(p -> p.getAndeler().stream()).collect(Collectors.toList());
+
+        var andelerUtenArbeidsgiver = andeler.stream()
+            .filter(andel -> INNTEKTKATEGORI_UTEN_ARBEIDSGIVER.contains(andel.getInntektskategori()))
+            .collect(Collectors.toList());
+        var perioderMedArbeidsgiver = andeler.stream()
+            .filter(andel -> !INNTEKTKATEGORI_UTEN_ARBEIDSGIVER.contains(andel.getInntektskategori()))
+            .collect(Collectors.toList());
+
+        andelerUtenArbeidsgiver.forEach(andel -> validerAndelUtenArbeidsgiver(andel));
+        perioderMedArbeidsgiver.forEach(andel -> validerArbeidsgiver(andel.getArbeidsgiver().getIdentifikator(), fagsakAktørId));
+    }
+
+    private void validerAndelUtenArbeidsgiver(TilkjentYtelseAndelDto andel) {
+        var refusjon = Optional.ofNullable(andel.getRefusjon()).orElse(0);
+        if (refusjon > 0) {
+            throw new IllegalArgumentException("Må oppgi arbeidstaker dersom andel er refusjon");
+        }
     }
 
     void validerArbeidsgiver(String identifikator, AktørId faksakAktørid) {

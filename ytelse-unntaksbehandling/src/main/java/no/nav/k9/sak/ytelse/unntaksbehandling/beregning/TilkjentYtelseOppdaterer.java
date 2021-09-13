@@ -125,19 +125,29 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     }
 
     private BeregningsresultatAndel.Builder byggAndel(TilkjentYtelseAndelDto tyAndel, Integer dagsats, Boolean erBrukerMottaker) {
+        Arbeidsgiver arbeidsgiver = hentArbeidsgiver(tyAndel);
+
         return BeregningsresultatAndel.builder()
             .medBrukerErMottaker(erBrukerMottaker)
             .medDagsats(dagsats)
             .medDagsatsFraBg(0) // Settes kun senere dersom aksjonspunkt for vurdering av tilbaketrekk
             .medUtbetalingsgrad(tyAndel.getUtbetalingsgrad())
-            .medArbeidsgiver(OrgNummer.erGyldigOrgnr(tyAndel.getArbeidsgiver().getIdentifikator())
-                ? Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiver().getIdentifikator())
-                : Arbeidsgiver.person(new AktørId(tyAndel.getArbeidsgiver().getIdentifikator())))
+            .medArbeidsgiver(arbeidsgiver)
             .medArbeidsforholdRef(InternArbeidsforholdRef.ref(tyAndel.getArbeidsforholdRef()))
             .medAktivitetStatus(aktivitetStatusFor(tyAndel.getInntektskategori()))
             .medInntektskategori(tyAndel.getInntektskategori())
             .medArbeidsforholdType(ARBEIDSFORHOLD_TYPE)
             .medStillingsprosent(STILLINGSPROSENT);
+    }
+
+    private Arbeidsgiver hentArbeidsgiver(TilkjentYtelseAndelDto tyAndel) {
+        var arbeidsgiver = tyAndel.getArbeidsgiver();
+        if (arbeidsgiver == null) {
+            return null;
+        }
+        return OrgNummer.erGyldigOrgnr(tyAndel.getArbeidsgiver().getIdentifikator())
+            ? Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiver().getIdentifikator())
+            : Arbeidsgiver.person(new AktørId(tyAndel.getArbeidsgiver().getIdentifikator()));
     }
 
     private void validerDto(BekreftTilkjentYtelseDto dto, Behandling behandling) {
