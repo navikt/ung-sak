@@ -40,7 +40,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BekreftTilkjentYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
@@ -126,7 +125,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     }
 
     private BeregningsresultatAndel.Builder byggAndel(TilkjentYtelseAndelDto tyAndel, Integer dagsats, Boolean erBrukerMottaker) {
-        Arbeidsgiver arbeidsgiver = hentArbeidsgiver(tyAndel, erBrukerMottaker).orElse(null);
+        Arbeidsgiver arbeidsgiver = hentArbeidsgiver(tyAndel);
 
         return BeregningsresultatAndel.builder()
             .medBrukerErMottaker(erBrukerMottaker)
@@ -141,15 +140,14 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .medStillingsprosent(STILLINGSPROSENT);
     }
 
-    private Optional<Arbeidsgiver> hentArbeidsgiver(TilkjentYtelseAndelDto tyAndel, Boolean erBrukerMottaker) {
-        var arbeidsgiverIdentikator = Optional.ofNullable(tyAndel.getArbeidsgiver()).map(ArbeidsgiverDto::getIdentifikator);
-        if (arbeidsgiverIdentikator.isEmpty() && !erBrukerMottaker) {
-            throw new IllegalArgumentException("Må opggi arbeidstaker dersom andel er refusjon");
+    private Arbeidsgiver hentArbeidsgiver(TilkjentYtelseAndelDto tyAndel) {
+        var arbeidsgiver = tyAndel.getArbeidsgiver();
+        if (arbeidsgiver == null) {
+            return null;
         }
-        return arbeidsgiverIdentikator
-            .map(identitikator -> OrgNummer.erGyldigOrgnr(identitikator)
-                ? Arbeidsgiver.virksomhet(identitikator)
-                : Arbeidsgiver.person(new AktørId(identitikator)));
+        return OrgNummer.erGyldigOrgnr(tyAndel.getArbeidsgiver().getIdentifikator())
+            ? Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiver().getIdentifikator())
+            : Arbeidsgiver.person(new AktørId(tyAndel.getArbeidsgiver().getIdentifikator()));
     }
 
     private void validerDto(BekreftTilkjentYtelseDto dto, Behandling behandling) {
