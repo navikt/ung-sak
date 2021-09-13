@@ -309,13 +309,13 @@ public class ÅrskvantumTjeneste {
     }
 
     private SøknadÅrsak utledSøknadÅrsak(OppgittFraværPeriode periode) {
-        if (no.nav.k9.kodeverk.uttak.SøknadÅrsak.ARBEIDSGIVER_KONKURS.equals(periode.getFraværÅrsak())) {
+        if (no.nav.k9.kodeverk.uttak.SøknadÅrsak.ARBEIDSGIVER_KONKURS.equals(periode.getSøknadÅrsak())) {
             return SøknadÅrsak.ARBEIDSGIVER_KONKURS;
         }
-        if (no.nav.k9.kodeverk.uttak.SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER.equals(periode.getFraværÅrsak())) {
+        if (no.nav.k9.kodeverk.uttak.SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER.equals(periode.getSøknadÅrsak())) {
             return SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER;
         }
-        if (no.nav.k9.kodeverk.uttak.SøknadÅrsak.KONFLIKT_MED_ARBEIDSGIVER.equals(periode.getFraværÅrsak())) {
+        if (no.nav.k9.kodeverk.uttak.SøknadÅrsak.KONFLIKT_MED_ARBEIDSGIVER.equals(periode.getSøknadÅrsak())) {
             return SøknadÅrsak.KONFLIKT_MED_ARBEIDSGIVER;
         }
         return SøknadÅrsak.UDEFINERT;
