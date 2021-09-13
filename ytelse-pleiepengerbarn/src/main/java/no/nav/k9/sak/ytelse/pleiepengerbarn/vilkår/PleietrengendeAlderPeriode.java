@@ -14,6 +14,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
 public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjon {
     
@@ -24,7 +25,7 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
     private BehandlingRepository behandlingRepository;
     private PersoninfoAdapter personinfoAdapter;
     
-    private SøktePerioder søktePerioder;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private int fomAlder;
     private int toAlder;
 
@@ -32,21 +33,22 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
     private PleietrengendeAlderPeriode(BasisPersonopplysningTjeneste personopplysningTjeneste,
             BehandlingRepository behandlingRepository,
             PersoninfoAdapter personinfoAdapter,
-            SøktePerioder søktePerioder,
+            SøknadsperiodeTjeneste søknadsperiodeTjeneste,
             int fomAlder,
             int toAlder) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.personinfoAdapter = personinfoAdapter;
-        this.søktePerioder = søktePerioder;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.fomAlder = fomAlder;
         this.toAlder = toAlder;
     }
     
 
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {        
-        final var perioder = søktePerioder.utledPeriode(behandlingId);
+    public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
+        // XXX: Hvorfor virker det ikke med utledPeriode her?
+        final var perioder = søknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId);
         
         final var fødselsdato = finnPleietrengendesFødselsdato(behandlingId);
         final var periodeSomKanUtledes = new LocalDateInterval(fødselsdato.plusYears(fomAlder), fødselsdato.plusYears(toAlder).minusDays(1));
@@ -91,15 +93,15 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
             BasisPersonopplysningTjeneste personopplysningTjeneste,
             BehandlingRepository behandlingRepository,
             PersoninfoAdapter personinfoAdapter,
-            SøktePerioder søktePerioder) {
-        return new PleietrengendeAlderPeriode(personopplysningTjeneste, behandlingRepository, personinfoAdapter, søktePerioder, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
+            SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
+        return new PleietrengendeAlderPeriode(personopplysningTjeneste, behandlingRepository, personinfoAdapter, søknadsperiodeTjeneste, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
     }
     
     public static final PleietrengendeAlderPeriode overEllerLik18(
             BasisPersonopplysningTjeneste personopplysningTjeneste,
             BehandlingRepository behandlingRepository,
             PersoninfoAdapter personinfoAdapter,
-            SøktePerioder søktePerioder) {
-        return new PleietrengendeAlderPeriode(personopplysningTjeneste, behandlingRepository, personinfoAdapter, søktePerioder, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
+            SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
+        return new PleietrengendeAlderPeriode(personopplysningTjeneste, behandlingRepository, personinfoAdapter, søknadsperiodeTjeneste, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
     }
 }
