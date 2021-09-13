@@ -20,7 +20,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 class OmsorgspengerInntektsmeldingerRelevantForBeregningTest {
 
-    private OmsorgspengerInntektsmeldingerRelevantForBeregning tjeneste = new OmsorgspengerInntektsmeldingerRelevantForBeregning();
+    private OmsorgspengerInntektsmeldingerRelevantForBeregning tjeneste = new OmsorgspengerInntektsmeldingerRelevantForBeregning(true);
 
     private DatoIntervallEntitet periode1 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now().minusDays(25));
     private DatoIntervallEntitet periode2 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10));
@@ -65,6 +65,32 @@ class OmsorgspengerInntektsmeldingerRelevantForBeregningTest {
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
         var vilkårsperiode2 = DatoIntervallEntitet.fraOgMedTilOgMed(dato("04-14"), dato("04-14"));
         var relevanteInntektsmeldinger = tjeneste.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsperiode2);
+        assertThat(relevanteInntektsmeldinger).containsOnly(inntektsmelding2);
+    }
+
+    @Test
+    public void skal_utlede_inntektsmeldinger_som_gjelder_for_periode_basert_på_første_stønadsdag_når_det_ikke_finnes_fraværsperioder() {
+        var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(dato("04-14"), dato("04-14"));
+
+        Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("000000000");
+        var inntektsmelding1 = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(virksomhet)
+            .medJournalpostId("1")
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("AR123")
+            .medStartDatoPermisjon(vilkårsperiode.getFomDato().minusDays(10))
+            .medRefusjon(BigDecimal.TEN)
+            .build();
+        var inntektsmelding2 = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(virksomhet)
+            .medJournalpostId("2")
+            .medBeløp(BigDecimal.ONE)
+            .medKanalreferanse("AR124")
+            .medStartDatoPermisjon(vilkårsperiode.getFomDato())
+            .medRefusjon(BigDecimal.ONE)
+            .build();
+        var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
+        var relevanteInntektsmeldinger = tjeneste.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsperiode);
         assertThat(relevanteInntektsmeldinger).containsOnly(inntektsmelding2);
     }
 
