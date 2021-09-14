@@ -22,7 +22,7 @@ import no.nav.k9.sak.typer.Periode;
 public class FastsettBGTidsbegrensetArbeidsforholdDto extends BekreftetBeregningsgrunnlagDto {
 
 
-    @JsonProperty(value = "fastsatteTidsbegrensendePerioder")
+    @JsonProperty(value = "fastsatteTidsbegrensedePerioder")
     @Valid
     @Size(max = 100)
     private List<FastsattePerioderTidsbegrensetDto> fastsatteTidsbegrensedePerioder;
