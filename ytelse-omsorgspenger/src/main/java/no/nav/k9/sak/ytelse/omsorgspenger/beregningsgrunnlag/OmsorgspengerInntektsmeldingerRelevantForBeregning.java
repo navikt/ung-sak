@@ -30,7 +30,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class OmsorgspengerInntektsmeldingerRelevantForBeregning implements InntektsmeldingerRelevantForBeregning {
 
     private Period IGNORER_IM_FRAVÆRSDAG_FØR_STP = Period.ofWeeks(4);
-    private Period IGNORER_IM_FRAVÆRSDAG_ETTER_STP = Period.ofWeeks(2);
+    private Period IGNORER_IM_FRAVÆRSDAG_ETTER_STP = Period.ofDays(0);
     private boolean lansertSjekkFørsteFraværsdag;
 
     OmsorgspengerInntektsmeldingerRelevantForBeregning() {
