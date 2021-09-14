@@ -197,6 +197,8 @@ spec:
       value: "3030"
 
     # Feature-flag
+    - name: OMP_IM_SJEKK_FORSTE_FRAVAERSDAG
+      value: "false"
     - name: STOPP_VED_MANGLENDE_SOKTE_PERIODER
       value: "false"
     - name: OVERSTYRING_OPPTJ_AKT_FJERNET
