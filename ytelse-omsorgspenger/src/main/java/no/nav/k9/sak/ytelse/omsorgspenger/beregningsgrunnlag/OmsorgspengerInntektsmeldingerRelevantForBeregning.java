@@ -29,9 +29,10 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 @FagsakYtelseTypeRef("OMP")
 public class OmsorgspengerInntektsmeldingerRelevantForBeregning implements InntektsmeldingerRelevantForBeregning {
 
-    private Period IGNORER_IM_FRAVÆRSDAG_FØR_STP = Period.ofWeeks(4);
-    private Period IGNORER_IM_FRAVÆRSDAG_ETTER_STP = Period.ofDays(0);
     private boolean lansertSjekkFørsteFraværsdag;
+
+    private Period GRENSE_AKSEPTER_STARTDATO_FØR_STP = Period.ofWeeks(4);
+    private Period GRENSE_AKSEPTER_STARTDATO_ETTER_STP = Period.ofDays(0);
 
     OmsorgspengerInntektsmeldingerRelevantForBeregning() {
     }
@@ -109,7 +110,7 @@ public class OmsorgspengerInntektsmeldingerRelevantForBeregning implements Innte
 
     private Set<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
         LocalDate stp = vilkårsPeriode.getFomDato();
-        LocalDateInterval godtattStartdato = new LocalDateInterval(stp.minus(IGNORER_IM_FRAVÆRSDAG_FØR_STP), stp.plus(IGNORER_IM_FRAVÆRSDAG_ETTER_STP));
+        LocalDateInterval intervallForAksepterbarStartdato = new LocalDateInterval(stp.minus(GRENSE_AKSEPTER_STARTDATO_FØR_STP), stp.plus(GRENSE_AKSEPTER_STARTDATO_ETTER_STP));
 
         Predicate<Inntektsmelding> filterGittFraværsperioder = it -> it.getOppgittFravær()
             .stream()
@@ -117,7 +118,7 @@ public class OmsorgspengerInntektsmeldingerRelevantForBeregning implements Innte
             .anyMatch(at -> vilkårsPeriode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom())));
 
         Predicate<Inntektsmelding> filtrerGittFraværsperioderOgFørsteStønadsdag = im ->
-            filterGittFraværsperioder.test(im) || im.getOppgittFravær().isEmpty() && im.getStartDatoPermisjon().map(godtattStartdato::encloses).orElse(false);
+            filterGittFraværsperioder.test(im) || im.getOppgittFravær().isEmpty() && im.getStartDatoPermisjon().isPresent() && intervallForAksepterbarStartdato.encloses(im.getStartDatoPermisjon().get());
 
         return sakInntektsmeldinger
             .stream()
