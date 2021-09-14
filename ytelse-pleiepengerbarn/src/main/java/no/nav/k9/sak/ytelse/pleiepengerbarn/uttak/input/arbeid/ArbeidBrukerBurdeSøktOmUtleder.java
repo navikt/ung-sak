@@ -136,12 +136,11 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
                 if (Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).contains(next.getDayOfWeek()) && min.isEqual(next)) {
                     next = finnNeste(max, next);
                     timeline = timeline.combine(new LocalDateSegment<>(min, next, true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-                } else {
-                    var start = finnNærmeste(DayOfWeek.SATURDAY, next);
-                    next = finnNeste(max, start);
-                    if (start.isBefore(max)) {
-                        timeline = timeline.combine(new LocalDateSegment<>(start, next, true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-                    }
+                }
+                var start = finnNærmeste(DayOfWeek.SATURDAY, next);
+                next = finnNeste(max, start);
+                if (start.isBefore(max)) {
+                    timeline = timeline.combine(new LocalDateSegment<>(start, next, true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
                 }
             }
 
