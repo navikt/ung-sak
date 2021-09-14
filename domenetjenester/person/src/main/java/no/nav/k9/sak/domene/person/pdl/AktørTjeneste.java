@@ -151,7 +151,12 @@ public class AktørTjeneste {
 
     private Stream<Tuple<PersonIdent, AktørId>> hentBolkMedAktørId(List<PersonIdent> personIdents) {
         var query = new HentIdenterBolkQueryRequest();
-        query.setIdenter(personIdents.stream().map(PersonIdent::getIdent).collect(toList()));
+        var fødselsnummere = personIdents.stream().map(PersonIdent::getIdent).collect(toList());
+        if (fødselsnummere.contains(null)) {
+            throw new IllegalArgumentException("Kan ikke søke på ident som ikke er gyldig fnr. Mulig feil er at fnr" +
+                "har feil lengde, har feil sjekksum, eller er et FDAT-nummer");
+        }
+        query.setIdenter(fødselsnummere);
         query.setGrupper(of(IdentGruppe.AKTORID));
 
         var projection = new HentIdenterBolkResultResponseProjection()
