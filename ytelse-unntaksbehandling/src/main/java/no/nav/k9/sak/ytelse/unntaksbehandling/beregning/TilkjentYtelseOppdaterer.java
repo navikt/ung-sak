@@ -127,11 +127,14 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     private BeregningsresultatAndel.Builder byggAndel(TilkjentYtelseAndelDto tyAndel, Integer dagsats, Boolean erBrukerMottaker) {
         Arbeidsgiver arbeidsgiver = hentArbeidsgiver(tyAndel);
 
+        //utbetalingsgrad kreves kun for ytelse som skal skattes (trengs for å sette riktig skattesats hos Oppdrag)
+        //men kreves av modellen, setter dummy-verdi
+        BigDecimal utbetalingsgrad = tyAndel.getUtbetalingsgrad() != null ? tyAndel.getUtbetalingsgrad() : BigDecimal.valueOf(100);
         return BeregningsresultatAndel.builder()
             .medBrukerErMottaker(erBrukerMottaker)
             .medDagsats(dagsats)
             .medDagsatsFraBg(0) // Settes kun senere dersom aksjonspunkt for vurdering av tilbaketrekk
-            .medUtbetalingsgrad(tyAndel.getUtbetalingsgrad())
+            .medUtbetalingsgrad(utbetalingsgrad)
             .medArbeidsgiver(arbeidsgiver)
             .medArbeidsforholdRef(InternArbeidsforholdRef.ref(tyAndel.getArbeidsforholdRef()))
             .medAktivitetStatus(aktivitetStatusFor(tyAndel.getInntektskategori()))
