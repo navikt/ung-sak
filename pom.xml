@@ -39,7 +39,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <junit.version>5.8.0</junit.version>
-        <felles.version>0.2.18</felles.version>
+        <felles.version>0.5.6</felles.version>
         <swagger.version>2.1.10</swagger.version>
         <fp-kontrakter.version>6.0.4</fp-kontrakter.version>
         <k9format.version>5.4.14</k9format.version>
