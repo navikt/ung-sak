@@ -12,6 +12,8 @@ public class OpptjeningAktivitetVurderingOpptjeningsvilkår implements Opptjenin
             // - Egen næring oppgitt eller registrert
             // - Frilans oppgitt eller registrert
             case ARBEID, NÆRING, FRILANS -> VurderingsStatus.TIL_VURDERING;
+            // Ytelser til livsopphold fra NAV likestilles med arbeidsaktivitet
+            case ARBEIDSAVKLARING, DAGPENGER, FORELDREPENGER, FRISINN, OMSORGSPENGER, OPPLÆRINGSPENGER, PLEIEPENGER, SVANGERSKAPSPENGER, SYKEPENGER -> VurderingsStatus.TIL_VURDERING;
             // Alle andre opptjeningsaktiviteter underkjennes mht automatisk vilkårsvurdering
             default -> VurderingsStatus.FERDIG_VURDERT_UNDERKJENT;
         };
