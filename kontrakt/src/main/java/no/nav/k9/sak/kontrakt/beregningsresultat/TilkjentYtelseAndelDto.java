@@ -9,10 +9,8 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -20,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.OrgNummer;
 
@@ -30,23 +27,12 @@ import no.nav.k9.sak.typer.OrgNummer;
 public class TilkjentYtelseAndelDto {
 
     @JsonProperty(value = "inntektskategori", required = true)
+    @NotNull
     @Valid
     private Inntektskategori inntektskategori;
-    @JsonProperty(value = "aktørId")
+    @JsonProperty(value = "arbeidsgiverAktørId")
     @Valid
     private AktørId aktørId;
-    @JsonProperty(value = "arbeidsforholdId")
-    @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Graph}\\-\\p{P}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    private String arbeidsforholdId;
-    @JsonProperty(value = "arbeidsforholdRef")
-    @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Alnum}\\-_:.\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    private String arbeidsforholdRef;
-    @JsonProperty(value = "arbeidsgiver")
-    @Valid
-    private ArbeidsgiverDto arbeidsgiver;
-    @JsonAlias("orgNummer")
     @JsonProperty(value = "arbeidsgiverOrgnr")
     @Valid
     private OrgNummer arbeidsgiverOrgnr;
@@ -73,10 +59,7 @@ public class TilkjentYtelseAndelDto {
         this.tilSoker = builder.tilSoker;
         this.refusjon = builder.refusjon;
         this.utbetalingsgrad = builder.utbetalingsgrad;
-        this.arbeidsforholdId = builder.arbeidsforholdId;
-        this.arbeidsforholdRef = builder.arbeidsforholdRef;
-        this.aktørId = builder.aktørId;
-        this.arbeidsgiver = builder.arbeidsgiver;
+        this.aktørId = builder.arbeidsgiverAktørId;
         this.inntektskategori = Objects.requireNonNull(builder.inntektskategori, "inntektskategori");
     }
 
@@ -86,18 +69,6 @@ public class TilkjentYtelseAndelDto {
 
     public AktørId getAktørId() {
         return aktørId;
-    }
-
-    public String getArbeidsforholdId() {
-        return arbeidsforholdId;
-    }
-
-    public ArbeidsgiverDto getArbeidsgiver() {
-        return arbeidsgiver;
-    }
-
-    public String getArbeidsforholdRef() {
-        return arbeidsforholdRef;
     }
 
     public OrgNummer getArbeidsgiverOrgnr() {
@@ -121,10 +92,7 @@ public class TilkjentYtelseAndelDto {
     }
 
     public static class Builder {
-        private AktørId aktørId;
-        private String arbeidsforholdId;
-        public String arbeidsforholdRef;
-        private ArbeidsgiverDto arbeidsgiver;
+        private AktørId arbeidsgiverAktørId;
         private OrgNummer arbeidsgiverOrgnr;
         private Integer refusjon;
         private Integer tilSoker;
@@ -138,23 +106,13 @@ public class TilkjentYtelseAndelDto {
             return new TilkjentYtelseAndelDto(this);
         }
 
-        public Builder medAktørId(AktørId aktørId) {
-            this.aktørId = aktørId;
+        public Builder medArbeidsgiverOrgNr(OrgNummer arbeidsgiverOrgnr) {
+            this.arbeidsgiverOrgnr = arbeidsgiverOrgnr;
             return this;
         }
 
-        public Builder medArbeidsforholdId(String arbeidsforholdId) {
-            this.arbeidsforholdId = arbeidsforholdId;
-            return this;
-        }
-
-        public Builder medArbeidsforholdRef(String arbeidsforholdRef) {
-            this.arbeidsforholdRef = arbeidsforholdRef;
-            return this;
-        }
-
-        public Builder medArbeidsgiver(ArbeidsgiverDto arbeidsgiver) {
-            this.arbeidsgiver = arbeidsgiver;
+        public Builder medAktørId(AktørId arbeidsgiverAktørId) {
+            this.arbeidsgiverAktørId = arbeidsgiverAktørId;
             return this;
         }
 

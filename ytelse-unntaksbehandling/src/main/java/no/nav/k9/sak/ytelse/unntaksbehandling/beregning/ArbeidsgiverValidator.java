@@ -4,7 +4,6 @@ import static no.nav.k9.felles.feil.LogLevel.INFO;
 import static no.nav.k9.sak.ytelse.unntaksbehandling.beregning.ArbeidsgiverValidator.ArbeidsgiverLookupFeil.FACTORY;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -26,7 +25,6 @@ import no.nav.k9.sak.typer.OrgNummer;
 
 @Dependent
 class ArbeidsgiverValidator {
-    static final int ORGNUMMER_LENGDE = 9;
     private static final List<Inntektskategori> INNTEKTKATEGORI_UTEN_ARBEIDSGIVER = List.of(Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE, Inntektskategori.FRILANSER);
 
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
@@ -55,7 +53,7 @@ class ArbeidsgiverValidator {
             .collect(Collectors.toList());
 
         andelerUtenArbeidsgiver.forEach(andel -> validerAndelUtenArbeidsgiver(andel));
-        perioderMedArbeidsgiver.forEach(andel -> validerArbeidsgiver(andel.getArbeidsgiver().getIdentifikator(), fagsakAktørId));
+        perioderMedArbeidsgiver.forEach(andel -> validerArbeidsgiver(andel.getArbeidsgiverOrgnr(), andel.getAktørId(), fagsakAktørId));
     }
 
     private void validerAndelUtenArbeidsgiver(TilkjentYtelseAndelDto andel) {
@@ -63,15 +61,20 @@ class ArbeidsgiverValidator {
         if (refusjon > 0) {
             throw new IllegalArgumentException("Må oppgi arbeidstaker dersom andel er refusjon");
         }
+
     }
 
-    void validerArbeidsgiver(String identifikator, AktørId faksakAktørid) {
-        Objects.requireNonNull(identifikator, "identifikator for arbeidsgiver kan ikke være tom");
-
-        if (identifikator.length() == ORGNUMMER_LENGDE) {
-            validerOrgnummer(identifikator);
+    void validerArbeidsgiver(OrgNummer orgNummer, AktørId aktørId, AktørId faksakAktørid) {
+        if (orgNummer == null && aktørId == null) {
+            throw new IllegalArgumentException("Mangler id for arbeidsgiver");
+        }
+        if (orgNummer != null && aktørId != null) {
+            throw new IllegalArgumentException("Kan bare opplyse om orgNr eller personId, ikke begge");
+        }
+        if (orgNummer != null) {
+            validerOrgnummer(orgNummer.getOrgNummer());
         } else {
-            validerAktørId(identifikator, faksakAktørid);
+            validerAktørId(aktørId, faksakAktørid);
         }
     }
 
@@ -89,15 +92,13 @@ class ArbeidsgiverValidator {
         if (arbeidsgiverOpplysninger == null) {
             throw FACTORY.ukjentOrgnummer(identifikator).toException();
         }
-
     }
 
-    private void validerAktørId(String identifikator, AktørId fagsakAktørId) {
-        if (!identifikator.equals(fagsakAktørId.getId())) {
-            throw FACTORY.ukjentIdentifikator(identifikator).toException();
+    private void validerAktørId(AktørId identifikator, AktørId fagsakAktørId) {
+        if (identifikator.equals(fagsakAktørId)) {
+            throw FACTORY.egenArbeidsgiver().toException();
         }
     }
-
 
     interface ArbeidsgiverLookupFeil extends DeklarerteFeil {
         ArbeidsgiverValidator.ArbeidsgiverLookupFeil FACTORY = FeilFactory.create(ArbeidsgiverValidator.ArbeidsgiverLookupFeil.class);
@@ -111,7 +112,7 @@ class ArbeidsgiverValidator {
         @FunksjonellFeil(feilkode = "K9-886241", feilmelding = "Arbeidsgiver for andel finnes ikke i Enhetsregisteret: %s", løsningsforslag = "", logLevel = INFO)
         Feil ukjentOrgnummer(String feilmelding, Throwable e);
 
-        @FunksjonellFeil(feilkode = "K9-146118", feilmelding = "Arbeidsgiver for andel er verken orgnummer eller bruker. Ident mottatt: %s", løsningsforslag = "", logLevel = INFO)
-        Feil ukjentIdentifikator(String feilmelding);
+        @FunksjonellFeil(feilkode = "K9-146118", feilmelding = "Arbeidsgiver for andel er brukeren selv, det gir ikke helt mening. Skulle vært selvstendig næringsdrivende?", løsningsforslag = "", logLevel = INFO)
+        Feil egenArbeidsgiver();
     }
 }

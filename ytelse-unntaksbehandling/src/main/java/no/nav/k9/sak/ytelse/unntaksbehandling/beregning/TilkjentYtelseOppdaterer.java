@@ -43,10 +43,8 @@ import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BekreftTilkjentYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 
@@ -136,7 +134,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .medDagsatsFraBg(0) // Settes kun senere dersom aksjonspunkt for vurdering av tilbaketrekk
             .medUtbetalingsgrad(utbetalingsgrad)
             .medArbeidsgiver(arbeidsgiver)
-            .medArbeidsforholdRef(InternArbeidsforholdRef.ref(tyAndel.getArbeidsforholdRef()))
+            .medArbeidsforholdRef(InternArbeidsforholdRef.nullRef())
             .medAktivitetStatus(aktivitetStatusFor(tyAndel.getInntektskategori()))
             .medInntektskategori(tyAndel.getInntektskategori())
             .medArbeidsforholdType(ARBEIDSFORHOLD_TYPE)
@@ -144,13 +142,13 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     }
 
     private Arbeidsgiver hentArbeidsgiver(TilkjentYtelseAndelDto tyAndel) {
-        var arbeidsgiver = tyAndel.getArbeidsgiver();
-        if (arbeidsgiver == null) {
-            return null;
+        if (tyAndel.getArbeidsgiverOrgnr() != null){
+            return Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiverOrgnr());
         }
-        return OrgNummer.erGyldigOrgnr(tyAndel.getArbeidsgiver().getIdentifikator())
-            ? Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiver().getIdentifikator())
-            : Arbeidsgiver.person(new AktørId(tyAndel.getArbeidsgiver().getIdentifikator()));
+        if (tyAndel.getAktørId() != null){
+            return Arbeidsgiver.person(tyAndel.getAktørId());
+        }
+        return null;
     }
 
     private void validerDto(BekreftTilkjentYtelseDto dto, Behandling behandling) {
