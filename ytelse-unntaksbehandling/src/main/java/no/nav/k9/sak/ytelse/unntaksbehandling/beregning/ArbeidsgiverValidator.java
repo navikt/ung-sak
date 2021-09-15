@@ -57,7 +57,7 @@ class ArbeidsgiverValidator {
     }
 
     private void validerAndelUtenArbeidsgiver(TilkjentYtelseAndelDto andel) {
-        var refusjon = Optional.ofNullable(andel.getRefusjon()).orElse(0);
+        var refusjon = Optional.ofNullable(andel.getRefusjonsbeløp()).orElse(0);
         if (refusjon > 0) {
             throw new IllegalArgumentException("Må oppgi arbeidstaker dersom andel er refusjon");
         }

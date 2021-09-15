@@ -39,11 +39,11 @@ public class TilkjentYtelseAndelDto {
     @JsonProperty(value = "refusjon")
     @Min(0)
     @Max(1000000)
-    private Integer refusjon;
+    private Integer refusjonsbeløp;
     @JsonProperty(value = "tilSoker")
     @Min(0)
     @Max(1000000)
-    private Integer tilSoker;
+    private Integer beløpTilSøker;
     @JsonProperty(value = "utbetalingsgrad")
     @DecimalMin("0.00")
     @DecimalMax("100.00")
@@ -55,12 +55,12 @@ public class TilkjentYtelseAndelDto {
     }
 
     private TilkjentYtelseAndelDto(Builder builder) {
-        this.arbeidsgiverOrgnr = builder.arbeidsgiverOrgnr;
-        this.tilSoker = builder.tilSoker;
-        this.refusjon = builder.refusjon;
-        this.utbetalingsgrad = builder.utbetalingsgrad;
-        this.aktørId = builder.arbeidsgiverAktørId;
         this.inntektskategori = Objects.requireNonNull(builder.inntektskategori, "inntektskategori");
+        this.arbeidsgiverOrgnr = builder.arbeidsgiverOrgnr;
+        this.aktørId = builder.arbeidsgiverAktørId;
+        this.beløpTilSøker = builder.beløpTilSøker;
+        this.refusjonsbeløp = builder.refusjonsbeløp;
+        this.utbetalingsgrad = builder.utbetalingsgrad;
     }
 
     public static Builder build() {
@@ -79,12 +79,12 @@ public class TilkjentYtelseAndelDto {
         return inntektskategori;
     }
 
-    public Integer getRefusjon() {
-        return refusjon;
+    public Integer getRefusjonsbeløp() {
+        return refusjonsbeløp;
     }
 
-    public Integer getTilSoker() {
-        return tilSoker;
+    public Integer getBeløpTilSøker() {
+        return beløpTilSøker;
     }
 
     public BigDecimal getUtbetalingsgrad() {
@@ -94,8 +94,8 @@ public class TilkjentYtelseAndelDto {
     public static class Builder {
         private AktørId arbeidsgiverAktørId;
         private OrgNummer arbeidsgiverOrgnr;
-        private Integer refusjon;
-        private Integer tilSoker;
+        private Integer refusjonsbeløp;
+        private Integer beløpTilSøker;
         private BigDecimal utbetalingsgrad;
         private Inntektskategori inntektskategori;
 
@@ -104,6 +104,11 @@ public class TilkjentYtelseAndelDto {
 
         public TilkjentYtelseAndelDto create() {
             return new TilkjentYtelseAndelDto(this);
+        }
+
+        public Builder medInntektskategori(Inntektskategori inntektskategori) {
+            this.inntektskategori = inntektskategori;
+            return this;
         }
 
         public Builder medArbeidsgiverOrgNr(OrgNummer arbeidsgiverOrgnr) {
@@ -116,23 +121,18 @@ public class TilkjentYtelseAndelDto {
             return this;
         }
 
-        public Builder medRefusjon(Integer refusjon) {
-            this.refusjon = refusjon;
+        public Builder medBeløpTilSøker(Integer beløpTilSøker) {
+            this.beløpTilSøker = beløpTilSøker;
             return this;
         }
 
-        public Builder medTilSoker(Integer tilSoker) {
-            this.tilSoker = tilSoker;
+        public Builder medRefusjonsbeløp(Integer refusjonsbeløp) {
+            this.refusjonsbeløp = refusjonsbeløp;
             return this;
         }
 
         public Builder medUtbetalingsgrad(BigDecimal utbetalingsgrad) {
             this.utbetalingsgrad = utbetalingsgrad;
-            return this;
-        }
-
-        public Builder medInntektskategori(Inntektskategori inntektskategori) {
-            this.inntektskategori = inntektskategori;
             return this;
         }
     }

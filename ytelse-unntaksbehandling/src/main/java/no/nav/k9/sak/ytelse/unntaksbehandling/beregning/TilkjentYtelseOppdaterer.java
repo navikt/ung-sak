@@ -107,8 +107,8 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .build(beregningsresultat);
 
         for (TilkjentYtelseAndelDto tyAndel : tyPeriode.getAndeler()) {
-            var tilSøker = Optional.ofNullable(tyAndel.getTilSoker()).orElse(0);
-            var refusjon = Optional.ofNullable(tyAndel.getRefusjon()).orElse(0);
+            var tilSøker = Optional.ofNullable(tyAndel.getBeløpTilSøker()).orElse(0);
+            var refusjon = Optional.ofNullable(tyAndel.getRefusjonsbeløp()).orElse(0);
 
             // Søkers andel - obligatorisk for Beregningsresultat
             var søkersAndel = byggAndel(tyAndel, tilSøker, true);

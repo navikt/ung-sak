@@ -100,8 +100,8 @@ public class TilkjentYtelseOppdatererTest {
         Inntektskategori inntekskategori = Inntektskategori.ARBEIDSAVKLARINGSPENGER;
 
         var andelBruker = TilkjentYtelseAndelDto.build()
-            .medRefusjon(dagsatsRefusjon)
-            .medTilSoker(dagsatsBruker)
+            .medRefusjonsbeløp(dagsatsRefusjon)
+            .medBeløpTilSøker(dagsatsBruker)
             .medInntektskategori(inntekskategori)
             .medArbeidsgiverOrgNr(new OrgNummer("910909088"))
             .medUtbetalingsgrad(utbealingsgrad)
