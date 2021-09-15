@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.OrgNummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -30,9 +29,6 @@ public class TilkjentYtelseAndelDto {
     @NotNull
     @Valid
     private Inntektskategori inntektskategori;
-    @JsonProperty(value = "arbeidsgiverAktørId")
-    @Valid
-    private AktørId aktørId;
     @JsonProperty(value = "arbeidsgiverOrgnr")
     @Valid
     private OrgNummer arbeidsgiverOrgnr;
@@ -57,7 +53,6 @@ public class TilkjentYtelseAndelDto {
     private TilkjentYtelseAndelDto(Builder builder) {
         this.inntektskategori = Objects.requireNonNull(builder.inntektskategori, "inntektskategori");
         this.arbeidsgiverOrgnr = builder.arbeidsgiverOrgnr;
-        this.aktørId = builder.arbeidsgiverAktørId;
         this.beløpTilSøker = builder.beløpTilSøker;
         this.refusjonsbeløp = builder.refusjonsbeløp;
         this.utbetalingsgrad = builder.utbetalingsgrad;
@@ -65,10 +60,6 @@ public class TilkjentYtelseAndelDto {
 
     public static Builder build() {
         return new Builder();
-    }
-
-    public AktørId getAktørId() {
-        return aktørId;
     }
 
     public OrgNummer getArbeidsgiverOrgnr() {
@@ -92,7 +83,6 @@ public class TilkjentYtelseAndelDto {
     }
 
     public static class Builder {
-        private AktørId arbeidsgiverAktørId;
         private OrgNummer arbeidsgiverOrgnr;
         private Integer refusjonsbeløp;
         private Integer beløpTilSøker;
@@ -113,11 +103,6 @@ public class TilkjentYtelseAndelDto {
 
         public Builder medArbeidsgiverOrgNr(OrgNummer arbeidsgiverOrgnr) {
             this.arbeidsgiverOrgnr = arbeidsgiverOrgnr;
-            return this;
-        }
-
-        public Builder medAktørId(AktørId arbeidsgiverAktørId) {
-            this.arbeidsgiverAktørId = arbeidsgiverAktørId;
             return this;
         }
 

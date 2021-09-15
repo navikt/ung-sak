@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import no.nav.k9.felles.exception.FunksjonellException;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
 
@@ -21,9 +20,6 @@ public class ArbeidsgiverValidatorTest {
     private static final OrgNummer GYLDIG_ORGNR = new OrgNummer("910909088");
     private static final OrgNummer UKJENT_ORGNR = new OrgNummer("979312059");
     private static final OrgNummer ORGNR_VIRKSOMHETSTJENESTE_FEILER = new OrgNummer("890484832");
-
-    private static final AktørId AKTØRID_IDENT1 = new AktørId("1234567890123");
-    private static final AktørId AKTØRID_IDENT2 = new AktørId("1234567890124");
 
     private ArbeidsgiverValidator arbeidsgiverValidator;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
@@ -41,17 +37,9 @@ public class ArbeidsgiverValidatorTest {
         when(arbeidsgiverTjeneste.hent(eq(Arbeidsgiver.virksomhet(UKJENT_ORGNR)))).thenReturn(null);
         when(arbeidsgiverTjeneste.hent(eq(Arbeidsgiver.virksomhet(ORGNR_VIRKSOMHETSTJENESTE_FEILER)))).thenThrow(new RuntimeException("Oppslag mot virksomhetstjeneste feilet"));
 
-        assertDoesNotThrow(() -> arbeidsgiverValidator.validerArbeidsgiver(GYLDIG_ORGNR, null, null));
-        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(UKJENT_ORGNR, null, null));
-        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(ORGNR_VIRKSOMHETSTJENESTE_FEILER, null, null));
-    }
-
-    @Test
-    public void valider_orgnr_som_aktørid() {
-        AktørId fagsakAktørId = AKTØRID_IDENT1;
-
-        assertDoesNotThrow(() -> arbeidsgiverValidator.validerArbeidsgiver(null, AKTØRID_IDENT2, fagsakAktørId));
-        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(null, AKTØRID_IDENT1, fagsakAktørId));
+        assertDoesNotThrow(() -> arbeidsgiverValidator.validerArbeidsgiver(GYLDIG_ORGNR));
+        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(UKJENT_ORGNR));
+        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(ORGNR_VIRKSOMHETSTJENESTE_FEILER));
     }
 
 }

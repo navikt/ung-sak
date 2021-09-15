@@ -142,11 +142,8 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     }
 
     private Arbeidsgiver hentArbeidsgiver(TilkjentYtelseAndelDto tyAndel) {
-        if (tyAndel.getArbeidsgiverOrgnr() != null){
+        if (tyAndel.getArbeidsgiverOrgnr() != null) {
             return Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiverOrgnr());
-        }
-        if (tyAndel.getAktørId() != null){
-            return Arbeidsgiver.person(tyAndel.getAktørId());
         }
         return null;
     }
@@ -156,7 +153,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .getVilkår(VilkårType.K9_VILKÅRET).orElseThrow();
         TilkjentYtelsePerioderValidator.valider(dto.getTilkjentYtelse().getPerioder(), k9Vilkåret);
 
-        arbeidsgiverValidator.valider(dto.getTilkjentYtelse().getPerioder(), behandling.getAktørId());
+        arbeidsgiverValidator.valider(dto.getTilkjentYtelse().getPerioder());
     }
 
     private void opprettHistorikkinnslag(Behandling behandling, BeregningsresultatEntitet beregningsresultatFør, BeregningsresultatEntitet beregningsresultatEtter) {
