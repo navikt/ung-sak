@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
+import java.util.List;
 import java.util.Objects;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
@@ -26,6 +27,9 @@ public class Aktivitet {
     }
 
     public boolean matcher(Aktivitet aktivitet) {
+        if (List.of(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, UttakArbeidType.FRILANSER).contains(aktivitetType)) {
+            return Objects.equals(aktivitetType, aktivitet.aktivitetType);
+        }
         return Objects.equals(aktivitetType, aktivitet.aktivitetType) &&
             Objects.equals(arbeidsgiver, aktivitet.arbeidsgiver) &&
             arbeidsforholdRef.gjelderFor(aktivitet.arbeidsforholdRef);
