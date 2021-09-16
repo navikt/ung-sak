@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
@@ -17,21 +18,22 @@ import no.nav.k9.sak.domene.opptjening.OpptjeningInntektPeriode;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Aktivitet;
+import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Aktivitet.ReferanseType;
 import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.AktivitetPeriode;
 import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Opptjeningsgrunnlag;
 import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Opptjeningsvilkår;
-import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Aktivitet.ReferanseType;
-import no.nav.k9.felles.util.Tuple;
 
 class OpptjeningsgrunnlagAdapter {
     private LocalDate behandlingstidspunkt;
     private LocalDate startDato;
     private LocalDate sluttDato;
+    private Boolean overstyringFjernet;
 
-    OpptjeningsgrunnlagAdapter(LocalDate behandlingstidspunkt, LocalDate startDato, LocalDate sluttDato) {
+    OpptjeningsgrunnlagAdapter(LocalDate behandlingstidspunkt, LocalDate startDato, LocalDate sluttDato, Boolean overstyringFjernet) {
         this.behandlingstidspunkt = behandlingstidspunkt;
         this.startDato = startDato;
         this.sluttDato = sluttDato;
+        this.overstyringFjernet = overstyringFjernet;
     }
 
     Opptjeningsgrunnlag mapTilGrunnlag(Collection<OpptjeningAktivitetPeriode> opptjeningAktiveter,
@@ -155,6 +157,9 @@ class OpptjeningsgrunnlagAdapter {
     }
 
     private AktivitetPeriode.VurderingsStatus mapStatus(OpptjeningAktivitetPeriode periode) {
+        if (overstyringFjernet && List.of(VurderingsStatus.UNDERKJENT, VurderingsStatus.FERDIG_VURDERT_UNDERKJENT).contains(periode.getVurderingsStatus())) {
+            return AktivitetPeriode.VurderingsStatus.VURDERT_UNDERKJENT;
+        }
         if (VurderingsStatus.FERDIG_VURDERT_UNDERKJENT.equals(periode.getVurderingsStatus())) {
             return AktivitetPeriode.VurderingsStatus.VURDERT_UNDERKJENT;
         } else if (VurderingsStatus.FERDIG_VURDERT_GODKJENT.equals(periode.getVurderingsStatus())) {
