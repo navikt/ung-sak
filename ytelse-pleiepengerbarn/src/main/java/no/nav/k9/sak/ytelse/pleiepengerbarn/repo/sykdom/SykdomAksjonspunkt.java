@@ -29,12 +29,15 @@ public class SykdomAksjonspunkt {
 
 
     public boolean isKanLøseAksjonspunkt() {
+        /*
+         * Merk at "nyttDokumentHarIkkekontrollertEksisterendeVurderinger" ikke er med i sjekken fordi
+         * denne nå automatisk håndteres ved løsing av aksjonspunkt.
+         */
         return !harUklassifiserteDokumenter &&
             !manglerDiagnosekode &&
             !manglerGodkjentLegeerklæring &&
             !manglerVurderingAvKontinuerligTilsynOgPleie &&
-            !manglerVurderingAvToOmsorgspersoner &&
-            !nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
+            !manglerVurderingAvToOmsorgspersoner;
     }
 
     public boolean isHarUklassifiserteDokumenter() {

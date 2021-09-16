@@ -176,7 +176,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private boolean trengerAksjonspunkt(BehandlingskontrollKontekst kontekst, final Behandling behandling,
                                         final SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
         final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()));
-        final boolean trengerInput = !sykdomAksjonspunkt.isKanLøseAksjonspunkt();
+        final boolean trengerInput = !sykdomAksjonspunkt.isKanLøseAksjonspunkt() || sykdomAksjonspunkt.isHarDataSomIkkeHarBlittTattMedIBehandling();
         final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && sykdomGrunnlagBehandling.isFørsteGrunnlagPåBehandling();
         return trengerInput || førsteGangManuellRevurdering;
     }

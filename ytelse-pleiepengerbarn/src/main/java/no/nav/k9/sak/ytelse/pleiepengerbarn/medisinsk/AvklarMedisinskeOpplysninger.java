@@ -1,5 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.medisinsk;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -23,7 +26,11 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBu
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentHarOppdatertEksisterendeVurderinger;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarMedisinskeOpplysningerDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -34,6 +41,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private PleiebehovResultatRepository resultatRepository;
+    private SykdomDokumentRepository sykdomDokumentRepository;
     
     AvklarMedisinskeOpplysninger() {
         // for CDI proxy
@@ -42,18 +50,20 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     @Inject
     public AvklarMedisinskeOpplysninger(HistorikkTjenesteAdapter historikkTjenesteAdapter, SykdomVurderingService sykdomVurderingService,
             BehandlingRepository behandlingRepository, VilkårResultatRepository vilkårResultatRepository,
-            PleiebehovResultatRepository resultatRepository) {
+            PleiebehovResultatRepository resultatRepository, SykdomDokumentRepository sykdomDokumentRepository) {
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.sykdomVurderingService = sykdomVurderingService;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.resultatRepository = resultatRepository;
+        this.sykdomDokumentRepository = sykdomDokumentRepository;
     }
 
     @Override
-    public OppdateringResultat oppdater(AvklarMedisinskeOpplysningerDto dto, AksjonspunktOppdaterParameter param) {        
+    public OppdateringResultat oppdater(AvklarMedisinskeOpplysningerDto dto, AksjonspunktOppdaterParameter param) {
+        final Behandling behandling = behandlingRepository.hentBehandling(param.getRef().getBehandlingId());
+        
         if (dto.isIkkeVentPåGodkjentLegeerklæring()) {
-            final Behandling behandling = behandlingRepository.hentBehandling(param.getRef().getBehandlingId());
             final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandling);
             if (!sykdomAksjonspunkt.isManglerGodkjentLegeerklæring()) {
                 throw new IllegalStateException("Saksbehandler har bedt om å avslå sykdomsvilkåret grunnet manglende legeerklæring, selv om en godkjent legeerklæring allerede ligger inne.");
@@ -68,6 +78,17 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
             oppdaterMedIkkeOppfylt(VilkårType.MEDISINSKEVILKÅR_18_ÅR, param, behandling);
             return OppdateringResultat.utenOveropp();
         }
+        
+        /*
+         * Vi kvitterer her ut alle dokumenter som ligger på pleietrengende uavhengig av om
+         * saksbehandler har sett dokumentet eller ikke. En bedre løsning er å enten:
+         * 
+         * 1. Oppdatere behandlingsversjon når det kommer inn nye dokumenter.
+         * 2. Sende med fra frontend hvilke dokumenter som skal kvitteres ut.
+         * 
+         * ...men dette har ikke blitt prioritert.
+         */
+        kvitterUtAlleDokumenterSomLiggerPåPleietrengende(behandling);
 
         lagHistorikkinnslag(param, "Sykdom manuelt behandlet.");
         
@@ -76,6 +97,14 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         resultat.setSteg(BehandlingStegType.VURDER_MEDISINSKVILKÅR);
         
         return resultat;
+    }
+
+    private void kvitterUtAlleDokumenterSomLiggerPåPleietrengende(final Behandling behandling) {
+        final LocalDateTime nå = LocalDateTime.now();
+        final List<SykdomDokument> dokumenter = sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(behandling.getFagsak().getPleietrengendeAktørId());
+        for (var sykdomDokument : dokumenter) {
+            sykdomDokumentRepository.kvitterDokumenterMedOppdatertEksisterendeVurderinger(new SykdomDokumentHarOppdatertEksisterendeVurderinger(sykdomDokument, SubjectHandler.getSubjectHandler().getUid(), nå));
+        }
     }
 
     private void oppdaterMedIkkeOppfylt(VilkårType vilkårType, AksjonspunktOppdaterParameter param, final Behandling behandling) {
