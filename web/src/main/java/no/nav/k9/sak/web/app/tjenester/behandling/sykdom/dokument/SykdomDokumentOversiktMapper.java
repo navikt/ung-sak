@@ -153,6 +153,7 @@ public class SykdomDokumentOversiktMapper {
                     !aktørId.equals(d.getPerson().getAktørId()),
                     d.getDatert(),
                     behandlingUuid.equals(d.getBehandlingUuid()),
+                    sykdomDokumentRepository.isDokumentBruktIVurdering(d.getId()),
                     Arrays.asList(linkForGetDokumentinnhold(behandlingUuid.toString(), "" + d.getId()))
                 )).collect(Collectors.toList());
     }
