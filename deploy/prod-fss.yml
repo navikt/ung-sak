@@ -202,7 +202,7 @@ spec:
     - name: STOPP_VED_MANGLENDE_SOKTE_PERIODER
       value: "true"
     - name: OVERSTYRING_OPPTJ_AKT_FJERNET
-      value: "false"
+      value: "true"
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
       value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
