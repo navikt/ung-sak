@@ -142,8 +142,9 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     public ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling, boolean forceInnhent) {
         if (forceInnhent) {
             log.warn("Innhenter registerdata på nytt (force), selv om data er hentet tidligere i dag");
+            return doOppfriskingTaskOgFortsattBehandling(behandling, forceInnhent);
         }
-        return doOppfriskingTaskOgFortsattBehandling(behandling, forceInnhent);
+        return lagOppdaterFortsettTasksForPolling(behandling);
     }
 
     private ProsessTaskGruppe doOppfriskingTaskOgFortsattBehandling(Behandling behandling, boolean innhentRegisterdataFørst) {
