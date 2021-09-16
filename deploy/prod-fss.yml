@@ -200,7 +200,7 @@ spec:
     - name: OMP_IM_SJEKK_FORSTE_FRAVAERSDAG
       value: "false"
     - name: STOPP_VED_MANGLENDE_SOKTE_PERIODER
-      value: "false"
+      value: "true"
     - name: OVERSTYRING_OPPTJ_AKT_FJERNET
       value: "false"
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
