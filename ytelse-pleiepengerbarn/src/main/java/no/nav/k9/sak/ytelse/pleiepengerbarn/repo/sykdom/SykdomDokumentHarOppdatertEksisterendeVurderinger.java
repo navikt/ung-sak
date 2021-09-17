@@ -35,6 +35,10 @@ public class SykdomDokumentHarOppdatertEksisterendeVurderinger implements Serial
     }
 
     public SykdomDokumentHarOppdatertEksisterendeVurderinger(SykdomDokument dokument, String opprettetAv, LocalDateTime opprettetTidspunkt) {
+        if (dokument.getId() == null) {
+            throw new IllegalArgumentException("Kan ikke utkvittere dokumenter som ikke er peristert først");
+        }
+
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
         this.id = dokument.getId();
