@@ -145,9 +145,9 @@ public class SykdomDokumentRepository {
             entityManager.createQuery(
                 "SELECT k " +
                     "FROM SykdomDokumentHarOppdatertEksisterendeVurderinger as k " +
-                    "WHERE k.dokument = :dokument", SykdomDokumentHarOppdatertEksisterendeVurderinger.class);
+                    "WHERE k.id = :id", SykdomDokumentHarOppdatertEksisterendeVurderinger.class);
 
-        q.setParameter("dokument", dokument);
+        q.setParameter("id", dokument.getId());
 
         return q.getResultList().stream().findFirst().isPresent();
     }
@@ -160,7 +160,7 @@ public class SykdomDokumentRepository {
             "ON CONFLICT DO NOTHING";
 
         Query query = entityManager.createNativeQuery(sql)
-            .setParameter("id", utkvittering.getDokument().getId())
+            .setParameter("id", utkvittering.getId())
             .setParameter("opprettetAv", utkvittering.getOpprettetAv())
             .setParameter("opprettetTidspunkt", utkvittering.getOpprettetTidspunkt());
 
