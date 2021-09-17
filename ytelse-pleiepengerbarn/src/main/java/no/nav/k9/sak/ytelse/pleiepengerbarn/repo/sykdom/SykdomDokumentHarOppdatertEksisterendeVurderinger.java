@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -17,9 +19,8 @@ import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 public class SykdomDokumentHarOppdatertEksisterendeVurderinger implements Serializable {
 
     @Id
-    @OneToOne
-    @JoinColumn(name = "SYKDOM_DOKUMENT_ID")
-    private SykdomDokument dokument;
+    @Column(name = "SYKDOM_DOKUMENT_ID", unique = true, nullable = false)
+    private Long id;
 
     @DiffIgnore
     @Column(name = "OPPRETTET_AV", nullable = false, updatable = false)
@@ -34,17 +35,17 @@ public class SykdomDokumentHarOppdatertEksisterendeVurderinger implements Serial
     }
 
     public SykdomDokumentHarOppdatertEksisterendeVurderinger(SykdomDokument dokument, String opprettetAv, LocalDateTime opprettetTidspunkt) {
+        if (dokument.getId() == null) {
+            throw new IllegalArgumentException("Kan ikke utkvittere dokumenter som ikke er peristert først");
+        }
+
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
-        this.setDokument(dokument);
+        this.id = dokument.getId();
     }
 
-    public SykdomDokument getDokument() {
-        return dokument;
-    }
-
-    public void setDokument(SykdomDokument dokument) {
-        this.dokument = dokument;
+    public Long getId() {
+        return id;
     }
 
     public String getOpprettetAv() {
