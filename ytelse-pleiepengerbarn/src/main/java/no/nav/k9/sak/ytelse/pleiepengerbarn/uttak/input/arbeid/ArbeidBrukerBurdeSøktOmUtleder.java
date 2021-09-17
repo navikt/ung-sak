@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -173,7 +174,14 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         var key = utledIdentifikator(yrkesaktivitet);
         var arbeidsAktivTidslinje = resultat.getOrDefault(key, new LocalDateTimeline<>(List.of()));
 
-        var segmenter = yrkesaktivitet.getAnsettelsesPeriode().stream()
+        var segmenter = yrkesaktivitet.getAnsettelsesPeriode()
+            .stream()
+            .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), true))
+            .collect(Collectors.toList());
+        var segmenterMedAvtaltArbeidstidOver0Prosent = yrkesaktivitet.getAlleAktivitetsAvtaler()
+            .stream()
+            .filter(it -> Objects.nonNull(it.getProsentsats()))
+            .filter(it -> !it.getProsentsats().erNulltall())
             .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), true))
             .collect(Collectors.toList());
         // Har ikke helt kontroll på aa-reg mtp overlapp her så better safe than sorry
@@ -181,6 +189,13 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             var arbeidsforholdTidslinje = new LocalDateTimeline<>(List.of(segment));
             arbeidsAktivTidslinje = arbeidsAktivTidslinje.combine(arbeidsforholdTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
+        var arbeidstidOver0Prosent = new LocalDateTimeline<Boolean>(List.of());
+        for (LocalDateSegment<Boolean> segment : segmenterMedAvtaltArbeidstidOver0Prosent) {
+            var arbeidsforholdTidslinje = new LocalDateTimeline<>(List.of(segment));
+            arbeidstidOver0Prosent = arbeidstidOver0Prosent.combine(arbeidsforholdTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        arbeidsAktivTidslinje = arbeidsAktivTidslinje.intersection(arbeidstidOver0Prosent);
 
         resultat.put(key, arbeidsAktivTidslinje.compress());
     }
