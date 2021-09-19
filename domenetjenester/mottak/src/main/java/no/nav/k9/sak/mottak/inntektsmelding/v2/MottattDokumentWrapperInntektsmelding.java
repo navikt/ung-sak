@@ -104,7 +104,6 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
         FagsakYtelseType ytelseType = getYtelse();
         switch (ytelseType) {
             case OMSORGSPENGER:
-                return markertIkkeFravær() ? getFørsteFraværsdag() : Optional.empty();
             case OPPLÆRINGSPENGER:
             case PLEIEPENGER_SYKT_BARN:
             case PLEIEPENGER_NÆRSTÅENDE:
