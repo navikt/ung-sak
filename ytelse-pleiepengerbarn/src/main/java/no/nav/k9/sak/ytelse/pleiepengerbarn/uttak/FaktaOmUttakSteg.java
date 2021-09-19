@@ -7,7 +7,6 @@ import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -37,7 +36,6 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     private PleiebehovResultatRepository pleiebehovResultatRepository;
     private BehandlingRepository behandlingRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
-    private Boolean stoppVedManglendeSøktePerioder = false;
     private ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder;
     private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
 
@@ -51,7 +49,6 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
                             PleiebehovResultatRepository pleiebehovResultatRepository,
                             BehandlingRepository behandlingRepository,
                             PersonopplysningTjeneste personopplysningTjeneste,
-                            @KonfigVerdi(value = "STOPP_VED_MANGLENDE_SOKTE_PERIODER", defaultVerdi = "false") Boolean stoppVedManglendeSøktePerioder,
                             ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder,
                             PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder) {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
@@ -59,7 +56,6 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
-        this.stoppVedManglendeSøktePerioder = stoppVedManglendeSøktePerioder;
         this.arbeidBrukerBurdeSøktOmUtleder = arbeidBrukerBurdeSøktOmUtleder;
         this.perioderMedSykdomInnvilgetUtleder = perioderMedSykdomInnvilgetUtleder;
     }
@@ -89,11 +85,9 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
             aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD);
         }
 
-        if (stoppVedManglendeSøktePerioder) {
-            var manglendeAktiviteter = arbeidBrukerBurdeSøktOmUtleder.utledMangler(referanse);
-            if (manglendeAktiviteter.entrySet().stream().anyMatch(it -> !it.getValue().isEmpty()) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
-                aksjonspunkter.add(AksjonspunktDefinisjon.MANGLER_AKTIVITETER);
-            }
+        var manglendeAktiviteter = arbeidBrukerBurdeSøktOmUtleder.utledMangler(referanse);
+        if (manglendeAktiviteter.entrySet().stream().anyMatch(it -> !it.getValue().isEmpty()) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
+            aksjonspunkter.add(AksjonspunktDefinisjon.MANGLER_AKTIVITETER);
         }
 
         if (aksjonspunkter.isEmpty()) {
