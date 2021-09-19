@@ -29,8 +29,6 @@ public class HindreTilbaketrekkNårAlleredeUtbetalt {
         BeregningsresultatEntitet utbetaltTY = BeregningsresultatEntitet.builder()
             .medRegelSporing(beregningsgrunnlagTY.getRegelSporing())
             .medRegelInput(beregningsgrunnlagTY.getRegelInput())
-            .medFeriepengerRegelInput(beregningsgrunnlagTY.getFeriepengerRegelInput())
-            .medFeriepengerRegelSporing(beregningsgrunnlagTY.getFeriepengerRegelSporing())
             .build();
 
         for (var segment : tidslinje) {
