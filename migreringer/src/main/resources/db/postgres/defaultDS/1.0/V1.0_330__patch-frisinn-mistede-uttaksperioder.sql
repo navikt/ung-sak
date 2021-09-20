@@ -13,7 +13,7 @@ with siste_komplette_uttak as (
              inner join UT_UTTAK_AKTIVITET_PERIODE uttak_akt_per on uttak_akt.id = uttak_akt_per.aktivitet_id
     where f.saksnummer = '6ECA8'
       and grunnlag.aktiv = true
-      and grunnlag.behandling_id = 1431288
+      and grunnlag.behandling_id = 1270009
       and b.behandling_status = 'AVSLU'
       and uttak_akt_per.aktivitet_type = 'SN'
 ),
