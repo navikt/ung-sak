@@ -9,17 +9,21 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.felles.exception.FunksjonellException;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.felles.exception.FunksjonellException;
 
 public class ArbeidsgiverValidatorTest {
 
-    private static final OrgNummer GYLDIG_ORGNR = new OrgNummer("910909088");
-    private static final OrgNummer UKJENT_ORGNR = new OrgNummer("979312059");
-    private static final OrgNummer ORGNR_VIRKSOMHETSTJENESTE_FEILER = new OrgNummer("890484832");
+    private static final String GYLDIG_ORGNR = "910909088";
+    private static final String UGYLDIG_ORGNR = "123456789";
+    private static final String UKJENT_ORGNR = "979312059";
+    private static final String ORGNR_VIRKSOMHETSTJENESTE_FEILER = "890484832";
+
+    private static final String AKTØRID_IDENT1 = "1234567890123";
+    private static final String AKTØRID_IDENT2 = "1234567890124";
 
     private ArbeidsgiverValidator arbeidsgiverValidator;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
@@ -32,14 +36,23 @@ public class ArbeidsgiverValidatorTest {
 
     @Test
     public void valider_orgnr_som_arbeidsforhold() {
-        ArbeidsgiverOpplysninger opplysningerForGyldigOrgnr = new ArbeidsgiverOpplysninger(GYLDIG_ORGNR.getOrgNummer(), "Bedrift 1");
+        ArbeidsgiverOpplysninger opplysningerForGyldigOrgnr = new ArbeidsgiverOpplysninger(GYLDIG_ORGNR, "Bedrift 1");
         when(arbeidsgiverTjeneste.hent(eq(Arbeidsgiver.virksomhet(GYLDIG_ORGNR)))).thenReturn(opplysningerForGyldigOrgnr);
         when(arbeidsgiverTjeneste.hent(eq(Arbeidsgiver.virksomhet(UKJENT_ORGNR)))).thenReturn(null);
         when(arbeidsgiverTjeneste.hent(eq(Arbeidsgiver.virksomhet(ORGNR_VIRKSOMHETSTJENESTE_FEILER)))).thenThrow(new RuntimeException("Oppslag mot virksomhetstjeneste feilet"));
 
-        assertDoesNotThrow(() -> arbeidsgiverValidator.validerArbeidsgiver(GYLDIG_ORGNR));
-        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(UKJENT_ORGNR));
-        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(ORGNR_VIRKSOMHETSTJENESTE_FEILER));
+        assertDoesNotThrow(() -> arbeidsgiverValidator.validerArbeidsgiver(GYLDIG_ORGNR, null));
+        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(UGYLDIG_ORGNR, null));
+        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(UKJENT_ORGNR, null));
+        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(ORGNR_VIRKSOMHETSTJENESTE_FEILER, null));
+    }
+
+    @Test
+    public void valider_orgnr_som_aktørid() {
+        AktørId fagsakAktørId = new AktørId(AKTØRID_IDENT1);
+
+        assertDoesNotThrow(() -> arbeidsgiverValidator.validerArbeidsgiver(AKTØRID_IDENT1, fagsakAktørId));
+        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(AKTØRID_IDENT2, fagsakAktørId));
     }
 
 }

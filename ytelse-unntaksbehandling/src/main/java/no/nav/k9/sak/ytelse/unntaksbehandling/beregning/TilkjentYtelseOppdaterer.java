@@ -43,8 +43,10 @@ import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BekreftTilkjentYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 
@@ -107,8 +109,8 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .build(beregningsresultat);
 
         for (TilkjentYtelseAndelDto tyAndel : tyPeriode.getAndeler()) {
-            var tilSøker = Optional.ofNullable(tyAndel.getBeløpTilSøker()).orElse(0);
-            var refusjon = Optional.ofNullable(tyAndel.getRefusjonsbeløp()).orElse(0);
+            var tilSøker = Optional.ofNullable(tyAndel.getTilSoker()).orElse(0);
+            var refusjon = Optional.ofNullable(tyAndel.getRefusjon()).orElse(0);
 
             // Søkers andel - obligatorisk for Beregningsresultat
             var søkersAndel = byggAndel(tyAndel, tilSøker, true);
@@ -125,16 +127,13 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     private BeregningsresultatAndel.Builder byggAndel(TilkjentYtelseAndelDto tyAndel, Integer dagsats, Boolean erBrukerMottaker) {
         Arbeidsgiver arbeidsgiver = hentArbeidsgiver(tyAndel);
 
-        //utbetalingsgrad kreves kun for ytelse som skal skattes (trengs for å sette riktig skattesats hos Oppdrag)
-        //men kreves av modellen, setter dummy-verdi
-        BigDecimal utbetalingsgrad = tyAndel.getUtbetalingsgrad() != null ? tyAndel.getUtbetalingsgrad() : BigDecimal.valueOf(100);
         return BeregningsresultatAndel.builder()
             .medBrukerErMottaker(erBrukerMottaker)
             .medDagsats(dagsats)
             .medDagsatsFraBg(0) // Settes kun senere dersom aksjonspunkt for vurdering av tilbaketrekk
-            .medUtbetalingsgrad(utbetalingsgrad)
+            .medUtbetalingsgrad(tyAndel.getUtbetalingsgrad())
             .medArbeidsgiver(arbeidsgiver)
-            .medArbeidsforholdRef(InternArbeidsforholdRef.nullRef())
+            .medArbeidsforholdRef(InternArbeidsforholdRef.ref(tyAndel.getArbeidsforholdRef()))
             .medAktivitetStatus(aktivitetStatusFor(tyAndel.getInntektskategori()))
             .medInntektskategori(tyAndel.getInntektskategori())
             .medArbeidsforholdType(ARBEIDSFORHOLD_TYPE)
@@ -142,10 +141,13 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     }
 
     private Arbeidsgiver hentArbeidsgiver(TilkjentYtelseAndelDto tyAndel) {
-        if (tyAndel.getArbeidsgiverOrgnr() != null) {
-            return Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiverOrgnr());
+        var arbeidsgiver = tyAndel.getArbeidsgiver();
+        if (arbeidsgiver == null) {
+            return null;
         }
-        return null;
+        return OrgNummer.erGyldigOrgnr(tyAndel.getArbeidsgiver().getIdentifikator())
+            ? Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiver().getIdentifikator())
+            : Arbeidsgiver.person(new AktørId(tyAndel.getArbeidsgiver().getIdentifikator()));
     }
 
     private void validerDto(BekreftTilkjentYtelseDto dto, Behandling behandling) {
@@ -153,7 +155,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .getVilkår(VilkårType.K9_VILKÅRET).orElseThrow();
         TilkjentYtelsePerioderValidator.valider(dto.getTilkjentYtelse().getPerioder(), k9Vilkåret);
 
-        arbeidsgiverValidator.valider(dto.getTilkjentYtelse().getPerioder());
+        arbeidsgiverValidator.valider(dto.getTilkjentYtelse().getPerioder(), behandling.getAktørId());
     }
 
     private void opprettHistorikkinnslag(Behandling behandling, BeregningsresultatEntitet beregningsresultatFør, BeregningsresultatEntitet beregningsresultatEtter) {
