@@ -1,8 +1,10 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
 import static no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType.NÆRING;
+import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -21,6 +23,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
+import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
@@ -29,6 +32,7 @@ import no.nav.k9.sak.domene.iay.modell.Inntektspost;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
+import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
@@ -178,6 +182,11 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
         Collection<Yrkesaktivitet> frilansOppdrag = filter.getFrilansOppdrag();
 
         if (aktørArbeidFraRegister.isPresent() && !inntektFilter.getFiltrertInntektsposter().isEmpty() && !frilansOppdrag.isEmpty()) {
+
+            Optional<DatoIntervallEntitet> frilansPeriodeFraOppdrag = finnPeriodeFraOppdrag(frilansOppdrag);
+            Optional<DatoIntervallEntitet> frilansperiodeFraSøknad = finnOppgittFrilansperiode(oppgittOpptjening);
+            var frilansPeriode = frilansperiodeFraSøknad.orElse(frilansPeriodeFraOppdrag.orElse(periode));
+
             List<Yrkesaktivitet> frilansMedInntekt = frilansOppdrag.stream()
                 .filter(frilans -> harInntektFraVirksomhetForPeriode(frilans, inntektFilter, periode))
                 .collect(Collectors.toList());
@@ -187,10 +196,45 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
                 : Optional.of(OpptjeningsperiodeForSaksbehandling.Builder.ny()
                 .medOpptjeningAktivitetType(brukType)
                 .medVurderingsStatus(status)
-                .medPeriode(periode)
+                .medPeriode(frilansPeriode)
                 .build());
         }
         return Optional.empty();
+    }
+
+    private Optional<DatoIntervallEntitet> finnPeriodeFraOppdrag(Collection<Yrkesaktivitet> frilansOppdrag) {
+        List<DatoIntervallEntitet> oppdragsperioderFrilans = frilansOppdrag.stream().flatMap(y -> y.getAnsettelsesPeriode().stream())
+            .map(AktivitetsAvtale::getPeriode)
+            .collect(Collectors.toList());
+        return finnMinMaxAvAllePerioder(oppdragsperioderFrilans);
+    }
+
+    private Optional<DatoIntervallEntitet> finnOppgittFrilansperiode(OppgittOpptjening oppgittOpptjening) {
+        if (oppgittOpptjening != null) {
+            List<DatoIntervallEntitet> oppgittFrilansOppdrag = oppgittOpptjening.getFrilans().stream()
+                .flatMap(oo -> oo.getFrilansoppdrag().stream())
+                .map(OppgittFrilansoppdrag::getPeriode)
+                .collect(Collectors.toList());
+
+            return finnMinMaxAvAllePerioder(oppgittFrilansOppdrag);
+
+
+        }
+        return Optional.empty();
+    }
+
+    private Optional<DatoIntervallEntitet> finnMinMaxAvAllePerioder(List<DatoIntervallEntitet> perioder) {
+        Optional<LocalDate> startDatoFrilans = perioder.stream()
+            .map(DatoIntervallEntitet::getFomDato)
+            .min(Comparator.naturalOrder());
+
+        var sluttDatoFrilans = perioder.stream()
+            .map(DatoIntervallEntitet::getTomDato)
+            .max(Comparator.naturalOrder())
+            .orElse(TIDENES_ENDE);
+
+
+        return startDatoFrilans.map(startDato -> DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDatoFrilans));
     }
 
     private boolean harInntektFraVirksomhetForPeriode(Yrkesaktivitet frilans, InntektFilter inntektFilter, DatoIntervallEntitet opptjeningsPeriode) {
