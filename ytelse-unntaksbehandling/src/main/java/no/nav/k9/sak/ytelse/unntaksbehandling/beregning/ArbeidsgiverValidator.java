@@ -28,6 +28,7 @@ class ArbeidsgiverValidator {
         Inntektskategori.FRILANSER,
         Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE,
         Inntektskategori.DAGMAMMA,
+        Inntektskategori.JORDBRUKER,
         Inntektskategori.FISKER
     );
 
