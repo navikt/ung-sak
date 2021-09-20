@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.opptjening;
+package no.nav.k9.sak.domene.opptjening;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,9 +19,9 @@ import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.JournalpostId;
 
-public class OMPOppgittOpptjeningFilterTest {
+public class DefaultOppgittOpptjeningFilterTest {
 
-    private final OMPOppgittOpptjeningFilter opptjeningFilter = new OMPOppgittOpptjeningFilter();
+    private final DefaultOppgittOpptjeningFilter opptjeningFilter = new DefaultOppgittOpptjeningFilter();
 
     JournalpostId jpId1 = new JournalpostId("1");
     JournalpostId jpId2 = new JournalpostId("2");
@@ -66,7 +66,7 @@ public class OMPOppgittOpptjeningFilterTest {
         Map<KravDokument, List<SøktPeriode<?>>> kravDokumenterMedFravær = Map.of(
             kravdok1, List.of(byggSøktPeriode(fraværFom, fraværTom)),
             kravdok2, List.of(byggSøktPeriode(fraværFom, fraværTom))
-        );
+            );
 
         OppgittOpptjeningBuilder opptjeningBuilder1 = lagOpptjeningBuilderSN(kravdok1, arbeidsgiver1);
         OppgittOpptjeningBuilder opptjeningBuilder2 = lagOpptjeningBuilderSN(kravdok2, arbeidsgiver2);
