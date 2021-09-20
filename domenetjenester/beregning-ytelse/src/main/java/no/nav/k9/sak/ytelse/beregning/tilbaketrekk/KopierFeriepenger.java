@@ -24,6 +24,7 @@ public class KopierFeriepenger {
         if (tilResultat.getFeriepengerRegelInput() == null) {
             //TODO fjerne if, og alltid utføre følgende etter at sak i prod er kjørt gjennom
             //FeriepengerRegel* sattes tidligere fra HindreTilbaketrekkNårAlleredeUtbetalt-klassen
+            //å sette feltet 2 ganger gir exception
             tilResultat.setFeriepengerRegelInput(fraResultat.getFeriepengerRegelInput());
             tilResultat.setFeriepengerRegelSporing(fraResultat.getFeriepengerRegelSporing());
         }
