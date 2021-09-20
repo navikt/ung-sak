@@ -31,8 +31,8 @@ public class OmsorgspengerInntektsmeldingerRelevantForBeregning implements Innte
 
     private boolean lansertSjekkFørsteFraværsdag;
 
-    private Period GRENSE_AKSEPTER_STARTDATO_FØR_STP = Period.ofWeeks(4);
-    private Period GRENSE_AKSEPTER_STARTDATO_ETTER_STP = Period.ofDays(0);
+    private Period GRENSE_AKSEPTER_STARTDATO_FØR_VILKÅRSPERIODE = Period.ofWeeks(4);
+    private Period GRENSE_AKSEPTER_STARTDATO_ETTER_VILKÅRSPERIODE = Period.ofDays(0);
 
     OmsorgspengerInntektsmeldingerRelevantForBeregning() {
     }
@@ -109,8 +109,9 @@ public class OmsorgspengerInntektsmeldingerRelevantForBeregning implements Innte
     }
 
     private Set<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
-        LocalDate stp = vilkårsPeriode.getFomDato();
-        LocalDateInterval intervallForAksepterbarStartdato = new LocalDateInterval(stp.minus(GRENSE_AKSEPTER_STARTDATO_FØR_STP), stp.plus(GRENSE_AKSEPTER_STARTDATO_ETTER_STP));
+        LocalDateInterval intervallForAksepterbarStartdato = new LocalDateInterval(
+            vilkårsPeriode.getFomDato().minus(GRENSE_AKSEPTER_STARTDATO_FØR_VILKÅRSPERIODE),
+            vilkårsPeriode.getTomDato().plus(GRENSE_AKSEPTER_STARTDATO_ETTER_VILKÅRSPERIODE));
 
         Predicate<Inntektsmelding> filterGittFraværsperioder = it -> it.getOppgittFravær()
             .stream()
