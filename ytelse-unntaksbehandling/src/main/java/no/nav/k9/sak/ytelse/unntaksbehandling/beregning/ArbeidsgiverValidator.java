@@ -24,7 +24,12 @@ import no.nav.k9.sak.typer.OrgNummer;
 
 @Dependent
 class ArbeidsgiverValidator {
-    private static final List<Inntektskategori> INNTEKTKATEGORI_UTEN_ARBEIDSGIVER = List.of(Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE, Inntektskategori.FRILANSER);
+    private static final List<Inntektskategori> INNTEKTKATEGORI_UTEN_ARBEIDSGIVER = List.of(
+        Inntektskategori.FRILANSER,
+        Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE,
+        Inntektskategori.DAGMAMMA,
+        Inntektskategori.FISKER
+    );
 
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
 
