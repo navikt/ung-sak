@@ -69,7 +69,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
             oppdaterUtfallOgLagre(nyttUtfall, vilkårPeriodeVurdering, vilkårBuilder);
         }
         builder.leggTil(vilkårBuilder);
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
     // TODO: Bedre løsning på sikt at endepunkt opptjening-v2 kobler sammen vilkårsperioder med opptjeningsperioder.

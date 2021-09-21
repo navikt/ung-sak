@@ -40,7 +40,7 @@ public class VurderFaktaOmBeregningOppdaterer implements AksjonspunktOppdaterer<
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto1 -> MapDtoTilRequest.map(dto1, dtoer.getBegrunnelse())));
         var resultatListe = oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
         faktaOmBeregningHistorikkTjeneste.lagHistorikk(param.getBehandlingId(), resultatListe, dtoer.getBegrunnelse());
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
 }

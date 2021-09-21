@@ -63,7 +63,7 @@ public class K9VilkåretOverstyringshåndterer extends AbstractOverstyringshånd
         inngangsvilkårTjeneste.overstyrAksjonspunkt(behandling.getId(), VilkårType.K9_VILKÅRET, utfall, dto.getAvslagskode(),
             kontekst, periode.getFom(), periode.getTom(), dto.getBegrunnelse());
 
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
     @Override

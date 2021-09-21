@@ -87,7 +87,7 @@ public class AvklarOmsorgenFor implements AksjonspunktOppdaterer<AvklarOmsorgenF
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), dto.getAvslagsårsak());
         }
 
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
     private boolean erÅpenPeriode(Periode periode) {

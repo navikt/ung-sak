@@ -100,7 +100,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
 
         opprettHistorikkinnslag(behandling, gammeltBeregningsresultat, nyttBeregningsresultat);
 
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
     private void byggAndelForSøkerOgArbeidsgiver(BeregningsresultatEntitet beregningsresultat, TilkjentYtelsePeriodeDto tyPeriode) {
