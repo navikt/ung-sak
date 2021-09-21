@@ -61,7 +61,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
             var innvilgelseMerknad = VilkårUtfallMerknad.fraKode(vilkårPeriodeVurdering.getInnvilgelseMerknadKode());
 
             Utfall nyttUtfall = vilkårPeriodeVurdering.isErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-            lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
+            lagHistorikkInnslag(param, nyttUtfall, vilkårPeriodeVurdering.getBegrunnelse());
 
             if (nyttUtfall.equals(Utfall.OPPFYLT)) {
                 sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId(), opptjeningPeriode, innvilgelseMerknad);
@@ -89,6 +89,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
     private void oppdaterUtfallOgLagre(Utfall utfallType, VilkårPeriodeVurderingDto vilkårPeriode, VilkårBuilder vilkårBuilder) {
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vilkårPeriode.getPeriode().getFom(), vilkårPeriode.getPeriode().getTom())
             .medUtfall(utfallType)
+            .medBegrunnelse(vilkårPeriode.getBegrunnelse())
             .medMerknad(utfallType.equals(Utfall.OPPFYLT) ? VilkårUtfallMerknad.fraKode(vilkårPeriode.getInnvilgelseMerknadKode()): null)
             .medAvslagsårsak(!utfallType.equals(Utfall.OPPFYLT) ? Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING : null));
     }
