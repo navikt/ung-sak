@@ -114,7 +114,6 @@ public class BeregningsresultatAndel extends BaseEntitet {
     public BeregningsresultatAndel(BeregningsresultatAndel fraAndel, BeregningsresultatPeriode tilknyttPeriode) {
 
         this.beregningsresultatPeriode = Objects.requireNonNull(tilknyttPeriode, "tilknyttPeriode");
-        tilknyttPeriode.addBeregningsresultatAndel(this);
 
         // avleder periode i onCreateMigrate
         // avleder beregningsresultat i onCreateMigrate
@@ -131,6 +130,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
         this.aktivitetStatus = fraAndel.aktivitetStatus;
         this.inntektskategori = fraAndel.inntektskategori;
 
+        tilknyttPeriode.addBeregningsresultatAndel(this);
     }
 
     // copy ctor
@@ -296,7 +296,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
      * Ideelt sett trengs kun BeregningsresultatAktivitetsnøkkelV2, men det må undersøkes mer om BeregningsresultatAktivitetsnøkkel tjener en
      * unik funksjon.
      * Brukes til å identifisere endringsdato, så undersøk om man her kan bruke BeregningsresultatAktivitetsnøkkelV2 istedet.
-     * 
+     *
      * @return Nøkkel med Aktivitetstatus, arbeidsgiver, inntektskategori, arbeidsforholdreferanse
      */
     public BeregningsresultatAktivitetsnøkkel getAktivitetsnøkkel() {
@@ -306,7 +306,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
     /**
      * Returnerer en aktivitetsnøkkel som kan brukes til å identifisere like andeler
      * men som ikke skiller på andeler hos samme arbeidsgiver på forskjellige arbeidsforhold.
-     * 
+     *
      * @return Nøkkel med Aktivitetstatus og arbeidsgiver
      */
     public BeregningsresultatAktivitetsnøkkelV2 getAktivitetsnøkkelV2() {
