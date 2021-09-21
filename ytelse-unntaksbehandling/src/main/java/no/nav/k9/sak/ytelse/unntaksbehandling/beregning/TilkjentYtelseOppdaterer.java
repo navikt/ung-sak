@@ -142,8 +142,8 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     }
 
     private Arbeidsgiver hentArbeidsgiver(TilkjentYtelseAndelDto tyAndel) {
-        if (tyAndel.getArbeidsgiverOrgnr() != null) {
-            return Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiverOrgnr());
+        if (tyAndel.getArbeidsgiverOrgNr() != null) {
+            return Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiverOrgNr());
         }
         return null;
     }

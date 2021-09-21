@@ -51,7 +51,7 @@ class ArbeidsgiverValidator {
             .forEach(this::validerAndelUtenArbeidsgiver);
         andeler.stream()
             .filter(andel -> !INNTEKTKATEGORI_UTEN_ARBEIDSGIVER.contains(andel.getInntektskategori()))
-            .map(TilkjentYtelseAndelDto::getArbeidsgiverOrgnr)
+            .map(TilkjentYtelseAndelDto::getArbeidsgiverOrgNr)
             .forEach(this::validerArbeidsgiver);
     }
 

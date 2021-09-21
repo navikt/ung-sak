@@ -29,9 +29,9 @@ public class TilkjentYtelseAndelDto {
     @NotNull
     @Valid
     private Inntektskategori inntektskategori;
-    @JsonProperty(value = "arbeidsgiverOrgnr")
+    @JsonProperty(value = "arbeidsgiverOrgNr")
     @Valid
-    private OrgNummer arbeidsgiverOrgnr;
+    private OrgNummer arbeidsgiverOrgNr;
     @JsonProperty(value = "refusjon")
     @Min(0)
     @Max(1000000)
@@ -52,7 +52,7 @@ public class TilkjentYtelseAndelDto {
 
     private TilkjentYtelseAndelDto(Builder builder) {
         this.inntektskategori = Objects.requireNonNull(builder.inntektskategori, "inntektskategori");
-        this.arbeidsgiverOrgnr = builder.arbeidsgiverOrgnr;
+        this.arbeidsgiverOrgNr = builder.arbeidsgiverOrgnr;
         this.beløpTilSøker = builder.beløpTilSøker;
         this.refusjonsbeløp = builder.refusjonsbeløp;
         this.utbetalingsgrad = builder.utbetalingsgrad;
@@ -62,8 +62,8 @@ public class TilkjentYtelseAndelDto {
         return new Builder();
     }
 
-    public OrgNummer getArbeidsgiverOrgnr() {
-        return arbeidsgiverOrgnr;
+    public OrgNummer getArbeidsgiverOrgNr() {
+        return arbeidsgiverOrgNr;
     }
 
     public Inntektskategori getInntektskategori() {
