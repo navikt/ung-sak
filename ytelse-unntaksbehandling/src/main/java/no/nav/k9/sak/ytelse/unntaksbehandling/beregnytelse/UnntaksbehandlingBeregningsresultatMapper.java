@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -40,7 +41,6 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
-import no.nav.k9.felles.util.Tuple;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -236,7 +236,7 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
             throw new IllegalStateException(
                 "Utviklerfeil: Andeler som slås sammen skal ikke ha ulikt arbeidsforhold, periode, stillingsprosent eller utbetalingsgrad");
         }
-        BeregningsresultatAndel ny = new BeregningsresultatAndel(a, a.getBeregningsresultatPeriode());
+        BeregningsresultatAndel ny = new BeregningsresultatAndel(a);
         BeregningsresultatAndel.builder(ny)
             .medDagsats(a.getDagsats() + b.getDagsats())
             .medDagsatsFraBg(a.getDagsatsFraBg() + b.getDagsatsFraBg());

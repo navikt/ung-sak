@@ -17,6 +17,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -42,7 +43,6 @@ import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
-import no.nav.k9.felles.util.Tuple;
 
 @FagsakYtelseTypeRef("FRISINN")
 @ApplicationScoped
@@ -245,7 +245,7 @@ public class FRISINNBeregningsresultatMapper implements BeregningsresultatMapper
             throw new IllegalStateException(
                 "Utviklerfeil: Andeler som slås sammen skal ikke ha ulikt arbeidsforhold, periode, stillingsprosent eller utbetalingsgrad");
         }
-        BeregningsresultatAndel ny = new BeregningsresultatAndel(a, a.getBeregningsresultatPeriode());
+        BeregningsresultatAndel ny = new BeregningsresultatAndel(a);
         BeregningsresultatAndel.builder(ny)
             .medDagsats(a.getDagsats() + b.getDagsats())
             .medDagsatsFraBg(a.getDagsatsFraBg() + b.getDagsatsFraBg());

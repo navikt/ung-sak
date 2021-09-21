@@ -278,8 +278,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
                 .reduce(this::slåSammenAndeler);
 
             return new Tuple<>(brukerAndel, arbeidsgiverAndel);
-        })
-            .collect(Collectors.toList());
+        }).collect(Collectors.toList());
     }
 
     private Optional<String> finnSekundærIdentifikator(BeregningsresultatAndel andel) {
@@ -307,7 +306,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
             throw new IllegalStateException(
                 "Utviklerfeil: Andeler som slås sammen skal ikke ha ulikt arbeidsforhold, periode, stillingsprosent eller utbetalingsgrad");
         }
-        BeregningsresultatAndel ny = new BeregningsresultatAndel(a, a.getBeregningsresultatPeriode());
+        BeregningsresultatAndel ny = new BeregningsresultatAndel(a);
         BeregningsresultatAndel.builder(ny)
             .medDagsats(a.getDagsats() + b.getDagsats())
             .medDagsatsFraBg(a.getDagsatsFraBg() + b.getDagsatsFraBg());
