@@ -28,6 +28,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.engine.jdbc.ClobProxy;
 
+import no.nav.k9.felles.jpa.converters.PropertiesToStringConverter;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -39,7 +40,6 @@ import no.nav.k9.sak.behandlingslager.kodeverk.AvslagsårsakKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.UtfallKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.VurderUtfallMerknadKodeverdiConverter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.felles.jpa.converters.PropertiesToStringConverter;
 
 @Entity
 @Table(name = "VR_VILKAR_PERIODE")
@@ -123,6 +123,10 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
         this.regelEvalueringCached = vilkårPeriode.regelEvalueringCached;
 
         this.begrunnelse = vilkårPeriode.begrunnelse;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     @Override
