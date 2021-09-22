@@ -88,6 +88,8 @@ public enum Avslagsårsak implements Kodeverdi {
     IKKE_UTVIDETRETT_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG("1076", "Søker regnes ikke som å ha aleneomsorg", Map.of(
         FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd",
         FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
+    IKKE_GRUNNLAG_FOR_ALENEOMSORG("1077", "Ikke grunnlag for aleneomsorg", Map.of(
+        FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd")),
 
     SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",
             Map.of(FagsakYtelseType.PSB, "9-3 1. ledd")),
