@@ -86,13 +86,6 @@ public interface InntektArbeidYtelseTjeneste {
     void lagreIayAggregat(Long behandlingId, InntektArbeidYtelseAggregatBuilder inntektArbeidYtelseAggregatBuilder);
 
     /**
-     * @deprecated Denne blir lett misbrukt, siden man antagelig ønsker å gjøre mer enn kun fjerne saksbehandlet versjon. Bruk derfor heller
-     *             {@link #lagreIayAggregat(Long, InntektArbeidYtelseAggregatBuilder)} etter du er ferdig med alle endringer du trenger å gjøre
-     */
-    @Deprecated(forRemoval = true)
-    void fjernSaksbehandletVersjon(Long behandlingId);
-
-    /**
      * Lagre nytt grunnlag for Oppgitt Opptjening.
      */
     /** @deprecated (brukes kun i test) Bruk AsyncAbakusLagreOpptjeningTask i modul mottak i stedet */

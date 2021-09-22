@@ -312,17 +312,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     }
 
     @Override
-    public void fjernSaksbehandletVersjon(Long behandlingId) {
-        Optional<InntektArbeidYtelseGrunnlag> iayGrunnlagOpt = finnGrunnlag(behandlingId);
-        if (iayGrunnlagOpt.isPresent()) {
-            InntektArbeidYtelseGrunnlag iayGrunnlag = iayGrunnlagOpt.get();
-            if (iayGrunnlag.getSaksbehandletVersjon().isPresent()) {
-                konverterOgLagre(behandlingId, null, iayGrunnlag.getArbeidsforholdInformasjon().orElse(null));
-            }
-        }
-    }
-
-    @Override
     public void kopierGrunnlagFraEksisterendeBehandling(Long fraBehandlingId, Long tilBehandlingId, Set<Dataset> dataset) {
         asyncIayTjeneste.kopierIayGrunnlag(fraBehandlingId, tilBehandlingId, dataset);
     }
