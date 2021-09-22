@@ -38,14 +38,21 @@ public class VilkårPeriodeVurderingDto {
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String innvilgelseMerknadKode;
 
+    @JsonProperty(value = "begrunnelse")
+    @Size(max = 5000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String begrunnelse;
+
+
     public VilkårPeriodeVurderingDto() {
     }
 
-    public VilkårPeriodeVurderingDto(Periode periode, boolean erVilkarOk, String avslagskode, String innvilgelseMerknadKode) {
+    public VilkårPeriodeVurderingDto(Periode periode, boolean erVilkarOk, String avslagskode, String innvilgelseMerknadKode, String begrunnelse) {
         this.periode = periode;
         this.erVilkarOk = erVilkarOk;
         this.avslagskode = avslagskode;
         this.innvilgelseMerknadKode = innvilgelseMerknadKode;
+        this.begrunnelse = begrunnelse;
     }
 
     public Periode getPeriode() {
@@ -62,5 +69,9 @@ public class VilkårPeriodeVurderingDto {
 
     public String getInnvilgelseMerknadKode() {
         return innvilgelseMerknadKode;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
     }
 }
