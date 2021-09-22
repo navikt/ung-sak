@@ -6,6 +6,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -51,6 +52,8 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     private PleiebehovResultatRepository resultatRepository;
     private SykdomDokumentRepository sykdomDokumentRepository;
 
+    @KonfigVerdi(value = "NY_SYKDOM_TOTRINN", defaultVerdi = "false") boolean enableNySykdomTotrinn;
+
     AvklarMedisinskeOpplysninger() {
         // for CDI proxy
     }
@@ -75,12 +78,17 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     public OppdateringResultat oppdater(AvklarMedisinskeOpplysningerDto dto, AksjonspunktOppdaterParameter param) {
         final Behandling behandling = behandlingRepository.hentBehandling(param.getRef().getBehandlingId());
 
-        final var perioder = psbVilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
-        SykdomGrunnlagSammenlikningsresultat sammenlikningsresultat = sykdomGrunnlagService.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder);
+        boolean skalHaToTrinn;
+        if (enableNySykdomTotrinn) {
+            final var perioder = psbVilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+            List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
+            SykdomGrunnlagSammenlikningsresultat sammenlikningsresultat = sykdomGrunnlagService.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder);
 
-        final var harEndringer = !sammenlikningsresultat.getDiffPerioder().isEmpty();
-        final var skalHaToTrinn = harEndringer;
+            final var harEndringer = !sammenlikningsresultat.getDiffPerioder().isEmpty();
+            skalHaToTrinn = harEndringer;
+        } else {
+            skalHaToTrinn = true;
+        }
 
 
         if (dto.isIkkeVentPåGodkjentLegeerklæring()) {
@@ -96,7 +104,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
 
             oppdaterMedIkkeOppfylt(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, param, behandling);
             oppdaterMedIkkeOppfylt(VilkårType.MEDISINSKEVILKÅR_18_ÅR, param, behandling);
-            return OppdateringResultat.utenOverhopp();
+            return OppdateringResultat.utenTransisjon().medTotrinnHvis(skalHaToTrinn).build();
         }
 
         /*
