@@ -16,6 +16,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -56,7 +57,8 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
 
     @Inject
     public AvklarMedisinskeOpplysninger(HistorikkTjenesteAdapter historikkTjenesteAdapter, SykdomVurderingService sykdomVurderingService,
-                                        SykdomGrunnlagService sykdomGrunnlagService, PSBVilkårsPerioderTilVurderingTjeneste psbVilkårsPerioderTilVurderingTjeneste,
+                                        SykdomGrunnlagService sykdomGrunnlagService,
+                                        @FagsakYtelseTypeRef("PSB") PSBVilkårsPerioderTilVurderingTjeneste psbVilkårsPerioderTilVurderingTjeneste,
                                         BehandlingRepository behandlingRepository, VilkårResultatRepository vilkårResultatRepository,
                                         PleiebehovResultatRepository resultatRepository, SykdomDokumentRepository sykdomDokumentRepository) {
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
