@@ -26,6 +26,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
@@ -34,6 +35,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.PerioderMedSykdomInnvilgetUtleder;
 
 @ApplicationScoped
 public class ArbeidBrukerBurdeSøktOmUtleder {
@@ -42,6 +44,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
+    private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
     private VilkårResultatRepository vilkårResultatRepository;
 
     public ArbeidBrukerBurdeSøktOmUtleder() {
@@ -52,10 +55,12 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
                                           @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                           @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                           UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
+                                          PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
                                           VilkårResultatRepository vilkårResultatRepository) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
+        this.perioderMedSykdomInnvilgetUtleder = perioderMedSykdomInnvilgetUtleder;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
     }
@@ -75,18 +80,26 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             .medPerioderFraSøknader(perioderFraSøknader)
             .medTidslinjeTilVurdering(tidslinjeTilVurdering)
             .medVilkår(vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow());
+        var innvilgeteVilkårPerioder = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse);
+
+        var innvilgedeSegmenter = innvilgeteVilkårPerioder.stream()
+            .map(VilkårPeriode::getPeriode)
+            .map(DatoIntervallEntitet::toLocalDateInterval)
+            .map(it -> new LocalDateSegment<>(it, true))
+            .collect(Collectors.toList());
+
+        var timelineMedYtelse = new LocalDateTimeline<>(innvilgedeSegmenter);
 
         var aktørArbeidFraRegister = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId()).getAktørArbeidFraRegister(referanse.getAktørId());
-        return utledFraInput(tidslinjeTilVurdering, input, aktørArbeidFraRegister);
+        return utledFraInput(timelineMedYtelse, input, aktørArbeidFraRegister);
     }
 
     Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledFraInput(LocalDateTimeline<Boolean> tidslinjeTilVurdering, ArbeidstidMappingInput input, Optional<AktørArbeid> aktørArbeid) {
-        var søktArbeid = new MapArbeid().mapTilRaw(input);
-
         if (tidslinjeTilVurdering.isEmpty()) {
             return Map.of();
         }
 
+        var søktArbeid = new MapArbeid().mapTilRaw(input);
         return utledHvaSomBurdeVærtSøktOm(tidslinjeTilVurdering, aktørArbeid, søktArbeid);
     }
 
