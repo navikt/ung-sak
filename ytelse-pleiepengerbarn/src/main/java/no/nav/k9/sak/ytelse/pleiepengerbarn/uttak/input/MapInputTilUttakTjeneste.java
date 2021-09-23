@@ -266,10 +266,10 @@ public class MapInputTilUttakTjeneste {
             .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende)
             .orElse(null);
 
-        var innvilgetePerioderMedSykdom = finnInnvilgetePerioderSykdom(input.getVilkårene());
+        var innvilgedePerioderMedSykdom = finnInnvilgedePerioderSykdom(input.getVilkårene());
 
-        var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende, innvilgetePerioderMedSykdom);
-        var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende, innvilgetePerioderMedSykdom);
+        var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
+        var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
         final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
 
@@ -291,7 +291,7 @@ public class MapInputTilUttakTjeneste {
             kravprioritet);
     }
 
-    private Set<DatoIntervallEntitet> finnInnvilgetePerioderSykdom(Vilkårene vilkårene) {
+    private Set<DatoIntervallEntitet> finnInnvilgedePerioderSykdom(Vilkårene vilkårene) {
         var s1 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR).orElseThrow()
             .getPerioder()
             .stream();
@@ -323,25 +323,25 @@ public class MapInputTilUttakTjeneste {
         return resultat;
     }
 
-    private Map<LukketPeriode, Utfall> tilBeredskap(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Set<DatoIntervallEntitet> innvilgetePerioderMedSykdom) {
+    private Map<LukketPeriode, Utfall> tilBeredskap(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Set<DatoIntervallEntitet> innvilgedePerioderMedSykdom) {
         if (unntakEtablertTilsynForPleietrengende == null || unntakEtablertTilsynForPleietrengende.getBeredskap() == null) {
             return Map.of();
         }
-        return tilUnntakEtablertTilsynMap(unntakEtablertTilsynForPleietrengende.getBeredskap(), innvilgetePerioderMedSykdom);
+        return tilUnntakEtablertTilsynMap(unntakEtablertTilsynForPleietrengende.getBeredskap(), innvilgedePerioderMedSykdom);
     }
 
-    private Map<LukketPeriode, Utfall> tilNattevåk(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Set<DatoIntervallEntitet> innvilgetePerioderMedSykdom) {
+    private Map<LukketPeriode, Utfall> tilNattevåk(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Set<DatoIntervallEntitet> innvilgedePerioderMedSykdom) {
         if (unntakEtablertTilsynForPleietrengende == null || unntakEtablertTilsynForPleietrengende.getNattevåk() == null) {
             return Map.of();
         }
-        return tilUnntakEtablertTilsynMap(unntakEtablertTilsynForPleietrengende.getNattevåk(), innvilgetePerioderMedSykdom);
+        return tilUnntakEtablertTilsynMap(unntakEtablertTilsynForPleietrengende.getNattevåk(), innvilgedePerioderMedSykdom);
     }
 
-    private Map<LukketPeriode, Utfall> tilUnntakEtablertTilsynMap(UnntakEtablertTilsyn unntakEtablertTilsyn, Set<DatoIntervallEntitet> innvilgetePerioderMedSykdom) {
+    private Map<LukketPeriode, Utfall> tilUnntakEtablertTilsynMap(UnntakEtablertTilsyn unntakEtablertTilsyn, Set<DatoIntervallEntitet> innvilgedePerioderMedSykdom) {
         var map = new HashMap<LukketPeriode, Utfall>();
         unntakEtablertTilsyn.getPerioder()
             .stream()
-            .filter(it -> erRelevantForBehandling(it, innvilgetePerioderMedSykdom))
+            .filter(it -> erRelevantForBehandling(it, innvilgedePerioderMedSykdom))
             .forEach(periode -> {
                 var utfall = switch (periode.getResultat()) {
                     case OPPFYLT -> Utfall.OPPFYLT;
@@ -354,9 +354,9 @@ public class MapInputTilUttakTjeneste {
         return map;
     }
 
-    private boolean erRelevantForBehandling(UnntakEtablertTilsynPeriode it, Set<DatoIntervallEntitet> innvilgetePerioderMedSykdom) {
+    private boolean erRelevantForBehandling(UnntakEtablertTilsynPeriode it, Set<DatoIntervallEntitet> innvilgedePerioderMedSykdom) {
         return Set.of(Resultat.OPPFYLT, Resultat.IKKE_OPPFYLT).contains(it.getResultat())
-            || innvilgetePerioderMedSykdom.stream().anyMatch(at -> at.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFomDato(), it.getPeriode().getTomDato())));
+            || innvilgedePerioderMedSykdom.stream().anyMatch(at -> at.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFomDato(), it.getPeriode().getTomDato())));
     }
 
     private void evaluerDokumenter(Set<PerioderFraSøknad> perioderFraSøknader, Set<KravDokument> kravDokumenter) {
