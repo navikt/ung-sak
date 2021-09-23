@@ -94,10 +94,10 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste; 
-        
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
+
         søktePerioder = new SøktePerioder(søknadsperiodeTjeneste);
-        var maksSøktePeriode = new MaksSøktePeriode(søktePerioder);
+        var maksSøktePeriode = new MaksSøktePeriode(søknadsperiodeTjeneste);
 
         vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, maksSøktePeriode);
         vilkårsPeriodisering.put(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, PleietrengendeAlderPeriode.under18(basisPersonopplysningsTjeneste, behandlingRepository, personinfoAdapter, søknadsperiodeTjeneste));
@@ -178,7 +178,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             .orElse(Set.of());
 
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
-        
+
         return søknadsperiodeTjeneste.utledVurderingsperioderFraSøknadsperioder(behandling.getFagsakId(), alleSøknadsperioder);
     }
 
@@ -247,7 +247,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     public Set<VilkårType> definerendeVilkår() {
         return Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR);
     }
-    
+
     @Override
     public NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(Long behandlingId) {
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
