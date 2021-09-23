@@ -56,6 +56,10 @@ jobs:
           distribution: 'adopt'
           java-version: '16'
           cache: 'maven'
+          
+      - name: Set variables
+        run: |
+          echo "TIMESTAMP=$(expr $(date +%Y%m%d%H%M%S))" >> $GITHUB_ENV
 
       - name: Build artifacts & deploy
         shell: bash
