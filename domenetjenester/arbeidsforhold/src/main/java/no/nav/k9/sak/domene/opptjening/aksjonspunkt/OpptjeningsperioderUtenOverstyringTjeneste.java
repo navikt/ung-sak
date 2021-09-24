@@ -183,9 +183,7 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
 
         if (aktørArbeidFraRegister.isPresent() && !inntektFilter.getFiltrertInntektsposter().isEmpty() && !frilansOppdrag.isEmpty()) {
 
-            Optional<DatoIntervallEntitet> frilansPeriodeFraOppdrag = finnPeriodeFraOppdrag(frilansOppdrag);
-            Optional<DatoIntervallEntitet> frilansperiodeFraSøknad = finnOppgittFrilansperiode(oppgittOpptjening);
-            var frilansPeriode = frilansperiodeFraSøknad.orElse(frilansPeriodeFraOppdrag.orElse(periode));
+            DatoIntervallEntitet frilansPeriode = finnFrilansPeriode(oppgittOpptjening, periode, frilansOppdrag);
 
             List<Yrkesaktivitet> frilansMedInntekt = frilansOppdrag.stream()
                 .filter(frilans -> harInntektFraVirksomhetForPeriode(frilans, inntektFilter, periode))
@@ -200,6 +198,13 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
                 .build());
         }
         return Optional.empty();
+    }
+
+    protected DatoIntervallEntitet finnFrilansPeriode(OppgittOpptjening oppgittOpptjening, DatoIntervallEntitet periode, Collection<Yrkesaktivitet> frilansOppdrag) {
+        Optional<DatoIntervallEntitet> frilansPeriodeFraOppdrag = finnPeriodeFraOppdrag(frilansOppdrag);
+        Optional<DatoIntervallEntitet> frilansperiodeFraSøknad = finnOppgittFrilansperiode(oppgittOpptjening);
+        var frilansPeriode = frilansperiodeFraSøknad.orElse(frilansPeriodeFraOppdrag.orElse(periode));
+        return frilansPeriode;
     }
 
     private Optional<DatoIntervallEntitet> finnPeriodeFraOppdrag(Collection<Yrkesaktivitet> frilansOppdrag) {
