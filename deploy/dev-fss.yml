@@ -198,6 +198,8 @@ spec:
     # Feature-flag
     - name: OMP_IM_SJEKK_FORSTE_FRAVAERSDAG
       value: "true"
+    - name: PSB_OPPG_OPPTJENING_PRIORITERING
+      value: "true"
     - name: OVERSTYRING_OPPTJ_AKT_FJERNET
       value: "true"
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD

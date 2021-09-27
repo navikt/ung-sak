@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.opptjening;
+package no.nav.k9.sak.ytelse.omsorgspenger.opptjening;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -28,6 +28,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningAggregat;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
@@ -37,21 +38,20 @@ import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP")
-@FagsakYtelseTypeRef("PSB")
-public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
+public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
     private VilkårTjeneste vilkårTjeneste;
     private BehandlingRepository behandlingRepository;
     private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
 
-    DefaultOppgittOpptjeningFilter() {
+    OMPOppgittOpptjeningFilter() {
         // For CDI
     }
 
     @Inject
-    public DefaultOppgittOpptjeningFilter(VilkårTjeneste vilkårTjeneste,
-                                          BehandlingRepository behandlingRepository,
-                                          @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester) {
+    public OMPOppgittOpptjeningFilter(VilkårTjeneste vilkårTjeneste,
+                                      BehandlingRepository behandlingRepository,
+                                      @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjenester = søknadsfristTjenester;
@@ -167,14 +167,14 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     }
 
     private LocalDateTimeline<Void> slåSammenPerioder(List<SøktPeriode<?>> søktePerioder) {
-        var fraværPerioder = søktePerioder.stream()
+        var søktPeriode = søktePerioder.stream()
             .map(it -> new LocalDateSegment<Void>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), null))
             .collect(Collectors.toSet());
-        var tilkjentYtelseTimeline = new LocalDateTimeline<Void>(List.of());
-        for (LocalDateSegment<Void> periode : fraværPerioder) {
-            tilkjentYtelseTimeline = tilkjentYtelseTimeline.combine(new LocalDateTimeline<>(List.of(periode)), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        var mergetSøktePerioder = new LocalDateTimeline<Void>(List.of());
+        for (LocalDateSegment<Void> periode : søktPeriode) {
+            mergetSøktePerioder = mergetSøktePerioder.combine(new LocalDateTimeline<>(List.of(periode)), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-        return tilkjentYtelseTimeline.compress();
+        return mergetSøktePerioder.compress();
     }
 
     @SuppressWarnings("rawtypes")
