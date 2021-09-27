@@ -73,7 +73,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         if (skalHaAksjonspunktGrunnetManuellRevurdering(samletOmsorgenForTidslinje, behandling) || harAksjonspunkt(samletOmsorgenForTidslinje, false)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2)));
-        } else if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2) && !harAksjonspunkt(samletOmsorgenForTidslinje, false)) {
+        } else if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2) && harIkkeLengerAksjonspunkt(behandling, samletOmsorgenForTidslinje)) {
             // Må manuelt avbryte pga konfig på aksjonspunktet hvis registerdata tilsier at det ikke er noen grunn til å
             // Manuelt avklare dette
             behandling.getAksjonspunktFor(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2).avbryt();
@@ -85,6 +85,10 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private boolean harIkkeLengerAksjonspunkt(Behandling behandling, LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje) {
+        return !harAksjonspunkt(samletOmsorgenForTidslinje, behandling.erManueltOpprettet());
     }
 
     private boolean skalHaAksjonspunktGrunnetManuellRevurdering(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, final Behandling behandling) {
