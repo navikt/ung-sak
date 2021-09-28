@@ -13,7 +13,7 @@ on:
       - 'dev/**'
   schedule:
     - cron: '0 4 * * 1'
-      
+
 env:
   IMAGE_BASE_CR: ghcr.io/${{ github.repository }}
   CLUSTER: dev-fss
@@ -56,7 +56,7 @@ jobs:
           distribution: 'adopt'
           java-version: '16'
           cache: 'maven'
-          
+
       - name: Set variables
         run: |
           echo "TIMESTAMP=$(expr $(date +%Y%m%d%H%M%S))" >> $GITHUB_ENV
@@ -70,7 +70,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.READ_PACKAGES_PAT }}
           DATASOURCE_HOST: localhost
           DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
-      
+
       - name: Bygg og laste opp docker-image
         run: |
           docker build --pull --tag ${IMAGE_BASE_CR}:${TAG} --tag ${IMAGE_BASE_CR}:latest .
@@ -82,14 +82,14 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.issues.listForRepo({
+            github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
               labels: ['deployment']
             }).then(response => {
               response.data.forEach(issue => {
-                github.issues.update({
+                github.rest.issues.update({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: issue.number,
@@ -97,7 +97,7 @@ jobs:
                 });
               });
             });
-            
+
       -  name: Opprett deployment issue
          id: createdeployissue
          if: success()
@@ -105,7 +105,7 @@ jobs:
          with:
            github-token: ${{secrets.GITHUB_TOKEN}}
            script: |
-               github.issues.create( {
+               github.rest.issues.create( {
                  owner: context.issue.owner,
                  repo: context.issue.repo,
                  labels: ['deployment'],
@@ -114,7 +114,7 @@ jobs:
                .then(response => {
                        core.setOutput('number', response.data.number);
                 });
-                
+
       - name: Trigger verdikjede test
         shell: bash
         run: |
