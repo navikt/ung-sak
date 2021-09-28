@@ -30,11 +30,11 @@ import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
@@ -132,11 +132,18 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     }
 
     private UtbetalingsgradArbeidsforholdDto mapTilKalkulusArbeidsforhold(Arbeidsforhold arb) {
-        var aktør = mapTilKalkulusAktør(arb);
-        var type = mapType(arb.getType());
-        var internArbeidsforholdId = mapArbeidsforholdId(arb.getArbeidsforholdId());
-        var utbetalingsgradARbeidsforhold = new UtbetalingsgradArbeidsforholdDto(aktør, internArbeidsforholdId, type);
-        return utbetalingsgradARbeidsforhold;
+        if (erTypeMedArbeidsforhold(arb)) {
+            var aktør = mapTilKalkulusAktør(arb);
+            var type = mapType(arb.getType());
+            var internArbeidsforholdId = mapArbeidsforholdId(arb.getArbeidsforholdId());
+            return new UtbetalingsgradArbeidsforholdDto(aktør, internArbeidsforholdId, type);
+        } else {
+            return new UtbetalingsgradArbeidsforholdDto(null, null, mapType(arb.getType()));
+        }
+    }
+
+    private boolean erTypeMedArbeidsforhold(Arbeidsforhold arbeidsforhold) {
+        return arbeidsforhold.getType().equals(no.nav.k9.kodeverk.uttak.UttakArbeidType.ARBEIDSTAKER.getKode());
     }
 
 }
