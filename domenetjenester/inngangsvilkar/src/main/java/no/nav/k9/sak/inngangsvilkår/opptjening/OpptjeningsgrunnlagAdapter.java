@@ -27,13 +27,11 @@ class OpptjeningsgrunnlagAdapter {
     private LocalDate behandlingstidspunkt;
     private LocalDate startDato;
     private LocalDate sluttDato;
-    private Boolean overstyringFjernet;
 
-    OpptjeningsgrunnlagAdapter(LocalDate behandlingstidspunkt, LocalDate startDato, LocalDate sluttDato, Boolean overstyringFjernet) {
+    OpptjeningsgrunnlagAdapter(LocalDate behandlingstidspunkt, LocalDate startDato, LocalDate sluttDato) {
         this.behandlingstidspunkt = behandlingstidspunkt;
         this.startDato = startDato;
         this.sluttDato = sluttDato;
-        this.overstyringFjernet = overstyringFjernet;
     }
 
     Opptjeningsgrunnlag mapTilGrunnlag(Collection<OpptjeningAktivitetPeriode> opptjeningAktiveter,
@@ -157,15 +155,11 @@ class OpptjeningsgrunnlagAdapter {
     }
 
     private AktivitetPeriode.VurderingsStatus mapStatus(OpptjeningAktivitetPeriode periode) {
-        if (overstyringFjernet && List.of(VurderingsStatus.UNDERKJENT, VurderingsStatus.FERDIG_VURDERT_UNDERKJENT).contains(periode.getVurderingsStatus())) {
-            return AktivitetPeriode.VurderingsStatus.VURDERT_UNDERKJENT;
-        }
-        if (VurderingsStatus.FERDIG_VURDERT_UNDERKJENT.equals(periode.getVurderingsStatus())) {
-            return AktivitetPeriode.VurderingsStatus.VURDERT_UNDERKJENT;
-        } else if (VurderingsStatus.FERDIG_VURDERT_GODKJENT.equals(periode.getVurderingsStatus())) {
-            return AktivitetPeriode.VurderingsStatus.VURDERT_GODKJENT;
-        }
-        return AktivitetPeriode.VurderingsStatus.TIL_VURDERING;
+        return switch (periode.getVurderingsStatus()) {
+            case UNDERKJENT -> AktivitetPeriode.VurderingsStatus.VURDERT_UNDERKJENT;
+            case TIL_VURDERING -> AktivitetPeriode.VurderingsStatus.TIL_VURDERING;
+            default -> throw new IllegalArgumentException("Oppstjeningsvilkår sin regelmodell støtter ikke status=" + periode.getVurderingsStatus());
+        };
     }
 
 

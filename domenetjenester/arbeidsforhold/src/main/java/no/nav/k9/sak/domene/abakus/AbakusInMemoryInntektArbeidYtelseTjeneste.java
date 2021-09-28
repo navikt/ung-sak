@@ -222,17 +222,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     }
 
     @Override
-    public void fjernSaksbehandletVersjon(Long behandlingId) {
-        Optional<InntektArbeidYtelseGrunnlag> entitetOpt = hentInntektArbeidYtelseGrunnlagForBehandling(behandlingId);
-        if (entitetOpt.isPresent()) {
-            InntektArbeidYtelseGrunnlag entitet = entitetOpt.get();
-            var builder = new InMemoryInntektArbeidYtelseGrunnlagBuilder(entitet);
-            builder.fjernSaksbehandlet();
-            lagreOgFlush(behandlingId, entitet);
-        }
-    }
-
-    @Override
     public void lagreArbeidsforhold(Long behandlingId, AktørId søkerAktørId, ArbeidsforholdInformasjonBuilder informasjon) {
         Objects.requireNonNull(informasjon, "informasjon"); // NOSONAR
         var builder = opprettGrunnlagBuilderFor(behandlingId);

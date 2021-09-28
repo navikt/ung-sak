@@ -12,7 +12,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.vedtak.TotrinnsArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.vedtak.TotrinnsBeregningDto;
 import no.nav.k9.sak.kontrakt.vedtak.TotrinnskontrollAksjonspunkterDto;
-import no.nav.k9.sak.kontrakt.vedtak.TotrinnskontrollAktivitetDto;
 import no.nav.k9.sak.kontrakt.vedtak.TotrinnskontrollVurderÅrsak;
 import no.nav.k9.sak.produksjonsstyring.totrinn.BeregningsgrunnlagToTrinn;
 import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
@@ -22,7 +21,6 @@ import no.nav.k9.sak.produksjonsstyring.totrinn.VurderÅrsakTotrinnsvurdering;
 @Dependent
 public class TotrinnsaksjonspunktDtoTjeneste {
     private TotrinnsBeregningDtoTjeneste totrinnsBeregningDtoTjeneste;
-    private TotrinnskontrollAktivitetDtoTjeneste totrinnskontrollAktivitetDtoTjeneste;
     private TotrinnArbeidsforholdDtoTjeneste totrinnArbeidsforholdDtoTjeneste;
 
     protected TotrinnsaksjonspunktDtoTjeneste() {
@@ -31,9 +29,7 @@ public class TotrinnsaksjonspunktDtoTjeneste {
 
     @Inject
     public TotrinnsaksjonspunktDtoTjeneste(TotrinnsBeregningDtoTjeneste totrinnsBeregningDtoTjeneste,
-                                           TotrinnArbeidsforholdDtoTjeneste totrinnArbeidsforholdDtoTjeneste,
-                                           TotrinnskontrollAktivitetDtoTjeneste totrinnskontrollAktivitetDtoTjeneste) {
-        this.totrinnskontrollAktivitetDtoTjeneste = totrinnskontrollAktivitetDtoTjeneste;
+                                           TotrinnArbeidsforholdDtoTjeneste totrinnArbeidsforholdDtoTjeneste) {
         this.totrinnsBeregningDtoTjeneste = totrinnsBeregningDtoTjeneste;
         this.totrinnArbeidsforholdDtoTjeneste = totrinnArbeidsforholdDtoTjeneste;
     }
@@ -49,12 +45,9 @@ public class TotrinnsaksjonspunktDtoTjeneste {
         List<TotrinnsArbeidsforholdDto> totrinnArbeidsforhold = totrinnArbeidsforholdDtoTjeneste.hentArbeidsforhold(behandling, aksjonspunkt,
             totrinnresultatgrunnlag.flatMap(Totrinnresultatgrunnlag::getGrunnlagUuid));
 
-        List<TotrinnskontrollAktivitetDto> opptjeningAktiviteter = totrinnskontrollAktivitetDtoTjeneste.hentAktiviterEndretForOpptjening(aksjonspunkt, behandling,
-            totrinnresultatgrunnlag.flatMap(Totrinnresultatgrunnlag::getGrunnlagUuid));
 
         return new TotrinnskontrollAksjonspunkterDto.Builder()
             .medAksjonspunktKode(aksjonspunkt.getAksjonspunktDefinisjon())
-            .medOpptjeningAktiviteter(opptjeningAktiviteter)
             .medBeregningDtoer(beregningDtoer)
             .medBesluttersBegrunnelse(aksjonspunkt.getBegrunnelse())
             .medArbeidsforhold(totrinnArbeidsforhold)

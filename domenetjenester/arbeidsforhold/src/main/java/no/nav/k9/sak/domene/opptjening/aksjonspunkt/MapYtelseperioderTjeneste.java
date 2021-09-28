@@ -104,10 +104,6 @@ public class MapYtelseperioderTjeneste {
 
         ytelse.getYtelseAnvist().forEach(ytelseAnvist -> {
             var input = new VurderStatusInput(type, behandlingReferanse);
-            input.setGrunnlag(iayGrunnlag);
-            input.setOpptjeningPeriode(opptjeningPeriode);
-            input.setSkjæringstidspunkt(skjæringstidspunkt);
-            input.setHarVærtSaksbehandlet(false);
             if (orgnumre.isEmpty()) {
                 OpptjeningsperiodeForSaksbehandling.Builder builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
                     .medPeriode(hentUtDatoIntervall(ytelse, ytelseAnvist))

@@ -16,10 +16,7 @@ public class OpptjeningsperiodeForSaksbehandling {
     private Stillingsprosent stillingsprosent;
     private DatoIntervallEntitet periode;
     private VurderingsStatus vurderingsStatus;
-    private Boolean erPeriodeEndret = false;
-    private Boolean erManueltRegistrert = false;
     private String begrunnelse;
-    private Boolean manueltBehandlet = false;
     private String arbeidsgiverUtlandNavn;
 
     public OpptjeningsperiodeForSaksbehandling() {
@@ -53,20 +50,8 @@ public class OpptjeningsperiodeForSaksbehandling {
         return vurderingsStatus;
     }
 
-    public Boolean getErManueltRegistrert() {
-        return erManueltRegistrert;
-    }
-
-    public Boolean getErPeriodeEndret() {
-        return erPeriodeEndret;
-    }
-
     public String getBegrunnelse() {
         return begrunnelse;
-    }
-
-    public boolean erManueltBehandlet() {
-        return manueltBehandlet;
     }
 
     public Arbeidsgiver getArbeidsgiver() {
@@ -84,15 +69,13 @@ public class OpptjeningsperiodeForSaksbehandling {
         OpptjeningsperiodeForSaksbehandling other = (OpptjeningsperiodeForSaksbehandling) o;
         return Objects.equals(opptjeningAktivitetType, other.opptjeningAktivitetType) &&
             Objects.equals(grupperingNøkkel, other.grupperingNøkkel) &&
-            Objects.equals(erPeriodeEndret, other.erPeriodeEndret) &&
-            Objects.equals(erManueltRegistrert, other.erManueltRegistrert) &&
             Objects.equals(begrunnelse, other.begrunnelse);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(opptjeningAktivitetType, grupperingNøkkel, erPeriodeEndret, erManueltRegistrert, begrunnelse);
+        return Objects.hash(opptjeningAktivitetType, grupperingNøkkel, begrunnelse);
     }
 
     @Override
@@ -104,10 +87,7 @@ public class OpptjeningsperiodeForSaksbehandling {
             ", stillingsprosent=" + stillingsprosent +
             ", periode=" + periode +
             ", vurderingsStatus=" + vurderingsStatus +
-            ", erPeriodeEndret=" + erPeriodeEndret +
-            ", erManueltRegistrert=" + erManueltRegistrert +
             ", begrunnelse='" + begrunnelse + '\'' +
-            ", manueltBehandlet=" + manueltBehandlet +
             ", arbeidsgiverUtlandNavn='" + arbeidsgiverUtlandNavn + '\'' +
             '}';
     }
@@ -152,23 +132,8 @@ public class OpptjeningsperiodeForSaksbehandling {
             return this;
         }
 
-        public Builder medErManueltRegistrert() {
-            kladd.erManueltRegistrert = true;
-            return this;
-        }
-
-        public Builder medErPeriodenEndret() {
-            kladd.erPeriodeEndret = true;
-            return this;
-        }
-
         public Builder medBegrunnelse(String begrunnelse) {
             kladd.begrunnelse = begrunnelse;
-            return this;
-        }
-
-        public Builder medErManueltBehandlet() {
-            kladd.manueltBehandlet = true;
             return this;
         }
 

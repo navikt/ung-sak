@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -115,10 +114,9 @@ class ForeslåVedtakTjeneste {
             behandling.harAksjonspunktMedTotrinnskontroll();
 
         if (totrinn && deaktiverTotrinnSelektivt) {
-            var ignorerTotrinnAksMidlertidig = Set.of(AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP, AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
             var totrinnAks = behandling.getAksjonspunkter().stream()
                 .filter(a -> a.isToTrinnsBehandling())
-                .filter(a -> !ignorerTotrinnAksMidlertidig.contains(a.getAksjonspunktDefinisjon()))
+                .filter(a -> a.getAksjonspunktDefinisjon() != AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP)
                 .collect(Collectors.toList());
             return !totrinnAks.isEmpty();
         }
