@@ -288,7 +288,9 @@ public class MapInputTilUttakTjeneste {
             tilsynsperioder,
             beredskapsperioder,
             nattevåksperioder,
-            kravprioritet);
+            kravprioritet,
+            Map.of() //TODO oppgi kravprioritet for behandlinger istedet for per sak
+        );
     }
 
     private Set<DatoIntervallEntitet> finnInnvilgedePerioderSykdom(Vilkårene vilkårene) {
