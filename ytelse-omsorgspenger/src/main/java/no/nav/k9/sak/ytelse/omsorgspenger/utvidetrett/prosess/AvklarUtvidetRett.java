@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -38,7 +39,6 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     private final VilkårType vilkårType = VilkårType.UTVIDETRETT;
     private final Avslagsårsak defaultAvslagsårsak = Avslagsårsak.IKKE_UTVIDETRETT;
     private final SkjermlenkeType skjermlenkeType = SkjermlenkeType.PUNKT_FOR_UTVIDETRETT;
-    private final HistorikkEndretFeltType historikkEndretFeltType = HistorikkEndretFeltType.UTVIDETRETT;
 
     private HistorikkTjenesteAdapter historikkAdapter;
     private BehandlingRepository behandlingRepository;
@@ -68,12 +68,13 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         var behandlingId = param.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         var fagsak = behandling.getFagsak();
+        var ytelseType = fagsak.getYtelseType();
 
         Utfall nyttUtfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         var vilkårResultatBuilder = param.getVilkårResultatBuilder();
         var periode = dto.getPeriode();
 
-        lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
+        lagHistorikkInnslag(param, ytelseType, nyttUtfall, dto.getBegrunnelse());
 
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var originalVilkårTidslinje = vilkårene.getVilkårTimeline(vilkårType);
@@ -139,7 +140,13 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
 
     }
 
-    private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, Utfall nyVerdi, String begrunnelse) {
+    private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, FagsakYtelseType ytelseType, Utfall nyVerdi, String begrunnelse) {
+        HistorikkEndretFeltType historikkEndretFeltType = switch (ytelseType) {
+            case OMSORGSPENGER_KS -> HistorikkEndretFeltType.UTVIDETRETT;
+            case OMSORGSPENGER_MA -> HistorikkEndretFeltType.MIDLERTIDIG_ALENE;
+            case OMSORGSPENGER_AO -> HistorikkEndretFeltType.ALENE_OM_OMSORG;
+            default -> throw new IllegalArgumentException("Kan ikke lage historikk for annet enn rammevedtak, fikk ytelse =" + ytelseType);
+        };
         historikkAdapter.tekstBuilder()
             .medEndretFelt(historikkEndretFeltType, null, nyVerdi);
 
