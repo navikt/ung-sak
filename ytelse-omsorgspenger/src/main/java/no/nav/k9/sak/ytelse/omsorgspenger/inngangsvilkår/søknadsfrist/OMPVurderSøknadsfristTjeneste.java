@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
@@ -24,6 +25,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 @FagsakYtelseTypeRef("OMP")
 public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjeneste<OppgittFraværPeriode> {
 
+    private BehandlingRepository behandlingRepository;
     private InntektsmeldingerPerioderTjeneste inntektsmeldingerPerioderTjeneste;
     private InntektsmeldingSøktePerioderMapper inntektsmeldingMapper;
     private SøknadPerioderTjeneste søknadPerioderTjeneste;
@@ -38,12 +40,14 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
                                          InntektsmeldingSøktePerioderMapper inntektsmeldingMapper,
                                          SøknadPerioderTjeneste søknadPerioderTjeneste,
                                          VurderSøknadsfrist vurderSøknadsfrist,
-                                         AvklartSøknadsfristRepository avklartSøknadsfristRepository) {
+                                         AvklartSøknadsfristRepository avklartSøknadsfristRepository,
+                                         BehandlingRepository behandlingRepository) {
         this.inntektsmeldingerPerioderTjeneste = inntektsmeldingerPerioderTjeneste;
         this.inntektsmeldingMapper = inntektsmeldingMapper;
         this.søknadPerioderTjeneste = søknadPerioderTjeneste;
         this.vurderSøknadsfrist = vurderSøknadsfrist;
         this.avklartSøknadsfristRepository = avklartSøknadsfristRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
@@ -55,7 +59,6 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
 
     @Override
     public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
-
         var inntektsmeldinger = inntektsmeldingerPerioderTjeneste.hentUtInntektsmeldingerRelevantForBehandling(referanse);
         Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søktePerioder = new HashMap<>(inntektsmeldingMapper.mapTilSøktePerioder(inntektsmeldinger));
         var søktePerioderFraSøknad = søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåFagsak(referanse);
@@ -72,6 +75,12 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
 
     @Override
     public Set<KravDokument> relevanteKravdokumentForBehandling(BehandlingReferanse referanse) {
+        var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
+
+        if (behandling.erManueltOpprettet() && behandling.erRevurdering()) {
+            return hentPerioderTilVurdering(referanse).keySet();
+        }
+
         var inntektsmeldinger = inntektsmeldingerPerioderTjeneste.hentUtInntektsmeldingerKnyttetTilBehandling(referanse);
         var kravDokumenter = inntektsmeldinger.stream()
             .map(it -> new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING))

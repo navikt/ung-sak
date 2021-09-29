@@ -23,6 +23,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
@@ -44,6 +45,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
 
     private final DefaultSøknadsfristPeriodeVurderer vurderer = new DefaultSøknadsfristPeriodeVurderer();
 
+    private BehandlingRepository behandlingRepository;
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private AvklartSøknadsfristRepository avklartSøknadsfristRepository;
@@ -55,10 +57,12 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
     @Inject
     public PSBVurdererSøknadsfristTjeneste(SøknadsperiodeRepository søknadsperiodeRepository,
                                            MottatteDokumentRepository mottatteDokumentRepository,
-                                           AvklartSøknadsfristRepository avklartSøknadsfristRepository) {
+                                           AvklartSøknadsfristRepository avklartSøknadsfristRepository,
+                                           BehandlingRepository behandlingRepository) {
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.avklartSøknadsfristRepository = avklartSøknadsfristRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
@@ -97,10 +101,10 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
         var mottattTidspunkt = utledMottattTidspunkt(dokument, mottatteDokumenter);
         var kravDokument = new KravDokument(dokument.getJournalpostId(), mottattTidspunkt, KravDokumentType.SØKNAD);
         var søktePerioder = dokument.getSøknadsperioder()
-                .stream()
-                .filter(it -> !it.isHarTrukketKrav()) // Denne fjerner bare søkteperioder som kun har blitt sendt inn med harTrukketKrav
-                .map(it -> new SøktPeriode<>(it.getPeriode(), it))
-                .collect(Collectors.toList());
+            .stream()
+            .filter(it -> !it.isHarTrukketKrav()) // Denne fjerner bare søkteperioder som kun har blitt sendt inn med harTrukketKrav
+            .map(it -> new SøktPeriode<>(it.getPeriode(), it))
+            .collect(Collectors.toList());
 
         result.put(kravDokument, søktePerioder);
     }
@@ -143,6 +147,12 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
 
     @Override
     public Set<KravDokument> relevanteKravdokumentForBehandling(BehandlingReferanse referanse) {
+        var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
+
+        if (behandling.erManueltOpprettet() && behandling.erRevurdering()) {
+            return hentPerioderTilVurdering(referanse).keySet();
+        }
+
         return mottatteDokumentRepository.hentMottatteDokumentForBehandling(referanse.getFagsakId(), referanse.getBehandlingId(), List.of(Brevkode.PLEIEPENGER_BARN_SOKNAD), false, DokumentStatus.GYLDIG)
             .stream()
             .map(it -> new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.SØKNAD))
