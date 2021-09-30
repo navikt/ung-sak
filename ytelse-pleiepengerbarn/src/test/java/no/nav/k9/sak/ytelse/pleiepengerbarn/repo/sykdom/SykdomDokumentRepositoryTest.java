@@ -36,6 +36,7 @@ class SykdomDokumentRepositoryTest {
         final String endretAv = "saksbehandler";
         final LocalDateTime nå = LocalDateTime.now();
         final JournalpostId journalpostId = new JournalpostId("journalpostId");
+        final JournalpostId journalpostId2 = new JournalpostId("journalpostId2");
 
         final AktørId pleietrengendeAktørId = new AktørId("lala");
         final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
@@ -49,8 +50,11 @@ class SykdomDokumentRepositoryTest {
         final AktørId annenPleietrengendeAktørId = new AktørId("annetBarn");
         assertThat(repo.hentDokument(dokumenter.get(0).getId(), annenPleietrengendeAktørId).isEmpty());
         final SykdomDokumentInformasjon informasjon2 = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
-        final SykdomDokument dokument2 = new SykdomDokument(journalpostId, null, informasjon2, null, null, null, endretAv, nå);
+        final SykdomDokument dokument2 = new SykdomDokument(journalpostId2, null, informasjon2, null, null, null, endretAv, nå);
+        
+        assertThat(repo.finnesSykdomDokument(journalpostId2, null)).isFalse();
         repo.lagre(dokument2, annenPleietrengendeAktørId);
+        assertThat(repo.finnesSykdomDokument(journalpostId2, null)).isTrue();
 
         assertThat(repo.hentAlleDokumenterFor(pleietrengendeAktørId).size()).isEqualTo(1);
         assertThat(repo.hentAlleDokumenterFor(annenPleietrengendeAktørId).size()).isEqualTo(1);
