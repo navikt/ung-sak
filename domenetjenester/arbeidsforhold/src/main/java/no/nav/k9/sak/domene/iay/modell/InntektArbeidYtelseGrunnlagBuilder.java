@@ -68,6 +68,7 @@ public class InntektArbeidYtelseGrunnlagBuilder {
         return this;
     }
 
+    @Deprecated
     public void medSaksbehandlet(InntektArbeidYtelseAggregatBuilder builder) {
         kladd.setSaksbehandlet(builder == null ? null : builder.build());
     }

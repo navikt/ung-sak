@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -32,6 +33,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
@@ -50,6 +52,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtab
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidstidMappingInput;
@@ -147,7 +150,7 @@ public class MapInputTilUttakTjeneste {
         var rettVedDød = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
 
         final NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(referanse.getBehandlingId());
-        
+
         var input = new InputParametere()
             .medBehandling(behandling)
             .medVilkårene(vilkårene)
@@ -262,11 +265,14 @@ public class MapInputTilUttakTjeneste {
         var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId())
             .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende)
             .orElse(null);
-        var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende);
-        var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende);
+
+        var innvilgedePerioderMedSykdom = finnInnvilgedePerioderSykdom(input.getVilkårene());
+
+        var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
+        var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
         final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
-        
+
         return new Uttaksgrunnlag(
             barn,
             søker,
@@ -282,7 +288,22 @@ public class MapInputTilUttakTjeneste {
             tilsynsperioder,
             beredskapsperioder,
             nattevåksperioder,
-            kravprioritet);
+            kravprioritet,
+            Map.of() //TODO oppgi kravprioritet for behandlinger istedet for per sak
+        );
+    }
+
+    private Set<DatoIntervallEntitet> finnInnvilgedePerioderSykdom(Vilkårene vilkårene) {
+        var s1 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR).orElseThrow()
+            .getPerioder()
+            .stream();
+        var s2 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR).orElseThrow()
+            .getPerioder()
+            .stream();
+        return Stream.concat(s1, s2)
+            .filter(it -> no.nav.k9.kodeverk.vilkår.Utfall.OPPFYLT.equals(it.getUtfall()))
+            .map(VilkårPeriode::getPeriode)
+            .collect(Collectors.toSet());
     }
 
     private RettVedDød utledRettVedDød(InputParametere input) {
@@ -304,23 +325,26 @@ public class MapInputTilUttakTjeneste {
         return resultat;
     }
 
-    private Map<LukketPeriode, Utfall> tilBeredskap(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
+    private Map<LukketPeriode, Utfall> tilBeredskap(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Set<DatoIntervallEntitet> innvilgedePerioderMedSykdom) {
         if (unntakEtablertTilsynForPleietrengende == null || unntakEtablertTilsynForPleietrengende.getBeredskap() == null) {
             return Map.of();
         }
-        return tilUnntakEtablertTilsynMap(unntakEtablertTilsynForPleietrengende.getBeredskap());
+        return tilUnntakEtablertTilsynMap(unntakEtablertTilsynForPleietrengende.getBeredskap(), innvilgedePerioderMedSykdom);
     }
 
-    private Map<LukketPeriode, Utfall> tilNattevåk(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
+    private Map<LukketPeriode, Utfall> tilNattevåk(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Set<DatoIntervallEntitet> innvilgedePerioderMedSykdom) {
         if (unntakEtablertTilsynForPleietrengende == null || unntakEtablertTilsynForPleietrengende.getNattevåk() == null) {
             return Map.of();
         }
-        return tilUnntakEtablertTilsynMap(unntakEtablertTilsynForPleietrengende.getNattevåk());
+        return tilUnntakEtablertTilsynMap(unntakEtablertTilsynForPleietrengende.getNattevåk(), innvilgedePerioderMedSykdom);
     }
 
-    private Map<LukketPeriode, Utfall> tilUnntakEtablertTilsynMap(UnntakEtablertTilsyn unntakEtablertTilsyn) {
+    private Map<LukketPeriode, Utfall> tilUnntakEtablertTilsynMap(UnntakEtablertTilsyn unntakEtablertTilsyn, Set<DatoIntervallEntitet> innvilgedePerioderMedSykdom) {
         var map = new HashMap<LukketPeriode, Utfall>();
-        unntakEtablertTilsyn.getPerioder().forEach(periode -> {
+        unntakEtablertTilsyn.getPerioder()
+            .stream()
+            .filter(it -> erRelevantForBehandling(it, innvilgedePerioderMedSykdom))
+            .forEach(periode -> {
                 var utfall = switch (periode.getResultat()) {
                     case OPPFYLT -> Utfall.OPPFYLT;
                     case IKKE_OPPFYLT -> Utfall.IKKE_OPPFYLT;
@@ -330,6 +354,11 @@ public class MapInputTilUttakTjeneste {
             }
         );
         return map;
+    }
+
+    private boolean erRelevantForBehandling(UnntakEtablertTilsynPeriode it, Set<DatoIntervallEntitet> innvilgedePerioderMedSykdom) {
+        return Set.of(Resultat.OPPFYLT, Resultat.IKKE_OPPFYLT).contains(it.getResultat())
+            || innvilgedePerioderMedSykdom.stream().anyMatch(at -> at.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFomDato(), it.getPeriode().getTomDato())));
     }
 
     private void evaluerDokumenter(Set<PerioderFraSøknad> perioderFraSøknader, Set<KravDokument> kravDokumenter) {

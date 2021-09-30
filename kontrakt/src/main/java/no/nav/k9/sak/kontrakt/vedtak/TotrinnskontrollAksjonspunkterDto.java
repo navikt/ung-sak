@@ -57,11 +57,6 @@ public class TotrinnskontrollAksjonspunkterDto {
             return this;
         }
 
-        public Builder medOpptjeningAktiviteter(List<TotrinnskontrollAktivitetDto> opptjeningAktiviteter) {
-            kladd.opptjeningAktiviteter = opptjeningAktiviteter;
-            return this;
-        }
-
         public Builder medTotrinnskontrollGodkjent(Boolean totrinnskontrollGodkjent) {
             kladd.totrinnskontrollGodkjent = totrinnskontrollGodkjent;
             return this;
@@ -99,12 +94,6 @@ public class TotrinnskontrollAksjonspunkterDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String besluttersBegrunnelse;
 
-    @JsonInclude(value = Include.NON_EMPTY)
-    @JsonProperty(value = "opptjeningAktiviteter")
-    @Size(max = 200)
-    @Valid
-    private List<TotrinnskontrollAktivitetDto> opptjeningAktiviteter = new ArrayList<>();
-
     @JsonProperty(value = "totrinnskontrollGodkjent")
     private Boolean totrinnskontrollGodkjent;
 
@@ -133,10 +122,6 @@ public class TotrinnskontrollAksjonspunkterDto {
         return besluttersBegrunnelse;
     }
 
-    public List<TotrinnskontrollAktivitetDto> getOpptjeningAktiviteter() {
-        return Collections.unmodifiableList(opptjeningAktiviteter);
-    }
-
     public List<TotrinnsBeregningDto> getBeregningDtoer() {
         return beregningDtoer;
     }
@@ -163,10 +148,6 @@ public class TotrinnskontrollAksjonspunkterDto {
 
     public void setBesluttersBegrunnelse(String besluttersBegrunnelse) {
         this.besluttersBegrunnelse = besluttersBegrunnelse;
-    }
-
-    public void setOpptjeningAktiviteter(List<TotrinnskontrollAktivitetDto> opptjeningAktiviteter) {
-        this.opptjeningAktiviteter = opptjeningAktiviteter;
     }
 
     public void setTotrinnskontrollGodkjent(Boolean totrinnskontrollGodkjent) {

@@ -15,19 +15,12 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
-import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 class MapFraUttaksplan {
 
     private static final Comparator<UttakResultatPeriode> COMP_PERIODE = Comparator.comparing(UttakResultatPeriode::getPeriode,
         Comparator.nullsFirst(Comparator.naturalOrder()));
-
-    private static List<UttakAktivitet> toUttakAktiviteter(UttaksperiodeInfo uttaksplanperiode) {
-        return uttaksplanperiode.getUtbetalingsgrader().stream()
-            .map(MapFraUttaksplan::mapTilUttaksAktiviteter)
-            .collect(Collectors.toList());
-    }
 
     private static UttakAktivitet mapTilUttaksAktiviteter(Utbetalingsgrader data) {
         BigDecimal stillingsgrad = BigDecimal.ZERO; // bruker ikke for Pleiepenger barn, bruker kun utbetalingsgrad
@@ -41,6 +34,7 @@ class MapFraUttaksplan {
 
     private static Arbeidsforhold buildArbeidsforhold(UttakArbeidType type, Utbetalingsgrader data) {
         switch (type) {
+            case IKKE_YRKESAKTIV:
             case ARBEIDSTAKER:
                 var arb = data.getArbeidsforhold();
                 final Arbeidsforhold.Builder arbeidsforholdBuilder = Arbeidsforhold.builder();

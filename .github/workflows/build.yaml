@@ -13,7 +13,7 @@ on:
       - 'dev/**'
   schedule:
     - cron: '0 4 * * 1'
-      
+
 env:
   IMAGE_BASE_CR: ghcr.io/${{ github.repository }}
   CLUSTER: dev-fss
@@ -55,15 +55,11 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '16'
+          cache: 'maven'
 
-      - name: Set cache key
+      - name: Set variables
         run: |
-          echo "CACHE_KEY=$(expr $(date +%V) - 1 + 1)" >> $GITHUB_ENV
           echo "TIMESTAMP=$(expr $(date +%Y%m%d%H%M%S))" >> $GITHUB_ENV
-      - uses: actions/cache@v2
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ env.CACHE_KEY }}
 
       - name: Build artifacts & deploy
         shell: bash
@@ -71,10 +67,10 @@ jobs:
           mvn verify -e --batch-mode -DtrimStackTrace=false --file pom.xml -Dchangelist= -Dsha1=-$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7) -Dfile.encoding=UTF-8
           echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
         env:
-          GITHUB_TOKEN: ${{ secrets.GHCR_PUSH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.READ_PACKAGES_PAT }}
           DATASOURCE_HOST: localhost
           DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
-      
+
       - name: Bygg og laste opp docker-image
         run: |
           docker build --pull --tag ${IMAGE_BASE_CR}:${TAG} --tag ${IMAGE_BASE_CR}:latest .
@@ -82,18 +78,18 @@ jobs:
           docker push ${IMAGE_BASE_CR} --all-tags
 
       - name: Lukk gamle issues
-        uses: actions/github-script@v4
+        uses: actions/github-script@v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.issues.listForRepo({
+            github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
               labels: ['deployment']
             }).then(response => {
               response.data.forEach(issue => {
-                github.issues.update({
+                github.rest.issues.update({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: issue.number,
@@ -101,15 +97,15 @@ jobs:
                 });
               });
             });
-            
+
       -  name: Opprett deployment issue
          id: createdeployissue
          if: success()
-         uses: actions/github-script@v4
+         uses: actions/github-script@v5
          with:
            github-token: ${{secrets.GITHUB_TOKEN}}
            script: |
-               github.issues.create( {
+               github.rest.issues.create( {
                  owner: context.issue.owner,
                  repo: context.issue.repo,
                  labels: ['deployment'],
@@ -118,7 +114,7 @@ jobs:
                .then(response => {
                        core.setOutput('number', response.data.number);
                 });
-                
+
       - name: Trigger verdikjede test
         shell: bash
         run: |

@@ -18,12 +18,14 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
+import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.søknad.felles.opptjening.AnnenAktivitet;
+import no.nav.k9.søknad.felles.opptjening.Frilanser;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende;
 import no.nav.k9.søknad.felles.opptjening.UtenlandskArbeidsforhold;
@@ -46,7 +48,11 @@ public class OppgittOpptjeningMapper {
             builder.leggTilEgneNæringer(snBuilders);
         }
         if (opptjeningAktiviteter.getFrilanser() != null) {
+            Frilanser frilanser = opptjeningAktiviteter.getFrilanser();
+            DatoIntervallEntitet frilansperiode = frilanser.getSluttdato() == null ? DatoIntervallEntitet.fraOgMed(frilanser.getStartdato()) :
+                DatoIntervallEntitet.fraOgMedTilOgMed(frilanser.getStartdato(), frilanser.getSluttdato());
             builder.leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
+                    .leggTilFrilansOppdrag(lagFrilansperiode(frilansperiode))
                 .build());
         }
         if (opptjeningAktiviteter.getUtenlandskeArbeidsforhold() != null) {
@@ -63,6 +69,11 @@ public class OppgittOpptjeningMapper {
         return byggRequest(behandling, builder);
     }
 
+    private OppgittFrilansoppdrag lagFrilansperiode(DatoIntervallEntitet frilansperiode) {
+        return OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder.ny()
+            .medPeriode(frilansperiode)
+            .build();
+    }
 
     private EgenNæringBuilder mapEgenNæring(SelvstendigNæringsdrivende sn) {
         Map.Entry<Periode, SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo> entry = getSnPeriodeInfo(sn);

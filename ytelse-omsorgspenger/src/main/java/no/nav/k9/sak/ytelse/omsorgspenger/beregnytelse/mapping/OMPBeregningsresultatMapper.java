@@ -23,6 +23,7 @@ import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
@@ -51,7 +52,6 @@ import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
-import no.nav.k9.felles.util.Tuple;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP")
@@ -308,7 +308,7 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
             throw new IllegalStateException(
                 "Utviklerfeil: Andeler som slås sammen skal ikke ha ulikt arbeidsforhold, periode, stillingsprosent eller utbetalingsgrad");
         }
-        BeregningsresultatAndel ny = new BeregningsresultatAndel(a, a.getBeregningsresultatPeriode());
+        BeregningsresultatAndel ny = new BeregningsresultatAndel(a);
         BeregningsresultatAndel.builder(ny)
             .medDagsats(a.getDagsats() + b.getDagsats())
             .medDagsatsFraBg(a.getDagsatsFraBg() + b.getDagsatsFraBg());

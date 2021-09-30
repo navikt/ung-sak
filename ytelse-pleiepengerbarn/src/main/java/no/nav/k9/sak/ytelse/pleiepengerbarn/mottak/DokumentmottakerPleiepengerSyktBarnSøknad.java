@@ -11,6 +11,9 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -39,6 +42,7 @@ import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnSøknadValidator;
 @DokumentGruppeRef(Brevkode.PLEIEPENGER_BARN_SOKNAD_KODE)
 class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
 
+    private Logger logger = LoggerFactory.getLogger(DokumentmottakerPleiepengerSyktBarnSøknad.class);
     private SøknadOversetter pleiepengerBarnSoknadOversetter;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SøknadParser søknadParser;
@@ -132,14 +136,19 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             if (journalpost.getInneholderMedisinskeOpplysninger() != null) {
                 journalpostHarMedisinskeOpplysninger = journalpost.getInneholderMedisinskeOpplysninger();
             }
-
-            sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
-                behandling,
-                new JournalpostId(journalpost.getJournalpostId()),
-                behandling.getFagsak().getPleietrengendeAktørId(),
-                søknad.getMottattDato().toLocalDateTime(),
-                journalpostHarInformasjonSomIkkeKanPunsjes,
-                journalpostHarMedisinskeOpplysninger);
+ 
+            try {
+                sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
+                    behandling,
+                    new JournalpostId(journalpost.getJournalpostId()),
+                    behandling.getFagsak().getPleietrengendeAktørId(),
+                    søknad.getMottattDato().toLocalDateTime(),
+                    journalpostHarInformasjonSomIkkeKanPunsjes,
+                    journalpostHarMedisinskeOpplysninger);
+            } catch (RuntimeException e) {
+                logger.warn("Feil ved håndtering av forsendelse " + journalpostId.getVerdi() + " med tilknyttet journalpost " + journalpost.getJournalpostId());
+                throw e;
+            }
         }
 
         Optional<Journalpost> journalpost = søknad.getJournalposter()

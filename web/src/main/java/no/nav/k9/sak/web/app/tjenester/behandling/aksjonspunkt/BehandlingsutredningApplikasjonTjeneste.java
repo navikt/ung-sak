@@ -12,6 +12,12 @@ import java.util.Objects;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -29,12 +35,6 @@ import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.SjekkProsessering;
-import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
-import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
-import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @Dependent
 public class BehandlingsutredningApplikasjonTjeneste {
@@ -142,7 +142,7 @@ public class BehandlingsutredningApplikasjonTjeneste {
         @TekniskFeil(feilkode = "K9-760741", feilmelding = "Behandling [ytelseType=%s, behandlingId=%s, saksnummer=%s] pågår eller feilet, kan ikke gjøre endringer inntil det er klart: %s", logLevel = WARN)
         Feil prosessUnderveisKanIkkeEndreTilKlart(FagsakYtelseType ytelseType, Long behandlingId, Saksnummer saksnummer, AsyncPollingStatus st);
 
-        @FunksjonellFeil(feilkode = "K9-837578", feilmelding = "Behandlingen [%s] er endret av en annen saksbehandler, eller har blitt oppdatert med ny informasjon av systemet. Fikk versjon [%s], har versjon [%s]", løsningsforslag = "Last inn behandlingen på nytt.", logLevel = WARN, exceptionClass = BehandlingEndretKonfliktException.class)
+        @FunksjonellFeil(feilkode = "K9-837578", feilmelding = "Behandlingen [%s] har blitt oppdatert med ny informasjon av systemet, eller er endret av en annen saksbehandler. Prøv å laste inn behandlingen på nytt, hvis problemet vedvarer ta kontakt på teams. Fikk versjon [%s], har versjon [%s]", løsningsforslag = "Last inn behandlingen på nytt.", logLevel = WARN, exceptionClass = BehandlingEndretKonfliktException.class)
         Feil endringerHarForekommetPåBehandlingen(Long behandlingId, Long versjonInn, Long versjonEksisterende);
     }
 }

@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
+import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 
@@ -31,6 +32,7 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private OpptjeningRepository opptjeningRepository;
     private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
+    private OpptjeningAktivitetVurderingOpptjeningsvilkår vurderForOpptjeningsvilkår;
 
     OpptjeningInntektArbeidYtelseTjeneste() {
         // for CDI proxy
@@ -43,6 +45,7 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
         this.iayTjeneste = iayTjeneste;
         this.opptjeningRepository = opptjeningRepository;
         this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
+        this.vurderForOpptjeningsvilkår = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
     }
 
     public OpptjeningResultat hentOpptjening(Long behandlingId) {
@@ -71,9 +74,9 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
         return Collections.unmodifiableNavigableMap(alle);
     }
 
-    public NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> hentRelevanteOpptjeningAktiveterForVilkårVurdering(BehandlingReferanse behandlingReferanse,
+    public NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> hentRelevanteOpptjeningAktiveterForVilkårVurdering(BehandlingReferanse ref,
                                                                                                                                    Collection<DatoIntervallEntitet> vilkårsPerioder) {
-        Long behandlingId = behandlingReferanse.getBehandlingId();
+        Long behandlingId = ref.getBehandlingId();
         var grunnlagOpt = iayTjeneste.finnGrunnlag(behandlingId);
         if (grunnlagOpt.isEmpty() || vilkårsPerioder.isEmpty()) {
             return Collections.emptyNavigableMap();
@@ -82,11 +85,10 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
         var iayGrunnlag = grunnlagOpt.get();
         NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> alle = new TreeMap<>();
 
-
         for (var periode : new TreeSet<>(vilkårsPerioder)) {
             LocalDate stp = periode.getFomDato();
             var opptjening = opptjeningsresultat.finnOpptjening(stp).orElseThrow(() -> new IllegalStateException("Finner ikke opptjening for vilkårsperiode, stp=" + stp));
-            var perioderForSaksbehandling = opptjeningsperioderTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, iayGrunnlag, opptjening, stp);
+            var perioderForSaksbehandling = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjening.getOpptjeningPeriode());
             var opptjeningAktivitetPerioder = perioderForSaksbehandling.stream().map(this::mapTilPerioder).collect(Collectors.toList());
             alle.put(periode, opptjeningAktivitetPerioder);
         }

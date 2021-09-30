@@ -78,6 +78,11 @@ public class SykdomsDokumentVedleggHåndterer {
                // Oppsummerings-PDFen fra punsj skal ikke klassifiseres under sykdom.
                 continue;
             }
+            
+            if (sykdomDokumentRepository.finnesSykdomDokument(journalpostId, dokumentInfo.getDokumentInfoId())) {
+                log.warn("Tidligere innsendt dokument har blitt sendt inn på nytt -- dette skyldes trolig feil hos avsender. Journalpost: " + journalpostId + ", DokumentInfo: " + dokumentInfo.getDokumentInfoId());
+                continue;
+            }
 
             final boolean erDigitalPleiepengerSyktBarnSøknad = hoveddokument
                     && journalpost.getKanal() == Kanal.NAV_NO

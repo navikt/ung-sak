@@ -47,6 +47,10 @@ public class SykdomDokumentDto {
     @JsonProperty(value = "fremhevet")
     @Valid
     private boolean fremhevet;
+    
+    @JsonProperty(value = "bruktTilMinstEnVurdering")
+    @Valid
+    private boolean bruktTilMinstEnVurdering;
 
     @JsonProperty(value = "links")
     @Size(max = 100)
@@ -58,6 +62,7 @@ public class SykdomDokumentDto {
 
     public SykdomDokumentDto(String id, SykdomDokumentType type, boolean benyttet,
                              boolean annenPartErKilde, LocalDate datert, boolean fremhevet,
+                             boolean bruktTilMinstEnVurdering,
                              List<ResourceLink> links) {
         this.id = id;
         this.type = type;
@@ -65,6 +70,7 @@ public class SykdomDokumentDto {
         this.annenPartErKilde = annenPartErKilde;
         this.datert = datert;
         this.fremhevet = fremhevet;
+        this.bruktTilMinstEnVurdering = bruktTilMinstEnVurdering;
         this.links = links;
     }
 

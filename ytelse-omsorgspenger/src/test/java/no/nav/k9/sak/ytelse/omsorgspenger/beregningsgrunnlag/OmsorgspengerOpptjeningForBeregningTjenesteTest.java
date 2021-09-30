@@ -34,9 +34,8 @@ import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
-import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
+import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -75,7 +74,7 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
         ref = BehandlingReferanse.fra(behandling);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, FØRSTE_UTTAKSDAG.minusMonths(10), FØRSTE_UTTAKSDAG.minusDays(1), false);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, SKJÆRINGSTIDSPUNKT.minusMonths(10), SKJÆRINGSTIDSPUNKT.minusDays(1), false);
-        tjeneste = new OmsorgspengerOpptjeningForBeregningTjeneste(new UnitTestLookupInstanceImpl<>(new OpptjeningsperioderUtenOverstyringTjeneste(opptjeningRepository)), oppgittOpptjeningFilterProvider);
+        tjeneste = new OmsorgspengerOpptjeningForBeregningTjeneste(new OpptjeningsperioderTjeneste(opptjeningRepository, oppgittOpptjeningFilterProvider), oppgittOpptjeningFilterProvider);
     }
 
     @Test
