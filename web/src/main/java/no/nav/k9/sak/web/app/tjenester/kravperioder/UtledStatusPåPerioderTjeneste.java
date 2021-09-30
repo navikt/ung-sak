@@ -30,7 +30,8 @@ import no.nav.k9.sak.typer.Periode;
 @Dependent
 public class UtledStatusPåPerioderTjeneste {
 
-    public StatusForPerioderPåBehandling utled(Behandling behandling, Set<KravDokument> kravdokumenter,
+    public StatusForPerioderPåBehandling utled(Behandling behandling,
+                                               Set<KravDokument> kravdokumenter,
                                                Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
                                                NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
                                                NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter) {

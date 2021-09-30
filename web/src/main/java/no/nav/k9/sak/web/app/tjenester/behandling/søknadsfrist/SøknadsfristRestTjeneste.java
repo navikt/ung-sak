@@ -5,6 +5,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 
 import java.util.List;
 import java.util.Map;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -60,7 +61,7 @@ public class SøknadsfristRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(SØKNADSFRIST_STATUS_PATH)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public SøknadsfristTilstandDto utledStatusForKompletthet(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+    public SøknadsfristTilstandDto utledStatus(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
 
         var referanse = BehandlingReferanse.fra(behandling);
