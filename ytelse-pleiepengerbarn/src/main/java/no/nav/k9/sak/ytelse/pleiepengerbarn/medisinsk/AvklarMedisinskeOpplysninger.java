@@ -55,7 +55,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     private SykdomDokumentRepository sykdomDokumentRepository;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
 
-    @KonfigVerdi(value = "NY_SYKDOM_TOTRINN", defaultVerdi = "false") boolean enableNySykdomTotrinn;
+    private boolean enableNySykdomTotrinn;
 
     AvklarMedisinskeOpplysninger() {
         // for CDI proxy
@@ -67,7 +67,8 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
                                         @FagsakYtelseTypeRef("PSB") PSBVilkårsPerioderTilVurderingTjeneste psbVilkårsPerioderTilVurderingTjeneste,
                                         BehandlingRepository behandlingRepository, VilkårResultatRepository vilkårResultatRepository,
                                         PleiebehovResultatRepository resultatRepository, SykdomDokumentRepository sykdomDokumentRepository,
-                                        SykdomGrunnlagRepository sykdomGrunnlagRepository) {
+                                        SykdomGrunnlagRepository sykdomGrunnlagRepository,
+                                        @KonfigVerdi(value = "NY_SYKDOM_TOTRINN", defaultVerdi = "false") boolean enableNySykdomTotrinn) {
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.sykdomVurderingService = sykdomVurderingService;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
@@ -77,6 +78,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         this.resultatRepository = resultatRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
+        this.enableNySykdomTotrinn = enableNySykdomTotrinn;
     }
 
 
