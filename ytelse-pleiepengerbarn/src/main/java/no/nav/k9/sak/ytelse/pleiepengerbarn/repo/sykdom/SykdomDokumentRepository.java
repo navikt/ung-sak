@@ -121,13 +121,19 @@ public class SykdomDokumentRepository {
     }
     
     public boolean finnesSykdomDokument(JournalpostId journalpostId, String dokumentInfoId) {
+        Objects.requireNonNull(journalpostId, "journalpostId");
+        
+        final String dokumentInfoSjekk = (dokumentInfoId == null) ? "d.dokumentInfoId IS NULL" : "d.dokumentInfoId = :dokumentInfoId";
+        
         final TypedQuery<SykdomDokument> q = entityManager.createQuery(
                 "SELECT d From SykdomDokument as d "
                     + "where d.journalpostId = :journalpostId"
-                    + "  and d.dokumentInfoId = :dokumentInfoId", SykdomDokument.class);
+                    + "  and " + dokumentInfoSjekk, SykdomDokument.class);
 
         q.setParameter("journalpostId", journalpostId);
-        q.setParameter("dokumentInfoId", dokumentInfoId);
+        if (dokumentInfoId != null) {
+            q.setParameter("dokumentInfoId", dokumentInfoId);
+        }
 
         Optional<SykdomDokument> dokument = q.getResultList().stream().findFirst();
 

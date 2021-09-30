@@ -80,7 +80,7 @@ public class SykdomsDokumentVedleggHåndterer {
             }
             
             if (sykdomDokumentRepository.finnesSykdomDokument(journalpostId, dokumentInfo.getDokumentInfoId())) {
-                log.warn("Tidligere innsendt dokument har blitt sendt inn på nytt -- dette skyldes trolig feil hos avsender (punsj). Journalpost: " + journalpostId + ", DokumentInfo: " + dokumentInfo.getDokumentInfoId());
+                log.warn("Tidligere innsendt dokument har blitt sendt inn på nytt -- dette skyldes trolig feil hos avsender. Journalpost: " + journalpostId + ", DokumentInfo: " + dokumentInfo.getDokumentInfoId());
                 continue;
             }
 
