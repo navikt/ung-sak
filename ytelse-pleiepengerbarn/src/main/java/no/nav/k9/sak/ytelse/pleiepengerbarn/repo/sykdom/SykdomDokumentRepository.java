@@ -16,9 +16,9 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @Dependent
 public class SykdomDokumentRepository {
@@ -118,6 +118,20 @@ public class SykdomDokumentRepository {
         Optional<SykdomDokument> dokument = q.getResultList().stream().findFirst();
 
         return dokument;
+    }
+    
+    public boolean finnesSykdomDokument(JournalpostId journalpostId, String dokumentInfoId) {
+        final TypedQuery<SykdomDokument> q = entityManager.createQuery(
+                "SELECT d From SykdomDokument as d "
+                    + "where d.journalpostId = :journalpostId"
+                    + "  and d.dokumentInfoId = :dokumentInfoId", SykdomDokument.class);
+
+        q.setParameter("journalpostId", journalpostId);
+        q.setParameter("dokumentInfoId", dokumentInfoId);
+
+        Optional<SykdomDokument> dokument = q.getResultList().stream().findFirst();
+
+        return dokument.isPresent();
     }
 
     public void lagre(SykdomDokument dokument, AktørId pleietrengende) {
