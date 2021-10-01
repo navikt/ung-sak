@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
@@ -63,6 +64,7 @@ class SøknadOversetter {
     private FagsakRepository fagsakRepository;
     private OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository;
     private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
+    private boolean skalBrukeUtledetEndringsperiode;
 
     SøknadOversetter() {
         // for CDI proxy
@@ -75,7 +77,8 @@ class SøknadOversetter {
                      UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                      TpsTjeneste tpsTjeneste,
                      OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository,
-                     UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository) {
+                     UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
+                     @KonfigVerdi(value = "ENABLE_UTLEDET_ENDRINGSPERIODE", defaultVerdi = "false") boolean skalBrukeUtledetEndringsperiode) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.søknadsperiodeRepository = søknadsperiodeRepository;
@@ -84,6 +87,7 @@ class SøknadOversetter {
         this.tpsTjeneste = tpsTjeneste;
         this.omsorgenForGrunnlagRepository = omsorgenForGrunnlagRepository;
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
+        this.skalBrukeUtledetEndringsperiode = skalBrukeUtledetEndringsperiode;
     }
 
     void persister(Søknad søknad, JournalpostId journalpostId, Behandling behandling) {
@@ -91,8 +95,8 @@ class SøknadOversetter {
         var behandlingId = behandling.getId();
 
         PleiepengerSyktBarn ytelse = søknad.getYtelse();
-        var maksSøknadsperiode = ytelse.getSøknadsperiode();
         final List<Periode> søknadsperioder = hentAlleSøknadsperioder(ytelse);
+        final var maksSøknadsperiode = finnMaksperiode(søknadsperioder);
 
         // TODO: Stopp barn som mangler norskIdentitetsnummer i k9-punsj ... eller støtt fødselsdato her?
 
@@ -134,10 +138,25 @@ class SøknadOversetter {
 
         lagreOmsorg(ytelse.getOmsorg(), søknadsperioder, behandling);
     }
+    
+    private Periode finnMaksperiode(List<Periode> perioder) {
+        final var fom = perioder
+                .stream()
+                .map(Periode::getFraOgMed)
+                .min(LocalDate::compareTo)
+                .orElseThrow();
+        final var tom = perioder
+                .stream()
+                .map(Periode::getTilOgMed)
+                .max(LocalDate::compareTo)
+                .orElseThrow();
+        return new Periode(fom, tom);
+    }
 
     private List<Periode> hentAlleSøknadsperioder(PleiepengerSyktBarn ytelse) {
         final LocalDateTimeline<Boolean> kompletteSøknadsperioderTidslinje = tilTidslinje(ytelse.getSøknadsperiodeList());
-        final LocalDateTimeline<Boolean> endringssøknadsperioderTidslinje = tilTidslinje(ytelse.getEndringsperiode());
+        final var endringsperioder = skalBrukeUtledetEndringsperiode ? ytelse.getUtledetEndringsperiode() : ytelse.getEndringsperiode();
+        final LocalDateTimeline<Boolean> endringssøknadsperioderTidslinje = tilTidslinje(endringsperioder);
         final LocalDateTimeline<Boolean> søknadsperioder = kompletteSøknadsperioderTidslinje.union(endringssøknadsperioderTidslinje, StandardCombinators::coalesceLeftHandSide).compress();
         return søknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
     }

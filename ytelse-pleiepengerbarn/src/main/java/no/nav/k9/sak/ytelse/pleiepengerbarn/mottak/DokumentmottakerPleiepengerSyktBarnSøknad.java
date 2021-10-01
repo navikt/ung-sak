@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -31,9 +32,11 @@ import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.k9.sak.mottak.dokumentmottak.OppgittOpptjeningMapper;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.felles.type.Journalpost;
+import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnSøknadValidator;
 
@@ -49,6 +52,8 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
     private ProsessTaskRepository prosessTaskRepository;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
+    private boolean skalBrukeUtledetEndringsperiode;
 
     DokumentmottakerPleiepengerSyktBarnSøknad() {
         // for CDI proxy
@@ -60,13 +65,17 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                                               SøknadOversetter pleiepengerBarnSoknadOversetter,
                                               SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
                                               ProsessTaskRepository prosessTaskRepository,
-                                              OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste) {
+                                              OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
+                                              SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+                                              @KonfigVerdi(value = "ENABLE_UTLEDET_ENDRINGSPERIODE", defaultVerdi = "false") boolean skalBrukeUtledetEndringsperiode) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
         this.pleiepengerBarnSoknadOversetter = pleiepengerBarnSoknadOversetter;
         this.prosessTaskRepository = prosessTaskRepository;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
+        this.skalBrukeUtledetEndringsperiode = skalBrukeUtledetEndringsperiode;
     }
 
     @Override
@@ -123,7 +132,15 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     }
 
     private void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {
-        new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad);
+        if (skalBrukeUtledetEndringsperiode) {
+            final List<Periode> tidligereSøknadsperioder = søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId())
+                    .stream()
+                    .map(d -> new Periode(d.getFomDato(), d.getTomDato()))
+                    .toList();
+            new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad, tidligereSøknadsperioder);
+        } else {
+            new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad);
+        }
 
         pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
 

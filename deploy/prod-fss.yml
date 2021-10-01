@@ -213,6 +213,8 @@ spec:
       value: "true"
     - name: K9TILBAKE_AKTIVERT
       value: "true"
+    - name: ENABLE_UTLEDET_ENDRINGSPERIODE
+      value: "false"
     - name: NY_SYKDOM_TOTRINN
       value: "false"
 
