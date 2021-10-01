@@ -61,7 +61,6 @@ import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.typer.Stillingsprosent;
@@ -138,7 +137,6 @@ class OpptjeningsperioderTjenesteTest {
 
         var inntektsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusYears(1), skjæringstidspunkt);
         var register = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(AKTØRID, ARBEIDSFORHOLD_ID, inntektsperiode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, Arbeidsgiver.virksomhet(ORG_NUMMER));
-        opprettInntektForFrilanser(register, AKTØRID, ARBEIDSFORHOLD_ID, inntektsperiode, Arbeidsgiver.virksomhet(ORG_NUMMER));
         iayTjeneste.lagreIayAggregat(behandling.getId(), register);
 
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());

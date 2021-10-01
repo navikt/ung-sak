@@ -76,7 +76,7 @@ public class MapYtelseperioderTjeneste {
         return p1.isConnected(p2) || p2.isConnected(p1) || periode1.getTomDato().plusDays(1).equals(periode2.getFomDato()) || periode2.getTomDato().plusDays(1).equals(periode1.getFomDato());
     }
 
-    public List<OpptjeningsperiodeForSaksbehandling> mapYtelsePerioder(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag grunnlag, OpptjeningAktivitetVurdering vurderOpptjening, DatoIntervallEntitet opptjeningPeriode, LocalDate skjæringstidspunkt) {
+    public List<OpptjeningsperiodeForSaksbehandling> mapYtelsePerioder(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag grunnlag, OpptjeningAktivitetVurdering vurderOpptjening, DatoIntervallEntitet opptjeningPeriode) {
         AktørId aktørId = behandlingReferanse.getAktørId();
         var filter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato());
         List<OpptjeningsperiodeForSaksbehandling> ytelsePerioder = new ArrayList<>();
@@ -85,15 +85,13 @@ public class MapYtelseperioderTjeneste {
             .filter(ytelse -> !(ytelse.getKilde().equals(Fagsystem.K9SAK) && ytelse.getSaksnummer().equals(behandlingReferanse.getSaksnummer())))
             .filter(ytelse -> ytelse.getYtelseType().girOpptjeningsTid(behandlingReferanse.getFagsakYtelseType()))
             .forEach(behandlingRelaterteYtelse -> {
-                List<OpptjeningsperiodeForSaksbehandling> periode = mapYtelseAnvist(behandlingRelaterteYtelse, behandlingReferanse, grunnlag, vurderOpptjening, opptjeningPeriode, skjæringstidspunkt);
+                List<OpptjeningsperiodeForSaksbehandling> periode = mapYtelseAnvist(behandlingRelaterteYtelse, behandlingReferanse, vurderOpptjening);
                 ytelsePerioder.addAll(periode);
             });
         return slåSammenYtelsePerioder(ytelsePerioder);
     }
 
-    private List<OpptjeningsperiodeForSaksbehandling> mapYtelseAnvist(Ytelse ytelse, BehandlingReferanse behandlingReferanse,
-                                                                      InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                      OpptjeningAktivitetVurdering vurderForSaksbehandling, DatoIntervallEntitet opptjeningPeriode, LocalDate skjæringstidspunkt) {
+    private List<OpptjeningsperiodeForSaksbehandling> mapYtelseAnvist(Ytelse ytelse, BehandlingReferanse behandlingReferanse, OpptjeningAktivitetVurdering vurderForSaksbehandling) {
         OpptjeningAktivitetType type = mapYtelseType(ytelse);
         List<OpptjeningsperiodeForSaksbehandling> ytelserAnvist = new ArrayList<>();
         List<YtelseStørrelse> grunnlagList = ytelse.getYtelseGrunnlag().map(YtelseGrunnlag::getYtelseStørrelse).orElse(Collections.emptyList());

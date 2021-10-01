@@ -63,6 +63,8 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                 .medStillingsandel(finnStillingsprosent(registerAktivitet, skjæringstidspunkt));
             settArbeidsgiverInformasjon(registerAktivitet, builder);
             var input = new VurderStatusInput(type, behandlingReferanse);
+            input.setOpptjeningsperiode(opptjeningPeriode);
+            input.setRegisterAktivitet(registerAktivitet);
             builder.medVurderingsStatus(vurderForSaksbehandling.vurderStatus(input));
             perioderForAktivitetsavtaler.add(builder.build());
         }
