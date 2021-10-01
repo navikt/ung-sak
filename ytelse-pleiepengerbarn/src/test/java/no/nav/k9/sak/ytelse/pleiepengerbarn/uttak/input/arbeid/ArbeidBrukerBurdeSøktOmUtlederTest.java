@@ -84,7 +84,7 @@ class ArbeidBrukerBurdeSøktOmUtlederTest {
                     .medSisteLønnsendringsdato(periodeTilVurdering.getFomDato().minusYears(2))))));
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
-        var manglendeAktivitereFraBruker = utleder.utledFraInput(timeline, input, grunnlag.getAktørArbeidFraRegister(brukerAktørId));
+        var manglendeAktivitereFraBruker = utleder.utledFraInput(timeline, timeline, input, grunnlag.getAktørArbeidFraRegister(brukerAktørId));
 
         assertThat(manglendeAktivitereFraBruker).hasSize(1);
         var identifikator = manglendeAktivitereFraBruker.keySet().iterator().next();
@@ -128,7 +128,7 @@ class ArbeidBrukerBurdeSøktOmUtlederTest {
                     .medSisteLønnsendringsdato(periodeTilVurdering.getFomDato().minusYears(2))))));
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
-        var manglendeAktivitereFraBruker = utleder.utledFraInput(timeline, input, grunnlag.getAktørArbeidFraRegister(brukerAktørId));
+        var manglendeAktivitereFraBruker = utleder.utledFraInput(timeline, timeline, input, grunnlag.getAktørArbeidFraRegister(brukerAktørId));
 
         assertThat(manglendeAktivitereFraBruker).hasSize(0);
     }
