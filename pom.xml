@@ -42,7 +42,7 @@
         <felles.version>0.2.18</felles.version>
         <swagger.version>2.1.10</swagger.version>
         <fp-kontrakter.version>6.0.4</fp-kontrakter.version>
-        <k9format.version>5.4.22</k9format.version>
+        <k9format.version>5.4.23</k9format.version>
     </properties>
 
     <repositories>
