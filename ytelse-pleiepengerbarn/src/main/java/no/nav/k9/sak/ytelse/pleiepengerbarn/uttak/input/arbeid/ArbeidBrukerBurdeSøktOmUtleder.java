@@ -21,11 +21,14 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
@@ -89,18 +92,51 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             .collect(Collectors.toList());
 
         var timelineMedYtelse = new LocalDateTimeline<>(innvilgedeSegmenter);
+        // Trekke fra perioder med avslag fra
+        // - Søknadsfrist
+        // - Medlemskap
+        // - Opptjening
+        var timelineMedInnvilgetYtelse = utledYtelse(vilkårene, timelineMedYtelse);
 
         var aktørArbeidFraRegister = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId()).getAktørArbeidFraRegister(referanse.getAktørId());
-        return utledFraInput(timelineMedYtelse, input, aktørArbeidFraRegister);
+        return utledFraInput(timelineMedYtelse, timelineMedInnvilgetYtelse, input, aktørArbeidFraRegister);
     }
 
-    Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledFraInput(LocalDateTimeline<Boolean> tidslinjeTilVurdering, ArbeidstidMappingInput input, Optional<AktørArbeid> aktørArbeid) {
+    private LocalDateTimeline<Boolean> utledYtelse(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        var timeline = new LocalDateTimeline<>(tidslinjeTilVurdering.stream()
+            .map(it -> new LocalDateSegment<>(it.getLocalDateInterval(), true))
+            .collect(Collectors.toList()));
+
+        // NB! Ikke legg til vilkår her uten å prate med en voksen først. (Nei, du regnes ikke som en voksen)
+        var vilkår = Set.of(VilkårType.OPPTJENINGSVILKÅRET);
+
+        for (VilkårType type : vilkår) {
+            var innvilgeteSegmenter = vilkårene.getVilkår(type)
+                .map(Vilkår::getPerioder)
+                .orElse(List.of())
+                .stream()
+                .filter(it -> Utfall.OPPFYLT.equals(it.getGjeldendeUtfall()))
+                .map(VilkårPeriode::getPeriode)
+                .map(DatoIntervallEntitet::toLocalDateInterval)
+                .filter(datoInterval -> tidslinjeTilVurdering.intersects(new LocalDateTimeline<>(datoInterval, true)))
+                .map(it -> new LocalDateSegment<>(it, true))
+                .collect(Collectors.toList());
+
+            var vilkårTimeline = new LocalDateTimeline<>(innvilgeteSegmenter);
+
+            timeline = timeline.intersection(vilkårTimeline);
+        }
+
+        return timeline;
+    }
+
+    Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledFraInput(LocalDateTimeline<Boolean> tidslinjeTilVurdering, LocalDateTimeline<Boolean> timelineMedYtelse, ArbeidstidMappingInput input, Optional<AktørArbeid> aktørArbeid) {
         if (tidslinjeTilVurdering.isEmpty()) {
             return Map.of();
         }
 
         var søktArbeid = new MapArbeid().mapTilRaw(input);
-        return utledHvaSomBurdeVærtSøktOm(tidslinjeTilVurdering, aktørArbeid, søktArbeid);
+        return utledHvaSomBurdeVærtSøktOm(timelineMedYtelse, aktørArbeid, søktArbeid);
     }
 
     private NavigableSet<DatoIntervallEntitet> finnSykdomsperioder(BehandlingReferanse referanse) {
