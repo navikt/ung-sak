@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Set;
@@ -137,15 +138,28 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
 
     private boolean dødDatoInnenforPleiebehov(Long behandlingId, LocalDate dødsdato) {
         var pleiebehov = pleiebehovResultatRepository.hentHvisEksisterer(behandlingId);
+
+        // Hvis dødsdato er i helg, så flytt den til mandag slik at den vil overlappe med eventuelle pleieperioder(fordi det ikke er mulig å søke i helg).
+        var flyttetDødsdato = flyttDatoTilNærmesteMandagHvisHelg(dødsdato);
+
         if (pleiebehov.isPresent()) {
             var overlappendePleiehov = pleiebehov.get().getPleieperioder().getPerioder()
                 .stream()
                 .filter(pleiebehovPeriode -> pleiebehovPeriode.getGrad().getProsent() > 0)
-                .filter(pleiebehovPeriode -> pleiebehovPeriode.getPeriode().inkluderer(dødsdato))
+                .filter(pleiebehovPeriode -> pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdato))
                 .findAny();
             return overlappendePleiehov.isPresent();
         }
         return false;
+    }
+
+    private LocalDate flyttDatoTilNærmesteMandagHvisHelg(LocalDate dato) {
+        if (dato.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            return dato.plusDays(2);
+        } else if (dato.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            return dato.plusDays(1);
+        }
+        return dato;
     }
 
 }
