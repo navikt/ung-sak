@@ -212,6 +212,8 @@ spec:
       value: "false"
     - name: K9TILBAKE_AKTIVERT
       value: "true"
+    - name: ENABLE_UTLEDET_ENDRINGSPERIODE
+      value: "true" 
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
