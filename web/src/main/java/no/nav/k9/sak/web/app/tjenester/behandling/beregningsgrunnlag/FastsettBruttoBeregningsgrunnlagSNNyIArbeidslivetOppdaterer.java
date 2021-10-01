@@ -36,7 +36,7 @@ public class FastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetOppdaterer impleme
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto -> MapDtoTilRequest.map(dto, dtoer.getBegrunnelse())));
         oppdateringjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
         // TODO FIKS HISTORIKK
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
 
     }
 }

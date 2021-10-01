@@ -14,6 +14,6 @@ class VurderAnnenYtelseFørVedtakOppdaterer implements AksjonspunktOppdaterer<Vu
 
     @Override
     public OppdateringResultat oppdater(VurdereAnnenYteleseFørVedtakDto dto, AksjonspunktOppdaterParameter param) {
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 }

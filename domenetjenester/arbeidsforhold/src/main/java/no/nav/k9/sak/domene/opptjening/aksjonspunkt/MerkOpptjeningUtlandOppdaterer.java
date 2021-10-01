@@ -14,6 +14,6 @@ class MerkOpptjeningUtlandOppdaterer implements AksjonspunktOppdaterer<MerkOpptj
 
     @Override
     public OppdateringResultat oppdater(MerkOpptjeningUtlandDto dto, AksjonspunktOppdaterParameter param) {
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 }

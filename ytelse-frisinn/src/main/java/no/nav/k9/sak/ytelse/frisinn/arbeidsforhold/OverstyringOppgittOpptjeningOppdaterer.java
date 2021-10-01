@@ -78,7 +78,7 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
         inntektArbeidYtelseTjeneste.lagreOverstyrtOppgittOpptjening(param.getBehandlingId(), oppgittOpptjeningBuilder);
 
         historikkAdapter.opprettHistorikkInnslag(param.getBehandlingId(), HistorikkinnslagType.FAKTA_ENDRET);
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
     private Optional<List<OppgittArbeidsforholdBuilder>> leggerTilArbeidsforhold(SøknadsperiodeOgOppgittOpptjeningV2Dto dto, HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder) {

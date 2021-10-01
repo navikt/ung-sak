@@ -60,7 +60,7 @@ public class VurderFaresignalerOppdaterer implements AksjonspunktOppdaterer<Vurd
             lagHistorikkInnslag(dto, FaresignalVurdering.INGEN_INNVIRKNING, originalFaresignalVurdering, param);
         }
 
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
     private void lagHistorikkInnslag(VurderFaresignalerDto dto, FaresignalVurdering vurdering, FaresignalVurdering orginalVurdering, AksjonspunktOppdaterParameter param) {

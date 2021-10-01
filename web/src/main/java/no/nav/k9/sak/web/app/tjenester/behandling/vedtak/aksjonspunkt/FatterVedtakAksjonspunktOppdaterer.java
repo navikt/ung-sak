@@ -34,7 +34,7 @@ public class FatterVedtakAksjonspunktOppdaterer implements AksjonspunktOppdatere
     @Inject
     public FatterVedtakAksjonspunktOppdaterer(FatterVedtakAksjonspunkt fatterVedtakAksjonspunkt) {
         this.fatterVedtakAksjonspunkt = fatterVedtakAksjonspunkt;
-    }   
+    }
 
     @Override
     public OppdateringResultat oppdater(FatterVedtakAksjonspunktDto dto, AksjonspunktOppdaterParameter param) {
@@ -52,7 +52,7 @@ public class FatterVedtakAksjonspunktOppdaterer implements AksjonspunktOppdatere
         Behandling behandling = param.getBehandling();
         fatterVedtakAksjonspunkt.oppdater(behandling, aksjonspunkter);
 
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
     private Collection<String> fraDto(Collection<VurderÅrsak> arsaker) {

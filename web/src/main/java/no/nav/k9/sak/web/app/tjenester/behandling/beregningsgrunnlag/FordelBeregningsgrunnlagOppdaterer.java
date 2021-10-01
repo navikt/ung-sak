@@ -36,7 +36,7 @@ public class FordelBeregningsgrunnlagOppdaterer implements AksjonspunktOppdatere
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto1 -> MapDtoTilRequest.map(dto1, dtoer.getBegrunnelse())));
         oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
         // TODO FIKS HISTORIKK
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
 }
