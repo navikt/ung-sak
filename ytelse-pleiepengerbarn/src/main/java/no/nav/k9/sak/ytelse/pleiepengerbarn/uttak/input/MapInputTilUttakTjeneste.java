@@ -279,6 +279,7 @@ public class MapInputTilUttakTjeneste {
             behandling.getFagsak().getSaksnummer().getVerdi(),
             behandling.getUuid().toString(),
             andrePartersSaksnummer,
+            List.of(), //TODO oppgi andre parters behandling istedet for saker
             søktUttak,
             perioderSomSkalTilbakestilles,
             arbeid,

@@ -32,8 +32,8 @@ public class VarselRevurderingOppdaterer implements AksjonspunktOppdaterer<Varse
     }
 
     @Inject
-    public VarselRevurderingOppdaterer(VedtakVarselRepository vedtakVarselRepository, 
-                                       DokumentBestillerTjeneste dokumentTjeneste, 
+    public VarselRevurderingOppdaterer(VedtakVarselRepository vedtakVarselRepository,
+                                       DokumentBestillerTjeneste dokumentTjeneste,
                                        HistorikkTjenesteAdapter historikkApplikasjonTjeneste) {
         this.vedtakVarselRepository = vedtakVarselRepository;
         this.dokumentTjeneste = dokumentTjeneste;
@@ -49,7 +49,7 @@ public class VarselRevurderingOppdaterer implements AksjonspunktOppdaterer<Varse
         } else if (!dto.isSendVarsel()) {
             opprettHistorikkinnslagOmIkkeSendtVarselOmRevurdering(behandling, dto, HistorikkAktør.SAKSBEHANDLER);
         }
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
     private void opprettHistorikkinnslagOmIkkeSendtVarselOmRevurdering(Behandling behandling, VarselRevurderingDto varselRevurderingDto, HistorikkAktør historikkAktør) {

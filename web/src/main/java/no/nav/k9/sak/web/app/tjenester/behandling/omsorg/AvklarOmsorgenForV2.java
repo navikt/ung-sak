@@ -60,7 +60,7 @@ public class AvklarOmsorgenForV2 implements AksjonspunktOppdaterer<AvklarOmsorge
         final List<OmsorgenForSaksbehandlervurdering> nyeVurderinger = toOmsorgenForSaksbehandlervurderinger(dto);
         omsorgenForGrunnlagRepository.lagreNyeVurderinger(behandlingId, nyeVurderinger);
 
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
     private void sjekkAtPerioderTilOppdateringErTillatt(AvklarOmsorgenForDto dto, AksjonspunktOppdaterParameter param, Long behandlingId) {

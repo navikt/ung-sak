@@ -15,6 +15,6 @@ class AvklarTilleggsopplysningerOppdaterer implements AksjonspunktOppdaterer<Avk
     @Override
     public OppdateringResultat oppdater(AvklarTilleggsopplysningerDto dto, AksjonspunktOppdaterParameter param) {
         // skal ikke oppdater noe her
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 }

@@ -43,7 +43,7 @@ public class VurderTilbaketrekkOppdaterer implements AksjonspunktOppdaterer<Vurd
 
         lagHistorikkInnslag(dto, originalSkalHindreTilbaketrekk, param);
 
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
     private void lagHistorikkInnslag(VurderTilbaketrekkDto dto, Boolean originalSkalUtføreTilbaketrekk, AksjonspunktOppdaterParameter param) {

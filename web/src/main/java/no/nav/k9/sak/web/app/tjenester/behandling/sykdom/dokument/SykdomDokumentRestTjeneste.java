@@ -35,6 +35,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.exception.FunksjonellException;
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.exception.TekniskException;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -92,6 +93,8 @@ public class SykdomDokumentRestTjeneste {
     private static final String DOKUMENTER_SOM_IKKE_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER = "/eksisterendevurderinger";
     public static final String DOKUMENTER_SOM_IKKE_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER_PATH = BASE_PATH + "/eksisterendevurderinger";
 
+    private boolean enableNyttDokument;
+
     private BehandlingRepository behandlingRepository;
     private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper;
     private SykdomDokumentRepository sykdomDokumentRepository;
@@ -105,13 +108,21 @@ public class SykdomDokumentRestTjeneste {
 
 
     @Inject
-    public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper, SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingRepository sykdomVurderingRepository, DokumentArkivTjeneste dokumentArkivTjeneste, SykdomGrunnlagRepository sykdomGrunnlagRepository) {
+    public SykdomDokumentRestTjeneste(
+            BehandlingRepository behandlingRepository,
+            SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper,
+            SykdomDokumentRepository sykdomDokumentRepository,
+            SykdomVurderingRepository sykdomVurderingRepository,
+            DokumentArkivTjeneste dokumentArkivTjeneste,
+            SykdomGrunnlagRepository sykdomGrunnlagRepository,
+            @KonfigVerdi(value = "TEST_NYTT_DOKUMENT", defaultVerdi = "false") boolean enableNyttDokument) {
         this.sykdomDokumentOversiktMapper = sykdomDokumentOversiktMapper;
         this.behandlingRepository = behandlingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
+        this.enableNyttDokument = enableNyttDokument;
     }
 
     @GET
@@ -455,31 +466,35 @@ public class SykdomDokumentRestTjeneste {
             @Valid
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SykdomDokumentOpprettelseDto sykdomDokumentOpprettelseDto) {
-        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDokumentOpprettelseDto.getBehandlingUuid()).orElseThrow();
-        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
-            throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
+        if (enableNyttDokument) {
+            final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDokumentOpprettelseDto.getBehandlingUuid()).orElseThrow();
+            //if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
+            //   throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
+            //}
+
+            final LocalDateTime nå = LocalDateTime.now();
+            final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
+                SykdomDokumentType.UKLASSIFISERT,
+                sykdomDokumentOpprettelseDto.getHarInfoSomIkkeKanPunsjes(),
+                nå.toLocalDate(),
+                nå,
+                0L,
+                getCurrentUserId(),
+                nå);
+            final SykdomDokument dokument = new SykdomDokument(
+                sykdomDokumentOpprettelseDto.getJournalpostId(),
+                null,
+                informasjon,
+                behandling.getUuid(),
+                behandling.getFagsak().getSaksnummer(),
+                sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
+                getCurrentUserId(),
+                nå);
+
+            sykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
+        } else {
+            throw new IllegalArgumentException();
         }
-
-        final LocalDateTime nå = LocalDateTime.now();
-        final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
-            SykdomDokumentType.UKLASSIFISERT,
-            sykdomDokumentOpprettelseDto.getHarInfoSomIkkeKanPunsjes(),
-            nå.toLocalDate(),
-            nå,
-            0L,
-            getCurrentUserId(),
-            nå);
-        final SykdomDokument dokument = new SykdomDokument(
-            sykdomDokumentOpprettelseDto.getJournalpostId(),
-            null,
-            informasjon,
-            behandling.getUuid(),
-            behandling.getFagsak().getSaksnummer(),
-            sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
-            getCurrentUserId(),
-            nå);
-
-        sykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
     }
 
     @GET

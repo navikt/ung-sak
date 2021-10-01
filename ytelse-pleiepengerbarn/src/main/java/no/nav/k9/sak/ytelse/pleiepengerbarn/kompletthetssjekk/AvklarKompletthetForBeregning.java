@@ -52,7 +52,7 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .medTotrinn()
                 .build();
         } else {
-            var resultat = OppdateringResultat.utenOveropp();
+            var resultat = OppdateringResultat.utenOverhopp();
             resultat.skalRekjøreSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
             resultat.setSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING);
             return resultat;

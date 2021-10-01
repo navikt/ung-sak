@@ -214,6 +214,8 @@ spec:
       value: "true"
     - name: ENABLE_UTLEDET_ENDRINGSPERIODE
       value: "true" 
+    - name: NY_SYKDOM_TOTRINN
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

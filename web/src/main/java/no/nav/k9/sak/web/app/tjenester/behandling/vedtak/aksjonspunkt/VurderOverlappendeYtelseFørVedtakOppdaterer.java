@@ -14,6 +14,6 @@ class VurderOverlappendeYtelseFørVedtakOppdaterer implements AksjonspunktOppdat
 
     @Override
     public OppdateringResultat oppdater(VurdereOverlappendeYteleseFørVedtakDto dto, AksjonspunktOppdaterParameter param) {
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 }

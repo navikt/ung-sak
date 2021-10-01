@@ -35,7 +35,7 @@ public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<Avkla
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto1 -> MapDtoTilRequest.map(dto1, dtoer.getBegrunnelse())));
         oppdateringjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
 }
