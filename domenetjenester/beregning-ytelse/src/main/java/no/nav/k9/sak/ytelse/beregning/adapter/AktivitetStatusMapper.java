@@ -27,6 +27,7 @@ public final class AktivitetStatusMapper {
         map.put(no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus.SN, AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE);
         map.put(no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus.KUN_YTELSE, AktivitetStatus.KUN_YTELSE);
         map.put(no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus.MIDL_INAKTIV, AktivitetStatus.MIDLERTIDIG_INAKTIV);
+        map.put(no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus.ATFL, AktivitetStatus.IKKE_YRKESAKTIV);
         REGEL_TIL_VL_MAP = Collections.unmodifiableMap(map);
     }
 
