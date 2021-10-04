@@ -93,8 +93,6 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
 
         var timelineMedYtelse = new LocalDateTimeline<>(innvilgedeSegmenter);
         // Trekke fra perioder med avslag fra
-        // - Søknadsfrist
-        // - Medlemskap
         // - Opptjening
         var timelineMedInnvilgetYtelse = utledYtelse(vilkårene, timelineMedYtelse);
 
