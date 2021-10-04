@@ -11,6 +11,8 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -75,6 +77,14 @@ public class OpprettToTrinnsgrunnlag {
             .filter(Objects::nonNull)
             .map(bg -> new BeregningsgrunnlagToTrinn(bg.getSkjæringstidspunkt())).collect(Collectors.toList());
 
+    }
+
+    // Ta i bruk når tabell BeregningsgrunnlagToTrinnFaktaTilfeller er opprettet
+    private boolean erVarigEndringFastsattForSelvstendingNæringsdrivende(Beregningsgrunnlag beregningsgrunnlag) {
+        return beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
+            .flatMap(bgps -> bgps.getBeregningsgrunnlagPrStatusOgAndelList().stream())
+            .filter(andel -> andel.getAktivitetStatus().equals(AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE))
+            .anyMatch(andel -> andel.getOverstyrtPrÅr() != null);
     }
 
     private InformasjonselementerUtleder finnTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
