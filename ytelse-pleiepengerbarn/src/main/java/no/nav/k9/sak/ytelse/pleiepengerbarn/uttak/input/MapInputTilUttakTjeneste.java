@@ -270,6 +270,7 @@ public class MapInputTilUttakTjeneste {
 
         var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
         var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
+        final Map<LukketPeriode, List<String>> deprecatedKravprioritet = deprecatedMapKravprioritetsliste(input.getKravprioritet());
         final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
 
@@ -289,8 +290,8 @@ public class MapInputTilUttakTjeneste {
             tilsynsperioder,
             beredskapsperioder,
             nattevåksperioder,
-            kravprioritet,
-            Map.of() //TODO oppgi kravprioritet for behandlinger istedet for per sak
+            deprecatedKravprioritet,
+            kravprioritet
         );
     }
 
@@ -318,10 +319,18 @@ public class MapInputTilUttakTjeneste {
         return rettVedDød;
     }
 
-    public Map<LukketPeriode, List<String>> mapKravprioritetsliste(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
+    public Map<LukketPeriode, List<String>> deprecatedMapKravprioritetsliste(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
         final Map<LukketPeriode, List<String>> resultat = new HashMap<>();
         kravprioritet.forEach(s -> {
             resultat.put(new LukketPeriode(s.getFom(), s.getTom()), s.getValue().stream().map(kp -> kp.getSaksnummer().getVerdi()).collect(Collectors.toList()));
+        });
+        return resultat;
+    }
+    
+    public Map<LukketPeriode, List<String>> mapKravprioritetsliste(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
+        final Map<LukketPeriode, List<String>> resultat = new HashMap<>();
+        kravprioritet.forEach(s -> {
+            resultat.put(new LukketPeriode(s.getFom(), s.getTom()), s.getValue().stream().map(kp -> kp.getAktuellBehandlingUuid().toString()).collect(Collectors.toList()));
         });
         return resultat;
     }
