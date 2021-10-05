@@ -117,7 +117,7 @@ public class OppgittOpptjeningMapper {
         builder.medEndringDato(info.getEndringDato());
         builder.medBegrunnelse(info.getEndringBegrunnelse());
         builder.medNyoppstartet(info.getErNyoppstartet());
-        // TODO Map ny i arbeidslivet
+        builder.medNyIArbeidslivet(info.getErNyIArbeidslivet());
         return builder;
     }
 
