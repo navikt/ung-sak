@@ -198,6 +198,10 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             var skjæringstidspunkt = segment.getFom();
             var opptjening = opptjeningResultat.finnOpptjening(skjæringstidspunkt);
 
+            if (opptjening.isEmpty()) {
+                return;
+            }
+
             var erFrilans = opptjening.orElseThrow()
                 .getOpptjeningAktivitet()
                 .stream()
