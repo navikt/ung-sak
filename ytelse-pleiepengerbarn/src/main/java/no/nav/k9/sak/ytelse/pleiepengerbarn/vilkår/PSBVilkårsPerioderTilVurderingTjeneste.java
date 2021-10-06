@@ -42,10 +42,8 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
 
@@ -171,15 +169,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
-        // TODO: Ignorerer rekkefølge for nå, blir først en utfordring når brukeren kan "trekke" perioder ved søknad
-        var alleSøknadsperioder = søknadsperiodeRepository.hentGrunnlag(behandlingId)
-            .map(SøknadsperiodeGrunnlag::getOppgitteSøknadsperioder)
-            .map(SøknadsperioderHolder::getPerioder)
-            .orElse(Set.of());
-
-        final var behandling = behandlingRepository.hentBehandling(behandlingId);
-
-        return søknadsperiodeTjeneste.utledVurderingsperioderFraSøknadsperioder(behandling.getFagsakId(), alleSøknadsperioder);
+        return søknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId);
     }
 
     @Override
@@ -254,7 +244,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return søknadsperiodeTjeneste.hentKravperioder(behandling.getFagsakId(), behandlingId)
             .stream()
             .filter(kp -> kp.isHarTrukketKrav() && kp.getBehandlingId().equals(behandlingId))
-            .map(kp -> kp.getPeriode())
+            .map(SøknadsperiodeTjeneste.Kravperiode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
