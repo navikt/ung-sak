@@ -215,6 +215,8 @@ spec:
       value: "true"
     - name: ENABLE_UTLEDET_ENDRINGSPERIODE
       value: "false"
+    - name: ARBEIDSTID_SJEKK_SNFL
+      value: "false"
     - name: NY_SYKDOM_TOTRINN
       value: "false"
 
