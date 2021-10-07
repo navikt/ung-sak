@@ -75,11 +75,14 @@ public class OpprettToTrinnsgrunnlag {
         return beregningsgrunnlag.stream()
             .map(bgg -> bgg.getBeregningsgrunnlag().orElse(null))
             .filter(Objects::nonNull)
-            .map(bg -> new BeregningsgrunnlagToTrinn(bg.getSkjæringstidspunkt())).collect(Collectors.toList());
+            .map(bg -> new BeregningsgrunnlagToTrinn(
+                bg.getSkjæringstidspunkt(),
+                bg.getFaktaOmBeregningTilfeller(),
+                erVarigEndringFastsattForSelvstendingNæringsdrivende(bg)))
+            .collect(Collectors.toList());
 
     }
 
-    // Ta i bruk når tabell BeregningsgrunnlagToTrinnFaktaTilfeller er opprettet
     private boolean erVarigEndringFastsattForSelvstendingNæringsdrivende(Beregningsgrunnlag beregningsgrunnlag) {
         return beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
             .flatMap(bgps -> bgps.getBeregningsgrunnlagPrStatusOgAndelList().stream())
