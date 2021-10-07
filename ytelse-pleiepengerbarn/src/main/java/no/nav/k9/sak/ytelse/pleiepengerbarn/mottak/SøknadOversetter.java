@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -90,6 +91,30 @@ class SøknadOversetter {
         this.skalBrukeUtledetEndringsperiode = skalBrukeUtledetEndringsperiode;
     }
 
+    private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, Beredskap beredskap) {
+        var nyeUnntakBeredskap = new ArrayList<Unntaksperiode>();
+        beredskap.getPerioder().forEach((key, value) ->
+            nyeUnntakBeredskap.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon(), Resultat.IKKE_VURDERT))
+        );
+        var unntakSomSkalSlettes = new ArrayList<no.nav.k9.sak.typer.Periode>();
+        beredskap.getPerioderSomSkalSlettes().forEach((key, value) ->
+            unntakSomSkalSlettes.add(new no.nav.k9.sak.typer.Periode(key.getFraOgMed(), key.getTilOgMed()))
+        );
+        return BeredskapOgNattevåkOppdaterer.oppdaterMedPerioderFraSøknad(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, nyeUnntakBeredskap, unntakSomSkalSlettes);
+    }
+
+    private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, Nattevåk nattevåk) {
+        var nyeUnntakNattevåk = new ArrayList<Unntaksperiode>();
+        nattevåk.getPerioder().forEach((key, value) ->
+            nyeUnntakNattevåk.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon(), Resultat.IKKE_VURDERT))
+        );
+        var unntakSomSkalSlettes = new ArrayList<no.nav.k9.sak.typer.Periode>();
+        nattevåk.getPerioderSomSkalSlettes().forEach((key, value) ->
+            unntakSomSkalSlettes.add(new no.nav.k9.sak.typer.Periode(key.getFraOgMed(), key.getTilOgMed()))
+        );
+        return BeredskapOgNattevåkOppdaterer.oppdaterMedPerioderFraSøknad(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, nyeUnntakNattevåk, unntakSomSkalSlettes);
+    }
+
     void persister(Søknad søknad, JournalpostId journalpostId, Behandling behandling) {
         var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
@@ -108,13 +133,13 @@ class SøknadOversetter {
         // TODO: Hvis vi skal beholde SøknadEntitet trenger vi å lagre SøknadID og sikre idempotens med denne.
 
         var søknadBuilder = new SøknadEntitet.Builder()
-            .medSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(maksSøknadsperiode.getFraOgMed(), maksSøknadsperiode.getTilOgMed()))
+            .medSøknadsperiode(maksSøknadsperiode.map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed())).orElse(null))
             .medElektroniskRegistrert(elektroniskSøknad)
             .medMottattDato(mottattDato)
             .medErEndringssøknad(false) // TODO: Håndtere endringssøknad. "false" betyr at vi krever IMer.
             .medJournalpostId(journalpostId)
             .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().getId())
-            .medSøknadsdato(maksSøknadsperiode.getFraOgMed())
+            .medSøknadsdato(maksSøknadsperiode.map(Periode::getFraOgMed).orElse(mottattDato))
             .medSpråkkode(getSpraakValg(søknad.getSpråk()));
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
@@ -138,19 +163,22 @@ class SøknadOversetter {
 
         lagreOmsorg(ytelse.getOmsorg(), søknadsperioder, behandling);
     }
-    
-    private Periode finnMaksperiode(List<Periode> perioder) {
+
+    private Optional<Periode> finnMaksperiode(List<Periode> perioder) {
+        if (perioder == null || perioder.isEmpty()) {
+            return Optional.empty();
+        }
         final var fom = perioder
-                .stream()
-                .map(Periode::getFraOgMed)
-                .min(LocalDate::compareTo)
-                .orElseThrow();
+            .stream()
+            .map(Periode::getFraOgMed)
+            .min(LocalDate::compareTo)
+            .orElseThrow();
         final var tom = perioder
-                .stream()
-                .map(Periode::getTilOgMed)
-                .max(LocalDate::compareTo)
-                .orElseThrow();
-        return new Periode(fom, tom);
+            .stream()
+            .map(Periode::getTilOgMed)
+            .max(LocalDate::compareTo)
+            .orElseThrow();
+        return Optional.of(new Periode(fom, tom));
     }
 
     private List<Periode> hentAlleSøknadsperioder(PleiepengerSyktBarn ytelse) {
@@ -169,25 +197,25 @@ class SøknadOversetter {
         trekkKravPerioder.stream()
             .map(s -> new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFraOgMed(), s.getTilOgMed()), true))
             .forEach(p -> søknadsperiodeliste.add(p));
-        
+
         søknadsperiodeRepository.lagre(behandlingId, new Søknadsperioder(journalpostId, søknadsperiodeliste.toArray(new Søknadsperiode[0])));
     }
 
     private LocalDateTimeline<Boolean> tilTidslinje(List<Periode> perioder) {
         return new LocalDateTimeline<>(
-                perioder.stream()
+            perioder.stream()
                 .map(p -> new LocalDateSegment<>(p.getFraOgMed(), p.getTilOgMed(), Boolean.TRUE))
                 .collect(Collectors.toList())
-                ).compress();
+        ).compress();
     }
 
     private void lagreBeredskapOgNattevåk(Søknad søknad, final Long behandlingId) {
         var ytelse = (PleiepengerSyktBarn) søknad.getYtelse();
 
         if (ytelse.getBeredskap().getPerioder().isEmpty()
-                && (ytelse.getBeredskap().getPerioderSomSkalSlettes() == null || ytelse.getBeredskap().getPerioderSomSkalSlettes().isEmpty())
-                && ytelse.getNattevåk().getPerioder().isEmpty()
-                && (ytelse.getNattevåk().getPerioderSomSkalSlettes() == null || ytelse.getNattevåk().getPerioderSomSkalSlettes().isEmpty())) {
+            && (ytelse.getBeredskap().getPerioderSomSkalSlettes() == null || ytelse.getBeredskap().getPerioderSomSkalSlettes().isEmpty())
+            && ytelse.getNattevåk().getPerioder().isEmpty()
+            && (ytelse.getNattevåk().getPerioderSomSkalSlettes() == null || ytelse.getNattevåk().getPerioderSomSkalSlettes().isEmpty())) {
             // Ingen endringer.
             return;
         }
@@ -234,30 +262,6 @@ class SøknadOversetter {
         unntakEtablertTilsynGrunnlagRepository.lagre(behandlingId, unntakEtablertTilsynForPleietrengende);
     }
 
-    private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, Beredskap beredskap) {
-        var nyeUnntakBeredskap = new ArrayList<Unntaksperiode>();
-        beredskap.getPerioder().forEach( (key,value) ->
-            nyeUnntakBeredskap.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon(), Resultat.IKKE_VURDERT))
-        );
-        var unntakSomSkalSlettes = new ArrayList<no.nav.k9.sak.typer.Periode>();
-        beredskap.getPerioderSomSkalSlettes().forEach( (key,value) ->
-            unntakSomSkalSlettes.add(new no.nav.k9.sak.typer.Periode(key.getFraOgMed(), key.getTilOgMed()))
-        );
-        return BeredskapOgNattevåkOppdaterer.oppdaterMedPerioderFraSøknad(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, nyeUnntakBeredskap, unntakSomSkalSlettes);
-    }
-
-    private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, Nattevåk nattevåk) {
-        var nyeUnntakNattevåk = new ArrayList<Unntaksperiode>();
-        nattevåk.getPerioder().forEach( (key,value) ->
-            nyeUnntakNattevåk.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon(), Resultat.IKKE_VURDERT))
-        );
-        var unntakSomSkalSlettes = new ArrayList<no.nav.k9.sak.typer.Periode>();
-        nattevåk.getPerioderSomSkalSlettes().forEach( (key,value) ->
-            unntakSomSkalSlettes.add(new no.nav.k9.sak.typer.Periode(key.getFraOgMed(), key.getTilOgMed()))
-        );
-        return BeredskapOgNattevåkOppdaterer.oppdaterMedPerioderFraSøknad(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, nyeUnntakNattevåk, unntakSomSkalSlettes);
-    }
-
     private void lagreOmsorg(Omsorg omsorg, List<Periode> søknadsperioder, Behandling behandling) {
         for (var periode : søknadsperioder) {
             final OmsorgenForPeriode omsorgForPeriode = OmsorgenForPeriode.nyPeriodeFraSøker(
@@ -268,7 +272,7 @@ class SøknadOversetter {
         }
     }
 
-    private void lagreUttakOgPerioder(Søknad soknad, Periode maksSøknadsperiode, JournalpostId journalpostId, final Long behandlingId, Long fagsakId) {
+    private void lagreUttakOgPerioder(Søknad soknad, Optional<Periode> maksSøknadsperiode, JournalpostId journalpostId, final Long behandlingId, Long fagsakId) {
         // TODO etter18feb: LovbestemtFerie
 
         // TODO 18feb: Arbeidstid
@@ -276,7 +280,7 @@ class SøknadOversetter {
         var perioderFraSøknad = new MapSøknadUttakPerioder(soknad, journalpostId).getPerioderFraSøknad();
         uttakPerioderGrunnlagRepository.lagre(behandlingId, perioderFraSøknad);
 
-        fagsakRepository.utvidPeriode(fagsakId, maksSøknadsperiode.getFraOgMed(), maksSøknadsperiode.getTilOgMed());
+        maksSøknadsperiode.ifPresent(periode -> fagsakRepository.utvidPeriode(fagsakId, periode.getFraOgMed(), periode.getTilOgMed()));
     }
 
     private void lagrePleietrengende(Long fagsakId, Barn barn) {
