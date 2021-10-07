@@ -13,10 +13,7 @@ public class AktivitetIdentifikator {
     private InternArbeidsforholdRef arbeidsforhold;
 
     public AktivitetIdentifikator(UttakArbeidType aktivitetType) {
-        if (UttakArbeidType.ARBEIDSTAKER.equals(aktivitetType)) {
-            throw new IllegalArgumentException("[Utvikler feil] Arbeidstaker trenger identifikator");
-        }
-        this.aktivitetType = aktivitetType;
+        this(aktivitetType, null, InternArbeidsforholdRef.nullRef());
     }
 
     public AktivitetIdentifikator(UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforhold) {
