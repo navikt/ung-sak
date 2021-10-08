@@ -16,6 +16,7 @@ import org.threeten.extra.Interval;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
 import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -128,6 +129,15 @@ public class MapYtelseperioderTjeneste {
         if (!FagsakYtelseType.RELATERT_YTELSE_TYPER_FOR_SØKER.contains(ytelse.getYtelseType())) {
             return OpptjeningAktivitetType.hentFraTemaUnderkategori()
                 .getOrDefault(ytelse.getBehandlingsTema(), Collections.singleton(UDEFINERT)).stream().findFirst().orElse(UDEFINERT);
+        }
+
+        if (FagsakYtelseType.SYKEPENGER.equals(ytelse.getYtelseType())) {
+            boolean harSPBasertPåDP = ytelse.getYtelseGrunnlag().flatMap(YtelseGrunnlag::getArbeidskategori)
+                .stream().anyMatch(a -> Arbeidskategori.DAGPENGER.equals(a) || Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER.equals(a));
+            if (harSPBasertPåDP) {
+                return OpptjeningAktivitetType.SYKEPENGER_AV_DAGPENGER;
+            }
+            return OpptjeningAktivitetType.SYKEPENGER;
         }
 
         return OpptjeningAktivitetType.hentFraFagsakYtelseTyper()

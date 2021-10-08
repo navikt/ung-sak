@@ -221,6 +221,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         List<HåndterBeregningRequest> requestListe = håndterberegningMap.entrySet().stream().map(e -> new HåndterBeregningRequest(e.getValue(), e.getKey())).collect(Collectors.toList());
         var oppdateringRespons = restTjeneste.oppdaterBeregningListe(new HåndterBeregningListeRequest(requestListe,
             null, // Sender null fordi inputen ligger lagret i kalkulus, settes ulik null når kalkulus svarer med trengerNyInput = true
+            YtelseTyperKalkulusStøtterKontrakt.fraKode(behandlingReferanse.getFagsakYtelseType().getKode()),
             behandlingReferanse.getSaksnummer().getVerdi(),
             behandlingReferanse.getBehandlingUuid()));
         if (oppdateringRespons.trengerNyInput()) {
