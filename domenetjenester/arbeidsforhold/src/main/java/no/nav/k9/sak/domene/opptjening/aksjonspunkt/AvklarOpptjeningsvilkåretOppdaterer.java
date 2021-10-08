@@ -16,13 +16,15 @@ import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
-import no.nav.k9.sak.domene.opptjening.Opptjeningsfeil;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
+import no.nav.k9.sak.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkårDto;
@@ -33,19 +35,25 @@ import no.nav.k9.sak.typer.Periode;
 @DtoTilServiceAdapter(dto = AvklarOpptjeningsvilkårDto.class, adapter = AksjonspunktOppdaterer.class)
 public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdaterer<AvklarOpptjeningsvilkårDto> {
 
-    private OpptjeningRepository opptjeningRepository;
     private HistorikkTjenesteAdapter historikkAdapter;
+    private InntektArbeidYtelseTjeneste iayTjeneste;
+    private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
+    private OpptjeningAktivitetVurderingOpptjeningsvilkår vurderForOpptjeningsvilkår;
 
     AvklarOpptjeningsvilkåretOppdaterer() {
         // for CDI proxy
     }
 
     @Inject
-    public AvklarOpptjeningsvilkåretOppdaterer(OpptjeningRepository opptjeningRepository,
-                                               HistorikkTjenesteAdapter historikkAdapter) {
+    public AvklarOpptjeningsvilkåretOppdaterer(HistorikkTjenesteAdapter historikkAdapter,
+                                               InntektArbeidYtelseTjeneste iayTjeneste,
+                                               OpptjeningsperioderTjeneste opptjeningsperioderTjeneste,
+                                               OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste) {
 
-        this.opptjeningRepository = opptjeningRepository;
         this.historikkAdapter = historikkAdapter;
+        this.iayTjeneste = iayTjeneste;
+        this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
+        this.vurderForOpptjeningsvilkår = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
     }
 
     @Override
@@ -64,7 +72,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
             lagHistorikkInnslag(param, nyttUtfall, vilkårPeriodeVurdering.getBegrunnelse());
 
             if (nyttUtfall.equals(Utfall.OPPFYLT)) {
-                sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId(), opptjeningPeriode, innvilgelseMerknad);
+                sjekkOmVilkåretKanSettesTilOppfylt(param.getRef(), opptjeningPeriode, innvilgelseMerknad);
             }
             oppdaterUtfallOgLagre(nyttUtfall, vilkårPeriodeVurdering, vilkårBuilder);
         }
@@ -90,28 +98,28 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vilkårPeriode.getPeriode().getFom(), vilkårPeriode.getPeriode().getTom())
             .medUtfall(utfallType)
             .medBegrunnelse(vilkårPeriode.getBegrunnelse())
-            .medMerknad(utfallType.equals(Utfall.OPPFYLT) ? VilkårUtfallMerknad.fraKode(vilkårPeriode.getInnvilgelseMerknadKode()): null)
+            .medMerknad(utfallType.equals(Utfall.OPPFYLT) ? VilkårUtfallMerknad.fraKode(vilkårPeriode.getInnvilgelseMerknadKode()) : null)
             .medAvslagsårsak(!utfallType.equals(Utfall.OPPFYLT) ? Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING : null));
     }
 
-    private void sjekkOmVilkåretKanSettesTilOppfylt(Long behandlingId, Periode opptjeningPeriode, VilkårUtfallMerknad innvilgelseMerknad) {
-        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode.getFom(), opptjeningPeriode.getTom());
-        var stp = periode.getTomDato().plusDays(1);
-        var opptjening = opptjeningRepository.finnOpptjening(behandlingId).flatMap(it -> it.finnOpptjening(periode))
-            .orElseThrow(() -> Opptjeningsfeil.FACTORY.opptjeningPreconditionFailed().toException());
-        var opptjeningAktiviteter = opptjening.getOpptjeningAktivitet();
+    private void sjekkOmVilkåretKanSettesTilOppfylt(BehandlingReferanse ref, Periode opptjeningPeriode, VilkårUtfallMerknad innvilgelseMerknad) {
+        var opptjPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode.getFom(), opptjeningPeriode.getTom());
+        var stp = opptjPeriode.getTomDato().plusDays(1);
+        var iayGrunnlag = iayTjeneste.finnGrunnlag(ref.getBehandlingId()).orElseThrow();
+        var opptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjPeriode);
 
         // Validering før opptjening kan gå videre til beregningsvilkår
         long antall = opptjeningAktiviteter.stream()
-            .filter(oa -> !oa.getAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD)).count();
+            .filter(oa -> !oa.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD)).count();
         if (antall == 0 && innvilgelseMerknad != VilkårUtfallMerknad.VM_7847_A) {
             throw new IllegalArgumentException("Må ha opptjeningsaktivitet for å kunne gå videre til beregingsvilkår. (Dersom 8-47 A er tilgjengelig, kan denne velges.) Skjæringstidspunkt=" + stp);
         }
         // Validering av 8-47 (dersom valgt)
         if (innvilgelseMerknad != null) {
             long antallAktiviteterPåStp = opptjeningAktiviteter.stream()
-                .filter(oa -> oa.getTom().plusDays(1).equals(stp))
-                .filter(oa -> !oa.getAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD))
+                .filter(oa -> oa.getPeriode().getTomDato().plusDays(1).isEqual(stp)
+                    || oa.getPeriode().getTomDato().plusDays(1).isAfter(stp))
+                .filter(oa -> !oa.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD))
                 .count();
             if (antallAktiviteterPåStp == 0) {
                 if (innvilgelseMerknad != VilkårUtfallMerknad.VM_7847_A) {
