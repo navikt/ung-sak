@@ -90,7 +90,9 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     // Kode for lansering av ny prioriering - START
     Optional<OppgittOpptjening> finnOppgittOpptjeningLansert(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravDokumenterMedFravær) {
         var stp = vilkårsperiode.getFomDato();
-        var sistMottatteSøknadNærmestStp = kravDokumenterMedFravær.entrySet().stream()
+        var sistMottatteSøknadNærmestStp = kravDokumenterMedFravær.entrySet()
+            .stream()
+            .filter(it -> !it.getValue().isEmpty())
             .min((e1, e2) -> {
                 var kravdok1 = e1.getKey();
                 var kravdok2 = e2.getKey();
