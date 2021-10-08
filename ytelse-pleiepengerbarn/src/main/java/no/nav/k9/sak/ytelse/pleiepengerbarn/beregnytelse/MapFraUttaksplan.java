@@ -28,6 +28,9 @@ class MapFraUttaksplan {
         BigDecimal utbetalingsgrad = data.getUtbetalingsgrad();
 
         var type = UttakArbeidType.fraKode(data.getArbeidsforhold().getType());
+        if (UttakArbeidType.IKKE_YRKESAKTIV.equals(type)) {
+            type = UttakArbeidType.ARBEIDSTAKER;
+        }
         Arbeidsforhold arbeidsforhold = buildArbeidsforhold(type, data);
         return new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, type, erGradering);
     }
@@ -35,6 +38,7 @@ class MapFraUttaksplan {
     private static Arbeidsforhold buildArbeidsforhold(UttakArbeidType type, Utbetalingsgrader data) {
         switch (type) {
             case IKKE_YRKESAKTIV:
+                throw new IllegalArgumentException("IKKE_YRKESAKTIV skal mappes til ARBEIDSTAKER");
             case ARBEIDSTAKER:
                 var arb = data.getArbeidsforhold();
                 final Arbeidsforhold.Builder arbeidsforholdBuilder = Arbeidsforhold.builder();
