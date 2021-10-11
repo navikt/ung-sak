@@ -61,15 +61,10 @@ public class MellomregningOpptjeningsvilkårData {
                     a -> new MellomregningAktivitetData(a, e.getValue())));
 
         splitAktiviter(
-            a -> Objects.equals(AktivitetPeriode.VurderingsStatus.VURDERT_GODKJENT, a.getVurderingsStatus()))
-                .forEach(e -> mellomregning.computeIfAbsent(e.getKey(),
-                    MellomregningAktivitetData::new).setAktivitetManueltGodkjent(e.getValue()));
-
-        splitAktiviter(
             a -> Objects.equals(AktivitetPeriode.VurderingsStatus.VURDERT_UNDERKJENT, a.getVurderingsStatus()))
                 .forEach(
                     e -> mellomregning.computeIfAbsent(e.getKey(),
-                        MellomregningAktivitetData::new).setAktivitetManueltUnderkjent(e.getValue()));
+                        MellomregningAktivitetData::new).setAktivitetUnderkjent(e.getValue()));
 
         // grupper inntektperioder etter aktivitet og avkort i forhold til angitt startDato/skjæringstidspunkt
         Map<Aktivitet, Set<LocalDateSegment<Long>>> grupperInntekterEtterAktiitet = grunnlag.getInntektPerioder().stream().collect(
@@ -146,14 +141,10 @@ public class MellomregningOpptjeningsvilkårData {
             return false;
         }
         LocalDateInterval underkjennIntervall = new LocalDateInterval(splitDato.plusDays(1), grunnlag.getSisteDatoForOpptjening());
-        LocalDateTimeline<Boolean> underkjennTimeline = new LocalDateTimeline<>(splitDato.plusDays(1), grunnlag.getSisteDatoForOpptjening(), Boolean.TRUE);
+        LocalDateTimeline<Boolean> underkjennTimeline = new LocalDateTimeline<>(underkjennIntervall, Boolean.TRUE);
         MellomregningAktivitetData aktivitetMellomregning = mellomregning.get(aktivitet);
 
         aktivitetMellomregning.setAktivitetUnderkjent(underkjennTimeline);
-        if (!MellomregningAktivitetData.EMPTY.equals(aktivitetMellomregning.getAktivitetManueltGodkjent())) {
-            // Må overskrive manuell godkjenning da annen aktivitet gjerne er vurdert i aksjonspunkt i steg 82
-            aktivitetMellomregning.setAktivitetManueltGodkjent(aktivitetMellomregning.getAktivitetManueltGodkjent().disjoint(underkjennIntervall));
-        }
         return true;
     }
 
