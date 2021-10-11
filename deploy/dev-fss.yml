@@ -79,13 +79,9 @@ spec:
       value: k9-sak-q1
 
     # Gjentatt grunnet felles-sikkerhet
-    - name: OIDC_OPENAM_HOSTURL
+    - name: OPENIDCONNECT_ISSOHOST
       value: https://isso-q.adeo.no:443/isso/oauth2
-    - name: OIDC_OPENAM_ISSUERURL
-      value: https://isso-q.adeo.no:443/isso/oauth2
-    - name: OIDC_OPENAM_JWKSURL
-      value: https://isso-q.adeo.no:443/isso/oauth2/connect/jwk_uri
-    - name: OIDC_OPENAM_AGENTNAME
+    - name: OPENIDCONNECT_USERNAME
       value: k9-sak-q1
 
     # Integrasjoner (Kafka)
@@ -113,8 +109,8 @@ spec:
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
 
     # Loadbalancerconfig
-    - name: LOADBALANCER_FQDN
-      value: app-q1.adeo.no
+    - name: LOADBALANCER_URL
+      value: https://app-q1.adeo.no
 
     # LDAP
     - name: LDAP_URL

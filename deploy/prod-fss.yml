@@ -79,13 +79,9 @@ spec:
       value: k9-sak-p
 
     # Gjentatt grunnet felles-sikkerhet
-    - name: OIDC_OPENAM_HOSTURL
+    - name: OPENIDCONNECT_ISSOHOST
       value: https://isso.adeo.no:443/isso/oauth2
-    - name: OIDC_OPENAM_ISSUERURL
-      value: https://isso.adeo.no:443/isso/oauth2
-    - name: OIDC_OPENAM_JWKSURL
-      value: https://isso.adeo.no:443/isso/oauth2/connect/jwk_uri
-    - name: OIDC_OPENAM_AGENTNAME
+    - name: OPENIDCONNECT_USERNAME
       value: k9-sak-p
 
     # Integrasjoner (Kafka)
@@ -113,8 +109,8 @@ spec:
       value: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443
 
     # Loadbalancerconfig
-    - name: LOADBALANCER_FQDN
-      value: app.adeo.no
+    - name: LOADBALANCER_URL
+      value: https://app.adeo.no
 
     # LDAP
     - name: LDAP_URL
@@ -216,7 +212,7 @@ spec:
     - name: ENABLE_UTLEDET_ENDRINGSPERIODE
       value: "false"
     - name: ARBEIDSTID_SJEKK_SNFL
-      value: "false"
+      value: "true"
     - name: NY_SYKDOM_TOTRINN
       value: "false"
 
