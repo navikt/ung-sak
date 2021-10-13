@@ -90,6 +90,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         var tidslinjeTilVurdering = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList()));
 
         var input = new ArbeidstidMappingInput()
+            .medSaksnummer(referanse.getSaksnummer())
             .medKravDokumenter(vurderteSøknadsperioder.keySet())
             .medPerioderFraSøknader(perioderFraSøknader)
             .medTidslinjeTilVurdering(tidslinjeTilVurdering)

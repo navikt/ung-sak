@@ -215,6 +215,8 @@ spec:
       value: "true"
     - name: NY_SYKDOM_TOTRINN
       value: "false"
+    - name: PSB_UTTAK_UNNTAK_AKTIVITETER
+      value: "ACJ40|2021-03-01"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

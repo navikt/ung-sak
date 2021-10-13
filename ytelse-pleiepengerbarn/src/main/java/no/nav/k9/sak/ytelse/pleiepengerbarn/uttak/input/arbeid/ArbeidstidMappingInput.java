@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -7,16 +9,19 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 
 public class ArbeidstidMappingInput {
 
+    private Saksnummer saksnummer;
     private Set<KravDokument> kravDokumenter;
     private Set<PerioderFraSøknad> perioderFraSøknader;
     private LocalDateTimeline<Boolean> tidslinjeTilVurdering;
     private Vilkår vilkår;
     private OpptjeningResultat opptjeningResultat;
     private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivTidslinje;
+    private Map<Saksnummer, Set<LocalDate>> sakerSomMåSpesialhåndteres = new HashMap<>();
 
     public ArbeidstidMappingInput() {
     }
@@ -35,6 +40,16 @@ public class ArbeidstidMappingInput {
 
     public ArbeidstidMappingInput medKravDokumenter(Set<KravDokument> kravDokumenter) {
         this.kravDokumenter = kravDokumenter;
+        return this;
+    }
+
+    public ArbeidstidMappingInput medSaksnummer(Saksnummer saksnummer) {
+        this.saksnummer = saksnummer;
+        return this;
+    }
+
+    public ArbeidstidMappingInput medSakerSomMåSpesialHåndteres(Map<Saksnummer, Set<LocalDate>> sakerSomMåSpesialhåndteres) {
+        this.sakerSomMåSpesialhåndteres = sakerSomMåSpesialhåndteres;
         return this;
     }
 
@@ -85,5 +100,13 @@ public class ArbeidstidMappingInput {
 
     public Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> getInaktivTidslinje() {
         return inaktivTidslinje != null ? inaktivTidslinje : Map.of();
+    }
+
+    public Saksnummer getSaksnummer() {
+        return saksnummer;
+    }
+
+    public Map<Saksnummer, Set<LocalDate>> getSakerSomMåSpesialhåndteres() {
+        return sakerSomMåSpesialhåndteres;
     }
 }
