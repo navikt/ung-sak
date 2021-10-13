@@ -17,6 +17,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -74,6 +75,11 @@ public class MapArbeid {
                 .filter(it -> harDagpengerPåSkjæringstidspunktet(it, opptjeningResultat))
                 .collect(Collectors.toList()) : List.of();
 
+            List<VilkårPeriode> sykepengerFraDagpengerOgIkkeDagpengerPåSkjæringstidspunktet = vilkår != null ? vilkår.getPerioder().stream()
+                .filter(it -> it.getPeriode().overlapper(periode))
+                .filter(it -> harSykepengerFraDagpengerPåSkjæringstidspunktet(it, opptjeningResultat, dagpengerPåSkjæringstidspunktet))
+                .collect(Collectors.toList()) : List.of();
+
             List<VilkårPeriode> kunYtelsePåSkjæringstidspunktet = vilkår != null ? vilkår.getPerioder().stream()
                 .filter(it -> it.getPeriode().overlapper(periode))
                 .filter(it -> harKunYtelsePåSkjæringstidspunktet(it, opptjeningResultat))
@@ -81,6 +87,7 @@ public class MapArbeid {
 
             var midlertidigInaktivPeriode = mapInaktivePerioder(arbeidsforhold, midlertidigInaktivVilkårsperioder);
             mapPerioderMedType(arbeidsforhold, dagpengerPåSkjæringstidspunktet, UttakArbeidType.DAGPENGER);
+            mapPerioderMedType(arbeidsforhold, sykepengerFraDagpengerOgIkkeDagpengerPåSkjæringstidspunktet, UttakArbeidType.SYKEPENGER_AV_DAGPENGER);
             mapPerioderMedType(arbeidsforhold, kunYtelsePåSkjæringstidspunktet, UttakArbeidType.KUN_YTELSE);
 
             kravDokumenter.stream()
@@ -96,11 +103,38 @@ public class MapArbeid {
         return arbeidsforhold;
     }
 
+    private boolean harSykepengerFraDagpengerPåSkjæringstidspunktet(VilkårPeriode vilkårPeriode, OpptjeningResultat opptjeningResultat, List<VilkårPeriode> dagpengerPåSkjæringstidspunktet) {
+        Optional<Opptjening> opptjening = finnOpptjeningForPeriode(vilkårPeriode, opptjeningResultat);
+        if (opptjening.isEmpty()) {
+            return false;
+        }
+
+        if (dagpengerPåSkjæringstidspunktet.stream().anyMatch(it -> it.getPeriode().equals(vilkårPeriode.getPeriode()))) {
+            return false;
+        }
+
+        return opptjening.get().getOpptjeningAktivitet()
+            .stream()
+            .filter(it -> OpptjeningAktivitetType.SYKEPENGER_AV_DAGPENGER.equals(it.getAktivitetType()))
+            .anyMatch(it -> DatoIntervallEntitet.fraOgMedTilOgMed(vilkårPeriode.getSkjæringstidspunkt().minusDays(1), vilkårPeriode.getSkjæringstidspunkt().minusDays(1)).overlapper(it.getFom(), it.getTom()));
+    }
+
+    private Optional<Opptjening> finnOpptjeningForPeriode(VilkårPeriode vilkårPeriode, OpptjeningResultat opptjeningResultat) {
+        if (opptjeningResultat == null) {
+            return Optional.empty();
+        }
+        var opptjening = opptjeningResultat.finnOpptjening(vilkårPeriode.getSkjæringstidspunkt());
+
+        if (opptjening.isEmpty()) {
+            return Optional.empty();
+        }
+        return opptjening;
+    }
+
     private void leggTilAnsettSomInaktivPerioder(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivPerioder) {
         if (inaktivPerioder.isEmpty()) {
             return;
         }
-
 
         for (Map.Entry<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivArbeidsforhold : inaktivPerioder.entrySet()) {
             var relevanteAktiviteter = arbeidsforhold.entrySet()
@@ -118,11 +152,7 @@ public class MapArbeid {
     }
 
     private boolean harKunYtelsePåSkjæringstidspunktet(VilkårPeriode vilkårPeriode, OpptjeningResultat opptjeningResultat) {
-        if (opptjeningResultat == null) {
-            return false;
-        }
-        var opptjening = opptjeningResultat.finnOpptjening(vilkårPeriode.getSkjæringstidspunkt());
-
+        Optional<Opptjening> opptjening = finnOpptjeningForPeriode(vilkårPeriode, opptjeningResultat);
         if (opptjening.isEmpty()) {
             return false;
         }
@@ -146,11 +176,7 @@ public class MapArbeid {
     }
 
     private boolean harDagpengerPåSkjæringstidspunktet(VilkårPeriode vilkårPeriode, OpptjeningResultat opptjeningResultat) {
-        if (opptjeningResultat == null) {
-            return false;
-        }
-        var opptjening = opptjeningResultat.finnOpptjening(vilkårPeriode.getSkjæringstidspunkt());
-
+        Optional<Opptjening> opptjening = finnOpptjeningForPeriode(vilkårPeriode, opptjeningResultat);
         if (opptjening.isEmpty()) {
             return false;
         }
