@@ -24,6 +24,9 @@ final class MapUnntakFraAktivitetGenerering {
 
         for (String s : splittedString) {
             var split = s.split("\\|");
+            if (s.trim().length() == 0) {
+                throw new IllegalStateException("Fant ingen gyldige elementer for splitt.");
+            }
             if (split.length != 2) {
                 continue; //  Ugyldig, next please
             }
