@@ -18,6 +18,7 @@ import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -87,6 +88,7 @@ public class MapInputTilUttakTjeneste {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private OpptjeningRepository opptjeningRepository;
+    private String unntak;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
     private EtablertTilsynRepository etablertTilsynRepository;
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
@@ -105,7 +107,8 @@ public class MapInputTilUttakTjeneste {
                                     RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                     @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
-                                    @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+                                    @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
@@ -120,6 +123,7 @@ public class MapInputTilUttakTjeneste {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.opptjeningRepository = opptjeningRepository;
+        this.unntak = unntak;
     }
 
     public Uttaksgrunnlag hentUtOgMapRequest(BehandlingReferanse referanse) {
@@ -246,12 +250,14 @@ public class MapInputTilUttakTjeneste {
         var inaktivTidslinje = new PerioderMedInaktivitetUtleder().utled(inaktivitetUtlederInput);
 
         var arbeidstidInput = new ArbeidstidMappingInput()
+            .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medKravDokumenter(kravDokumenter)
             .medPerioderFraSøknader(perioderFraSøknader)
             .medTidslinjeTilVurdering(tidslinjeTilVurdering)
             .medVilkår(input.getVilkårene().getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow())
             .medOpptjeningsResultat(input.getOpptjeningResultat().orElse(null))
-            .medInaktivTidslinje(inaktivTidslinje);
+            .medInaktivTidslinje(inaktivTidslinje)
+            .medSakerSomMåSpesialHåndteres(MapUnntakFraAktivitetGenerering.mapUnntak(unntak));
         final List<Arbeid> arbeid = new MapArbeid().map(arbeidstidInput);
 
         final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehov());
@@ -326,7 +332,7 @@ public class MapInputTilUttakTjeneste {
         });
         return resultat;
     }
-    
+
     public Map<LukketPeriode, List<String>> mapKravprioritetsliste(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
         final Map<LukketPeriode, List<String>> resultat = new HashMap<>();
         kravprioritet.forEach(s -> {
