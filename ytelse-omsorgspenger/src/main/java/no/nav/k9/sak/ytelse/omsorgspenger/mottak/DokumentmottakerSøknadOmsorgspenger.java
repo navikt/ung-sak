@@ -54,6 +54,7 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 @FagsakYtelseTypeRef("OMP")
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_AT_KODE)
+@DokumentGruppeRef(Brevkode.FRAVÆRSKORRIGERING_IM_OMS_KODE)
 public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private SøknadRepository søknadRepository;

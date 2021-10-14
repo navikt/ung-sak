@@ -68,7 +68,7 @@ public class SøknadPerioderTjeneste {
     private List<MottattDokument> hentMottatteDokument(long fagsakId) {
         return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsakId, DokumentStatus.GYLDIG)
             .stream()
-            .filter(dok -> List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT).contains(dok.getType()))
+            .filter(dok -> List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT, Brevkode.FRAVÆRSKORRIGERING_IM_OMS).contains(dok.getType()))
             .filter(dok -> dok.getBehandlingId() != null)
             .collect(Collectors.toList());
     }

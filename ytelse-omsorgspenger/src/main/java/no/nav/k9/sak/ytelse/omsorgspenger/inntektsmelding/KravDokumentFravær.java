@@ -14,15 +14,18 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 public class KravDokumentFravær {
 
-    public List<WrappedOppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
-        var sorterteKravdokumenter = fraværFraKravdokumenter.keySet().stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+    public List<WrappedOppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Map<JournalpostId, MottattDokument> mottatteDokumenter, Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
+        LinkedHashSet<KravDokument> sorterteKravdokumenter = sorterDokumenter(mottatteDokumenter, fraværFraKravdokumenter);
 
         Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
         for (var dok : sorterteKravdokumenter) {
@@ -57,6 +60,22 @@ public class KravDokumentFravær {
             .stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
+    }
+
+    private LinkedHashSet<KravDokument> sorterDokumenter(Map<JournalpostId, MottattDokument> mottatteDokumenter, Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
+        var sorterteKravdokumenter = fraværFraKravdokumenter.keySet().stream()
+            .sorted((kravDok1, kravDok2) -> {
+                // Dersom journalpostId == null, må kravdokumentet komme fra før journalpost ble lagres i juni 2021 -> gjelder bare innntektsmeldinger
+                var brevkode1 = kravDok1.getJournalpostId() != null ? mottatteDokumenter.get(kravDok1.getJournalpostId()).getType() : Brevkode.INNTEKTSMELDING;
+                var brevkode2 = kravDok2.getJournalpostId() != null ? mottatteDokumenter.get(kravDok1.getJournalpostId()).getType() : Brevkode.INNTEKTSMELDING;
+                if (!brevkode1.equals(brevkode2)) {
+                    // Søknad har lavere pri enn Inntektsmelding og Fraværskorrrigering IM, må prosesseres først
+                    return brevkode1.equals(Brevkode.SØKNAD_UTBETALING_OMS) ? -1 : 1;
+                }
+                return kravDok1.getInnsendingsTidspunkt().compareTo(kravDok2.getInnsendingsTidspunkt());
+            })
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+        return sorterteKravdokumenter;
     }
 
     /**
