@@ -28,7 +28,6 @@ public class SøknadsperiodeTjeneste {
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
-
     @Inject
     public SøknadsperiodeTjeneste(BehandlingRepository behandlingRepository, SøknadsperiodeRepository søknadsperiodeRepository, MottatteDokumentRepository mottatteDokumentRepository) {
         this.behandlingRepository = behandlingRepository;
@@ -38,16 +37,34 @@ public class SøknadsperiodeTjeneste {
 
 
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        var søknadsperioder = søknadsperiodeRepository.hentGrunnlag(behandlingId).map(SøknadsperiodeGrunnlag::getRelevantSøknadsperioder);
+        var søknadsperioder = søknadsperiodeRepository.hentGrunnlag(behandlingId);
+        var relevantePerioder = søknadsperioder.map(SøknadsperiodeGrunnlag::getRelevantSøknadsperioder);
+        var oppgittePerioder = søknadsperioder.map(SøknadsperiodeGrunnlag::getOppgitteSøknadsperioder);
 
-        if (søknadsperioder.isEmpty() || søknadsperioder.get().getPerioder().isEmpty()) {
+        if (relevantePerioder.isEmpty() || relevantePerioder.get().getPerioder().isEmpty()) {
             return Collections.emptyNavigableSet();
         } else {
-            final var søknadsperioders = søknadsperioder.get().getPerioder();
+            final var søknadsperioders = relevantePerioder.get().getPerioder();
+            final var oppgitteSøknadsperioder = oppgittePerioder.orElseThrow().getPerioder();
             final var behandling = behandlingRepository.hentBehandling(behandlingId);
 
-            return utledVurderingsperioderFraSøknadsperioder(behandling.getFagsakId(), søknadsperioders);
+            var utledeRelevantePerioder = utledVurderingsperioderFraSøknadsperioder(behandling.getFagsakId(), søknadsperioders);
+            var oppgittPerioder = utledVurderingsperioderFraSøknadsperioder(behandling.getFagsakId(), oppgitteSøknadsperioder);
+
+            var relevanteSegmenter = tilSegmenter(utledeRelevantePerioder);
+            var oppgitteSegmenter = tilSegmenter(oppgittPerioder);
+
+            var intersection = new LocalDateTimeline<>(oppgitteSegmenter).intersection(new LocalDateTimeline<>(relevanteSegmenter));
+
+            return intersection.stream().map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom())).collect(Collectors.toCollection(TreeSet::new));
         }
+    }
+
+    private List<LocalDateSegment<Boolean>> tilSegmenter(NavigableSet<DatoIntervallEntitet> oppgittPerioder) {
+        return oppgittPerioder.stream()
+            .map(DatoIntervallEntitet::toLocalDateInterval)
+            .map(it -> new LocalDateSegment<>(it, true))
+            .collect(Collectors.toList());
     }
 
     public NavigableSet<DatoIntervallEntitet> utledFullstendigPeriode(Long behandlingId) {
@@ -65,11 +82,32 @@ public class SøknadsperiodeTjeneste {
     }
 
     public NavigableSet<DatoIntervallEntitet> utledVurderingsperioderFraSøknadsperioder(Long fagsakId, Set<Søknadsperioder> søknadsperioders) {
-        return hentKravperioder(fagsakId, søknadsperioders)
+        var kravperioder = hentKravperioder(fagsakId, søknadsperioders)
                 .stream()
                 .filter(kp -> !kp.isHarTrukketKrav())
                 .map(Kravperiode::getPeriode)
                 .collect(Collectors.toCollection(TreeSet::new));
+
+        LocalDateTimeline<Boolean> timeline = kravPerioderTilTidslinje(kravperioder);
+
+        return timeline
+            .stream()
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private LocalDateTimeline<Boolean> kravPerioderTilTidslinje(TreeSet<DatoIntervallEntitet> kravperioder) {
+        var timeline = new LocalDateTimeline<Boolean>(List.of());
+        var tidslinjer = kravperioder.stream()
+            .map(DatoIntervallEntitet::toLocalDateInterval)
+            .map(it -> new LocalDateSegment<>(it, true))
+            .map(it -> new LocalDateTimeline<>(List.of(it)))
+            .collect(Collectors.toList());
+
+        for (LocalDateTimeline<Boolean> localDateSegments : tidslinjer) {
+            timeline = timeline.combine(localDateSegments, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+        return timeline.compress();
     }
 
     public List<Kravperiode> hentKravperioder(Long fagsakId, Long behandlingId) {
