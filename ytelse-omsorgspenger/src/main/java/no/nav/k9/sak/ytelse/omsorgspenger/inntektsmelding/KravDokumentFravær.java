@@ -65,7 +65,7 @@ public class KravDokumentFravær {
             .sorted((kravDok1, kravDok2) -> {
                 if (kravDok1.getType() != kravDok2.getType()) {
                     // Søknad har lavere pri enn Inntektsmelding og Fraværskorrrigering Inntektsmelding, må prosesseres først
-                    return kravDok1.equals(KravDokumentType.SØKNAD) ? -1 : 1;
+                    return kravDok1.getType() == KravDokumentType.SØKNAD ? -1 : 1;
                 }
                 return kravDok1.getInnsendingsTidspunkt().compareTo(kravDok2.getInnsendingsTidspunkt());
             })
