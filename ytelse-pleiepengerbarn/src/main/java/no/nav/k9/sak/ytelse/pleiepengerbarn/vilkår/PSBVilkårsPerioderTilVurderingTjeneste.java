@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -113,7 +114,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Long behandlingId, Vilkår vilkår, Set<DatoIntervallEntitet> perioder) {
-        var perioderTilVurdering = new TreeSet<>(perioder);
+        var perioderTilVurdering = new TreeSet<>(utledPerioderTilVurderingVedÅHensyntaFullstendigTidslinje(behandlingId, perioder));
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         var referanse = BehandlingReferanse.fra(behandling);
@@ -130,6 +131,23 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             .stream()
             .map(VilkårPeriode::getPeriode)
             .filter(datoIntervallEntitet -> perioderTilVurdering.stream().anyMatch(it -> datoIntervallEntitet.overlapper(it.getFomDato().minusDays(1), it.getTomDato().plusDays(1))))
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private Set<DatoIntervallEntitet> utledPerioderTilVurderingVedÅHensyntaFullstendigTidslinje(Long behandlingId, Set<DatoIntervallEntitet> perioder) {
+        var fullstendigTidslinje = new LocalDateTimeline<>(utledFullstendigePerioder(behandlingId)
+            .stream()
+            .map(DatoIntervallEntitet::toLocalDateInterval)
+            .map(it -> new LocalDateSegment<>(it, true))
+            .collect(Collectors.toList()));
+        var relevantTidslinje = new LocalDateTimeline<>(perioder.stream()
+            .map(DatoIntervallEntitet::toLocalDateInterval)
+            .map(it -> new LocalDateSegment<>(it, true))
+            .collect(Collectors.toList()));
+
+        return fullstendigTidslinje.intersection(relevantTidslinje).compress()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
