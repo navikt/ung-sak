@@ -22,11 +22,13 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.mottak.inntektsmelding.KompletthetssjekkerInntektsmelding;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-002")
@@ -39,6 +41,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
     private BehandlingRepository behandlingRepository;
     private KompletthetsjekkerFelles fellesUtil;
+    private OmsorgspengerGrunnlagRepository grunnlagRepository;
 
     OmsorgspengerKompletthetsjekker() {
         // CDI
@@ -48,11 +51,13 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     public OmsorgspengerKompletthetsjekker(@Any Instance<KompletthetssjekkerInntektsmelding> kompletthetssjekkerInntektsmelding,
                                            InntektsmeldingTjeneste inntektsmeldingTjeneste,
                                            BehandlingRepository behandlingRepository,
-                                           KompletthetsjekkerFelles fellesUtil) {
+                                           KompletthetsjekkerFelles fellesUtil,
+                                           OmsorgspengerGrunnlagRepository grunnlagRepository) {
         this.kompletthetssjekkerInntektsmelding = kompletthetssjekkerInntektsmelding;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.fellesUtil = fellesUtil;
+        this.grunnlagRepository = grunnlagRepository;
     }
 
     @Override
@@ -70,13 +75,30 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
         List<ManglendeVedlegg> manglendeInntektsmeldinger = getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt());
         if (!manglendeInntektsmeldinger.isEmpty()) {
-            LOGGER.info("Behandling {} er ikke komplett - IM fra {} arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size(), manglendeInntektsmeldinger.size()); // NOSONAR //$NON-NLS-1$
-            Optional<LocalDateTime> ventefristManglendeIM = finnVentefristTilManglendeInntektsmelding(ref);
-            return ventefristManglendeIM
-                .map(frist -> KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK))
-                .orElse(KompletthetResultat.fristUtløpt()); // Setter til oppfylt om fristen er passert
+            LOGGER.info("Behandling {} er ikke komplett - IM fra {} arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size());
+            return settPåVent(ref);
+        }
+        if (harIngenKravFraMottatteInntektsmeldinger(ref) && harIkkeSøknadsperiode(ref)) {
+            LOGGER.info("Behandling {} er ikke komplett - Ingen IM eller søknad har sendt kravperioder.", ref.getBehandlingId());
+            return settPåVent(ref);
         }
         return KompletthetResultat.oppfylt();
+    }
+
+    private boolean harIkkeSøknadsperiode(BehandlingReferanse ref) {
+        return grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(ref.getBehandlingId()).isEmpty();
+    }
+
+    private KompletthetResultat settPåVent(BehandlingReferanse ref) {
+        return finnVentefristTilManglendeInntektsmelding(ref)
+            .map(frist -> KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK))
+            .orElse(KompletthetResultat.fristUtløpt());
+    }
+
+    private boolean harIngenKravFraMottatteInntektsmeldinger(BehandlingReferanse ref) {
+        List<Inntektsmelding> inntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt());
+        return inntektsmeldinger.stream()
+            .allMatch(im -> im.getOppgittFravær().isEmpty());
     }
 
     @Override
