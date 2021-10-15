@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -42,8 +41,6 @@ import no.nav.k9.sak.mottak.dokumentmottak.OppgittOpptjeningMapper;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
@@ -59,7 +56,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
-    private OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository;
+    private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private FagsakRepository fagsakRepository;
     private ProsessTaskRepository prosessTaskRepository;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
@@ -77,7 +74,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     @Inject
     DokumentmottakerSøknadOmsorgspenger(BehandlingRepositoryProvider repositoryProvider,
-                                        OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
+                                        OmsorgspengerGrunnlagRepository grunnlagRepository,
                                         ProsessTaskRepository prosessTaskRepository,
                                         OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
                                         SøknadParser søknadParser,
@@ -87,7 +84,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-        this.omsorgspengerGrunnlagRepository = omsorgspengerGrunnlagRepository;
+        this.grunnlagRepository = grunnlagRepository;
         this.prosessTaskRepository = prosessTaskRepository;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
         this.søknadParser = søknadParser;
@@ -182,20 +179,14 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         var behandlingId = behandling.getId();
         var fagsakId = behandling.getFagsakId();
 
-        // TODO: vurder om aggregering av perioder kan gjøres smidigere
-        Set<OppgittFraværPeriode> søktFravær = new LinkedHashSet<>();
-        var søktFraværFraTidligere = omsorgspengerGrunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId)
-            .map(OppgittFravær::getPerioder)
-            .orElse(Set.of());
-        var søktFraværFraSøknad = mapper.map(ytelse, søker, journalpostId);
-        søktFravær.addAll(søktFraværFraTidligere);
-        søktFravær.addAll(søktFraværFraSøknad);
+        var fraværFraSøknad = mapper.mapFraværFraSøknad(journalpostId, ytelse, søker);
+        grunnlagRepository.lagreOgFlushOppgittFraværFraSøknad(behandlingId, fraværFraSøknad);
 
-        var fraværFraSøknad = new OppgittFravær(søktFravær);
-        omsorgspengerGrunnlagRepository.lagreOgFlushOppgittFraværFraSøknad(behandlingId, fraværFraSøknad);
+        var fraværskorrigeringerIm = mapper.mapFraværskorringeringIm(journalpostId, ytelse);
+        grunnlagRepository.lagreOgFlushFraværskorrigeringerIm(behandlingId, fraværskorrigeringerIm);
 
         // Utvide fagsakperiode
-        var maksPeriode = omsorgspengerGrunnlagRepository.hentMaksPeriode(behandlingId).orElseThrow();
+        var maksPeriode = grunnlagRepository.hentMaksPeriode(behandlingId).orElseThrow();
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
     }
 

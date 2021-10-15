@@ -46,33 +46,31 @@ class SøknadOppgittFraværMapper {
         this.aktørTjeneste = aktørTjeneste;
     }
 
-    Set<OppgittFraværPeriode> map(OmsorgspengerUtbetaling søknadsinnhold, Søker søker, JournalpostId jpId) {
+    Set<OppgittFraværPeriode> mapFraværskorringeringIm(JournalpostId jpId, OmsorgspengerUtbetaling ytelse) {
+        var fraværsperioderKorrigeringIm = ytelse.getFraværsperioderKorrigeringIm();
+        if (fraværsperioderKorrigeringIm == null) {
+            return Set.of();
+        }
+
         Set<OppgittFraværPeriode> resultat = new LinkedHashSet<>();
-
-        var fraværskorrigeringIm = søknadsinnhold.getFraværsperioderKorrigeringIm();
-        var fraværPerioderFraSøknad = OmsorspengerFraværPeriodeSammenslåer.fjernHelgOgSlåSammen(søknadsinnhold.getFraværsperioder());
-        resultat.addAll(mapFraværskorringeringIm(jpId, fraværskorrigeringIm));
-        resultat.addAll(mapFraværFraSøknad(jpId, fraværPerioderFraSøknad, søknadsinnhold, søker));
-
-        return resultat;
-    }
-
-    private Set<OppgittFraværPeriode> mapFraværskorringeringIm(JournalpostId jpId, List<FraværPeriode> fraværPerioder) {
-        Set<OppgittFraværPeriode> resultat = new LinkedHashSet<>();
-        for (FraværPeriode fp : fraværPerioder) {
+        for (FraværPeriode fp : fraværsperioderKorrigeringIm) {
             FraværÅrsak fraværÅrsak = FraværÅrsak.fraKode(fp.getÅrsak().getKode());
             resultat.add(mapAt(jpId, fp, fraværÅrsak));
         }
         return resultat;
     }
 
-    private Set<OppgittFraværPeriode> mapFraværFraSøknad(JournalpostId jpId, List<FraværPeriode> fraværPerioder, OmsorgspengerUtbetaling søknadsinnhold, Søker søker) {
-        var opptj = Objects.requireNonNull(søknadsinnhold.getAktivitet());
+    Set<OppgittFraværPeriode> mapFraværFraSøknad(JournalpostId jpId, OmsorgspengerUtbetaling ytelse, Søker søker) {
+        var fraværsperioder = ytelse.getFraværsperioder();
+        if (fraværsperioder == null) {
+            return Set.of();
+        }
+        var opptj = Objects.requireNonNull(ytelse.getAktivitet());
         var snAktiviteter = Optional.ofNullable(opptj.getSelvstendigNæringsdrivende()).orElse(Collections.emptyList());
         var frilanser = opptj.getFrilanser();
 
         Set<OppgittFraværPeriode> resultat = new LinkedHashSet<>();
-        for (FraværPeriode fp : fraværPerioder) {
+        for (FraværPeriode fp : OmsorspengerFraværPeriodeSammenslåer.fjernHelgOgSlåSammen(fraværsperioder)) {
             LocalDate fom = fp.getPeriode().getFraOgMed();
             LocalDate tom = fp.getPeriode().getTilOgMed();
             Duration varighet = fp.getDuration();

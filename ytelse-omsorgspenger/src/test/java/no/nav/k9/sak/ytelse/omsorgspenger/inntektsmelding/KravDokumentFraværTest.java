@@ -12,12 +12,10 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.SøknadÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
@@ -81,10 +79,8 @@ public class KravDokumentFraværTest {
             .build();
         var input = Map.ofEntries(
             mapTilKravdok(inntektsmelding1), mapTilKravdok(inntektsmelding2), mapTilKravdok(inntektsmelding3), mapTilKravdok(inntektsmelding4));
-        var mottatteDokumenter = Map.ofEntries(
-            mapImTilDokument(inntektsmelding1), mapImTilDokument(inntektsmelding2), mapImTilDokument(inntektsmelding3), mapImTilDokument(inntektsmelding4));
 
-        List<WrappedOppgittFraværPeriode> oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(mottatteDokumenter, input);
+        List<WrappedOppgittFraværPeriode> oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(input);
 
         assertThat(oppgittFraværPeriode).hasSize(3);
         assertThat(oppgittFraværPeriode.stream().map(WrappedOppgittFraværPeriode::getPeriode).filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000"))).hasSize(2);
@@ -118,10 +114,8 @@ public class KravDokumentFraværTest {
             .build();
         var input = Map.ofEntries(
             mapTilKravdok(inntektsmelding1), mapTilKravdok(inntektsmelding2));
-        var mottatteDokumenter = Map.ofEntries(
-            mapImTilDokument(inntektsmelding1), mapImTilDokument(inntektsmelding2));
 
-        List<WrappedOppgittFraværPeriode> oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(mottatteDokumenter, input);
+        List<WrappedOppgittFraværPeriode> oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(input);
 
         assertThat(oppgittFraværPeriode).hasSize(2);
         assertThat(oppgittFraværPeriode.stream().map(WrappedOppgittFraværPeriode::getPeriode).filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(arbeidsforholdId))).hasSize(1);
@@ -168,10 +162,8 @@ public class KravDokumentFraværTest {
             .build();
         var input = Map.ofEntries(
             mapTilKravdok(inntektsmelding1), mapTilKravdok(inntektsmelding2));
-        var mottatteDokumenter = Map.ofEntries(
-            mapImTilDokument(inntektsmelding1), mapImTilDokument(inntektsmelding2));
 
-        List<WrappedOppgittFraværPeriode> oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(mottatteDokumenter, input);
+        List<WrappedOppgittFraværPeriode> oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(input);
 
         assertThat(oppgittFraværPeriode).hasSize(1);
         assertThat(oppgittFraværPeriode.stream()
@@ -215,10 +207,8 @@ public class KravDokumentFraværTest {
             .build();
         var input = Map.ofEntries(
             mapTilKravdok(inntektsmelding1), mapTilKravdok(inntektsmelding2));
-        var mottatteDokumenter = Map.ofEntries(
-            mapImTilDokument(inntektsmelding1), mapImTilDokument(inntektsmelding2));
 
-        List<WrappedOppgittFraværPeriode> oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(mottatteDokumenter, input);
+        List<WrappedOppgittFraværPeriode> oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(input);
 
         assertThat(oppgittFraværPeriode).hasSize(2);
         assertThat(oppgittFraværPeriode.stream()
@@ -252,10 +242,8 @@ public class KravDokumentFraværTest {
         var input = Map.of(
             kravDok1, Arrays.asList(lagSøktPeriode(journalpost1, idag.minusDays(10), idag.minusDays(9), UttakArbeidType.FRILANSER)),
             kravDok2, Arrays.asList(lagSøktPeriode(journalpost2, idag.minusDays(5), idag.minusDays(5), UttakArbeidType.FRILANSER)));
-        var mottatteDokumenter = Map.ofEntries(
-            mapSøknadTilDokument(kravDok1), mapSøknadTilDokument(kravDok2));
 
-        List<WrappedOppgittFraværPeriode> resultat = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(mottatteDokumenter, input);
+        List<WrappedOppgittFraværPeriode> resultat = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(input);
 
         assertThat(resultat).hasSize(2);
         WrappedOppgittFraværPeriode fp1 = resultat.get(0);
@@ -296,10 +284,8 @@ public class KravDokumentFraværTest {
         var input = Map.of(
             kravDokIm, fraværsperioderIm,
             kravDokSøknad, fraværsperioderSøknad);
-        var mottatteDokumenter = Map.ofEntries(
-            mapImTilDokument(im), mapSøknadTilDokument(kravDokSøknad));
 
-        List<WrappedOppgittFraværPeriode> resultat = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(mottatteDokumenter, input);
+        List<WrappedOppgittFraværPeriode> resultat = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(input);
 
         assertThat(resultat).hasSize(1);
         WrappedOppgittFraværPeriode fp1 = resultat.get(0);
@@ -320,16 +306,6 @@ public class KravDokumentFraværTest {
 
         return Map.entry(new KravDokument(jpId, im.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING),
             List.of(lagSøktPeriode(jpId, fom, tom, fraværPerDag, UttakArbeidType.ARBEIDSTAKER, im.getArbeidsgiver(), im.getArbeidsforholdRef())));
-    }
-
-    private static Map.Entry<JournalpostId, MottattDokument> mapImTilDokument(Inntektsmelding im) {
-        return Map.entry(im.getJournalpostId(),
-            new MottattDokument.Builder().medType(Brevkode.INNTEKTSMELDING).medMottattTidspunkt(im.getInnsendingstidspunkt()).medKanalreferanse(im.getKanalreferanse()).medFagsakId(123L).build());
-    }
-
-    private static Map.Entry<JournalpostId, MottattDokument> mapSøknadTilDokument(KravDokument kravDok) {
-        return Map.entry(kravDok.getJournalpostId(),
-            new MottattDokument.Builder().medType(Brevkode.SØKNAD_UTBETALING_OMS).medMottattTidspunkt(kravDok.getInnsendingsTidspunkt()).medFagsakId(123L).build());
     }
 
     private static VurdertSøktPeriode<OppgittFraværPeriode> lagSøktPeriode(JournalpostId journalpost, LocalDate fom, LocalDate tom, UttakArbeidType uttakArbeidType) {
