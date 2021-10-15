@@ -29,7 +29,7 @@ public class OmsorgspengerGrunnlag extends BaseEntitet {
     @ChangeTracked
     @ManyToOne
     @JoinColumn(name = "fravaer_id")
-    private OppgittFravær samletOppgittFravær;
+    private OppgittFravær sammenslåttOppgittFravær;
 
     @ChangeTracked
     @ManyToOne
@@ -52,9 +52,9 @@ public class OmsorgspengerGrunnlag extends BaseEntitet {
     }
 
     /** Opprett uten oppgittFravær - kommer fra saksbehandler senere. */
-    public OmsorgspengerGrunnlag(Long behandlingId, OppgittFravær samletOppgittFravær, OppgittFravær oppgittFraværFraSøknad, OppgittFravær oppgittFraværFraKorrigeringIm) {
+    public OmsorgspengerGrunnlag(Long behandlingId, OppgittFravær sammenslåttOppgittFravær, OppgittFravær oppgittFraværFraSøknad, OppgittFravær oppgittFraværFraKorrigeringIm) {
         this.behandlingId = behandlingId;
-        this.samletOppgittFravær = samletOppgittFravær;
+        this.sammenslåttOppgittFravær = sammenslåttOppgittFravær;
         this.oppgittFraværFraSøknad = oppgittFraværFraSøknad;
         this.oppgittFraværFraKorrigeringIm = oppgittFraværFraKorrigeringIm;
     }
@@ -63,8 +63,8 @@ public class OmsorgspengerGrunnlag extends BaseEntitet {
         return id;
     }
 
-    public OppgittFravær getSamletOppgittFravær() {
-        return samletOppgittFravær;
+    public OppgittFravær getSammenslåttOppgittFravær() {
+        return sammenslåttOppgittFravær;
     }
 
     public OppgittFravær getOppgittFraværFraSøknad() {
@@ -86,14 +86,14 @@ public class OmsorgspengerGrunnlag extends BaseEntitet {
         if (o == null || !(o instanceof OmsorgspengerGrunnlag))
             return false;
         var that = this.getClass().cast(o);
-        return Objects.equals(samletOppgittFravær, that.samletOppgittFravær)
+        return Objects.equals(sammenslåttOppgittFravær, that.sammenslåttOppgittFravær)
             && Objects.equals(oppgittFraværFraSøknad, that.oppgittFraværFraSøknad)
             && Objects.equals(oppgittFraværFraKorrigeringIm, that.oppgittFraværFraKorrigeringIm);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(samletOppgittFravær, oppgittFraværFraSøknad, oppgittFraværFraKorrigeringIm);
+        return Objects.hash(sammenslåttOppgittFravær, oppgittFraværFraSøknad, oppgittFraværFraKorrigeringIm);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class OmsorgspengerGrunnlag extends BaseEntitet {
         return getClass().getSimpleName() + "<" +
             "id=" + id +
             ", behandling=" + behandlingId +
-            ", samletOppgittFravær=" + samletOppgittFravær +
+            ", sammenslåttOppgittFravær=" + sammenslåttOppgittFravær +
             ", oppgittFraværFraSøknad=" + oppgittFraværFraSøknad +
             ", oppgittFraværFraKorrigeringIm=" + oppgittFraværFraKorrigeringIm +
             ", aktiv=" + aktiv +

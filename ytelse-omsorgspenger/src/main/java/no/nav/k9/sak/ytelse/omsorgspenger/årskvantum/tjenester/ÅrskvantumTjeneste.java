@@ -142,7 +142,7 @@ public class ÅrskvantumTjeneste {
 
     private ÅrskvantumGrunnlag hentForRef(BehandlingReferanse ref) {
 
-        var oppgittFravær = grunnlagRepository.hentAlleFraværPerioder(ref.getBehandlingId());
+        var oppgittFravær = grunnlagRepository.hentSammenslåtteFraværPerioder(ref.getBehandlingId());
         var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
         var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
 
