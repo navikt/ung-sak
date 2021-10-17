@@ -4,6 +4,7 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.util.Collection;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -78,6 +80,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
 
         var kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(ref);
+        var perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(ref.getBehandlingId());
 
         var kravdokumenterMedPeriode = søknadsfristTjeneste.hentPerioderTilVurdering(ref);
         var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
@@ -89,7 +92,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
 
         var revurderingPerioderFraAndreParter = perioderTilVurderingTjeneste.utledRevurderingPerioder(ref);
 
-        var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(behandling, kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering, revurderingPerioderFraAndreParter);
+        var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(behandling, kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering, perioderSomSkalTilbakestilles, revurderingPerioderFraAndreParter);
 
         return statusForPerioderPåBehandling;
     }
