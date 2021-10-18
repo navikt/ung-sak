@@ -27,7 +27,6 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.typer.AktørId;
@@ -74,7 +73,6 @@ class SøknadOversetter {
     @Inject
     SøknadOversetter(BehandlingRepositoryProvider repositoryProvider,
                      SøknadsperiodeRepository søknadsperiodeRepository,
-                     UttakRepository uttakRepository,
                      UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                      TpsTjeneste tpsTjeneste,
                      OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository,
