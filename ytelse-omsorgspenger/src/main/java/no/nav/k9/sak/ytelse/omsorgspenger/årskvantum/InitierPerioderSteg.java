@@ -39,7 +39,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
         Long behandlingId = kontekst.getBehandlingId();
 
         var samletFravær = trekkUtFraværTjeneste.samleSammenOppgittFravær(behandlingId);
-        grunnlagRepository.lagreOgFlushOppgittFravær(behandlingId, samletFravær);
+        grunnlagRepository.lagreOgFlushSammenslåttOppgittFravær(behandlingId, samletFravær);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }

@@ -24,7 +24,9 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 @Dependent
 public class SøknadPerioderTjeneste {
 
-    private static final KravDokumentType KRAVDOKUMENTTYPE_SØKNAD = KravDokumentType.SØKNAD;
+    private static final List<Brevkode> BREVKODER_SØKNAD = List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT);
+    private static final List<Brevkode> BREVKODER_IM_KORRIGERING = List.of(Brevkode.FRAVÆRSKORRIGERING_IM_OMS);
+
     private MottatteDokumentRepository mottatteDokumentRepository;
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
 
@@ -52,23 +54,37 @@ public class SøknadPerioderTjeneste {
     private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> tilSøktePerioderMedKravdokument(List<MottattDokument> mottatteDokumenter) {
         Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søktePerioderMedKravDokument = new HashMap<>();
         for (MottattDokument dok : mottatteDokumenter) {
-            var kravDokument = new KravDokument(dok.getJournalpostId(), dok.getMottattTidspunkt(), KRAVDOKUMENTTYPE_SØKNAD);
-            var fraværPerioder = grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(dok.getBehandlingId())
-                .map(OppgittFravær::getPerioder)
-                .orElse(Set.of());
-            var søktePerioderPåJp = fraværPerioder.stream()
-                .filter(fp -> dok.getJournalpostId().equals(fp.getJournalpostId()))
-                .map(fp -> new SøktPeriode<>(fp.getPeriode(), fp.getAktivitetType(), fp.getArbeidsgiver(), fp.getArbeidsforholdRef(), fp))
-                .collect(Collectors.toList());
-            søktePerioderMedKravDokument.put(kravDokument, søktePerioderPåJp);
+            if (BREVKODER_SØKNAD.contains(dok.getType())) {
+                var kravDokument = new KravDokument(dok.getJournalpostId(), dok.getMottattTidspunkt(), KravDokumentType.SØKNAD);
+                var fraværPerioderFraSøknad = grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(dok.getBehandlingId())
+                    .map(OppgittFravær::getPerioder)
+                    .orElse(Set.of());
+                søktePerioderMedKravDokument.put(kravDokument, mapFraværPerioder(fraværPerioderFraSøknad, dok));
+            } else if (BREVKODER_IM_KORRIGERING.contains(dok.getType())) {
+                var kravDokument = new KravDokument(dok.getJournalpostId(), dok.getMottattTidspunkt(), KravDokumentType.INNTEKTSMELDING);
+                var fraværskorrigeringerFraIm = grunnlagRepository.hentOppgittFraværFraFraværskorrigeringerHvisEksisterer(dok.getBehandlingId())
+                    .map(OppgittFravær::getPerioder)
+                    .orElse(Set.of());
+                søktePerioderMedKravDokument.put(kravDokument, mapFraværPerioder(fraværskorrigeringerFraIm, dok));
+            } else {
+                throw new IllegalArgumentException("Mapping av fraværsperidoder er ikke støttet for brevkode=" + dok.getType());
+            }
         }
         return søktePerioderMedKravDokument;
+    }
+
+    private List<SøktPeriode<OppgittFraværPeriode>> mapFraværPerioder(Set<OppgittFraværPeriode> fraværPerioder, MottattDokument dok) {
+        var søktePerioderPåJp = fraværPerioder.stream()
+            .filter(fp -> dok.getJournalpostId().equals(fp.getJournalpostId()))
+            .map(fp -> new SøktPeriode<>(fp.getPeriode(), fp.getAktivitetType(), fp.getArbeidsgiver(), fp.getArbeidsforholdRef(), fp))
+            .collect(Collectors.toList());
+        return søktePerioderPåJp;
     }
 
     private List<MottattDokument> hentMottatteDokument(long fagsakId) {
         return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsakId, DokumentStatus.GYLDIG)
             .stream()
-            .filter(dok -> List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT).contains(dok.getType()))
+            .filter(dok -> BREVKODER_SØKNAD.contains(dok.getType()) || BREVKODER_IM_KORRIGERING.contains(dok.getType()))
             .filter(dok -> dok.getBehandlingId() != null)
             .collect(Collectors.toList());
     }

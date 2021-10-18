@@ -83,7 +83,7 @@ public class TrekkUtFraværTjeneste {
                 // Kan inntreffe dersom IM er av variant ikkeFravaer eller ikke refusjon. Da brukes fraværsperioder kopiert fra forrige behandling
                 // TODO: Logg heller dokumenter tilknyttet behandling
                 log.warn("Kun kravdokument uten fraværsperioder er knyttet til behandling. Fraværsperioder fra tidligere behandlinger brukes, forventer noop for ytelse.");
-                var oppgittOpt = grunnlagRepository.hentOppittFraværHvisEksisterer(behandling.getUuid());
+                var oppgittOpt = grunnlagRepository.hentSammenslåttOppgittFraværHvisEksisterer(behandling.getId());
                 fravær = new ArrayList<>(oppgittOpt.orElseThrow().getPerioder());
             } else {
                 fravær = fraværFraKravDokument;

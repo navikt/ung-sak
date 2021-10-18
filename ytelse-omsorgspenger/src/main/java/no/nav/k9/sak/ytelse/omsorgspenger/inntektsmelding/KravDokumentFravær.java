@@ -16,13 +16,14 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 public class KravDokumentFravær {
 
     public List<WrappedOppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
-        var sorterteKravdokumenter = fraværFraKravdokumenter.keySet().stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+        LinkedHashSet<KravDokument> sorterteKravdokumenter = sorterDokumenter(fraværFraKravdokumenter);
 
         Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
         for (var dok : sorterteKravdokumenter) {
@@ -57,6 +58,18 @@ public class KravDokumentFravær {
             .stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
+    }
+
+    private LinkedHashSet<KravDokument> sorterDokumenter(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
+        return fraværFraKravdokumenter.keySet().stream()
+            .sorted((kravDok1, kravDok2) -> {
+                if (kravDok1.getType() != kravDok2.getType()) {
+                    // Søknad har lavere pri enn Inntektsmelding og Fraværskorrrigering Inntektsmelding, må prosesseres først
+                    return kravDok1.getType() == KravDokumentType.SØKNAD ? -1 : 1;
+                }
+                return kravDok1.getInnsendingsTidspunkt().compareTo(kravDok2.getInnsendingsTidspunkt());
+            })
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**

@@ -60,7 +60,7 @@ class NulledePerioder implements VilkårsPeriodiseringsFunksjon {
     }
 
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId, List<OppgittFraværPeriode> fraværPåSak) {
-        var søknadsperioder = grunnlagRepository.hentAlleFraværPerioder(behandlingId);
+        var søknadsperioder = grunnlagRepository.hentSammenslåtteFraværPerioder(behandlingId);
 
         if (søknadsperioder.isEmpty()) {
             return Collections.emptyNavigableSet();

@@ -21,7 +21,7 @@ import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.K9FormidlingKlient
 @ApplicationScoped
 public class OmsorgspengerForeslåVedtakManueltUtleder implements ForeslåVedtakManueltUtleder {
 
-    private static final List<Brevkode> BREVKODER_SØKNAD_OMS = List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT);
+    private static final List<Brevkode> BREVKODER_SØKNAD_OMS = List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT, Brevkode.FRAVÆRSKORRIGERING_IM_OMS);
 
     private K9FormidlingKlient formidlingKlient;
     private Boolean automatiskVedtakForSøknader;
