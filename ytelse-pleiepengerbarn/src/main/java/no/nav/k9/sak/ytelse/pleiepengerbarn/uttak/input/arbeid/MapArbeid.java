@@ -328,7 +328,7 @@ public class MapArbeid {
                 .map(DatoIntervallEntitet::getFomDato)
                 .min(LocalDate::compareTo);
 
-            if (startDato.isPresent()) {
+            if (startDato.isPresent() && periode.getTomDato().isAfter(startDato.get())) {
                 var gyldigArbeidsgiverTidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(startDato.get(), periode.getTomDato(), true)));
                 perioder = perioder.intersection(gyldigArbeidsgiverTidslinje);
             }
