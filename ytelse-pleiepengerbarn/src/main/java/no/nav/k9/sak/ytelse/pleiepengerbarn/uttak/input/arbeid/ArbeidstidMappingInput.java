@@ -8,13 +8,16 @@ import java.util.Set;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 
 public class ArbeidstidMappingInput {
 
     private Saksnummer saksnummer;
+    private AktørId bruker;
     private Set<KravDokument> kravDokumenter;
     private Set<PerioderFraSøknad> perioderFraSøknader;
     private LocalDateTimeline<Boolean> tidslinjeTilVurdering;
@@ -22,6 +25,7 @@ public class ArbeidstidMappingInput {
     private OpptjeningResultat opptjeningResultat;
     private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivTidslinje;
     private Map<Saksnummer, Set<LocalDate>> sakerSomMåSpesialhåndteres = new HashMap<>();
+    private InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag;
 
     public ArbeidstidMappingInput() {
     }
@@ -108,5 +112,23 @@ public class ArbeidstidMappingInput {
 
     public Map<Saksnummer, Set<LocalDate>> getSakerSomMåSpesialhåndteres() {
         return sakerSomMåSpesialhåndteres;
+    }
+
+    public ArbeidstidMappingInput medInntektArbeidYtelseGrunnlag(InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag) {
+        this.inntektArbeidYtelseGrunnlag = inntektArbeidYtelseGrunnlag;
+        return this;
+    }
+
+    public ArbeidstidMappingInput medBruker(AktørId bruker) {
+        this.bruker = bruker;
+        return this;
+    }
+
+    public InntektArbeidYtelseGrunnlag getInntektArbeidYtelseGrunnlag() {
+        return inntektArbeidYtelseGrunnlag;
+    }
+
+    public AktørId getBruker() {
+        return bruker;
     }
 }

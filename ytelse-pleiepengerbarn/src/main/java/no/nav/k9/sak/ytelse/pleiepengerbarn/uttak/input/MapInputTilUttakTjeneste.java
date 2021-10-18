@@ -257,7 +257,10 @@ public class MapInputTilUttakTjeneste {
             .medVilkår(input.getVilkårene().getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow())
             .medOpptjeningsResultat(input.getOpptjeningResultat().orElse(null))
             .medInaktivTidslinje(inaktivTidslinje)
+            .medInntektArbeidYtelseGrunnlag(input.getInntektArbeidYtelseGrunnlag())
+            .medBruker(behandling.getAktørId())
             .medSakerSomMåSpesialHåndteres(MapUnntakFraAktivitetGenerering.mapUnntak(unntak));
+
         final List<Arbeid> arbeid = new MapArbeid().map(arbeidstidInput);
 
         final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehov());
