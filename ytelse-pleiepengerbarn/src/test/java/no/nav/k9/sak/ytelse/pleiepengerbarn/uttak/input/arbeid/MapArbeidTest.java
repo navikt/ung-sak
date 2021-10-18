@@ -7,14 +7,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
@@ -22,12 +26,20 @@ import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
+import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
+import no.nav.k9.sak.domene.iay.modell.VersjonType;
+import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
@@ -38,7 +50,14 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 
 class MapArbeidTest {
 
+    public static final long DUMMY_BEHANDLING_ID = 1L;
     private MapArbeid mapper = new MapArbeid();
+    private InntektArbeidYtelseTjeneste iayTjeneste;
+
+    @BeforeEach
+    public void setUp() {
+        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+    }
 
     @Test
     void skal_mappe_arbeid_innenfor_periode_til_vurdering() {
@@ -352,6 +371,49 @@ class MapArbeidTest {
                 Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7)))),
             new Arbeid(new Arbeidsforhold(UttakArbeidType.IKKE_YRKESAKTIV.getKode(), arbeidsgiverOrgnr, null, null),
                 Map.of(new LukketPeriode(periodeTilVurdering.getFomDato(), arbeidsperiode.getFomDato().minusDays(1)), new ArbeidsforholdPeriodeInfo(Duration.ofMinutes((long) (7.5 * 60)), Duration.ofHours(0)))));
+    }
+
+    @Test
+    void skal_justere_periode_i_henhold_til_arbeidsforholdet_i_aareg() {
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(14);
+        var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var brukerAktørId = AktørId.dummy();
+        var arbeidsforholdStart = fom.plusDays(3);
+        iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
+            .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(arbeidsforholdStart, Tid.TIDENES_ENDE))))));
+        var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
+
+        var tidlinjeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
+
+        var journalpostId = new JournalpostId(1L);
+        var kravDokumenter = Set.of(new KravDokument(journalpostId, LocalDateTime.now().minusDays(1), KravDokumentType.SØKNAD));
+        var varighet = Duration.ofHours(3);
+        var arbeidsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+        var arbeidsgiverOrgnr = "000000000";
+        var periodeDel = arbeidsperiode;
+        var virksomhet = Arbeidsgiver.virksomhet(arbeidsgiverOrgnr);
+        var perioderFraSøknader = Set.of(new PerioderFraSøknad(journalpostId,
+                List.of(new UttakPeriode(periodeDel, varighet)),
+                List.of(new ArbeidPeriode(arbeidsperiode, UttakArbeidType.ARBEIDSTAKER, virksomhet, InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(1))),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()));
+
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        input.medInntektArbeidYtelseGrunnlag(grunnlag)
+            .medBruker(brukerAktørId)
+            .medSaksnummer(new Saksnummer("asdf"));
+
+        var result = mapper.map(input);
+        assertThat(result).hasSize(1);
+        assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
+                Map.of(new LukketPeriode(arbeidsforholdStart, arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)))));
     }
 
     private Vilkår opprettVilkår(LocalDateTimeline<Boolean> tidlinjeTilVurdering) {
