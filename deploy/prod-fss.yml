@@ -210,7 +210,7 @@ spec:
     - name: K9TILBAKE_AKTIVERT
       value: "true"
     - name: ENABLE_UTLEDET_ENDRINGSPERIODE
-      value: "false"
+      value: "true"
     - name: ARBEIDSTID_SJEKK_SNFL
       value: "true"
     - name: NY_SYKDOM_TOTRINN
