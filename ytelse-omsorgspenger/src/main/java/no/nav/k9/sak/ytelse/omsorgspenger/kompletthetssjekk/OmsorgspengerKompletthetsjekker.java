@@ -78,7 +78,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
             LOGGER.info("Behandling {} er ikke komplett - IM fra {} arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size());
             return settPåVent(ref);
         }
-        if (harIngenKravFraMottatteInntektsmeldinger(ref) && harIkkeSøknadsperiode(ref)) {
+        if (harIngenRefusjonskravFraMottatteInntektsmeldinger(ref) && harIkkeSøknadsperiode(ref)) {
             LOGGER.info("Behandling {} er ikke komplett - Ingen IM eller søknad har sendt kravperioder.", ref.getBehandlingId());
             return settPåVent(ref);
         }
@@ -95,10 +95,10 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
             .orElse(KompletthetResultat.fristUtløpt());
     }
 
-    private boolean harIngenKravFraMottatteInntektsmeldinger(BehandlingReferanse ref) {
+    private boolean harIngenRefusjonskravFraMottatteInntektsmeldinger(BehandlingReferanse ref) {
         List<Inntektsmelding> inntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt());
         return inntektsmeldinger.stream()
-            .allMatch(im -> im.getOppgittFravær().isEmpty());
+            .allMatch(im -> !im.harRefusjonskrav());
     }
 
     @Override
