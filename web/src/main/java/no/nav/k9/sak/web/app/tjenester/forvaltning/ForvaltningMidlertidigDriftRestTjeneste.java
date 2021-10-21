@@ -290,7 +290,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         final String restApiPath = "/starttidspunkt-aapen-behandling";
         final String resultatString = result.stream()
                 .filter(a -> harLesetilgang(a[0].toString(), restApiPath))
-                .map(a -> a[0].toString() + ";" + a[1].toString() + ";" + a[2].toString())
+                .map(a -> a[0].toString() + ";" + a[1].toString() + ";" + (a[2] != null ? a[2].toString() : ""))
                 .reduce((a, b) -> a + "\n" + b)
                 .orElse("");
 
