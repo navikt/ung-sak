@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -31,7 +32,7 @@ import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 
 @ApplicationScoped
-@BehandlingTypeRef("BT-002")
+@BehandlingTypeRef
 @FagsakYtelseTypeRef("OMP")
 public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     private static final Logger LOGGER = LoggerFactory.getLogger(OmsorgspengerKompletthetsjekker.class);
@@ -67,6 +68,11 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public KompletthetResultat vurderForsendelseKomplett(BehandlingReferanse ref) {
+        var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
+        if (behandling.erManueltOpprettet() && behandling.erRevurdering()) {
+            // Ikke nødvendig å vente på dokument-kompletthet når saksbehandler oppretter. Vil stoppe opp i steg Foreslå vedtak.
+            return KompletthetResultat.oppfylt();
+        }
         if (BehandlingStatus.OPPRETTET.equals(ref.getBehandlingStatus())) {
             return KompletthetResultat.oppfylt();
         }
@@ -74,7 +80,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         // hendelser)
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
         List<ManglendeVedlegg> manglendeInntektsmeldinger = getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt());
-        if (!manglendeInntektsmeldinger.isEmpty()) {
+        if (!manglendeInntektsmeldinger.isEmpty() && behandling.getType() == BehandlingType.FØRSTEGANGSSØKNAD) {
             LOGGER.info("Behandling {} er ikke komplett - IM fra {} arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size());
             return settPåVent(ref);
         }
@@ -108,6 +114,9 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public List<ManglendeVedlegg> utledAlleManglendeVedleggForForsendelse(BehandlingReferanse ref) {
+        if (ref.erRevurdering()) {
+            return List.of();
+        }
         List<ManglendeVedlegg> manglendeVedlegg = new ArrayList<>();
         manglendeVedlegg.addAll(getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldingerFraGrunnlag(ref, ref.getUtledetSkjæringstidspunkt()));
         return manglendeVedlegg;
