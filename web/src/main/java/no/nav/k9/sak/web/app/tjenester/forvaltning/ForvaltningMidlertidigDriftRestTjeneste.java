@@ -279,7 +279,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 + "  and m.status = 'GYLDIG'\n"
                 + "  and f.ytelse_type = 'PSB'\n"
                 + "group by saksnummer\n"
-                + "order by tidspunkt ASC\n");
+                + "order by tidspunkt ASC\n"
+                + "limit 100");
 
         @SuppressWarnings("unchecked")
         final List<Object[]> result = q.getResultList();
