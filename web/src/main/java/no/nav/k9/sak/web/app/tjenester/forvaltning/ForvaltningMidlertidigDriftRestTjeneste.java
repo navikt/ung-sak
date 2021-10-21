@@ -268,7 +268,10 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @Operation(description = "Henter starttidspunkt for åpen behandling. Dvs tidspunktet den første søknaden kom inn på behandlingen i k9-sak.", summary = ("Henter starttidspunkt for åpen behandling. Dvs tidspunktet den første søknaden kom inn på behandlingen i k9-sak."), tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     public Response hentStarttidspunktÅpenBehandling() {
-        final Query q = entityManager.createNativeQuery("select f.saksnummer, MIN(m.opprettet_tid) as tidspunkt\n"
+        final Query q = entityManager.createNativeQuery("select\n"
+                + "  f.saksnummer,\n"
+                +   "MIN(m.opprettet_tid) as tidspunkt,\n"
+                + "  (select string_agg(a.aksjonspunkt_def||'('||a.vent_aarsak||')', ', ') from aksjonspunkt a where a.behandling_id = b.id and a.aksjonspunkt_status = 'OPPR') AS aksjonspunkt\n"
                 + "from behandling b inner join mottatt_dokument m ON (\n"
                 + "  m.behandling_id = b.id\n"
                 + ") inner join fagsak f ON (\n"
@@ -278,7 +281,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 + "  and m.type = 'PLEIEPENGER_SOKNAD'\n"
                 + "  and m.status = 'GYLDIG'\n"
                 + "  and f.ytelse_type = 'PSB'\n"
-                + "group by saksnummer\n"
+                + "group by saksnummer, b.id\n"
                 + "order by tidspunkt ASC\n"
                 + "limit 500");
 
@@ -287,7 +290,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         final String restApiPath = "/starttidspunkt-aapen-behandling";
         final String resultatString = result.stream()
                 .filter(a -> harLesetilgang(a[0].toString(), restApiPath))
-                .map(a -> a[0].toString() + ";" + a[1].toString())
+                .map(a -> a[0].toString() + ";" + a[1].toString() + ";" + a[2].toString())
                 .reduce((a, b) -> a + "\n" + b)
                 .orElse("");
 
