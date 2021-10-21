@@ -44,6 +44,7 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .map(KompletthetsPeriode::getKanFortsette)
                 .findFirst()
                 .orElse(false));
+        // TODO: Lagre ned de som er avklart OK for fortsettelse
 
         if (kanFortsette) {
             lagHistorikkinnslag(param, dto);
