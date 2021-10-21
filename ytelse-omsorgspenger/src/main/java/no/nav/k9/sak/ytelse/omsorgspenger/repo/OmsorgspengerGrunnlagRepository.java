@@ -192,7 +192,6 @@ public class OmsorgspengerGrunnlagRepository {
         oppgittFraværFraSøknad.ifPresent(entityManager::persist);
         oppgittFraværskorrigeringerIm.ifPresent(entityManager::persist);
 
-        deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
         lagreOgFlushNyttGrunnlag(new OmsorgspengerGrunnlag(nyBehandlingId,
             samletOppgittFravær.orElse(null),
             oppgittFraværFraSøknad.orElse(null),
