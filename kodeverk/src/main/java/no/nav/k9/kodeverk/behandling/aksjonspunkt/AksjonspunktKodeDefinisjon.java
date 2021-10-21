@@ -126,6 +126,7 @@ public class AksjonspunktKodeDefinisjon {
 
     // Kompletthet for beregning
     public static final String AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9069";
+    public static final String ENDELING_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9072";
     public static final String ETTERLYS_IM_FOR_BEREGNING_KODE = "9070";
     public static final String ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING_KODE = "9071";
 

@@ -10,6 +10,7 @@ public class KompletthetsAksjon {
     private AksjonspunktDefinisjon aksjonspunktDefinisjon;
     private LocalDateTime frist;
     private boolean skalSendeBrev;
+    private boolean skalAvslåResterende = false;
 
     public KompletthetsAksjon(AksjonspunktDefinisjon aksjonspunktDefinisjon, LocalDateTime frist, boolean skalSendeBrev) {
         this.aksjonspunktDefinisjon = aksjonspunktDefinisjon;
@@ -54,5 +55,9 @@ public class KompletthetsAksjon {
 
     public boolean isSkalSendeBrev() {
         return skalSendeBrev;
+    }
+
+    public boolean isSkalAvslåResterende() {
+        return skalAvslåResterende;
     }
 }

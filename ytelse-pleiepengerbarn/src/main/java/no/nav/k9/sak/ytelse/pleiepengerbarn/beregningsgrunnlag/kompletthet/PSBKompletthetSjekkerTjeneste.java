@@ -80,7 +80,7 @@ public class PSBKompletthetSjekkerTjeneste {
         }
 
         // Manuell avklaring
-        return KompletthetsAksjon.manuellAvklaring(AksjonspunktDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING);
+        return KompletthetsAksjon.manuellAvklaring(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING);
     }
 
     private LocalDateTime regnUtFrist(AksjonspunktDefinisjon definisjon, LocalDateTime eksisterendeFrist) {
