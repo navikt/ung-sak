@@ -214,7 +214,7 @@ spec:
     - name: ARBEIDSTID_SJEKK_SNFL
       value: "true"
     - name: NY_SYKDOM_TOTRINN
-      value: "false"
+      value: "true"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "ACJ40|2021-03-01"
 
