@@ -53,10 +53,14 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.Pep;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.k9.felles.sikkerhet.abac.Tilgangsbeslutning;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -85,6 +89,7 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadMottaker;
+import no.nav.k9.sikkerhet.oidc.token.bruker.BrukerTokenProvider;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.Språk;
@@ -113,6 +118,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private BehandlingRepository behandlingRepository;
 
     private SjekkProsessering sjekkProsessering;
+    
+    private Pep pep;
+    private BrukerTokenProvider tokenProvider;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
@@ -127,7 +135,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    MottatteDokumentRepository mottatteDokumentRepository,
                                                    BehandlingRepository behandlingRepository,
                                                    SjekkProsessering sjekkProsessering,
-                                                   EntityManager entityManager) {
+                                                   EntityManager entityManager,
+                                                   Pep pep,
+                                                   BrukerTokenProvider tokenProvider) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
@@ -138,6 +148,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.behandlingRepository = behandlingRepository;
         this.sjekkProsessering = sjekkProsessering;
         this.entityManager = entityManager;
+        this.pep = pep;
+        this.tokenProvider = tokenProvider;
     }
 
     /**
@@ -248,6 +260,50 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         final String saksnummerliste = result.stream().reduce((a, b) -> a + ", " + b).orElse("");
         
         return Response.ok(saksnummerliste).build();
+    }
+
+    @GET
+    @Path("/starttidspunkt-aapen-behandling")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Henter starttidspunkt for åpen behandling. Dvs tidspunktet den første søknaden kom inn på behandlingen i k9-sak.", summary = ("Henter starttidspunkt for åpen behandling. Dvs tidspunktet den første søknaden kom inn på behandlingen i k9-sak."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response hentStarttidspunktÅpenBehandling() {
+        final Query q = entityManager.createNativeQuery("select f.saksnummer, MIN(m.opprettet_tid) as tidspunkt\n"
+                + "from behandling b inner join mottatt_dokument m ON (\n"
+                + "  m.behandling_id = b.id\n"
+                + ") inner join fagsak f ON (\n"
+                + "  f.id = m.fagsak_id\n"
+                + ")\n"
+                + "where b.behandling_status = 'UTRED'\n"
+                + "  and m.type = 'PLEIEPENGER_SOKNAD'\n"
+                + "  and m.status = 'GYLDIG'\n"
+                + "  and f.ytelse_type = 'PSB'\n"
+                + "group by saksnummer\n"
+                + "order by tidspunkt ASC\n");
+
+        @SuppressWarnings("unchecked")
+        final List<Object[]> result = q.getResultList();
+        final String restApiPath = "/starttidspunkt-aapen-behandling";
+        final String resultatString = result.stream()
+                .filter(a -> harLesetilgang(a[0].toString(), restApiPath))
+                .map(a -> a[0].toString() + ";" + a[1].toString())
+                .reduce((a, b) -> a + "\n" + b)
+                .orElse("");
+
+        return Response.ok(resultatString).build();
+    }
+
+    private final boolean harLesetilgang(String saksnummer, String restApiPath) {
+        final AbacAttributtSamling attributter = AbacAttributtSamling.medJwtToken(tokenProvider.getToken().getToken());
+        attributter.setActionType(BeskyttetRessursActionAttributt.READ);
+        attributter.setResource(DRIFT);
+
+        // Package private:
+        //attributter.setAction(restApiPath);
+        attributter.leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.SAKSNUMMER, new Saksnummer(saksnummer)));
+
+        final Tilgangsbeslutning beslutning = pep.vurderTilgang(attributter);
+        return beslutning.fikkTilgang();
     }
 
     @POST
