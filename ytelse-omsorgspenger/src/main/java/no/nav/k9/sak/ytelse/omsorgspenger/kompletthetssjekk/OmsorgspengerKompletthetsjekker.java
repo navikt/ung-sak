@@ -85,6 +85,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
             return settPåVent(ref);
         }
         if (harIngenRefusjonskravFraMottatteInntektsmeldinger(ref) && harIkkeSøknadsperiode(ref)) {
+            // Gjelder både behandlinger som er førstegangs og som er forlengelse
             LOGGER.info("Behandling {} er ikke komplett - Ingen IM eller søknad har sendt kravperioder.", ref.getBehandlingId());
             return settPåVent(ref);
         }
