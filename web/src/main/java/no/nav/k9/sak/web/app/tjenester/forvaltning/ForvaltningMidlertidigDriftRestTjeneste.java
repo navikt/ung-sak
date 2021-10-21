@@ -280,7 +280,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 + "  and f.ytelse_type = 'PSB'\n"
                 + "group by saksnummer\n"
                 + "order by tidspunkt ASC\n"
-                + "limit 100");
+                + "limit 500");
 
         @SuppressWarnings("unchecked")
         final List<Object[]> result = q.getResultList();
