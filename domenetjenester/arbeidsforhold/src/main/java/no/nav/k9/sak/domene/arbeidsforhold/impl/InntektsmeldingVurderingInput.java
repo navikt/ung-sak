@@ -19,11 +19,6 @@ public class InntektsmeldingVurderingInput {
         this.grunnlag = grunnlag;
     }
 
-    public InntektsmeldingVurderingInput medGrunnlag(InntektArbeidYtelseGrunnlag grunnlag) {
-        this.grunnlag = grunnlag;
-        return this;
-    }
-
     public BehandlingReferanse getReferanse() {
         return referanse;
     }

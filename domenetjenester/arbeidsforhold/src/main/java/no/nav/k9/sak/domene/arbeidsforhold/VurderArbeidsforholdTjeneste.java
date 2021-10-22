@@ -79,7 +79,6 @@ public class VurderArbeidsforholdTjeneste {
         var vurderingInput = new InntektsmeldingVurderingInput(ref, grunnlag);
         // Ikke relevant å sjekke permisjonen da dette går til avslag ..
         var ytelsespesifikkeInntektsmeldingTjeneste = finnPåkrevdeInntektsmeldingerTjeneste(ref);
-        leggTilManglendePåkrevdeInntektsmeldinger(vurderingInput, result, ytelsespesifikkeInntektsmeldingTjeneste);
         erMottattInntektsmeldingUtenArbeidsforhold(result, vurderingInput, ytelsespesifikkeInntektsmeldingTjeneste);
         erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(result, vurderingInput, ytelsespesifikkeInntektsmeldingTjeneste);
 
@@ -89,11 +88,6 @@ public class VurderArbeidsforholdTjeneste {
     private void erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result, InntektsmeldingVurderingInput ref, YtelsespesifikkeInntektsmeldingTjeneste ytelsespesifikkeInntektsmeldingTjeneste) {
         var resultMap = ytelsespesifikkeInntektsmeldingTjeneste.erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(ref);
         resultMap.forEach((k, v) -> result.merge(k, v, this::mergeSets));
-    }
-
-    private void leggTilManglendePåkrevdeInntektsmeldinger(InntektsmeldingVurderingInput ref, Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result, YtelsespesifikkeInntektsmeldingTjeneste ytelsespesifikkeInntektsmeldingTjeneste) {
-        var manglendePåkrevdeInntektsmeldinger = ytelsespesifikkeInntektsmeldingTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(ref);
-        manglendePåkrevdeInntektsmeldinger.forEach((k, v) -> result.merge(k, v, this::mergeSets));
     }
 
     private Set<ArbeidsforholdMedÅrsak> mergeSets(Set<ArbeidsforholdMedÅrsak> a, Set<ArbeidsforholdMedÅrsak> b) {

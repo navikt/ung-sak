@@ -38,8 +38,6 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.DefaultManglendePåkrevdeInntektsmeldingerTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingFilterYtelseImpl;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingRegisterTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.YtelsespesifikkeInntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektBuilder;
@@ -70,7 +68,6 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
     private BehandlingRepositoryProvider repositoryProvider ;
     private InntektArbeidYtelseTjeneste iayTjeneste  ;
     private InntektsmeldingTjeneste inntektsmeldingTjeneste ;
-    private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste ;
     private Instance<YtelsespesifikkeInntektsmeldingTjeneste> påkrevdeInntektsmeldingerTjeneste ;
     private VurderArbeidsforholdTjeneste tjeneste  ;
 
@@ -82,8 +79,7 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
-        inntektsmeldingArkivTjeneste = new InntektsmeldingRegisterTjeneste(iayTjeneste, inntektsmeldingTjeneste, null, new UnitTestLookupInstanceImpl<>(new InntektsmeldingFilterYtelseImpl()));
-        påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, repositoryProvider.getSøknadRepository()));
+        påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(new DefaultManglendePåkrevdeInntektsmeldingerTjeneste());
         tjeneste = new VurderArbeidsforholdTjeneste(iayTjeneste, påkrevdeInntektsmeldingerTjeneste);
 
         utleder = new AksjonspunktUtlederForVurderArbeidsforhold(
@@ -132,65 +128,6 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
         // Act
         List<AksjonspunktResultat> aksjonspunktResultater = utleder.utledAksjonspunkterFor(lagRef(behandling));
 
-        // Assert
-        assertThat(aksjonspunktResultater).isEmpty();
-    }
-
-    @Test
-    public void skal_ikke_få_aksjonspunkt_ved_søknad_uten_inntekter() {
-        // Arrange
-        AktørId aktørId1 = AktørId.dummy();
-        var scenario = TestScenarioBuilder.builderMedSøknad().medBruker(aktørId1);
-        Behandling behandling = scenario.lagre(repositoryProvider);
-
-        var arbeidsforholdId = InternArbeidsforholdRef.nyRef();
-
-        final InntektArbeidYtelseAggregatBuilder builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
-        leggTilArbeidsforholdPåBehandling(behandling, ORGNR, arbeidsforholdId, builder);
-        iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
-
-        // Act
-        List<AksjonspunktResultat> aksjonspunktResultater = utleder.utledAksjonspunkterFor(lagRef(behandling));
-
-        // Assert
-        assertThat(aksjonspunktResultater).isNotEmpty();  // TODO: Expect empty hvis man ikke venter AP når det ikke foreligger inntekt
-
-        // Arrange + Act
-        opprettInntekt(aktørId1, behandling, ORGNR, arbeidsforholdId);
-        aksjonspunktResultater = utleder.utledAksjonspunkterFor(lagRef(behandling));
-
-        // Assert
-        assertThat(aksjonspunktResultater).isNotEmpty();
-    }
-
-    @Test
-    public void skal_ikke_få_aksjonspunkt_ved_komplett_søknad_med_to_arbeidsforhold_etter_begge_inntektsmeldinger() {
-        // Arrange
-        AktørId aktørId1 = AktørId.dummy();
-        var scenario = TestScenarioBuilder.builderMedSøknad().medBruker(aktørId1);
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        String virksomhetOrgnr2 = "648751348";
-        var arbeidsforholdId1 = InternArbeidsforholdRef.nyRef();
-        var arbeidsforholdId2 = InternArbeidsforholdRef.nyRef();
-
-        final InntektArbeidYtelseAggregatBuilder builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
-        leggTilArbeidsforholdPåBehandling(behandling, ORGNR, arbeidsforholdId1, builder);
-        leggTilArbeidsforholdPåBehandling(behandling, virksomhetOrgnr2, arbeidsforholdId2, builder);
-        iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
-        opprettInntekt(aktørId1, behandling, ORGNR, arbeidsforholdId1);
-        opprettInntekt(aktørId1, behandling, virksomhetOrgnr2, arbeidsforholdId2);
-
-        sendInnInntektsmeldingPå(behandling, ORGNR, arbeidsforholdId1);
-
-        // Act
-        List<AksjonspunktResultat> aksjonspunktResultater = utleder.utledAksjonspunkterFor(lagRef(behandling));
-        // Assert
-        assertThat(aksjonspunktResultater).hasSize(1);
-
-        // Arrange
-        sendInnInntektsmeldingPå(behandling, virksomhetOrgnr2, arbeidsforholdId2);
-        // Act
-        aksjonspunktResultater = utleder.utledAksjonspunkterFor(lagRef(behandling));
         // Assert
         assertThat(aksjonspunktResultater).isEmpty();
     }
