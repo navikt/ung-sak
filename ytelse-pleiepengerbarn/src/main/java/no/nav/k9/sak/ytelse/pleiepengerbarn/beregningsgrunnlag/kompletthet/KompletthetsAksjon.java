@@ -45,6 +45,10 @@ public class KompletthetsAksjon {
         return frist == null && aksjonspunktDefinisjon == null;
     }
 
+    public boolean harFrist() {
+        return frist != null;
+    }
+
     public AksjonspunktDefinisjon getAksjonspunktDefinisjon() {
         return aksjonspunktDefinisjon;
     }
