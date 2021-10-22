@@ -9,6 +9,8 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
@@ -24,7 +26,7 @@ public class PSBKompletthetSjekkerTjeneste {
     @Inject
     public PSBKompletthetSjekkerTjeneste(BehandlingRepository behandlingRepository,
                                          BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                         PSBKompletthetsjekker kompletthetsjekker) {
+                                         @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") PSBKompletthetsjekker kompletthetsjekker) {
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.kompletthetsjekker = kompletthetsjekker;
