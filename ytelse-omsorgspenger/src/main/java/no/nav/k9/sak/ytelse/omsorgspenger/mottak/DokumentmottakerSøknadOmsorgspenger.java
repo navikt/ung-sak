@@ -179,10 +179,10 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         var behandlingId = behandling.getId();
         var fagsakId = behandling.getFagsakId();
 
-        var fraværFraSøknad = mapper.mapFraværFraSøknad(journalpostId, ytelse, søker);
+        var fraværFraSøknad = mapper.mapFraværFraSøknad(journalpostId, ytelse, søker, behandling);
         grunnlagRepository.lagreOgFlushOppgittFraværFraSøknad(behandlingId, fraværFraSøknad);
 
-        var fraværskorrigeringerIm = mapper.mapFraværskorringeringIm(journalpostId, ytelse);
+        var fraværskorrigeringerIm = mapper.mapFraværskorringeringIm(journalpostId, ytelse, behandling);
         grunnlagRepository.lagreOgFlushFraværskorrigeringerIm(behandlingId, fraværskorrigeringerIm);
 
         // Utvide fagsakperiode
