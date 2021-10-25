@@ -127,9 +127,12 @@ public enum UttakArbeidType implements Kodeverdi {
 
     public boolean matcher(AktivitetStatus aktivitetStatus) {
         if (UttakArbeidType.IKKE_YRKESAKTIV.equals(this)) {
-            return Objects.equals(UttakArbeidType.ARBEIDSTAKER.kode, aktivitetStatus.getKode());
+            return Objects.equals(UttakArbeidType.ARBEIDSTAKER.getAktivitetStatus().getKode(), aktivitetStatus.getKode());
         }
-        return Objects.equals(this.kode, aktivitetStatus.getKode());
+        if (UttakArbeidType.INAKTIV.equals(this)) {
+            return Objects.equals(UttakArbeidType.INAKTIV.getAktivitetStatus().getKode(), aktivitetStatus.getKode());
+        }
+        return Objects.equals(this.getAktivitetStatus().getKode(), aktivitetStatus.getKode());
     }
 
 }
