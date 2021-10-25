@@ -23,6 +23,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLDtoer;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.web.app.tjenester.behandling.historikk.FastsettBeregningsgrunnlagATFLHistorikkTjeneste;
 
 public class FastsettBeregningsgrunnlagATFLOppdatererTest {
     private FastsettBeregningsgrunnlagATFLOppdaterer oppdaterer;
@@ -39,11 +40,14 @@ public class FastsettBeregningsgrunnlagATFLOppdatererTest {
     @Mock
     private BeregningsgrunnlagOppdateringTjeneste oppdateringjeneste;
 
+    @Mock
+    private FastsettBeregningsgrunnlagATFLHistorikkTjeneste historikkTjeneste;
+
     @BeforeEach
     public void setup() {
         initMocks(this);
         when(behandling.getFagsak()).thenReturn(fagsak);
-        oppdaterer = new FastsettBeregningsgrunnlagATFLOppdaterer(oppdateringjeneste);
+        oppdaterer = new FastsettBeregningsgrunnlagATFLOppdaterer(oppdateringjeneste, historikkTjeneste);
     }
 
     @Test
