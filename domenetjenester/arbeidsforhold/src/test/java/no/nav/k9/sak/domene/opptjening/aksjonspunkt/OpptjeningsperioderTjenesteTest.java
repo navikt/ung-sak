@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -224,6 +225,29 @@ class OpptjeningsperioderTjenesteTest {
     }
 
     @Test
+    void skal_returnere_sammenhengende_periode_for_ytelse_som_gir_opptjening() {
+        // Arrange
+        var behandling = opprettBehandling(skjæringstidspunkt);
+        var opptjening = opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(28), skjæringstidspunkt.minusDays(1), false);
+
+        var ytelsePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusYears(1), skjæringstidspunkt);
+        InntektArbeidYtelseAggregatBuilder aggregatBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(empty(), VersjonType.REGISTER);
+        InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder aktørYtelseBuilder = aggregatBuilder.getAktørYtelseBuilder(AKTØRID);
+        aktørYtelseBuilder.leggTilYtelse(byggHelgeKnektYtelser(ytelsePeriode, skjæringstidspunkt, Fagsystem.FPSAK));
+        aggregatBuilder.leggTilAktørYtelse(aktørYtelseBuilder);
+        iayTjeneste.lagreIayAggregat(behandling.getId(), aggregatBuilder);
+
+        var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
+
+        // Act
+        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode());
+
+        // Assert
+        assertThat(perioder.size()).isEqualTo(1);
+        assertThat(perioder.get(0).getVurderingsStatus()).isEqualTo(VurderingsStatus.TIL_VURDERING);
+    }
+
+    @Test
     void skal_returnere_periode_for_annen_aktivitet() {
         // Arrange
         var behandling = opprettBehandling(skjæringstidspunkt);
@@ -254,10 +278,23 @@ class OpptjeningsperioderTjenesteTest {
             .medStatus(RelatertYtelseTilstand.LØPENDE)
             .medYtelseType(FagsakYtelseType.DAGPENGER)
             .medBehandlingsTema(TemaUnderkategori.UDEFINERT);
-        byggYtelserAnvist(periode.getFomDato(), periode.getTomDato(), t1, ytelseBuilder).forEach(
-            ytelseAnvist -> {
-                ytelseBuilder.medYtelseAnvist(ytelseAnvist);
-            });
+        byggYtelserAnvist(periode.getFomDato(), periode.getTomDato(), t1, ytelseBuilder)
+            .forEach(ytelseBuilder::medYtelseAnvist);
+        return ytelseBuilder;
+    }
+
+    private YtelseBuilder byggHelgeKnektYtelser(DatoIntervallEntitet periode,
+                                                LocalDate t1,
+                                                Fagsystem fagsystem) {
+        YtelseBuilder ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty())
+            .medKilde(fagsystem)
+            .medSaksnummer(new Saksnummer("123"))
+            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), periode.getTomDato()))
+            .medStatus(RelatertYtelseTilstand.LØPENDE)
+            .medYtelseType(FagsakYtelseType.FORELDREPENGER)
+            .medBehandlingsTema(TemaUnderkategori.UDEFINERT);
+        byggHelgeKnektePerioder(periode.getFomDato(), periode.getTomDato(), t1, ytelseBuilder)
+            .forEach(ytelseBuilder::medYtelseAnvist);
         return ytelseBuilder;
     }
 
@@ -284,6 +321,53 @@ class OpptjeningsperioderTjenesteTest {
 
         return ytelseAnvistList;
     }
+
+    private List<YtelseAnvist> byggHelgeKnektePerioder(LocalDate yaFom,
+                                                       @SuppressWarnings("unused") LocalDate yaTom,
+                                                       LocalDate t1,
+                                                       YtelseBuilder ytelseBuilder) {
+        List<YtelseAnvist> ytelseAnvistList = new ArrayList<>();
+        LocalDate fom = utledFom(yaFom);
+        LocalDate tom = utledTom(fom);
+        do {
+            YtelseAnvist ya = ytelseBuilder.getAnvistBuilder()
+                .medAnvistPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
+                .medUtbetalingsgradProsent(BigDecimal.valueOf(100L))
+                .medBeløp(BigDecimal.valueOf(30000L))
+                .medDagsats(BigDecimal.valueOf(1000L))
+                .build();
+            ytelseAnvistList.add(ya);
+            fom = utledFom(tom);
+            tom = utledTom(fom);
+        } while (tom.isBefore(t1));
+
+        return ytelseAnvistList;
+    }
+
+    private LocalDate utledFom(LocalDate fomDato) {
+        if (DayOfWeek.FRIDAY.equals(fomDato.getDayOfWeek())) {
+            return fomDato.plusDays(3);
+        } else if (DayOfWeek.SATURDAY.equals(fomDato.getDayOfWeek())) {
+            return fomDato.plusDays(2);
+        } else if (DayOfWeek.SUNDAY.equals(fomDato.getDayOfWeek())) {
+            return fomDato.plusDays(1);
+        }
+        return fomDato;
+    }
+
+    private LocalDate utledTom(LocalDate tomDato) {
+        if (DayOfWeek.MONDAY.equals(tomDato.getDayOfWeek())) {
+            return tomDato.plusDays(4);
+        } else if (DayOfWeek.TUESDAY.equals(tomDato.getDayOfWeek())) {
+            return tomDato.plusDays(3);
+        } else if (DayOfWeek.WEDNESDAY.equals(tomDato.getDayOfWeek())) {
+            return tomDato.plusDays(2);
+        } else if (DayOfWeek.THURSDAY.equals(tomDato.getDayOfWeek())) {
+            return tomDato.plusDays(1);
+        }
+        return tomDato;
+    }
+
 
     private InntektArbeidYtelseAggregatBuilder opprettInntektArbeidYtelseAggregatForYrkesaktivitet(AktørId aktørId, InternArbeidsforholdRef ref,
                                                                                                    DatoIntervallEntitet periode, ArbeidType type,

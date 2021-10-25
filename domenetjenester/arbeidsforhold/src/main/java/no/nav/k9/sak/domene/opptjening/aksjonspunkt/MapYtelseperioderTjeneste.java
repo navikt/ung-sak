@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.threeten.extra.Interval;
-
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.Fagsystem;
@@ -69,12 +67,6 @@ public class MapYtelseperioderTjeneste {
             tom = periode1.getTomDato();
         }
         return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
-    }
-
-    private static boolean erTilgrensende(DatoIntervallEntitet periode1, DatoIntervallEntitet periode2) {
-        Interval p1 = periode1.tilIntervall();
-        Interval p2 = periode2.tilIntervall();
-        return p1.isConnected(p2) || p2.isConnected(p1) || periode1.getTomDato().plusDays(1).equals(periode2.getFomDato()) || periode2.getTomDato().plusDays(1).equals(periode1.getFomDato());
     }
 
     public List<OpptjeningsperiodeForSaksbehandling> mapYtelsePerioder(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag grunnlag, OpptjeningAktivitetVurdering vurderOpptjening, DatoIntervallEntitet opptjeningPeriode) {
@@ -174,7 +166,7 @@ public class MapYtelseperioderTjeneste {
         OpptjeningsperiodeForSaksbehandling next;
         while (iterator.hasNext()) {
             next = iterator.next();
-            if (erTilgrensende(prev.getPeriode(), next.getPeriode())) {
+            if (erKantIKantPåTversAvHelg(prev.getPeriode(), next.getPeriode())) {
                 prev = slåSammenToPerioder(prev, next);
             } else {
                 fusjonert.add(prev);
@@ -183,6 +175,30 @@ public class MapYtelseperioderTjeneste {
         }
         fusjonert.add(prev);
         return fusjonert;
+    }
+
+    boolean erKantIKantPåTversAvHelg(DatoIntervallEntitet periode1, DatoIntervallEntitet periode2) {
+        return utledTomDato(periode1).equals(utledFom(periode2).minusDays(1)) || utledTomDato(periode2).equals(utledFom(periode1).minusDays(1));
+    }
+
+    private LocalDate utledFom(DatoIntervallEntitet periode1) {
+        var fomDato = periode1.getFomDato();
+        if (DayOfWeek.SATURDAY.equals(fomDato.getDayOfWeek())) {
+            return fomDato.plusDays(2);
+        } else if (DayOfWeek.SUNDAY.equals(fomDato.getDayOfWeek())) {
+            return fomDato.plusDays(1);
+        }
+        return fomDato;
+    }
+
+    private LocalDate utledTomDato(DatoIntervallEntitet periode1) {
+        var tomDato = periode1.getTomDato();
+        if (DayOfWeek.FRIDAY.equals(tomDato.getDayOfWeek())) {
+            return tomDato.plusDays(2);
+        } else if (DayOfWeek.SATURDAY.equals(tomDato.getDayOfWeek())) {
+            return tomDato.plusDays(1);
+        }
+        return tomDato;
     }
 
     private OpptjeningsperiodeForSaksbehandling slåSammenToPerioder(OpptjeningsperiodeForSaksbehandling opp1, OpptjeningsperiodeForSaksbehandling opp2) {
