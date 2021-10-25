@@ -221,10 +221,13 @@ public class MapArbeid {
             return false;
         }
 
-        return opptjening.get().getOpptjeningAktivitet()
+        var aktiviteterPåStp = opptjening.get().getOpptjeningAktivitet()
             .stream()
             .filter(it -> DatoIntervallEntitet.fraOgMedTilOgMed(vilkårPeriode.getSkjæringstidspunkt().minusDays(1), vilkårPeriode.getSkjæringstidspunkt().minusDays(1)).overlapper(it.getFom(), it.getTom()))
-            .allMatch(it -> OpptjeningAktivitetType.YTELSE.contains(it.getAktivitetType()));
+            .collect(Collectors.toList());
+        return !aktiviteterPåStp.isEmpty() &&
+            aktiviteterPåStp.stream()
+                .allMatch(it -> OpptjeningAktivitetType.YTELSE.contains(it.getAktivitetType()));
     }
 
     private void mapPerioderMedType(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold,
