@@ -174,7 +174,7 @@ spec:
 
     # Graphql services
     - name: SAF_BASE_URL
-      value: http://saf.q1
+      value: http://saf-q1.teamdokumenthandtering
 
     # Sikkerhet:
     - name: OIDC_STS_ISSUER_URL
