@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
@@ -49,7 +50,8 @@ public class MapYtelseperioderTjeneste {
         }
         LocalDate tom = ytelseAnvist.getAnvistTOM();
         if (tom != null && !Tid.TIDENES_ENDE.equals(tom)) {
-            if (Fagsystem.INFOTRYGD.equals(ytelse.getKilde()) && DayOfWeek.THURSDAY.getValue() < DayOfWeek.from(tom).getValue()) {
+            if (Set.of(Fagsystem.INFOTRYGD, Fagsystem.K9SAK, Fagsystem.FPSAK).contains(ytelse.getKilde())
+                && DayOfWeek.THURSDAY.getValue() < DayOfWeek.from(tom).getValue()) {
                 tom = tom.plusDays((long) DayOfWeek.SUNDAY.getValue() - DayOfWeek.from(tom).getValue());
             }
             return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
