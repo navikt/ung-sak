@@ -15,29 +15,25 @@ import org.apache.kafka.common.errors.AuthenticationException;
 import org.apache.kafka.common.errors.AuthorizationException;
 import org.apache.kafka.common.errors.RetriableException;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
-public class AksjonspunktKafkaProducer {
-
-    private static final Logger log = LoggerFactory.getLogger(AksjonspunktKafkaProducer.class);
+public class ProsessEventKafkaProducer {
 
     Producer<String, String> producer;
     String topic;
 
-    public AksjonspunktKafkaProducer() {
+    public ProsessEventKafkaProducer() {
         // for CDI proxy
     }
 
     @Inject
-    public AksjonspunktKafkaProducer(@KonfigVerdi("kafka.aksjonspunkthendelse.topic") String topic,
-                                       @KonfigVerdi("bootstrap.servers") String bootstrapServers,
-                                       @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
-                                       @KonfigVerdi("systembruker.username") String username,
-                                       @KonfigVerdi("systembruker.password") String password) {
+    public ProsessEventKafkaProducer(@KonfigVerdi("kafka.aksjonspunkthendelse.topic") String topic,
+                                     @KonfigVerdi("bootstrap.servers") String bootstrapServers,
+                                     @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
+                                     @KonfigVerdi("systembruker.username") String username,
+                                     @KonfigVerdi("systembruker.password") String password) {
         Properties properties = new Properties();
 
         properties.setProperty("bootstrap.servers", bootstrapServers);
@@ -61,16 +57,16 @@ public class AksjonspunktKafkaProducer {
             producer.send(record)
                 .get();
         } catch (InterruptedException e) {
-            log.warn("Uventet feil ved sending til Kafka, topic:" + topic, e);
-            Thread.currentThread().interrupt(); // reinterrupt
+            Thread.currentThread().interrupt();
+            throw HendelseKafkaProducerFeil.FACTORY.uventetFeil(topic, e).toException();
         } catch (ExecutionException e) {
-            log.warn("Uventet feil ved sending til Kafka, topic:" + topic, e);
+            throw HendelseKafkaProducerFeil.FACTORY.uventetFeil(topic, e).toException();
         } catch (AuthenticationException | AuthorizationException e) {
-            log.warn("Feil i pålogging mot Kafka, topic:" + topic, e);
+            throw HendelseKafkaProducerFeil.FACTORY.feilIPålogging(topic, e).toException();
         } catch (RetriableException e) {
-            log.warn("Fikk transient feil mot Kafka, kan prøve igjen, topic:" + topic, e);
+            throw HendelseKafkaProducerFeil.FACTORY.retriableExceptionMotKaka(topic, e).toException();
         } catch (KafkaException e) {
-            log.warn("Fikk feil mot Kafka, topic:" + topic, e);
+            throw HendelseKafkaProducerFeil.FACTORY.annenExceptionMotKafka(topic, e).toException();
         }
     }
 
