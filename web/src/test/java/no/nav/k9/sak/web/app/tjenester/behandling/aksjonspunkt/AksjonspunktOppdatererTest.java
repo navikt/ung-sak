@@ -17,10 +17,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
+import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
@@ -49,6 +53,9 @@ public class AksjonspunktOppdatererTest {
     private BehandlingRepositoryProvider repositoryProvider;
 
     @Inject
+    private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
+
+    @Inject
     private TotrinnRepository totrinnRepository;
 
     @Inject
@@ -66,6 +73,38 @@ public class AksjonspunktOppdatererTest {
     @BeforeEach
     public void setup() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+    }
+
+    @Test
+    public void foreslå_vedtak_aksjonspunkt_setter_totrinn_på_pleiepenger() {
+        var scenario = TestScenarioBuilder.builderMedSøknad();
+        scenario.medSøknad();
+
+        Behandling behandling = scenario.lagre(repositoryProvider);
+
+        aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.FORESLÅ_VEDTAK);
+
+        BehandlingLås behandlingLås = repositoryProvider.getBehandlingRepository().taSkriveLås(behandling.getId());
+        repositoryProvider.getBehandlingRepository().lagre(behandling, behandlingLås);
+
+        var dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false, null, false);
+        var vedtaksbrevHåndterer = new VedtaksbrevHåndterer(
+            vedtakVarselRepository,
+            mock(HistorikkTjenesteAdapter.class),
+            opprettTotrinnsgrunnlag,
+            vedtakTjeneste) {
+            @Override
+            protected String getCurrentUserId() {
+                // return test verdi
+                return "hello";
+            }
+        };
+
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer);
+        OppdateringResultat oppdateringResultat = foreslaVedtakAksjonspunktOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
+
+        assertThat(behandling.getFagsakYtelseType()).isEqualTo(FagsakYtelseType.PSB);
+        assertThat(oppdateringResultat.kreverTotrinnsKontroll()).isTrue();
     }
 
     @Test
