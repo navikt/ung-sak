@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -20,15 +21,19 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
 
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
+    private Boolean benyttNyFlyt = false;
 
     AvklarKompletthetForBeregning() {
         // for CDI proxy
     }
 
     @Inject
-    public AvklarKompletthetForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste, HistorikkTjenesteAdapter historikkTjenesteAdapter) {
+    public AvklarKompletthetForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
+                                         HistorikkTjenesteAdapter historikkTjenesteAdapter,
+                                         @KonfigVerdi(value = "KOMPLETTHET_NY_FLYT", defaultVerdi = "false") Boolean benyttNyFlyt) {
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
+        this.benyttNyFlyt = benyttNyFlyt;
     }
 
     @Override
@@ -44,16 +49,19 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .map(KompletthetsPeriode::getKanFortsette)
                 .findFirst()
                 .orElse(false));
-        // TODO: Lagre ned de som er avklart OK for fortsettelse
+        // TODO: Lagre ned de som er avklart OK for fortsettelse eller om det er varsel til AG
 
-        if (kanFortsette) {
+        if (kanFortsette && !benyttNyFlyt) {
             lagHistorikkinnslag(param, dto);
 
             return OppdateringResultat.utenTransisjon()
                 .medTotrinn()
                 .build();
         } else {
-            var resultat = OppdateringResultat.utenOverhopp();
+            var resultat = OppdateringResultat.utenTransisjon()
+                .medTotrinnHvis(benyttNyFlyt)
+                .build();
+
             resultat.skalRekjøreSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
             resultat.setSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING);
             return resultat;

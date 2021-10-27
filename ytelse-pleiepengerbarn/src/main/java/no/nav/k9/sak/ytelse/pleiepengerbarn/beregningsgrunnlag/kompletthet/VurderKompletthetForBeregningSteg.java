@@ -67,12 +67,19 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
 
     private BehandleStegResultat nyKompletthetFlyt(BehandlingReferanse ref) {
         var kompletthetsAksjon = kompletthetSjekkerTjeneste.utledHandlinger(ref);
+
         if (kompletthetsAksjon.erKomplett()) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         } else if (kompletthetsAksjon.harFrist()) {
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunktMedFrist(kompletthetsAksjon.getAksjonspunktDefinisjon(), utledVenteÅrsak(kompletthetsAksjon), kompletthetsAksjon.getFrist())));
+            var aksjonspunktResultat = AksjonspunktResultat.opprettForAksjonspunktMedFrist(kompletthetsAksjon.getAksjonspunktDefinisjon(),
+                utledVenteÅrsak(kompletthetsAksjon),
+                kompletthetsAksjon.getFrist());
+
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(aksjonspunktResultat));
         } else {
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(kompletthetsAksjon.getAksjonspunktDefinisjon())));
+            var aksjonspunktResultat = AksjonspunktResultat.opprettForAksjonspunkt(kompletthetsAksjon.getAksjonspunktDefinisjon());
+
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(aksjonspunktResultat));
         }
     }
 
