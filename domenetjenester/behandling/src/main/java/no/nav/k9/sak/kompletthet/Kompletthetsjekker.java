@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kompletthet;
 
 import java.util.List;
+
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -15,6 +16,10 @@ public interface Kompletthetsjekker {
     List<ManglendeVedlegg> utledAlleManglendeVedleggForForsendelse(BehandlingReferanse ref);
 
     List<ManglendeVedlegg> utledAlleManglendeVedleggSomIkkeKommer(BehandlingReferanse ref);
+
+    default boolean ingenSøknadsperioder(BehandlingReferanse ref) {
+        return false;
+    }
 
     boolean erForsendelsesgrunnlagKomplett(BehandlingReferanse ref);
 

@@ -26,8 +26,7 @@ class BehandlingskontrollHenleggelseTransisjonEventObserver {
     public void observerBehandlingSteg(@Observes BehandlingTransisjonEvent event) {
 
         if (FellesTransisjoner.HENLAGT.equals(event.getTransisjonIdentifikator())) {
-            behandlingskontrollTjeneste.henleggBehandlingFraSteg(event.getKontekst(), BehandlingResultatType.HENLAGT_SØKNAD_MANGLER);
-
+            behandlingskontrollTjeneste.henleggBehandlingFraSteg(event.getKontekst(), BehandlingResultatType.HENLAGT_MASKINELT);
         }
     }
 }

@@ -174,6 +174,10 @@ public class HenleggBehandlingTjeneste {
         dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, aktør);
     }
 
+    public void lagHistorikkInnslagForHenleggelseFraSteg(Long behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
+        lagHistorikkinnslagForHenleggelse(behandlingId, årsakKode, begrunnelse, HistorikkAktør.VEDTAKSLØSNINGEN);
+    }
+
     private void lagHistorikkinnslagForHenleggelse(Long behandlingsId, BehandlingResultatType aarsak, String begrunnelse, HistorikkAktør aktør) {
         HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder()
             .medHendelse(HistorikkinnslagType.AVBRUTT_BEH)
