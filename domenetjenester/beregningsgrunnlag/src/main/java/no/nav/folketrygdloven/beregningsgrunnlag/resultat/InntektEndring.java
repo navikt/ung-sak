@@ -2,6 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.resultat;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Optional;
 
 public class InntektEndring {
 
@@ -13,8 +14,8 @@ public class InntektEndring {
         this.tilInntekt = tilInntekt;
     }
 
-    public BigDecimal getFraInntekt() {
-        return fraInntekt;
+    public Optional<BigDecimal> getFraInntekt() {
+        return Optional.ofNullable(fraInntekt).map(i -> i.setScale(0, RoundingMode.HALF_UP));
     }
 
     public BigDecimal getFraMånedsinntekt() {
@@ -22,7 +23,7 @@ public class InntektEndring {
     }
 
     public BigDecimal getTilInntekt() {
-        return tilInntekt;
+        return tilInntekt.setScale(0, RoundingMode.HALF_UP);
     }
 
     public BigDecimal getTilMånedsinntekt() {
