@@ -38,7 +38,7 @@ import no.nav.k9.sak.typer.Stillingsprosent;
 public class MapAktørYtelse {
 
     private static final Comparator<YtelseDto> COMP_YTELSE = Comparator
-            .comparing((YtelseDto dto) -> dto.getSaksnummer(), Comparator.nullsLast(Comparator.naturalOrder()))
+            .comparing(YtelseDto::getSaksnummer, Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(dto -> dto.getYtelseType() == null ? null : dto.getYtelseType().getKode(), Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(dto -> dto.getTemaUnderkategori() == null ? null : dto.getTemaUnderkategori().getKode(), Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(dto -> dto.getPeriode().getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
@@ -132,6 +132,7 @@ public class MapAktørYtelse {
             }
             var arbeidsgiver = fordeling.getArbeidsgiver();
             return YtelseStørrelseBuilder.ny()
+                .medErRefusjon(fordeling.getErRefusjon())
                 .medBeløp(fordeling.getBeløp())
                 .medHyppighet(KodeverkMapper.mapInntektPeriodeTypeFraDto(fordeling.getHyppighet()))
                 .medVirksomhet(arbeidsgiver == null ? null : new OrgNummer(arbeidsgiver.getIdent()))
@@ -173,7 +174,7 @@ public class MapAktørYtelse {
             var organisasjon = ytelseStørrelse.getVirksomhet().map(o -> new Organisasjon(o.getId())).orElse(null);
             var inntektPeriodeType = KodeverkMapper.mapInntektPeriodeTypeTilDto(ytelseStørrelse.getHyppighet());
             var beløp = ytelseStørrelse.getBeløp().getVerdi();
-            return new FordelingDto(organisasjon, inntektPeriodeType, beløp);
+            return new FordelingDto(organisasjon, inntektPeriodeType, beløp, ytelseStørrelse.getErRefusjon());
         }
 
         private YtelseDto tilYtelse(Ytelse ytelse) {
@@ -186,7 +187,7 @@ public class MapAktørYtelse {
                 .medSaksnummer(ytelse.getSaksnummer() == null ? null : ytelse.getSaksnummer().getVerdi())
                 .medTemaUnderkategori(temaUnderkategori);
 
-            ytelse.getYtelseGrunnlag().map(this::mapYtelseGrunnlag).ifPresent(gr -> dto.setGrunnlag(gr));
+            ytelse.getYtelseGrunnlag().map(this::mapYtelseGrunnlag).ifPresent(dto::setGrunnlag);
 
             Comparator<AnvisningDto> compAnvisning = Comparator
                 .comparing((AnvisningDto anv) -> anv.getPeriode().getFom() , Comparator.nullsFirst(Comparator.naturalOrder()))

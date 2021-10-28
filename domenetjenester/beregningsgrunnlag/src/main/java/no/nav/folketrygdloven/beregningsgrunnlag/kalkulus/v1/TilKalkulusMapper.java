@@ -214,7 +214,7 @@ public class TilKalkulusMapper {
 
     private static List<YtelseFordelingDto> mapYtelseFordeling(List<YtelseStørrelse> ytelseStørrelse) {
         return ytelseStørrelse.stream()
-            .map(ys -> new YtelseFordelingDto(mapVirksomhet(ys), InntektPeriodeType.fraKode(ys.getHyppighet().getKode()), ys.getBeløp().getVerdi()))
+            .map(ys -> new YtelseFordelingDto(mapVirksomhet(ys), InntektPeriodeType.fraKode(ys.getHyppighet().getKode()), ys.getBeløp().getVerdi(), ys.getErRefusjon()))
             .collect(Collectors.toList());
     }
 
