@@ -41,6 +41,7 @@ import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
@@ -49,6 +50,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRe
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
@@ -91,7 +93,9 @@ public class MapInputTilUttakTjeneste {
     private String unntak;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
     private EtablertTilsynRepository etablertTilsynRepository;
+    private EtablertTilsynTjeneste etablertTilsynTjeneste;
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     @Inject
     public MapInputTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
@@ -103,11 +107,13 @@ public class MapInputTilUttakTjeneste {
                                     FagsakRepository fagsakRepository,
                                     PleietrengendeKravprioritet pleietrengendeKravprioritet,
                                     EtablertTilsynRepository etablertTilsynRepository,
+                                    EtablertTilsynTjeneste etablertTilsynTjeneste,
                                     OpptjeningRepository opptjeningRepository,
                                     RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                     @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                     @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                    SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                     @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
@@ -118,21 +124,33 @@ public class MapInputTilUttakTjeneste {
         this.fagsakRepository = fagsakRepository;
         this.pleietrengendeKravprioritet = pleietrengendeKravprioritet;
         this.etablertTilsynRepository = etablertTilsynRepository;
+        this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.opptjeningRepository = opptjeningRepository;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.unntak = unntak;
     }
 
     public Uttaksgrunnlag hentUtOgMapRequest(BehandlingReferanse referanse) {
+        return hentUtOgMapRequest(referanse, false);
+    }
+    public Uttaksgrunnlag hentUtOgMapRequest(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
+        boolean skalMappeHeleTidslinjen = brukUbesluttedeData;
+        
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
         var uttakGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
         var pleiebehov = pleiebehovResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
-        var perioderTilVurdering = finnSykdomsperioder(referanse);
+        final NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
+        if (skalMappeHeleTidslinjen) {
+            perioderTilVurdering = søknadsperiodeTjeneste.utledFullstendigPeriode(referanse.getBehandlingId());
+        } else {
+            perioderTilVurdering = finnSykdomsperioder(referanse);
+        }
         var utvidetRevurderingPerioder = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(referanse);
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
         var opptjeningsresultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
@@ -149,8 +167,13 @@ public class MapInputTilUttakTjeneste {
 
         var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
 
-        final List<EtablertTilsynPeriode> etablertTilsynPerioder = fjernInnleggelsesperioderFra(etablertTilsynRepository.hent(referanse.getBehandlingId()).getEtablertTilsyn().getPerioder(), pleiebehov);
-        final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getFagsakId(), referanse.getPleietrengendeAktørId());
+        final List<EtablertTilsynPeriode> etablertTilsynPerioder;
+        if (brukUbesluttedeData) {
+            etablertTilsynPerioder = fjernInnleggelsesperioderFra(etablertTilsynTjeneste.utledGrunnlagForTilsynstidlinje(referanse).getPerioder(), pleiebehov);
+        } else {
+            etablertTilsynPerioder = fjernInnleggelsesperioderFra(etablertTilsynRepository.hent(referanse.getBehandlingId()).getEtablertTilsyn().getPerioder(), pleiebehov);
+        }
+        final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getFagsakId(), referanse.getPleietrengendeAktørId(), brukUbesluttedeData);
         var rettVedDød = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
 
         final NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(referanse.getBehandlingId());
