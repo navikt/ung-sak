@@ -63,7 +63,7 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .build();
 
             resultat.skalRekjøreSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
-            resultat.setSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING);
+            resultat.setSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING); // TODO: Ved fjerning av toggle, endre til å alltid hoppe tilbake
             return resultat;
         }
     }

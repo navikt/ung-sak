@@ -40,6 +40,11 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
     @JoinColumn(name = "bg_grunnlag_id", nullable = false, updatable = false)
     private BeregningsgrunnlagPerioder grunnlagPerioder;
 
+    @ChangeTracked
+    @ManyToOne
+    @JoinColumn(name = "bg_grunnlag_id", nullable = false, updatable = false)
+    private KompletthetPerioder kompletthetsPerioder;
+
     @Column(name = "aktiv", nullable = false, updatable = true)
     private boolean aktiv = true;
 
