@@ -21,7 +21,6 @@ public class BekreftHenleggelseUkomplettSøknadsgrunnlagOppdaterer implements Ak
 
     @Override
     public OppdateringResultat oppdater(BekreftHenleggelseUkompletthetSøknadsgrunnlagDto dto, AksjonspunktOppdaterParameter param) {
-        return OppdateringResultat.medHenleggelse(BehandlingResultatType.HENLAGT_IKKE_KOMPLETT,
-            "Kan ikke fortsette uten søknadsperioder");
+        return OppdateringResultat.medHenleggelse(BehandlingResultatType.HENLAGT_IKKE_KOMPLETT, dto.getBegrunnelse());
     }
 }
