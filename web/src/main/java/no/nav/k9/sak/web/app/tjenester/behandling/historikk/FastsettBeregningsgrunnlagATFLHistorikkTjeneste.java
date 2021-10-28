@@ -1,7 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +81,7 @@ public class FastsettBeregningsgrunnlagATFLHistorikkTjeneste {
             historikkAdapter.tekstBuilder()
                 .medNavnOgGjeldendeFra(HistorikkEndretFeltType.FRILANS_INNTEKT, null, fom)
                 .medEndretFelt(HistorikkEndretFeltType.FRILANS_INNTEKT,
-                    endringFL.getFraInntekt(),
+                    endringFL.getFraInntekt().orElse(null),
                     endringFL.getTilInntekt());
         }
 
@@ -104,13 +102,13 @@ public class FastsettBeregningsgrunnlagATFLHistorikkTjeneste {
                     endretAndel.getArbeidsgiver(),
                     Optional.ofNullable(endretAndel.getArbeidsforholdRef()),
                     arbeidsforholOverstyringer);
-                BigDecimal fra = endretAndel.getInntektEndring().get().getFraInntekt().setScale(0, RoundingMode.HALF_UP);
-                BigDecimal til = endretAndel.getInntektEndring().get().getTilInntekt().setScale(0, RoundingMode.HALF_UP);
-                if (fra.compareTo(til) != 0) {
+                var fra = endretAndel.getInntektEndring().get().getFraInntekt();
+                var til = endretAndel.getInntektEndring().get().getTilInntekt();
+                if (fra.isEmpty() || fra.get().compareTo(til) != 0) {
                     historikkAdapter.tekstBuilder()
                         .medNavnOgGjeldendeFra(HistorikkEndretFeltType.INNTEKT_FRA_ARBEIDSFORHOLD, null, fom)
                         .medEndretFelt(HistorikkEndretFeltType.INNTEKT_FRA_ARBEIDSFORHOLD, visningsNavn,
-                            fra,
+                            fra.orElse(null),
                             til);
                 }
             }
