@@ -80,7 +80,7 @@ public class HenleggBehandlingTjeneste {
         this.henleggelsePostopsTjenester = henleggelsePostopsTjenester;
     }
 
-    public void henleggBehandlingAvSaksbehandler(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
+    public void henleggBehandlingAvSaksbehandler(String behandlingId, BehandlingResultatType årsakKode, boolean henleggDokumenter, String begrunnelse) {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
@@ -98,16 +98,18 @@ public class HenleggBehandlingTjeneste {
 
         fagsakProsessTaskRepository.ryddProsessTasks(behandling.getFagsakId(), behandling.getId());  // rydd tidligere tasks (eks. registerinnhenting, etc)
 
-        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, HistorikkAktør.SAKSBEHANDLER);
+        doHenleggBehandling(behandlingId, årsakKode, henleggDokumenter, begrunnelse, HistorikkAktør.SAKSBEHANDLER);
     }
 
-    private void doHenleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse, HistorikkAktør historikkAktør) {
+    private void doHenleggBehandling(String behandlingId, BehandlingResultatType årsakKode, boolean henleggDokumenter, String begrunnelse, HistorikkAktør historikkAktør) {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         behandlingskontrollTjeneste.henleggBehandling(kontekst, årsakKode);
 
-        henleggDokumenter(behandling);
+        if (henleggDokumenter) {
+            henleggDokumenter(behandling);
+        }
 
         if (BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET.equals(årsakKode)) {
             sendHenleggelsesbrev(behandling.getId(), HistorikkAktør.VEDTAKSLØSNINGEN);
@@ -159,7 +161,7 @@ public class HenleggBehandlingTjeneste {
             behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtførtForHenleggelse(behandling, kontekst);
         }
 
-        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, HistorikkAktør.VEDTAKSLØSNINGEN);
+        doHenleggBehandling(behandlingId, årsakKode, true, begrunnelse, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 
     private void opprettOppgaveTilInfotrygd(Behandling behandling) {
@@ -172,10 +174,6 @@ public class HenleggBehandlingTjeneste {
     private void sendHenleggelsesbrev(long behandlingId, HistorikkAktør aktør) {
         BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, DokumentMalType.HENLEGG_BEHANDLING_DOK);
         dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, aktør);
-    }
-
-    public void lagHistorikkInnslagForHenleggelseFraSteg(Long behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
-        lagHistorikkinnslagForHenleggelse(behandlingId, årsakKode, begrunnelse, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 
     private void lagHistorikkinnslagForHenleggelse(Long behandlingsId, BehandlingResultatType aarsak, String begrunnelse, HistorikkAktør aktør) {

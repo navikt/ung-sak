@@ -36,6 +36,7 @@ public enum BehandlingResultatType implements Kodeverdi {
     /** @deprecated HENLAGT_SØKNAD_MANGLER erstattes av HENLAGT_MASKINELT */
     HENLAGT_SØKNAD_MANGLER("HENLAGT_SØKNAD_MANGLER", "Henlagt søknad mangler", true),
     HENLAGT_MASKINELT("HENLAGT_MASKINELT", "Henlagt maskinelt", true),
+    HENLAGT_IKKE_KOMPLETT("HENLAGT_IKKE_KOMPLETT", "Henlagt på grunn av ukomplett grunnlag", true),
     INNVILGET_ENDRING("INNVILGET_ENDRING", "Endring innvilget"),
     INGEN_ENDRING("INGEN_ENDRING", "Ingen endring"),
     MANGLER_BEREGNINGSREGLER("MANGLER_BEREGNINGSREGLER", "Mangler beregningsregler", true),

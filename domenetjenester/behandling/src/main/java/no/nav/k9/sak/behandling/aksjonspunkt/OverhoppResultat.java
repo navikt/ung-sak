@@ -52,6 +52,12 @@ public class OverhoppResultat {
             .findFirst(); // TODO (essv): Sorter steg ut fra deres rekkefølge
     }
 
+    public Optional<OppdateringResultat> finnHenleggelse() {
+        return oppdatereResultater.stream()
+            .filter(delresultat -> delresultat.getOverhoppKontroll().equals(OverhoppKontroll.HENLEGGELSE))
+            .findFirst();
+    }
+
     public Set<Tuple<AksjonspunktDefinisjon, AksjonspunktStatus>> finnEkstraAksjonspunktResultat() {
         Set<Tuple<AksjonspunktDefinisjon, AksjonspunktStatus>> resultater = new HashSet<>();
         oppdatereResultater.stream().forEach(res -> resultater.addAll(res.getEkstraAksjonspunktResultat()));

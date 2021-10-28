@@ -169,6 +169,14 @@ public class AksjonspunktApplikasjonTjeneste {
     }
 
     private void håndterOverhopp(OverhoppResultat overhoppResultat, BehandlingskontrollKontekst kontekst) {
+        var henleggelse = overhoppResultat.finnHenleggelse().orElse(null);
+        if (henleggelse != null) {
+            var henleggDokumenter = false;
+            henleggBehandlingTjeneste.henleggBehandlingAvSaksbehandler(String.valueOf(kontekst.getBehandlingId()),
+                henleggelse.getHenleggelseResultat(), henleggDokumenter, henleggelse.getHenleggingsbegrunnelse());
+            return;
+        }
+
         Optional<TransisjonIdentifikator> fremoverTransisjon = overhoppResultat.finnFremoverTransisjon();
         if (fremoverTransisjon.isPresent()) {
             TransisjonIdentifikator riktigTransisjon = utledFremhoppTransisjon(fremoverTransisjon.get());
@@ -198,6 +206,10 @@ public class AksjonspunktApplikasjonTjeneste {
     }
 
     private void fortsettBehandlingen(Behandling behandling, BehandlingskontrollKontekst kontekst, OverhoppResultat overhoppResultat) {
+        if (overhoppResultat.finnHenleggelse().isPresent()) {
+            // Allerede henlagt - ikke mer som skal gjøres her
+            return;
+        }
         if (overhoppResultat.skalOppdatereGrunnlag()) {
             behandlingsprosessApplikasjonTjeneste.asynkRegisteroppdateringKjørProsess(behandling);
         } else {

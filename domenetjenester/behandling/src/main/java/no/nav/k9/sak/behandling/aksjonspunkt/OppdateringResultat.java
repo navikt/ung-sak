@@ -70,6 +70,13 @@ public class OppdateringResultat {
         return new OppdateringResultat(null, OverhoppKontroll.FREMOVERHOPP, transisjonId, true);
     }
 
+    /**
+     * Vil avbryte alle åpne aksjonspunkt hoppe til iverksetting og avslutte uten vedtak
+     */
+    public static OppdateringResultat medHenleggelse(BehandlingResultatType henleggelseResultat, String henleggingsbegrunnelse) {
+        return new OppdateringResultat(OverhoppKontroll.HENLEGGELSE, henleggelseResultat, henleggingsbegrunnelse);
+    }
+
     public BehandlingStegType getNesteSteg() {
         return nesteSteg;
     }

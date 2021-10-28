@@ -82,6 +82,7 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String TILKNYTTET_STORTINGET_KODE = "5072";
 
+    public static final String BEKREFT_HENLEGGELSE_UKOMPLETT_SØKNADSGRUNNLAG_KODE = "5070";
     public static final String KONTROLLER_OPPLYSNINGER_OM_DØD_KODE = "5076";
     public static final String KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE = "5077";
     public static final String KONTROLLER_TILSTØTENDE_YTELSER_INNVILGET_KODE = "5078";

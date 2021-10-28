@@ -183,6 +183,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     AVKLAR_KOMPLETT_NOK_FOR_BEREGNING(AksjonspunktKodeDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE,
             AksjonspunktType.MANUELL, "Avklar om inntektsmeldinger kreves for å kunne beregne", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT,
             UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, ENTRINN, EnumSet.of(PSB)),
+    BEKREFT_HENLEGGELSE_UKOMPLETT_SØKNADSGRUNNLAG(AksjonspunktKodeDefinisjon.BEKREFT_HENLEGGELSE_UKOMPLETT_SØKNADSGRUNNLAG_KODE,
+        AksjonspunktType.MANUELL, "Bekreft henleggelse av behandling med ukomplett søknads- eller refusjonsgrunnlag", BehandlingStatus.UTREDES, BehandlingStegType.POSTCONDITION_KOMPLETTHET, VurderingspunktType.UT,
+        UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, ENTRINN, EnumSet.of(OMP)),
 
     // Gruppe : 60xx
 
