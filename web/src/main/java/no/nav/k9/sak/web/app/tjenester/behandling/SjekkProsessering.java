@@ -9,7 +9,19 @@ import java.util.UUID;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.LogLevel;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
+import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -18,18 +30,6 @@ import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
 import no.nav.k9.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi.ProsessTaskFeilmelder;
 import no.nav.k9.sak.web.app.util.LdapUtil;
-import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.feil.LogLevel;
-import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
-import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
-import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
-import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Dependent
@@ -110,10 +110,6 @@ public class SjekkProsessering {
     }
 
     public boolean opprettTaskForOppfrisking(Behandling behandling, boolean forceInnhent) {
-        if (!forceInnhent && !skalInnhenteRegisteropplysningerPåNytt(behandling)) {
-            return false;
-        }
-
         if (pågårEllerFeiletTasks(behandling)) {
             return false;
         }
