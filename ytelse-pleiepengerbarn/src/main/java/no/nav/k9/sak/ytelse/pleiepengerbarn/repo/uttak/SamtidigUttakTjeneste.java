@@ -164,7 +164,7 @@ public class SamtidigUttakTjeneste {
     }
     
     private Simulering simulerUttak(BehandlingReferanse ref) {
-        final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref, true);
+        final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtUbesluttededataOgMapRequest(ref);
         final Simulering simulering = uttakTjeneste.simulerUttaksplan(request);
 
         return simulering;
