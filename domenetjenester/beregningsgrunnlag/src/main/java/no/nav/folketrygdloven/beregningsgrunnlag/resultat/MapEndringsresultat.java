@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringRespons;
-import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.VarigEndretNæringEndring;
+import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.VarigEndretEllerNyoppstartetNæringEndring;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -30,12 +30,17 @@ public class MapEndringsresultat {
             );
     }
 
-    private static VarigEndretNæringVurdering mapVarigEndretNæringVurdering(VarigEndretNæringEndring varigEndretNæringEndring) {
-        if (varigEndretNæringEndring != null && varigEndretNæringEndring.getErVarigEndretNaeringEndring() != null) {
-            return new VarigEndretNæringVurdering(new ToggleEndring(varigEndretNæringEndring.getErVarigEndretNaeringEndring().getFraVerdi(),
-                varigEndretNæringEndring.getErVarigEndretNaeringEndring().getTilVerdi()));
+    private static VarigEndretNæringVurdering mapVarigEndretNæringVurdering(VarigEndretEllerNyoppstartetNæringEndring varigEndretEllerNyoppstartetNæringEndring) {
+        if (harVerdier(varigEndretEllerNyoppstartetNæringEndring)) {
+            return new VarigEndretNæringVurdering(
+                mapTilToggle(varigEndretEllerNyoppstartetNæringEndring.getErVarigEndretNaeringEndring()),
+                mapTilToggle(varigEndretEllerNyoppstartetNæringEndring.getErNyoppstartetNaeringEndring()));
         }
         return null;
+    }
+
+    private static boolean harVerdier(VarigEndretEllerNyoppstartetNæringEndring varigEndretEllerNyoppstartetNæringEndring) {
+        return varigEndretEllerNyoppstartetNæringEndring != null && (varigEndretEllerNyoppstartetNæringEndring.getErVarigEndretNaeringEndring() != null || varigEndretEllerNyoppstartetNæringEndring.getErNyoppstartetNaeringEndring() != null);
     }
 
     private static FaktaOmBeregningVurderinger mapFaktaOmBeregningVurderinger(no.nav.folketrygdloven.kalkulus.response.v1.håndtering.FaktaOmBeregningVurderinger faktaOmBeregningVurderinger) {

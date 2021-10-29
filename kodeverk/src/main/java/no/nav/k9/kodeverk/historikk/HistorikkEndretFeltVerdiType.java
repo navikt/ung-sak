@@ -36,12 +36,10 @@ public enum HistorikkEndretFeltVerdiType implements Kodeverdi {
 
     /** Tilbaketrekk */
     HINDRE_TILBAKETREKK("HINDRE_TILBAKETREKK", "Ikke tilbakekrev fra søker"),
-    IKKE_NYOPPSTARTET("IKKE_NYOPPSTARTET", "ikke nyoppstartet"),
     UTFØR_TILBAKETREKK("UTFØR_TILBAKETREKK", "Tilbakekrev fra søker"),
 
     /** Arbeid. */
     IKKE_NY_I_ARBEIDSLIVET("IKKE_NY_I_ARBEIDSLIVET", "til ikke ny i arbeidslivet"),
-    NYOPPSTARTET("NYOPPSTARTET", "nyoppstartet"),
     IKKE_TIDSBEGRENSET_ARBEIDSFORHOLD("IKKE_TIDSBEGRENSET_ARBEIDSFORHOLD", "ikke tidsbegrenset"),
     NY_I_ARBEIDSLIVET("NY_I_ARBEIDSLIVET", "ny i arbeidslivet"),
     TIDSBEGRENSET_ARBEIDSFORHOLD("TIDSBEGRENSET_ARBEIDSFORHOLD", "tidsbegrenset arbeidsforhold"),
@@ -49,6 +47,8 @@ public enum HistorikkEndretFeltVerdiType implements Kodeverdi {
     /** Beregning. */
     VARIG_ENDRET_NAERING("VARIG_ENDRET_NAERING", "Varig endret næring"),
     INGEN_VARIG_ENDRING_NAERING("INGEN_VARIG_ENDRING_NAERING", "Ingen varig endring i næring"),
+    NYOPPSTARTET("NYOPPSTARTET", "nyoppstartet"),
+    IKKE_NYOPPSTARTET("IKKE_NYOPPSTARTET", "ikke nyoppstartet"),
 
 
     /** Vilkår. */
