@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -76,7 +77,11 @@ public class VedtakTjeneste {
             tekstBuilder.medResultat(utledVedtakResultatType(behandling));
         }
         Historikkinnslag innslag = new Historikkinnslag();
-        innslag.setAktør(utledAktør(behandling));
+        var aktør = utledAktør(behandling);
+        if (HistorikkAktør.SAKSBEHANDLER.equals(aktør)) {
+            innslag.setAktør(aktør);
+            innslag.setOpprettetAv(behandling.getAnsvarligSaksbehandler());
+        }
         innslag.setType(historikkinnslagType);
         innslag.setBehandling(behandling);
         tekstBuilder.build(innslag);
@@ -89,7 +94,7 @@ public class VedtakTjeneste {
             return HistorikkAktør.BESLUTTER;
         }
         var aksjonspunkt = behandling.getAksjonspunktFor(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT.getKode());
-        if (aksjonspunkt.map(Aksjonspunkt::erUtført).orElse(false)) {
+        if (aksjonspunkt.map(Aksjonspunkt::erUtført).orElse(false) && !Objects.equals(null, behandling.getAnsvarligSaksbehandler())) {
             return HistorikkAktør.SAKSBEHANDLER;
         }
         return HistorikkAktør.VEDTAKSLØSNINGEN;
