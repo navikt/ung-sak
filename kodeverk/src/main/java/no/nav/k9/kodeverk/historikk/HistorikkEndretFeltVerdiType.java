@@ -29,11 +29,11 @@ public enum HistorikkEndretFeltVerdiType implements Kodeverdi {
     LOVLIG_OPPHOLD("LOVLIG_OPPHOLD", "Søker har lovlig opphold"),
     OPPHOLDSRETT("OPPHOLDSRETT", "Søker har oppholdsrett"),
     NASJONAL("NASJONAL", "Nasjonal"),
-    
+
     /** Behandling */
     FORTSETT_BEHANDLING("FORTSETT_BEHANDLING", "Fortsett behandling"),
     HENLEGG_BEHANDLING("HENLEGG_BEHANDLING", "Henlegg behandling"),
-    
+
     /** Tilbaketrekk */
     HINDRE_TILBAKETREKK("HINDRE_TILBAKETREKK", "Ikke tilbakekrev fra søker"),
     IKKE_NYOPPSTARTET("IKKE_NYOPPSTARTET", "ikke nyoppstartet"),
@@ -45,7 +45,12 @@ public enum HistorikkEndretFeltVerdiType implements Kodeverdi {
     IKKE_TIDSBEGRENSET_ARBEIDSFORHOLD("IKKE_TIDSBEGRENSET_ARBEIDSFORHOLD", "ikke tidsbegrenset"),
     NY_I_ARBEIDSLIVET("NY_I_ARBEIDSLIVET", "ny i arbeidslivet"),
     TIDSBEGRENSET_ARBEIDSFORHOLD("TIDSBEGRENSET_ARBEIDSFORHOLD", "tidsbegrenset arbeidsforhold"),
-    
+
+    /** Beregning. */
+    VARIG_ENDRET_NAERING("VARIG_ENDRET_NAERING", "Varig endret næring"),
+    INGEN_VARIG_ENDRING_NAERING("INGEN_VARIG_ENDRING_NAERING", "Ingen varig endring i næring"),
+
+
     /** Vilkår. */
     VILKAR_IKKE_OPPFYLT("VILKAR_IKKE_OPPFYLT", "Vilkåret er ikke oppfylt"),
     VILKAR_OPPFYLT("VILKAR_OPPFYLT", "Vilkåret er oppfylt"),
@@ -57,7 +62,7 @@ public enum HistorikkEndretFeltVerdiType implements Kodeverdi {
     /** Risk. */
     INGEN_INNVIRKNING("INGEN_INNVIRKNING", "Faresignalene hadde ingen innvirkning på behandlingen"),
     INNVIRKNING("INNVIRKNING", "Faresignalene hadde innvirkning på behandlingen"),
-    
+
     UDEFINERT("-", "Ikke definert"),
     ;
 
