@@ -78,8 +78,8 @@ public class VedtakTjeneste {
         }
         Historikkinnslag innslag = new Historikkinnslag();
         var aktør = utledAktør(behandling);
+        innslag.setAktør(aktør);
         if (HistorikkAktør.SAKSBEHANDLER.equals(aktør)) {
-            innslag.setAktør(aktør);
             innslag.setOpprettetAv(behandling.getAnsvarligSaksbehandler());
         }
         innslag.setType(historikkinnslagType);
