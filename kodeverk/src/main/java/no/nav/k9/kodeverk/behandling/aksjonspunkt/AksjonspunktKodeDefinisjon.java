@@ -107,6 +107,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_BEREDSKAP = "9201";
     public static final String VURDER_RETT_ETTER_PLEIETRENGENDES_DØD = "9202";
     public static final String MANGLER_AKTIVITETER = "9203";
+    public static final String VENT_ANNEN_PSB_SAK_KODE = "9290";
     public static final String AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9069";
 
     // OMS
