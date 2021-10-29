@@ -7,6 +7,7 @@ import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
@@ -24,6 +25,11 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
     @Override
     public Uttaksplan hentUttaksplan(UUID behandlingId, boolean slåSammenLikePerioder) {
         return restKlient.hentUttaksplan(behandlingId, slåSammenLikePerioder);
+    }
+    
+    @Override
+    public Simulering simulerUttaksplan(Uttaksgrunnlag request) {
+        return restKlient.simulerUttaksplan(request);
     }
 
     @Override

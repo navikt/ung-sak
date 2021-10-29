@@ -27,6 +27,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
 @ApplicationScoped
 @GrunnlagRef("SykdomGrunnlag")
@@ -40,6 +41,7 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
     private VilkårResultatRepository vilkårResultatRepository;
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
+    private SamtidigUttakTjeneste samtidigUttakTjeneste;
 
     StartpunktUtlederPleiepengerSyktBarn() {
         // For CDI
@@ -50,12 +52,14 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
                                          SykdomGrunnlagService sykdomGrunnlagService,
                                          VilkårResultatRepository vilkårResultatRepository,
                                          ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
-                                         EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste) {
+                                         EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
+                                         SamtidigUttakTjeneste samtidigUttakTjeneste) {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
+        this.samtidigUttakTjeneste = samtidigUttakTjeneste;
     }
 
     @Override
@@ -68,16 +72,20 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
         StartpunktType tilsynStartpunkt = utledStartpunktForEtablertTilsyn(ref);
         result.add(tilsynStartpunkt);
         log.info("Kjører diff av etablertTilsyn, funnet følgende resultat = {}", tilsynStartpunkt);
+        
+        StartpunktType uttakStartpunkt = utledStartpunktForUttak(ref);
+        log.info("Kjører diff av uttak, funnet følgende resultat = {}", uttakStartpunkt);
+        result.add(uttakStartpunkt);
 
         StartpunktType nattevåkBeredskapStartpunkt = utledStartpunktForNattevåkOgBeredskap(ref);
         result.add(nattevåkBeredskapStartpunkt);
         log.info("Kjører diff av nattevåk & beredskap, funnet følgende resultat = {}", nattevåkBeredskapStartpunkt);
-
+        
         return result.stream()
             .min(Comparator.comparing(StartpunktType::getRangering))
             .orElse(StartpunktType.UDEFINERT);
     }
-
+    
     private StartpunktType utledStartpunktForNattevåkOgBeredskap(BehandlingReferanse ref) {
         return endringUnntakEtablertTilsynTjeneste.harEndringerSidenBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId()) ? StartpunktType.UTTAKSVILKÅR : StartpunktType.UDEFINERT;
     }
@@ -91,6 +99,15 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
             return StartpunktType.UDEFINERT;
         }
     }
+    
+    private StartpunktType utledStartpunktForUttak(BehandlingReferanse ref) {
+        if (samtidigUttakTjeneste.isSkalHaTilbakehopp(ref)) {
+            return StartpunktType.UTTAKSVILKÅR;
+        } else {
+            return StartpunktType.UDEFINERT;
+        }
+    }
+
 
     private StartpunktType utledStartpunktForSykdom(BehandlingReferanse ref) {
         var sykdomGrunnlag = sykdomGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())

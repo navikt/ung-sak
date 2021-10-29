@@ -22,6 +22,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTils
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
 public class InputParametere {
@@ -41,6 +42,7 @@ public class InputParametere {
     private OpptjeningResultat opptjeningResultat;
     private RettPleiepengerVedDødGrunnlag rettPleiepengerVedDødGrunnlag;
     private InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag;
+    private Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende;
 
     public InputParametere() {
     }
@@ -178,5 +180,14 @@ public class InputParametere {
 
     public InntektArbeidYtelseGrunnlag getInntektArbeidYtelseGrunnlag() {
         return inntektArbeidYtelseGrunnlag;
+    }
+
+    public InputParametere medUnntakEtablertTilsynForPleietrengende(Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende) {
+        this.unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynForPleietrengende;
+        return this;
+    }
+    
+    public Optional<UnntakEtablertTilsynForPleietrengende> getUnntakEtablertTilsynForPleietrengende() {
+        return unntakEtablertTilsynForPleietrengende;
     }
 }

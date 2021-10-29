@@ -15,6 +15,7 @@ import javax.enterprise.inject.Alternative;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.SøktUttak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
@@ -72,6 +73,11 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
         lagreUttakResultatPerioder(saksnummer, behandlingUuid, plan);
 
         return plan;
+    }
+    
+    @Override
+    public Simulering simulerUttaksplan(Uttaksgrunnlag request) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
