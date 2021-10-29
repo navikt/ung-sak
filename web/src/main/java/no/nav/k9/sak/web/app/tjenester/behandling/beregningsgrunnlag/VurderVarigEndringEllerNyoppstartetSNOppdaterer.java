@@ -16,20 +16,24 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndringEllerNyoppstartetSNDtoer;
+import no.nav.k9.sak.web.app.tjenester.behandling.historikk.VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderVarigEndringEllerNyoppstartetSNDtoer.class, adapter = AksjonspunktOppdaterer.class)
 public class VurderVarigEndringEllerNyoppstartetSNOppdaterer implements AksjonspunktOppdaterer<VurderVarigEndringEllerNyoppstartetSNDtoer> {
 
     private BeregningsgrunnlagOppdateringTjeneste oppdateringTjeneste;
+    private VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste historikkTjeneste;
 
     VurderVarigEndringEllerNyoppstartetSNOppdaterer() {
         // CDI
     }
 
     @Inject
-    public VurderVarigEndringEllerNyoppstartetSNOppdaterer(BeregningsgrunnlagOppdateringTjeneste oppdateringTjeneste) {
+    public VurderVarigEndringEllerNyoppstartetSNOppdaterer(BeregningsgrunnlagOppdateringTjeneste oppdateringTjeneste,
+                                                           VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste historikkTjeneste) {
         this.oppdateringTjeneste = oppdateringTjeneste;
+        this.historikkTjeneste = historikkTjeneste;
     }
 
     @Override
@@ -38,8 +42,7 @@ public class VurderVarigEndringEllerNyoppstartetSNOppdaterer implements Aksjonsp
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto1 -> MapDtoTilRequest.map(dto1, dtoer.getBegrunnelse())));
         List<OppdaterBeregningsgrunnlagResultat> utførteOppdateringer = oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
-        // TODO FIKS HISTORIKK
-
+        historikkTjeneste.lagHistorikkInnslag(param, dtoer, utførteOppdateringer);
         return resultatBuilder.build();
     }
 }

@@ -10,11 +10,16 @@ public class OppdaterBeregningsgrunnlagResultat {
     private UUID referanse;
     private BeregningsgrunnlagEndring beregningsgrunnlagEndring;
     private FaktaOmBeregningVurderinger faktaOmBeregningVurderinger;
+    private VarigEndretNæringVurdering varigEndretNæringVurdering;
 
-    public OppdaterBeregningsgrunnlagResultat(BeregningsgrunnlagEndring beregningsgrunnlagEndring, FaktaOmBeregningVurderinger faktaOmBeregningVurderinger, UUID referanse) {
+    public OppdaterBeregningsgrunnlagResultat(BeregningsgrunnlagEndring beregningsgrunnlagEndring,
+                                              FaktaOmBeregningVurderinger faktaOmBeregningVurderinger,
+                                              VarigEndretNæringVurdering varigEndretNæringVurdering,
+                                              UUID referanse) {
         this.beregningsgrunnlagEndring = beregningsgrunnlagEndring;
         this.faktaOmBeregningVurderinger = faktaOmBeregningVurderinger;
         this.referanse = referanse;
+        this.varigEndretNæringVurdering = varigEndretNæringVurdering;
     }
 
     public Optional<BeregningsgrunnlagEndring> getBeregningsgrunnlagEndring() {
@@ -23,6 +28,10 @@ public class OppdaterBeregningsgrunnlagResultat {
 
     public Optional<FaktaOmBeregningVurderinger> getFaktaOmBeregningVurderinger() {
         return Optional.ofNullable(faktaOmBeregningVurderinger);
+    }
+
+    public Optional<VarigEndretNæringVurdering> getVarigEndretNæringVurdering() {
+        return Optional.ofNullable(varigEndretNæringVurdering);
     }
 
     public LocalDate getSkjæringstidspunkt() {

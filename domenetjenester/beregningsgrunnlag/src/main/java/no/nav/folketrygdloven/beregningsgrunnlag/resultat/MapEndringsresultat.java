@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringRespons;
+import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.VarigEndretNæringEndring;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -24,8 +25,17 @@ public class MapEndringsresultat {
         return oppdateringRespons == null ? null :
             new OppdaterBeregningsgrunnlagResultat(mapTilBeregningsgrunnlagEndring(oppdateringRespons.getBeregningsgrunnlagEndring()),
                 mapFaktaOmBeregningVurderinger(oppdateringRespons.getFaktaOmBeregningVurderinger()),
+                mapVarigEndretNæringVurdering(oppdateringRespons.getVarigEndretNæringEndring()),
                 bgReferanse
             );
+    }
+
+    private static VarigEndretNæringVurdering mapVarigEndretNæringVurdering(VarigEndretNæringEndring varigEndretNæringEndring) {
+        if (varigEndretNæringEndring != null && varigEndretNæringEndring.getErVarigEndretNaeringEndring() != null) {
+            return new VarigEndretNæringVurdering(new ToggleEndring(varigEndretNæringEndring.getErVarigEndretNaeringEndring().getFraVerdi(),
+                varigEndretNæringEndring.getErVarigEndretNaeringEndring().getTilVerdi()));
+        }
+        return null;
     }
 
     private static FaktaOmBeregningVurderinger mapFaktaOmBeregningVurderinger(no.nav.folketrygdloven.kalkulus.response.v1.håndtering.FaktaOmBeregningVurderinger faktaOmBeregningVurderinger) {
@@ -47,8 +57,8 @@ public class MapEndringsresultat {
     private static List<ErTidsbegrensetArbeidsforholdEndring> mapTilErTidsbegrensetArbeidsforholdEndringer(List<no.nav.folketrygdloven.kalkulus.response.v1.håndtering.ErTidsbegrensetArbeidsforholdEndring> erTidsbegrensetArbeidsforholdEndringer) {
         return erTidsbegrensetArbeidsforholdEndringer == null ? null :
             erTidsbegrensetArbeidsforholdEndringer.stream()
-            .map(MapEndringsresultat::mapErTidsbegrensetArbeidsforholdEndring)
-            .collect(Collectors.toList());
+                .map(MapEndringsresultat::mapErTidsbegrensetArbeidsforholdEndring)
+                .collect(Collectors.toList());
     }
 
     private static ErTidsbegrensetArbeidsforholdEndring mapErTidsbegrensetArbeidsforholdEndring(no.nav.folketrygdloven.kalkulus.response.v1.håndtering.ErTidsbegrensetArbeidsforholdEndring erTidsbegrensetArbeidsforholdEndring) {
