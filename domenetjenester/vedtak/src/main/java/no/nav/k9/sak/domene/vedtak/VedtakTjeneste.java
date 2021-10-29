@@ -12,12 +12,14 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagTotrinnsvurdering;
@@ -74,12 +76,23 @@ public class VedtakTjeneste {
             tekstBuilder.medResultat(utledVedtakResultatType(behandling));
         }
         Historikkinnslag innslag = new Historikkinnslag();
-        innslag.setAktør(behandling.isToTrinnsBehandling() ? HistorikkAktør.BESLUTTER : HistorikkAktør.VEDTAKSLØSNINGEN);
+        innslag.setAktør(utledAktør(behandling));
         innslag.setType(historikkinnslagType);
         innslag.setBehandling(behandling);
         tekstBuilder.build(innslag);
 
         historikkRepository.lagre(innslag);
+    }
+
+    private HistorikkAktør utledAktør(Behandling behandling) {
+        if (behandling.isToTrinnsBehandling()) {
+            return HistorikkAktør.BESLUTTER;
+        }
+        var aksjonspunkt = behandling.getAksjonspunktFor(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT.getKode());
+        if (aksjonspunkt.map(Aksjonspunkt::erUtført).orElse(false)) {
+            return HistorikkAktør.SAKSBEHANDLER;
+        }
+        return HistorikkAktør.VEDTAKSLØSNINGEN;
     }
 
     private void lagHistorikkInnslagVurderPåNytt(Behandling behandling, Collection<Totrinnsvurdering> medTotrinnskontroll) {
