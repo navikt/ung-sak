@@ -46,7 +46,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Endringsstatus;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @FagsakYtelseTypeRef("PSB")
 @BehandlingTypeRef
@@ -67,6 +70,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
+    private UttakTjeneste uttakTjeneste;
 
     PSBVilkårsPerioderTilVurderingTjeneste() {
         // CDI
@@ -84,7 +88,8 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   PersoninfoAdapter personinfoAdapter,
                                                   MottatteDokumentRepository mottatteDokumentRepository,
-                                                  SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
+                                                  SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+                                                  UttakTjeneste uttakTjeneste) {
         this.vilkårUtleder = vilkårUtleder;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.behandlingRepository = behandlingRepository;
@@ -94,6 +99,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
+        this.uttakTjeneste = uttakTjeneste;
 
         søktePerioder = new SøktePerioder(søknadsperiodeTjeneste);
         var maksSøktePeriode = new MaksSøktePeriode(søknadsperiodeTjeneste);
@@ -222,12 +228,29 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         LocalDateTimeline<Boolean> utvidedePerioder = utledUtvidetPeriodeForSykdom(referanse);
         utvidedePerioder = utvidedePerioder.union(etablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
         utvidedePerioder = utvidedePerioder.union(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId()), StandardCombinators::alwaysTrueForMatch);
-        // TODO: Utvid periode med uttaksperioder til revurdering
+        utvidedePerioder = utvidedePerioder.union(uttaksendringerSidenForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
 
         return utvidedePerioder.toSegments()
             .stream()
             .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
             .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    @SuppressWarnings("unchecked")
+    private LocalDateTimeline<Boolean> uttaksendringerSidenForrigeBehandling(BehandlingReferanse referanse) {
+        final Uttaksplan uttaksplan = uttakTjeneste.hentUttaksplan(referanse.getBehandlingUuid(), false);
+        if (uttaksplan == null) {
+            return LocalDateTimeline.EMPTY_TIMELINE;
+        }
+        
+        final List<LocalDateSegment<Boolean>> segments = uttaksplan.getPerioder()
+            .entrySet()
+            .stream()
+            .filter(entry -> entry.getValue().getEndringsstatus() != Endringsstatus.UENDRET)
+            .map(entry -> new LocalDateSegment<Boolean>(entry.getKey().getFom(), entry.getKey().getTom(), Boolean.TRUE))
+            .toList();
+        
+        return new LocalDateTimeline<Boolean>(segments);
     }
 
     private LocalDateTimeline<Boolean> utledUtvidetPeriodeForSykdom(BehandlingReferanse referanse) {
