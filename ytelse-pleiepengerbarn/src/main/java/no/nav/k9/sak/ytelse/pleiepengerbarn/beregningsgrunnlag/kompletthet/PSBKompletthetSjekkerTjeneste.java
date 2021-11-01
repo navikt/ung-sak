@@ -1,6 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -8,12 +10,14 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.PSBKompletthetsjekker;
 
 @Dependent
@@ -21,14 +25,17 @@ public class PSBKompletthetSjekkerTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
+    private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private PSBKompletthetsjekker kompletthetsjekker;
 
     @Inject
     public PSBKompletthetSjekkerTjeneste(BehandlingRepository behandlingRepository,
                                          BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
+                                         BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                          @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") PSBKompletthetsjekker kompletthetsjekker) {
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
+        this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.kompletthetsjekker = kompletthetsjekker;
     }
 
@@ -55,6 +62,23 @@ public class PSBKompletthetSjekkerTjeneste {
 
         if (erKomplett) {
             return KompletthetsAksjon.fortsett();
+        }
+
+        var grunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+
+        if (grunnlag.isPresent() && !grunnlag.get().getKompletthetPerioder().isEmpty()) {
+            var kompletthetPerioder = grunnlag.get().getKompletthetPerioder();
+            // Sjekk mot saksbehandler avklaringer
+            var kanFortsette = relevanteKompletthetsvurderinger.stream()
+                .filter(it -> !it.getValue().isEmpty())
+                .filter(it -> kompletthetPerioder.stream().noneMatch(at -> Objects.equals(at.getSkjæringstidspunkt(), it.getKey().getFomDato()))
+                    || kompletthetPerioder.stream().anyMatch(at -> Objects.equals(at.getSkjæringstidspunkt(), it.getKey().getFomDato())
+                    && Set.of(Vurdering.UDEFINERT, Vurdering.MANGLENDE_GRUNNLAG).contains(at.getVurdering())))
+                .allMatch(it -> it.getValue().isEmpty());
+
+            if (kanFortsette) {
+                return KompletthetsAksjon.fortsett();
+            }
         }
 
         var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());

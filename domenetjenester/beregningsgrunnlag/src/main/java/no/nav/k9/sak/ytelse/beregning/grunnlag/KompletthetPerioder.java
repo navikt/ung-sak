@@ -32,9 +32,9 @@ class KompletthetPerioder extends BaseEntitet {
     private Long id;
 
     @Immutable
-    @JoinColumn(name = "bg_grunnlag_id", nullable = false, updatable = false)
+    @JoinColumn(name = "bg_komplett_id", nullable = false, updatable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    private List<BeregningsgrunnlagPeriode> grunnlagPerioder = new ArrayList<>();
+    private List<KompletthetPeriode> kompletthetPerioder = new ArrayList<>();
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -44,37 +44,40 @@ class KompletthetPerioder extends BaseEntitet {
     }
 
     KompletthetPerioder(KompletthetPerioder grunnlagPeriode) {
-        if (grunnlagPeriode != null && grunnlagPeriode.grunnlagPerioder != null) {
-            this.grunnlagPerioder = grunnlagPeriode.getGrunnlagPerioder().stream().map(BeregningsgrunnlagPeriode::new).collect(Collectors.toList());
+        if (grunnlagPeriode != null && grunnlagPeriode.kompletthetPerioder != null) {
+            this.kompletthetPerioder = grunnlagPeriode.getKompletthetPerioder()
+                .stream()
+                .map(KompletthetPeriode::new)
+                .collect(Collectors.toList());
         }
     }
 
-    KompletthetPerioder(List<BeregningsgrunnlagPeriode> grunnlagPerioder) {
-        this.grunnlagPerioder = grunnlagPerioder;
+    KompletthetPerioder(List<KompletthetPeriode> kompletthetPerioder) {
+        this.kompletthetPerioder = kompletthetPerioder;
     }
 
-    List<BeregningsgrunnlagPeriode> getGrunnlagPerioder() {
-        if (grunnlagPerioder == null) {
+    List<KompletthetPeriode> getKompletthetPerioder() {
+        if (kompletthetPerioder == null) {
             return List.of();
         }
-        return List.copyOf(grunnlagPerioder);
+        return List.copyOf(kompletthetPerioder);
     }
 
     void deaktiver(LocalDate skjæringstidspunkt) {
         Objects.requireNonNull(skjæringstidspunkt);
-        this.grunnlagPerioder.removeIf(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt));
+        this.kompletthetPerioder.removeIf(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt));
     }
 
-    void leggTil(BeregningsgrunnlagPeriode periode) {
+    void leggTil(KompletthetPeriode periode) {
         Objects.requireNonNull(periode);
-        this.grunnlagPerioder.add(periode);
+        this.kompletthetPerioder.add(periode);
     }
 
     @Override
     public String toString() {
-        return "BeregningsgrunnlagPeriode{" +
+        return "KompletthetPerioder{" +
             "id=" + id +
-            ", eksternReferanse=" + grunnlagPerioder +
+            ", perioder=" + kompletthetPerioder +
             '}';
     }
 }

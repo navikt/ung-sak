@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.beregning.grunnlag;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -21,20 +20,23 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.kodeverk.VurderingKodeverdiConverter;
 
 @Entity(name = "KompletthetPeriode")
-@Table(name = "SEQ_BG_KOMPLETT_PERIODE")
+@Table(name = "BG_KOMPLETT_PERIODE")
 @Immutable
 public class KompletthetPeriode extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SEQ_BG_KOMPLETT_PERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BG_KOMPLETT_PERIODE")
     private Long id;
 
     @Column(name = "skjaeringstidspunkt", nullable = false)
     private LocalDate skjæringstidspunkt;
 
     @Convert(converter = VurderingKodeverdiConverter.class)
-    @Column(name = "merknad", nullable = false)
-    private Vurdering utfallMerknad = Vurdering.UDEFINERT;
+    @Column(name = "vurdering", nullable = false)
+    private Vurdering vurdering = Vurdering.UDEFINERT;
+
+    @Column(name = "begrunnelse")
+    private String begrunnelse;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -47,8 +49,10 @@ public class KompletthetPeriode extends BaseEntitet {
         this.skjæringstidspunkt = grunnlagPeriode.skjæringstidspunkt;
     }
 
-    public KompletthetPeriode(UUID eksternReferanse, LocalDate skjæringstidspunkt) {
+    public KompletthetPeriode(Vurdering vurdering, LocalDate skjæringstidspunkt, String begrunnelse) {
         this.skjæringstidspunkt = Objects.requireNonNull(skjæringstidspunkt);
+        this.vurdering = Objects.requireNonNull(vurdering);
+        this.begrunnelse = Objects.requireNonNull(begrunnelse);
     }
 
     public Long getId() {
@@ -58,6 +62,14 @@ public class KompletthetPeriode extends BaseEntitet {
 
     public LocalDate getSkjæringstidspunkt() {
         return skjæringstidspunkt;
+    }
+
+    public Vurdering getVurdering() {
+        return vurdering;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
     }
 
     @Override
@@ -75,9 +87,9 @@ public class KompletthetPeriode extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "BeregningsgrunnlagPeriode{" +
+        return "KompletthetPeriode{" +
             "id=" + id +
-            ", eksternReferanse=" + null +
+            ", utfallMerknad=" + vurdering +
             ", skjæringstidspunkt=" + skjæringstidspunkt +
             '}';
     }

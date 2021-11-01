@@ -6,9 +6,13 @@
     <sequence-generator name="SEQ_GR_BEREGNINGSGRUNNLAG" allocation-size="50" sequence-name="SEQ_GR_BEREGNINGSGRUNNLAG"/>
     <sequence-generator name="SEQ_BG_PERIODER" allocation-size="50" sequence-name="SEQ_BG_PERIODER"/>
     <sequence-generator name="SEQ_BG_PERIODE" allocation-size="50" sequence-name="SEQ_BG_PERIODE"/>
+    <sequence-generator name="SEQ_BG_KOMPLETT_PERIODER" allocation-size="50" sequence-name="SEQ_BG_KOMPLETT_PERIODER"/>
+    <sequence-generator name="SEQ_BG_KOMPLETT_PERIODE" allocation-size="50" sequence-name="SEQ_SEQ_BG_KOMPLETT_PERIODE"/>
 
     <entity class="no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag"/>
     <entity class="no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioder"/>
     <entity class="no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode"/>
+    <entity class="no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPerioder"/>
+    <entity class="no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode"/>
 
 </entity-mappings>

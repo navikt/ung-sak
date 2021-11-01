@@ -19,29 +19,29 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
-import no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt.AvklarKompletthetForBeregningDto;
+import no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt.EndeligAvklaringKompletthetForBeregningDto;
 import no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt.KompletthetsPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = AvklarKompletthetForBeregningDto.class, adapter = AksjonspunktOppdaterer.class)
-public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<AvklarKompletthetForBeregningDto> {
+@DtoTilServiceAdapter(dto = EndeligAvklaringKompletthetForBeregningDto.class, adapter = AksjonspunktOppdaterer.class)
+public class EndeligAvklaringKompletthetForBeregning implements AksjonspunktOppdaterer<EndeligAvklaringKompletthetForBeregningDto> {
 
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
     private BeregningPerioderGrunnlagRepository grunnlagRepository;
     private Boolean benyttNyFlyt = false;
 
-    AvklarKompletthetForBeregning() {
+    EndeligAvklaringKompletthetForBeregning() {
         // for CDI proxy
     }
 
     @Inject
-    public AvklarKompletthetForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
-                                         HistorikkTjenesteAdapter historikkTjenesteAdapter,
-                                         BeregningPerioderGrunnlagRepository grunnlagRepository,
-                                         @KonfigVerdi(value = "KOMPLETTHET_NY_FLYT", defaultVerdi = "false") Boolean benyttNyFlyt) {
+    public EndeligAvklaringKompletthetForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
+                                                   HistorikkTjenesteAdapter historikkTjenesteAdapter,
+                                                   BeregningPerioderGrunnlagRepository grunnlagRepository,
+                                                   @KonfigVerdi(value = "KOMPLETTHET_NY_FLYT", defaultVerdi = "false") Boolean benyttNyFlyt) {
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.grunnlagRepository = grunnlagRepository;
@@ -49,7 +49,7 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
     }
 
     @Override
-    public OppdateringResultat oppdater(AvklarKompletthetForBeregningDto dto, AksjonspunktOppdaterParameter param) {
+    public OppdateringResultat oppdater(EndeligAvklaringKompletthetForBeregningDto dto, AksjonspunktOppdaterParameter param) {
         var perioderMedManglendeGrunnlag = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(param.getRef());
 
         var kanFortsette = perioderMedManglendeGrunnlag.entrySet()
@@ -82,7 +82,7 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
     }
 
     private void lagreVurderinger(Long behandlingId, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> perioderMedManglendeGrunnlag,
-                                  AvklarKompletthetForBeregningDto dto) {
+                                  EndeligAvklaringKompletthetForBeregningDto dto) {
         var perioder = dto.getPerioder()
             .stream()
             .filter(at -> perioderMedManglendeGrunnlag.keySet()
@@ -98,13 +98,13 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
     }
 
     private Vurdering utledVurderingstype(KompletthetsPeriode it) {
-        return it.getKanFortsette() ? Vurdering.KAN_FORTSETTE : Vurdering.UDEFINERT;
+        return it.getKanFortsette() ? Vurdering.KAN_FORTSETTE : Vurdering.MANGLENDE_GRUNNLAG;
     }
 
-    private void lagHistorikkinnslag(AksjonspunktOppdaterParameter param, AvklarKompletthetForBeregningDto dto) {
+    private void lagHistorikkinnslag(AksjonspunktOppdaterParameter param, EndeligAvklaringKompletthetForBeregningDto dto) {
         historikkTjenesteAdapter.tekstBuilder()
             .medSkjermlenke(SkjermlenkeType.BEREGNING) // TODO: Sette noe fornuftig avhengig av hvor frontend plasserer dette
-            .medBegrunnelse("Behov for inntektsmelding avklart: " + dto.getBegrunnelse());
+            .medBegrunnelse("Endelig behov for inntektsmelding avklart: " + dto.getBegrunnelse());
         historikkTjenesteAdapter.opprettHistorikkInnslag(param.getBehandlingId(), HistorikkinnslagType.FAKTA_ENDRET);
     }
 

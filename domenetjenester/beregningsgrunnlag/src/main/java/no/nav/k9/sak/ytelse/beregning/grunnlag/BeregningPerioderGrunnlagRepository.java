@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.beregning.grunnlag;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -38,7 +39,27 @@ public class BeregningPerioderGrunnlagRepository {
         var aktivtGrunnlag = grunnlagOptional.orElse(new BeregningsgrunnlagPerioderGrunnlag());
 
         var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(aktivtGrunnlag);
-        builder.leggTil(periode);
+        builder.leggTilGrunnlag(periode);
+
+        var differ = differ();
+
+        if (builder.erForskjellig(aktivtGrunnlag, differ)) {
+            grunnlagOptional.ifPresent(this::deaktiverEksisterende);
+
+            lagre(builder, behandlingId, true);
+        } else {
+            log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
+        }
+    }
+
+    public void lagre(Long behandlingId, List<KompletthetPeriode> perioder) {
+        var grunnlagOptional = hentGrunnlag(behandlingId);
+        var aktivtGrunnlag = grunnlagOptional.orElse(new BeregningsgrunnlagPerioderGrunnlag());
+
+        var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(aktivtGrunnlag);
+        for (KompletthetPeriode periode : perioder) {
+            builder.leggTilKompletthetVurdering(periode);
+        }
 
         var differ = differ();
 
@@ -89,7 +110,7 @@ public class BeregningPerioderGrunnlagRepository {
             var grunnlag = aktivtGrunnlag.get();
 
             var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(grunnlag);
-            builder.deaktiver(skjæringstidspunkt);
+            builder.deaktiverGrunnlag(skjæringstidspunkt);
 
             deaktiverEksisterende(grunnlag);
 
@@ -126,7 +147,12 @@ public class BeregningPerioderGrunnlagRepository {
         var oppdatertGrunnlag = builder.build();
         oppdatertGrunnlag.setBehandlingId(behandlingId);
 
-        entityManager.persist(oppdatertGrunnlag.getHolder());
+        if (oppdatertGrunnlag.getGrunnlagHolder() != null) {
+            entityManager.persist(oppdatertGrunnlag.getGrunnlagHolder());
+        }
+        if (oppdatertGrunnlag.getKompletthetHolder() != null) {
+            entityManager.persist(oppdatertGrunnlag.getKompletthetHolder());
+        }
         entityManager.persist(oppdatertGrunnlag);
         entityManager.flush();
     }

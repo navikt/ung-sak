@@ -233,8 +233,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             var bgReferanser = vilkår.getPerioder()
                 .stream()
                 .map(VilkårPeriode::getSkjæringstidspunkt)
-                .filter(it -> grunnlag.finnFor(it).isPresent())
-                .map(it -> new BeregningsgrunnlagReferanse(grunnlag.finnFor(it).map(BeregningsgrunnlagPeriode::getEksternReferanse).orElseThrow(), it))
+                .filter(it -> grunnlag.finnGrunnlagFor(it).isPresent())
+                .map(it -> new BeregningsgrunnlagReferanse(grunnlag.finnGrunnlagFor(it).map(BeregningsgrunnlagPeriode::getEksternReferanse).orElseThrow(), it))
                 .filter(it -> Objects.nonNull(it.getReferanse()))
                 .collect(Collectors.toSet());
 
@@ -347,11 +347,11 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         var resultater = new TreeSet<BgRef>();
 
         for (var stp : new TreeSet<>(skjæringstidspunkter)) {
-            var beregningsgrunnlagPeriodeOpt = grunnlag.finnFor(stp);
+            var beregningsgrunnlagPeriodeOpt = grunnlag.finnGrunnlagFor(stp);
             var grunnlagReferanse = beregningsgrunnlagPeriodeOpt.map(BeregningsgrunnlagPeriode::getEksternReferanse);
             if (grunnlagReferanse.isPresent() && skalLageNyVedLikSomInitiell) {
                 if (grunnlagInitiellVersjon.isPresent()) {
-                    var initReferanse = grunnlagInitiellVersjon.get().finnFor(stp).map(BeregningsgrunnlagPeriode::getEksternReferanse);
+                    var initReferanse = grunnlagInitiellVersjon.get().finnGrunnlagFor(stp).map(BeregningsgrunnlagPeriode::getEksternReferanse);
                     if (initReferanse.isPresent() && grunnlagReferanse.get().equals(initReferanse.get())) {
                         grunnlagReferanse = Optional.empty();
                     }
