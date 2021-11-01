@@ -51,12 +51,23 @@ public class VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste {
     }
 
     private void lagHistorikkForVurderingAvVarigEndringOgSkjønnsfastsetting(OppdaterBeregningsgrunnlagResultat endringer, LocalDate skjæringstidspunkt, VarigEndretNæringVurdering varigEndretNæringVurdering) {
-        ToggleEndring varigEndretNæringEndring = varigEndretNæringVurdering.getErVarigEndretNaeringEndring();
+        ToggleEndring varigEndretNæringEndring = varigEndretNæringVurdering.getErVarigEndretNæringEndring();
         historikkAdapter.tekstBuilder().medNavnOgGjeldendeFra(HistorikkEndretFeltType.ENDRING_NÆRING, null, skjæringstidspunkt);
-        historikkAdapter.tekstBuilder().medEndretFelt(HistorikkEndretFeltType.ENDRING_NÆRING, null, konvertBooleanTilFaktaEndretVerdiType(varigEndretNæringEndring.getTilVerdi()));
-        if (varigEndretNæringEndring.getTilVerdi()) {
-            lagHistorikkForInntekt(endringer, varigEndretNæringEndring);
+        if (varigEndretNæringEndring != null) {
+            historikkAdapter.tekstBuilder().medEndretFelt(HistorikkEndretFeltType.ENDRING_NÆRING, null, konvertBooleanTilVarigEndringEndretVerdiType(varigEndretNæringEndring.getTilVerdi()));
         }
+        ToggleEndring erNyoppstartetNæringEndring = varigEndretNæringVurdering.getErNyoppstartetNæringEndring();
+        if (erNyoppstartetNæringEndring != null) {
+            historikkAdapter.tekstBuilder().medEndretFelt(HistorikkEndretFeltType.SELVSTENDIG_NÆRINGSDRIVENDE, null, konvertBooleanTilNyoppstartetEndretVerdiType(erNyoppstartetNæringEndring.getTilVerdi()));
+        }
+
+        if (erTrue(varigEndretNæringEndring) || (erTrue(erNyoppstartetNæringEndring))) {
+            lagHistorikkForInntekt(endringer, erTrue(varigEndretNæringEndring) ? varigEndretNæringEndring : erNyoppstartetNæringEndring);
+        }
+    }
+
+    private boolean erTrue(ToggleEndring varigEndretNæringEndring) {
+        return varigEndretNæringEndring != null && varigEndretNæringEndring.getTilVerdi();
     }
 
     private void lagHistorikkForInntekt(OppdaterBeregningsgrunnlagResultat endringer, ToggleEndring varigEndretNæringEndring) {
@@ -75,11 +86,18 @@ public class VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste {
                 inntektEndring.getTilInntekt()));
     }
 
-    private HistorikkEndretFeltVerdiType konvertBooleanTilFaktaEndretVerdiType(Boolean endringNæring) {
+    private HistorikkEndretFeltVerdiType konvertBooleanTilVarigEndringEndretVerdiType(Boolean endringNæring) {
         if (endringNæring == null) {
             return null;
         }
         return endringNæring ? HistorikkEndretFeltVerdiType.VARIG_ENDRET_NAERING : HistorikkEndretFeltVerdiType.INGEN_VARIG_ENDRING_NAERING;
+    }
+
+    private HistorikkEndretFeltVerdiType konvertBooleanTilNyoppstartetEndretVerdiType(Boolean endringNæring) {
+        if (endringNæring == null) {
+            return null;
+        }
+        return endringNæring ? HistorikkEndretFeltVerdiType.NYOPPSTARTET : HistorikkEndretFeltVerdiType.IKKE_NYOPPSTARTET;
     }
 
 
