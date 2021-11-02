@@ -60,8 +60,7 @@ class SøknadOppgittFraværMapper {
 
         Set<OppgittFraværPeriode> resultat = new LinkedHashSet<>();
         for (FraværPeriode fp : fraværsperioderKorrigeringIm) {
-            FraværÅrsak fraværÅrsak = FraværÅrsak.fraKode(fp.getÅrsak().getKode());
-            resultat.add(mapAt(jpId, fp, fraværÅrsak, behandling));
+            resultat.add(mapAt(jpId, fp, FraværÅrsak.UDEFINERT, behandling));
         }
 
         return resultat;
