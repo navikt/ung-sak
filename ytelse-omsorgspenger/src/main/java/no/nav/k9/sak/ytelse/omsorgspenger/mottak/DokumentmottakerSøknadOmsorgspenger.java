@@ -15,7 +15,6 @@ import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
-import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -125,18 +124,17 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     private void lagreOppgittOpptjeningFraSøknad(Søknad søknad, Behandling behandling, MottattDokument dokument) {
         try {
             var utbetaling = (OmsorgspengerUtbetaling) søknad.getYtelse();
-            var opptjeningDto = Optional.ofNullable(utbetaling.getAktivitet())
+            var request = Optional.ofNullable(utbetaling.getAktivitet())
                 .map(aktiviteter -> oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, aktiviteter))
-                .map(OppgittOpptjeningMottattRequest::getOppgittOpptjening)
                 .orElse(null);
-            if (opptjeningDto == null) {
+            if (request == null || request.getOppgittOpptjening() == null) {
                 // Ingenting mer som skal lagres - dokument settes som ferdig
                 mottatteDokumentRepository.oppdaterStatus(List.of(dokument), DokumentStatus.GYLDIG);
                 return;
             }
 
             var enkeltTask = new ProsessTaskData(AsyncAbakusLagreOpptjeningTask.TASKTYPE);
-            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(opptjeningDto);
+            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
             enkeltTask.setPayload(payload);
 
             enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, dokument.getJournalpostId().getVerdi());
