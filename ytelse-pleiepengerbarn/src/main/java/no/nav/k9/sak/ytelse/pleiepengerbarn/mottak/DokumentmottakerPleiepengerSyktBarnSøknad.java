@@ -11,7 +11,11 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -28,9 +32,11 @@ import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.k9.sak.mottak.dokumentmottak.OppgittOpptjeningMapper;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.felles.type.Journalpost;
+import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnSøknadValidator;
 
@@ -39,12 +45,15 @@ import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnSøknadValidator;
 @DokumentGruppeRef(Brevkode.PLEIEPENGER_BARN_SOKNAD_KODE)
 class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
 
+    private Logger logger = LoggerFactory.getLogger(DokumentmottakerPleiepengerSyktBarnSøknad.class);
     private SøknadOversetter pleiepengerBarnSoknadOversetter;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SøknadParser søknadParser;
     private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
     private ProsessTaskRepository prosessTaskRepository;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
+    private boolean skalBrukeUtledetEndringsperiode;
 
     DokumentmottakerPleiepengerSyktBarnSøknad() {
         // for CDI proxy
@@ -56,13 +65,17 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                                               SøknadOversetter pleiepengerBarnSoknadOversetter,
                                               SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
                                               ProsessTaskRepository prosessTaskRepository,
-                                              OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste) {
+                                              OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
+                                              SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+                                              @KonfigVerdi(value = "ENABLE_UTLEDET_ENDRINGSPERIODE", defaultVerdi = "false") boolean skalBrukeUtledetEndringsperiode) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
         this.pleiepengerBarnSoknadOversetter = pleiepengerBarnSoknadOversetter;
         this.prosessTaskRepository = prosessTaskRepository;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
+        this.skalBrukeUtledetEndringsperiode = skalBrukeUtledetEndringsperiode;
     }
 
     @Override
@@ -119,7 +132,15 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     }
 
     private void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {
-        new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad);
+        if (skalBrukeUtledetEndringsperiode) {
+            final List<Periode> tidligereSøknadsperioder = søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId())
+                    .stream()
+                    .map(d -> new Periode(d.getFomDato(), d.getTomDato()))
+                    .toList();
+            new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad, tidligereSøknadsperioder);
+        } else {
+            new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad);
+        }
 
         pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
 
@@ -132,14 +153,19 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             if (journalpost.getInneholderMedisinskeOpplysninger() != null) {
                 journalpostHarMedisinskeOpplysninger = journalpost.getInneholderMedisinskeOpplysninger();
             }
-
-            sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
-                behandling,
-                new JournalpostId(journalpost.getJournalpostId()),
-                behandling.getFagsak().getPleietrengendeAktørId(),
-                søknad.getMottattDato().toLocalDateTime(),
-                journalpostHarInformasjonSomIkkeKanPunsjes,
-                journalpostHarMedisinskeOpplysninger);
+ 
+            try {
+                sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
+                    behandling,
+                    new JournalpostId(journalpost.getJournalpostId()),
+                    behandling.getFagsak().getPleietrengendeAktørId(),
+                    søknad.getMottattDato().toLocalDateTime(),
+                    journalpostHarInformasjonSomIkkeKanPunsjes,
+                    journalpostHarMedisinskeOpplysninger);
+            } catch (RuntimeException e) {
+                logger.warn("Feil ved håndtering av forsendelse " + journalpostId.getVerdi() + " med tilknyttet journalpost " + journalpost.getJournalpostId());
+                throw e;
+            }
         }
 
         Optional<Journalpost> journalpost = søknad.getJournalposter()

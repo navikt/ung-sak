@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -32,9 +33,15 @@ public class ForeslåVedtakAksjonspunktOppdaterer implements AksjonspunktOppdate
         vedtaksbrevHåndterer.oppdaterBegrunnelse(behandling, begrunnelse);
 
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
+        if (behandling.getFagsakYtelseType().equals(FagsakYtelseType.PSB)) {
+            builder.medTotrinn();
+        }
+
         vedtaksbrevHåndterer.oppdaterVedtaksbrev(dto, param, builder);
 
         vedtaksbrevHåndterer.oppdaterVedtaksvarsel(dto, param.getBehandlingId());
+
+
         return builder.build();
     }
 

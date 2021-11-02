@@ -51,7 +51,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
 
         Optional<BekreftedePerioderDto> bekreftedeDto = dto.getBekreftedePerioder().stream().findFirst();
         if (bekreftedeDto.isEmpty()) {
-            return OppdateringResultat.utenOveropp();
+            return OppdateringResultat.utenOverhopp();
         }
         BekreftedePerioderDto bekreftet = bekreftedeDto.get();
         Optional<MedlemskapAggregat> medlemskap = medlemskapRepository.hentMedlemskap(behandlingId);

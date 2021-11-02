@@ -79,13 +79,9 @@ spec:
       value: k9-sak-q1
 
     # Gjentatt grunnet felles-sikkerhet
-    - name: OIDC_OPENAM_HOSTURL
+    - name: OPENIDCONNECT_ISSOHOST
       value: https://isso-q.adeo.no:443/isso/oauth2
-    - name: OIDC_OPENAM_ISSUERURL
-      value: https://isso-q.adeo.no:443/isso/oauth2
-    - name: OIDC_OPENAM_JWKSURL
-      value: https://isso-q.adeo.no:443/isso/oauth2/connect/jwk_uri
-    - name: OIDC_OPENAM_AGENTNAME
+    - name: OPENIDCONNECT_USERNAME
       value: k9-sak-q1
 
     # Integrasjoner (Kafka)
@@ -113,8 +109,8 @@ spec:
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
 
     # Loadbalancerconfig
-    - name: LOADBALANCER_FQDN
-      value: app-q1.adeo.no
+    - name: LOADBALANCER_URL
+      value: https://app-q1.adeo.no
 
     # LDAP
     - name: LDAP_URL
@@ -178,7 +174,7 @@ spec:
 
     # Graphql services
     - name: SAF_BASE_URL
-      value: http://saf.q1
+      value: http://saf-q1.teamdokumenthandtering
 
     # Sikkerhet:
     - name: OIDC_STS_ISSUER_URL
@@ -198,6 +194,8 @@ spec:
     # Feature-flag
     - name: OMP_IM_SJEKK_FORSTE_FRAVAERSDAG
       value: "true"
+    - name: PSB_OPPG_OPPTJENING_PRIORITERING
+      value: "true"
     - name: OVERSTYRING_OPPTJ_AKT_FJERNET
       value: "true"
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
@@ -210,6 +208,12 @@ spec:
       value: "false"
     - name: K9TILBAKE_AKTIVERT
       value: "true"
+    - name: ENABLE_UTLEDET_ENDRINGSPERIODE
+      value: "true"
+    - name: ARBEIDSTID_SJEKK_SNFL
+      value: "true"
+    - name: NY_SYKDOM_TOTRINN
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
@@ -220,4 +224,4 @@ spec:
       value: "k9-sak"
 
     - name: PIP_USERS
-      value: "srvPDP,srvk9-tilbake,Z993210"
+      value: "srvPDP,srvk9-tilbake,srvsaf,Z993210,Z994080"

@@ -1,8 +1,10 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -50,41 +52,56 @@ public class PsbYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtel
             .entrySet()
             .stream()
             .filter(it -> vilkårsperiode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getKey().getFom(), it.getKey().getTom())))
-            .flatMap(e -> lagUtbetalingsgrad(e.getKey(), e.getValue()).stream())
+            .flatMap(e -> lagUtbetalingsgrad(e.getKey(), e.getValue()).entrySet().stream())
+            .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())))
+            .entrySet()
+            .stream()
+            .map(e -> new UtbetalingsgradPrAktivitetDto(e.getKey(), e.getValue()))
             .collect(Collectors.toList());
 
         return new PleiepengerSyktBarnGrunnlag(utbetalingsgrader);
     }
 
-    private List<UtbetalingsgradPrAktivitetDto> lagUtbetalingsgrad(LukketPeriode periode, UttaksperiodeInfo plan) {
+    private Map<UtbetalingsgradArbeidsforholdDto, PeriodeMedUtbetalingsgradDto> lagUtbetalingsgrad(LukketPeriode periode, UttaksperiodeInfo plan) {
         var perArbeidsforhold = plan.getUtbetalingsgrader()
             .stream()
-            .collect(Collectors.groupingBy(Utbetalingsgrader::getArbeidsforhold));
+            .collect(Collectors.toMap(this::mapUtbetalingsgradArbeidsforhold, Utbetalingsgrader::getUtbetalingsgrad));
 
-        List<UtbetalingsgradPrAktivitetDto> res = new ArrayList<>();
+        Map<UtbetalingsgradArbeidsforholdDto, PeriodeMedUtbetalingsgradDto> res = new HashMap<>();
         for (var entry : perArbeidsforhold.entrySet()) {
-            var arbeidsforhold = lagArbeidsforhold(entry.getKey());
-            var perioder = lagPerioder(periode, entry.getValue());
-            res.add(new UtbetalingsgradPrAktivitetDto(arbeidsforhold, perioder));
+            var utbetalingsgradPeriode = lagPeriode(periode, entry.getValue());
+            res.put(entry.getKey(), utbetalingsgradPeriode);
         }
         return res;
     }
 
-    private List<PeriodeMedUtbetalingsgradDto> lagPerioder(LukketPeriode periode, List<Utbetalingsgrader> ut) {
-        if (ut == null) {
-            return Collections.emptyList();
+    private UtbetalingsgradArbeidsforholdDto mapUtbetalingsgradArbeidsforhold(Utbetalingsgrader utbGrad) {
+        Arbeidsforhold arbeidsforhold = utbGrad.getArbeidsforhold();
+        if (erTypeMedArbeidsforhold(arbeidsforhold)) {
+            return lagArbeidsforhold(arbeidsforhold);
         } else {
-            return ut.stream().map(p -> {
-                var kalkulusPeriode = new no.nav.folketrygdloven.kalkulus.felles.v1.Periode(periode.getFom(), periode.getTom());
-                return new PeriodeMedUtbetalingsgradDto(kalkulusPeriode, p.getUtbetalingsgrad());
-            }).collect(Collectors.toList());
+            return new UtbetalingsgradArbeidsforholdDto(null, null, mapUttakArbeidType(arbeidsforhold));
         }
+    }
+
+    private boolean erTypeMedArbeidsforhold(Arbeidsforhold arbeidsforhold) {
+        return arbeidsforhold.getType().equals(no.nav.k9.kodeverk.uttak.UttakArbeidType.ARBEIDSTAKER.getKode()) ||
+            arbeidsforhold.getType().equals(no.nav.k9.kodeverk.uttak.UttakArbeidType.IKKE_YRKESAKTIV.getKode());
+    }
+
+    private PeriodeMedUtbetalingsgradDto lagPeriode(LukketPeriode periode, BigDecimal utbetalingsgrad) {
+        var kalkulusPeriode = new no.nav.folketrygdloven.kalkulus.felles.v1.Periode(periode.getFom(), periode.getTom());
+        return new PeriodeMedUtbetalingsgradDto(kalkulusPeriode, utbetalingsgrad);
     }
 
     private UtbetalingsgradArbeidsforholdDto lagArbeidsforhold(Arbeidsforhold arb) {
         return new UtbetalingsgradArbeidsforholdDto(lagAktør(arb),
             arb.getArbeidsforholdId() != null ? new InternArbeidsforholdRefDto(arb.getArbeidsforholdId()) : null,
-            new UttakArbeidType(arb.getType()));
+            mapUttakArbeidType(arb));
+    }
+
+    private UttakArbeidType mapUttakArbeidType(Arbeidsforhold arb) {
+        return new UttakArbeidType(arb.getType());
     }
 
     private Aktør lagAktør(Arbeidsforhold arb) {

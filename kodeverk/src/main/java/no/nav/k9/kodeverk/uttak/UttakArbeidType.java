@@ -26,6 +26,7 @@ public enum UttakArbeidType implements Kodeverdi {
     FRILANSER(AktivitetStatus.FRILANSER, "Frilans"),
 
     DAGPENGER(AktivitetStatus.DAGPENGER, "Dagpenger"),
+    SYKEPENGER_AV_DAGPENGER(AktivitetStatus.SYKEPENGER_AV_DAGPENGER, "Sykepenger basert på dagpenger"),
     KUN_YTELSE(AktivitetStatus.BRUKERS_ANDEL, "Kun ytelse"),
 
     IKKE_YRKESAKTIV(AktivitetStatus.IKKE_YRKESAKTIV, "Ikke yrkesaktiv"),
@@ -125,7 +126,13 @@ public enum UttakArbeidType implements Kodeverdi {
     }
 
     public boolean matcher(AktivitetStatus aktivitetStatus) {
-        return Objects.equals(this.kode, aktivitetStatus.getKode());
+        if (UttakArbeidType.IKKE_YRKESAKTIV.equals(this)) {
+            return Objects.equals(UttakArbeidType.ARBEIDSTAKER.getAktivitetStatus().getKode(), aktivitetStatus.getKode());
+        }
+        if (UttakArbeidType.INAKTIV.equals(this)) {
+            return Objects.equals(UttakArbeidType.INAKTIV.getAktivitetStatus().getKode(), aktivitetStatus.getKode());
+        }
+        return Objects.equals(this.getAktivitetStatus().getKode(), aktivitetStatus.getKode());
     }
 
 }

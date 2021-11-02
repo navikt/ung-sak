@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,9 +65,15 @@ public class TotrinnsBeregningDtoTjeneste {
             }
 
             if (FAKTA_ATFL_SN.equals(apDef)) {
-                List<FaktaOmBeregningTilfelle> tilfeller = Objects.requireNonNull(bg, "Mangler beregningsgrunnlag for " + bgTotrinn).getFaktaOmBeregningTilfeller();
-                dto.setFaktaOmBeregningTilfeller(tilfeller);
-                dto.setSkjæringstidspunkt(bg.getSkjæringstidspunkt());
+                if (bg != null) {
+                    List<FaktaOmBeregningTilfelle> tilfeller = bg.getFaktaOmBeregningTilfeller();
+                    dto.setFaktaOmBeregningTilfeller(tilfeller);
+                    dto.setSkjæringstidspunkt(bg.getSkjæringstidspunkt());
+                } else {
+                    List<FaktaOmBeregningTilfelle> tilfeller = bgTotrinn.getFaktaOmBeregningTilfeller();
+                    dto.setFaktaOmBeregningTilfeller(tilfeller);
+                    dto.setSkjæringstidspunkt(bgTotrinn.getSkjæringstidspunkt());
+                }
             }
 
             // TODO : er det verdt å returnere tom dto for andre tilfeller her?
@@ -90,11 +95,13 @@ public class TotrinnsBeregningDtoTjeneste {
     }
 
     private boolean erVarigEndringFastsattForSelvstendingNæringsdrivendeGittGrunnlag(BeregningsgrunnlagToTrinn bgTotrinn, Beregningsgrunnlag beregningsgrunnlag) {
-        Objects.requireNonNull(beregningsgrunnlag, "Fant ingen beregningsgrunnlag for " + bgTotrinn);
 
-        return beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
-            .flatMap(bgps -> bgps.getBeregningsgrunnlagPrStatusOgAndelList().stream())
-            .filter(andel -> andel.getAktivitetStatus().equals(AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE))
-            .anyMatch(andel -> andel.getOverstyrtPrÅr() != null);
+        if (beregningsgrunnlag != null) {
+            return beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
+                .flatMap(bgps -> bgps.getBeregningsgrunnlagPrStatusOgAndelList().stream())
+                .filter(andel -> andel.getAktivitetStatus().equals(AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE))
+                .anyMatch(andel -> andel.getOverstyrtPrÅr() != null);
+        }
+        return bgTotrinn.getFastsattVarigEndring();
     }
 }

@@ -1,86 +1,21 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
-import java.time.LocalDate;
 import java.util.Objects;
-import java.util.Set;
 
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class VurderStatusInput {
     private OpptjeningAktivitetType type;
     private BehandlingReferanse behandlingReferanse;
+    private DatoIntervallEntitet opptjeningsperiode;
     private Yrkesaktivitet registerAktivitet;
-    private Yrkesaktivitet overstyrtAktivitet;
-    private InntektArbeidYtelseGrunnlag iayGrunnlag;
-    private boolean harVærtSaksbehandlet;
-    private DatoIntervallEntitet opptjeningPeriode;
-    private LocalDate skjæringstidspunkt;
-    private Set<Inntektsmelding> inntektsmeldinger;
 
     public VurderStatusInput(OpptjeningAktivitetType type, BehandlingReferanse behandlingReferanse) {
         this.type = Objects.requireNonNull(type);
         this.behandlingReferanse = Objects.requireNonNull(behandlingReferanse);
-    }
-
-    public Yrkesaktivitet getRegisterAktivitet() {
-        return registerAktivitet;
-    }
-
-    public void setRegisterAktivitet(Yrkesaktivitet registerAktivitet) {
-        this.registerAktivitet = registerAktivitet;
-    }
-
-    public Yrkesaktivitet getOverstyrtAktivitet() {
-        return overstyrtAktivitet;
-    }
-
-    public void setOverstyrtAktivitet(Yrkesaktivitet overstyrtAktivitet) {
-        this.overstyrtAktivitet = overstyrtAktivitet;
-    }
-
-    public InntektArbeidYtelseGrunnlag getIayGrunnlag() {
-        return iayGrunnlag;
-    }
-
-    public void setGrunnlag(InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        this.iayGrunnlag = iayGrunnlag;
-    }
-
-    public boolean getHarVærtSaksbehandlet() {
-        return harVærtSaksbehandlet;
-    }
-
-    public void setHarVærtSaksbehandlet(boolean harVærtSaksbehandlet) {
-        this.harVærtSaksbehandlet = harVærtSaksbehandlet;
-    }
-
-    public DatoIntervallEntitet getOpptjeningPeriode() {
-        return opptjeningPeriode;
-    }
-
-    public void setOpptjeningPeriode(DatoIntervallEntitet opptjeningPeriode) {
-        this.opptjeningPeriode = opptjeningPeriode;
-    }
-
-    public LocalDate getSkjæringstidspunkt() {
-        return skjæringstidspunkt;
-    }
-
-    public void setSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
-        this.skjæringstidspunkt = skjæringstidspunkt;
-    }
-
-    public Set<Inntektsmelding> getInntektsmeldinger() {
-        return inntektsmeldinger;
-    }
-
-    public void setInntektsmeldinger(Set<Inntektsmelding> inntektsmeldinger) {
-        this.inntektsmeldinger = inntektsmeldinger;
     }
 
     public OpptjeningAktivitetType getType() {
@@ -89,5 +24,21 @@ public class VurderStatusInput {
 
     public BehandlingReferanse getBehandlingReferanse() {
         return behandlingReferanse;
+    }
+
+    public DatoIntervallEntitet getOpptjeningsperiode() {
+        return opptjeningsperiode;
+    }
+
+    public void setOpptjeningsperiode(DatoIntervallEntitet opptjeningsperiode) {
+        this.opptjeningsperiode = opptjeningsperiode;
+    }
+
+    public Yrkesaktivitet getRegisterAktivitet() {
+        return registerAktivitet;
+    }
+
+    public void setRegisterAktivitet(Yrkesaktivitet yrkesaktivitet) {
+        this.registerAktivitet = yrkesaktivitet;
     }
 }

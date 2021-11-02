@@ -12,6 +12,10 @@ public class AktivitetIdentifikator {
     private Arbeidsgiver arbeidsgiver;
     private InternArbeidsforholdRef arbeidsforhold;
 
+    public AktivitetIdentifikator(UttakArbeidType aktivitetType) {
+        this(aktivitetType, null, InternArbeidsforholdRef.nullRef());
+    }
+
     public AktivitetIdentifikator(UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforhold) {
         this.aktivitetType = Objects.requireNonNull(aktivitetType);
         this.arbeidsgiver = UttakArbeidType.ARBEIDSTAKER.equals(aktivitetType) ? Objects.requireNonNull(arbeidsgiver) : arbeidsgiver;

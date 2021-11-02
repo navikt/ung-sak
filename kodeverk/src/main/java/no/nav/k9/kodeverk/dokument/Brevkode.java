@@ -38,6 +38,7 @@ public class Brevkode implements Kodeverdi {
     public static final String SØKNAD_OMS_UTVIDETRETT_AO_KODE = "SØKNAD_OMS_UTVIDETRETT_AO";
     public static final String SØKNAD_UTBETALING_OMS_KODE = "SØKNAD_UTBETALING_OMS";
     public static final String SØKNAD_UTBETALING_OMS_AT_KODE = "SØKNAD_UTBETALING_OMS_AT";
+    public static final String FRAVÆRSKORRIGERING_IM_OMS_KODE = "FRAVÆRSKORRIGERING_IM_OMS";
     public static final String INNTEKTSMELDING_KODE = "INNTEKTSMELDING";
     // Match mot Deprecated {@link no.nav.k9.kodeverk.dokument.DokumentTypeId}
     public static final Brevkode INNTEKTSMELDING = new Brevkode(INNTEKTSMELDING_KODE, "4936", INNTEKTSMELDING_RANGERING);
@@ -48,14 +49,17 @@ public class Brevkode implements Kodeverdi {
      */
     public static final Brevkode SØKNAD_UTBETALING_OMS = new Brevkode(SØKNAD_UTBETALING_OMS_KODE, "NAV 09-35.01", SØKNAD_RANGERING);
     public static final Brevkode SØKNAD_UTBETALING_OMS_AT = new Brevkode(SØKNAD_UTBETALING_OMS_AT_KODE, "NAV 09-35.02", SØKNAD_RANGERING);
+    public static final Brevkode FRAVÆRSKORRIGERING_IM_OMS = new Brevkode(FRAVÆRSKORRIGERING_IM_OMS_KODE, FRAVÆRSKORRIGERING_IM_OMS_KODE, SØKNAD_RANGERING);
     public static final Brevkode SØKNAD_OMS_UTVIDETRETT_KS = new Brevkode(SØKNAD_OMS_UTVIDETRETT_KS_KODE, "NAV 09-06.05", SØKNAD_RANGERING);
     public static final Brevkode SØKNAD_OMS_UTVIDETRETT_MA = new Brevkode(SØKNAD_OMS_UTVIDETRETT_MA_KODE, "NAV 09-06.07", SØKNAD_RANGERING);
     public static final Brevkode SØKNAD_OMS_UTVIDETRETT_AO = new Brevkode(SØKNAD_OMS_UTVIDETRETT_AO_KODE, "NAV 09-06.10", SØKNAD_RANGERING);
     public static final String PLEIEPENGER_BARN_SOKNAD_KODE = "PLEIEPENGER_SOKNAD";
+    public static final String SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE_KODE = "PLEIEPENGER_LIVETS_SLUTTFASE_SOKNAD";
     /**
      * Pleiepenger brevkoder.
      */
     public static final Brevkode PLEIEPENGER_BARN_SOKNAD = new Brevkode(PLEIEPENGER_BARN_SOKNAD_KODE, "NAV 09-11.05", SØKNAD_RANGERING);
+    public static final Brevkode SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE = new Brevkode(SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE_KODE, "NAV 09-12.05", SØKNAD_RANGERING);
     // Default
     public static final Brevkode UDEFINERT = new Brevkode("-", null, VEDLEGG_RANGERING);
     public static final String KODEVERK = "DOKUMENT_TYPE_ID";
@@ -63,6 +67,7 @@ public class Brevkode implements Kodeverdi {
 
     public static final Set<Brevkode> SØKNAD_TYPER = Set.of(
         PLEIEPENGER_BARN_SOKNAD,
+        SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE,
         SØKNAD_UTBETALING_OMS,
         SØKNAD_UTBETALING_OMS_AT,
         SØKNAD_OMS_UTVIDETRETT_KS,

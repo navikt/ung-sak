@@ -30,9 +30,11 @@ import no.nav.k9.sak.typer.Periode;
 @Dependent
 public class UtledStatusPåPerioderTjeneste {
 
-    public StatusForPerioderPåBehandling utled(Behandling behandling, Set<KravDokument> kravdokumenter,
+    public StatusForPerioderPåBehandling utled(Behandling behandling,
+                                               Set<KravDokument> kravdokumenter,
                                                Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
                                                NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
+                                               NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles,
                                                NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter) {
 
         var relevanteDokumenterMedPeriode = utledKravdokumenterTilkommetIBehandlingen(kravdokumenter, kravdokumenterMedPeriode);
@@ -47,6 +49,12 @@ public class UtledStatusPåPerioderTjeneste {
         for (LocalDateTimeline<ÅrsakerTilVurdering> linje : relevanteTidslinjer) {
             tidslinje = tidslinje.combine(linje, this::mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
+
+        var tilbakestillingSegmenter = perioderSomSkalTilbakestilles.stream()
+            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.TRUKKET_KRAV))))
+            .collect(Collectors.toList());
+
+        tidslinje = tidslinje.combine(new LocalDateTimeline<>(tilbakestillingSegmenter), this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         var endringFraBruker = andreRelevanteDokumenterForPeriodenTilVurdering.stream()
             .map(entry -> tilSegments(entry, utledRevurderingÅrsak(behandling)))

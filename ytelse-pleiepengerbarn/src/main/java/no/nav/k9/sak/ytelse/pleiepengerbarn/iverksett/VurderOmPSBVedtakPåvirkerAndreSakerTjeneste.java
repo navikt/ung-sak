@@ -32,6 +32,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
@@ -47,6 +48,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
     private SykdomGrunnlagService sykdomGrunnlagService;
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
+    private SamtidigUttakTjeneste samtidigUttakTjeneste;
 
     VurderOmPSBVedtakPåvirkerAndreSakerTjeneste() {
     }
@@ -59,7 +61,8 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
                                                        SykdomVurderingRepository sykdomVurderingRepository,
                                                        SykdomGrunnlagService sykdomGrunnlagService,
                                                        ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
-                                                       EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste) {
+                                                       EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
+                                                       SamtidigUttakTjeneste samtidigUttakTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -68,6 +71,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
+        this.samtidigUttakTjeneste = samtidigUttakTjeneste;
     }
 
     @Override
@@ -85,11 +89,12 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
                 var sisteBehandlingPåKandidat = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(kandidatFagsak.getId()).orElseThrow();
                 boolean skalRevurderesPgaSykdom = vurderBehovForRevurderingPgaSykdom(pleietrengende, kandidatsaksnummer, sisteBehandlingPåKandidat);
                 var referanse = BehandlingReferanse.fra(sisteBehandlingPåKandidat);
-                var skalRevurderesPgaEtablertTilsyn = skalRevurderesPgaEtablertTilsyn(referanse);
-                var skalRevurderesPgaNattevåkOgBeredskap = skalRevurderesPgaNattevåkOgBeredskap(referanse);
-                if (skalRevurderesPgaSykdom || skalRevurderesPgaEtablertTilsyn || skalRevurderesPgaNattevåkOgBeredskap) {
+                boolean skalRevurderesPgaEtablertTilsyn = skalRevurderesPgaEtablertTilsyn(referanse);
+                boolean skalRevurderesPgaNattevåkOgBeredskap = skalRevurderesPgaNattevåkOgBeredskap(referanse);
+                boolean skalRevurderesPgaEndretUttak = samtidigUttakTjeneste.isEndringerMedUbesluttedeData(referanse);
+                if (skalRevurderesPgaSykdom || skalRevurderesPgaEtablertTilsyn || skalRevurderesPgaNattevåkOgBeredskap || skalRevurderesPgaEndretUttak) {
                     result.add(kandidatsaksnummer);
-                    log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}", kandidatsaksnummer, skalRevurderesPgaSykdom, skalRevurderesPgaEtablertTilsyn, skalRevurderesPgaNattevåkOgBeredskap);
+                    log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}", kandidatsaksnummer, skalRevurderesPgaSykdom, skalRevurderesPgaEtablertTilsyn, skalRevurderesPgaNattevåkOgBeredskap, skalRevurderesPgaEndretUttak);
                 }
             }
         }

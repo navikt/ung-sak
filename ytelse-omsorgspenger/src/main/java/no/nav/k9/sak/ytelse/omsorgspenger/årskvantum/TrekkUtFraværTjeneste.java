@@ -83,7 +83,7 @@ public class TrekkUtFraværTjeneste {
                 // Kan inntreffe dersom IM er av variant ikkeFravaer eller ikke refusjon. Da brukes fraværsperioder kopiert fra forrige behandling
                 // TODO: Logg heller dokumenter tilknyttet behandling
                 log.warn("Kun kravdokument uten fraværsperioder er knyttet til behandling. Fraværsperioder fra tidligere behandlinger brukes, forventer noop for ytelse.");
-                var oppgittOpt = grunnlagRepository.hentOppittFraværHvisEksisterer(behandling.getUuid());
+                var oppgittOpt = grunnlagRepository.hentSammenslåttOppgittFraværHvisEksisterer(behandling.getId());
                 fravær = new ArrayList<>(oppgittOpt.orElseThrow().getPerioder());
             } else {
                 fravær = fraværFraKravDokument;
@@ -185,6 +185,7 @@ public class TrekkUtFraværTjeneste {
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         sjekkOmInntektsmeldingerMatcher(inntektsmeldingerJournalposter, inntektsmeldinger);
+        inntektsmeldinger = fjernInntektsmeldingerUtenRefusjonskrav(inntektsmeldinger);
         return inntektsmeldingMapper.mapTilSøktePerioder(inntektsmeldinger);
     }
 
@@ -209,6 +210,14 @@ public class TrekkUtFraværTjeneste {
                     + " som er knyttet til behandlingen, men finner ikke disse i abakus (har følgende i abakus: "
                     + abakusJournalposter + ", mangler " + journalposterSomMangler + ")");
         }
+    }
+
+    // Skal ikke opprette kravperioder for inntektsmeldinger uten refusjonskrav
+    private LinkedHashSet<Inntektsmelding> fjernInntektsmeldingerUtenRefusjonskrav(LinkedHashSet<Inntektsmelding> inntektsmeldinger) {
+        return inntektsmeldinger
+            .stream()
+            .filter(im -> im.harRefusjonskrav())
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     // Slår sammen overlappende perioder fra kravdokumenter (IM-er, søknader)

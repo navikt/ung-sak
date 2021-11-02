@@ -35,9 +35,13 @@ import no.nav.folketrygdloven.kalkulus.iay.inntekt.v1.UtbetalingsPostDto;
 import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.iay.ytelse.v1.YtelseAnvistDto;
 import no.nav.folketrygdloven.kalkulus.iay.ytelse.v1.YtelseDto;
+import no.nav.folketrygdloven.kalkulus.iay.ytelse.v1.YtelseFordelingDto;
+import no.nav.folketrygdloven.kalkulus.iay.ytelse.v1.YtelseGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.iay.ytelse.v1.YtelserDto;
 import no.nav.folketrygdloven.kalkulus.kodeverk.ArbeidType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.ArbeidsforholdHandlingType;
+import no.nav.folketrygdloven.kalkulus.kodeverk.Arbeidskategori;
+import no.nav.folketrygdloven.kalkulus.kodeverk.InntektPeriodeType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.InntektskildeType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.InntektspostType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.NaturalYtelseType;
@@ -75,6 +79,7 @@ import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.YtelseStørrelse;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -189,17 +194,32 @@ public class TilKalkulusMapper {
 
     public static YtelserDto mapYtelseDto(List<Ytelse> alleYtelser) {
         List<YtelseDto> ytelserDto = alleYtelser.stream().map(ytelse -> new YtelseDto(
-            mapBeløp(ytelse.getYtelseGrunnlag().flatMap(YtelseGrunnlag::getVedtaksDagsats)),
-            mapYtelseAnvist(ytelse.getYtelseAnvist()),
-            new RelatertYtelseType(ytelse.getYtelseType().getKode()),
-            mapPeriode(ytelse.getPeriode()),
-            mapTemaUnderkategori(ytelse)))
+                mapBeløp(ytelse.getYtelseGrunnlag().flatMap(YtelseGrunnlag::getVedtaksDagsats)),
+                mapYtelseAnvist(ytelse.getYtelseAnvist()),
+                new RelatertYtelseType(ytelse.getYtelseType().getKode()),
+                mapPeriode(ytelse.getPeriode()),
+                mapTemaUnderkategori(ytelse),
+                mapYtelseGrunnlag(ytelse.getYtelseGrunnlag())))
             .collect(Collectors.toList());
 
         if (!ytelserDto.isEmpty()) {
             return new YtelserDto(ytelserDto);
         }
         return null;
+    }
+
+    private static YtelseGrunnlagDto mapYtelseGrunnlag(Optional<YtelseGrunnlag> ytelseGrunnlag) {
+        return ytelseGrunnlag.map(yg -> new YtelseGrunnlagDto(Arbeidskategori.fraKode(yg.getArbeidskategori().map(no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori::getKode).orElse(null)), mapYtelseFordeling(yg.getYtelseStørrelse()))).orElse(null);
+    }
+
+    private static List<YtelseFordelingDto> mapYtelseFordeling(List<YtelseStørrelse> ytelseStørrelse) {
+        return ytelseStørrelse.stream()
+            .map(ys -> new YtelseFordelingDto(mapVirksomhet(ys), InntektPeriodeType.fraKode(ys.getHyppighet().getKode()), ys.getBeløp().getVerdi(), ys.getErRefusjon()))
+            .collect(Collectors.toList());
+    }
+
+    private static Organisasjon mapVirksomhet(YtelseStørrelse ys) {
+        return ys.getVirksomhet().map(orgNummer -> new Organisasjon(orgNummer.getOrgNummer())).orElse(null);
     }
 
     // TODO (OJR): Skal vi mappe dette slik eller tåler Kalkulus UNDEFINED("-")
@@ -349,7 +369,7 @@ public class TilKalkulusMapper {
     public OppgittOpptjeningDto mapTilOppgittOpptjeningDto(OppgittOpptjening oppgittOpptjening) {
         if (oppgittOpptjening != null) {
             return new OppgittOpptjeningDto(
-                oppgittOpptjening.getFrilans().map(oppgittFrilans -> mapOppgittFrilansOppdragListe(oppgittFrilans)).orElse(null),
+                oppgittOpptjening.getFrilans().map(this::mapOppgittFrilansOppdragListe).orElse(null),
                 mapOppgittEgenNæringListe(oppgittOpptjening.getEgenNæring()),
                 mapOppgittArbeidsforholdDto(oppgittOpptjening.getOppgittArbeidsforhold()));
         }
@@ -370,6 +390,7 @@ public class TilKalkulusMapper {
     private OppgittFrilansDto mapOppgittFrilansOppdragListe(OppgittFrilans oppgittFrilans) {
         List<OppgittFrilansInntekt> oppdrag = oppgittFrilans.getFrilansoppdrag()
             .stream()
+            .filter(o -> o.getInntekt() != null)
             .map(mapFrilansOppdrag())
             .collect(Collectors.toList());
         return new OppgittFrilansDto(Boolean.TRUE.equals(oppgittFrilans.getErNyoppstartet()), oppdrag);

@@ -40,6 +40,7 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
@@ -65,9 +66,11 @@ public class UttakRestKlient {
             .setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
 
     private ObjectReader uttaksplanReader = objectMapper.readerFor(Uttaksplan.class);
+    private ObjectReader simuleringReader = objectMapper.readerFor(Simulering.class);
 
     private OidcRestClient restKlient;
     private URI endpointUttaksplan;
+    private URI endpointSimuleringUttaksplan;
     private String psbUttakToken;
 
     protected UttakRestKlient() {
@@ -80,6 +83,7 @@ public class UttakRestKlient {
             @KonfigVerdi(value = "NAV_PSB_UTTAK_TOKEN", defaultVerdi = "no_secret") String psbUttakToken) {
         this.restKlient = restKlient;
         this.endpointUttaksplan = toUri(endpoint, "/uttaksplan");
+        this.endpointSimuleringUttaksplan = toUri(endpoint, "/uttaksplan/simulering");
         this.psbUttakToken = psbUttakToken;
     }
 
@@ -90,6 +94,18 @@ public class UttakRestKlient {
             var json = objectMapper.writer().writeValueAsString(request);
             kall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
             return utførOgHent(kall, json, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
+        } catch (IOException | URISyntaxException e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilUttak(UUID.fromString(request.getBehandlingUUID()), e).toException();
+        }
+    }
+    
+    public Simulering simulerUttaksplan(Uttaksgrunnlag request) {
+        URIBuilder builder = new URIBuilder(endpointSimuleringUttaksplan);
+        try {
+            HttpPost kall = new HttpPost(builder.build());
+            var json = objectMapper.writer().writeValueAsString(request);
+            kall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+            return utførOgHent(kall, json, new ObjectReaderResponseHandler<>(endpointSimuleringUttaksplan, simuleringReader));
         } catch (IOException | URISyntaxException e) {
             throw RestTjenesteFeil.FEIL.feilKallTilUttak(UUID.fromString(request.getBehandlingUUID()), e).toException();
         }

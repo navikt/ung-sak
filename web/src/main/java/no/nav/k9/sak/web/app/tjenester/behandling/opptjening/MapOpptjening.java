@@ -21,34 +21,35 @@ import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
+import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
-import no.nav.k9.sak.domene.opptjening.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
+import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.kontrakt.opptjening.FastsattOpptjeningDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningAktivitetDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningPeriodeDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningerDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
 @Dependent
 class MapOpptjening {
-    private OpptjeningsperioderTjeneste forSaksbehandlingTjeneste;
+    private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    private OpptjeningAktivitetVurderingOpptjeningsvilkår vurderForOpptjeningsvilkår;
 
     @Inject
-    MapOpptjening(OpptjeningsperioderTjeneste forSaksbehandlingTjeneste,
+    MapOpptjening(OpptjeningsperioderTjeneste opptjeningsperioderTjeneste,
                   ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                   InntektArbeidYtelseTjeneste iayTjeneste) {
-        this.forSaksbehandlingTjeneste = forSaksbehandlingTjeneste;
+        this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.iayTjeneste = iayTjeneste;
+        this.vurderForOpptjeningsvilkår = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
     }
 
     private List<OpptjeningDto> mapOpptjeninger(BehandlingReferanse ref, Long behandlingId, OpptjeningResultat opptjeningResultat) {
@@ -63,7 +64,7 @@ class MapOpptjening {
 
         for (var opptjening : opptjeningResultat.getOpptjeningPerioder()) {
             OpptjeningDto resultat = new OpptjeningDto();
-            var relevanteOpptjeningAktiviteter = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, iayGrunnlag, opptjening, opptjening.getSkjæringstidspunkt());
+            var relevanteOpptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjening.getOpptjeningPeriode());
             List<OpptjeningAktivitet> opptjeningAktivitet = opptjening.getOpptjeningAktivitet();
             resultat.setFastsattOpptjening(new FastsattOpptjeningDto(opptjening.getFom(),
                 opptjening.getTom(), mapFastsattOpptjening(opptjening),
@@ -83,7 +84,7 @@ class MapOpptjening {
         Long behandlingId = ref.getBehandlingId();
 
         var opptjening = new OpptjeningerDto();
-        var opptjeningResultat = forSaksbehandlingTjeneste.hentOpptjeningHvisFinnes(behandlingId);
+        var opptjeningResultat = opptjeningsperioderTjeneste.hentOpptjeningHvisFinnes(behandlingId);
         if (opptjeningResultat.isPresent()) {
             var opptjeninger = new ArrayList<OpptjeningDto>();
             List<OpptjeningDto> opptjeningDtoer = mapOpptjeninger(ref, behandlingId, opptjeningResultat.get());
@@ -118,7 +119,6 @@ class MapOpptjening {
             dto.setArbeidsgiver(oap.getArbeidsgiverUtlandNavn());
         }
         settVurdering(oap, dto);
-        leggPåFellesEgenskaper(oap, dto);
         return dto;
     }
 
@@ -128,17 +128,6 @@ class MapOpptjening {
         } else if (oap.getVurderingsStatus().equals(VurderingsStatus.UNDERKJENT)) {
             dto.setErGodkjent(false);
         }
-    }
-
-    private void leggPåFellesEgenskaper(OpptjeningsperiodeForSaksbehandling oap, OpptjeningAktivitetDto dto) {
-        dto.setErManueltOpprettet(oap.getErManueltRegistrert());
-        dto.setBegrunnelse(oap.getBegrunnelse());
-        dto.setErEndret(oap.erManueltBehandlet());
-        dto.setErPeriodeEndret(oap.getErPeriodeEndret());
-        dto.setArbeidsforholdRef(Optional.ofNullable(oap.getOpptjeningsnøkkel())
-            .flatMap(Opptjeningsnøkkel::getArbeidsforholdRef)
-            .map(InternArbeidsforholdRef::getReferanse)
-            .orElse(null));
     }
 
     private void lagOpptjeningAktivitetDtoForArbeidsgiver(OpptjeningsperiodeForSaksbehandling oap, OpptjeningAktivitetDto dto, boolean kunstig, List<ArbeidsforholdOverstyring> overstyringer) {
@@ -180,5 +169,4 @@ class MapOpptjening {
     private Optional<ArbeidsgiverOpplysninger> hentNavnTilManueltArbeidsforhold(List<ArbeidsforholdOverstyring> overstyringer) {
         return FinnNavnForManueltLagtTilArbeidsforholdTjeneste.finnNavnTilManueltLagtTilArbeidsforhold(overstyringer);
     }
-
 }

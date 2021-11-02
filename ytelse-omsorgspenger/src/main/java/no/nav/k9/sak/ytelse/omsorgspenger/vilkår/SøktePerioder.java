@@ -26,7 +26,7 @@ class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        var søknadsperioder = grunnlagRepository.hentAlleFraværPerioder(behandlingId);
+        var søknadsperioder = grunnlagRepository.hentSammenslåtteFraværPerioder(behandlingId);
 
         if (søknadsperioder.isEmpty()) {
             return Collections.emptyNavigableSet();

@@ -25,7 +25,7 @@ import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingBeregning;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
-import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
+import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Periode;
 
@@ -34,7 +34,7 @@ import no.nav.k9.sak.typer.Periode;
 public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
     private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
-    private Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser;
+    private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
 
     private OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
@@ -47,9 +47,9 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
     }
 
     @Inject
-    public OmsorgspengerOpptjeningForBeregningTjeneste(@Any Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser,
+    public OmsorgspengerOpptjeningForBeregningTjeneste(OpptjeningsperioderTjeneste opptjeningsperioderTjeneste,
                                                        OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
-        this.opptjeningsperioderTjenesteInstanser = opptjeningsperioderTjenesteInstanser;
+        this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
         this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
     }
 
@@ -63,10 +63,6 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
     private List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregning(BehandlingReferanse behandlingReferanse,
                                                                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                                                       LocalDate stp) {
-        OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste = FagsakYtelseTypeRef.Lookup
-            .find(OpptjeningsperioderUtenOverstyringTjeneste.class, opptjeningsperioderTjenesteInstanser, behandlingReferanse.getFagsakYtelseType())
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningsperioderUtenOverstyringTjeneste.class.getSimpleName() + " for " + behandlingReferanse.getBehandlingUuid()));
-
         Long behandlingId = behandlingReferanse.getId();
 
         var opptjeningResultat = opptjeningsperioderTjeneste.hentOpptjeningHvisFinnes(behandlingId);
@@ -75,9 +71,7 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
         }
         var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(stp)).orElseThrow(() -> new IllegalStateException("Finner ingen opptjeningsaktivitet for skjæringstidspunkt=" + stp));
 
-        var oppgittOpptjening = finnOppgittOpptjening(behandlingReferanse, iayGrunnlag, stp).orElse(null);
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(),
-            oppgittOpptjening, Set.of());
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode());
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))

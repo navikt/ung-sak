@@ -59,13 +59,13 @@ public class PerioderMedInaktivitetUtleder {
                 var yrkesaktivIPeriodeMedYtelse = arbeidsgiverTidslinje.intersection(periodeMedYtelse.getLocalDateInterval());
 
                 if (yrkesaktivIPeriodeMedYtelse.isEmpty()) {
-                    break;
+                    continue;
                 }
 
                 var ikkeAktivPeriode = new LocalDateTimeline<>(List.of(periodeMedYtelse)).disjoint(yrkesaktivIPeriodeMedYtelse);
 
                 if (ikkeAktivPeriode.isEmpty()) {
-                    break;
+                    continue;
                 }
 
                 if (ikkeAktivPeriode.toSegments().stream().noneMatch(it -> Objects.equals(it.getFom(), periodeMedYtelse.getFom()))) {

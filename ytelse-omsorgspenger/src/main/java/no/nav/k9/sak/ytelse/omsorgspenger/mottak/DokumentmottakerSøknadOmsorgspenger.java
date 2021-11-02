@@ -7,7 +7,7 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -15,6 +15,7 @@ import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -42,10 +43,7 @@ import no.nav.k9.sak.mottak.dokumentmottak.OppgittOpptjeningMapper;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
@@ -54,11 +52,12 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 @FagsakYtelseTypeRef("OMP")
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_AT_KODE)
+@DokumentGruppeRef(Brevkode.FRAVÆRSKORRIGERING_IM_OMS_KODE)
 public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
-    private OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository;
+    private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private FagsakRepository fagsakRepository;
     private ProsessTaskRepository prosessTaskRepository;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
@@ -76,7 +75,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     @Inject
     DokumentmottakerSøknadOmsorgspenger(BehandlingRepositoryProvider repositoryProvider,
-                                        OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
+                                        OmsorgspengerGrunnlagRepository grunnlagRepository,
                                         ProsessTaskRepository prosessTaskRepository,
                                         OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
                                         SøknadParser søknadParser,
@@ -86,7 +85,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-        this.omsorgspengerGrunnlagRepository = omsorgspengerGrunnlagRepository;
+        this.grunnlagRepository = grunnlagRepository;
         this.prosessTaskRepository = prosessTaskRepository;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
         this.søknadParser = søknadParser;
@@ -125,15 +124,19 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
      */
     private void lagreOppgittOpptjeningFraSøknad(Søknad søknad, Behandling behandling, MottattDokument dokument) {
         try {
-            OpptjeningAktivitet opptjeningAktiviteter = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getAktivitet();
-            var request = oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, opptjeningAktiviteter);
-            if (request.getOppgittOpptjening() == null) {
+            var utbetaling = (OmsorgspengerUtbetaling) søknad.getYtelse();
+            var opptjeningDto = Optional.ofNullable(utbetaling.getAktivitet())
+                .map(aktiviteter -> oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, aktiviteter))
+                .map(OppgittOpptjeningMottattRequest::getOppgittOpptjening)
+                .orElse(null);
+            if (opptjeningDto == null) {
                 // Ingenting mer som skal lagres - dokument settes som ferdig
                 mottatteDokumentRepository.oppdaterStatus(List.of(dokument), DokumentStatus.GYLDIG);
                 return;
             }
+
             var enkeltTask = new ProsessTaskData(AsyncAbakusLagreOpptjeningTask.TASKTYPE);
-            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
+            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(opptjeningDto);
             enkeltTask.setPayload(payload);
 
             enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, dokument.getJournalpostId().getVerdi());
@@ -181,20 +184,14 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         var behandlingId = behandling.getId();
         var fagsakId = behandling.getFagsakId();
 
-        // TODO: vurder om aggregering av perioder kan gjøres smidigere
-        Set<OppgittFraværPeriode> søktFravær = new LinkedHashSet<>();
-        var søktFraværFraTidligere = omsorgspengerGrunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId)
-            .map(OppgittFravær::getPerioder)
-            .orElse(Set.of());
-        var søktFraværFraSøknad = mapper.map(ytelse, søker, journalpostId);
-        søktFravær.addAll(søktFraværFraTidligere);
-        søktFravær.addAll(søktFraværFraSøknad);
+        var fraværFraSøknad = mapper.mapFraværFraSøknad(journalpostId, ytelse, søker, behandling);
+        grunnlagRepository.lagreOgFlushOppgittFraværFraSøknad(behandlingId, fraværFraSøknad);
 
-        var fraværFraSøknad = new OppgittFravær(søktFravær);
-        omsorgspengerGrunnlagRepository.lagreOgFlushOppgittFraværFraSøknad(behandlingId, fraværFraSøknad);
+        var fraværskorrigeringerIm = mapper.mapFraværskorringeringIm(journalpostId, ytelse, behandling);
+        grunnlagRepository.lagreOgFlushFraværskorrigeringerIm(behandlingId, fraværskorrigeringerIm);
 
         // Utvide fagsakperiode
-        var maksPeriode = omsorgspengerGrunnlagRepository.hentMaksPeriode(behandlingId).orElseThrow();
+        var maksPeriode = grunnlagRepository.hentMaksPeriode(behandlingId).orElseThrow();
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
     }
 

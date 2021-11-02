@@ -262,7 +262,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             BehandlingStatus.UTREDES, BehandlingStegType.INREG_AVSL, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P4D", EnumSet.of(OMP, PSB)),
     AUTO_VENT_BRUKER_70_ÅR(AksjonspunktKodeDefinisjon.AUTO_VENT_BRUKER_70_ÅR, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet, bruker 70år ved refusjonskrav",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OPPTJENING_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", EnumSet.of(OMP, PSB)),
-
+    
     // Gruppe : 80xx (FRISINN)
     AUTO_VENT_FRISINN_BEREGNING(AksjonspunktKodeDefinisjon.AUTO_VENT_FRISINN_BEREGNING, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",
             BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P1D", EnumSet.of(FRISINN)),
@@ -280,7 +280,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     KONTROLLER_LEGEERKLÆRING(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE,
             AksjonspunktType.MANUELL, "Kontroller legeerklæring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKVILKÅR, VurderingspunktType.UT,
-            VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, FORBLI, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
+            VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, SkjermlenkeType.FAKTA_OM_MEDISINSK, ENTRINN, FORBLI, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
     VURDER_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE,
             AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT,
             VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN, EnumSet.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO)),
@@ -310,6 +310,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     MANGLER_AKTIVITETER(AksjonspunktKodeDefinisjon.MANGLER_AKTIVITETER, AksjonspunktType.MANUELL,
         "Bruker har ikke oppgitt alle arbeidsgiverne sine", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
         VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, ENTRINN, FORBLI, AVBRYTES, EnumSet.of(PSB)),
+    VENT_ANNEN_PSB_SAK(AksjonspunktKodeDefinisjon.VENT_ANNEN_PSB_SAK_KODE, AksjonspunktType.MANUELL,
+        "En annen sak tilknyttet barnet må behandles frem til uttak, eller besluttes, før denne saken kan behandles videre.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR,
+        UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(PSB)),
 
 
     // Gruppe : 999x

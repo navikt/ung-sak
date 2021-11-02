@@ -89,12 +89,14 @@ public class PleiepengerUttakRestTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
 
         var mangler = manglendeArbeidstidUtleder.utledMangler(BehandlingReferanse.fra(behandling));
-        return new ManglendeArbeidstidDto(mangler.entrySet().stream().map(this::mapArbeidsgiver).collect(Collectors.toList()));
+        return new ManglendeArbeidstidDto(mangler.entrySet()
+            .stream()
+            .map(this::mapArbeidsgiver).collect(Collectors.toList()));
     }
 
     private ArbeidsgiverMedPerioderSomManglerDto mapArbeidsgiver(Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> entry) {
         var arbeidsgiver = entry.getKey().getArbeidsgiver();
-        var uttakArbeidsgiver = new UttakArbeidsforhold(arbeidsgiver.getArbeidsgiverOrgnr(), arbeidsgiver.getAktørId(), entry.getKey().getAktivitetType(), null);
+        var uttakArbeidsgiver = new UttakArbeidsforhold(arbeidsgiver != null ? arbeidsgiver.getArbeidsgiverOrgnr() : null, arbeidsgiver != null ? arbeidsgiver.getAktørId() : null, entry.getKey().getAktivitetType(), null);
         var perioder = entry.getValue().stream().map(it -> new Periode(it.getFom(), it.getTom())).collect(Collectors.toList());
 
         return new ArbeidsgiverMedPerioderSomManglerDto(uttakArbeidsgiver, perioder);

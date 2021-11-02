@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.iay.modell;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -26,7 +25,12 @@ public class InntektArbeidYtelseGrunnlag {
     @ChangeTracked
     private InntektArbeidYtelseAggregat register;
 
-    @ChangeTracked
+    /**
+     * @deprecated overstyring av opptjeningsaktiviteter ble fjernet fra k9 2021-09-16
+     * Historiske overstyringer vil fortsatt være persistert her
+     */
+    @DiffIgnore
+    @Deprecated
     private InntektArbeidYtelseAggregat saksbehandlet;
 
     @ChangeTracked
@@ -89,6 +93,7 @@ public class InntektArbeidYtelseGrunnlag {
      * Returnerer en overstyrt versjon av aggregat. Hvis saksbehandler har løst et aksjonspunkt i forbindele med
      * opptjening vil det finnes et overstyrt aggregat, gjelder for FØR første dag i permisjonsuttaket (skjæringstidspunktet)
      */
+    @Deprecated
     public Optional<InntektArbeidYtelseAggregat> getSaksbehandletVersjon() {
         return Optional.ofNullable(saksbehandlet);
     }
@@ -103,13 +108,6 @@ public class InntektArbeidYtelseGrunnlag {
      */
     public Optional<InntektArbeidYtelseAggregat> getRegisterVersjon() {
         return Optional.ofNullable(register);
-    }
-
-    /**
-     * Returnere TRUE hvis det finnes en overstyr versjon, sjekker både FØR og ETTER
-     */
-    public boolean harBlittSaksbehandlet() {
-        return getSaksbehandletVersjon().isPresent();
     }
 
     /**
@@ -172,10 +170,6 @@ public class InntektArbeidYtelseGrunnlag {
             return aktørInntekt.stream().findFirst();
         }
         return Optional.empty();
-    }
-
-    public Collection<AktørInntekt> getAlleAktørInntektFraRegister() {
-        return register != null ? register.getAktørInntekt() : Collections.emptyList();
     }
 
     /**

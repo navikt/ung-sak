@@ -103,22 +103,6 @@ class MellomregningAktivitetData {
         this.aktivitetAntattGodkjent = aktivitetAntattGodkjent;
     }
 
-    LocalDateTimeline<Boolean> getAktivitetManueltGodkjent() {
-        return aktivitetManueltGodkjent;
-    }
-
-    void setAktivitetManueltGodkjent(LocalDateTimeline<Boolean> aktivitetManueltGodkjent) {
-        this.aktivitetManueltGodkjent = aktivitetManueltGodkjent;
-    }
-
-    LocalDateTimeline<Boolean> getAktivitetManueltUnderkjent() {
-        return aktivitetManueltUnderkjent;
-    }
-
-    void setAktivitetManueltUnderkjent(LocalDateTimeline<Boolean> aktivitetManueltUnderkjent) {
-        this.aktivitetManueltUnderkjent = aktivitetManueltUnderkjent;
-    }
-
     LocalDateTimeline<Boolean> getAktivitetTidslinjer() {
         return aktivitetTidslinjer;
     }

@@ -162,11 +162,12 @@ public class AksjonspunktRepository {
 
     /** Returnerer alle behandlinger med aksjonspunkt som er opprettet innenfor periode. */
     @SuppressWarnings("unchecked")
-    public Map<Behandling, Aksjonspunkt> hentAksjonspunkterForKode(LocalDate fom, LocalDate tom, String kode) {
+    public Map<Behandling, Aksjonspunkt> hentAksjonspunkterForKodeUtenVenteÅrsak(LocalDate fom, LocalDate tom, String kode) {
         String sql = "select distinct b.* from behandling b"
             + " inner join aksjonspunkt a on a.behandling_id=b.id"
-            + " where a.aksjonspunkt_def = :def and a.opprettet_tid between :fom and :tom" +
-            " and a.aksjonspunkt_status in (:statuser)";
+            + " where a.aksjonspunkt_def = :def and a.opprettet_tid between :fom and :tom"
+            + " and a.vent_aarsak is null"
+            + " and a.aksjonspunkt_status in (:statuser)";
         List<Behandling> list = em
             .createNativeQuery(sql, Behandling.class)
             .setParameter("fom", fom)

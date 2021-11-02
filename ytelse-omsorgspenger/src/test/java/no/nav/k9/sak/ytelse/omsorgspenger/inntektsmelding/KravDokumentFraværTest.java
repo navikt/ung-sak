@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -232,16 +233,18 @@ public class KravDokumentFraværTest {
     @Test
     public void skal_takle_søknader_om_utbetaling_til_frilanser() {
         JournalpostId journalpost1 = new JournalpostId("1");
+        JournalpostId journalpost2 = new JournalpostId("2");
         LocalDateTime nå = LocalDateTime.now();
         LocalDate idag = nå.toLocalDate();
+        var kravDok1 = new KravDokument(journalpost1, nå.minusMinutes(15), KravDokumentType.SØKNAD);
+        var kravDok2 = new KravDokument(journalpost2, nå.minusMinutes(5), KravDokumentType.SØKNAD);
 
         var input = Map.of(
-            new KravDokument(journalpost1, nå.minusMinutes(15), KravDokumentType.SØKNAD),
-            Arrays.asList(lagSøktPeriode(journalpost1, idag.minusDays(10), idag.minusDays(9), UttakArbeidType.FRILANSER)),
-            new KravDokument(journalpost1, nå.minusMinutes(5), KravDokumentType.SØKNAD),
-            Arrays.asList(lagSøktPeriode(journalpost1, idag.minusDays(5), idag.minusDays(5), UttakArbeidType.FRILANSER)));
+            kravDok1, Arrays.asList(lagSøktPeriode(journalpost1, idag.minusDays(10), idag.minusDays(9), UttakArbeidType.FRILANSER)),
+            kravDok2, Arrays.asList(lagSøktPeriode(journalpost2, idag.minusDays(5), idag.minusDays(5), UttakArbeidType.FRILANSER)));
 
         List<WrappedOppgittFraværPeriode> resultat = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(input);
+
         assertThat(resultat).hasSize(2);
         WrappedOppgittFraværPeriode fp1 = resultat.get(0);
         assertThat(fp1.getPeriode().getAktivitetType()).isEqualTo(UttakArbeidType.FRILANSER);
@@ -253,6 +256,44 @@ public class KravDokumentFraværTest {
         assertThat(fp2.getPeriode().getTom()).isEqualTo(idag.minusDays(5));
     }
 
+    @Test
+    public void skal_prioritere_fravær_fra_im_over_fravær_fra_søknad() {
+        // IM mottas først, men prioriteres likevel over søknad
+        var innsendingIm = LocalDateTime.now().plusDays(1);
+        var innsendingsSøknad = LocalDateTime.now().minusDays(10);
+
+        var im = InntektsmeldingBuilder.builder()
+            .medJournalpostId("1")
+            .medInnsendingstidspunkt(innsendingIm)
+            .medOppgittFravær(List.of(new PeriodeAndel(LocalDate.now().minusDays(10), LocalDate.now(), Duration.ZERO)))
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
+            .medArbeidsforholdId(EksternArbeidsforholdRef.nullRef())
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("AR123")
+            .medRefusjon(BigDecimal.TEN)
+            .build();
+        var kravDokIm = mapTilKravdok(im).getKey();
+        var fraværsperioderIm = mapTilKravdok(im).getValue();
+
+        var jpSøknad = new JournalpostId("2");
+        var kravDokSøknad = new KravDokument(jpSøknad, innsendingsSøknad, KravDokumentType.SØKNAD);
+        var fraværsperioderSøknad = Arrays.asList(
+            lagSøktPeriode(jpSøknad, LocalDate.now().minusDays(10), LocalDate.now(), null, UttakArbeidType.ARBEIDSTAKER, im.getArbeidsgiver(), im.getArbeidsforholdRef()));
+
+        var input = Map.of(
+            kravDokIm, fraværsperioderIm,
+            kravDokSøknad, fraværsperioderSøknad);
+
+        List<WrappedOppgittFraværPeriode> resultat = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(input);
+
+        assertThat(resultat).hasSize(1);
+        WrappedOppgittFraværPeriode fp1 = resultat.get(0);
+        assertThat(fp1.getPeriode().getFraværPerDag()).isEqualTo(Duration.ZERO);
+        assertThat(fp1.getPeriode().getFom()).isEqualTo(LocalDate.now().minusDays(10));
+        assertThat(fp1.getPeriode().getTom()).isEqualTo(LocalDate.now());
+    }
+
 
     private static Map.Entry<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> mapTilKravdok(Inntektsmelding im) {
         if (im.getOppgittFravær().size() != 1) {
@@ -260,18 +301,19 @@ public class KravDokumentFraværTest {
         }
         var fom = im.getOppgittFravær().get(0).getFom();
         var tom = im.getOppgittFravær().get(0).getTom();
+        var fraværPerDag = im.getOppgittFravær().get(0).getVarighetPerDag();
         var jpId = im.getJournalpostId();
 
         return Map.entry(new KravDokument(jpId, im.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING),
-            List.of(lagSøktPeriode(jpId, fom, tom, UttakArbeidType.ARBEIDSTAKER, im.getArbeidsgiver(), im.getArbeidsforholdRef())));
+            List.of(lagSøktPeriode(jpId, fom, tom, fraværPerDag, UttakArbeidType.ARBEIDSTAKER, im.getArbeidsgiver(), im.getArbeidsforholdRef())));
     }
 
     private static VurdertSøktPeriode<OppgittFraværPeriode> lagSøktPeriode(JournalpostId journalpost, LocalDate fom, LocalDate tom, UttakArbeidType uttakArbeidType) {
-        return lagSøktPeriode(journalpost, fom, tom, uttakArbeidType, null, null);
+        return lagSøktPeriode(journalpost, fom, tom, null, uttakArbeidType, null, null);
     }
 
-    private static VurdertSøktPeriode<OppgittFraværPeriode> lagSøktPeriode(JournalpostId journalpost, LocalDate fom, LocalDate tom, UttakArbeidType uttakArbeidType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
-        OppgittFraværPeriode op1 = new OppgittFraværPeriode(journalpost, fom, tom, uttakArbeidType, arbeidsgiver, arbeidsforholdRef, null, FraværÅrsak.UDEFINERT, SøknadÅrsak.UDEFINERT);
+    private static VurdertSøktPeriode<OppgittFraværPeriode> lagSøktPeriode(JournalpostId journalpost, LocalDate fom, LocalDate tom, Duration fraværPerDag, UttakArbeidType uttakArbeidType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
+        OppgittFraværPeriode op1 = new OppgittFraværPeriode(journalpost, fom, tom, uttakArbeidType, arbeidsgiver, arbeidsforholdRef, fraværPerDag, FraværÅrsak.UDEFINERT, SøknadÅrsak.UDEFINERT);
         DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
         return new VurdertSøktPeriode<>(periode, uttakArbeidType, arbeidsgiver, arbeidsforholdRef, Utfall.OPPFYLT, op1);
     }

@@ -38,7 +38,7 @@ public class BeregningsaktivitetOverstyringshåndterer extends AbstractOverstyri
                                                   BehandlingskontrollKontekst kontekst) {
         HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.mapOverstyring(dto);
         kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, BehandlingReferanse.fra(behandling), dto.getPeriode().getFom());
-        return OppdateringResultat.utenOveropp();
+        return OppdateringResultat.utenOverhopp();
     }
 
     @Override

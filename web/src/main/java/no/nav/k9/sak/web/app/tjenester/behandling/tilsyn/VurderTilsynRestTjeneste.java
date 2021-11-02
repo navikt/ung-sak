@@ -13,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,6 +29,7 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.tilsyn.EtablertTilsynNattevåkOgBeredskapDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -50,15 +52,15 @@ public class VurderTilsynRestTjeneste {
     public VurderTilsynRestTjeneste(UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
                                     BehandlingRepository behandlingRepository,
                                     EtablertTilsynNattevåkOgBeredskapMapper etablertTilsynNattevåkOgBeredskapMapper) {
-       this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
-       this.behandlingRepository = behandlingRepository;
-       this.etablertTilsynNattevåkOgBeredskapMapper = etablertTilsynNattevåkOgBeredskapMapper;
+        this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
+        this.behandlingRepository = behandlingRepository;
+        this.etablertTilsynNattevåkOgBeredskapMapper = etablertTilsynNattevåkOgBeredskapMapper;
     }
 
     @GET
     @Operation(description = "Hent etablert tilsyn perioder",
         summary = "Returnerer alle perioder med etablert tilsyn",
-        tags="tilsyn",
+        tags = "tilsyn",
         responses = {
             @ApiResponse(responseCode = "200",
                 description = "perioder med etablert tilsyn, nattevåk og beredskap",
@@ -68,21 +70,27 @@ public class VurderTilsynRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     @Path((BASEPATH))
-    public EtablertTilsynNattevåkOgBeredskapDto hentEtablertTilsyn(@NotNull @QueryParam(BehandlingUuidDto.NAME)
-                                                @Parameter(description = BehandlingUuidDto.DESC)
-                                                @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-                                                    BehandlingUuidDto behandlingUuidDto) {
+    public Response hentEtablertTilsyn(@NotNull @QueryParam(BehandlingUuidDto.NAME)
+                                       @Parameter(description = BehandlingUuidDto.DESC)
+                                       @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+                                           BehandlingUuidDto behandlingUuidDto) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuidDto.getBehandlingUuid());
-        
+
         final UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende;
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
-            unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId()).map(g -> g.getUnntakEtablertTilsynForPleietrengende()).orElseThrow();
+            unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId()).map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende).orElse(null);
         } else {
-            unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(behandling.getFagsak().getPleietrengendeAktørId()).orElseThrow();
+            unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(behandling.getFagsak().getPleietrengendeAktørId()).orElse(null);
+        }
+
+        if (unntakEtablertTilsynForPleietrengende == null) {
+            return Response.noContent().build();
         }
 
         var behandlingRef = BehandlingReferanse.fra(behandling);
-        return etablertTilsynNattevåkOgBeredskapMapper.tilDto(behandlingRef, unntakEtablertTilsynForPleietrengende);
+        return Response.ok()
+            .entity(etablertTilsynNattevåkOgBeredskapMapper.tilDto(behandlingRef, unntakEtablertTilsynForPleietrengende))
+            .build();
     }
 
 }

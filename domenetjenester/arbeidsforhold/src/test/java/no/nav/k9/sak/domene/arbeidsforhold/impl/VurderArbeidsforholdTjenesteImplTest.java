@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -43,7 +44,6 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -60,8 +60,6 @@ public class VurderArbeidsforholdTjenesteImplTest {
     private IAYRepositoryProvider repositoryProvider ;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private InntektsmeldingTjeneste inntektsmeldingTjeneste ;
-    private InntektsmeldingFilterYtelse inntektsmeldingFilterYtelse ;
-    private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste ;
     private Instance<YtelsespesifikkeInntektsmeldingTjeneste> påkrevdeInntektsmeldingerTjeneste ;
     private VurderArbeidsforholdTjeneste tjeneste ;
 
@@ -71,9 +69,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         repositoryProvider = new IAYRepositoryProvider(entityManager);
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
-        inntektsmeldingFilterYtelse = new InntektsmeldingFilterYtelseImpl();
-        inntektsmeldingArkivTjeneste = new InntektsmeldingRegisterTjeneste(iayTjeneste, inntektsmeldingTjeneste, null, new UnitTestLookupInstanceImpl<>(inntektsmeldingFilterYtelse));
-        påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, repositoryProvider.getSøknadRepository()));
+        påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(new DefaultManglendePåkrevdeInntektsmeldingerTjeneste());
         tjeneste = new VurderArbeidsforholdTjeneste(iayTjeneste, påkrevdeInntektsmeldingerTjeneste);
     }
 

@@ -15,7 +15,6 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
-import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 class MapFraUttaksplan {
@@ -23,24 +22,23 @@ class MapFraUttaksplan {
     private static final Comparator<UttakResultatPeriode> COMP_PERIODE = Comparator.comparing(UttakResultatPeriode::getPeriode,
         Comparator.nullsFirst(Comparator.naturalOrder()));
 
-    private static List<UttakAktivitet> toUttakAktiviteter(UttaksperiodeInfo uttaksplanperiode) {
-        return uttaksplanperiode.getUtbetalingsgrader().stream()
-            .map(MapFraUttaksplan::mapTilUttaksAktiviteter)
-            .collect(Collectors.toList());
-    }
-
     private static UttakAktivitet mapTilUttaksAktiviteter(Utbetalingsgrader data) {
         BigDecimal stillingsgrad = BigDecimal.ZERO; // bruker ikke for Pleiepenger barn, bruker kun utbetalingsgrad
         boolean erGradering = false; // setter alltid false (bruker alltid utbetalingsgrad, framfor stillingsprosent
         BigDecimal utbetalingsgrad = data.getUtbetalingsgrad();
 
         var type = UttakArbeidType.fraKode(data.getArbeidsforhold().getType());
+        if (UttakArbeidType.IKKE_YRKESAKTIV.equals(type)) {
+            type = UttakArbeidType.ARBEIDSTAKER;
+        }
         Arbeidsforhold arbeidsforhold = buildArbeidsforhold(type, data);
         return new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, type, erGradering);
     }
 
     private static Arbeidsforhold buildArbeidsforhold(UttakArbeidType type, Utbetalingsgrader data) {
         switch (type) {
+            case IKKE_YRKESAKTIV:
+                throw new IllegalArgumentException("IKKE_YRKESAKTIV skal mappes til ARBEIDSTAKER");
             case ARBEIDSTAKER:
                 var arb = data.getArbeidsforhold();
                 final Arbeidsforhold.Builder arbeidsforholdBuilder = Arbeidsforhold.builder();

@@ -23,7 +23,7 @@ public abstract class BaseEntitet implements Serializable {
 
     @DiffIgnore
     @Column(name = "opprettet_av", nullable = false, updatable=false)
-    private String opprettetAv;
+    protected String opprettetAv;
 
     @DiffIgnore
     @Column(name = "opprettet_tid", nullable = false, updatable=false)

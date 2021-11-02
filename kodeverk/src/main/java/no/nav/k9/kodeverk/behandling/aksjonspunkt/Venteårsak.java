@@ -26,6 +26,8 @@ public enum Venteårsak implements Kodeverdi {
     ANKE_OVERSENDT_TIL_TRYGDERETTEN("ANKE_OVERSENDT_TIL_TRYGDERETTEN", "Venter på at saken blir behandlet hos Trygderetten"),
     ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER("ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER", "Venter på merknader fra bruker"),
     AVV_DOK("AVV_DOK", "Avventer dokumentasjon"),
+    AVV_IM_MOT_AAREG("AVV_IM_MOT_AAREG", "Venter på inntektsmelding fra arbeidsgiver som stemmer med Aareg"),
+    AVV_SØKNADSPERIODER("AVV_SØKNADSPERIODER", "Kan ikke behandle videre før det mottas søknadsperioder fra søknad eller refusjonskrav fra inntektsmelding"),
     AVV_FODSEL("AVV_FODSEL", "Avventer fødsel"),
     AVV_RESPONS_REVURDERING("AVV_RESPONS_REVURDERING", "Avventer respons på varsel om revurdering"),
     FOR_TIDLIG_SOKNAD("FOR_TIDLIG_SOKNAD", "Venter pga for tidlig søknad"),

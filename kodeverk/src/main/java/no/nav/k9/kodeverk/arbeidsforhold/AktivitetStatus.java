@@ -24,6 +24,7 @@ public enum AktivitetStatus implements Kodeverdi {
     ARBEIDSAVKLARINGSPENGER("AAP", "Arbeidsavklaringspenger", Inntektskategori.ARBEIDSAVKLARINGSPENGER),
     ARBEIDSTAKER("AT", "Arbeidstaker", Inntektskategori.ARBEIDSTAKER),
     DAGPENGER("DP", "Dagpenger", Inntektskategori.DAGPENGER),
+    SYKEPENGER_AV_DAGPENGER("SP_AV_DP", "Sykepenger basert på dagpenger", Inntektskategori.DAGPENGER),
     FRILANSER("FL", "Frilanser", Inntektskategori.FRILANSER),
     MILITÆR_ELLER_SIVIL("MS", "Militær eller sivil", Inntektskategori.ARBEIDSTAKER),
     SELVSTENDIG_NÆRINGSDRIVENDE("SN", "Selvstendig næringsdrivende", Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE),

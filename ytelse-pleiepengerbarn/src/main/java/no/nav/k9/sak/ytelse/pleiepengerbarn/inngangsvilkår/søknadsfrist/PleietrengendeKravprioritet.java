@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -49,13 +50,17 @@ public class PleietrengendeKravprioritet {
     /**
      * @param fagsakId Fagsaken vi behandler nå og dermed skal bruke ikke-avsluttet behandling for.
      */
-    @SuppressWarnings("unchecked")
     public LocalDateTimeline<List<Kravprioritet>> vurderKravprioritet(Long fagsakId, AktørId pleietrengende) {
+        return vurderKravprioritet(fagsakId, pleietrengende, false);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public LocalDateTimeline<List<Kravprioritet>> vurderKravprioritet(Long fagsakId, AktørId pleietrengende, boolean brukUbesluttedeData) {
         final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, pleietrengende, null, null, null);        
         
         LocalDateTimeline<List<Kravprioritet>> kravprioritetstidslinje = LocalDateTimeline.EMPTY_TIMELINE;
         for (Fagsak fagsak : fagsaker) {
-            final boolean brukAvsluttetBehandling = !fagsak.getId().equals(fagsakId);
+            final boolean brukAvsluttetBehandling = !brukUbesluttedeData && !fagsak.getId().equals(fagsakId);
             final LocalDateTimeline<Kravprioritet> fagsakTidslinje = finnEldsteKravTidslinjeForFagsak(fagsak, brukAvsluttetBehandling);
             kravprioritetstidslinje = kravprioritetstidslinje.union(fagsakTidslinje, sortertMedEldsteKravFørst());
         }
@@ -82,7 +87,7 @@ public class PleietrengendeKravprioritet {
             final LocalDateTimeline<Kravprioritet> periodetidslinje = new LocalDateTimeline<>(kravdokument.getValue()
                 .stream()
                 .filter(vsp -> vsp.getUtfall() == no.nav.k9.kodeverk.vilkår.Utfall.OPPFYLT)
-                .map(vsp -> new LocalDateSegment<>(vsp.getPeriode().toLocalDateInterval(), new Kravprioritet(fagsak, kravdokument.getKey().getInnsendingsTidspunkt())))
+                .map(vsp -> new LocalDateSegment<>(vsp.getPeriode().toLocalDateInterval(), new Kravprioritet(fagsak, behandlingOpt.get(), kravdokument.getKey().getInnsendingsTidspunkt())))
                 .collect(Collectors.toList())
             );
             fagsakTidslinje = fagsakTidslinje.union(periodetidslinje, new LocalDateSegmentCombinator<Kravprioritet, Kravprioritet, Kravprioritet>() {
@@ -131,10 +136,12 @@ public class PleietrengendeKravprioritet {
     
     public static final class Kravprioritet implements Comparable<Kravprioritet> {
         private final Fagsak fagsak;
+        private final Behandling aktuellBehandling;
         private final LocalDateTime tidspunktForKrav;
         
-        public Kravprioritet(Fagsak fagsak, LocalDateTime tidspunktForKrav) {
+        public Kravprioritet(Fagsak fagsak, Behandling aktuellBehandling, LocalDateTime tidspunktForKrav) {
             this.fagsak = fagsak;
+            this.aktuellBehandling = aktuellBehandling;
             this.tidspunktForKrav = tidspunktForKrav;
         }
         
@@ -144,6 +151,20 @@ public class PleietrengendeKravprioritet {
         
         public Fagsak getFagsak() {
             return fagsak;
+        }
+        
+        /**
+         * Gir siste gjeldende behandling der kravet inngår.
+         * 
+         * Dette er den åpne behandlingen for søker, og siste besluttede
+         * behandling for andre søkere.
+         */
+        private Behandling getAktuellBehandling() {
+            return aktuellBehandling;
+        }
+        
+        public UUID getAktuellBehandlingUuid() {
+            return aktuellBehandling.getUuid();
         }
         
         public LocalDateTime getTidspunktForKrav() {

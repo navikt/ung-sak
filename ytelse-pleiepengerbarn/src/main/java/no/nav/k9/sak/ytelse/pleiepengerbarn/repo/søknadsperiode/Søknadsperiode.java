@@ -38,14 +38,14 @@ public class Søknadsperiode extends BaseEntitet implements SøktPeriodeData {
 
     @Column(name = "har_trukket_krav")
     private boolean harTrukketKrav;
-    
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
     Søknadsperiode() {
     }
-    
+
     public Søknadsperiode(DatoIntervallEntitet periode, boolean harTrukketKrav) {
         this.periode = periode;
         this.harTrukketKrav = harTrukketKrav;
@@ -54,7 +54,7 @@ public class Søknadsperiode extends BaseEntitet implements SøktPeriodeData {
     public Søknadsperiode(DatoIntervallEntitet periode) {
         this(periode, false);
     }
-    
+
     public Søknadsperiode(LocalDate fom, LocalDate tom) {
         this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
     }
@@ -67,7 +67,7 @@ public class Søknadsperiode extends BaseEntitet implements SøktPeriodeData {
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }
-    
+
     public boolean isHarTrukketKrav() {
         return harTrukketKrav;
     }
@@ -83,12 +83,12 @@ public class Søknadsperiode extends BaseEntitet implements SøktPeriodeData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Søknadsperiode that = (Søknadsperiode) o;
-        return Objects.equals(periode, that.periode);
+        return Objects.equals(periode, that.periode) && Objects.equals(harTrukketKrav, that.harTrukketKrav);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode);
+        return Objects.hash(periode, harTrukketKrav);
     }
 
     @Override
@@ -96,6 +96,7 @@ public class Søknadsperiode extends BaseEntitet implements SøktPeriodeData {
         return getClass().getSimpleName() +"<" +
             "id=" + id +
             ", periode=" + periode +
+            ", harTrukketKrav=" + harTrukketKrav +
             ", versjon=" + versjon +
             '>';
     }

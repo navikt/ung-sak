@@ -9,13 +9,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.threeten.extra.Interval;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
 import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -50,7 +50,8 @@ public class MapYtelseperioderTjeneste {
         }
         LocalDate tom = ytelseAnvist.getAnvistTOM();
         if (tom != null && !Tid.TIDENES_ENDE.equals(tom)) {
-            if (Fagsystem.INFOTRYGD.equals(ytelse.getKilde()) && DayOfWeek.THURSDAY.getValue() < DayOfWeek.from(tom).getValue()) {
+            if (Set.of(Fagsystem.INFOTRYGD, Fagsystem.K9SAK, Fagsystem.FPSAK).contains(ytelse.getKilde())
+                && DayOfWeek.THURSDAY.getValue() < DayOfWeek.from(tom).getValue()) {
                 tom = tom.plusDays((long) DayOfWeek.SUNDAY.getValue() - DayOfWeek.from(tom).getValue());
             }
             return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
@@ -70,13 +71,7 @@ public class MapYtelseperioderTjeneste {
         return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
     }
 
-    private static boolean erTilgrensende(DatoIntervallEntitet periode1, DatoIntervallEntitet periode2) {
-        Interval p1 = periode1.tilIntervall();
-        Interval p2 = periode2.tilIntervall();
-        return p1.isConnected(p2) || p2.isConnected(p1) || periode1.getTomDato().plusDays(1).equals(periode2.getFomDato()) || periode2.getTomDato().plusDays(1).equals(periode1.getFomDato());
-    }
-
-    public List<OpptjeningsperiodeForSaksbehandling> mapYtelsePerioder(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag grunnlag, OpptjeningAktivitetVurdering vurderOpptjening, DatoIntervallEntitet opptjeningPeriode, LocalDate skjæringstidspunkt) {
+    public List<OpptjeningsperiodeForSaksbehandling> mapYtelsePerioder(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag grunnlag, OpptjeningAktivitetVurdering vurderOpptjening, DatoIntervallEntitet opptjeningPeriode) {
         AktørId aktørId = behandlingReferanse.getAktørId();
         var filter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato());
         List<OpptjeningsperiodeForSaksbehandling> ytelsePerioder = new ArrayList<>();
@@ -85,15 +80,13 @@ public class MapYtelseperioderTjeneste {
             .filter(ytelse -> !(ytelse.getKilde().equals(Fagsystem.K9SAK) && ytelse.getSaksnummer().equals(behandlingReferanse.getSaksnummer())))
             .filter(ytelse -> ytelse.getYtelseType().girOpptjeningsTid(behandlingReferanse.getFagsakYtelseType()))
             .forEach(behandlingRelaterteYtelse -> {
-                List<OpptjeningsperiodeForSaksbehandling> periode = mapYtelseAnvist(behandlingRelaterteYtelse, behandlingReferanse, grunnlag, vurderOpptjening, opptjeningPeriode, skjæringstidspunkt);
+                List<OpptjeningsperiodeForSaksbehandling> periode = mapYtelseAnvist(behandlingRelaterteYtelse, behandlingReferanse, vurderOpptjening);
                 ytelsePerioder.addAll(periode);
             });
         return slåSammenYtelsePerioder(ytelsePerioder);
     }
 
-    private List<OpptjeningsperiodeForSaksbehandling> mapYtelseAnvist(Ytelse ytelse, BehandlingReferanse behandlingReferanse,
-                                                                      InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                      OpptjeningAktivitetVurdering vurderForSaksbehandling, DatoIntervallEntitet opptjeningPeriode, LocalDate skjæringstidspunkt) {
+    private List<OpptjeningsperiodeForSaksbehandling> mapYtelseAnvist(Ytelse ytelse, BehandlingReferanse behandlingReferanse, OpptjeningAktivitetVurdering vurderForSaksbehandling) {
         OpptjeningAktivitetType type = mapYtelseType(ytelse);
         List<OpptjeningsperiodeForSaksbehandling> ytelserAnvist = new ArrayList<>();
         List<YtelseStørrelse> grunnlagList = ytelse.getYtelseGrunnlag().map(YtelseGrunnlag::getYtelseStørrelse).orElse(Collections.emptyList());
@@ -104,10 +97,6 @@ public class MapYtelseperioderTjeneste {
 
         ytelse.getYtelseAnvist().forEach(ytelseAnvist -> {
             var input = new VurderStatusInput(type, behandlingReferanse);
-            input.setGrunnlag(iayGrunnlag);
-            input.setOpptjeningPeriode(opptjeningPeriode);
-            input.setSkjæringstidspunkt(skjæringstidspunkt);
-            input.setHarVærtSaksbehandlet(false);
             if (orgnumre.isEmpty()) {
                 OpptjeningsperiodeForSaksbehandling.Builder builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
                     .medPeriode(hentUtDatoIntervall(ytelse, ytelseAnvist))
@@ -134,6 +123,15 @@ public class MapYtelseperioderTjeneste {
         if (!FagsakYtelseType.RELATERT_YTELSE_TYPER_FOR_SØKER.contains(ytelse.getYtelseType())) {
             return OpptjeningAktivitetType.hentFraTemaUnderkategori()
                 .getOrDefault(ytelse.getBehandlingsTema(), Collections.singleton(UDEFINERT)).stream().findFirst().orElse(UDEFINERT);
+        }
+
+        if (FagsakYtelseType.SYKEPENGER.equals(ytelse.getYtelseType())) {
+            boolean harSPBasertPåDP = ytelse.getYtelseGrunnlag().flatMap(YtelseGrunnlag::getArbeidskategori)
+                .stream().anyMatch(a -> Arbeidskategori.DAGPENGER.equals(a) || Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER.equals(a));
+            if (harSPBasertPåDP) {
+                return OpptjeningAktivitetType.SYKEPENGER_AV_DAGPENGER;
+            }
+            return OpptjeningAktivitetType.SYKEPENGER;
         }
 
         return OpptjeningAktivitetType.hentFraFagsakYtelseTyper()
@@ -170,7 +168,7 @@ public class MapYtelseperioderTjeneste {
         OpptjeningsperiodeForSaksbehandling next;
         while (iterator.hasNext()) {
             next = iterator.next();
-            if (erTilgrensende(prev.getPeriode(), next.getPeriode())) {
+            if (erKantIKantPåTversAvHelg(prev.getPeriode(), next.getPeriode())) {
                 prev = slåSammenToPerioder(prev, next);
             } else {
                 fusjonert.add(prev);
@@ -179,6 +177,30 @@ public class MapYtelseperioderTjeneste {
         }
         fusjonert.add(prev);
         return fusjonert;
+    }
+
+    boolean erKantIKantPåTversAvHelg(DatoIntervallEntitet periode1, DatoIntervallEntitet periode2) {
+        return utledTomDato(periode1).equals(utledFom(periode2).minusDays(1)) || utledTomDato(periode2).equals(utledFom(periode1).minusDays(1));
+    }
+
+    private LocalDate utledFom(DatoIntervallEntitet periode1) {
+        var fomDato = periode1.getFomDato();
+        if (DayOfWeek.SATURDAY.equals(fomDato.getDayOfWeek())) {
+            return fomDato.plusDays(2);
+        } else if (DayOfWeek.SUNDAY.equals(fomDato.getDayOfWeek())) {
+            return fomDato.plusDays(1);
+        }
+        return fomDato;
+    }
+
+    private LocalDate utledTomDato(DatoIntervallEntitet periode1) {
+        var tomDato = periode1.getTomDato();
+        if (DayOfWeek.FRIDAY.equals(tomDato.getDayOfWeek())) {
+            return tomDato.plusDays(2);
+        } else if (DayOfWeek.SATURDAY.equals(tomDato.getDayOfWeek())) {
+            return tomDato.plusDays(1);
+        }
+        return tomDato;
     }
 
     private OpptjeningsperiodeForSaksbehandling slåSammenToPerioder(OpptjeningsperiodeForSaksbehandling opp1, OpptjeningsperiodeForSaksbehandling opp2) {

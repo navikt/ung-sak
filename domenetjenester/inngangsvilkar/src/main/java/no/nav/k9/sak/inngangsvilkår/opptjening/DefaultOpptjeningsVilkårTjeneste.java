@@ -12,7 +12,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -30,16 +29,13 @@ import no.nav.k9.sak.typer.AktørId;
 @FagsakYtelseTypeRef
 public class DefaultOpptjeningsVilkårTjeneste implements OpptjeningsVilkårTjeneste {
     private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste;
-    private Boolean overstyringFjernet;
 
     public DefaultOpptjeningsVilkårTjeneste() {
     }
 
     @Inject
-    public DefaultOpptjeningsVilkårTjeneste(OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste,
-                                            @KonfigVerdi(value = "OVERSTYRING_OPPTJ_AKT_FJERNET", defaultVerdi = "true") Boolean overstyringFjernet) {
+    public DefaultOpptjeningsVilkårTjeneste(OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste) {
         this.opptjeningTjeneste = opptjeningTjeneste;
-        this.overstyringFjernet = overstyringFjernet;
     }
 
     @Override
@@ -67,8 +63,8 @@ public class DefaultOpptjeningsVilkårTjeneste implements OpptjeningsVilkårTjen
 
             var inntektPerioder = relevanteOpptjeningInntekter.get(stp);
             var aktivitetPerioder = relevanteOpptjeningAktiveter.get(vilkårPeriode);
-            var grunnlag = new OpptjeningsgrunnlagAdapter(behandlingstidspunkt, opptjening.getFom(),
-                opptjening.getTom(), overstyringFjernet).mapTilGrunnlag(aktivitetPerioder, inntektPerioder);
+            var grunnlag = new OpptjeningsgrunnlagAdapter(behandlingstidspunkt, opptjening.getFom(), opptjening.getTom())
+                .mapTilGrunnlag(aktivitetPerioder, inntektPerioder);
 
             // TODO(OJR) overstyrer konfig for fp... burde blitt flyttet ut til konfig verdier.. både for FP og for SVP???
             grunnlag.setMinsteAntallDagerGodkjent(28);

@@ -191,7 +191,7 @@ public class ForvaltningBeregningRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response migrerAksjonspunkt(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @Parameter(description = "migrerAksjonspunktDto") no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.MigrerAksjonspunktRequest migrerAksjonspunktDto) { // NOSONAR
         Periode periode = migrerAksjonspunktDto.getPeriode();
-        Map<Behandling, Aksjonspunkt> behandlingerMedAksjonspunkt = aksjonspunktRepository.hentAksjonspunkterForKode(periode.getFom(), periode.getTom(), migrerAksjonspunktDto.getAksjonspunktKode());
+        Map<Behandling, Aksjonspunkt> behandlingerMedAksjonspunkt = aksjonspunktRepository.hentAksjonspunkterForKodeUtenVenteÅrsak(periode.getFom(), periode.getTom(), migrerAksjonspunktDto.getAksjonspunktKode());
         List<String> saksummer = behandlingerMedAksjonspunkt.keySet().stream()
             .map(Behandling::getFagsak).map(Fagsak::getSaksnummer)
             .map(Saksnummer::getVerdi)
