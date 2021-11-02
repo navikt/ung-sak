@@ -60,14 +60,6 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
     private void validerInnhold(Søknad søknad) {
         OmsorgspengerUtbetaling ytelse = søknad.getYtelse();
         defaultValidering(ytelse);
-        sanityCheck(ytelse);
-    }
-
-    private void sanityCheck(OmsorgspengerUtbetaling ytelse) {
-        // TODO sanity check kan vurderes flyttet inn i kontrakt
-        if (ytelse.getFraværsperioder().size() > 365) {
-            throw valideringsfeil("Antallet fraværeperioder er " + ytelse.getFraværsperioder().size() + ", det gir ikke mening.");
-        }
     }
 
     private void defaultValidering(OmsorgspengerUtbetaling ytelse) {
