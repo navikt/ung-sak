@@ -125,8 +125,8 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     private void lagreOppgittOpptjeningFraSøknad(Søknad søknad, Behandling behandling, MottattDokument dokument) {
         try {
             var utbetaling = (OmsorgspengerUtbetaling) søknad.getYtelse();
-            var opptjeningDto = Optional.ofNullable(utbetaling)
-                .map(ytelse -> oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, ytelse.getAktivitet()))
+            var opptjeningDto = Optional.ofNullable(utbetaling.getAktivitet())
+                .map(aktiviteter -> oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, aktiviteter))
                 .map(OppgittOpptjeningMottattRequest::getOppgittOpptjening)
                 .orElse(null);
             if (opptjeningDto == null) {
