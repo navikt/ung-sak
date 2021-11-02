@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -14,6 +15,7 @@ import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -42,7 +44,6 @@ import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
@@ -123,15 +124,19 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
      */
     private void lagreOppgittOpptjeningFraSøknad(Søknad søknad, Behandling behandling, MottattDokument dokument) {
         try {
-            OpptjeningAktivitet opptjeningAktiviteter = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getAktivitet();
-            var request = oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, opptjeningAktiviteter);
-            if (request.getOppgittOpptjening() == null) {
+            var utbetaling = (OmsorgspengerUtbetaling) søknad.getYtelse();
+            var opptjeningDto = Optional.ofNullable(utbetaling)
+                .map(ytelse -> oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, ytelse.getAktivitet()))
+                .map(OppgittOpptjeningMottattRequest::getOppgittOpptjening)
+                .orElse(null);
+            if (opptjeningDto == null) {
                 // Ingenting mer som skal lagres - dokument settes som ferdig
                 mottatteDokumentRepository.oppdaterStatus(List.of(dokument), DokumentStatus.GYLDIG);
                 return;
             }
+
             var enkeltTask = new ProsessTaskData(AsyncAbakusLagreOpptjeningTask.TASKTYPE);
-            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
+            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(opptjeningDto);
             enkeltTask.setPayload(payload);
 
             enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, dokument.getJournalpostId().getVerdi());
