@@ -30,7 +30,6 @@ import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -42,7 +41,6 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
 
     private static final Comparator<Uttaksperiode> COMP_PERIODE = comparing(uttaksperiode -> uttaksperiode.getPeriode().getFom());
 
-    private Boolean hentFullUttaksplan;
     private ÅrskvantumTjeneste årskvantumTjeneste;
 
     protected OmsorgspengerYtelsesspesifiktGrunnlagMapper() {
@@ -50,8 +48,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     }
 
     @Inject
-    public OmsorgspengerYtelsesspesifiktGrunnlagMapper(@KonfigVerdi(value = "OMP_HENT_FULLUTTAKSPLAN_AKTIVERT", defaultVerdi = "true") Boolean hentFullUttaksplan, ÅrskvantumTjeneste årskvantumTjeneste) {
-        this.hentFullUttaksplan = hentFullUttaksplan;
+    public OmsorgspengerYtelsesspesifiktGrunnlagMapper(ÅrskvantumTjeneste årskvantumTjeneste) {
         this.årskvantumTjeneste = årskvantumTjeneste;
     }
 
@@ -96,13 +93,8 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
 
     @NotNull
     private List<Aktivitet> hentAktiviteter(BehandlingReferanse ref) {
-        if (hentFullUttaksplan) {
-            var fullUttaksplan = årskvantumTjeneste.hentFullUttaksplan(ref.getSaksnummer());
-            return fullUttaksplan.getAktiviteter();
-        } else {
-            var forbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
-            return forbrukteDager.getSisteUttaksplan().getAktiviteter();
-        }
+        var fullUttaksplan = årskvantumTjeneste.hentFullUttaksplan(ref.getSaksnummer());
+        return fullUttaksplan.getAktiviteter();
     }
 
     private UtbetalingsgradPrAktivitetDto mapTilUtbetalingsgrad(Arbeidsforhold uttakArbeidsforhold, List<Uttaksperiode> perioder) {
