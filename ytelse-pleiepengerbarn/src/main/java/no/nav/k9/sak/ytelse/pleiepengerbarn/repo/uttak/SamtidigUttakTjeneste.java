@@ -140,14 +140,12 @@ public class SamtidigUttakTjeneste {
             // Fremtving at steget skal kjøres på nytt for å fjerne venting.
             return true;
         }
+
+        // Det skal kun slippes én behandling gjennom.
         
-        final Simulering simulering = simulerUttak(ref);
+        final Simulering simulering = simulerUttakKunBesluttet(ref);
         final boolean uttaksplanEndret = simulering.getUttakplanEndret();
-        if (!erPåUttakssteget(ref) && uttaksplanEndret) {
-            return true;
-        }
-        
-        return false;
+        return uttaksplanEndret;
     }
     
     private boolean harKommetTilUttak(BehandlingReferanse ref) {
@@ -165,6 +163,13 @@ public class SamtidigUttakTjeneste {
     
     private Simulering simulerUttak(BehandlingReferanse ref) {
         final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtUbesluttededataOgMapRequest(ref);
+        final Simulering simulering = uttakTjeneste.simulerUttaksplan(request);
+
+        return simulering;
+    }
+    
+    private Simulering simulerUttakKunBesluttet(BehandlingReferanse ref) {
+        final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
         final Simulering simulering = uttakTjeneste.simulerUttaksplan(request);
 
         return simulering;

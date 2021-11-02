@@ -13,6 +13,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.dokument.bestill.tjenester.FormidlingDokumentdataTjeneste;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
 public class ForeslåVedtakStegImplTest {
@@ -26,7 +27,7 @@ public class ForeslåVedtakStegImplTest {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagMocked();
         var behandlingRepository = scenario.mockBehandlingRepository();
-        ForeslåVedtakStegImpl steg = new ForeslåVedtakStegImpl(behandlingRepository, foreslåVedtakTjeneste, formidlingDokumentdataKlient);
+        ForeslåVedtakStegImpl steg = new ForeslåVedtakStegImpl(behandlingRepository, foreslåVedtakTjeneste, formidlingDokumentdataKlient, new UnitTestLookupInstanceImpl<YtelsespesifikkForeslåVedtak>(b -> null));
 
         // Act
         Fagsak fagsak = behandling.getFagsak();
@@ -44,7 +45,7 @@ public class ForeslåVedtakStegImplTest {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagMocked();
         var behandlingRepository = scenario.mockBehandlingRepository();
-        ForeslåVedtakStegImpl steg = new ForeslåVedtakStegImpl(behandlingRepository, foreslåVedtakTjeneste, formidlingDokumentdataKlient);
+        ForeslåVedtakStegImpl steg = new ForeslåVedtakStegImpl(behandlingRepository, foreslåVedtakTjeneste, formidlingDokumentdataKlient, new UnitTestLookupInstanceImpl<YtelsespesifikkForeslåVedtak>(b -> null));
 
         // Act
         Fagsak fagsak = behandling.getFagsak();

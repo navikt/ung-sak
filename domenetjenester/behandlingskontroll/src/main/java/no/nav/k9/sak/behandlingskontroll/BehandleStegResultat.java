@@ -38,14 +38,11 @@ public class BehandleStegResultat {
     }
 
     /**
-     * Factory-metode basert steg
-     * {@link BehandlingStegType}
-     *
-     * @param tilSteg steg
-     * @deprecated Kun lagt til for feilretting
+     * Setter at behandlingen ligger på angitt steg uten å kjøre videre.
+     * 
+     * Den som kaller på denne metoden må selv leggge inn en FortsettBehandlingTask.
      */
-    @Deprecated
-    public static BehandleStegResultat tilbakeførtTilSteg(BehandlingStegType tilSteg) {
+    public static BehandleStegResultat tilbakeførtTilStegUtenVidereKjøring(BehandlingStegType tilSteg) {
         return new BehandleStegResultat(FellesTransisjoner.TILBAKEFØRT_TIL_STEG, Objects.requireNonNull(tilSteg));
     }
 
