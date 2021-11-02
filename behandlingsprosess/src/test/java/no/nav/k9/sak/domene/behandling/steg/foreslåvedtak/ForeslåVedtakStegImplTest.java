@@ -27,7 +27,7 @@ public class ForeslåVedtakStegImplTest {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagMocked();
         var behandlingRepository = scenario.mockBehandlingRepository();
-        ForeslåVedtakStegImpl steg = new ForeslåVedtakStegImpl(behandlingRepository, foreslåVedtakTjeneste, formidlingDokumentdataKlient, new UnitTestLookupInstanceImpl<YtelsespesifikkForeslåVedtak>(null));
+        ForeslåVedtakStegImpl steg = new ForeslåVedtakStegImpl(behandlingRepository, foreslåVedtakTjeneste, formidlingDokumentdataKlient, new UnitTestLookupInstanceImpl<YtelsespesifikkForeslåVedtak>(b -> null));
 
         // Act
         Fagsak fagsak = behandling.getFagsak();
@@ -45,7 +45,7 @@ public class ForeslåVedtakStegImplTest {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagMocked();
         var behandlingRepository = scenario.mockBehandlingRepository();
-        ForeslåVedtakStegImpl steg = new ForeslåVedtakStegImpl(behandlingRepository, foreslåVedtakTjeneste, formidlingDokumentdataKlient, new UnitTestLookupInstanceImpl<YtelsespesifikkForeslåVedtak>(null));
+        ForeslåVedtakStegImpl steg = new ForeslåVedtakStegImpl(behandlingRepository, foreslåVedtakTjeneste, formidlingDokumentdataKlient, new UnitTestLookupInstanceImpl<YtelsespesifikkForeslåVedtak>(b -> null));
 
         // Act
         Fagsak fagsak = behandling.getFagsak();
