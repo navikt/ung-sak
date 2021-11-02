@@ -100,7 +100,7 @@ public enum FagsakYtelseType implements Kodeverdi {
             return false;
         }
     },
-    OMSORGSPENGER_AO("OMP_AO", "Alene om omsorg", "OM", "OMS") {
+    OMSORGSPENGER_AO("OMP_AO", "Alene om omsorgen", "OM", "OMS") {
         @Override
         public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
             requireNonNull(pleietrengendeAktørId, "pleietrengende");
