@@ -15,15 +15,11 @@ import org.apache.kafka.common.errors.AuthenticationException;
 import org.apache.kafka.common.errors.AuthorizationException;
 import org.apache.kafka.common.errors.RetriableException;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
 public class DokumentbestillingProducer {
-
-    private static final Logger log = LoggerFactory.getLogger(DokumentbestillingProducer.class);
 
     Producer<String, String> producer;
     String topic;
@@ -61,23 +57,23 @@ public class DokumentbestillingProducer {
         try {
             @SuppressWarnings("unused")
             var recordMetadata = producer.send(record).get(); // NOSONAR
-        } catch (ExecutionException e) {
-            log.warn("Uventet feil ved sending til Kafka, topic:" + topic, e);
         } catch (InterruptedException e) {
-            log.warn("Uventet feil ved sending til Kafka, topic:" + topic, e);
             Thread.currentThread().interrupt();
+            throw DokumentbestillerKafkaFeil.FACTORY.uventetFeil(topic, e).toException();
+        } catch (ExecutionException e) {
+            throw DokumentbestillerKafkaFeil.FACTORY.uventetFeil(topic, e).toException();
         } catch (AuthenticationException | AuthorizationException e) {
-            log.warn("Feil i pålogging mot Kafka, topic:" + topic, e);
+            throw DokumentbestillerKafkaFeil.FACTORY.feilIPålogging(topic, e).toException();
         } catch (RetriableException e) {
-            log.warn("Fikk transient feil mot Kafka, kan prøve igjen, topic:" + topic, e);
+            throw DokumentbestillerKafkaFeil.FACTORY.retriableExceptionMotKaka(topic, e).toException();
         } catch (KafkaException e) {
-            log.warn("Fikk feil mot Kafka, topic:" + topic, e);
+            throw DokumentbestillerKafkaFeil.FACTORY.annenExceptionMotKafka(topic, e).toException();
         }
     }
 
     void setUsernameAndPassword(String username, String password, Properties properties) {
         if ((username != null && !username.isEmpty())
-                && (password != null && !password.isEmpty())) {
+            && (password != null && !password.isEmpty())) {
             String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
             String jaasCfg = String.format(jaasTemplate, username, password);
             properties.setProperty("sasl.jaas.config", jaasCfg);

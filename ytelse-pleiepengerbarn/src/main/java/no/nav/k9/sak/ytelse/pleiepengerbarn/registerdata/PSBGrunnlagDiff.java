@@ -12,24 +12,21 @@ import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomGrunnlagSammenlikningsresultat;
 
+/**
+ * Grunnlagdiff som alltid gir diff. Dette er OK siden StartpunktUtlederPleiepengerSyktBarn
+ * kjører diff selv.
+ */
 public class PSBGrunnlagDiff extends DiffResult {
 
-    private SykdomGrunnlagSammenlikningsresultat grunnlagSammenlikningsresultat;
-    private LocalDateTimeline<Boolean> perioderMedEndringIEtablertTilsyn;
-    private List<DatoIntervallEntitet> nattevåkBeredskap;
-
-    public PSBGrunnlagDiff(SykdomGrunnlagSammenlikningsresultat grunnlagSammenlikningsresultat, LocalDateTimeline<Boolean> perioderMedEndringIEtablertTilsyn, List<DatoIntervallEntitet> nattevåkBeredskap) {
+    public PSBGrunnlagDiff() {
         super(null, null, null);
-        this.grunnlagSammenlikningsresultat = grunnlagSammenlikningsresultat;
-        this.perioderMedEndringIEtablertTilsyn = perioderMedEndringIEtablertTilsyn;
-        this.nattevåkBeredskap = nattevåkBeredskap;
     }
 
     @Override
     public Map<Node, Pair> getLeafDifferences() {
         if (areDifferent()) {
             return new DiffEntity(TraverseEntityGraphFactory.build())
-                .diff(null, new PSBDiffData(grunnlagSammenlikningsresultat, perioderMedEndringIEtablertTilsyn, nattevåkBeredskap))
+                .diff(null, new PSBDiffData())
                 .getLeafDifferences();
         }
         return Map.of();
@@ -37,19 +34,12 @@ public class PSBGrunnlagDiff extends DiffResult {
 
     @Override
     public boolean isEmpty() {
-        var sykdomEmpty = grunnlagSammenlikningsresultat == null || grunnlagSammenlikningsresultat.getDiffPerioder().isEmpty();
-        var tilsynEmpty = perioderMedEndringIEtablertTilsyn == null || perioderMedEndringIEtablertTilsyn.isEmpty();
-        var nattevåkEmpty = nattevåkBeredskap == null || nattevåkBeredskap.isEmpty();
-
-        return sykdomEmpty && tilsynEmpty && nattevåkEmpty;
+        return false;
     }
 
     @Override
     public boolean areDifferent() {
-        var sykdomEndring = grunnlagSammenlikningsresultat != null && !grunnlagSammenlikningsresultat.getDiffPerioder().isEmpty();
-        var tilsynEndring = perioderMedEndringIEtablertTilsyn != null && !perioderMedEndringIEtablertTilsyn.isEmpty();
-        var nattevåkEndring = nattevåkBeredskap != null && !nattevåkBeredskap.isEmpty();
-        return sykdomEndring || tilsynEndring || nattevåkEndring;
+        return true;
     }
 
     @Override
@@ -57,9 +47,6 @@ public class PSBGrunnlagDiff extends DiffResult {
         return "SykdomDiffResult{" +
             "isEmpty=" + isEmpty() +
             ", areDifferent=" + areDifferent() +
-            ", sykdomDiff=" + (grunnlagSammenlikningsresultat != null ? grunnlagSammenlikningsresultat.getDiffPerioder().toString() : "[]") +
-            ", tilsynDiff=" + (perioderMedEndringIEtablertTilsyn != null ? perioderMedEndringIEtablertTilsyn.toString() : "[]") +
-            ", nattevåkBeredskapDiff=" + (nattevåkBeredskap != null ? nattevåkBeredskap.toString() : "[]") +
             "}";
     }
 }

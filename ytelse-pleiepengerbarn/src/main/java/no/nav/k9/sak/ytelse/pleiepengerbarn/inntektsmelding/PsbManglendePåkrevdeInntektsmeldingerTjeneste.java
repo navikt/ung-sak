@@ -63,11 +63,6 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
     }
 
     @Override
-    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(InntektsmeldingVurderingInput input) {
-        return Map.of();
-    }
-
-    @Override
     public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> erMottattInntektsmeldingUtenArbeidsforhold(InntektsmeldingVurderingInput input) {
         var result = new HashMap<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>>();
         var behandlingReferanse = input.getReferanse();

@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
 import no.nav.k9.formidling.kontrakt.kodeverk.Mottaker;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -59,6 +60,7 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
     private KompletthetsjekkerFelles fellesUtil;
     private SøknadRepository søknadRepository;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private Boolean benyttNyFlyt;
 
     PSBKompletthetsjekker() {
         // CDI
@@ -70,13 +72,15 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
                                  KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
                                  KompletthetsjekkerFelles fellesUtil,
                                  SøknadRepository søknadRepository,
-                                 @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+                                 @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                 @KonfigVerdi(value = "KOMPLETTHET_NY_FLYT", defaultVerdi = "false") Boolean benyttNyFlyt) {
         this.kompletthetssjekkerSøknad = kompletthetssjekkerSøknad;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.fellesUtil = fellesUtil;
         this.søknadRepository = søknadRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.benyttNyFlyt = benyttNyFlyt;
     }
 
     @Override
@@ -87,6 +91,9 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public KompletthetResultat vurderForsendelseKomplett(BehandlingReferanse ref) {
+        if (benyttNyFlyt) {
+            return KompletthetResultat.oppfylt();
+        }
         Long behandlingId = ref.getBehandlingId();
         if (BehandlingStatus.OPPRETTET.equals(ref.getBehandlingStatus())) {
             return KompletthetResultat.oppfylt();
@@ -176,6 +183,9 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public KompletthetResultat vurderEtterlysningInntektsmelding(BehandlingReferanse ref) {
+        if (benyttNyFlyt) {
+            return KompletthetResultat.oppfylt();
+        }
         Long behandlingId = ref.getBehandlingId();
 
         // Utled vilkårsperioder

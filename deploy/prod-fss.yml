@@ -174,7 +174,7 @@ spec:
 
     # Graphql services
     - name: SAF_BASE_URL
-      value: http://saf.default
+      value: http://saf.teamdokumenthandtering
 
     # Sikkerhet:
     - name: OIDC_STS_ISSUER_URL
@@ -214,9 +214,9 @@ spec:
     - name: ARBEIDSTID_SJEKK_SNFL
       value: "true"
     - name: NY_SYKDOM_TOTRINN
-      value: "false"
+      value: "true"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
-      value: "ACJ40|2021-03-01"
+      value: "AFMX0|2021-03-01"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

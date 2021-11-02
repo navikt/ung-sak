@@ -50,13 +50,17 @@ public class PleietrengendeKravprioritet {
     /**
      * @param fagsakId Fagsaken vi behandler nå og dermed skal bruke ikke-avsluttet behandling for.
      */
-    @SuppressWarnings("unchecked")
     public LocalDateTimeline<List<Kravprioritet>> vurderKravprioritet(Long fagsakId, AktørId pleietrengende) {
+        return vurderKravprioritet(fagsakId, pleietrengende, false);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public LocalDateTimeline<List<Kravprioritet>> vurderKravprioritet(Long fagsakId, AktørId pleietrengende, boolean brukUbesluttedeData) {
         final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, pleietrengende, null, null, null);        
         
         LocalDateTimeline<List<Kravprioritet>> kravprioritetstidslinje = LocalDateTimeline.EMPTY_TIMELINE;
         for (Fagsak fagsak : fagsaker) {
-            final boolean brukAvsluttetBehandling = !fagsak.getId().equals(fagsakId);
+            final boolean brukAvsluttetBehandling = !brukUbesluttedeData && !fagsak.getId().equals(fagsakId);
             final LocalDateTimeline<Kravprioritet> fagsakTidslinje = finnEldsteKravTidslinjeForFagsak(fagsak, brukAvsluttetBehandling);
             kravprioritetstidslinje = kravprioritetstidslinje.union(fagsakTidslinje, sortertMedEldsteKravFørst());
         }

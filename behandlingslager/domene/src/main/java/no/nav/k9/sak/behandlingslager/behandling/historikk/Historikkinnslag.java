@@ -21,6 +21,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.NaturalId;
 
+import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -53,11 +54,11 @@ public class Historikkinnslag extends BaseEntitet {
     private Long fagsakId;
 
     @Convert(converter = HistorikkAktørKodeverdiConverter.class)
-    @Column(name="historikk_aktoer_id", nullable = false)
+    @Column(name = "historikk_aktoer_id", nullable = false)
     private HistorikkAktør aktør = HistorikkAktør.UDEFINERT;
 
     @Convert(converter = HistorikkinnslagTypeKodeverdiConverter.class)
-    @Column(name="historikkinnslag_type", nullable = false)
+    @Column(name = "historikkinnslag_type", nullable = false)
     private HistorikkinnslagType type = HistorikkinnslagType.UDEFINERT;
 
     @OneToMany(mappedBy = "historikkinnslag", cascade = CascadeType.ALL)
@@ -67,15 +68,15 @@ public class Historikkinnslag extends BaseEntitet {
     private List<HistorikkinnslagDel> historikkinnslagDeler = new ArrayList<>();
 
     /**
-     *  Foreløpig inneholder denne kun tidspunkt for når historikkinnslag er opprettet eksternt
-     *  Eksisterende opprettet tid burde migreres og kopieres over hit, så en enkelt kan sortere kronologisk på
-     *  når historikkhendelsen egentlig oppstod
+     * Foreløpig inneholder denne kun tidspunkt for når historikkinnslag er opprettet eksternt
+     * Eksisterende opprettet tid burde migreres og kopieres over hit, så en enkelt kan sortere kronologisk på
+     * når historikkhendelsen egentlig oppstod
      */
     @Column(name = "historikk_tid", updatable = false)
     private LocalDateTime historikkTid;
 
     @Column(name = "opprettet_i_system", updatable = false)
-    private String opprettetISystem = "FPSAK";
+    private String opprettetISystem = Fagsystem.K9SAK.getKode();
 
     public Historikkinnslag() {
         this.uuid = UUID.randomUUID();
@@ -93,14 +94,14 @@ public class Historikkinnslag extends BaseEntitet {
         return behandlingId;
     }
 
-    public void setBehandling(Behandling behandling) {
-        this.behandlingId = behandling.getId();
-        this.fagsakId = behandling.getFagsakId();
-    }
-
     public void setBehandlingId(Long behandlingId) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         this.behandlingId = behandlingId;
+    }
+
+    public void setBehandling(Behandling behandling) {
+        this.behandlingId = behandling.getId();
+        this.fagsakId = behandling.getFagsakId();
     }
 
     public HistorikkAktør getAktør() {
@@ -139,17 +140,44 @@ public class Historikkinnslag extends BaseEntitet {
         return historikkinnslagDeler;
     }
 
-    public String getOpprettetISystem() {
-        return opprettetISystem;
-    }
-
     public void setHistorikkinnslagDeler(List<HistorikkinnslagDel> historikkinnslagDeler) {
         historikkinnslagDeler.forEach(del -> HistorikkinnslagDel.builder(del).medHistorikkinnslag(this));
         this.historikkinnslagDeler = historikkinnslagDeler;
     }
 
+    public String getOpprettetISystem() {
+        return opprettetISystem;
+    }
+
     public LocalDateTime getHistorikkTid() {
         return historikkTid;
+    }
+
+    public void setOpprettetAv(String ansvarligSaksbehandler) {
+        this.opprettetAv = ansvarligSaksbehandler;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Historikkinnslag)) {
+            return false;
+        }
+        Historikkinnslag that = (Historikkinnslag) o;
+        // FIXME: Her burde ikke generert id vært del av equals/hashcode. Bør fjernes. Evt. droppe equals/hashcode helt
+        return Objects.equals(id, that.id) &&
+            Objects.equals(behandlingId, that.behandlingId) &&
+            Objects.equals(fagsakId, that.fagsakId) &&
+            Objects.equals(getAktør(), that.getAktør()) &&
+            Objects.equals(type, that.type) &&
+            Objects.equals(getDokumentLinker(), that.getDokumentLinker());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, behandlingId, fagsakId, getAktør(), type, getDokumentLinker());
     }
 
     public static class Builder {
@@ -194,6 +222,11 @@ public class Historikkinnslag extends BaseEntitet {
             return this;
         }
 
+        public Builder medOpprettetAv(String opprettetAv) {
+            historikkinnslag.opprettetAv = opprettetAv;
+            return this;
+        }
+
         public Builder medDokumentLinker(List<HistorikkinnslagDokumentLink> dokumentLinker) {
             if (historikkinnslag.dokumentLinker == null) {
                 historikkinnslag.dokumentLinker = dokumentLinker;
@@ -206,28 +239,5 @@ public class Historikkinnslag extends BaseEntitet {
         public Historikkinnslag build() {
             return historikkinnslag;
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Historikkinnslag)) {
-            return false;
-        }
-        Historikkinnslag that = (Historikkinnslag) o;
-        // FIXME: Her burde ikke generert id vært del av equals/hashcode. Bør fjernes. Evt. droppe equals/hashcode helt
-        return Objects.equals(id, that.id) &&
-            Objects.equals(behandlingId, that.behandlingId) &&
-            Objects.equals(fagsakId, that.fagsakId) &&
-            Objects.equals(getAktør(), that.getAktør()) &&
-            Objects.equals(type, that.type) &&
-            Objects.equals(getDokumentLinker(), that.getDokumentLinker());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, behandlingId, fagsakId, getAktør(), type, getDokumentLinker());
     }
 }

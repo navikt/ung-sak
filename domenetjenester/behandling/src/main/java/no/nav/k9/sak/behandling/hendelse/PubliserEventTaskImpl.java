@@ -6,10 +6,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.sak.behandling.PubliserEventTask;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.sak.behandling.PubliserEventTask;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 
 /**
  * Publiserer ulike prosesshendelser på kafka slik som aksjonspunkter funnet,, prosess stoppet, behandling lagt på vent, behandlende enhet
@@ -21,14 +21,14 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 class PubliserEventTaskImpl implements PubliserEventTask {
     private static final Logger log = LoggerFactory.getLogger(PubliserEventTaskImpl.class);
 
-    private AksjonspunktKafkaProducer kafkaProducer;
+    private ProsessEventKafkaProducer kafkaProducer;
 
     PubliserEventTaskImpl() {
         // for CDI proxy
     }
 
     @Inject
-    public PubliserEventTaskImpl(AksjonspunktKafkaProducer kafkaProducer) {
+    public PubliserEventTaskImpl(ProsessEventKafkaProducer kafkaProducer) {
         this.kafkaProducer = kafkaProducer;
     }
 

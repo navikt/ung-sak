@@ -60,7 +60,10 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 public class AksjonspunktApplikasjonTjeneste {
     private static final Logger LOGGER = LoggerFactory.getLogger(AksjonspunktApplikasjonTjeneste.class);
 
-    private static final Set<AksjonspunktDefinisjon> VEDTAK_AP = Set.of(AksjonspunktDefinisjon.FORESLÅ_VEDTAK, AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL,
+    private static final Set<AksjonspunktDefinisjon> EKSTRARESULTAT_AP_SPERR_TOTRINN = Set.of(
+        AksjonspunktDefinisjon.FORESLÅ_VEDTAK,
+        AksjonspunktDefinisjon.FATTER_VEDTAK,
+        AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL,
         AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
 
     private BehandlingRepository behandlingRepository;
@@ -441,7 +444,7 @@ public class AksjonspunktApplikasjonTjeneste {
 
     private boolean aksjonspunktStøtterTotrinn(Aksjonspunkt aksjonspunkt) {
         SkjermlenkeType aksjonspunktSkjermlenkeType = aksjonspunkt.getAksjonspunktDefinisjon().getSkjermlenkeType();
-        return !VEDTAK_AP.contains(aksjonspunkt.getAksjonspunktDefinisjon())
+        return !EKSTRARESULTAT_AP_SPERR_TOTRINN.contains(aksjonspunkt.getAksjonspunktDefinisjon())
             // Aksjonspunkter må ha SkjermlenkeType for å støtte totrinnskontroll
             && aksjonspunktSkjermlenkeType != null
             && !SkjermlenkeType.UDEFINERT.equals(aksjonspunktSkjermlenkeType);
