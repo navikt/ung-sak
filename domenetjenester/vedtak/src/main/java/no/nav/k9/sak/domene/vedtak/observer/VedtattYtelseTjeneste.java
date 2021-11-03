@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.vedtak.observer;
 
-import java.math.BigDecimal;
+import static no.nav.k9.sak.domene.vedtak.observer.VedtattYtelseMapper.mapAnvisninger;
+
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -16,11 +17,9 @@ import no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.vedtak.ytelse.Aktør;
-import no.nav.abakus.vedtak.ytelse.Desimaltall;
 import no.nav.abakus.vedtak.ytelse.Periode;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
-import no.nav.abakus.vedtak.ytelse.v1.anvisning.Anvisning;
 import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfig;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
@@ -32,6 +31,8 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPer
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
 
 @ApplicationScoped
 public class VedtattYtelseTjeneste {
@@ -39,21 +40,28 @@ public class VedtattYtelseTjeneste {
     private BehandlingVedtakRepository vedtakRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
     private Instance<YtelseTilleggsopplysningerTjeneste> tilleggsopplysningerTjenester;
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     public VedtattYtelseTjeneste() {
     }
 
     @Inject
     public VedtattYtelseTjeneste(BehandlingVedtakRepository vedtakRepository, BeregningsresultatRepository beregningsresultatRepository,
-                                 @Any Instance<YtelseTilleggsopplysningerTjeneste> tilleggsopplysningerTjenester) {
+                                 @Any Instance<YtelseTilleggsopplysningerTjeneste> tilleggsopplysningerTjenester, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
         this.vedtakRepository = vedtakRepository;
         this.beregningsresultatRepository = beregningsresultatRepository;
         this.tilleggsopplysningerTjenester = tilleggsopplysningerTjenester;
+        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
     }
 
     public Ytelse genererYtelse(Behandling behandling) {
         final BehandlingVedtak vedtak = vedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
         Optional<BeregningsresultatEntitet> berResultat = beregningsresultatRepository.hentEndeligBeregningsresultat(behandling.getId());
+        List<ArbeidsforholdReferanse> arbeidsforholdReferanser = inntektArbeidYtelseTjeneste.hentGrunnlag(behandling.getId())
+            .getArbeidsforholdInformasjon()
+            .stream()
+            .flatMap(a -> a.getArbeidsforholdReferanser().stream())
+            .collect(Collectors.toList());
 
         final Aktør aktør = new Aktør();
         aktør.setVerdi(behandling.getAktørId().getId());
@@ -70,30 +78,11 @@ public class VedtattYtelseTjeneste {
                 PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere)));
 
         ytelse.setPeriode(utledPeriode(vedtak, berResultat.orElse(null)));
-        ytelse.setAnvist(map(berResultat.orElse(null)));
+        ytelse.setAnvist(mapAnvisninger(berResultat.orElse(null), arbeidsforholdReferanser));
         return ytelse;
     }
 
-    private List<Anvisning> map(BeregningsresultatEntitet uttakResultatEntitet) {
-        if (uttakResultatEntitet == null) {
-            return List.of();
-        }
-        return uttakResultatEntitet.getBeregningsresultatPerioder().stream()
-            .filter(periode -> periode.getDagsats() > 0)
-            .map(this::map)
-            .collect(Collectors.toList());
-    }
 
-    private Anvisning map(BeregningsresultatPeriode periode) {
-        final Anvisning anvisning = new Anvisning();
-        final Periode p = new Periode();
-        p.setFom(periode.getBeregningsresultatPeriodeFom());
-        p.setTom(periode.getBeregningsresultatPeriodeTom());
-        anvisning.setPeriode(p);
-        anvisning.setDagsats(new Desimaltall(new BigDecimal(periode.getDagsats())));
-        anvisning.setUtbetalingsgrad(periode.getLavestUtbetalingsgrad().map(Desimaltall::new).orElse(null));
-        return anvisning;
-    }
 
     private Periode utledPeriode(BehandlingVedtak vedtak, BeregningsresultatEntitet beregningsresultat) {
         final Periode periode = new Periode();
