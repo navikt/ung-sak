@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.vurderer;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,8 +16,6 @@ import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal.KompletthetUtleder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal.VurdererInput;
 
 class KompletthetUtlederTest {
 

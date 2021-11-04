@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.autopunkter;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,8 +15,6 @@ import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal.EtterlysInntektsmeldingOgVarsleOmAvslagUtleder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal.EtterlysningInput;
 
 class EtterlysInntektsmeldingOgVarsleOmAvslagUtlederTest {
 
@@ -25,7 +23,8 @@ class EtterlysInntektsmeldingOgVarsleOmAvslagUtlederTest {
     @Test
     void skal_fortsette_hvis_komplett() {
         var aksjonspunkter = Map.of(AksjonspunktKodeDefinisjon.ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING_KODE, LocalDateTime.now().plusDays(10));
-        var input = new EtterlysningInput(aksjonspunkter, Map.of());
+
+        var input = new EtterlysningInput(aksjonspunkter, Map.of(), Map.of());
 
         var aksjon = utleder.utled(input);
 
@@ -37,7 +36,8 @@ class EtterlysInntektsmeldingOgVarsleOmAvslagUtlederTest {
     @Test
     void skal_fortsatt_gå_på_vent_hvis_aksjonspunkt() {
         var aksjonspunkter = Map.of(AksjonspunktKodeDefinisjon.ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING_KODE, LocalDateTime.now().plusDays(10));
-        var input = new EtterlysningInput(aksjonspunkter, Map.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), List.of(new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, Arbeidsgiver.virksomhet("000000000")))));
+        var mangler = Map.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), List.of(new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, Arbeidsgiver.virksomhet("000000000"))));
+        var input = new EtterlysningInput(aksjonspunkter, mangler, Map.of());
 
         var aksjon = utleder.utled(input);
 
@@ -50,7 +50,8 @@ class EtterlysInntektsmeldingOgVarsleOmAvslagUtlederTest {
     @Test
     void skal_gi_fortsett_hvis_frist_utløpt_og_ikke_komplett() {
         var aksjonspunkter = Map.of(AksjonspunktKodeDefinisjon.ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING_KODE, LocalDateTime.now().minusDays(10));
-        var input = new EtterlysningInput(aksjonspunkter, Map.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), List.of(new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, Arbeidsgiver.virksomhet("000000000")))));
+        var mangler = Map.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), List.of(new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, Arbeidsgiver.virksomhet("000000000"))));
+        var input = new EtterlysningInput(aksjonspunkter, mangler, Map.of());
 
         var aksjon = utleder.utled(input);
 

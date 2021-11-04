@@ -84,7 +84,8 @@ public class PSBKompletthetSjekkerTjeneste {
         var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         // Automatisk etterlys hvis ikke sendt ut før
         var aksjonspunkter = behandling.getAksjonspunkter().stream().collect(Collectors.toMap(a -> a.getAksjonspunktDefinisjon().getKode(), Aksjonspunkt::getFristTid));
-        var etterlysInntektsmeldingInput = new EtterlysningInput(aksjonspunkter, kompletthetUtleder.utledRelevanteVurderinger(inputMedVurderinger));
+        Map<DatoIntervallEntitet, List<BestiltEtterlysning>> bestilteBrev = Map.of(); // TODO
+        var etterlysInntektsmeldingInput = new EtterlysningInput(aksjonspunkter, kompletthetUtleder.utledRelevanteVurderinger(inputMedVurderinger), bestilteBrev);
         var etterlysAksjon = etterlysInntektsmeldingUtleder.utled(etterlysInntektsmeldingInput);
 
         if (!etterlysAksjon.erUavklart() || etterlysAksjon.kanFortsette()) {
