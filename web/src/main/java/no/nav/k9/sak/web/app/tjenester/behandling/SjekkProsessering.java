@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.enterprise.context.Dependent;
@@ -18,7 +19,6 @@ import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
 import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
@@ -78,10 +78,15 @@ public class SjekkProsessering {
     /** Hvorvidt betingelser for å hente inn registeropplysninger på nytt er oppfylt. */
     private boolean skalInnhenteRegisteropplysningerPåNytt(Behandling behandling) {
         BehandlingStatus behandlingStatus = behandling.getStatus();
-        return BehandlingStatus.UTREDES.equals(behandlingStatus)
+        return erGyldigBehandlingStatus(behandling)
             && !behandling.isBehandlingPåVent()
-            // XXX: Finne en bedre måte å bestemme når vi skal oppfriske data og ikke. Skal det være konfigurasjon per ytelse? ...eller eget interface per ytelse? 
-            && (behandling.getFagsakYtelseType() == FagsakYtelseType.PLEIEPENGER_SYKT_BARN || behandlingProsesseringTjeneste.skalInnhenteRegisteropplysningerPåNytt(behandling));
+            // XXX: Finne en bedre måte å bestemme når vi skal oppfriske data og ikke. Skal det være konfigurasjon per ytelse? ...eller eget interface per ytelse?
+            && (behandling.getFagsak().getPleietrengendeAktørId() != null || behandlingProsesseringTjeneste.skalInnhenteRegisteropplysningerPåNytt(behandling));
+    }
+
+    private boolean erGyldigBehandlingStatus(Behandling behandling) {
+        return behandling.getFagsak().getPleietrengendeAktørId() == null && BehandlingStatus.UTREDES.equals(behandling.getStatus())
+            || behandling.getFagsak().getPleietrengendeAktørId() != null && Set.of(BehandlingStatus.UTREDES, BehandlingStatus.FATTER_VEDTAK).contains(behandling.getStatus());
     }
 
     private boolean harRolleSaksbehandler() {
