@@ -20,7 +20,6 @@ import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Saksnummer;
 
 /**
  * Håndterer administrasjon(saksbehandlers input) vedrørende arbeidsforhold.
@@ -61,15 +60,6 @@ public class ArbeidsforholdAdministrasjonTjeneste {
      */
     public void lagre(Long behandlingId, AktørId aktørId, ArbeidsforholdInformasjonBuilder builder) {
         inntektArbeidYtelseTjeneste.lagreArbeidsforhold(behandlingId, aktørId, builder);
-    }
-
-    public Set<InntektArbeidYtelseArbeidsforholdV2Dto> hentArbeidsforholdFraInntektsmeldinger(Saksnummer saksnummer) {
-        var inntektsmeldinger = new TreeSet<Inntektsmelding>(Inntektsmelding.COMP_REKKEFØLGE); // ta i rekkefølge mottatt
-        inntektsmeldinger.addAll(inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(saksnummer));
-
-        var mapper = new ArbeidsforholdMapper(null);
-        mapper.utledArbeidsforholdFraInntektsmeldinger(Objects.requireNonNull(inntektsmeldinger));
-        return mapper.getArbeidsforhold();
     }
 
     public Set<InntektArbeidYtelseArbeidsforholdV2Dto> hentArbeidsforhold(BehandlingReferanse ref,
