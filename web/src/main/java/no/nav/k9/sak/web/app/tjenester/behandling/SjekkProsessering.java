@@ -19,7 +19,6 @@ import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
 import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
@@ -82,7 +81,7 @@ public class SjekkProsessering {
         return erGyldigBehandlingStatus(behandling)
             && !behandling.isBehandlingPåVent()
             // XXX: Finne en bedre måte å bestemme når vi skal oppfriske data og ikke. Skal det være konfigurasjon per ytelse? ...eller eget interface per ytelse?
-            && (behandling.getFagsakYtelseType() == FagsakYtelseType.PLEIEPENGER_SYKT_BARN || behandlingProsesseringTjeneste.skalInnhenteRegisteropplysningerPåNytt(behandling));
+            && (behandling.getFagsak().getPleietrengendeAktørId() != null || behandlingProsesseringTjeneste.skalInnhenteRegisteropplysningerPåNytt(behandling));
     }
 
     private boolean erGyldigBehandlingStatus(Behandling behandling) {

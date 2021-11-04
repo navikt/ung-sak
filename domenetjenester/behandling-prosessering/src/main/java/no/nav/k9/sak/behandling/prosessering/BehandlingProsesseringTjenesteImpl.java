@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.k9.felles.log.mdc.MDCOperations;
-import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -182,8 +181,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         }
 
         return behandlingskontrollTjeneste.erStegPassert(behandling, BehandlingStegType.INNHENT_REGISTEROPP)
-            && registerdataEndringshåndterer.skalInnhenteRegisteropplysningerPåNytt(behandling)
-            && BehandlingStatus.UTREDES.equals(behandling.getStatus());
+            && registerdataEndringshåndterer.skalInnhenteRegisteropplysningerPåNytt(behandling);
     }
 
     // Til bruk ved gjenopptak fra vent (Hendelse: Manuell input, Frist utløpt, mv)
