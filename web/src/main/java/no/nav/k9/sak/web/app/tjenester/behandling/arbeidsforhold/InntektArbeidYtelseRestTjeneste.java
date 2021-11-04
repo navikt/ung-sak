@@ -117,30 +117,19 @@ public class InntektArbeidYtelseRestTjeneste {
     @Path(INNTEKT_ARBEID_YTELSE_INNTEKTSMELDINGER_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(description = "Hent arbeidsforhold fra fagsak", summary = ("Returnerer arbeidsforhold oppgitt eller registrert på matchende fagsak"), tags = "inntekt-arbeid-ytelse", responses = {
+    @Operation(description = "Hent arbeidsforhold fra inntektsmeldinger", summary = ("Returnerer arbeidsforhold oppgitt på inntektsmeldinger"), tags = "inntekt-arbeid-ytelse", responses = {
         @ApiResponse(responseCode = "200", description = "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InntektArbeidYtelseArbeidsforholdV2Dto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Set<InntektArbeidYtelseArbeidsforholdV2Dto> hentArbeidsforholdIdFraInntektsmeldinger(@Parameter(description = "Match-kritierer for å lete opp fagsaken med arbeidsforhold") @Valid @TilpassetAbacAttributt(supplierClass = FagsakRestTjeneste.MatchFagsakAttributter.class) MatchFagsak dto) {
+    public Set<InntektArbeidYtelseArbeidsforholdV2Dto> hentArbeidsforholdIdFraInntektsmeldinger(@Parameter(description = "Match-kritierer for å lete opp fagsaken med inntektsmeldinger") @Valid @TilpassetAbacAttributt(supplierClass = FagsakRestTjeneste.MatchFagsakAttributter.class) MatchFagsak dto) {
         var aktørId = personinfoAdapter.hentAktørIdForPersonIdent(dto.getBruker()).orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for bruker"));
         var matchendeFagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(dto.getYtelseType(), aktørId, null, null, dto.getPeriode().getFom(), dto.getPeriode().getTom());
         if (matchendeFagsak.isEmpty()) {
             return Set.of();
         }
-        var sisteBehandling = behandlingRepository.hentSisteBehandlingForFagsakId(matchendeFagsak.get().getId()).orElse(null);
-        if (sisteBehandling == null) {
-            return Set.of();
-        }
-        var iayg = iayTjeneste.finnGrunnlag(sisteBehandling.getId()).orElse(null);
-        if (iayg == null) {
-            return Set.of();
-        }
 
-        Skjæringstidspunkt skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(sisteBehandling.getId());
-        BehandlingReferanse ref = BehandlingReferanse.fra(sisteBehandling, skjæringstidspunkt);
-        UtledArbeidsforholdParametere param = new UtledArbeidsforholdParametere(false);
-        return arbeidsforholdAdministrasjonTjeneste.hentArbeidsforhold(ref, iayg, param);
+        return arbeidsforholdAdministrasjonTjeneste.hentArbeidsforholdFraInntektsmeldinger(matchendeFagsak.get().getSaksnummer());
     }
 
 
