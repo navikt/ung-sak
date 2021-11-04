@@ -39,10 +39,7 @@ import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 
 @ApplicationScoped
 @BehandlingTypeRef
@@ -177,7 +174,7 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
         return inntektsmeldingTjeneste
             .hentAlleInntektsmeldingerSomIkkeKommer(ref.getBehandlingId())
             .stream()
-            .map(e -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, e.getArbeidsgiver().getIdentifikator(), true))
+            .map(e -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, e.getArbeidsgiver(), true))
             .collect(Collectors.toList());
     }
 
@@ -214,7 +211,7 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
                 inntektsmeldingerSomSkalEtterlyses.addAll(manglendeInntektsmeldinger.stream()
                     .filter(it -> DokumentTypeId.INNTEKTSMELDING.equals(it.getDokumentType()))
                     .filter(it -> !it.getBrukerHarSagtAtIkkeKommer())
-                    .map(it -> (OrganisasjonsNummerValidator.erGyldig(it.getArbeidsgiver()) || OrgNummer.erKunstig(it.getArbeidsgiver())) ? Arbeidsgiver.virksomhet(it.getArbeidsgiver()) : Arbeidsgiver.fra(new AktørId(it.getArbeidsgiver())))
+                    .map(ManglendeVedlegg::getArbeidsgiver)
                     .collect(Collectors.toSet()));
                 finnVentefristForEtterlysning(ref, entry.getKey().getFomDato()).ifPresent(result::add);
             }

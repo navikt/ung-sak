@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagSteg;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal.PSBKompletthetSjekkerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.PSBKompletthetsjekker;
 
 @FagsakYtelseTypeRef("PSB")
@@ -59,16 +60,16 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         var ref = BehandlingReferanse.fra(behandling);
 
         if (benyttNyFlyt) {
-            return nyKompletthetFlyt(ref);
+            return nyKompletthetFlyt(ref, kontekst);
         } else {
             return legacykompletthetHåndtering(ref);
         }
     }
 
-    private BehandleStegResultat nyKompletthetFlyt(BehandlingReferanse ref) {
-        var kompletthetsAksjon = kompletthetSjekkerTjeneste.utledHandlinger(ref);
+    private BehandleStegResultat nyKompletthetFlyt(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
+        var kompletthetsAksjon = kompletthetSjekkerTjeneste.utledHandlinger(ref, kontekst);
 
-        if (kompletthetsAksjon.erKomplett()) {
+        if (kompletthetsAksjon.kanFortsette()) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         } else if (kompletthetsAksjon.harFrist()) {
             var aksjonspunktResultat = AksjonspunktResultat.opprettForAksjonspunktMedFrist(kompletthetsAksjon.getAksjonspunktDefinisjon(),
@@ -76,10 +77,12 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
                 kompletthetsAksjon.getFrist());
 
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(aksjonspunktResultat));
-        } else {
+        } else if(!kompletthetsAksjon.erUavklart()) {
             var aksjonspunktResultat = AksjonspunktResultat.opprettForAksjonspunkt(kompletthetsAksjon.getAksjonspunktDefinisjon());
 
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(aksjonspunktResultat));
+        } else {
+            throw new IllegalStateException("Ugyldig kompletthetstilstand :: " + kompletthetsAksjon);
         }
     }
 

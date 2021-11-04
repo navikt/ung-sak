@@ -1,48 +1,64 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
+import java.util.List;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 
 public class KompletthetsAksjon {
 
+    private List<PeriodeMedMangler> arbeidsgiverDetSkalEtterlysesFra;
+    private boolean uavklart = false;
     private AksjonspunktDefinisjon aksjonspunktDefinisjon;
     private LocalDateTime frist;
-    private boolean skalSendeBrev;
-    private boolean skalAvslåResterende = false;
 
-    public KompletthetsAksjon(AksjonspunktDefinisjon aksjonspunktDefinisjon, LocalDateTime frist, boolean skalSendeBrev) {
+    public KompletthetsAksjon(AksjonspunktDefinisjon aksjonspunktDefinisjon, LocalDateTime frist, List<PeriodeMedMangler> arbeidsgiverDetSkalEtterlysesFra) {
         this.aksjonspunktDefinisjon = aksjonspunktDefinisjon;
-        this.skalSendeBrev = skalSendeBrev;
-        this.frist = aksjonspunktDefinisjon != null && skalSendeBrev ? Objects.requireNonNull(frist) : frist;
+        this.frist = frist;
+        this.arbeidsgiverDetSkalEtterlysesFra = arbeidsgiverDetSkalEtterlysesFra;
     }
 
     public KompletthetsAksjon() {
-        this.skalSendeBrev = false;
         this.frist = null;
         this.aksjonspunktDefinisjon = null;
+    }
+
+    KompletthetsAksjon(boolean uavklart) {
+        this.uavklart = uavklart;
     }
 
     /**
      * Fortsett uavbrutt, ingen aksjons trengs
      *
-     * @return
+     * @return fortsett
      */
     public static KompletthetsAksjon fortsett() {
         return new KompletthetsAksjon();
     }
 
-    public static KompletthetsAksjon automatiskEtterlysning(AksjonspunktDefinisjon aksjonspunktDefinisjon, LocalDateTime frist, boolean skalSendeBrev) {
-        return new KompletthetsAksjon(aksjonspunktDefinisjon, frist, skalSendeBrev);
+    /**
+     * Trenger videre vurdering
+     *
+     * @return uavklart
+     */
+    public static KompletthetsAksjon uavklart() {
+        return new KompletthetsAksjon(true);
+    }
+
+    public static KompletthetsAksjon automatiskEtterlysning(AksjonspunktDefinisjon aksjonspunktDefinisjon, LocalDateTime frist, List<PeriodeMedMangler> arbeidsgiverDetSkalEtterlysesFra) {
+        return new KompletthetsAksjon(aksjonspunktDefinisjon, frist, arbeidsgiverDetSkalEtterlysesFra);
     }
 
     public static KompletthetsAksjon manuellAvklaring(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
-        return new KompletthetsAksjon(aksjonspunktDefinisjon, null, false);
+        return new KompletthetsAksjon(aksjonspunktDefinisjon, null, null);
     }
 
-    public boolean erKomplett() {
-        return frist == null && aksjonspunktDefinisjon == null;
+    public boolean erUavklart() {
+        return uavklart;
+    }
+
+    public boolean kanFortsette() {
+        return !erUavklart() && frist == null && aksjonspunktDefinisjon == null;
     }
 
     public boolean harFrist() {
@@ -57,11 +73,7 @@ public class KompletthetsAksjon {
         return frist;
     }
 
-    public boolean isSkalSendeBrev() {
-        return skalSendeBrev;
-    }
-
-    public boolean isSkalAvslåResterende() {
-        return skalAvslåResterende;
+    public List<PeriodeMedMangler> getArbeidsgiverDetSkalEtterlysesFra() {
+        return arbeidsgiverDetSkalEtterlysesFra;
     }
 }

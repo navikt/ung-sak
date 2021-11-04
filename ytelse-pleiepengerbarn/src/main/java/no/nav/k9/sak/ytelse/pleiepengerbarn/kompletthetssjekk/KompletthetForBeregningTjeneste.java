@@ -291,7 +291,7 @@ public class KompletthetForBeregningTjeneste {
                 .stream()
                 .map(entry -> entry.getValue()
                     .stream()
-                    .map(it -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, entry.getKey().getIdentifikator(), it != null ? it.getReferanse() : null, false))
+                    .map(it -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, entry.getKey(), it != null ? it.getReferanse() : null, false))
                     .collect(Collectors.toList()))
                 .flatMap(Collection::stream)
                 .filter(it -> harFraværFraArbeidetIPerioden(input, periode, it))
