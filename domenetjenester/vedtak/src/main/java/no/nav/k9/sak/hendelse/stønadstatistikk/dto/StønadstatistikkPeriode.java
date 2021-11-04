@@ -1,5 +1,6 @@
 package no.nav.k9.sak.hendelse.stønadstatistikk.dto;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
@@ -12,8 +13,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.k9.kodeverk.vilkår.Utfall;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -38,7 +37,7 @@ public class StønadstatistikkPeriode {
     @JsonProperty(value = "uttaksgrad", required = true)
     @NotNull
     @Valid
-    private int uttaksgrad;
+    private BigDecimal uttaksgrad;
     
     @JsonProperty(value = "utbetalingsgrader", required = true)
     @Size(max=1000)
@@ -49,7 +48,7 @@ public class StønadstatistikkPeriode {
     @JsonProperty(value = "søkersTapteArbeidstid", required = true)
     @NotNull
     @Valid
-    private int søkersTapteArbeidstid;
+    private BigDecimal søkersTapteArbeidstid;
     
     @JsonProperty(value = "oppgittTilsyn", required = true)
     @NotNull
@@ -71,7 +70,7 @@ public class StønadstatistikkPeriode {
     @JsonProperty(value = "pleiebehov", required = true)
     @NotNull
     @Valid
-    private int pleiebehov;
+    private BigDecimal pleiebehov;
     //private StønadstatistikkGraderingMotTilsyn graderingMotTilsyn;
     //private StønadstatistikkNattevåk nattevåk;
     //private StønadstatistikkBeredskap beredskap;
@@ -80,7 +79,7 @@ public class StønadstatistikkPeriode {
     @JsonProperty(value = "bruttoBeregningsgrunnlag", required = true)
     @NotNull
     @Valid
-    private long bruttoBeregningsgrunnlag;
+    private BigDecimal bruttoBeregningsgrunnlag;
 
     
     public StønadstatistikkPeriode() {
@@ -90,14 +89,14 @@ public class StønadstatistikkPeriode {
     public StønadstatistikkPeriode(LocalDate fom,
             LocalDate tom,
             StønadstatistikkUtfall utfall,
-            int uttaksgrad,
+            BigDecimal uttaksgrad,
             List<StønadstatistikkUtbetalingsgrad> utbetalingsgrader,
-            int søkersTapteArbeidstid,
+            BigDecimal søkersTapteArbeidstid,
             Duration oppgittTilsyn,
             List<String> årsaker,
             List<StønadstatistikkInngangsvilkår> inngangsvilkår,
-            int pleiebehov,
-            long bruttoBeregningsgrunnlag) {
+            BigDecimal pleiebehov,
+            BigDecimal bruttoBeregningsgrunnlag) {
         this.fom = fom;
         this.tom = tom;
         this.utfall = utfall;

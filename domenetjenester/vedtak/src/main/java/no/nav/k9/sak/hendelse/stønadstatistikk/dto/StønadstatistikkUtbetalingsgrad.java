@@ -1,5 +1,6 @@
 package no.nav.k9.sak.hendelse.stønadstatistikk.dto;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 
 import javax.validation.Valid;
@@ -33,7 +34,7 @@ public class StønadstatistikkUtbetalingsgrad {
     @JsonProperty(value = "utbetalingsgrad", required = true)
     @NotNull
     @Valid
-    private int utbetalingsgrad;
+    private BigDecimal utbetalingsgrad;
     
     @JsonProperty(value = "dagsats", required = true)
     @NotNull
@@ -48,8 +49,8 @@ public class StønadstatistikkUtbetalingsgrad {
     public StønadstatistikkUtbetalingsgrad(StønadstatistikkArbeidsforhold arbeidsforhold,
             Duration normalArbeidstid,
             Duration faktiskArbeidstid,
-             int utbetalingsgrad,
-             int dagsats) {
+            BigDecimal utbetalingsgrad,
+            int dagsats) {
         this.arbeidsforhold = arbeidsforhold;
         this.normalArbeidstid = normalArbeidstid;
         this.faktiskArbeidstid = faktiskArbeidstid;

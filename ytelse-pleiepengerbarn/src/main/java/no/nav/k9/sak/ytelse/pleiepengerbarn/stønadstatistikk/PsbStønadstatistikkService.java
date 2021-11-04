@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -83,18 +84,18 @@ public class PsbStønadstatistikkService implements StønadstatistikkService {
     
     private StønadstatistikkPeriode mapPeriode(LocalDateSegment<InformasjonTilStønadstatistikkHendelse> ds) {
         final UttaksperiodeInfo info = ds.getValue().getUttaksperiodeInfo();
-        final long bruttoBeregningsgrunnlag = (ds.getValue().getBeregningsgrunnlagDto() != null) ? ds.getValue().getBeregningsgrunnlagDto().getÅrsinntektVisningstall().longValue() : -1; // TODO: OK med presisjonstap?
+        final BigDecimal bruttoBeregningsgrunnlag = (ds.getValue().getBeregningsgrunnlagDto() != null) ? ds.getValue().getBeregningsgrunnlagDto().getÅrsinntektVisningstall() : BigDecimal.valueOf(-1);
         return new StønadstatistikkPeriode(
                 ds.getFom(),
                 ds.getTom(),
                 mapUtfall(info.getUtfall()),
-                info.getUttaksgrad().intValue(), // OK med presisjonstap?
+                info.getUttaksgrad(),
                 mapUtbetalingsgrader(info.getUtbetalingsgrader(), ds.getValue().getBeregningsresultatAndeler()),
-                info.getSøkersTapteArbeidstid().intValue(), // OK med presisjonstap?
+                info.getSøkersTapteArbeidstid(),
                 info.getOppgittTilsyn(),
                 mapÅrsaker(info.getårsaker()),
                 mapInngangsvilkår(info.getInngangsvilkår()),
-                info.getPleiebehov().intValue(), // OK med presisjonstap?
+                info.getPleiebehov(),
                 bruttoBeregningsgrunnlag
                 );
     }
@@ -113,12 +114,12 @@ public class PsbStønadstatistikkService implements StønadstatistikkService {
             var a = u.getArbeidsforhold();
             final StønadstatistikkArbeidsforhold arbeidsforhold = new StønadstatistikkArbeidsforhold(a.getType(), a.getOrganisasjonsnummer(), a.getAktørId(), a.getArbeidsforholdId());
             
-            int utbetalingsgrad = u.getUtbetalingsgrad().intValue(); // TODO: OK med presisjonstap?
+            final BigDecimal utbetalingsgrad = u.getUtbetalingsgrad();
             
             final int dagsats;
-            if (utbetalingsgrad > 0) {
+            if (utbetalingsgrad.compareTo(BigDecimal.valueOf(0)) >= 0) {
                 final BeregningsresultatAndel andel = finnAndel(arbeidsforhold, beregningsresultatAndeler);
-                dagsats = andel.getDagsats(); // TODO: Sjekk om dette er riktig.
+                dagsats = andel.getDagsats();
             } else {
                 dagsats = 0;
             }
