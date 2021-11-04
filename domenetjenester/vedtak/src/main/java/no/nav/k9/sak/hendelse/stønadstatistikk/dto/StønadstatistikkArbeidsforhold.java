@@ -51,4 +51,10 @@ public class StønadstatistikkArbeidsforhold {
     public String getArbeidsforholdId() {
         return arbeidsforholdId;
     }
+
+    @Override
+    public String toString() {
+        return "StønadstatistikkArbeidsforhold [type=" + type + ", organisasjonsnummer=" + organisasjonsnummer
+                + ", aktørId=" + aktørId + ", arbeidsforholdId=" + arbeidsforholdId + "]";
+    }
 }

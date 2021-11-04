@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -115,7 +116,7 @@ public class PsbStønadstatistikkService implements StønadstatistikkService {
             int utbetalingsgrad = u.getUtbetalingsgrad().intValue(); // TODO: OK med presisjonstap?
             
             final int dagsats;
-            if (utbetalingsgrad >= 0) {
+            if (utbetalingsgrad > 0) {
                 final BeregningsresultatAndel andel = finnAndel(arbeidsforhold, beregningsresultatAndeler);
                 dagsats = andel.getDagsats(); // TODO: Sjekk om dette er riktig.
             } else {
@@ -149,7 +150,7 @@ public class PsbStønadstatistikkService implements StønadstatistikkService {
         }
         
         if (kandidater.isEmpty()) {
-            throw new IllegalStateException("Fant ingen andel.");
+            throw new IllegalStateException("Fant ingen andel i andeler: " + Arrays.toString(beregningsresultatAndeler.toArray()) + ", arbeidsforhold: " + arbeidsforhold.toString());
         }
         
         return kandidater.get(0);
