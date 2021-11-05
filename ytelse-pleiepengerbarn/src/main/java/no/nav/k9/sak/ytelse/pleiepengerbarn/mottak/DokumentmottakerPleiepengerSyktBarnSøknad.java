@@ -147,13 +147,13 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
         for (Journalpost journalpost : søknad.getJournalposter()) {
             boolean journalpostHarInformasjonSomIkkeKanPunsjes = false;
             boolean journalpostHarMedisinskeOpplysninger = true;
-            if (journalpost.getInneholderInfomasjonSomIkkeKanPunsjes() != null) {
-                journalpostHarInformasjonSomIkkeKanPunsjes = journalpost.getInneholderInfomasjonSomIkkeKanPunsjes();
+            if (journalpost.getInneholderInformasjonSomIkkeKanPunsjes() != null) {
+                journalpostHarInformasjonSomIkkeKanPunsjes = journalpost.getInneholderInformasjonSomIkkeKanPunsjes();
             }
             if (journalpost.getInneholderMedisinskeOpplysninger() != null) {
                 journalpostHarMedisinskeOpplysninger = journalpost.getInneholderMedisinskeOpplysninger();
             }
- 
+
             try {
                 sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
                     behandling,
