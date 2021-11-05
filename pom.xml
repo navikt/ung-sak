@@ -156,7 +156,7 @@
             <dependency>
                 <groupId>no.nav.k9.oppdrag.kontrakt</groupId>
                 <artifactId>oppdrag-kontrakter</artifactId>
-                <version>1.2.1</version>
+                <version>1.4</version>
             </dependency>
 
             <dependency>
