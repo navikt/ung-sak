@@ -426,7 +426,9 @@ public class Inntektsmelding implements IndexKey {
     }
 
     public boolean harRefusjonskrav() {
-        return getRefusjonBeløpPerMnd() != null || getRefusjonOpphører() != null || !getEndringerRefusjon().isEmpty();
+        return (getRefusjonBeløpPerMnd() != null && getRefusjonBeløpPerMnd().compareTo(Beløp.ZERO) > 0)
+            || getRefusjonOpphører() != null
+            || !getEndringerRefusjon().isEmpty();
     }
 
     public boolean harFravær() {
