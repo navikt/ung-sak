@@ -13,12 +13,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -40,6 +41,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     private BehandlingRepository behandlingRepository;
     private KompletthetsjekkerFelles fellesUtil;
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
+    private MottatteDokumentRepository mottatteDokumentRepository;
 
     OmsorgspengerKompletthetsjekker() {
         // CDI
@@ -50,12 +52,14 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
                                            InntektsmeldingTjeneste inntektsmeldingTjeneste,
                                            BehandlingRepository behandlingRepository,
                                            KompletthetsjekkerFelles fellesUtil,
-                                           OmsorgspengerGrunnlagRepository grunnlagRepository) {
+                                           OmsorgspengerGrunnlagRepository grunnlagRepository,
+                                           MottatteDokumentRepository mottatteDokumentRepository) {
         this.kompletthetssjekkerInntektsmelding = kompletthetssjekkerInntektsmelding;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.fellesUtil = fellesUtil;
         this.grunnlagRepository = grunnlagRepository;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
 
     @Override
@@ -77,9 +81,14 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         // hendelser)
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
         List<ManglendeVedlegg> manglendeInntektsmeldinger = getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt());
-        if (!manglendeInntektsmeldinger.isEmpty() && behandling.getType() == BehandlingType.FØRSTEGANGSSØKNAD) {
-            LOGGER.info("Behandling {} er ikke komplett - IM fra {} arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size());
-            return settPåVent(ref, Venteårsak.AVV_IM_MOT_AAREG, 3);
+        if (!manglendeInntektsmeldinger.isEmpty()) {
+            if (harSøknadSomArbeidstaker(ref)) {
+                LOGGER.info("Behandling {} er ikke komplett - Søknad arbeidstaker uten tilhørende IM", ref.getBehandlingId());
+                return settPåVent(ref, Venteårsak.AVV_IM_MOT_SØKNAD_AT, 14);
+            } else {
+                LOGGER.info("Behandling {} er ikke komplett - IM fra {} arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size());
+                return settPåVent(ref, Venteårsak.AVV_IM_MOT_AAREG, 3);
+            }
         }
         if (ingenSøknadsperioder(ref)) {
             // Gjelder både behandlinger som er førstegangs og som er forlengelse
@@ -92,6 +101,13 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     @Override
     public boolean ingenSøknadsperioder(BehandlingReferanse ref) {
         return harIngenRefusjonskravFraMottatteInntektsmeldinger(ref) && harIkkeSøknadsperiode(ref);
+    }
+
+    private boolean harSøknadSomArbeidstaker(BehandlingReferanse ref) {
+        return mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(ref.getFagsakId())
+            .stream()
+            .filter(it -> it.getBehandlingId() != null && it.getBehandlingId().equals(ref.getBehandlingId()))
+            .anyMatch(it -> Brevkode.SØKNAD_UTBETALING_OMS_AT.equals(it.getType()));
     }
 
     private boolean harIkkeSøknadsperiode(BehandlingReferanse ref) {
