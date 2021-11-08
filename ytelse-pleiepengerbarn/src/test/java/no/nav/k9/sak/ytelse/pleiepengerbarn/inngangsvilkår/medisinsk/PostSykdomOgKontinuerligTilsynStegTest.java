@@ -132,6 +132,51 @@ class PostSykdomOgKontinuerligTilsynStegTest {
     }
 
     @Test
+    void skal_justere_utfall_ved_perioder_med_avslag_på_medisinsk_med_18årsvurdering_2() {
+        var builder = Vilkårene.builder();
+        var vilkårBuilder = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
+        var avslåttPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(28), LocalDate.now().minusDays(14));
+        var avslåttPeriodeDel2 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(13), LocalDate.now());
+        var oppfyltPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(32), LocalDate.now().minusDays(29));
+        var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(oppfyltPeriode.getFomDato(), avslåttPeriodeDel2.getTomDato());
+        var perioderTilVurdering = List.of(periodeTilVurdering);
+
+        builder.leggTilIkkeVurderteVilkår(perioderTilVurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR,
+            VilkårType.MEDLEMSKAPSVILKÅRET,
+            VilkårType.OPPTJENINGSPERIODEVILKÅR,
+            VilkårType.OPPTJENINGSVILKÅRET);
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(oppfyltPeriode)
+                .medUtfall(Utfall.OPPFYLT))
+            .leggTil(vilkårBuilder.hentBuilderFor(avslåttPeriode)
+                .medUtfall(Utfall.IKKE_OPPFYLT));
+        builder.leggTil(vilkårBuilder);
+
+        var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+        vilkårBuilder18år.leggTil(vilkårBuilder18år.hentBuilderFor(avslåttPeriodeDel2)
+            .medUtfall(Utfall.IKKE_OPPFYLT));
+        builder.leggTil(vilkårBuilder18år);
+
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering));
+
+        var oppdaterteVilkår = resultatBuilder.build();
+
+        assertThat(oppdaterteVilkår).isNotNull();
+
+        for (Vilkår vilkår : oppdaterteVilkår.getVilkårene()) {
+            if (VilkårType.MEDISINSKEVILKÅR_18_ÅR.equals(vilkår.getVilkårType())) {
+                assertThat(vilkår.getPerioder()).hasSize(1);
+                assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)).contains(avslåttPeriodeDel2);
+            } else if (VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.equals(vilkår.getVilkårType())) {
+                assertThat(vilkår.getPerioder()).hasSize(2);
+                assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)).contains(oppfyltPeriode, avslåttPeriode);
+            } else {
+                assertThat(vilkår.getPerioder()).hasSize(1);
+                assertThat(vilkår.getPerioder().get(0).getPeriode()).isEqualTo(oppfyltPeriode);
+            }
+        }
+    }
+
+    @Test
     void skal_legge_tilbake_periode_hvis_sykdom_godkjent_igjen() {
         var builder = Vilkårene.builder();
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);

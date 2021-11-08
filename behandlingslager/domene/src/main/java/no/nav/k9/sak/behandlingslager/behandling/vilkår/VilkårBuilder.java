@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -56,7 +55,7 @@ public class VilkårBuilder {
         this.vilkårTidslinje = new LocalDateTimeline<>(vilkåret.getPerioder()
             .stream()
             .map(a -> toSegment(a, boundry))
-            .filter(s -> s != null)
+            .filter(Objects::nonNull)
             .collect(Collectors.toList()));
     }
 
@@ -162,7 +161,7 @@ public class VilkårBuilder {
             var segment = new LocalDateSegment<WrappedVilkårPeriode>(periode.getFomDato(), periode.getTomDato(), null);
             var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
 
-            this.vilkårTidslinje = vilkårTidslinje.combine(periodeTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            this.vilkårTidslinje = vilkårTidslinje.disjoint(periodeTidslinje);
         }
         this.tilbakestiltePerioder.addAll(perioder);
         return this;
@@ -308,7 +307,7 @@ public class VilkårBuilder {
         datoerSomOverlapper.addAll(datoerSomOverlapperFremover);
 
         for (DatoIntervallEntitet datoIntervallEntitet : datoerSomOverlapper) {
-            if (vilkårTidslinje.intersects(new LocalDateTimeline<>(List.of(new LocalDateSegment<WrappedVilkårPeriode>(datoIntervallEntitet.getFomDato(), datoIntervallEntitet.getTomDato(), null))))) {
+            if (harDataPåPeriode(datoIntervallEntitet)) {
                 var periodeBuilder = hentBuilderFor(datoIntervallEntitet)
                     .medUtfall(Utfall.IKKE_VURDERT);
                 leggTil(periodeBuilder);
