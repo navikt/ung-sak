@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
@@ -25,8 +26,8 @@ import no.nav.k9.sak.behandlingskontroll.StartpunktRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
-import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktTjeneste;
+import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
@@ -73,7 +74,10 @@ public class Endringskontroller {
         Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
 
-        avsluttOppgaverIGsak(behandling, behandling.getStatus());
+        if (behandling.getFagsakYtelseType() == FagsakYtelseType.FRISINN) {
+            //kun FRISINN som bruker gosys for produksjonsstyring, de andre ytelsene håndteres i k9-los
+            avsluttOppgaverIGsak(behandling, behandling.getStatus());
+        }
 
         StartpunktType startpunkt = FagsakYtelseTypeRef.Lookup.find(startpunktTjenester, behandling.getFagsakYtelseType())
             .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + behandling.getFagsakYtelseType().getKode()))
@@ -134,7 +138,7 @@ public class Endringskontroller {
 
     private void avsluttOppgaverIGsak(Behandling behandling, BehandlingStatus før) {
         boolean behandlingIFatteVedtak = BehandlingStatus.FATTER_VEDTAK.equals(før);
-        if (behandlingIFatteVedtak) {
+        if (behandlingIFatteVedtak ) {
             oppgaveTjeneste.avslutt(behandling.getId(), OppgaveÅrsak.GODKJENN_VEDTAK_VL);
         }
     }
