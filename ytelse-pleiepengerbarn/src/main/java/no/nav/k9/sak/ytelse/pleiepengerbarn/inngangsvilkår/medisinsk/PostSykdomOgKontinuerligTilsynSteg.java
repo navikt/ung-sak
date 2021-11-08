@@ -128,10 +128,12 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private void justerPeriodeForOpptjeningOgBeregning(Set<VilkårPeriode> avslåttePerioder, Set<VilkårPeriode> innvilgedePerioder, VilkårResultatBuilder resultatBuilder) {
         for (VilkårType vilkårType : Set.of(VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.OPPTJENINGSVILKÅRET, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET)) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
-            for (VilkårPeriode avslåttPeriode : avslåttePerioder) {
-                if (vilkårBuilder.harDataPåPeriode(avslåttPeriode.getPeriode())) {
-                    vilkårBuilder = vilkårBuilder.tilbakestill(avslåttPeriode.getPeriode());
-                }
+            var perioderSomSkalTilbakestilles = avslåttePerioder.stream()
+                .map(VilkårPeriode::getPeriode)
+                .filter(vilkårBuilder::harDataPåPeriode)
+                .collect(Collectors.toCollection(TreeSet::new));
+            if (!perioderSomSkalTilbakestilles.isEmpty()) {
+                vilkårBuilder = vilkårBuilder.tilbakestill(perioderSomSkalTilbakestilles);
             }
             for (VilkårPeriode innvilgetPeriode : innvilgedePerioder) {
                 vilkårBuilder = vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(innvilgetPeriode.getPeriode())
