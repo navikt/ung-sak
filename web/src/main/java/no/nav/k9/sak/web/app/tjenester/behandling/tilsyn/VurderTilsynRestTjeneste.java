@@ -3,6 +3,8 @@ package no.nav.k9.sak.web.app.tjenester.behandling.tilsyn;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.Optional;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -76,15 +78,11 @@ public class VurderTilsynRestTjeneste {
                                            BehandlingUuidDto behandlingUuidDto) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuidDto.getBehandlingUuid());
 
-        final UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende;
+        final Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende;
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
-            unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId()).map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende).orElse(null);
+            unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId()).map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
         } else {
-            unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(behandling.getFagsak().getPleietrengendeAktørId()).orElse(null);
-        }
-
-        if (unntakEtablertTilsynForPleietrengende == null) {
-            return Response.noContent().build();
+            unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(behandling.getFagsak().getPleietrengendeAktørId());
         }
 
         var behandlingRef = BehandlingReferanse.fra(behandling);
