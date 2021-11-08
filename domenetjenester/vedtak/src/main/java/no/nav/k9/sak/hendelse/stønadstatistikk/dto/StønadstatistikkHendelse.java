@@ -59,6 +59,10 @@ public class StønadstatistikkHendelse {
     @Valid
     private UUID behandlingUuid;
     
+    @JsonProperty(value = "forrigeBehandlingUuid", required = false)
+    @Valid
+    private UUID forrigeBehandlingUuid;
+    
     @JsonProperty(value = "perioder", required = true)
     @Size(max=100000)
     @NotNull
@@ -77,6 +81,7 @@ public class StønadstatistikkHendelse {
             Saksnummer saksnummer,
             String utbetalingsreferanse,
             UUID behandlingUuid,
+            UUID forrigeBehandlingUuid,
             List<StønadstatistikkPeriode> perioder) {
         this.ytelseType = ytelseType;
         this.søker = søker;
@@ -85,6 +90,7 @@ public class StønadstatistikkHendelse {
         this.saksnummer = saksnummer;
         this.utbetalingsreferanse = utbetalingsreferanse;
         this.behandlingUuid = behandlingUuid;
+        this.forrigeBehandlingUuid = forrigeBehandlingUuid;
         this.perioder = perioder;
     }
 }

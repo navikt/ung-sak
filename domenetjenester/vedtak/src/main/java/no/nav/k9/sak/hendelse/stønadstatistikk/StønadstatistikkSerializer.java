@@ -21,10 +21,14 @@ public class StønadstatistikkSerializer {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS);
     
-    public static String toJson(StønadstatistikkHendelse object) throws IOException {
-        Writer jsonWriter = new StringWriter();
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(jsonWriter, object);
-        jsonWriter.flush();
-        return jsonWriter.toString();
+    public static String toJson(StønadstatistikkHendelse object) {
+        try {
+            Writer jsonWriter = new StringWriter();
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(jsonWriter, object);
+            jsonWriter.flush();
+            return jsonWriter.toString();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

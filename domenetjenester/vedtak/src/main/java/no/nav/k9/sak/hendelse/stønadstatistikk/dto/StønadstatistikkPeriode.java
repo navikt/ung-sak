@@ -71,10 +71,22 @@ public class StønadstatistikkPeriode {
     @NotNull
     @Valid
     private BigDecimal pleiebehov;
-    //private StønadstatistikkGraderingMotTilsyn graderingMotTilsyn;
-    //private StønadstatistikkNattevåk nattevåk;
-    //private StønadstatistikkBeredskap beredskap;
-    //private Duration søkersTapteTimer;
+    
+    @JsonProperty(value = "graderingMotTilsyn")
+    @Valid
+    private StønadstatistikkGraderingMotTilsyn graderingMotTilsyn;
+    
+    @JsonProperty(value = "nattevåk")
+    @Valid
+    private StønadstatistikkUtfall nattevåk;
+    
+    @JsonProperty(value = "beredskap")
+    @Valid
+    private StønadstatistikkUtfall beredskap;
+    
+    @JsonProperty(value = "søkersTapteTimer")
+    @Valid
+    private Duration søkersTapteTimer;
     
     @JsonProperty(value = "bruttoBeregningsgrunnlag", required = true)
     @NotNull
@@ -96,6 +108,10 @@ public class StønadstatistikkPeriode {
             List<String> årsaker,
             List<StønadstatistikkInngangsvilkår> inngangsvilkår,
             BigDecimal pleiebehov,
+            StønadstatistikkGraderingMotTilsyn graderingMotTilsyn,
+            StønadstatistikkUtfall nattevåk,
+            StønadstatistikkUtfall beredskap,
+            Duration søkersTapteTimer,
             BigDecimal bruttoBeregningsgrunnlag) {
         this.fom = fom;
         this.tom = tom;
@@ -107,6 +123,10 @@ public class StønadstatistikkPeriode {
         this.årsaker = årsaker;
         this.inngangsvilkår = inngangsvilkår;
         this.pleiebehov = pleiebehov;
+        this.graderingMotTilsyn = graderingMotTilsyn;
+        this.nattevåk = nattevåk;
+        this.beredskap = beredskap;
+        this.søkersTapteTimer = søkersTapteTimer;
         this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
     }
     

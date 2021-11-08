@@ -18,9 +18,10 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
+import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkHendelseBygger;
 import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkArbeidsforhold;
 import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkDiagnosekode;
+import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkGraderingMotTilsyn;
 import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkHendelse;
 import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkInngangsvilkår;
 import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkPeriode;
@@ -30,6 +31,7 @@ import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk.StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse;
+import no.nav.pleiepengerbarn.uttak.kontrakter.GraderingMotTilsyn;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
@@ -37,7 +39,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Årsak;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
-public class PsbStønadstatistikkService implements StønadstatistikkService {
+public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHendelseBygger {
 
     private StønadstatistikkPeriodetidslinjebygger stønadstatistikkPeriodetidslinjebygger;
     private BehandlingRepository behandlingRepository;
@@ -46,7 +48,7 @@ public class PsbStønadstatistikkService implements StønadstatistikkService {
 
 
     @Inject
-    public PsbStønadstatistikkService(StønadstatistikkPeriodetidslinjebygger stønadstatistikkPeriodetidslinjebygger,
+    public PsbStønadstatistikkHendelseBygger(StønadstatistikkPeriodetidslinjebygger stønadstatistikkPeriodetidslinjebygger,
             BehandlingRepository behandlingRepository,
             AktørTjeneste aktørTjeneste,
             SykdomGrunnlagService sykdomGrunnlagService) {
@@ -64,6 +66,8 @@ public class PsbStønadstatistikkService implements StønadstatistikkService {
         final List<SykdomDiagnosekode> diagnosekoder = sykdomGrunnlagService.hentGrunnlag(behandlingUuid).getGrunnlag().getDiagnosekoder().getDiagnosekoder();
         final LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> periodetidslinje = stønadstatistikkPeriodetidslinjebygger.lagTidslinjeFor(behandling);
         
+        final UUID forrigeBehandlingUuid = finnForrigeBehandlingUuid(behandling);
+        
         final StønadstatistikkHendelse stønadstatistikkHendelse = new StønadstatistikkHendelse(
                 behandling.getFagsakYtelseType(),
                 søker,
@@ -72,10 +76,20 @@ public class PsbStønadstatistikkService implements StønadstatistikkService {
                 behandling.getFagsak().getSaksnummer(),
                 HenvisningUtleder.utledHenvisning(behandling.getUuid()), // behandlingsreferanse i økonomisystemet: "henvisning"
                 behandlingUuid,
+                forrigeBehandlingUuid,
                 mapPerioder(periodetidslinje)
                 );
         
         return stønadstatistikkHendelse;
+    }
+
+    private UUID finnForrigeBehandlingUuid(final Behandling behandling) {
+        return behandling.getOriginalBehandlingId()
+                .map(behandlingId -> behandlingRepository.hentBehandlingHvisFinnes(behandlingId)
+                    .map(Behandling::getUuid)
+                    .orElse(null)
+                )
+                .orElse(null);
     }
 
     private List<StønadstatistikkPeriode> mapPerioder(LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> periodetidslinje) {
@@ -96,10 +110,14 @@ public class PsbStønadstatistikkService implements StønadstatistikkService {
                 mapÅrsaker(info.getårsaker()),
                 mapInngangsvilkår(info.getInngangsvilkår()),
                 info.getPleiebehov(),
+                mapGraderingMotTilsyn(info.getGraderingMotTilsyn()),
+                mapUtfall(info.getNattevåk()),
+                mapUtfall(info.getBeredskap()),
+                info.getSøkersTapteTimer(),
                 bruttoBeregningsgrunnlag
                 );
     }
-    
+
     private StønadstatistikkUtfall mapUtfall(Utfall utfall) {
         switch (utfall) {
         case OPPFYLT: return StønadstatistikkUtfall.OPPFYLT;
@@ -107,7 +125,6 @@ public class PsbStønadstatistikkService implements StønadstatistikkService {
         default: throw new IllegalArgumentException("Utfallet '" + utfall.toString() + "' er ikke støttet.");
         }
     }
-
 
     private List<StønadstatistikkUtbetalingsgrad> mapUtbetalingsgrader(List<Utbetalingsgrader> utbetalingsgrader, List<BeregningsresultatAndel> beregningsresultatAndeler) {
         return utbetalingsgrader.stream().map(u -> {
@@ -163,5 +180,12 @@ public class PsbStønadstatistikkService implements StønadstatistikkService {
     
     private List<StønadstatistikkInngangsvilkår> mapInngangsvilkår(Map<String, Utfall> inngangsvilkår) {
         return inngangsvilkår.entrySet().stream().map(entry -> new StønadstatistikkInngangsvilkår(entry.getKey(), mapUtfall(entry.getValue()))).toList();
+    }
+    
+    private StønadstatistikkGraderingMotTilsyn mapGraderingMotTilsyn(GraderingMotTilsyn graderingMotTilsyn) {
+        return new StønadstatistikkGraderingMotTilsyn(graderingMotTilsyn.getEtablertTilsyn(),
+                graderingMotTilsyn.getOverseEtablertTilsynÅrsak().toString(),
+                graderingMotTilsyn.getAndreSøkeresTilsyn(),
+                graderingMotTilsyn.getTilgjengeligForSøker());
     }
 }
