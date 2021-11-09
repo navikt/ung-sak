@@ -109,7 +109,7 @@ public class DokumentmottakerSøknadUtvidetRettKroniskSyk implements Dokumentmot
     }
 
     @Override
-    public BehandlingÅrsakType getBehandlingÅrsakType() {
+    public BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode) {
         return BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
     }
 

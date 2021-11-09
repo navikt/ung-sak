@@ -223,8 +223,11 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     }
 
     @Override
-    public BehandlingÅrsakType getBehandlingÅrsakType() {
-        return BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
+    public BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode) {
+        return switch (brevkode.getKode()) {
+            case Brevkode.FRAVÆRSKORRIGERING_IM_OMS_KODE -> BehandlingÅrsakType.RE_SATS_REGULERING;
+            default -> BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
+        };
     }
 
 }

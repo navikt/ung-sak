@@ -151,7 +151,7 @@ public class InnhentDokumentTjeneste {
 
     private BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode, Fagsak fagsak) {
         var dokumentmottaker = getDokumentmottaker(brevkode, fagsak);
-        return dokumentmottaker.getBehandlingÅrsakType();
+        return dokumentmottaker.getBehandlingÅrsakType(brevkode);
     }
 
     private ProsessTaskData asynkStartBehandling(Behandling behandling) {

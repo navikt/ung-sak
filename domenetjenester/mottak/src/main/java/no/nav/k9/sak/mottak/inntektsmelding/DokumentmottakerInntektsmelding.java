@@ -36,7 +36,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
     }
 
     @Override
-    public BehandlingÅrsakType getBehandlingÅrsakType() {
+    public BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode) {
         return BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING;
     }
 

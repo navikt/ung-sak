@@ -153,7 +153,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             if (journalpost.getInneholderMedisinskeOpplysninger() != null) {
                 journalpostHarMedisinskeOpplysninger = journalpost.getInneholderMedisinskeOpplysninger();
             }
- 
+
             try {
                 sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
                     behandling,
@@ -184,7 +184,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     }
 
     @Override
-    public BehandlingÅrsakType getBehandlingÅrsakType() {
+    public BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode) {
         return BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
     }
 }
