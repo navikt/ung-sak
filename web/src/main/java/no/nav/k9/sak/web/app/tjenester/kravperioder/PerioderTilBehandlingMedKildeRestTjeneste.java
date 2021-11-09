@@ -88,6 +88,8 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             .flatMap(Collection::stream)
             .collect(Collectors.toCollection(TreeSet::new));
 
+        perioderTilVurdering.addAll(perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref));
+
         var revurderingPerioderFraAndreParter = perioderTilVurderingTjeneste.utledRevurderingPerioder(ref);
 
         var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(behandling, kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering, perioderSomSkalTilbakestilles, revurderingPerioderFraAndreParter);
