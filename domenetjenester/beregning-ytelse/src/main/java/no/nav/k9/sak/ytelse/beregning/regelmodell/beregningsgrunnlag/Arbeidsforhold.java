@@ -80,9 +80,9 @@ public class Arbeidsforhold {
             return true;
         }
 
-        var erIkkeHeltLike = !equals(annetAF);
-        return erIkkeHeltLike
-            && Objects.equals(frilanser, annetAF.frilanser)
+        // Ikke helt lik ... men kanskje lik nok?
+        
+        return Objects.equals(frilanser, annetAF.frilanser)
             && Objects.equals(orgnr, annetAF.orgnr)
             && Objects.equals(aktørId, annetAF.aktørId)
             && Objects.equals(referanseType, annetAF.referanseType)

@@ -21,7 +21,7 @@ public final class ArbeidsforholdMapper {
         return lagArbeidsforhold(arbeidsgiver, arbeidsforholdRef);
     }
 
-    static Arbeidsforhold mapArbeidsforholdFraBeregningsgrunnlag(BeregningsgrunnlagPrStatusOgAndel andel) {
+    public static Arbeidsforhold mapArbeidsforholdFraBeregningsgrunnlag(BeregningsgrunnlagPrStatusOgAndel andel) {
         if (AktivitetStatus.FRILANSER.equals(andel.getAktivitetStatus())) {
             return Arbeidsforhold.frilansArbeidsforhold();
         }

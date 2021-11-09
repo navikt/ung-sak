@@ -2,7 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.oppdrag.kontrakt.sporing.HenvisningUtleder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -35,6 +37,9 @@ import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkPeriode;
 import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkUtbetalingsgrad;
 import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkUtfall;
 import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold.Builder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.MapFraUttaksplan;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
@@ -163,50 +168,78 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     private List<StønadstatistikkUtbetalingsgrad> mapUtbetalingsgrader(List<Utbetalingsgrader> utbetalingsgrader, List<BeregningsresultatAndel> beregningsresultatAndeler) {
         return utbetalingsgrader.stream().map(u -> {
             var a = u.getArbeidsforhold();
-            final StønadstatistikkArbeidsforhold arbeidsforhold = new StønadstatistikkArbeidsforhold(a.getType(), a.getOrganisasjonsnummer(), a.getAktørId(), a.getArbeidsforholdId());
-            
+            final Arbeidsforhold arbeidsforholdFraUttaksplan = MapFraUttaksplan.buildArbeidsforhold(toUttakArbeidType(u), u);
             final BigDecimal utbetalingsgrad = u.getUtbetalingsgrad();
             
-            final int dagsats;
-            if (utbetalingsgrad.compareTo(BigDecimal.valueOf(0)) > 0) {
-                final BeregningsresultatAndel andel = finnAndel(arbeidsforhold, beregningsresultatAndeler);
-                dagsats = andel.getDagsats();
+            if (skalFinnesAndeler(utbetalingsgrad)) {
+                final List<BeregningsresultatAndel> andeler = finnAndeler(AktivitetStatus.fraKode(a.getType()), arbeidsforholdFraUttaksplan, beregningsresultatAndeler);
+                return andeler.stream().map(andel -> {
+                    final StønadstatistikkArbeidsforhold arbeidsforhold = new StønadstatistikkArbeidsforhold(a.getType(), a.getOrganisasjonsnummer(), a.getAktørId(), andel.getArbeidsforholdRef().getReferanse());
+                    final int dagsats = andel.getDagsats();
+                    return new StønadstatistikkUtbetalingsgrad(
+                            arbeidsforhold,
+                            u.getNormalArbeidstid(),
+                            u.getFaktiskArbeidstid(),
+                            utbetalingsgrad,
+                            dagsats
+                            );
+                }).toList();
             } else {
-                dagsats = 0;
+                final StønadstatistikkArbeidsforhold arbeidsforhold = new StønadstatistikkArbeidsforhold(a.getType(), a.getOrganisasjonsnummer(), a.getAktørId(), a.getArbeidsforholdId());
+                return List.of(new StønadstatistikkUtbetalingsgrad(
+                        arbeidsforhold,
+                        u.getNormalArbeidstid(),
+                        u.getFaktiskArbeidstid(),
+                        utbetalingsgrad,
+                        0
+                        ));
             }
-            
-            return new StønadstatistikkUtbetalingsgrad(
-                    arbeidsforhold,
-                    u.getNormalArbeidstid(),
-                    u.getFaktiskArbeidstid(),
-                    utbetalingsgrad,
-                    dagsats
-                    );
-        }).toList();
+        }).flatMap(Collection::stream).toList();
     }
 
-    private BeregningsresultatAndel finnAndel(StønadstatistikkArbeidsforhold arbeidsforhold, List<BeregningsresultatAndel> beregningsresultatAndeler) {
+    private boolean skalFinnesAndeler(final BigDecimal utbetalingsgrad) {
+        return utbetalingsgrad.compareTo(BigDecimal.valueOf(0)) > 0;
+    }
+    
+    private UttakArbeidType toUttakArbeidType(Utbetalingsgrader data) {
+        var type = UttakArbeidType.fraKode(data.getArbeidsforhold().getType());
+        if (UttakArbeidType.IKKE_YRKESAKTIV.equals(type)) {
+            type = UttakArbeidType.ARBEIDSTAKER;
+        }
+        return type;
+    }
+
+    private List<BeregningsresultatAndel> finnAndeler(AktivitetStatus aktivitetFraUttaksplan, Arbeidsforhold arbeidsforholdFraUttaksplan, List<BeregningsresultatAndel> beregningsresultatAndeler) {
         final List<BeregningsresultatAndel> kandidater = beregningsresultatAndeler.stream()
-                .filter(a -> arbeidsforhold.getOrganisasjonsnummer() != null && arbeidsforhold.getOrganisasjonsnummer().equals(a.getArbeidsforholdIdentifikator())
-                        || arbeidsforhold.getAktørId() != null && arbeidsforhold.getAktørId().equals(a.getArbeidsforholdIdentifikator()))
+                .filter(a -> {
+                    if (!a.getAktivitetStatus().erArbeidstaker()
+                            && !a.getAktivitetStatus().erFrilanser()
+                            &&  aktivitetFraUttaksplan == a.getAktivitetStatus()) {
+                        return true;
+                    }
+                    
+                    final Arbeidsforhold beregningsarbeidsforhold = toArbeidsforhold(a);
+                    return arbeidsforholdFraUttaksplan.gjelderFor(beregningsarbeidsforhold);
+                })
                 .toList();
         
-        final List<BeregningsresultatAndel> andelsliste = kandidater.stream().filter(a -> arbeidsforhold.getArbeidsforholdId() != null && arbeidsforhold.getArbeidsforholdId().equals(a.getArbeidsforholdRef().getReferanse())).toList();
-        if (andelsliste.size() == 1) {
-            return andelsliste.get(0);
-        } else if (andelsliste.size() > 1) {
-            throw new IllegalStateException("Fant mer enn én andel med arbeidsforholdref.");
+        return kandidater;
+    }
+
+    private Arbeidsforhold toArbeidsforhold(BeregningsresultatAndel andel) {
+        final Builder b = Arbeidsforhold.builder();
+        andel.getArbeidsgiver().ifPresent(a -> {
+            if (a.getErVirksomhet()) {
+                b.medOrgnr(a.getIdentifikator());
+            } else {
+                b.medAktørId(a.getIdentifikator());
+            }
+        });
+        if (andel.getAktivitetStatus().erFrilanser()) {
+            b.medFrilanser(true);
         }
-        
-        if (kandidater.size() > 1) {
-            throw new IllegalStateException("Fant mer enn én andel uten arbeidsforholdref.");
-        }
-        
-        if (kandidater.isEmpty()) {
-            throw new IllegalStateException("Fant ingen andel i andeler: " + Arrays.toString(beregningsresultatAndeler.toArray()) + ", arbeidsforhold: " + arbeidsforhold.toString());
-        }
-        
-        return kandidater.get(0);
+        b.medArbeidsforholdId(andel.getArbeidsforholdRef().getReferanse());
+        return b.build();
     }
 
     private List<String> mapÅrsaker(Set<Årsak> årsaker) {
