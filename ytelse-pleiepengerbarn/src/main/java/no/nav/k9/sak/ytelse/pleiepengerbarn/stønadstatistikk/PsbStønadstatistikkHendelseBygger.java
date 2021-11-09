@@ -197,6 +197,9 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     }
     
     private StønadstatistikkGraderingMotTilsyn mapGraderingMotTilsyn(GraderingMotTilsyn graderingMotTilsyn) {
+        if (graderingMotTilsyn == null) {
+            return null;
+        }
         final String årsak = (graderingMotTilsyn.getOverseEtablertTilsynÅrsak() != null) ? graderingMotTilsyn.getOverseEtablertTilsynÅrsak().toString() : null;
         return new StønadstatistikkGraderingMotTilsyn(graderingMotTilsyn.getEtablertTilsyn(),
                 årsak,
