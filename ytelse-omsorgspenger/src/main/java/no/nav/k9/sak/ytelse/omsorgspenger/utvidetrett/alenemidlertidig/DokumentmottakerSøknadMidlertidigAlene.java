@@ -124,7 +124,7 @@ public class DokumentmottakerSøknadMidlertidigAlene implements Dokumentmottaker
     }
 
     @Override
-    public BehandlingÅrsakType getBehandlingÅrsakType() {
+    public BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode) {
         return BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
     }
 

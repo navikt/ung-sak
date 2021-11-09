@@ -100,7 +100,7 @@ public class InnhentDokumentTjenesteTest {
         OrganisasjonsEnhet enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class))).thenReturn(enhet);
 
-        when(dokumentmottaker.getBehandlingÅrsakType()).thenReturn(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        when(dokumentmottaker.getBehandlingÅrsakType(Brevkode.INNTEKTSMELDING)).thenReturn(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
     }
 
     @Test
