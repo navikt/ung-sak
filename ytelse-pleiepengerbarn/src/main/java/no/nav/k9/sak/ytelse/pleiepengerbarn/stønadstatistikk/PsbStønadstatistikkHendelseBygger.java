@@ -36,6 +36,7 @@ import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkUtbetalings
 import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkUtfall;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk.StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse;
 import no.nav.pleiepengerbarn.uttak.kontrakter.GraderingMotTilsyn;
@@ -80,7 +81,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
         
         final PersonIdent søker = aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getAktørId()).get();
         final PersonIdent pleietrengende= aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getPleietrengendeAktørId()).get();
-        final List<SykdomDiagnosekode> diagnosekoder = sykdomGrunnlagService.hentGrunnlag(behandlingUuid).getGrunnlag().getDiagnosekoder().getDiagnosekoder();
+        final List<SykdomDiagnosekode> diagnosekoder = hentDiagnosekoder(behandlingUuid);
         final LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> periodetidslinje = stønadstatistikkPeriodetidslinjebygger.lagTidslinjeFor(behandling);
         
         final UUID forrigeBehandlingUuid = finnForrigeBehandlingUuid(behandling);
@@ -102,6 +103,15 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
                 );
         
         return stønadstatistikkHendelse;
+    }
+
+    private List<SykdomDiagnosekode> hentDiagnosekoder(UUID behandlingUuid) {
+        final SykdomGrunnlag sykdomGrunnlag = sykdomGrunnlagService.hentGrunnlag(behandlingUuid).getGrunnlag();
+        if (sykdomGrunnlag.getDiagnosekoder() == null || sykdomGrunnlag.getDiagnosekoder().getDiagnosekoder() == null) {
+            return List.of();
+        }
+        final List<SykdomDiagnosekode> diagnosekoder = sykdomGrunnlag.getDiagnosekoder().getDiagnosekoder();
+        return diagnosekoder;
     }
 
     private UUID finnForrigeBehandlingUuid(final Behandling behandling) {
