@@ -40,7 +40,7 @@ public class StønadstatistikkService {
     
     
     public void publiserHendelse(Behandling behandling) {
-        if (!enableStønadstatistikk) {
+        if (!enableStønadstatistikk || behandling.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
             return;
         }
         final ProsessTaskData pd = PubliserStønadstatistikkHendelseTask.createProsessTaskData(behandling);
