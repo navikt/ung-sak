@@ -41,6 +41,11 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
     public void doTask(ProsessTaskData pd) {
         final String key = Objects.requireNonNull(pd.getSaksnummer());
         final StønadstatistikkHendelse hendelse = stønadstatistikkService.lagHendelse(Long.parseLong(pd.getBehandlingId()));
+        if (hendelse == null) {
+            logger.info("Publiserer IKKE hendelse til stønadstatistikk. Key: '{}'", key);
+            return;
+        }
+        
         final String value = StønadstatistikkSerializer.toJson(hendelse);
         
         logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}'", key);

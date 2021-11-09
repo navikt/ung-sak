@@ -11,8 +11,12 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.oppdrag.kontrakt.sporing.HenvisningUtleder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -44,6 +48,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Årsak;
 @FagsakYtelseTypeRef("PSB")
 public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHendelseBygger {
 
+    private static final Logger logger = LoggerFactory.getLogger(PsbStønadstatistikkHendelseBygger.class);
     private StønadstatistikkPeriodetidslinjebygger stønadstatistikkPeriodetidslinjebygger;
     private BehandlingRepository behandlingRepository;
     private AktørTjeneste aktørTjeneste;
@@ -67,6 +72,12 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     @Override
     public StønadstatistikkHendelse lagHendelse(UUID behandlingUuid) {
         final Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid);
+        final BehandlingResultatType behandlingResultatType = behandling.getBehandlingResultatType();
+        if (behandlingResultatType.isBehandlingHenlagt() || behandlingResultatType.isBehandlingsresultatHenlagt()) {
+            logger.info("Lager ikke StønadstatistikkHendelse siden behandingen er henlagt: " + behandlingUuid.toString());
+            return null;
+        }
+        
         final PersonIdent søker = aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getAktørId()).get();
         final PersonIdent pleietrengende= aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getPleietrengendeAktørId()).get();
         final List<SykdomDiagnosekode> diagnosekoder = sykdomGrunnlagService.hentGrunnlag(behandlingUuid).getGrunnlag().getDiagnosekoder().getDiagnosekoder();
