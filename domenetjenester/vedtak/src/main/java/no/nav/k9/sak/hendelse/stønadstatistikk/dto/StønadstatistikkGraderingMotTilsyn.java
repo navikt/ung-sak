@@ -26,8 +26,7 @@ public class StønadstatistikkGraderingMotTilsyn {
      * BEREDSKAP,
      * NATTEVÅK_OG_BEREDSKAP
      */
-    @JsonProperty(value = "overseEtablertTilsynÅrsak", required = true)
-    @NotNull
+    @JsonProperty(value = "overseEtablertTilsynÅrsak")
     @Valid
     private String overseEtablertTilsynÅrsak;
     

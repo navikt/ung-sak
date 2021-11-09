@@ -59,6 +59,12 @@ public class JettyDevServer extends JettyServer {
 
         System.setProperty(storeProperty, storeFile.getAbsolutePath());
         System.setProperty(storePasswordProperty, password);
+        
+        // Aiven:
+        System.setProperty("KAFKA_TRUSTSTORE_PATH", storeFile.getAbsolutePath());
+        System.setProperty("KAFKA_KEYSTORE_PATH", storeFile.getAbsolutePath());
+        System.setProperty("KAFKA_CREDSTORE_PASSWORD", password);
+        
         return storePath;
     }
 

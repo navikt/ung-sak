@@ -77,7 +77,7 @@ class StønadstatistikkPeriodetidslinjebygger {
         final List<LocalDateSegment<BeregningsgrunnlagDto>> segments = new ArrayList<>();
         for (int i=0; i<beregningsgrunnlagListe.size(); i++) {
             final BeregningsgrunnlagDto b = beregningsgrunnlagListe.get(i);
-            final LocalDate tom = (i + 1 < beregningsgrunnlagListe.size()) ? beregningsgrunnlagListe.get(i+1).getSkjæringstidspunkt() : Tid.TIDENES_ENDE;
+            final LocalDate tom = (i + 1 < beregningsgrunnlagListe.size()) ? beregningsgrunnlagListe.get(i+1).getSkjæringstidspunkt().minusDays(1) : Tid.TIDENES_ENDE;
             segments.add(new LocalDateSegment<>(b.getSkjæringstidspunkt(), tom, b));
         }
         return new LocalDateTimeline<>(segments);

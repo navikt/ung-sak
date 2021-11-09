@@ -5,7 +5,9 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
@@ -17,20 +19,30 @@ import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkHendelse;
 @ApplicationScoped
 public class StønadstatistikkService {
 
-    private Instance<StønadstatistikkHendelseBygger> stønadstatistikkService;
+    private Instance<StønadstatistikkHendelseBygger> stønadstatistikkHendelseBygger;
     private BehandlingRepository behandlingRepository;
     private ProsessTaskRepository prosessTaskRepository;
+    private boolean enableStønadstatistikk;
     
+    public StønadstatistikkService() {
+        
+    }
     
-    public StønadstatistikkService(@Any Instance<StønadstatistikkHendelseBygger> stønadstatistikkService,
-            BehandlingRepository behandlingRepository, ProsessTaskRepository prosessTaskRepository) {
-        this.stønadstatistikkService = stønadstatistikkService;
+    @Inject
+    public StønadstatistikkService(@Any Instance<StønadstatistikkHendelseBygger> stønadstatistikkHendelseBygger,
+            BehandlingRepository behandlingRepository, ProsessTaskRepository prosessTaskRepository,
+            @KonfigVerdi(value = "ENABLE_STONADSTATISTIKK", defaultVerdi = "false") boolean enableStønadstatistikk) {
+        this.stønadstatistikkHendelseBygger = stønadstatistikkHendelseBygger;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
+        this.enableStønadstatistikk = enableStønadstatistikk;
     }
     
     
     public void publiserHendelse(Behandling behandling) {
+        if (!enableStønadstatistikk) {
+            return;
+        }
         final ProsessTaskData pd = PubliserStønadstatistikkHendelseTask.createProsessTaskData(behandling);
         prosessTaskRepository.lagre(pd);
     }
@@ -43,6 +55,6 @@ public class StønadstatistikkService {
     }
     
     private Optional<StønadstatistikkHendelseBygger> forYtelse(FagsakYtelseType type) {
-        return FagsakYtelseTypeRef.Lookup.find(stønadstatistikkService, type);
+        return FagsakYtelseTypeRef.Lookup.find(stønadstatistikkHendelseBygger, type);
     }
 }

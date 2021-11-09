@@ -1,5 +1,6 @@
 package no.nav.k9.sak.hendelse.stønadstatistikk.dto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,7 +52,8 @@ public class StønadstatistikkHendelse {
     @Valid
     private Saksnummer saksnummer;
     
-    @JsonProperty(value = "utbetalingsreferanse", required = false)
+    @JsonProperty(value = "utbetalingsreferanse", required = true)
+    @NotNull
     @Valid
     private String utbetalingsreferanse;
     
@@ -62,6 +64,11 @@ public class StønadstatistikkHendelse {
     @JsonProperty(value = "forrigeBehandlingUuid", required = false)
     @Valid
     private UUID forrigeBehandlingUuid;
+    
+    @JsonProperty(value = "vedtakstidspunkt", required = true)
+    @NotNull
+    @Valid
+    private LocalDateTime vedtakstidspunkt;
     
     @JsonProperty(value = "perioder", required = true)
     @Size(max=100000)
@@ -82,6 +89,7 @@ public class StønadstatistikkHendelse {
             String utbetalingsreferanse,
             UUID behandlingUuid,
             UUID forrigeBehandlingUuid,
+            LocalDateTime vedtakstidspunkt,
             List<StønadstatistikkPeriode> perioder) {
         this.ytelseType = ytelseType;
         this.søker = søker;
@@ -91,6 +99,7 @@ public class StønadstatistikkHendelse {
         this.utbetalingsreferanse = utbetalingsreferanse;
         this.behandlingUuid = behandlingUuid;
         this.forrigeBehandlingUuid = forrigeBehandlingUuid;
+        this.vedtakstidspunkt = vedtakstidspunkt;
         this.perioder = perioder;
     }
 }

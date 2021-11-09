@@ -12,18 +12,15 @@ public class StønadstatistikkArbeidsforhold {
     @Valid
     private String type;
     
-    @JsonProperty(value = "organisasjonsnummer", required = true)
-    @NotNull
+    @JsonProperty(value = "organisasjonsnummer")
     @Valid
     private String organisasjonsnummer;
     
-    @JsonProperty(value = "aktørId", required = true)
-    @NotNull
+    @JsonProperty(value = "aktørId")
     @Valid
     private String aktørId;
     
-    @JsonProperty(value = "arbeidsforholdId", required = true)
-    @NotNull
+    @JsonProperty(value = "arbeidsforholdId")
     @Valid
     private String arbeidsforholdId;
     

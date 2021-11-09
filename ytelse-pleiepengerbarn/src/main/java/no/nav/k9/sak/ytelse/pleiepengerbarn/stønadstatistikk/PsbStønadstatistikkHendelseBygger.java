@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,8 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkHendelseBygger;
 import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkArbeidsforhold;
@@ -45,17 +48,20 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     private BehandlingRepository behandlingRepository;
     private AktørTjeneste aktørTjeneste;
     private SykdomGrunnlagService sykdomGrunnlagService;
+    private BehandlingVedtakRepository behandlingVedtakRepository;
 
 
     @Inject
     public PsbStønadstatistikkHendelseBygger(StønadstatistikkPeriodetidslinjebygger stønadstatistikkPeriodetidslinjebygger,
             BehandlingRepository behandlingRepository,
             AktørTjeneste aktørTjeneste,
-            SykdomGrunnlagService sykdomGrunnlagService) {
+            SykdomGrunnlagService sykdomGrunnlagService,
+            BehandlingVedtakRepository behandlingVedtakRepository) {
         this.stønadstatistikkPeriodetidslinjebygger = stønadstatistikkPeriodetidslinjebygger;
         this.behandlingRepository = behandlingRepository;
         this.aktørTjeneste = aktørTjeneste;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
+        this.behandlingVedtakRepository = behandlingVedtakRepository;
     }
 
     @Override
@@ -67,6 +73,9 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
         final LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> periodetidslinje = stønadstatistikkPeriodetidslinjebygger.lagTidslinjeFor(behandling);
         
         final UUID forrigeBehandlingUuid = finnForrigeBehandlingUuid(behandling);
+        final BehandlingVedtak behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
+        final LocalDateTime vedtakstidspunkt = behandlingVedtak.getVedtakstidspunkt();
+        
         
         final StønadstatistikkHendelse stønadstatistikkHendelse = new StønadstatistikkHendelse(
                 behandling.getFagsakYtelseType(),
@@ -77,6 +86,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
                 HenvisningUtleder.utledHenvisning(behandling.getUuid()), // behandlingsreferanse i økonomisystemet: "henvisning"
                 behandlingUuid,
                 forrigeBehandlingUuid,
+                vedtakstidspunkt,
                 mapPerioder(periodetidslinje)
                 );
         
@@ -119,6 +129,9 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     }
 
     private StønadstatistikkUtfall mapUtfall(Utfall utfall) {
+        if (utfall == null) {
+            return null;
+        }
         switch (utfall) {
         case OPPFYLT: return StønadstatistikkUtfall.OPPFYLT;
         case IKKE_OPPFYLT: return StønadstatistikkUtfall.IKKE_OPPFYLT;
@@ -134,7 +147,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
             final BigDecimal utbetalingsgrad = u.getUtbetalingsgrad();
             
             final int dagsats;
-            if (utbetalingsgrad.compareTo(BigDecimal.valueOf(0)) >= 0) {
+            if (utbetalingsgrad.compareTo(BigDecimal.valueOf(0)) > 0) {
                 final BeregningsresultatAndel andel = finnAndel(arbeidsforhold, beregningsresultatAndeler);
                 dagsats = andel.getDagsats();
             } else {
@@ -153,7 +166,8 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
 
     private BeregningsresultatAndel finnAndel(StønadstatistikkArbeidsforhold arbeidsforhold, List<BeregningsresultatAndel> beregningsresultatAndeler) {
         final List<BeregningsresultatAndel> kandidater = beregningsresultatAndeler.stream()
-                .filter(a -> arbeidsforhold.getOrganisasjonsnummer().equals(a.getArbeidsforholdIdentifikator()) || arbeidsforhold.getAktørId().equals(a.getArbeidsforholdIdentifikator()))
+                .filter(a -> arbeidsforhold.getOrganisasjonsnummer() != null && arbeidsforhold.getOrganisasjonsnummer().equals(a.getArbeidsforholdIdentifikator())
+                        || arbeidsforhold.getAktørId() != null && arbeidsforhold.getAktørId().equals(a.getArbeidsforholdIdentifikator()))
                 .toList();
         
         final List<BeregningsresultatAndel> andelsliste = kandidater.stream().filter(a -> arbeidsforhold.getArbeidsforholdId() != null && arbeidsforhold.getArbeidsforholdId().equals(a.getArbeidsforholdRef().getReferanse())).toList();
@@ -183,8 +197,9 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     }
     
     private StønadstatistikkGraderingMotTilsyn mapGraderingMotTilsyn(GraderingMotTilsyn graderingMotTilsyn) {
+        final String årsak = (graderingMotTilsyn.getOverseEtablertTilsynÅrsak() != null) ? graderingMotTilsyn.getOverseEtablertTilsynÅrsak().toString() : null;
         return new StønadstatistikkGraderingMotTilsyn(graderingMotTilsyn.getEtablertTilsyn(),
-                graderingMotTilsyn.getOverseEtablertTilsynÅrsak().toString(),
+                årsak,
                 graderingMotTilsyn.getAndreSøkeresTilsyn(),
                 graderingMotTilsyn.getTilgjengeligForSøker());
     }

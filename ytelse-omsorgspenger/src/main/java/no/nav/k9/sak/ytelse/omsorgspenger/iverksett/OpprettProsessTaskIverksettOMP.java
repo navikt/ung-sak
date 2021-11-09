@@ -8,6 +8,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettTilkjentYtelseFelles;
+import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumDeaktiveringTjeneste;
 
@@ -25,8 +26,9 @@ public class OpprettProsessTaskIverksettOMP extends OpprettProsessTaskIverksettT
     public OpprettProsessTaskIverksettOMP(FagsakProsessTaskRepository prosessTaskRepository,
                                           OppgaveTjeneste oppgaveTjeneste,
                                           InfotrygdFeedService infotrygdFeedService,
-                                          ÅrskvantumDeaktiveringTjeneste årskvantumDeaktiveringTjeneste) {
-        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService);
+                                          ÅrskvantumDeaktiveringTjeneste årskvantumDeaktiveringTjeneste,
+                                          StønadstatistikkService stønadstatistikkService) {
+        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService);
         this.årskvantumDeaktiveringTjeneste = årskvantumDeaktiveringTjeneste;
 
     }
