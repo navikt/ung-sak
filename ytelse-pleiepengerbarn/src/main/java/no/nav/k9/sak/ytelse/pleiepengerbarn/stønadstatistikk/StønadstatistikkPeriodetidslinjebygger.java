@@ -43,6 +43,10 @@ class StønadstatistikkPeriodetidslinjebygger {
 
     
     LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> lagTidslinjeFor(Behandling behandling) {
+        /*
+         * Lager tidslinje for alle uttaksperioder (med helgedager fratrukket), med
+         * tilhørende beregningsgrunnlag og beregningsresultatdata.
+         */
         final LocalDateTimeline<UttaksperiodeInfo> uttaksperiodeTidslinje = toUttaksperiodeTidslinje(uttakRestKlient.hentUttaksplan(behandling.getUuid(), true));
         final LocalDateTimeline<UttaksperiodeInfo> uttaksperiodeUtenHelgerTidslinje = uttaksperiodeTidslinje.disjoint(Hjelpetidslinjer.lagTidslinjeMedKunHelger(uttaksperiodeTidslinje));
         
