@@ -22,3 +22,4 @@ spec:
     - team: dv-familie
       application: dvh-fampp-konsumer
       access: read
+
