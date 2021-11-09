@@ -14,19 +14,19 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
-@ProsessTask(FullPuliseringAvStønadstatistikkTask.TASKTYPE)
-public class FullPuliseringAvStønadstatistikkTask implements ProsessTaskHandler {
+@ProsessTask(FullPubliseringAvStønadstatistikkTask.TASKTYPE)
+public class FullPubliseringAvStønadstatistikkTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "init.fullPubliseringAvStonadstatistikk";
-    private static final Logger logger = LoggerFactory.getLogger(FullPuliseringAvStønadstatistikkTask.class);
+    private static final Logger logger = LoggerFactory.getLogger(FullPubliseringAvStønadstatistikkTask.class);
 
     private EntityManager entityManager;
     private boolean enableStønadstatistikk;
 
     
-    public FullPuliseringAvStønadstatistikkTask() {}
+    public FullPubliseringAvStønadstatistikkTask() {}
 
     @Inject
-    public FullPuliseringAvStønadstatistikkTask(EntityManager entityManager,
+    public FullPubliseringAvStønadstatistikkTask(EntityManager entityManager,
             @KonfigVerdi(value = "ENABLE_STONADSTATISTIKK", defaultVerdi = "false") boolean enableStønadstatistikk) {
         this.entityManager = entityManager;
         this.enableStønadstatistikk = enableStønadstatistikk;
