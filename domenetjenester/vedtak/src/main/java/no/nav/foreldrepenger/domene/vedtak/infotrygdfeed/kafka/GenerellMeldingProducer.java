@@ -21,7 +21,7 @@ public abstract class GenerellMeldingProducer {
     private Producer<String, String> producer;
     private String topic;
 
-    protected GenerellMeldingProducer(String topic,
+    GenerellMeldingProducer(String topic,
                             String bootstrapServers,
                             String schemaRegistryUrl,
                             String clientId,
@@ -41,7 +41,7 @@ public abstract class GenerellMeldingProducer {
 
     }
 
-    protected GenerellMeldingProducer() {
+    GenerellMeldingProducer() {
     }
 
 
