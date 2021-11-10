@@ -276,7 +276,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     private boolean erIkkeInitiellVersjon(Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon, BgRef it) {
-        return !initiellVersjon.flatMap(at -> at.finnGrunnlagFor(it.getStp()).map(BeregningsgrunnlagPeriode::getEksternReferanse)).equals(Optional.of(it.getRef()));
+        return !initiellVersjon.flatMap(at -> at.finnFor(it.getStp()).map(BeregningsgrunnlagPeriode::getEksternReferanse)).equals(Optional.of(it.getRef()));
     }
 
     @Override
