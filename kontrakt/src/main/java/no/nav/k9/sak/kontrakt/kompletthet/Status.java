@@ -13,7 +13,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public enum Status {
-    MOTTATT("MOTTATT"), FORTSETT_UTEN("FORTSETT_UTEN"), MANGLER("MANGLER");
+    MOTTATT("MOTTATT"),
+    FORTSETT_UTEN("FORTSETT_UTEN"),
+    MANGLER("MANGLER");
 
     private static final Map<String, Status> KODER = new LinkedHashMap<>();
 

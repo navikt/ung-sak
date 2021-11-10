@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.inte
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -74,7 +75,7 @@ public class PSBKompletthetSjekkerTjeneste {
         var grunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(ref.getBehandlingId());
         if (aksjon.kanFortsette()) {
             // TODO: Sjekk om det er tidliger avslåtte perioder som har blitt komplette og dermed må ryddes bort
-            
+
             log.info("Behandlingen er komplett, kan fortsette.");
             return aksjon;
         }
@@ -144,7 +145,7 @@ public class PSBKompletthetSjekkerTjeneste {
             grunnlag.get().getKompletthetPerioder()
                 .stream()
                 .filter(it -> Vurdering.MANGLENDE_GRUNNLAG.equals(it.getVurdering()))
-                .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.inkluderer(it.getSkjæringstidspunkt())))
+                .filter(it -> perioderTilVurdering.stream().anyMatch(at -> Objects.equals(at.getFomDato(),it.getSkjæringstidspunkt())))
                 .forEach(periode -> avslå(periode, perioderTilVurdering, kontekst));
         }
     }

@@ -6,6 +6,8 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,6 +26,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -43,6 +46,7 @@ import no.nav.k9.sak.kontrakt.kompletthet.Status;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBeregningTjeneste;
 
 @ApplicationScoped
@@ -97,13 +101,19 @@ public class KompletthetForBeregningRestTjeneste {
         var ref = BehandlingReferanse.fra(behandling);
         var manglendeVedleggForPeriode = kompletthetForBeregningTjeneste.utledAllePåkrevdeVedleggFraGrunnlag(ref);
         var unikeInntektsmeldingerForFagsak = kompletthetForBeregningTjeneste.hentAlleUnikeInntektsmeldingerForFagsak(behandling.getFagsak().getSaksnummer());
+        var kompletthetPerioder = kompletthetForBeregningTjeneste.hentKompletthetsVurderinger(ref);
 
         var status = manglendeVedleggForPeriode.entrySet()
             .stream()
-            .map(it -> new KompletthetsTilstandPåPeriodeV2Dto(new Periode(it.getKey().getFomDato(), it.getKey().getTomDato()), mapStatusPåInntektsmeldingerV2(it, unikeInntektsmeldingerForFagsak, ref)))
+            .map(it -> mapPeriode(ref, unikeInntektsmeldingerForFagsak, kompletthetPerioder, it))
             .collect(Collectors.toList());
 
         return new KompletthetsVurderingV2Dto(status);
+    }
+
+    private KompletthetsTilstandPåPeriodeV2Dto mapPeriode(BehandlingReferanse ref, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, List<KompletthetPeriode> kompletthetPerioder, Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it) {
+        var kompletthetsvurdering = finnRelevantVurderingForPeriode(it.getKey(), kompletthetPerioder);
+        return new KompletthetsTilstandPåPeriodeV2Dto(new Periode(it.getKey().getFomDato(), it.getKey().getTomDato()), mapStatusPåInntektsmeldingerV2(it, unikeInntektsmeldingerForFagsak, ref, kompletthetsvurdering), kompletthetsvurdering.map(KompletthetPeriode::getVurdering).orElse(Vurdering.UDEFINERT), kompletthetsvurdering.map(KompletthetPeriode::getVurdering).orElse(Vurdering.UDEFINERT));
     }
 
     private List<ArbeidsgiverArbeidsforholdStatus> mapStatusPåInntektsmeldinger(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, BehandlingReferanse behandlingReferanse) {
@@ -121,10 +131,10 @@ public class KompletthetForBeregningRestTjeneste {
         return resultat;
     }
 
-    private List<ArbeidsgiverArbeidsforholdStatusV2> mapStatusPåInntektsmeldingerV2(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, BehandlingReferanse behandlingReferanse) {
+    private List<ArbeidsgiverArbeidsforholdStatusV2> mapStatusPåInntektsmeldingerV2(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, BehandlingReferanse behandlingReferanse, Optional<KompletthetPeriode> kompletthetsvurdering) {
         var resultat = it.getValue()
             .stream()
-            .map(at -> new ArbeidsgiverArbeidsforholdStatusV2(new ArbeidsgiverArbeidsforholdIdV2(at.getArbeidsgiver(), at.getArbeidsforholdId()), Status.MANGLER, null))
+            .map(at -> new ArbeidsgiverArbeidsforholdStatusV2(new ArbeidsgiverArbeidsforholdIdV2(at.getArbeidsgiver(), at.getArbeidsforholdId()), utledStatus(kompletthetsvurdering), null))
             .collect(Collectors.toCollection(ArrayList::new));
 
         resultat.addAll(kompletthetForBeregningTjeneste.utledInntektsmeldingerSomBenytteMotBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
@@ -134,6 +144,31 @@ public class KompletthetForBeregningRestTjeneste {
             .collect(Collectors.toList()));
 
         return resultat;
+    }
+
+    private Status utledStatus(Optional<KompletthetPeriode> kompletthetsvurdering) {
+        if (kompletthetsvurdering.isEmpty()) {
+            return Status.MANGLER;
+        }
+        var vurderingPåPeriode = kompletthetsvurdering.get();
+        if (Vurdering.KAN_FORTSETTE.equals(vurderingPåPeriode.getVurdering())) {
+            return Status.FORTSETT_UTEN;
+        }
+
+        return Status.MANGLER;
+    }
+
+    private Optional<KompletthetPeriode> finnRelevantVurderingForPeriode(DatoIntervallEntitet key, List<KompletthetPeriode> kompletthetPerioder) {
+        var kompletthetsvurderinger = kompletthetPerioder.stream()
+            .filter(it -> Objects.equals(key.getFomDato(), it.getSkjæringstidspunkt()))
+            .collect(Collectors.toList());
+        if (kompletthetsvurderinger.isEmpty()) {
+            return Optional.empty();
+        } else if (kompletthetsvurderinger.size() > 1) {
+            throw new IllegalStateException("Har flere vurderinger for samme periode " + key + " :: " + kompletthetsvurderinger);
+        } else {
+            return Optional.of(kompletthetsvurderinger.get(0));
+        }
     }
 
 }

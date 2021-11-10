@@ -39,6 +39,9 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidstidMappingInput;
@@ -57,6 +60,7 @@ public class KompletthetForBeregningTjeneste {
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
+    private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
 
     KompletthetForBeregningTjeneste() {
         // CDI
@@ -69,7 +73,8 @@ public class KompletthetForBeregningTjeneste {
                                            @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                            ArbeidsforholdTjeneste arbeidsforholdTjeneste,
                                            InntektArbeidYtelseTjeneste iayTjeneste,
-                                           VilkårResultatRepository vilkårResultatRepository) {
+                                           VilkårResultatRepository vilkårResultatRepository,
+                                           BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
@@ -77,6 +82,7 @@ public class KompletthetForBeregningTjeneste {
         this.iayTjeneste = iayTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
     }
 
     public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggFraRegister(BehandlingReferanse ref) {
@@ -254,6 +260,11 @@ public class KompletthetForBeregningTjeneste {
 
     public Set<Inntektsmelding> hentAlleUnikeInntektsmeldingerForFagsak(Saksnummer saksnummer) {
         return iayTjeneste.hentUnikeInntektsmeldingerForSak(saksnummer);
+    }
+
+    public List<KompletthetPeriode> hentKompletthetsVurderinger(BehandlingReferanse ref) {
+        var grunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+        return grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of());
     }
 
     public List<Inntektsmelding> utledInntektsmeldingerSomBenytteMotBeregningForPeriode(BehandlingReferanse referanse, Set<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {

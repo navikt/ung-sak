@@ -96,10 +96,12 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
 
     void deaktiver(LocalDate skjæringstidspunkt) {
         Objects.requireNonNull(skjæringstidspunkt);
-        if (this.grunnlagPerioder == null) {
-            this.grunnlagPerioder = new BeregningsgrunnlagPerioder();
+        if (this.grunnlagPerioder != null) {
+            this.grunnlagPerioder.deaktiver(skjæringstidspunkt);
         }
-        this.grunnlagPerioder.deaktiver(skjæringstidspunkt);
+        if (this.kompletthetPerioder != null) {
+            this.kompletthetPerioder.deaktiver(skjæringstidspunkt);
+        }
     }
 
     void leggTil(BeregningsgrunnlagPeriode periode) {
