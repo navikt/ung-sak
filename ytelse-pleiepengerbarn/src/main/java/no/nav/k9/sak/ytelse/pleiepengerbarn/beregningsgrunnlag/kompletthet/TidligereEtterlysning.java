@@ -1,15 +1,15 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet;
 
 import java.util.Objects;
 
-import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
+import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
-public class BestiltEtterlysning {
+public class TidligereEtterlysning {
     private DokumentMalType dokumentType;
     private Arbeidsgiver arbeidsgiver;
 
-    public BestiltEtterlysning(DokumentMalType dokumentType, Arbeidsgiver arbeidsgiver) {
+    public TidligereEtterlysning(DokumentMalType dokumentType, Arbeidsgiver arbeidsgiver) {
         this.dokumentType = dokumentType;
         this.arbeidsgiver = arbeidsgiver;
     }
@@ -26,7 +26,7 @@ public class BestiltEtterlysning {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BestiltEtterlysning that = (BestiltEtterlysning) o;
+        TidligereEtterlysning that = (TidligereEtterlysning) o;
         return dokumentType == that.dokumentType && Objects.equals(arbeidsgiver, that.arbeidsgiver);
     }
 

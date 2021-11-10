@@ -46,7 +46,7 @@ public class BekreftUttakSteg implements BehandlingSteg {
         var beregningsgrunnlagsvilkåret = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
 
         if (harNoenPerioderTilVurderingBlittAvslåttIBeregning(perioderTilVurdering, beregningsgrunnlagsvilkåret)) {
-            // TDOO: Kall på uttaket for å "ajurholde"
+            // TODO: Kall på uttaket for å "ajurholde"
         }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();

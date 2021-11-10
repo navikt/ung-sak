@@ -182,10 +182,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null, EnumSet.of(OMP, PSB)),
     AVKLAR_KOMPLETT_NOK_FOR_BEREGNING(AksjonspunktKodeDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE,
             AksjonspunktType.MANUELL, "Avklar om inntektsmeldinger kreves for å kunne beregne", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT,
-            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, ENTRINN, EnumSet.of(PSB)),
+            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, ENTRINN, FORBLI, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
     ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING(AksjonspunktKodeDefinisjon.ENDELING_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE,
-            AksjonspunktType.MANUELL, "Avklar om inntektsmeldinger kreves for å kunne beregne eller om perioden skal avslås", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT,
-            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, EnumSet.of(PSB)),
+            AksjonspunktType.MANUELL, "Endeling avklaring om inntektsmeldinger kreves for å kunne beregne eller om perioden skal avslås", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT,
+            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
 
     // Gruppe : 60xx
 

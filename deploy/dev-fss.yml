@@ -73,16 +73,6 @@ spec:
 
     - name: OPENIDCONNECT_ISSOHOST
       value: https://isso-q.adeo.no:443/isso/oauth2
-    - name: OPENIDCONNECT_ISSOISSUER
-      value: https://isso-q.adeo.no:443/isso/oauth2
-    - name: OPENIDCONNECT_ISSOJWKS
-      value: https://isso-q.adeo.no:443/isso/oauth2/connect/jwk_uri
-    - name: OPENIDCONNECT_USERNAME
-      value: k9-sak-q1
-
-    # Gjentatt grunnet felles-sikkerhet
-    - name: OPENIDCONNECT_ISSOHOST
-      value: https://isso-q.adeo.no:443/isso/oauth2
     - name: OPENIDCONNECT_USERNAME
       value: k9-sak-q1
 

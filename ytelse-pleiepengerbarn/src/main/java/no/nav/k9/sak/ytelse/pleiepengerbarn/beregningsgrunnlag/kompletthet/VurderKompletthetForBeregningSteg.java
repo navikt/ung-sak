@@ -1,14 +1,22 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
+import no.nav.k9.formidling.kontrakt.kodeverk.Mottaker;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.kodeverk.dokument.DokumentMalType;
+import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -17,9 +25,15 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysning;
+import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagSteg;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
+import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal.PSBKompletthetSjekkerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.PSBKompletthetsjekker;
 
@@ -32,6 +46,8 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     private BehandlingRepository behandlingRepository;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private PSBKompletthetSjekkerTjeneste kompletthetSjekkerTjeneste;
+    private BestiltEtterlysningRepository bestiltEtterlysningRepository;
+    private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
     private PSBKompletthetsjekker kompletthetsjekker;
     private boolean benyttNyFlyt = false;
 
@@ -43,12 +59,16 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     public VurderKompletthetForBeregningSteg(BehandlingRepository behandlingRepository,
                                              BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                              PSBKompletthetSjekkerTjeneste kompletthetSjekkerTjeneste,
+                                             BestiltEtterlysningRepository bestiltEtterlysningRepository,
+                                             DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
                                              @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") PSBKompletthetsjekker kompletthetsjekker,
                                              @KonfigVerdi(value = "KOMPLETTHET_NY_FLYT", defaultVerdi = "false") Boolean benyttNyFlyt) {
 
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.kompletthetSjekkerTjeneste = kompletthetSjekkerTjeneste;
+        this.bestiltEtterlysningRepository = bestiltEtterlysningRepository;
+        this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
         this.kompletthetsjekker = kompletthetsjekker;
         this.benyttNyFlyt = benyttNyFlyt;
     }
@@ -67,22 +87,91 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     }
 
     private BehandleStegResultat nyKompletthetFlyt(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        var kompletthetsAksjon = kompletthetSjekkerTjeneste.utledHandlinger(ref, kontekst);
+        var kompletthetsAksjon = kompletthetSjekkerTjeneste.utledTilstand(ref, kontekst);
 
         if (kompletthetsAksjon.kanFortsette()) {
+            avbrytAksjonspunktHvisTilstede(kontekst);
+
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         } else if (kompletthetsAksjon.harFrist()) {
+            var arbeidsgiverDetSkalEtterlysesFra = kompletthetsAksjon.getArbeidsgiverDetSkalEtterlysesFra();
+            if (!arbeidsgiverDetSkalEtterlysesFra.isEmpty()) {
+                var manglendeBestillinger = utledManglendeBestillinger(ref, arbeidsgiverDetSkalEtterlysesFra, kompletthetsAksjon);
+
+                bestiltEtterlysningRepository.lagre(manglendeBestillinger);
+                var aktørerDetManglerFor = manglendeBestillinger.stream()
+                    .map(BestiltEtterlysning::getArbeidsgiver)
+                    .collect(Collectors.toSet());
+                for (Arbeidsgiver arbeidsgiver : aktørerDetManglerFor) {
+                    var mottaker = arbeidsgiver != null ? new Mottaker(arbeidsgiver.getIdentifikator(), arbeidsgiver.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID) : new Mottaker(ref.getAktørId().getAktørId(), IdType.AKTØRID);
+                    sendBrev(ref.getBehandlingId(), DokumentMalType.fraKode(kompletthetsAksjon.getDokumentMalType().getKode()), mottaker);
+                }
+            }
+
             var aksjonspunktResultat = AksjonspunktResultat.opprettForAksjonspunktMedFrist(kompletthetsAksjon.getAksjonspunktDefinisjon(),
                 utledVenteÅrsak(kompletthetsAksjon),
                 kompletthetsAksjon.getFrist());
-
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(aksjonspunktResultat));
-        } else if(!kompletthetsAksjon.erUavklart()) {
+        } else if (!kompletthetsAksjon.erUavklart()) {
             var aksjonspunktResultat = AksjonspunktResultat.opprettForAksjonspunkt(kompletthetsAksjon.getAksjonspunktDefinisjon());
 
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(aksjonspunktResultat));
         } else {
             throw new IllegalStateException("Ugyldig kompletthetstilstand :: " + kompletthetsAksjon);
+        }
+    }
+
+    private Set<BestiltEtterlysning> utledManglendeBestillinger(BehandlingReferanse ref, List<PeriodeMedMangler> arbeidsgiverDetSkalEtterlysesFra, KompletthetsAksjon aksjon) {
+        Objects.requireNonNull(aksjon);
+        var aksjonspunktDefinisjon = aksjon.getAksjonspunktDefinisjon();
+
+        var bestilteEtterlysninger = bestiltEtterlysningRepository.hentFor(ref.getFagsakId());
+
+        if (AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_FOR_BEREGNING.equals(aksjonspunktDefinisjon)) {
+            var bestilt = new HashSet<BestiltEtterlysning>();
+            var brukerBrev = arbeidsgiverDetSkalEtterlysesFra.stream()
+                .map(PeriodeMedMangler::getPeriode)
+                .map(it -> new BestiltEtterlysning(ref.getFagsakId(), ref.getBehandlingId(), it, null, aksjon.getDokumentMalType().getKode()))
+                .filter(it -> bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeFraSammeBehandling(it)))
+                .collect(Collectors.toSet());
+
+            var arbeidsgiverBrev = arbeidsgiverDetSkalEtterlysesFra.stream()
+                .map(it -> it.getMangler().stream().map(at -> new BestiltEtterlysning(ref.getFagsakId(), ref.getBehandlingId(), it.getPeriode(), at.getArbeidsgiver(), aksjon.getDokumentMalType().getKode())).collect(Collectors.toSet()))
+                .flatMap(Collection::stream)
+                .filter(it -> bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeFraSammeBehandling(it)))
+                .collect(Collectors.toSet());
+
+            bestilt.addAll(brukerBrev);
+            bestilt.addAll(arbeidsgiverBrev);
+
+            return bestilt;
+        } else if (AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING.equals(aksjonspunktDefinisjon)) {
+            return arbeidsgiverDetSkalEtterlysesFra.stream()
+                .map(PeriodeMedMangler::getPeriode)
+                .map(it -> new BestiltEtterlysning(ref.getFagsakId(), ref.getBehandlingId(), it, null, aksjon.getDokumentMalType().getKode()))
+                .filter(it -> bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeFraSammeBehandling(it)))
+                .collect(Collectors.toSet());
+        } else {
+            throw new IllegalArgumentException("Ukjent aksjonspunkt definisjon " + aksjonspunktDefinisjon);
+        }
+
+    }
+
+    private void avbrytAksjonspunktHvisTilstede(BehandlingskontrollKontekst kontekst) {
+        var haddeAksjonspunktSomSkulleAvbrytes = false;
+        var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING)) {
+            behandling.getAksjonspunktFor(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING)
+                .avbryt();
+            haddeAksjonspunktSomSkulleAvbrytes = true;
+        }
+        if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING)) {
+            behandling.getAksjonspunktFor(AksjonspunktDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING)
+                .avbryt();
+            haddeAksjonspunktSomSkulleAvbrytes = true;
+        }
+        if (haddeAksjonspunktSomSkulleAvbrytes) {
+            behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         }
     }
 
@@ -122,6 +211,11 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         } else {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING));
         }
+    }
+
+    private void sendBrev(Long behandlingId, DokumentMalType dokumentMalType, Mottaker mottaker) {
+        BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, dokumentMalType, new MottakerDto(mottaker.id, mottaker.type.toString()));
+        dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 
 }
