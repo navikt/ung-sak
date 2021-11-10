@@ -19,6 +19,9 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
@@ -42,8 +45,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Dependent
 public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
@@ -264,12 +265,18 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         var sortert = new TreeSet<>(skjæringstidspunkter);
         var referanser = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), sortert, false, false);
         if (!referanser.isEmpty()) {
+            Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = Objects.equals(ref.getBehandlingType(), BehandlingType.REVURDERING) ? grunnlagRepository.getInitiellVersjon(ref.getBehandlingId()) : Optional.empty();
             var bgReferanser = referanser.stream()
                 .filter(it -> !it.erGenerertReferanse())
+                .filter(it -> erIkkeInitiellVersjon(initiellVersjon, it))
                 .map(BgRef::getRef)
                 .collect(Collectors.toList());
             finnTjeneste(ref.getFagsakYtelseType()).deaktiverBeregningsgrunnlag(ref.getFagsakYtelseType(), ref.getSaksnummer(), bgReferanser);
         }
+    }
+
+    private boolean erIkkeInitiellVersjon(Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon, BgRef it) {
+        return !initiellVersjon.flatMap(at -> at.finnGrunnlagFor(it.getStp()).map(BeregningsgrunnlagPeriode::getEksternReferanse)).equals(Optional.of(it.getRef()));
     }
 
     @Override
