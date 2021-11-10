@@ -262,7 +262,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     @Override
     public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter) {
         var sortert = new TreeSet<>(skjæringstidspunkter);
-        var referanser = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), sortert, false, false);
+        var referanser = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), sortert, false, ref.getBehandlingType().equals(BehandlingType.REVURDERING));
         if (!referanser.isEmpty()) {
             var bgReferanser = referanser.stream()
                 .filter(it -> !it.erGenerertReferanse())
