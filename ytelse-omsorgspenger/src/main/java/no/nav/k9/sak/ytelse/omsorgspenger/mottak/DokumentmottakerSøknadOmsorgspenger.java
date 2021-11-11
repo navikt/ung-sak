@@ -105,7 +105,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
             // Søknadsinnhold som persisteres "lokalt" i k9-sak
-            persister(søknad, behandling, dokument.getJournalpostId());
+            persister(søknad, behandling, dokument);
             // Søknadsinnhold som persisteres eksternt (abakus)
             lagreOppgittOpptjeningFraSøknad(søknad, behandling, dokument);
         }
@@ -150,18 +150,23 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         }
     }
 
-    void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {
+    void persister(Søknad søknad, Behandling behandling, MottattDokument dokument) {
+        var journalpostId = dokument.getJournalpostId();
         var behandlingId = behandling.getId();
         var søknadInnhold = (OmsorgspengerUtbetaling) søknad.getYtelse();
         var søker = søknad.getSøker();
         var forsendelseMottatt = søknad.getMottattDato().toLocalDate();
 
-        lagreSøknad(behandlingId, journalpostId, søknad, søknadInnhold);
+        lagreSøknad(behandlingId, dokument, søknad, søknadInnhold);
         lagreMedlemskapinfo(behandlingId, søknadInnhold, forsendelseMottatt);
         lagreUttakOgUtvidPeriode(behandling, journalpostId, søknadInnhold, søker);
     }
 
-    private void lagreSøknad(Long behandlingId, JournalpostId journalpostId, Søknad søknad, OmsorgspengerUtbetaling søknadInnhold) {
+    private void lagreSøknad(Long behandlingId, MottattDokument dokument, Søknad søknad, OmsorgspengerUtbetaling søknadInnhold) {
+        if (dokument.getType() == Brevkode.FRAVÆRSKORRIGERING_IM_OMS) {
+            // Dokument er relatert til eksisterende inntektsmelding, klassifiseres derfor ikke som søknad fra bruker
+            return;
+        }
         var søknadsperiode = søknadInnhold.getSøknadsperiode();
         final boolean elektroniskSøknad = false;
         var søknadBuilder = new SøknadEntitet.Builder()
@@ -170,7 +175,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false)
             .medSøknadsdato(søknad.getMottattDato().toLocalDate())
-            .medJournalpostId(journalpostId)
+            .medJournalpostId(dokument.getJournalpostId())
             .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().getId())
             .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL)) //TODO: hente riktig språk
             ;
