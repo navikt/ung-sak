@@ -3,6 +3,8 @@ package no.nav.k9.sak.domene.behandling.steg.vedtak;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -23,6 +25,7 @@ public class FatteVedtakSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private FatteVedtakTjeneste fatteVedtakTjeneste;
     private SimulerInntrekkSjekkeTjeneste simulerInntrekkSjekkeTjeneste;
+    private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
 
     FatteVedtakSteg() {
         // for CDI proxy
@@ -30,11 +33,13 @@ public class FatteVedtakSteg implements BehandlingSteg {
 
     @Inject
     public FatteVedtakSteg(BehandlingRepositoryProvider repositoryProvider,
-                    FatteVedtakTjeneste fatteVedtakTjeneste,
-                    SimulerInntrekkSjekkeTjeneste simulerInntrekkSjekkeTjeneste) {
+                           FatteVedtakTjeneste fatteVedtakTjeneste,
+                           SimulerInntrekkSjekkeTjeneste simulerInntrekkSjekkeTjeneste,
+                           BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.fatteVedtakTjeneste = fatteVedtakTjeneste;
         this.simulerInntrekkSjekkeTjeneste = simulerInntrekkSjekkeTjeneste;
+        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
     }
 
 
@@ -43,6 +48,14 @@ public class FatteVedtakSteg implements BehandlingSteg {
         long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         simulerInntrekkSjekkeTjeneste.sjekkIntrekk(behandling);
+
+        konsistensSjekk(BehandlingReferanse.fra(behandling));
+
         return fatteVedtakTjeneste.fattVedtak(kontekst, behandling);
+    }
+
+    private void konsistensSjekk(BehandlingReferanse fra) {
+        // Konsistenssjekk ved at vi har like mange grunnlag som vi har vilkårsperioder innvilget
+        beregningsgrunnlagTjeneste.hentEksaktFastsattForAllePerioder(fra);
     }
 }
