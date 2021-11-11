@@ -82,7 +82,7 @@ import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.app.OpprettManuellRevurderingTask;
+import no.nav.k9.sak.web.app.tasks.OpprettManuellRevurderingTask;
 import no.nav.k9.sak.web.app.tjenester.behandling.SjekkProsessering;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
