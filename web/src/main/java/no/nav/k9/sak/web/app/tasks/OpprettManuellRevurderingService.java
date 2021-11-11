@@ -36,6 +36,9 @@ public class OpprettManuellRevurderingService {
     private ProsessTaskRepository prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
     
+    protected OpprettManuellRevurderingService() {
+        
+    }
     
     @Inject
     public OpprettManuellRevurderingService(BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
