@@ -175,7 +175,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             .stream()
             .filter(it -> !Utfall.IKKE_OPPFYLT.equals(it.getUtfall()))
             .peek(it -> {
-                if (Objects.equals(Utfall.IKKE_VURDERT, it.getGjeldendeUtfall())) {
+                if (!Objects.equals(Utfall.OPPFYLT, it.getGjeldendeUtfall())) {
                     throw new ManglerBeregningsgrunnlagException("Mangler grunnlag pga periode som ikke er vurdert.");
                 }
             })
