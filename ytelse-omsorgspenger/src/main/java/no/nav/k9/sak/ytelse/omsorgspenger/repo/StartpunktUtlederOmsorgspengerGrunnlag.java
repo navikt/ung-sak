@@ -1,8 +1,8 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.repo;
 
-import java.util.Collection;
-import java.util.Objects;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -14,6 +14,7 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt.FellesStartpunktUtlederLogger;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @ApplicationScoped
 @GrunnlagRef("OmsorgspengerGrunnlag")
@@ -35,27 +36,16 @@ public class StartpunktUtlederOmsorgspengerGrunnlag implements EndringStartpunkt
 
     @Override
     public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object nyGrunnlagId, Object origGrunnlagId) {
-        return hentStartpunktFor((Long) nyGrunnlagId, (Long) origGrunnlagId)
+         return hentStartpunktFor((Long) nyGrunnlagId, (Long) origGrunnlagId)
             .orElse(StartpunktType.UDEFINERT);
     }
 
     private Optional<StartpunktType> hentStartpunktFor(Long nyGrunnlagId, Long origGrunnlagId) {
+        var grunnlagOrig = grunnlagRepository.hentGrunnlagBasertPåId(origGrunnlagId);
+        Set<JournalpostId> orginaleJournalposter = grunnlagOrig.map(grunnlag -> hentJournalposter(grunnlag)).orElse(Set.of());
 
-        var orginaleJournalposter = grunnlagRepository.hentGrunnlagBasertPåId(origGrunnlagId).stream()
-            .map(OmsorgspengerGrunnlag::getOppgittFraværFraSøknad)
-            .filter(Objects::nonNull)
-            .map(OppgittFravær::getPerioder)
-            .flatMap(Collection::stream)
-            .map(OppgittFraværPeriode::getJournalpostId)
-            .collect(Collectors.toSet());
-
-        var nyeJournalposter = grunnlagRepository.hentGrunnlagBasertPåId(nyGrunnlagId).stream()
-            .map(OmsorgspengerGrunnlag::getOppgittFraværFraSøknad)
-            .filter(Objects::nonNull)
-            .map(OppgittFravær::getPerioder)
-            .flatMap(Collection::stream)
-            .map(OppgittFraværPeriode::getJournalpostId)
-            .collect(Collectors.toSet());
+        var grunnlagNytt = grunnlagRepository.hentGrunnlagBasertPåId(nyGrunnlagId);
+        Set<JournalpostId> nyeJournalposter = grunnlagNytt.map(grunnlag -> hentJournalposter(grunnlag)).orElse(Set.of());
         nyeJournalposter.removeAll(orginaleJournalposter);
 
         if (!nyeJournalposter.isEmpty()) {
@@ -64,6 +54,19 @@ public class StartpunktUtlederOmsorgspengerGrunnlag implements EndringStartpunkt
         }
 
         return Optional.empty();
+    }
+
+    private Set<JournalpostId> hentJournalposter(OmsorgspengerGrunnlag grunnlag) {
+        Set<JournalpostId> journalposter = new HashSet<>();
+        var fraSøknad = grunnlag.getOppgittFraværFraSøknad();
+        if (fraSøknad != null) {
+            journalposter.addAll(fraSøknad.getPerioder().stream().map(OppgittFraværPeriode::getJournalpostId).collect(Collectors.toSet()));
+        }
+        var fraKorrigeringIm = grunnlag.getOppgittFraværFraKorrigeringIm();
+        if (fraKorrigeringIm != null) {
+            journalposter.addAll(fraKorrigeringIm.getPerioder().stream().map(OppgittFraværPeriode::getJournalpostId).collect(Collectors.toSet()));
+        }
+        return journalposter;
     }
 
     private void loggStartpunkt(StartpunktType startpunkt, Long nyGrunnlagId, Long origGrunnlagId, String endringLoggtekst) {
