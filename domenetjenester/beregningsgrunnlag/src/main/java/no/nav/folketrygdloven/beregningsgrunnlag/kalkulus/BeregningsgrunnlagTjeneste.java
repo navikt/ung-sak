@@ -173,7 +173,12 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
         List<LocalDate> skjæringstidspunkt = vilkår.getPerioder()
             .stream()
-            .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
+            .filter(it -> !Utfall.IKKE_OPPFYLT.equals(it.getUtfall()))
+            .peek(it -> {
+                if (Objects.equals(Utfall.IKKE_VURDERT, it.getGjeldendeUtfall())) {
+                    throw new ManglerBeregningsgrunnlagException("Mangler grunnlag pga periode som ikke er vurdert.");
+                }
+            })
             .map(VilkårPeriode::getSkjæringstidspunkt)
             .collect(Collectors.toList());
 
