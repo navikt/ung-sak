@@ -180,7 +180,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         List<Beregningsgrunnlag> fastsatt = hentEksaktFastsatt(ref, skjæringstidspunkt);
 
         if (skjæringstidspunkt.size() != fastsatt.size()) {
-            throw new IllegalStateException("Avvik mellom innvilgede perioder og grunnlag :: bg:" + fastsatt.size() + " -- vp" + skjæringstidspunkt.size());
+            throw new ManglerBeregningsgrunnlagException("Avvik mellom innvilgede perioder og grunnlag :: bg:" + fastsatt.size() + " -- vp" + skjæringstidspunkt.size());
         }
 
         return fastsatt

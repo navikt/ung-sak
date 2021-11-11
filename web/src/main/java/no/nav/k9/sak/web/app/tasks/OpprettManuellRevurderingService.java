@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app;
+package no.nav.k9.sak.web.app.tasks;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,9 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
@@ -27,49 +25,32 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
 
 @ApplicationScoped
-@ProsessTask(OpprettManuellRevurderingTask.TASKTYPE)
-public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
-    public static final String TASKTYPE = "forvaltning.opprettManuellRevurdering";
+public class OpprettManuellRevurderingService {
 
-    private static final Logger logger = LoggerFactory.getLogger(OpprettManuellRevurderingTask.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(OpprettManuellRevurderingService.class);
+    
+    
     private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
     private FagsakTjeneste fagsakTjeneste;
     private ProsessTaskRepository prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
-
-    protected OpprettManuellRevurderingTask() {
-        // CDI proxy
-    }
-
+    
+    
     @Inject
-    public OpprettManuellRevurderingTask(BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
-                                         BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
-                                         FagsakTjeneste fagsakTjeneste,
-                                         ProsessTaskRepository prosessTaskRepository,
-                                         BehandlingRepository behandlingRepository) {
+    public OpprettManuellRevurderingService(BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
+             BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
+             FagsakTjeneste fagsakTjeneste,
+             ProsessTaskRepository prosessTaskRepository,
+             BehandlingRepository behandlingRepository) {
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
     }
-
-    @Override
-    public void doTask(ProsessTaskData pd) {
-        var saksnummer = pd.getSaksnummer();
-        if (saksnummer == null) {
-            final String[] saksnumre = pd.getPayloadAsString().split("\\s+");
-            if (saksnumre.length != 1) {
-                throw new IllegalStateException("Kan ikke håndtere forespørsel med flere saksnummer grunnet feil i Abakus. Antall: " + saksnumre.length);
-            }
-            revurder(new Saksnummer(saksnumre[0]));
-        } else {
-            revurder(new Saksnummer(saksnummer));
-        }
-    }
-
+    
+    
     public void revurder(Saksnummer saksnummer) {
         final Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
         final Fagsak fagsak = funnetFagsak.get();
