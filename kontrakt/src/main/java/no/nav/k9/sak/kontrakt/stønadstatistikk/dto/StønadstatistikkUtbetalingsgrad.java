@@ -1,4 +1,4 @@
-package no.nav.k9.sak.hendelse.stønadstatistikk.dto;
+package no.nav.k9.sak.kontrakt.stønadstatistikk.dto;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -42,7 +42,7 @@ public class StønadstatistikkUtbetalingsgrad {
     private int dagsats;
 
     
-    public StønadstatistikkUtbetalingsgrad() {
+    protected StønadstatistikkUtbetalingsgrad() {
         
     }
     

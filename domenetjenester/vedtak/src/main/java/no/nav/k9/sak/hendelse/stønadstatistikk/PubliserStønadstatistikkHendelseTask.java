@@ -15,7 +15,8 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkHendelse;
+import no.nav.k9.sak.kontrakt.stønadstatistikk.StønadstatistikkSerializer;
+import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkHendelse;
 
 @ApplicationScoped
 @ProsessTask(PubliserStønadstatistikkHendelseTask.TASKTYPE)

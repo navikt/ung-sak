@@ -1,4 +1,4 @@
-package no.nav.k9.sak.hendelse.stønadstatistikk.dto;
+package no.nav.k9.sak.kontrakt.stønadstatistikk.dto;
 
 import java.math.BigDecimal;
 
@@ -41,7 +41,7 @@ public class StønadstatistikkGraderingMotTilsyn {
     private BigDecimal tilgjengeligForSøker;
 
     
-    StønadstatistikkGraderingMotTilsyn() {
+    protected StønadstatistikkGraderingMotTilsyn() {
     }
     
     public StønadstatistikkGraderingMotTilsyn(BigDecimal etablertTilsyn,

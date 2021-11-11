@@ -2,7 +2,7 @@ package no.nav.k9.sak.hendelse.stønadstatistikk;
 
 import java.util.UUID;
 
-import no.nav.k9.sak.hendelse.stønadstatistikk.dto.StønadstatistikkHendelse;
+import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkHendelse;
 
 public interface StønadstatistikkHendelseBygger {
     
