@@ -6,7 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -58,10 +58,9 @@ public class FatteVedtakSteg implements BehandlingSteg {
     }
 
     private void konsistensSjekk(BehandlingReferanse fra) {
-        if (Objects.equals(BehandlingType.UNNTAKSBEHANDLING, fra.getBehandlingType())) {
-            return;
+        if (Objects.equals(FagsakYtelseType.OMSORGSPENGER, fra.getFagsakYtelseType()) || Objects.equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, fra.getFagsakYtelseType())) {
+            // Konsistenssjekk ved at vi har like mange grunnlag som vi har vilkårsperioder innvilget
+            beregningsgrunnlagTjeneste.hentEksaktFastsattForAllePerioder(fra);
         }
-        // Konsistenssjekk ved at vi har like mange grunnlag som vi har vilkårsperioder innvilget
-        beregningsgrunnlagTjeneste.hentEksaktFastsattForAllePerioder(fra);
     }
 }
