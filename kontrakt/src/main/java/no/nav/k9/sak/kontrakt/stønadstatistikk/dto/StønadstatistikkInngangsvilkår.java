@@ -1,4 +1,4 @@
-package no.nav.k9.sak.hendelse.stønadstatistikk.dto;
+package no.nav.k9.sak.kontrakt.stønadstatistikk.dto;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -18,7 +18,7 @@ public class StønadstatistikkInngangsvilkår {
     private StønadstatistikkUtfall utfall;
     
     
-    public StønadstatistikkInngangsvilkår() {
+    protected StønadstatistikkInngangsvilkår() {
         
     }
     

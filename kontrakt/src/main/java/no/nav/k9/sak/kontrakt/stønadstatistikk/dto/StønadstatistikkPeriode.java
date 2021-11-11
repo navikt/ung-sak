@@ -1,4 +1,4 @@
-package no.nav.k9.sak.hendelse.stønadstatistikk.dto;
+package no.nav.k9.sak.kontrakt.stønadstatistikk.dto;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -94,7 +94,7 @@ public class StønadstatistikkPeriode {
     private BigDecimal bruttoBeregningsgrunnlag;
 
     
-    public StønadstatistikkPeriode() {
+    protected StønadstatistikkPeriode() {
         
     }
             

@@ -1,4 +1,4 @@
-package no.nav.k9.sak.hendelse.stønadstatistikk.dto;
+package no.nav.k9.sak.kontrakt.stønadstatistikk.dto;
 
 import java.util.Objects;
 
@@ -30,6 +30,10 @@ public class StønadstatistikkDiagnosekode {
     @Valid
     private String type = "ICD10";
 
+    
+    protected StønadstatistikkDiagnosekode() {
+        
+    }
     
     public StønadstatistikkDiagnosekode(String kode) {
         if (!PATTERN.matcher(Objects.requireNonNull(kode, "kode")).matches()) {

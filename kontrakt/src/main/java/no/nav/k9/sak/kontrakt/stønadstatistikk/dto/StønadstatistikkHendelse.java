@@ -1,4 +1,4 @@
-package no.nav.k9.sak.hendelse.stønadstatistikk.dto;
+package no.nav.k9.sak.kontrakt.stønadstatistikk.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
