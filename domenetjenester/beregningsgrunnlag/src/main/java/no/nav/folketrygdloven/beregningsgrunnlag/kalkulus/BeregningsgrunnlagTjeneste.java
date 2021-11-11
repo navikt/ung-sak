@@ -178,6 +178,11 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             .collect(Collectors.toList());
 
         List<Beregningsgrunnlag> fastsatt = hentEksaktFastsatt(ref, skjæringstidspunkt);
+
+        if (skjæringstidspunkt.size() != fastsatt.size()) {
+            throw new IllegalStateException("Avvik mellom innvilgede perioder og grunnlag :: bg:" + fastsatt.size() + " -- vp" + skjæringstidspunkt.size());
+        }
+
         return fastsatt
             .stream()
             .sorted(Comparator.comparing(Beregningsgrunnlag::getSkjæringstidspunkt))
