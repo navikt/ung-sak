@@ -178,4 +178,22 @@ public class BeregningPerioderGrunnlagRepository {
         }
         vilkår.ifPresent(builder::validerMotVilkår);
     }
+
+    public void deaktiverKompletthetsPerioder(Long behandlingId, List<KompletthetPeriode> kompletthetPerioder) {
+        Objects.requireNonNull(kompletthetPerioder);
+        var aktivtGrunnlag = hentGrunnlag(behandlingId);
+        if (aktivtGrunnlag.isPresent()) {
+            var grunnlag = aktivtGrunnlag.get();
+
+            var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(grunnlag);
+
+            for (KompletthetPeriode kompletthetPeriode : kompletthetPerioder) {
+                builder.deaktiverKompletthet(kompletthetPeriode.getSkjæringstidspunkt());
+            }
+
+            deaktiverEksisterende(grunnlag);
+
+            lagre(builder, behandlingId, false);
+        }
+    }
 }

@@ -30,6 +30,7 @@ import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysnin
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
@@ -74,7 +75,7 @@ public class PSBKompletthetSjekkerTjeneste {
 
         var grunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(ref.getBehandlingId());
         if (aksjon.kanFortsette()) {
-            // TODO: Sjekk om det er tidliger avslåtte perioder som har blitt komplette og dermed må ryddes bort
+            deaktiverVurderingerSomIkkeErRelevantePgaNåKomplett(ref.getBehandlingId(), perioderTilVurdering, kompletthetsVurderinger, grunnlag);
 
             log.info("Behandlingen er komplett, kan fortsette.");
             return aksjon;
@@ -123,6 +124,30 @@ public class PSBKompletthetSjekkerTjeneste {
         return KompletthetsAksjon.manuellAvklaring(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING);
     }
 
+    private void deaktiverVurderingerSomIkkeErRelevantePgaNåKomplett(Long behandlingId, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> kompletthetsVurderinger, Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlag) {
+        if (grunnlag.isEmpty()) {
+            return;
+        }
+        if (perioderTilVurdering.isEmpty()) {
+            return;
+        }
+        if (kompletthetsVurderinger.keySet().isEmpty()) {
+            return;
+        }
+        var grlag = grunnlag.get();
+
+        var kompletthetPerioder = grlag.getKompletthetPerioder()
+            .stream()
+            .filter(it -> perioderTilVurdering.stream().anyMatch(at -> Objects.equals(at.getFomDato(), it.getSkjæringstidspunkt())))
+            .filter(it -> !Objects.equals(it.getVurdering(), Vurdering.UDEFINERT))
+            .filter(it -> kompletthetsVurderinger.entrySet().stream().anyMatch(at -> Objects.equals(at.getKey().getFomDato(), it.getSkjæringstidspunkt()) && at.getValue().isEmpty()))
+            .collect(Collectors.toList());
+
+        if (!kompletthetPerioder.isEmpty()) {
+            beregningPerioderGrunnlagRepository.deaktiverKompletthetsPerioder(behandlingId, kompletthetPerioder);
+        }
+    }
+
     private Map<DatoIntervallEntitet, List<TidligereEtterlysning>> hentTidligereEtterlysninger(BehandlingReferanse ref) {
         Map<DatoIntervallEntitet, List<TidligereEtterlysning>> bestilteBrev = etterlysningRepository.hentFor(ref.getFagsakId())
             .stream()
@@ -145,7 +170,7 @@ public class PSBKompletthetSjekkerTjeneste {
             grunnlag.get().getKompletthetPerioder()
                 .stream()
                 .filter(it -> Vurdering.MANGLENDE_GRUNNLAG.equals(it.getVurdering()))
-                .filter(it -> perioderTilVurdering.stream().anyMatch(at -> Objects.equals(at.getFomDato(),it.getSkjæringstidspunkt())))
+                .filter(it -> perioderTilVurdering.stream().anyMatch(at -> Objects.equals(at.getFomDato(), it.getSkjæringstidspunkt())))
                 .forEach(periode -> avslå(periode, perioderTilVurdering, kontekst));
         }
     }

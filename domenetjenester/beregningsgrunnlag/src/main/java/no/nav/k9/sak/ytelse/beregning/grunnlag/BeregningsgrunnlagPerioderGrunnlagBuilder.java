@@ -38,6 +38,13 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
         return this;
     }
 
+    BeregningsgrunnlagPerioderGrunnlagBuilder deaktiverKompletthet(LocalDate skjæringstidspunkt) {
+        validerState();
+        Objects.requireNonNull(skjæringstidspunkt);
+        kladd.deaktiverKompletthet(skjæringstidspunkt);
+        return this;
+    }
+
     Optional<BeregningsgrunnlagPeriode> hentTidligere(LocalDate skjæringstidspunkt) {
         validerState();
         return kladd.finnGrunnlagFor(skjæringstidspunkt);
@@ -110,7 +117,7 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
     BeregningsgrunnlagPerioderGrunnlagBuilder leggTilKompletthetVurdering(KompletthetPeriode periode) {
         validerState();
         Objects.requireNonNull(periode);
-        kladd.deaktiver(periode.getSkjæringstidspunkt());
+        kladd.deaktiverKompletthet(periode.getSkjæringstidspunkt());
         kladd.leggTil(periode);
         return this;
     }
