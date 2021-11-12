@@ -184,7 +184,9 @@ public class BehandlingDtoTjeneste {
     private void leggTilHandlingerResourceLinks(Behandling behandling, BehandlingDto dto) {
 
         if (behandling.getStatus().erFerdigbehandletStatus()) {
-            return; // skip resten hvis ferdig
+            // Tillatt å bestille brev på lukket behandling, skip resten for ferdigbehandlet behandling
+            dto.leggTil(post(BrevRestTjeneste.BREV_BESTILL_PATH, "brev-bestill", new BestillBrevDto()));
+            return;
         }
 
         // Behandlingsmeny-operasjoner
