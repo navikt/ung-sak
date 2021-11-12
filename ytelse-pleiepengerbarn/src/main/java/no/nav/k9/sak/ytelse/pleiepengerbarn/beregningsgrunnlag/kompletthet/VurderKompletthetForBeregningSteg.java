@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -31,6 +32,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagSteg;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -94,15 +96,15 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
 
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         } else if (kompletthetsAksjon.harFrist()) {
-            var arbeidsgiverDetSkalEtterlysesFra = kompletthetsAksjon.getArbeidsgiverDetSkalEtterlysesFra();
-            if (!arbeidsgiverDetSkalEtterlysesFra.isEmpty()) {
-                var manglendeBestillinger = utledManglendeBestillinger(ref, arbeidsgiverDetSkalEtterlysesFra, kompletthetsAksjon);
+            var perioderMedManglendeVedlegg = kompletthetsAksjon.getPerioderMedMangler();
+            if (!perioderMedManglendeVedlegg.isEmpty()) {
+                var manglendeBestillinger = utledManglendeBestillinger(ref, perioderMedManglendeVedlegg, kompletthetsAksjon);
 
                 bestiltEtterlysningRepository.lagre(manglendeBestillinger);
-                var aktørerDetManglerFor = manglendeBestillinger.stream()
+                var aktørerDetSkalEtterlysesFra = manglendeBestillinger.stream()
                     .map(BestiltEtterlysning::getArbeidsgiver)
                     .collect(Collectors.toSet());
-                for (Arbeidsgiver arbeidsgiver : aktørerDetManglerFor) {
+                for (Arbeidsgiver arbeidsgiver : aktørerDetSkalEtterlysesFra) {
                     var mottaker = arbeidsgiver != null ? new Mottaker(arbeidsgiver.getIdentifikator(), arbeidsgiver.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID) : new Mottaker(ref.getAktørId().getAktørId(), IdType.AKTØRID);
                     sendBrev(ref.getBehandlingId(), DokumentMalType.fraKode(kompletthetsAksjon.getDokumentMalType().getKode()), mottaker);
                 }
@@ -127,7 +129,8 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
 
         var bestilteEtterlysninger = bestiltEtterlysningRepository.hentFor(ref.getFagsakId());
 
-        if (AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_FOR_BEREGNING.equals(aksjonspunktDefinisjon)) {
+        if (AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_FOR_BEREGNING.equals(aksjonspunktDefinisjon) ||
+            AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING.equals(aksjonspunktDefinisjon)) {
             var bestilt = new HashSet<BestiltEtterlysning>();
             var brukerBrev = arbeidsgiverDetSkalEtterlysesFra.stream()
                 .map(PeriodeMedMangler::getPeriode)
@@ -136,7 +139,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
                 .collect(Collectors.toSet());
 
             var arbeidsgiverBrev = arbeidsgiverDetSkalEtterlysesFra.stream()
-                .map(it -> it.getMangler().stream().map(at -> new BestiltEtterlysning(ref.getFagsakId(), ref.getBehandlingId(), it.getPeriode(), at.getArbeidsgiver(), aksjon.getDokumentMalType().getKode())).collect(Collectors.toSet()))
+                .map(it -> it.getMangler().stream().map(mapTilBestilling(ref, aksjon, it)).collect(Collectors.toSet()))
                 .flatMap(Collection::stream)
                 .filter(it -> bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeFraSammeBehandling(it)))
                 .collect(Collectors.toSet());
@@ -145,16 +148,14 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             bestilt.addAll(arbeidsgiverBrev);
 
             return bestilt;
-        } else if (AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING.equals(aksjonspunktDefinisjon)) {
-            return arbeidsgiverDetSkalEtterlysesFra.stream()
-                .map(PeriodeMedMangler::getPeriode)
-                .map(it -> new BestiltEtterlysning(ref.getFagsakId(), ref.getBehandlingId(), it, null, aksjon.getDokumentMalType().getKode()))
-                .filter(it -> bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeFraSammeBehandling(it)))
-                .collect(Collectors.toSet());
         } else {
             throw new IllegalArgumentException("Ukjent aksjonspunkt definisjon " + aksjonspunktDefinisjon);
         }
 
+    }
+
+    private Function<ManglendeVedlegg, BestiltEtterlysning> mapTilBestilling(BehandlingReferanse ref, KompletthetsAksjon aksjon, PeriodeMedMangler it) {
+        return at -> new BestiltEtterlysning(ref.getFagsakId(), ref.getBehandlingId(), it.getPeriode(), at.getArbeidsgiver(), aksjon.getDokumentMalType().getKode());
     }
 
     private void avbrytAksjonspunktHvisTilstede(BehandlingskontrollKontekst kontekst) {

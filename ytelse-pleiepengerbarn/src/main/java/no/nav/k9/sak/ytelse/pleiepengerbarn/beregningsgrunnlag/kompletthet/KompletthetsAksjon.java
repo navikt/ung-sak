@@ -8,16 +8,16 @@ import no.nav.k9.kodeverk.dokument.DokumentMalType;
 
 public class KompletthetsAksjon {
 
-    private List<PeriodeMedMangler> arbeidsgiverDetSkalEtterlysesFra;
+    private List<PeriodeMedMangler> perioderMedMangler;
     private boolean uavklart = false;
     private AksjonspunktDefinisjon aksjonspunktDefinisjon;
     private DokumentMalType dokumentMalType;
     private LocalDateTime frist;
 
-    public KompletthetsAksjon(AksjonspunktDefinisjon aksjonspunktDefinisjon, LocalDateTime frist, List<PeriodeMedMangler> arbeidsgiverDetSkalEtterlysesFra, DokumentMalType dokumentMalType) {
+    public KompletthetsAksjon(AksjonspunktDefinisjon aksjonspunktDefinisjon, LocalDateTime frist, List<PeriodeMedMangler> perioderMedMangler, DokumentMalType dokumentMalType) {
         this.aksjonspunktDefinisjon = aksjonspunktDefinisjon;
         this.frist = frist;
-        this.arbeidsgiverDetSkalEtterlysesFra = arbeidsgiverDetSkalEtterlysesFra;
+        this.perioderMedMangler = perioderMedMangler;
         this.dokumentMalType = dokumentMalType;
     }
 
@@ -80,7 +80,7 @@ public class KompletthetsAksjon {
         return frist;
     }
 
-    public List<PeriodeMedMangler> getArbeidsgiverDetSkalEtterlysesFra() {
-        return arbeidsgiverDetSkalEtterlysesFra;
+    public List<PeriodeMedMangler> getPerioderMedMangler() {
+        return perioderMedMangler;
     }
 }
