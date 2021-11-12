@@ -17,7 +17,7 @@ class KompletthetUtleder {
     KompletthetsAksjon utled(VurdererInput input) {
         Objects.requireNonNull(input);
 
-        Map<DatoIntervallEntitet, List<ManglendeVedlegg>> relevanteKompletthetsvurderinger = utledRelevanteVurderinger(input);
+        var relevanteKompletthetsvurderinger = utledRelevanteVurderinger(input);
 
         if (relevanteKompletthetsvurderinger.isEmpty()) {
             return KompletthetsAksjon.fortsett();
