@@ -220,6 +220,8 @@ spec:
       value: "true"
     - name: ENABLE_STONADSTATISTIKK
       value: "true"
+    - name: ENABLE_RELEVANT_SYKDOMSPERIODE
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
