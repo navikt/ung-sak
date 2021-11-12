@@ -131,6 +131,9 @@ public class UtledStatusPåPerioderTjeneste {
         if (årsaker.contains(ÅrsakTilVurdering.MANUELT_REVURDERER_PERIODE) && årsaker.contains(ÅrsakTilVurdering.FØRSTEGANGSVURDERING)) {
             årsaker = Set.of(ÅrsakTilVurdering.MANUELT_REVURDERER_PERIODE, ÅrsakTilVurdering.ENDRING_FRA_BRUKER);
         }
+        if (årsaker.contains(ÅrsakTilVurdering.TRUKKET_KRAV) && årsaker.contains(ÅrsakTilVurdering.FØRSTEGANGSVURDERING)) {
+            årsaker = Set.of(ÅrsakTilVurdering.TRUKKET_KRAV);
+        }
 
         return new LocalDateSegment<>(interval, new ÅrsakerTilVurdering(årsaker));
     }
