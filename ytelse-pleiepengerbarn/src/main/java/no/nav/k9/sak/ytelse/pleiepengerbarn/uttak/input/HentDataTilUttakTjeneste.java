@@ -18,6 +18,7 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -107,12 +108,10 @@ public class HentDataTilUttakTjeneste {
         var uttakGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
         var pleiebehov = pleiebehovResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
-        final NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
-        if (skalMappeHeleTidslinjen) {
-            perioderTilVurdering = søknadsperiodeTjeneste.utledFullstendigPeriode(referanse.getBehandlingId());
-        } else {
-            perioderTilVurdering = finnSykdomsperioder(referanse);
-        }
+        
+        final NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(referanse.getBehandlingId());
+        final NavigableSet<DatoIntervallEntitet> perioderTilVurdering = hentPerioderTilVurdering(referanse, skalMappeHeleTidslinjen, behandling);
+        
         var utvidetRevurderingPerioder = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(referanse);
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
         var opptjeningsresultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
@@ -138,8 +137,6 @@ public class HentDataTilUttakTjeneste {
         final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getFagsakId(), referanse.getPleietrengendeAktørId(), brukUbesluttedeData);
         var rettVedDød = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
 
-        final NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(referanse.getBehandlingId());
-
         var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId())
                 .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
         
@@ -162,6 +159,29 @@ public class HentDataTilUttakTjeneste {
             .medUnntakEtablertTilsynForPleietrengende(unntakEtablertTilsynForPleietrengende);
 
         return input;
+    }
+
+    private NavigableSet<DatoIntervallEntitet> hentPerioderTilVurdering(BehandlingReferanse referanse, boolean skalMappeHeleTidslinjen,
+            Behandling behandling) {
+        final NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
+        if (skalMappeHeleTidslinjen) {
+            final LocalDateTimeline<Boolean> søknadsperioder = SykdomUtils.toLocalDateTimeline(søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId()));
+            final LocalDateTimeline<Boolean> trukkedeKrav = hentTrukkedeKravTidslinje(referanse, behandling);
+            perioderTilVurdering = SykdomUtils.kunPerioderSomIkkeFinnesI(søknadsperioder, trukkedeKrav).stream()
+                    .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getTom(), s.getTom()))
+                    .collect(Collectors.toCollection(TreeSet::new));
+        } else {
+            perioderTilVurdering = finnSykdomsperioder(referanse);
+        }
+        return perioderTilVurdering;
+    }
+
+    private LocalDateTimeline<Boolean> hentTrukkedeKravTidslinje(BehandlingReferanse referanse, Behandling behandling) {
+        return SykdomUtils.toLocalDateTimeline(søknadsperiodeTjeneste.hentKravperioder(behandling.getFagsakId(), referanse.getBehandlingId())
+            .stream()
+            .filter(kp -> kp.isHarTrukketKrav())
+            .map(SøknadsperiodeTjeneste.Kravperiode::getPeriode)
+            .collect(Collectors.toCollection(TreeSet::new)));
     }
 
     private List<EtablertTilsynPeriode> fjernInnleggelsesperioderFra(List<EtablertTilsynPeriode> perioder, Optional<PleiebehovResultat> pleiebehov) {
