@@ -3,11 +3,12 @@ package no.nav.k9.sak.kompletthet;
 import java.util.Objects;
 
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class ManglendeVedlegg {
 
     private final DokumentTypeId dokumentType;
-    private final String arbeidsgiver;
+    private final Arbeidsgiver arbeidsgiver;
     private final String arbeidsforholdId;
     private Boolean brukerHarSagtAtIkkeKommer = false;
 
@@ -15,16 +16,16 @@ public class ManglendeVedlegg {
         this(dokumentType, null);
     }
 
-    public ManglendeVedlegg(DokumentTypeId dokumentType, String arbeidsgiver) {
+    public ManglendeVedlegg(DokumentTypeId dokumentType, Arbeidsgiver arbeidsgiver) {
         this(dokumentType, arbeidsgiver, null, false);
     }
 
 
-    public ManglendeVedlegg(DokumentTypeId dokumentType, String arbeidsgiver, Boolean brukerHarSagtAtIkkeKommer) {
+    public ManglendeVedlegg(DokumentTypeId dokumentType, Arbeidsgiver arbeidsgiver, Boolean brukerHarSagtAtIkkeKommer) {
         this(dokumentType, arbeidsgiver, null, brukerHarSagtAtIkkeKommer);
     }
 
-    public ManglendeVedlegg(DokumentTypeId dokumentType, String arbeidsgiver, String arbeidsforholdId, Boolean brukerHarSagtAtIkkeKommer) {
+    public ManglendeVedlegg(DokumentTypeId dokumentType, Arbeidsgiver arbeidsgiver, String arbeidsforholdId, Boolean brukerHarSagtAtIkkeKommer) {
         this.dokumentType = dokumentType;
         this.arbeidsgiver = arbeidsgiver;
         this.arbeidsforholdId = arbeidsforholdId;
@@ -35,7 +36,7 @@ public class ManglendeVedlegg {
         return dokumentType;
     }
 
-    public String getArbeidsgiver() {
+    public Arbeidsgiver getArbeidsgiver() {
         return arbeidsgiver;
     }
 

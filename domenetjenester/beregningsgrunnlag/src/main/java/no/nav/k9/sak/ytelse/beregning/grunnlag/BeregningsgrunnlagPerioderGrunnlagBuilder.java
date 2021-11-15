@@ -23,7 +23,7 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
         this.kladd = (kladd != null) ? new BeregningsgrunnlagPerioderGrunnlag(kladd) : new BeregningsgrunnlagPerioderGrunnlag();
     }
 
-    BeregningsgrunnlagPerioderGrunnlagBuilder leggTil(BeregningsgrunnlagPeriode periode) {
+    BeregningsgrunnlagPerioderGrunnlagBuilder leggTilGrunnlag(BeregningsgrunnlagPeriode periode) {
         validerState();
         Objects.requireNonNull(periode);
         kladd.deaktiver(periode.getSkjæringstidspunkt());
@@ -31,16 +31,23 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
         return this;
     }
 
-    BeregningsgrunnlagPerioderGrunnlagBuilder deaktiver(LocalDate skjæringstidspunkt) {
+    BeregningsgrunnlagPerioderGrunnlagBuilder deaktiverGrunnlag(LocalDate skjæringstidspunkt) {
         validerState();
         Objects.requireNonNull(skjæringstidspunkt);
         kladd.deaktiver(skjæringstidspunkt);
         return this;
     }
 
+    BeregningsgrunnlagPerioderGrunnlagBuilder deaktiverKompletthet(LocalDate skjæringstidspunkt) {
+        validerState();
+        Objects.requireNonNull(skjæringstidspunkt);
+        kladd.deaktiverKompletthet(skjæringstidspunkt);
+        return this;
+    }
+
     Optional<BeregningsgrunnlagPeriode> hentTidligere(LocalDate skjæringstidspunkt) {
         validerState();
-        return kladd.finnFor(skjæringstidspunkt);
+        return kladd.finnGrunnlagFor(skjæringstidspunkt);
     }
 
     BeregningsgrunnlagPerioderGrunnlagBuilder validerMotVilkår(Vilkår vilkår) {
@@ -84,7 +91,7 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
             .collect(Collectors.toList());
 
         if (!perioderUtenKnytningTilVilkårsPerioder.isEmpty()) {
-            perioderUtenKnytningTilVilkårsPerioder.forEach(this::deaktiver);
+            perioderUtenKnytningTilVilkårsPerioder.forEach(this::deaktiverGrunnlag);
         }
 
         return this;
@@ -105,5 +112,13 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
         if (built) {
             throw new IllegalStateException("[Utviklerfeil] Skal ikke gjenbruke builder!");
         }
+    }
+
+    BeregningsgrunnlagPerioderGrunnlagBuilder leggTilKompletthetVurdering(KompletthetPeriode periode) {
+        validerState();
+        Objects.requireNonNull(periode);
+        kladd.deaktiverKompletthet(periode.getSkjæringstidspunkt());
+        kladd.leggTil(periode);
+        return this;
     }
 }
