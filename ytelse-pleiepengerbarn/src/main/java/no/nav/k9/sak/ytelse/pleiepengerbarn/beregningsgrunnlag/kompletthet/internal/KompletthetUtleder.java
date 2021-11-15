@@ -67,19 +67,19 @@ class KompletthetUtleder {
 
     private boolean erFortsattAnsettSomIkkeKomplett(List<KompletthetPeriode> kompletthetPerioder,
                                                     Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it,
-                                                    Set<Vurdering> vurderingstyperDetSkalTasHensynTil) {
+                                                    Set<Vurdering> vurderingStatuserSomTilsierKomplett) {
 
-        if (vurderingstyperDetSkalTasHensynTil.isEmpty() || kompletthetPerioder.isEmpty()) {
+        if (vurderingStatuserSomTilsierKomplett.isEmpty() || kompletthetPerioder.isEmpty()) {
             return true;
         }
 
         return harIkkeBlittTattStillingTilFør(kompletthetPerioder, it)
-            || harBlittTattStillingTilOgHarRelevantVurdering(kompletthetPerioder, it, vurderingstyperDetSkalTasHensynTil);
+            || harBlittTattStillingTilOgHarRelevantVurdering(kompletthetPerioder, it, vurderingStatuserSomTilsierKomplett);
     }
 
-    private boolean harBlittTattStillingTilOgHarRelevantVurdering(List<KompletthetPeriode> kompletthetPerioder, Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, Set<Vurdering> vurderingstyperDetSkalTasHensynTil) {
+    private boolean harBlittTattStillingTilOgHarRelevantVurdering(List<KompletthetPeriode> kompletthetPerioder, Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, Set<Vurdering> vurderingStatuserSomTilsierKomplett) {
         return kompletthetPerioder.stream().anyMatch(at -> Objects.equals(at.getSkjæringstidspunkt(), it.getKey().getFomDato())
-            && !vurderingstyperDetSkalTasHensynTil.contains(at.getVurdering()));
+            && !vurderingStatuserSomTilsierKomplett.contains(at.getVurdering()));
     }
 
     private boolean harIkkeBlittTattStillingTilFør(List<KompletthetPeriode> kompletthetPerioder, Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it) {
