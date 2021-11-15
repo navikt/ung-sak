@@ -34,6 +34,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.ArbeidsforholdRef;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
@@ -210,7 +211,7 @@ public class KompletthetForBeregningTjeneste {
 
         for (DatoIntervallEntitet periode : relevanteVilkårsperioder) {
             var arbeidsgiverSetMap = finnArbeidsforholdForIdentPåDagFunction.apply(ref, periode.getFomDato());
-            var manglendeVedleggForPeriode = utledManglendeInntektsmeldingerPerDag(relevanteInntektsmeldinger, periode, tilnternArbeidsforhold, arbeidsgiverSetMap, input, ref);
+            var manglendeVedleggForPeriode = utledManglendeInntektsmeldingerPerDag(relevanteInntektsmeldinger, periode, tilnternArbeidsforhold, arbeidsgiverSetMap, input);
 
             result.put(periode, manglendeVedleggForPeriode);
         }
@@ -245,11 +246,11 @@ public class KompletthetForBeregningTjeneste {
             .anyMatch(it -> Objects.equals(at.getArbeidsgiver(), utledIdentifikator(it)) && harFravær(it.getPerioder()));
     }
 
-    private String utledIdentifikator(Arbeid it) {
+    private Arbeidsgiver utledIdentifikator(Arbeid it) {
         if (it.getArbeidsforhold().getOrganisasjonsnummer() != null) {
-            return it.getArbeidsforhold().getOrganisasjonsnummer();
+            return Arbeidsgiver.virksomhet(it.getArbeidsforhold().getOrganisasjonsnummer());
         } else if (it.getArbeidsforhold().getAktørId() != null) {
-            return it.getArbeidsforhold().getAktørId();
+            return Arbeidsgiver.fra(new AktørId(it.getArbeidsforhold().getAktørId()));
         }
         return null;
     }
@@ -276,8 +277,7 @@ public class KompletthetForBeregningTjeneste {
                                                                                                        DatoIntervallEntitet periode,
                                                                                                        BiFunction<Arbeidsgiver, InternArbeidsforholdRef, V> tilnternArbeidsforhold,
                                                                                                        Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger,
-                                                                                                       InputForKompletthetsvurdering input,
-                                                                                                       BehandlingReferanse referanse) {
+                                                                                                       InputForKompletthetsvurdering input) {
         if (påkrevdeInntektsmeldinger.isEmpty()) {
             return List.of();
         } else {
