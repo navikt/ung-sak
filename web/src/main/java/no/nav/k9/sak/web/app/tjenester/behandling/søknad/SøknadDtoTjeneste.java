@@ -193,7 +193,7 @@ public class SøknadDtoTjeneste {
         final ManglendeVedleggDto dto = new ManglendeVedleggDto();
         dto.setDokumentType(mv.getDokumentType());
         if (mv.getDokumentType().equals(DokumentTypeId.INNTEKTSMELDING)) {
-            dto.setArbeidsgiver(mapTilArbeidsgiverDto(mv.getArbeidsgiver()));
+            dto.setArbeidsgiver(mapTilArbeidsgiverDto(mv.getArbeidsgiver().getIdentifikator()));
             dto.setBrukerHarSagtAtIkkeKommer(mv.getBrukerHarSagtAtIkkeKommer() != null ? mv.getBrukerHarSagtAtIkkeKommer() : false);
         }
         return dto;

@@ -51,7 +51,7 @@ public class DefaultKompletthetssjekkerInntektsmelding implements Kompletthetssj
             : inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(ref, false, vurderingsdato))
             .keySet()
             .stream()
-            .map(it -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, it.getIdentifikator()))
+            .map(it -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, it))
             .collect(Collectors.toList());
         return manglendeVedlegg;
     }
