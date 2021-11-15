@@ -30,14 +30,14 @@ public class StønadstatistikkSerializer {
             final String json = jsonWriter.toString();
             
             // Verifiserer at JSON er gyldig ved deserialisering:
-            Objects.requireNonNull(toJson(json), "json-deserialisert");
+            Objects.requireNonNull(fromJson(json), "json-deserialisert");
             return json;
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }
     
-    public static StønadstatistikkHendelse toJson(String json) {
+    public static StønadstatistikkHendelse fromJson(String json) {
         try {
             return objectMapper.readerFor(StønadstatistikkHendelse.class).readValue(json);
         } catch (IOException e) {
