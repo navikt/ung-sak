@@ -41,4 +41,12 @@ public class StønadstatistikkDiagnosekode {
         }
         this.kode = Objects.requireNonNull(kode, "kode");
     }
+    
+    public String getKode() {
+        return kode;
+    }
+    
+    public String getType() {
+        return type;
+    }
 }

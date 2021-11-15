@@ -27,5 +27,11 @@ public class StønadstatistikkInngangsvilkår {
         this.utfall = utfall;
     }
     
+    public String getVilkår() {
+        return vilkår;
+    }
     
+    public StønadstatistikkUtfall getUtfall() {
+        return utfall;
+    }
 }

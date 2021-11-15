@@ -54,5 +54,20 @@ public class StønadstatistikkGraderingMotTilsyn {
         this.tilgjengeligForSøker = tilgjengeligForSøker;
     }
     
-    
+
+    public BigDecimal getEtablertTilsyn() {
+        return etablertTilsyn;
+    }
+
+    public String getOverseEtablertTilsynÅrsak() {
+        return overseEtablertTilsynÅrsak;
+    }
+
+    public BigDecimal getAndreSøkeresTilsyn() {
+        return andreSøkeresTilsyn;
+    }
+
+    public BigDecimal getTilgjengeligForSøker() {
+        return tilgjengeligForSøker;
+    }
 }
