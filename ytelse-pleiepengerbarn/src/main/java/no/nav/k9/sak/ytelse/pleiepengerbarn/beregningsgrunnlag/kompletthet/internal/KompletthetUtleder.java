@@ -57,17 +57,17 @@ class KompletthetUtleder {
                                                                                       VurdererInput input) {
 
         var kompletthetPerioder = input.getKompletthetsPerioder();
-        var vurderingstyperDetSkalTasHensynTil = input.getVurderingDetSkalTasHensynTil();
+        var vurderingStatuserSomTilsierKomplett = input.getVurderingDetSkalTasHensynTil();
 
         return relevanteKompletthetsvurderinger.entrySet()
             .stream()
-            .filter(it -> skalMedEtterVurdering(kompletthetPerioder, it, vurderingstyperDetSkalTasHensynTil))
+            .filter(it -> erFortsattAnsettSomIkkeKomplett(kompletthetPerioder, it, vurderingStatuserSomTilsierKomplett))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private boolean skalMedEtterVurdering(List<KompletthetPeriode> kompletthetPerioder,
-                                          Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it,
-                                          Set<Vurdering> vurderingstyperDetSkalTasHensynTil) {
+    private boolean erFortsattAnsettSomIkkeKomplett(List<KompletthetPeriode> kompletthetPerioder,
+                                                    Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it,
+                                                    Set<Vurdering> vurderingstyperDetSkalTasHensynTil) {
 
         if (vurderingstyperDetSkalTasHensynTil.isEmpty() || kompletthetPerioder.isEmpty()) {
             return true;
