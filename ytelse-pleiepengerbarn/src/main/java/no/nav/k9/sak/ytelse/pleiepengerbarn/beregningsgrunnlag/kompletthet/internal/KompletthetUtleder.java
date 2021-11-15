@@ -73,8 +73,16 @@ class KompletthetUtleder {
             return true;
         }
 
-        return kompletthetPerioder.stream().noneMatch(at -> Objects.equals(at.getSkjæringstidspunkt(), it.getKey().getFomDato()))
-            || kompletthetPerioder.stream().anyMatch(at -> Objects.equals(at.getSkjæringstidspunkt(), it.getKey().getFomDato())
+        return harIkkeBlittTattStillingTilFør(kompletthetPerioder, it)
+            || harBlittTattStillingTilOgHarRelevantVurdering(kompletthetPerioder, it, vurderingstyperDetSkalTasHensynTil);
+    }
+
+    private boolean harBlittTattStillingTilOgHarRelevantVurdering(List<KompletthetPeriode> kompletthetPerioder, Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, Set<Vurdering> vurderingstyperDetSkalTasHensynTil) {
+        return kompletthetPerioder.stream().anyMatch(at -> Objects.equals(at.getSkjæringstidspunkt(), it.getKey().getFomDato())
             && !vurderingstyperDetSkalTasHensynTil.contains(at.getVurdering()));
+    }
+
+    private boolean harIkkeBlittTattStillingTilFør(List<KompletthetPeriode> kompletthetPerioder, Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it) {
+        return kompletthetPerioder.stream().noneMatch(at -> Objects.equals(at.getSkjæringstidspunkt(), it.getKey().getFomDato()));
     }
 }
