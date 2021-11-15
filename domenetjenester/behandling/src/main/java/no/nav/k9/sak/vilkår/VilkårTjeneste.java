@@ -68,7 +68,6 @@ public class VilkårTjeneste {
     public void lagreAvslåttVilkårresultat(BehandlingskontrollKontekst kontekst,
                                            VilkårType vilkårType,
                                            DatoIntervallEntitet vilkårsPeriode,
-                                           String begrunnelse,
                                            Avslagsårsak avslagsårsak) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var vilkårene = hentVilkårResultat(kontekst.getBehandlingId());
@@ -77,7 +76,6 @@ public class VilkårTjeneste {
             vilkårType,
             vilkårene,
             vilkårsPeriode,
-            begrunnelse,
             avslagsårsak);
         behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårResultatBuilder.build());
@@ -103,7 +101,6 @@ public class VilkårTjeneste {
                                                                 VilkårType vilkårType,
                                                                 Vilkårene vilkårene,
                                                                 DatoIntervallEntitet vilkårsPeriode,
-                                                                String begrunnelse,
                                                                 Avslagsårsak avslagsårsak) {
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(vilkårType)
@@ -113,7 +110,6 @@ public class VilkårTjeneste {
                 .hentBuilderFor(vilkårsPeriode)
                 .medUtfall(Utfall.IKKE_OPPFYLT)
                 .medMerknad(finnVilkårUtfallMerknad(avslagsårsak))
-                .medBegrunnelse(begrunnelse)
                 .medAvslagsårsak(avslagsårsak));
         builder.leggTil(vilkårBuilder);
         return builder;

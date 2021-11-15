@@ -30,14 +30,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
     public void lagreAvslåttVilkårresultat(BehandlingskontrollKontekst kontekst,
                                            DatoIntervallEntitet vilkårsPeriode,
                                            Avslagsårsak avslagsårsak) {
-        vilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, vilkårType, vilkårsPeriode, null, avslagsårsak);
-    }
-
-    public void lagreAvslåttVilkårresultat(BehandlingskontrollKontekst kontekst,
-                                           DatoIntervallEntitet vilkårsPeriode,
-                                           String begrunnelse,
-                                           Avslagsårsak avslagsårsak) {
-        vilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, vilkårType, vilkårsPeriode, begrunnelse, avslagsårsak);
+        vilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, vilkårType, vilkårsPeriode, avslagsårsak);
     }
 
     public void lagreVilkårresultat(BehandlingskontrollKontekst kontekst,

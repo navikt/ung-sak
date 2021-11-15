@@ -32,6 +32,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -72,6 +73,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private VilkårResultatRepository vilkårResultatRepository;
     private SykdomVurderingService sykdomVurderingService;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
 
     VurderSykdomOgKontinuerligTilsynSteg() {
         // CDI
@@ -82,7 +84,8 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                                                 PleiebehovResultatRepository resultatRepository,
                                                 @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                 SykdomVurderingService sykdomVurderingService,
-                                                SykdomGrunnlagRepository sykdomGrunnlagRepository) {
+                                                SykdomGrunnlagRepository sykdomGrunnlagRepository,
+                                                AksjonspunktKontrollRepository aksjonspunktKontrollRepository) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
@@ -90,6 +93,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.sykdomVurderingService = sykdomVurderingService;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
+        this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
     }
 
     private static final <T> NavigableSet<T> union(NavigableSet<T> s1, NavigableSet<T> s2) {

@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -13,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -32,25 +30,11 @@ public class KompletthetsTilstandPåPeriodeDto {
     @JsonProperty("status")
     private List<ArbeidsgiverArbeidsforholdStatus> status;
 
-    @Valid
-    @JsonProperty("vurdering")
-    private Vurdering vurdering;
-
-    @JsonProperty("begrunnelse")
-    @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    private String begrunnelse;
-
     @JsonCreator
     public KompletthetsTilstandPåPeriodeDto(@JsonProperty("periode") Periode periode,
-                                            @JsonProperty("status") List<ArbeidsgiverArbeidsforholdStatus> status,
-                                            @Valid @JsonProperty("vurdering") Vurdering vurdering,
-                                            @JsonProperty("begrunnelse") @Size(max = 4000)
-                                                @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse) {
+                                            @JsonProperty("status") List<ArbeidsgiverArbeidsforholdStatus> status) {
         this.periode = periode;
         this.status = status;
-        this.vurdering = vurdering;
-        this.begrunnelse = begrunnelse;
     }
 
     public Periode getPeriode() {
@@ -59,13 +43,5 @@ public class KompletthetsTilstandPåPeriodeDto {
 
     public List<ArbeidsgiverArbeidsforholdStatus> getStatus() {
         return status;
-    }
-
-    public Vurdering getVurdering() {
-        return vurdering;
-    }
-
-    public String getBegrunnelse() {
-        return begrunnelse;
     }
 }

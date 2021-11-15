@@ -108,6 +108,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_RETT_ETTER_PLEIETRENGENDES_DØD = "9202";
     public static final String MANGLER_AKTIVITETER = "9203";
     public static final String VENT_ANNEN_PSB_SAK_KODE = "9290";
+    public static final String AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9069";
 
     // OMS
     public static final String AVKLAR_OMSORGEN_FOR_KODE = "9002";
@@ -123,12 +124,6 @@ public class AksjonspunktKodeDefinisjon {
 
     // Generelt manglende funksjonalitet.
     public static final String AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET = "9999";
-
-    // Kompletthet for beregning
-    public static final String AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9069";
-    public static final String ENDELING_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9071";
-    public static final String ETTERLYS_IM_FOR_BEREGNING_KODE = "9068";
-    public static final String ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING_KODE = "9070";
 
     static final Map<String, String> KODER;
 

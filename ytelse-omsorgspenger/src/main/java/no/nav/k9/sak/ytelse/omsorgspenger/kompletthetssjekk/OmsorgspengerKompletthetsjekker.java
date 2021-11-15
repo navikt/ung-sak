@@ -151,7 +151,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         return inntektsmeldingTjeneste
             .hentAlleInntektsmeldingerSomIkkeKommer(ref.getBehandlingId())
             .stream()
-            .map(e -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, e.getArbeidsgiver(), true))
+            .map(e -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, e.getArbeidsgiver().getIdentifikator(), true))
             .collect(Collectors.toList());
     }
 

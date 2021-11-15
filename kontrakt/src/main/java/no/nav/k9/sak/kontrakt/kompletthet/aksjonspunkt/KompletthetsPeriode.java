@@ -2,8 +2,6 @@ package no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,20 +26,11 @@ public class KompletthetsPeriode {
     @JsonProperty("fortsett")
     private Boolean kanFortsette;
 
-    @JsonProperty("begrunnelse")
-    @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    private String begrunnelse;
-
     @JsonCreator
     public KompletthetsPeriode(@Valid @NotNull @JsonProperty(value = "periode", required = true) Periode periode,
-                               @NotNull @JsonProperty(value = "fortsett", required = true) Boolean kanFortsette,
-                               @JsonProperty("begrunnelse")
-                               @Size(max = 4000)
-                               @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse) {
+                               @NotNull @JsonProperty(value = "fortsett", required = true) Boolean kanFortsette) {
         this.periode = periode;
         this.kanFortsette = kanFortsette;
-        this.begrunnelse = begrunnelse;
     }
 
     public Periode getPeriode() {
@@ -50,9 +39,5 @@ public class KompletthetsPeriode {
 
     public Boolean getKanFortsette() {
         return kanFortsette;
-    }
-
-    public String getBegrunnelse() {
-        return begrunnelse;
     }
 }

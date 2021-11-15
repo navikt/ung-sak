@@ -1,28 +1,18 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt.AvklarKompletthetForBeregningDto;
 import no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt.KompletthetsPeriode;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarKompletthetForBeregningDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -30,22 +20,15 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
 
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
-    private BeregningPerioderGrunnlagRepository grunnlagRepository;
-    private Boolean benyttNyFlyt = false;
 
     AvklarKompletthetForBeregning() {
         // for CDI proxy
     }
 
     @Inject
-    public AvklarKompletthetForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
-                                         HistorikkTjenesteAdapter historikkTjenesteAdapter,
-                                         BeregningPerioderGrunnlagRepository grunnlagRepository,
-                                         @KonfigVerdi(value = "KOMPLETTHET_NY_FLYT", defaultVerdi = "false") Boolean benyttNyFlyt) {
+    public AvklarKompletthetForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste, HistorikkTjenesteAdapter historikkTjenesteAdapter) {
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
-        this.grunnlagRepository = grunnlagRepository;
-        this.benyttNyFlyt = benyttNyFlyt;
     }
 
     @Override
@@ -61,44 +44,19 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .map(KompletthetsPeriode::getKanFortsette)
                 .findFirst()
                 .orElse(false));
-        // TODO: Lagre ned de som er avklart OK for fortsettelse eller om det er varsel til AG
-        lagreVurderinger(param.getBehandlingId(), perioderMedManglendeGrunnlag, dto);
 
-        if (kanFortsette && !benyttNyFlyt) {
+        if (kanFortsette) {
             lagHistorikkinnslag(param, dto);
 
             return OppdateringResultat.utenTransisjon()
                 .medTotrinn()
                 .build();
         } else {
-            var resultat = OppdateringResultat.utenTransisjon()
-                .medTotrinnHvis(benyttNyFlyt)
-                .build();
-
+            var resultat = OppdateringResultat.utenOverhopp();
             resultat.skalRekjøreSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
-            resultat.setSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING); // TODO: Ved fjerning av toggle, endre til å alltid hoppe tilbake
+            resultat.setSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING);
             return resultat;
         }
-    }
-
-    private void lagreVurderinger(Long behandlingId, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> perioderMedManglendeGrunnlag,
-                                  AvklarKompletthetForBeregningDto dto) {
-        var perioder = dto.getPerioder()
-            .stream()
-            .filter(at -> perioderMedManglendeGrunnlag.keySet()
-                .stream()
-                .anyMatch(it -> it.overlapper(at.getPeriode().getFom(), at.getPeriode().getTom())))
-            .collect(Collectors.toList());
-
-        var kompletthetVurderinger = perioder.stream()
-            .map(it -> new KompletthetPeriode(utledVurderingstype(it), it.getPeriode().getFom(), it.getBegrunnelse()))
-            .collect(Collectors.toList());
-
-        grunnlagRepository.lagre(behandlingId, kompletthetVurderinger);
-    }
-
-    private Vurdering utledVurderingstype(KompletthetsPeriode it) {
-        return it.getKanFortsette() ? Vurdering.KAN_FORTSETTE : Vurdering.UDEFINERT;
     }
 
     private void lagHistorikkinnslag(AksjonspunktOppdaterParameter param, AvklarKompletthetForBeregningDto dto) {
