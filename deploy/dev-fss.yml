@@ -211,7 +211,7 @@ spec:
     - name: ENABLE_STONADSTATISTIKK
       value: "true"
     - name: ENABLE_RELEVANT_SYKDOMSPERIODE
-      value: "true"
+      value: "false"
     - name: KOMPLETTHET_NY_FLYT
       value: "true"
 

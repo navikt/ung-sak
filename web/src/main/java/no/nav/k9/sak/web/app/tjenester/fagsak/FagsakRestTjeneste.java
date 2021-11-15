@@ -114,9 +114,9 @@ public class FagsakRestTjeneste {
     @GET
     @Path(STATUS_PATH)
     @Operation(description = "Url for å polle på fagsak mens behandlingprosessen pågår i bakgrunnen(asynkront)", summary = "Returnerer link til enten samme (hvis ikke ferdig) eller redirecter til /fagsak dersom asynkrone operasjoner er ferdig.", tags = "fagsak", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Status", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class))),
-            @ApiResponse(responseCode = "303", description = "Pågående prosesstasks avsluttet", headers = @Header(name = HttpHeaders.LOCATION)),
-            @ApiResponse(responseCode = "418", description = "ProsessTasks har feilet", headers = @Header(name = HttpHeaders.LOCATION), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer Status", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class))),
+        @ApiResponse(responseCode = "303", description = "Pågående prosesstasks avsluttet", headers = @Header(name = HttpHeaders.LOCATION)),
+        @ApiResponse(responseCode = "418", description = "ProsessTasks har feilet", headers = @Header(name = HttpHeaders.LOCATION), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class)))
     })
     @Produces(MediaType.APPLICATION_JSON)
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
@@ -124,7 +124,7 @@ public class FagsakRestTjeneste {
     public Response hentFagsakMidlertidigStatus(@Context HttpServletRequest request,
                                                 @NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto idDto,
                                                 @QueryParam("gruppe") @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) ProsessTaskGruppeIdDto gruppeDto)
-            throws URISyntaxException {
+        throws URISyntaxException {
         Saksnummer saksnummer = idDto.getVerdi();
         String gruppe = gruppeDto == null ? null : gruppeDto.getGruppe();
         Optional<AsyncPollingStatus> prosessTaskGruppePågår = fagsakApplikasjonTjeneste.sjekkProsessTaskPågår(saksnummer, gruppe);
@@ -135,8 +135,8 @@ public class FagsakRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON)
     @Path(PATH)
     @Operation(description = "Hent fagsak for saksnummer", tags = "fagsak", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer fagsak", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FagsakDto.class))),
-            @ApiResponse(responseCode = "404", description = "Fagsak ikke tilgjengelig")
+        @ApiResponse(responseCode = "200", description = "Returnerer fagsak", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FagsakDto.class))),
+        @ApiResponse(responseCode = "404", description = "Fagsak ikke tilgjengelig")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -188,8 +188,8 @@ public class FagsakRestTjeneste {
     @GET
     @Path(BRUKER_PATH)
     @Operation(description = "Hent brukerdata for aktørId", tags = "fagsak", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer person", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonDto.class))),
-            @ApiResponse(responseCode = "404", description = "Person ikke tilgjengelig")
+        @ApiResponse(responseCode = "200", description = "Returnerer person", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonDto.class))),
+        @ApiResponse(responseCode = "404", description = "Person ikke tilgjengelig")
     })
     @Produces(MediaType.APPLICATION_JSON)
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
@@ -206,8 +206,8 @@ public class FagsakRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON)
     @Path(RETTIGHETER_PATH)
     @Operation(description = "Hent rettigheter for saksnummer", tags = "fagsak", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer rettigheter", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SakRettigheterDto.class))),
-            @ApiResponse(responseCode = "404", description = "Fagsak ikke tilgjengelig")
+        @ApiResponse(responseCode = "200", description = "Returnerer rettigheter", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SakRettigheterDto.class))),
+        @ApiResponse(responseCode = "404", description = "Fagsak ikke tilgjengelig")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -266,11 +266,11 @@ public class FagsakRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public RelatertSakDto hentRelaterteSaker(
-            @QueryParam(BehandlingUuidDto.NAME)
-            @Parameter(description = BehandlingUuidDto.DESC)
-            @NotNull
-            @Valid
-            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        @QueryParam(BehandlingUuidDto.NAME)
+        @Parameter(description = BehandlingUuidDto.DESC)
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid()); //TODO: utvide for andre ytelsestyper
         if (behandling.getFagsak().getPleietrengendeAktørId() == null) {
@@ -282,7 +282,11 @@ public class FagsakRestTjeneste {
             .filter(f -> !f.getAktørId().equals(behandling.getAktørId()))
             .map(f -> {
                 Personinfo personinfo = personinfoAdapter.hentKjerneinformasjon(f.getAktørId());
-                return new RelatertSøkerDto(personinfo.getPersonIdent(), personinfo.getNavn(), f.getSaksnummer());
+                var åpenBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(f.getId())
+                    .map(Behandling::erStatusFerdigbehandlet)
+                    .map(it -> !it)
+                    .orElse(false);
+                return new RelatertSøkerDto(personinfo.getPersonIdent(), personinfo.getNavn(), f.getSaksnummer(), åpenBehandling);
             }).collect(Collectors.toList()));
     }
 

@@ -39,17 +39,23 @@ public class RelatertSøkerDto {
     @Valid
     private Saksnummer saksnummer;
 
+    @JsonProperty(value = "åpenBehandling")
+    @NotNull
+    private Boolean åpenBehandling;
+
     protected RelatertSøkerDto() {
         //
     }
 
     public RelatertSøkerDto(
-            @Valid @NotNull PersonIdent søkerIdent,
-            @Valid @NotNull String søkerNavn,
-            @Valid @NotNull Saksnummer saksnummer) {
+        @Valid @NotNull PersonIdent søkerIdent,
+        @Valid @NotNull String søkerNavn,
+        @Valid @NotNull Saksnummer saksnummer,
+        @NotNull Boolean åpenBehandling) {
         this.søkerIdent = søkerIdent;
         this.søkerNavn = søkerNavn;
         this.saksnummer = saksnummer;
+        this.åpenBehandling = åpenBehandling;
     }
 
     public PersonIdent getSøkerIdent() {
@@ -62,5 +68,9 @@ public class RelatertSøkerDto {
 
     public Saksnummer getSaksnummer() {
         return saksnummer;
+    }
+
+    public Boolean getHarÅpenBehandling() {
+        return åpenBehandling;
     }
 }

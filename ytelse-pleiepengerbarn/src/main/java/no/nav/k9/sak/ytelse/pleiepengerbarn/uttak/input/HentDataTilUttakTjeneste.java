@@ -161,19 +161,18 @@ public class HentDataTilUttakTjeneste {
         return input;
     }
 
-    private NavigableSet<DatoIntervallEntitet> hentPerioderTilVurdering(BehandlingReferanse referanse, boolean skalMappeHeleTidslinjen,
-            Behandling behandling) {
-        final NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
+    private NavigableSet<DatoIntervallEntitet> hentPerioderTilVurdering(BehandlingReferanse referanse, boolean skalMappeHeleTidslinjen, Behandling behandling) {
+        LocalDateTimeline<Boolean> søknadsperioder;
         if (skalMappeHeleTidslinjen) {
-            final LocalDateTimeline<Boolean> søknadsperioder = SykdomUtils.toLocalDateTimeline(søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId()));
-            final LocalDateTimeline<Boolean> trukkedeKrav = hentTrukkedeKravTidslinje(referanse, behandling);
-            perioderTilVurdering = SykdomUtils.kunPerioderSomIkkeFinnesI(søknadsperioder, trukkedeKrav).stream()
-                    .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getTom(), s.getTom()))
-                    .collect(Collectors.toCollection(TreeSet::new));
+            søknadsperioder = SykdomUtils.toLocalDateTimeline(søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId()));
         } else {
-            perioderTilVurdering = finnSykdomsperioder(referanse);
+            søknadsperioder = SykdomUtils.toLocalDateTimeline(finnSykdomsperioder(referanse));
         }
-        return perioderTilVurdering;
+        
+        final LocalDateTimeline<Boolean> trukkedeKrav = hentTrukkedeKravTidslinje(referanse, behandling);
+        return SykdomUtils.kunPerioderSomIkkeFinnesI(søknadsperioder, trukkedeKrav).stream()
+                .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getTom(), s.getTom()))
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private LocalDateTimeline<Boolean> hentTrukkedeKravTidslinje(BehandlingReferanse referanse, Behandling behandling) {

@@ -1,0 +1,1 @@
+UPDATE MOTTATT_DOKUMENT SET status = 'UGYLDIG' WHERE journalpost_id = '511308165';
