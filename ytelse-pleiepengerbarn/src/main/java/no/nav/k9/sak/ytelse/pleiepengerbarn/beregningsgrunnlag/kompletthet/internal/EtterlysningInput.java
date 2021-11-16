@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
@@ -15,11 +16,11 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.Tidli
 
 class EtterlysningInput {
 
-    private Map<String, LocalDateTime> aksjonspunkter;
+    private Map<AksjonspunktDefinisjon, LocalDateTime> aksjonspunkter;
     private Map<DatoIntervallEntitet, List<ManglendeVedlegg>> relevanteMangler;
     private Map<DatoIntervallEntitet, List<TidligereEtterlysning>> etterlysningerBestilt;
 
-    EtterlysningInput(Map<String, LocalDateTime> aksjonspunkter,
+    EtterlysningInput(Map<AksjonspunktDefinisjon, LocalDateTime> aksjonspunkter,
                       Map<DatoIntervallEntitet, List<ManglendeVedlegg>> relevanteMangler,
                       Map<DatoIntervallEntitet, List<TidligereEtterlysning>> etterlysningerBestilt) {
 
@@ -28,7 +29,7 @@ class EtterlysningInput {
         this.etterlysningerBestilt = etterlysningerBestilt;
     }
 
-    Map<String, LocalDateTime> getAksjonspunkter() {
+    Map<AksjonspunktDefinisjon, LocalDateTime> getAksjonspunkter() {
         return aksjonspunkter;
     }
 

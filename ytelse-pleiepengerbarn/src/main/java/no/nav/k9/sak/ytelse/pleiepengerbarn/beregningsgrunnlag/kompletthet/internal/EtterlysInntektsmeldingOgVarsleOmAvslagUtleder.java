@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.KompletthetsAksjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.PeriodeMedMangler;
@@ -24,7 +23,7 @@ class EtterlysInntektsmeldingOgVarsleOmAvslagUtleder {
             .collect(Collectors.toList());
 
         var etterlysImAutopunkt = aksjonspunkter.entrySet().stream()
-            .filter(it -> AksjonspunktKodeDefinisjon.ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING_KODE.equals(it.getKey()))
+            .filter(it -> AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING.equals(it.getKey()))
             .findAny();
         var eksisterendeFrist = etterlysImAutopunkt.map(Map.Entry::getValue).orElse(null);
 

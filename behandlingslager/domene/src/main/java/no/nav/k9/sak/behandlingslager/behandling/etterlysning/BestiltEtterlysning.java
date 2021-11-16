@@ -26,7 +26,7 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 public class BestiltEtterlysning extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_ETTERLYSNING>")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_ETTERLYSNING")
     private Long id;
 
     @Column(name = "fagsak_id", nullable = false)

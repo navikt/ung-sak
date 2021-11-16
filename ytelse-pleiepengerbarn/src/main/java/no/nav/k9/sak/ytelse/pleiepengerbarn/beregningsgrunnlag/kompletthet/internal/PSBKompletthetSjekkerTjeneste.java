@@ -94,8 +94,11 @@ public class PSBKompletthetSjekkerTjeneste {
             return aksjon;
         }
 
+        log.info("Aksjonspunkter :: {}", behandling.getAksjonspunkter());
         // Automatisk etterlys hvis ikke sendt ut før
-        var aksjonspunkter = behandling.getAksjonspunkter().stream().collect(Collectors.toMap(a -> a.getAksjonspunktDefinisjon().getKode(), Aksjonspunkt::getFristTid));
+        var aksjonspunkter = behandling.getAksjonspunkter().stream()
+            .filter(it -> it.getFristTid() != null)
+            .collect(Collectors.toMap(Aksjonspunkt::getAksjonspunktDefinisjon, Aksjonspunkt::getFristTid));
         Map<DatoIntervallEntitet, List<TidligereEtterlysning>> bestilteBrev = hentTidligereEtterlysninger(ref);
         var etterlysInntektsmeldingInput = new EtterlysningInput(aksjonspunkter, kompletthetUtleder.utledRelevanteVurderinger(inputMedVurderinger), bestilteBrev);
         var etterlysAksjon = etterlysInntektsmeldingUtleder.utled(etterlysInntektsmeldingInput);

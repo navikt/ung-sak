@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.KompletthetsAksjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.PeriodeMedMangler;
@@ -24,7 +23,7 @@ class EtterlysInntektsmeldingUtleder {
             .collect(Collectors.toList());
 
         var etterlysImAutopunkt = aksjonspunkter.entrySet().stream()
-            .filter(it -> AksjonspunktKodeDefinisjon.ETTERLYS_IM_FOR_BEREGNING_KODE.equals(it.getKey()))
+            .filter(it -> AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_FOR_BEREGNING.equals(it.getKey()))
             .findAny();
         var eksisterendeFrist = etterlysImAutopunkt.map(Map.Entry::getValue).orElse(null);
 
@@ -39,7 +38,7 @@ class EtterlysInntektsmeldingUtleder {
             }
             var fristTid = FristKalkulerer.regnUtFrist(AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_FOR_BEREGNING, eksisterendeFrist);
 
-            return KompletthetsAksjon.automatiskEtterlysning(AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_FOR_BEREGNING, fristTid, ikkeEtterlystEnda, DokumentMalType.ETTERLYS_INNTEKTSMELDING_PURRING);
+            return KompletthetsAksjon.automatiskEtterlysning(AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_FOR_BEREGNING, fristTid, ikkeEtterlystEnda, DokumentMalType.ETTERLYS_INNTEKTSMELDING_DOK);
         } else if (!harEksisterendeFristSomIkkeErUtløpt(eksisterendeFrist) && erIkkeKomplett) {
             return KompletthetsAksjon.uavklart();
         }
@@ -48,7 +47,7 @@ class EtterlysInntektsmeldingUtleder {
     }
 
     private List<PeriodeMedMangler> utledManglerSomIkkeHarBlittEtterlystEnda(EtterlysningInput input) {
-        return input.getRelevanteFiltrerteMangler(DokumentMalType.ETTERLYS_INNTEKTSMELDING_PURRING)
+        return input.getRelevanteFiltrerteMangler(DokumentMalType.ETTERLYS_INNTEKTSMELDING_DOK)
             .stream()
             .filter(PeriodeMedMangler::harMangler)
             .collect(Collectors.toList());

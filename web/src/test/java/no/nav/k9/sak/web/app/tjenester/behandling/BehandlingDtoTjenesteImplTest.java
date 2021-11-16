@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -29,7 +30,6 @@ import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -73,7 +73,7 @@ public class BehandlingDtoTjenesteImplTest {
     @BeforeEach
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
-        tjeneste = new BehandlingDtoTjeneste(fagsakRepository, behandlingRepository, behandlingVedtakRepository, søknadRepository, uttakRepository, tilbakekrevingRepository, vilkårResultatRepository,
+        tjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingVedtakRepository, søknadRepository, tilbakekrevingRepository, vilkårResultatRepository,
             totrinnTjeneste, informasjonselementer, "/k9/oppdrag/api");
     }
 

@@ -54,7 +54,7 @@ public class BestiltEtterlysningRepository {
 
     public List<BestiltEtterlysning> hentFor(Long fagsakId) {
         var query = entityManager.createQuery("SELECT e " +
-            "FROM Etterlysning e " +
+            "FROM BestiltEtterlysning e " +
             "WHERE e.fagsakId = :fagsakId", BestiltEtterlysning.class);
         query.setParameter("fagsakId", fagsakId);
 
