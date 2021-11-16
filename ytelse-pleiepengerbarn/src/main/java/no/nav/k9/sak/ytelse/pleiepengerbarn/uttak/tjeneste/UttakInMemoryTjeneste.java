@@ -74,7 +74,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
 
         return plan;
     }
-    
+
     @Override
     public Simulering simulerUttaksplan(Uttaksgrunnlag request) {
         throw new UnsupportedOperationException();
@@ -97,7 +97,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             null,
             Set.of(),
             input.getBehandlingUUID(),
-            input.getAndrePartersSaksnummer().isEmpty() ? AnnenPart.ALENE : AnnenPart.MED_ANDRE,
+            AnnenPart.ALENE,
             null,
             null,
             null);
