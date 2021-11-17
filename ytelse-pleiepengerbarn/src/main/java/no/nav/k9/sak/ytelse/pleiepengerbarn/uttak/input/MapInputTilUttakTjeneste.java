@@ -24,7 +24,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.perioder.KravDokument;
-import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn;
@@ -55,7 +54,7 @@ public class MapInputTilUttakTjeneste {
     private HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private String unntak;
 
-    
+
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
             @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
@@ -63,7 +62,7 @@ public class MapInputTilUttakTjeneste {
         this.unntak = unntak;
     }
 
-    
+
     public Uttaksgrunnlag hentUtOgMapRequest(BehandlingReferanse referanse) {
         return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, false));
     }
@@ -71,7 +70,7 @@ public class MapInputTilUttakTjeneste {
         return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, true));
     }
 
-    
+
     private Uttaksgrunnlag toRequestData(InputParametere input) {
 
         var behandling = input.getBehandling();
@@ -94,11 +93,6 @@ public class MapInputTilUttakTjeneste {
         var barn = new Barn(pleietrengendePersonopplysninger.getAktørId().getId(), pleietrengendePersonopplysninger.getDødsdato(), rettVedDød);
 
         var søker = new Søker(søkerPersonopplysninger.getAktørId().getId());
-
-        final List<String> andrePartersSaksnummer = input.getRelaterteSaker()
-            .stream()
-            .map(Saksnummer::toString)
-            .collect(Collectors.toList());
 
         var tidslinjeTilVurdering = new LocalDateTimeline<>(mapPerioderTilVurdering(input));
 
@@ -134,7 +128,6 @@ public class MapInputTilUttakTjeneste {
         var unntakEtablertTilsynForPleietrengende = input.getUnntakEtablertTilsynForPleietrengende().orElse(null);
         var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
         var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
-        final Map<LukketPeriode, List<String>> deprecatedKravprioritet = deprecatedMapKravprioritetsliste(input.getKravprioritet());
         final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
 
@@ -143,8 +136,6 @@ public class MapInputTilUttakTjeneste {
             søker,
             behandling.getFagsak().getSaksnummer().getVerdi(),
             behandling.getUuid().toString(),
-            andrePartersSaksnummer,
-            List.of(), //TODO oppgi andre parters behandling istedet for saker
             søktUttak,
             perioderSomSkalTilbakestilles,
             arbeid,
@@ -154,7 +145,6 @@ public class MapInputTilUttakTjeneste {
             tilsynsperioder,
             beredskapsperioder,
             nattevåksperioder,
-            deprecatedKravprioritet,
             kravprioritet
         );
     }
@@ -181,14 +171,6 @@ public class MapInputTilUttakTjeneste {
             };
         }
         return rettVedDød;
-    }
-
-    public Map<LukketPeriode, List<String>> deprecatedMapKravprioritetsliste(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
-        final Map<LukketPeriode, List<String>> resultat = new HashMap<>();
-        kravprioritet.forEach(s -> {
-            resultat.put(new LukketPeriode(s.getFom(), s.getTom()), s.getValue().stream().map(kp -> kp.getSaksnummer().getVerdi()).collect(Collectors.toList()));
-        });
-        return resultat;
     }
 
     public Map<LukketPeriode, List<String>> mapKravprioritetsliste(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
