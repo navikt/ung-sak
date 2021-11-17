@@ -26,35 +26,15 @@ public interface VurderSøknadsfristTjeneste<T extends SøktPeriodeData> {
 
     /**
      * Henter ut kravdokumenter som har tilkommet i denne behandlingen
-     * Tar ikke hensyn til manuell revurdering (dvs viser kun dokumenter tilkommet i behandlingen)
      *
      * @param referanse referansen til behandlingen
      * @return kravdokumenter
      */
-    public default Set<KravDokument> relevanteKravdokumentForBehandling(BehandlingReferanse referanse) {
-        return relevanteKravdokumentForBehandling(referanse, false);
-    }
+    Set<KravDokument> relevanteKravdokumentForBehandling(BehandlingReferanse referanse);
 
-    Set<KravDokument> relevanteKravdokumentForBehandling(BehandlingReferanse referanse, boolean taHensynTilManuellRevurdering);
 
     /**
      * Henter ut kravdokumenter med perioder som har tilkommet i denne behandlingen
-     *
-     * @param referanse referansen til behandlingen
-     * @return kravdokumenter
-     */
-    public default Map<KravDokument, List<SøktPeriode<T>>> relevanteKravdokumentMedPeriodeForBehandling(BehandlingReferanse referanse) {
-        var kravDokumentListMap = hentPerioderTilVurdering(referanse);
-        var relevanteKrav = relevanteKravdokumentForBehandling(referanse);
-        return kravDokumentListMap.entrySet()
-            .stream()
-            .filter(it -> relevanteKrav.stream().anyMatch(at -> at.getJournalpostId().equals(it.getKey().getJournalpostId())))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-
-    /**
-     * Henter ut kravdokumenter med perioder som har tilkommet i denne behandlingen(tar hensyn til manuell revurdering og lister alle dokumenter)
      * og vurder status
      *
      * @param referanse referansen til behandlingen
@@ -62,7 +42,7 @@ public interface VurderSøknadsfristTjeneste<T extends SøktPeriodeData> {
      */
     public default Map<KravDokument, List<VurdertSøktPeriode<T>>> relevanteVurderteKravdokumentMedPeriodeForBehandling(BehandlingReferanse referanse) {
         var kravDokumentListMap = vurderSøknadsfrist(referanse);
-        var relevanteKrav = relevanteKravdokumentForBehandling(referanse, true);
+        var relevanteKrav = relevanteKravdokumentForBehandling(referanse);
         return kravDokumentListMap.entrySet()
             .stream()
             .filter(it -> relevanteKrav.stream().anyMatch(at -> at.getJournalpostId().equals(it.getKey().getJournalpostId())))
