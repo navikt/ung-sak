@@ -62,7 +62,7 @@ public class InnhentDokumentTjeneste {
         this.taskRepository = taskRepository;
     }
 
-    public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
+    public void mottaDokument(Long kjørendeTaskId, Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
         var brevkodeMap = mottattDokument
             .stream()
             .collect(Collectors.groupingBy(MottattDokument::getType));
@@ -81,7 +81,7 @@ public class InnhentDokumentTjeneste {
         } else if (prosessenStårStillePåAksjonspunktForSøknadsfrist(resultat.behandling)) {
             startTask = restartBehandling(resultat.behandling, behandlingÅrsak);
         } else {
-            startTask = asynkVurderKompletthetForÅpenBehandling(resultat.behandling, behandlingÅrsak);
+            startTask = asynkVurderKompletthetForÅpenBehandling(kjørendeTaskId, resultat.behandling, behandlingÅrsak);
         }
         lagreDokumenter(brevkodeMap, resultat.behandling);
 
@@ -143,10 +143,10 @@ public class InnhentDokumentTjeneste {
             });
     }
 
-    ProsessTaskData asynkVurderKompletthetForÅpenBehandling(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
+    ProsessTaskData asynkVurderKompletthetForÅpenBehandling(Long kjørendeTaskId, Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
         dokumentMottakerFelles.leggTilBehandlingsårsak(behandling, behandlingÅrsak);
         dokumentMottakerFelles.opprettHistorikkinnslagForBehandlingOppdatertMedNyInntektsmelding(behandling, behandlingÅrsak);
-        return kompletthetskontroller.asynkVurderKompletthet(behandling);
+        return kompletthetskontroller.asynkVurderKompletthet(kjørendeTaskId, behandling);
     }
 
     private BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode, Fagsak fagsak) {

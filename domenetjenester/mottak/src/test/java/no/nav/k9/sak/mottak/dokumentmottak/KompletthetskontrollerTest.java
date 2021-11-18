@@ -70,6 +70,7 @@ public class KompletthetskontrollerTest {
     private Kompletthetskontroller kompletthetskontroller;
     private Behandling behandling;
     private MottattDokument mottattDokument;
+    private Long dummyTaskId = 1L;
 
     @BeforeEach
     public void oppsett() {
@@ -102,7 +103,7 @@ public class KompletthetskontrollerTest {
 
         when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(ventefrist, Venteårsak.AVV_DOK));
 
-        var prosessTaskData = kompletthetskontroller.asynkVurderKompletthet(behandling);
+        var prosessTaskData = kompletthetskontroller.asynkVurderKompletthet(dummyTaskId, behandling);
         prosessTaskRepository.lagre(prosessTaskData);
 
         verify(behandlingProsesseringTjeneste, times(0)).opprettTasksForGjenopptaOppdaterFortsett(eq(behandling), eq(false));
@@ -120,7 +121,7 @@ public class KompletthetskontrollerTest {
         when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.VURDER_UTLAND)).thenReturn(true);
 
         // Act
-        var prosessTaskData1 = kompletthetskontroller.asynkVurderKompletthet(behandling);
+        var prosessTaskData1 = kompletthetskontroller.asynkVurderKompletthet(dummyTaskId, behandling);
         prosessTaskRepository.lagre(prosessTaskData1);
 
         // Assert
@@ -132,7 +133,7 @@ public class KompletthetskontrollerTest {
         primeProsessTaskRepositoryKompletthetskontroller(behandling);
 
         // Act 2
-        var prosessTaskData = kompletthetskontroller.asynkVurderKompletthet(behandling);
+        var prosessTaskData = kompletthetskontroller.asynkVurderKompletthet(dummyTaskId, behandling);
         prosessTaskRepository.lagre(prosessTaskData);
 
         // Assert 2
@@ -158,7 +159,7 @@ public class KompletthetskontrollerTest {
 
         primeProsessTaskRepositoryKompletthetskontroller(behandling);
 
-        var prosessTaskData = kompletthetskontroller.asynkVurderKompletthet(behandling);
+        var prosessTaskData = kompletthetskontroller.asynkVurderKompletthet(dummyTaskId, behandling);
         assertThat(prosessTaskData.getTaskType()).isEqualTo(KompletthetskontrollerVurderKompletthetTask.TASKTYPE);
         prosessTaskRepository.lagre(prosessTaskData);
         verify(behandlingProsesseringTjeneste).opprettTasksForFortsettBehandling(behandling);

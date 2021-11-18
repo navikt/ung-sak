@@ -78,6 +78,8 @@ public class InnhentDokumentTjenesteTest {
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
     private DokumentmottakerFelles dokumentmottakerFelles;
 
+    private Long dummyTaskId = 1L;
+
     @BeforeEach
     public void oppsett() {
         aksjonspunktRepository = new AksjonspunktTestSupport();
@@ -120,10 +122,10 @@ public class InnhentDokumentTjenesteTest {
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(revurderingBehandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
 
         // Act
-        innhentDokumentTjeneste.mottaDokument(revurderingBehandling.getFagsak(), List.of(mottattDokument));
+        innhentDokumentTjeneste.mottaDokument(dummyTaskId, revurderingBehandling.getFagsak(), List.of(mottattDokument));
 
         // Assert
-        verify(kompletthetskontroller).asynkVurderKompletthet(revurderingBehandling);
+        verify(kompletthetskontroller).asynkVurderKompletthet(dummyTaskId, revurderingBehandling);
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), revurderingBehandling);
     }
 
@@ -147,11 +149,11 @@ public class InnhentDokumentTjenesteTest {
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(revurderingBehandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
 
         // Act
-        innhentDokumentTjeneste.mottaDokument(revurderingBehandling.getFagsak(), List.of(mottattDokument));
+        innhentDokumentTjeneste.mottaDokument(dummyTaskId, revurderingBehandling.getFagsak(), List.of(mottattDokument));
 
         // Assert - sjekk flyt
-        verify(innhentDokumentTjeneste).asynkVurderKompletthetForÅpenBehandling(revurderingBehandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-        verify(kompletthetskontroller).asynkVurderKompletthet(revurderingBehandling);
+        verify(innhentDokumentTjeneste).asynkVurderKompletthetForÅpenBehandling(dummyTaskId, revurderingBehandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        verify(kompletthetskontroller).asynkVurderKompletthet(dummyTaskId, revurderingBehandling);
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), revurderingBehandling);
     }
 
@@ -167,10 +169,10 @@ public class InnhentDokumentTjenesteTest {
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
 
         // Act
-        innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
+        innhentDokumentTjeneste.mottaDokument(dummyTaskId, behandling.getFagsak(), List.of(mottattDokument));
 
         // Assert - sjekk flyt
-        verify(kompletthetskontroller).asynkVurderKompletthet(behandling);
+        verify(kompletthetskontroller).asynkVurderKompletthet(dummyTaskId, behandling);
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), behandling);
     }
 
@@ -186,10 +188,10 @@ public class InnhentDokumentTjenesteTest {
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
 
         // Act
-        innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
+        innhentDokumentTjeneste.mottaDokument(dummyTaskId, behandling.getFagsak(), List.of(mottattDokument));
 
         // Assert - sjekk flyt
-        verify(kompletthetskontroller).asynkVurderKompletthet(behandling);
+        verify(kompletthetskontroller).asynkVurderKompletthet(dummyTaskId, behandling);
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), behandling);
     }
 
@@ -212,7 +214,7 @@ public class InnhentDokumentTjenesteTest {
         when(behandlingsoppretter.opprettNyBehandlingFra(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING)).thenReturn(revurdering);
 
         // Act
-        innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
+        innhentDokumentTjeneste.mottaDokument(dummyTaskId, behandling.getFagsak(), List.of(mottattDokument));
 
         // Assert
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), revurdering);
@@ -230,7 +232,7 @@ public class InnhentDokumentTjenesteTest {
         when(behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty())).thenReturn(førstegangsbehandling);
 
         // Act
-        innhentDokumentTjeneste.mottaDokument(fagsak, List.of(mottattDokument));
+        innhentDokumentTjeneste.mottaDokument(dummyTaskId, fagsak, List.of(mottattDokument));
 
         // Assert
         verify(behandlingsoppretter).opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());

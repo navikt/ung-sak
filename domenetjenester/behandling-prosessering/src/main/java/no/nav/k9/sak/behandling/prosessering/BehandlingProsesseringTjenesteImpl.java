@@ -25,6 +25,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.k9.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
@@ -346,16 +347,23 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     @Override
-    public void feilPågåendeTaskHvisFremtidigTaskEksisterer(Behandling behandling, Set<String> tasktyper) {
+    public void feilPågåendeTaskHvisFremtidigTaskEksisterer(Behandling behandling, Long kjørendeTaskId, Set<String> tasktyper) {
         if (tasktyper.isEmpty()) {
             return;
         }
         var pågår = fagsakProsessTaskRepository.sjekkStatusProsessTasks(behandling.getFagsakId(), behandling.getId(), null);
-        Optional<ProsessTaskData> firstMatch = pågår.stream().filter(p -> tasktyper.contains(p.getTaskType())).findFirst();
+        Optional<ProsessTaskData> firstMatch = pågår.stream()
+            .filter(p -> tasktyper.contains(p.getTaskType()))
+            .filter(p -> taskerSomKanBlokkere(kjørendeTaskId, p))
+            .findFirst();
         if (firstMatch.isPresent()) {
             var t = firstMatch.get();
             throw ProsesseringsFeil.FACTORY.kanIkkePlanleggeNyTaskPgaAlleredePlanlagtetask(t.getId(), t.getTaskType(), t.getStatus()).toException();
         }
+    }
+
+    boolean taskerSomKanBlokkere(Long kjørendeTaskId, ProsessTaskData p) {
+        return !(Objects.equals(ProsessTaskStatus.VETO, p.getStatus()) && Objects.equals(kjørendeTaskId, p.getBlokkertAvProsessTaskId()));
     }
 
 }
