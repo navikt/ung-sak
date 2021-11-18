@@ -16,6 +16,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
@@ -23,8 +24,8 @@ import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
+import no.nav.k9.sak.domene.iay.modell.Permisjon;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
@@ -32,6 +33,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.typer.Stillingsprosent;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
@@ -322,21 +324,52 @@ public class MapArbeid {
             var aktørArbeid = input.getInntektArbeidYtelseGrunnlag().getAktørArbeidFraRegister(input.getBruker())
                 .map(AktørArbeid::hentAlleYrkesaktiviteter).orElse(List.of());
 
-            var startDato = aktørArbeid.stream()
+            var yrkesaktiviteter = aktørArbeid.stream()
                 .filter(it -> Set.of(ArbeidType.MARITIMT_ARBEIDSFORHOLD, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).contains(it.getArbeidType()))
                 .filter(it -> it.getArbeidsgiver().equals(key.getArbeidsgiver()))
-                .map(Yrkesaktivitet::getAnsettelsesPeriode)
-                .flatMap(Collection::stream)
-                .map(AktivitetsAvtale::getPeriode)
-                .map(DatoIntervallEntitet::getFomDato)
-                .min(LocalDate::compareTo);
+                .collect(Collectors.toList());
 
-            if (startDato.isPresent() && periode.getTomDato().isAfter(startDato.get())) {
-                var gyldigArbeidsgiverTidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(startDato.get(), periode.getTomDato(), true)));
-                perioder = perioder.intersection(gyldigArbeidsgiverTidslinje);
-            }
+            var arbeidstidslinje = mapArbeidsTidslinje(yrkesaktiviteter);
+
+            perioder = perioder.intersection(arbeidstidslinje);
         }
         return perioder;
+    }
+
+    private LocalDateTimeline<Boolean> mapArbeidsTidslinje(List<Yrkesaktivitet> yrkesaktiviteter) {
+        var timeline = new LocalDateTimeline<Boolean>(List.of());
+
+        for (Yrkesaktivitet yrkesaktivitet : yrkesaktiviteter) {
+            var aktivitet = new LocalDateTimeline<Boolean>(List.of());
+
+            var segmenter = yrkesaktivitet.getAnsettelsesPeriode()
+                .stream()
+                .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), true))
+                .collect(Collectors.toList());
+            // Har ikke helt kontroll på aa-reg mtp overlapp her så better safe than sorry
+            for (LocalDateSegment<Boolean> segment : segmenter) {
+                var arbeidsforholdTidslinje = new LocalDateTimeline<>(List.of(segment));
+                aktivitet = aktivitet.combine(arbeidsforholdTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
+
+            var relevantePermitteringer = yrkesaktivitet.getPermisjon().stream()
+                .filter(it -> Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.PERMITTERING))
+                .filter(it -> erStørreEllerLik100Prosent(it.getProsentsats()))
+                .collect(Collectors.toList());
+
+            for (Permisjon permisjon : relevantePermitteringer) {
+                var permittert = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(permisjon.getFraOgMed(), permisjon.getTilOgMed(), true)));
+                aktivitet = aktivitet.disjoint(permittert);
+            }
+
+            timeline = timeline.combine(aktivitet, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        return timeline.compress();
+    }
+
+    private boolean erStørreEllerLik100Prosent(Stillingsprosent prosentsats) {
+        return Stillingsprosent.HUNDRED.getVerdi().intValue() <= prosentsats.getVerdi().intValue();
     }
 
     private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> slåSammenOpplysningerForSammeArbeidsforhold(Map<DatoIntervallEntitet, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>> arbeidsforholdPerPeriode) {
