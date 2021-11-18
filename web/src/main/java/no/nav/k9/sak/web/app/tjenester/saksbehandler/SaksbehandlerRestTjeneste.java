@@ -44,9 +44,9 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 @Transactional
 public class SaksbehandlerRestTjeneste {
     public static final String SAKSBEHANDLER_PATH = "/saksbehandler";
-    private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
+    private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(120, TimeUnit.MINUTES);
 
-    private LRUCache<String, SaksbehandlerDto> cache = new LRUCache<>(10, CACHE_ELEMENT_LIVE_TIME_MS);
+    private LRUCache<String, SaksbehandlerDto> cache = new LRUCache<>(100, CACHE_ELEMENT_LIVE_TIME_MS);
 
     @Inject
     public SaksbehandlerRestTjeneste() {
