@@ -77,7 +77,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
         mottatteDokumentTjeneste.oppdaterStatus(mottatteDokumenter, DokumentStatus.BEHANDLER);
 
-        innhentDokumentTjeneste.mottaDokument(fagsak, mottatteDokumenter);
+        innhentDokumentTjeneste.mottaDokument(prosessTaskData.getId(), fagsak, mottatteDokumenter);
     }
 
     @Override
