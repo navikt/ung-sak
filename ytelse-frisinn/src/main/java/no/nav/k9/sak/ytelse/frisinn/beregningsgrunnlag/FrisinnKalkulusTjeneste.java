@@ -63,7 +63,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
                                    VilkårResultatRepository vilkårResultatRepository,
                                    @FagsakYtelseTypeRef("FRISINN") Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper) {
         super(restTjeneste, fagsakRepository, vilkårResultatRepository, kalkulatorInputTjeneste,
-            inntektArbeidYtelseTjeneste, arbeidsgiverTjeneste, ytelseGrunnlagMapper);
+            inntektArbeidYtelseTjeneste, ytelseGrunnlagMapper);
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
     }
 
