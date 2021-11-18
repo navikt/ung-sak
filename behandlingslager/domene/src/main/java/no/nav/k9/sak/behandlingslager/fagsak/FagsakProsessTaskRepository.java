@@ -165,13 +165,29 @@ public class FagsakProsessTaskRepository {
             Set<String> nyeTaskTyper = nyeTasks.stream().map(t -> t.getTask().getTaskType()).collect(Collectors.toSet());
             Set<String> eksisterendeTaskTyper = eksisterendeTasks.stream()
                 .filter(t -> currentTaskData == null || !Objects.equals(t.getId(), currentTaskData.getId())) // se bort fra oss selv (hvis vi kjører i en task
-                .map(t -> t.getTaskType()).collect(Collectors.toSet());
+                .map(ProsessTaskData::getTaskType).collect(Collectors.toSet());
+            var planlagteTaskBlokkerAvKjørende = eksisterendeTasks.stream()
+                .filter(t -> currentTaskData == null || !Objects.equals(t.getId(), currentTaskData.getId())) // se bort fra oss selv (hvis vi kjører i en task
+                .filter(t -> Objects.equals(t.getStatus(), ProsessTaskStatus.VETO) && currentTaskData != null && Objects.equals(currentTaskData.getId(), t.getBlokkertAvProsessTaskId()))
+                .collect(Collectors.toSet());
+            Set<String> planlagteTaskTyperBlokkerAvKjørende = planlagteTaskBlokkerAvKjørende.stream()
+                .map(ProsessTaskData::getTaskType)
+                .collect(Collectors.toSet());
 
             if (feilet.isEmpty()) {
                 var rest = new HashSet<>(eksisterendeTaskTyper);
                 rest.retainAll(nyeTaskTyper);
 
                 if (!rest.isEmpty()) {
+
+                    var vetoedTasksAvSammeType = new HashSet<>(planlagteTaskTyperBlokkerAvKjørende);
+                    vetoedTasksAvSammeType.retainAll(nyeTaskTyper);
+
+                    if (!vetoedTasksAvSammeType.isEmpty() && nyeTaskTyper.containsAll(vetoedTasksAvSammeType) && Objects.equals(nyeTaskTyper.size(), vetoedTasksAvSammeType.size())) {
+                        var grupper = planlagteTaskBlokkerAvKjørende.stream().map(ProsessTaskData::getGruppe).collect(Collectors.toSet());
+                        log.info("Skipper opprettelse av gruppe med tasks: [{}], Har allerede vetoet tasks av samme type [{}]", toStringEntry(gruppe.getTasks()), planlagteTaskTyperBlokkerAvKjørende);
+                        return grupper.stream().findFirst().orElseThrow();
+                    }
                     throw new IllegalStateException("Kan ikke opprette gruppe med tasks: [" + toStringEntry(gruppe.getTasks()) + "]"
                         + " Har allerede [" + toStringTask(eksisterendeTasks) + "]"
                         + " Eksisterende tasktyper hensyntatt [" + eksisterendeTaskTyper + "]");
