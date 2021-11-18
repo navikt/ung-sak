@@ -20,7 +20,7 @@ public class FrisinnKalkulatorInputTjeneste extends KalkulatorInputTjeneste {
     @Inject
     public FrisinnKalkulatorInputTjeneste(@Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                           @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregnings) {
-        super(opptjeningForBeregningTjeneste, inntektsmeldingerRelevantForBeregnings);
+        super(opptjeningForBeregningTjeneste, inntektsmeldingerRelevantForBeregnings, false);
     }
 
     protected FrisinnKalkulatorInputTjeneste() {

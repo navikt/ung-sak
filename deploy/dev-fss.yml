@@ -214,6 +214,8 @@ spec:
       value: "true"
     - name: KOMPLETTHET_NY_FLYT
       value: "true"
+    - name: MAP_ALLE_KRAV
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
