@@ -2,10 +2,14 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -27,6 +31,8 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarKompletthetForBeregningDto.class, adapter = AksjonspunktOppdaterer.class)
 public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<AvklarKompletthetForBeregningDto> {
+
+    private static final Logger log = LoggerFactory.getLogger(AvklarKompletthetForBeregning.class);
 
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
@@ -62,7 +68,9 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .findFirst()
                 .orElse(false));
         // TODO: Lagre ned de som er avklart OK for fortsettelse eller om det er varsel til AG
-        lagreVurderinger(param.getBehandlingId(), perioderMedManglendeGrunnlag, dto);
+        if (benyttNyFlyt) {
+            lagreVurderinger(param.getBehandlingId(), perioderMedManglendeGrunnlag, dto);
+        }
 
         if (kanFortsette && !benyttNyFlyt) {
             lagHistorikkinnslag(param, dto);
@@ -91,10 +99,19 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
             .collect(Collectors.toList());
 
         var kompletthetVurderinger = perioder.stream()
-            .map(it -> new KompletthetPeriode(utledVurderingstype(it), it.getPeriode().getFom(), it.getBegrunnelse()))
+            .map(it -> new KompletthetPeriode(utledVurderingstype(it), it.getPeriode().getFom(), getBegrunnelse(dto, it)))
             .collect(Collectors.toList());
 
         grunnlagRepository.lagre(behandlingId, kompletthetVurderinger);
+    }
+
+    private String getBegrunnelse(AvklarKompletthetForBeregningDto dto, KompletthetsPeriode it) {
+        if (Objects.isNull(it.getBegrunnelse())) {
+            log.info("Begrunnelse på periode er null når det er forventet at denne IKKE er null.");
+            return dto.getBegrunnelse();
+        }
+
+        return it.getBegrunnelse();
     }
 
     private Vurdering utledVurderingstype(KompletthetsPeriode it) {
