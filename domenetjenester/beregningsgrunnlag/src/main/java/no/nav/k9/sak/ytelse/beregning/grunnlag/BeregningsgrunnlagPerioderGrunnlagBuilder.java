@@ -45,6 +45,14 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
         return this;
     }
 
+    BeregningsgrunnlagPerioderGrunnlagBuilder deaktiverInputOverstyringer(LocalDate skjæringstidspunkt) {
+        validerState();
+        Objects.requireNonNull(skjæringstidspunkt);
+        kladd.deaktiverInputOverstyring(skjæringstidspunkt);
+        return this;
+    }
+
+
     Optional<BeregningsgrunnlagPeriode> hentTidligere(LocalDate skjæringstidspunkt) {
         validerState();
         return kladd.finnGrunnlagFor(skjæringstidspunkt);
@@ -121,4 +129,13 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
         kladd.leggTil(periode);
         return this;
     }
+
+    BeregningsgrunnlagPerioderGrunnlagBuilder leggTilInputOverstyring(InputOverstyringPeriode periode) {
+        validerState();
+        Objects.requireNonNull(periode);
+        kladd.deaktiverInputOverstyring(periode.getSkjæringstidspunkt());
+        kladd.leggTil(periode);
+        return this;
+    }
+
 }

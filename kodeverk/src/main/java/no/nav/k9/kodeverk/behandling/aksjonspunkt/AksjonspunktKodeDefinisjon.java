@@ -109,6 +109,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_RETT_ETTER_PLEIETRENGENDES_DØD = "9202";
     public static final String MANGLER_AKTIVITETER = "9203";
     public static final String VENT_ANNEN_PSB_SAK_KODE = "9290";
+    public static final String OVERSTYR_BEREGNING_INPUT = "9005";
+
 
     // OMS
     public static final String AVKLAR_OMSORGEN_FOR_KODE = "9002";
