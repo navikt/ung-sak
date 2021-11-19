@@ -277,7 +277,7 @@ class SøknadOversetter {
 
         // TODO 18feb: Arbeidstid
         // TODO etter18feb: UttakPeriodeInfo
-        var perioderFraSøknad = new MapSøknadUttakPerioder(soknad, journalpostId).getPerioderFraSøknad();
+        var perioderFraSøknad = new MapSøknadUttakPerioder(tpsTjeneste, soknad, journalpostId).getPerioderFraSøknad();
         uttakPerioderGrunnlagRepository.lagre(behandlingId, perioderFraSøknad);
 
         maksSøknadsperiode.ifPresent(periode -> fagsakRepository.utvidPeriode(fagsakId, periode.getFraOgMed(), periode.getTilOgMed()));
