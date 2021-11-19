@@ -36,6 +36,11 @@ public class KompletthetsTilstandPåPeriodeV2Dto {
     @JsonProperty("vurdering")
     private Vurdering vurdering;
 
+    @Valid
+    @NotNull
+    @JsonProperty("tilVurdering")
+    private Boolean tilVurdering;
+
     @JsonProperty("begrunnelse")
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -45,12 +50,18 @@ public class KompletthetsTilstandPåPeriodeV2Dto {
     public KompletthetsTilstandPåPeriodeV2Dto(@JsonProperty("periode") Periode periode,
                                               @JsonProperty("status") List<ArbeidsgiverArbeidsforholdStatusV2> status,
                                               @Valid @JsonProperty("vurdering") Vurdering vurdering,
+                                              @Valid @NotNull @JsonProperty("tilVurdering") Boolean tilVurdering,
                                               @JsonProperty("begrunnelse") @Size(max = 4000)
-                                              @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse) {
+                                                  @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse) {
         this.periode = periode;
         this.status = status;
         this.vurdering = vurdering;
         this.begrunnelse = begrunnelse;
+        this.tilVurdering = tilVurdering;
+    }
+
+    public Boolean getTilVurdering() {
+        return tilVurdering;
     }
 
     public Periode getPeriode() {
