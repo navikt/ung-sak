@@ -92,7 +92,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
             } else {
                 // tar en og en
                 var startBeregningRequest = initStartRequest(ref, iayGrunnlag, Set.of() /* frisinn har ikke inntektsmeldinger */
-                    , List.of(new StartBeregningInput(bgReferanse, input.getVilkårsperiode(), List.of())));
+                    , List.of(new StartBeregningInput(bgReferanse, input.getVilkårsperiode(), List.of(), null)));
 
                 var inputPerRef = startBeregningRequest.getKalkulatorInputPerKoblingReferanse();
                 if (inputPerRef.size() != 1) {

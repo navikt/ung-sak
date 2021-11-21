@@ -80,6 +80,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 
 /**
  * KalkulusTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt
@@ -96,6 +97,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     private KalkulatorInputTjeneste kalkulatorInputTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
+    private OverstyrInputTjeneste overstyrInputTjeneste;
 
     public KalkulusTjeneste() {
     }
@@ -114,6 +116,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         this.kalkulatorInputTjeneste = kalkulatorInputTjeneste;
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
+        this.overstyrInputTjeneste = new OverstyrInputTjeneste(vilkårResultatRepository, restTjeneste, ytelseGrunnlagMapper);
     }
 
     @Override
@@ -327,12 +330,15 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
         AktørIdPersonident aktør = new AktørIdPersonident(fagsak.getAktørId().getId());
 
-        var stpMap = startBeregningInput.stream().collect(Collectors.toMap(StartBeregningInput::getBgReferanse, StartBeregningInput::getSkjæringstidspunkt));
         var referanseRelasjoner = startBeregningInput.stream().collect(Collectors.toMap(StartBeregningInput::getBgReferanse, StartBeregningInput::getOriginalReferanser));
 
-        Map<UUID, KalkulatorInputDto> input = getReferanseTilInputMap(behandlingReferanse,
+        Map<UUID, KalkulatorInputDto> input = lagInputUtenOverstyring(
+            behandlingReferanse,
             iayGrunnlag,
-            sakInntektsmeldinger, stpMap);
+            sakInntektsmeldinger,
+            finnIkkeOverstyrt(startBeregningInput));
+
+        input.putAll(lagInputMedOverstyring(behandlingReferanse, finnOverstyrt(startBeregningInput)));
 
         return new StartBeregningListeRequest(
             input,
@@ -340,6 +346,40 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             aktør,
             YtelseTyperKalkulusStøtterKontrakt.fraKode(behandlingReferanse.getFagsakYtelseType().getKode()),
             referanseRelasjoner);
+    }
+
+    private List<StartBeregningInput> finnIkkeOverstyrt(List<StartBeregningInput> startBeregningInput) {
+        return startBeregningInput.stream().filter(i -> i.getInputOverstyringPeriode().isEmpty()).collect(Collectors.toList());
+    }
+
+    private List<StartBeregningInput> finnOverstyrt(List<StartBeregningInput> startBeregningInput) {
+        return startBeregningInput.stream().filter(i -> i.getInputOverstyringPeriode().isPresent()).collect(Collectors.toList());
+    }
+
+    private Map<UUID, KalkulatorInputDto> lagInputUtenOverstyring(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag iayGrunnlag, Collection<Inntektsmelding> sakInntektsmeldinger, List<StartBeregningInput> startBeregningInput) {
+        Map<UUID, LocalDate> stpMap = startBeregningInput.stream()
+            .collect(Collectors.toMap(StartBeregningInput::getBgReferanse, StartBeregningInput::getSkjæringstidspunkt));
+        return getReferanseTilInputMap(
+            behandlingReferanse,
+            iayGrunnlag,
+            sakInntektsmeldinger,
+            stpMap
+        );
+    }
+
+    private Map<UUID, KalkulatorInputDto> lagInputMedOverstyring(BehandlingReferanse behandlingReferanse,
+                                                                 List<StartBeregningInput> startBeregningInput) {
+
+        Map<UUID, InputOverstyringPeriode> overstyrteInput = startBeregningInput.stream()
+            .filter(i -> i.getInputOverstyringPeriode().isPresent())
+            .collect(Collectors.toMap(StartBeregningInput::getBgReferanse, i -> i.getInputOverstyringPeriode().get()));
+        Map<UUID, LocalDate> stpMap = startBeregningInput.stream()
+            .collect(Collectors.toMap(StartBeregningInput::getBgReferanse, StartBeregningInput::getSkjæringstidspunkt));
+        return overstyrInputTjeneste.getOverstyrtInputMap(
+            behandlingReferanse,
+            stpMap,
+            overstyrteInput
+        );
     }
 
     private Map<UUID, KalkulatorInputDto> lagInputMap(Collection<BgRef> bgReferanser, BehandlingReferanse referanse) {
@@ -371,15 +411,18 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                 }
 
                 var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårPeriode.getPeriode());
+
+
+                KalkulatorInputDto kalkulatorInputDto = kalkulatorInputTjeneste.byggDto(
+                    behandlingReferanse,
+                    bgReferanse,
+                    iayGrunnlag,
+                    sakInntektsmeldinger,
+                    ytelsesGrunnlag,
+                    vilkårPeriode.getPeriode(),
+                    vilkårsMerknad);
                 return new AbstractMap.SimpleEntry<>(bgReferanse,
-                    kalkulatorInputTjeneste.byggDto(
-                        behandlingReferanse,
-                        bgReferanse,
-                        iayGrunnlag,
-                        sakInntektsmeldinger,
-                        ytelsesGrunnlag,
-                        vilkårPeriode.getPeriode(),
-                        vilkårsMerknad));
+                    kalkulatorInputDto);
             }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
 

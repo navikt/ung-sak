@@ -189,6 +189,9 @@ public class TilKalkulusMapper {
     }
 
     public static Aktør mapTilAktør(Arbeidsgiver arbeidsgiver) {
+        if (arbeidsgiver == null) {
+            return null;
+        }
         return arbeidsgiver.getErVirksomhet() ? new Organisasjon(arbeidsgiver.getOrgnr()) : new AktørIdPersonident(arbeidsgiver.getAktørId().getId());
     }
 
