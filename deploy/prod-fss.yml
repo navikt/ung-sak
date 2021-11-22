@@ -73,16 +73,6 @@ spec:
 
     - name: OPENIDCONNECT_ISSOHOST
       value: https://isso.adeo.no:443/isso/oauth2
-    - name: OPENIDCONNECT_ISSOISSUER
-      value: https://isso.adeo.no:443/isso/oauth2
-    - name: OPENIDCONNECT_ISSOJWKS
-      value: https://isso.adeo.no:443/isso/oauth2/connect/jwk_uri
-    - name: OPENIDCONNECT_USERNAME
-      value: k9-sak-p
-
-    # Gjentatt grunnet felles-sikkerhet
-    - name: OPENIDCONNECT_ISSOHOST
-      value: https://isso.adeo.no:443/isso/oauth2
     - name: OPENIDCONNECT_USERNAME
       value: k9-sak-p
 
@@ -221,6 +211,8 @@ spec:
       value: "true"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
+    - name: MAP_ALLE_KRAV
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

@@ -58,5 +58,24 @@ public class StønadstatistikkUtbetalingsgrad {
         this.dagsats = dagsats;
     }
     
-    
+
+    public StønadstatistikkArbeidsforhold getArbeidsforhold() {
+        return arbeidsforhold;
+    }
+
+    public Duration getNormalArbeidstid() {
+        return normalArbeidstid;
+    }
+
+    public Duration getFaktiskArbeidstid() {
+        return faktiskArbeidstid;
+    }
+
+    public BigDecimal getUtbetalingsgrad() {
+        return utbetalingsgrad;
+    }
+
+    public int getDagsats() {
+        return dagsats;
+    }
 }

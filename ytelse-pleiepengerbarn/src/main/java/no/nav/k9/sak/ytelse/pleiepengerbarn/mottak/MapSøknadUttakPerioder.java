@@ -14,11 +14,13 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.BeredskapPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.FeriePeriode;
@@ -40,12 +42,14 @@ import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo;
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.TilsynPeriodeInfo;
 
 class MapSøknadUttakPerioder {
+    private TpsTjeneste tpsTjeneste;
     @SuppressWarnings("unused")
     private Søknad søknad;
     private PleiepengerSyktBarn ytelse;
     private JournalpostId journalpostId;
 
-    MapSøknadUttakPerioder(Søknad søknad, JournalpostId journalpostId) {
+    MapSøknadUttakPerioder(TpsTjeneste tpsTjeneste, Søknad søknad, JournalpostId journalpostId) {
+        this.tpsTjeneste = tpsTjeneste;
         this.søknad = søknad;
         this.ytelse = søknad.getYtelse();
         this.journalpostId = journalpostId;
@@ -137,10 +141,14 @@ class MapSøknadUttakPerioder {
             return input.getOrganisasjonsnummer() != null
                 ? Arbeidsgiver.virksomhet(input.getOrganisasjonsnummer().getVerdi())
                 : (input.getNorskIdentitetsnummer() != null
-                ? Arbeidsgiver.fra(new AktørId(input.getNorskIdentitetsnummer().getVerdi()))
+                ? Arbeidsgiver.fra(mapAktørId(input))
                 : null);
         }
         return null;
+    }
+
+    private AktørId mapAktørId(Arbeidstaker input) {
+        return tpsTjeneste.hentAktørForFnr(PersonIdent.fra(input.getNorskIdentitetsnummer().getVerdi())).orElseThrow();
     }
 
     private InternArbeidsforholdRef mapArbeidsforholdRef(UttakArbeidType aktivitetType) {
@@ -160,10 +168,10 @@ class MapSøknadUttakPerioder {
         ferieTidslinje = ferieTidslinje.combine(toFerieTidslinje(søknadsperioder, false), StandardCombinators::coalesceLeftHandSide, JoinStyle.CROSS_JOIN);
 
         return ferieTidslinje
-                .compress()
-                .stream()
-                .map(s -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue()))
-                .collect(Collectors.toList());
+            .compress()
+            .stream()
+            .map(s -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue()))
+            .collect(Collectors.toList());
     }
 
     private LocalDateTimeline<Boolean> toFerieTidslinje(Map<Periode, LovbestemtFerie.LovbestemtFeriePeriodeInfo> perioder) {
@@ -184,17 +192,17 @@ class MapSøknadUttakPerioder {
 
     private List<BeredskapPeriode> mapBeredskap(Beredskap beredskap) {
         final List<BeredskapPeriode> beredskapsperioder = beredskap.getPerioder()
-                .entrySet()
-                .stream()
-                .map(entry -> new BeredskapPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), true, entry.getValue().getTilleggsinformasjon()))
-                .collect(Collectors.toList());
+            .entrySet()
+            .stream()
+            .map(entry -> new BeredskapPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), true, entry.getValue().getTilleggsinformasjon()))
+            .collect(Collectors.toList());
 
         if (beredskap.getPerioderSomSkalSlettes() != null) {
             beredskapsperioder.addAll(beredskap.getPerioderSomSkalSlettes()
-                    .entrySet()
-                    .stream()
-                    .map(entry -> new BeredskapPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), false, entry.getValue().getTilleggsinformasjon()))
-                    .collect(Collectors.toList()));
+                .entrySet()
+                .stream()
+                .map(entry -> new BeredskapPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), false, entry.getValue().getTilleggsinformasjon()))
+                .collect(Collectors.toList()));
         }
 
         return beredskapsperioder;
@@ -202,17 +210,17 @@ class MapSøknadUttakPerioder {
 
     private List<NattevåkPeriode> mapNattevåk(Nattevåk nattevåk) {
         final List<NattevåkPeriode> nattevåkperioder = nattevåk.getPerioder()
-                .entrySet()
-                .stream()
-                .map(entry -> new NattevåkPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), true, entry.getValue().getTilleggsinformasjon()))
-                .collect(Collectors.toList());
+            .entrySet()
+            .stream()
+            .map(entry -> new NattevåkPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), true, entry.getValue().getTilleggsinformasjon()))
+            .collect(Collectors.toList());
 
         if (nattevåk.getPerioderSomSkalSlettes() != null) {
             nattevåkperioder.addAll(nattevåk.getPerioderSomSkalSlettes()
-                    .entrySet()
-                    .stream()
-                    .map(entry -> new NattevåkPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), false, entry.getValue().getTilleggsinformasjon()))
-                    .collect(Collectors.toList()));
+                .entrySet()
+                .stream()
+                .map(entry -> new NattevåkPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), false, entry.getValue().getTilleggsinformasjon()))
+                .collect(Collectors.toList()));
         }
 
         return nattevåkperioder;

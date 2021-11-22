@@ -130,6 +130,64 @@ public class StønadstatistikkPeriode {
         this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
     }
     
-    
-    
+
+    public LocalDate getFom() {
+        return fom;
+    }
+
+    public LocalDate getTom() {
+        return tom;
+    }
+
+    public StønadstatistikkUtfall getUtfall() {
+        return utfall;
+    }
+
+    public BigDecimal getUttaksgrad() {
+        return uttaksgrad;
+    }
+
+    public List<StønadstatistikkUtbetalingsgrad> getUtbetalingsgrader() {
+        return utbetalingsgrader;
+    }
+
+    public BigDecimal getSøkersTapteArbeidstid() {
+        return søkersTapteArbeidstid;
+    }
+
+    public Duration getOppgittTilsyn() {
+        return oppgittTilsyn;
+    }
+
+    public List<String> getÅrsaker() {
+        return årsaker;
+    }
+
+    public List<StønadstatistikkInngangsvilkår> getInngangsvilkår() {
+        return inngangsvilkår;
+    }
+
+    public BigDecimal getPleiebehov() {
+        return pleiebehov;
+    }
+
+    public StønadstatistikkGraderingMotTilsyn getGraderingMotTilsyn() {
+        return graderingMotTilsyn;
+    }
+
+    public StønadstatistikkUtfall getNattevåk() {
+        return nattevåk;
+    }
+
+    public StønadstatistikkUtfall getBeredskap() {
+        return beredskap;
+    }
+
+    public Duration getSøkersTapteTimer() {
+        return søkersTapteTimer;
+    }
+
+    public BigDecimal getBruttoBeregningsgrunnlag() {
+        return bruttoBeregningsgrunnlag;
+    }
 }

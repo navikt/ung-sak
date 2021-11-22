@@ -28,7 +28,7 @@ public class BeregningsgrunnlagPerioderGrunnlagBuilderTest {
 
         var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
         var grunnlag = new BeregningsgrunnlagPerioderGrunnlagBuilder(null)
-            .leggTil(beregningsgrunnlag)
+            .leggTilGrunnlag(beregningsgrunnlag)
             .validerMotVilkår(vilkår)
             .build();
 
@@ -36,7 +36,7 @@ public class BeregningsgrunnlagPerioderGrunnlagBuilderTest {
         assertThat(grunnlag.getGrunnlagPerioder()).hasSize(1);
 
         var oppdateringsBuilder = new BeregningsgrunnlagPerioderGrunnlagBuilder(grunnlag);
-        var oppdatertResultat = oppdateringsBuilder.deaktiver(LocalDate.now())
+        var oppdatertResultat = oppdateringsBuilder.deaktiverGrunnlag(LocalDate.now())
             .validerMotVilkår(vilkår)
             .build();
 

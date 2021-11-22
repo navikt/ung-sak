@@ -102,4 +102,45 @@ public class StønadstatistikkHendelse {
         this.vedtakstidspunkt = vedtakstidspunkt;
         this.perioder = perioder;
     }
+
+    
+    public FagsakYtelseType getYtelseType() {
+        return ytelseType;
+    }
+
+    public PersonIdent getSøker() {
+        return søker;
+    }
+
+    public PersonIdent getPleietrengende() {
+        return pleietrengende;
+    }
+
+    public List<StønadstatistikkDiagnosekode> getDiagnosekoder() {
+        return diagnosekoder;
+    }
+
+    public Saksnummer getSaksnummer() {
+        return saksnummer;
+    }
+
+    public String getUtbetalingsreferanse() {
+        return utbetalingsreferanse;
+    }
+
+    public UUID getBehandlingUuid() {
+        return behandlingUuid;
+    }
+
+    public UUID getForrigeBehandlingUuid() {
+        return forrigeBehandlingUuid;
+    }
+
+    public LocalDateTime getVedtakstidspunkt() {
+        return vedtakstidspunkt;
+    }
+
+    public List<StønadstatistikkPeriode> getPerioder() {
+        return perioder;
+    }
 }

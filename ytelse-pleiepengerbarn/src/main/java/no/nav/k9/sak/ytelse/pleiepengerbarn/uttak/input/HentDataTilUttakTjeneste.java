@@ -171,7 +171,7 @@ public class HentDataTilUttakTjeneste {
         
         final LocalDateTimeline<Boolean> trukkedeKrav = hentTrukkedeKravTidslinje(referanse, behandling);
         return SykdomUtils.kunPerioderSomIkkeFinnesI(søknadsperioder, trukkedeKrav).stream()
-                .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getTom(), s.getTom()))
+                .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 

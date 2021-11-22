@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
@@ -18,8 +20,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 /**
  * lagrer inntektsmeldinger til abakus asynk i egen task.
@@ -67,7 +67,7 @@ public class KompletthetskontrollerVurderKompletthetTask extends UnderBehandling
 
         try {
             var grunnlagSnapshot = OM.readValue(payload, EndringsresultatSnapshot.class);
-            kompletthetskontroller.vurderKompletthetOgFortsett(behandling, behandlingId, grunnlagSnapshot);
+            kompletthetskontroller.vurderKompletthetOgFortsett(input.getId(), behandling, behandlingId, grunnlagSnapshot);
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Kunne ikke deserialisere EndringsresultatSnapshot fra:" + payload, e);
         }

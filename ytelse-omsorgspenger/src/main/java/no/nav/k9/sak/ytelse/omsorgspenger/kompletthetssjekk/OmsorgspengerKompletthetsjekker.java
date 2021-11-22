@@ -127,8 +127,8 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     private boolean harIngenRefusjonskravFraMottatteInntektsmeldinger(BehandlingReferanse ref) {
         List<Inntektsmelding> inntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt());
-        return inntektsmeldinger.stream()
-            .allMatch(im -> !im.harRefusjonskrav());
+        return inntektsmeldinger.size() > 0
+            && inntektsmeldinger.stream().allMatch(im -> !im.harRefusjonskrav());
     }
 
     @Override
@@ -151,7 +151,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         return inntektsmeldingTjeneste
             .hentAlleInntektsmeldingerSomIkkeKommer(ref.getBehandlingId())
             .stream()
-            .map(e -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, e.getArbeidsgiver().getIdentifikator(), true))
+            .map(e -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, e.getArbeidsgiver(), true))
             .collect(Collectors.toList());
     }
 

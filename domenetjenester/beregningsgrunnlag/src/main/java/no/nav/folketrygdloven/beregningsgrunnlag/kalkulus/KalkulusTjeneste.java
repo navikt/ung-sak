@@ -1,7 +1,5 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-import static no.nav.k9.StringTrimmer.trim;
-
 import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -23,10 +21,6 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
-import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
-import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.FraKalkulusMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
@@ -37,15 +31,13 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.MapEndringsresultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
-import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.EksternArbeidsforholdRef;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
-import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdReferanseDto;
-import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsgiverOpplysningerDto;
+import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
 import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Vilkårsavslagsårsak;
 import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
@@ -59,12 +51,15 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.StartBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
+import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
@@ -81,16 +76,10 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
-import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
-import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Saksnummer;
 
 /**
@@ -107,9 +96,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     private VilkårResultatRepository vilkårResultatRepository;
     private KalkulatorInputTjeneste kalkulatorInputTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
-
 
     public KalkulusTjeneste() {
     }
@@ -120,7 +107,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                             VilkårResultatRepository vilkårResultatRepository,
                             @FagsakYtelseTypeRef("*") KalkulatorInputTjeneste kalkulatorInputTjeneste,
                             InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                            ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                             @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper
     ) {
         this.restTjeneste = restTjeneste;
@@ -128,32 +114,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.kalkulatorInputTjeneste = kalkulatorInputTjeneste;
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
-        this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
-    }
-
-    public static List<ArbeidsgiverOpplysningerDto> mapArbeidsforholdOpplysninger(Map<Arbeidsgiver, ArbeidsgiverOpplysninger> arbeidsgiverOpplysninger, List<ArbeidsforholdOverstyring> overstyringer) {
-        List<ArbeidsgiverOpplysningerDto> arbeidsgiverOpplysningerDtos = new ArrayList<>();
-        arbeidsgiverOpplysninger.forEach((key, value) -> arbeidsgiverOpplysningerDtos.add(mapOpplysning(key, value)));
-        overstyringer
-            .stream()
-            .filter(overstyring -> overstyring.getArbeidsgiverNavn() != null) // Vi er kun interessert i overstyringer der SBH har endret navn på arbeidsgiver
-            .findFirst()
-            .ifPresent(
-                arbeidsforhold -> arbeidsgiverOpplysningerDtos.add(new ArbeidsgiverOpplysningerDto(mapArbeidsgiver(arbeidsforhold.getArbeidsgiver()), trim(arbeidsforhold.getArbeidsgiverNavn()))));
-        return arbeidsgiverOpplysningerDtos;
-
-    }
-
-    public static ArbeidsgiverOpplysningerDto mapOpplysning(Arbeidsgiver key, ArbeidsgiverOpplysninger arbeidsgiverOpplysninger) {
-        return new ArbeidsgiverOpplysningerDto(mapArbeidsgiver(key), trim(arbeidsgiverOpplysninger.getNavn()), arbeidsgiverOpplysninger.getFødselsdato());
-    }
-
-    private static Aktør mapArbeidsgiver(Arbeidsgiver arbeidsgiver) {
-        if (arbeidsgiver.getErVirksomhet()) {
-            return new Organisasjon(arbeidsgiver.getIdentifikator());
-        }
-        return new AktørIdPersonident(arbeidsgiver.getIdentifikator());
     }
 
     @Override
@@ -277,7 +238,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     private HentBeregningsgrunnlagDtoListeForGUIRequest lagHentBeregningsgrunnlagListeRequest(BehandlingReferanse referanse, Set<BeregningsgrunnlagReferanse> bgReferanser) {
         YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode());
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
-        List<ArbeidsgiverOpplysningerDto> arbeidsgiverOpplysningerListe = lagArbeidsgiverOpplysningListe(referanse, inntektArbeidYtelseGrunnlag);
         Set<ArbeidsforholdReferanseDto> referanser = inntektArbeidYtelseGrunnlag.getArbeidsforholdInformasjon()
             .stream()
             .map(ArbeidsforholdInformasjon::getArbeidsforholdReferanser)
@@ -292,8 +252,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         var requestListe = bgReferanser.stream().map(it -> new HentBeregningsgrunnlagDtoForGUIRequest(
             it.getReferanse(),
             ytelseSomSkalBeregnes,
-            arbeidsgiverOpplysningerListe,
-            referanser, vilkår.finnPeriodeForSkjæringstidspunkt(it.getSkjæringstidspunkt()).getPeriode().getFomDato()))
+            referanser,
+                vilkår.finnPeriodeForSkjæringstidspunkt(it.getSkjæringstidspunkt()).getPeriode().getFomDato()))
             .sorted(Comparator.comparing(HentBeregningsgrunnlagDtoForGUIRequest::getVilkårsperiodeFom))
             .collect(Collectors.toList());
 
@@ -438,18 +398,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             return Avslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT;
         }
         return Avslagsårsak.UDEFINERT;
-    }
-
-    private List<ArbeidsgiverOpplysningerDto> lagArbeidsgiverOpplysningListe(BehandlingReferanse referanse, InntektArbeidYtelseGrunnlag iayGrunnlag) {
-
-        Map<Arbeidsgiver, ArbeidsgiverOpplysninger> arbeidsgiverOpplysninger = iayGrunnlag.getAktørArbeidFraRegister(referanse.getAktørId())
-            .map(AktørArbeid::hentAlleYrkesaktiviteter)
-            .orElse(Collections.emptyList())
-            .stream()
-            .map(Yrkesaktivitet::getArbeidsgiver)
-            .distinct()
-            .collect(Collectors.toMap(a -> a, arbeidsgiverTjeneste::hent));
-        return mapArbeidsforholdOpplysninger(arbeidsgiverOpplysninger, iayGrunnlag.getArbeidsforholdOverstyringer());
     }
 
     public BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?> getYtelsesspesifikkMapper(FagsakYtelseType ytelseType) {

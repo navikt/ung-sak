@@ -37,6 +37,10 @@ public class StønadstatistikkArbeidsforhold {
     }
     
     
+    public String getType() {
+        return type;
+    }
+    
     public String getOrganisasjonsnummer() {
         return organisasjonsnummer;
     }

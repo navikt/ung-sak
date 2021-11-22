@@ -61,7 +61,8 @@ public class FatteVedtakTjeneste {
                 // FIXME K9-LOS: Trengs hendelse her?
                 List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = totrinnaksjonspunktvurderinger.stream()
                     .filter(a -> !TRUE.equals(a.isGodkjent()))
-                    .map(Totrinnsvurdering::getAksjonspunktDefinisjon).collect(Collectors.toList());
+                    .map(Totrinnsvurdering::getAksjonspunktDefinisjon)
+                    .collect(Collectors.toList());
 
                 return BehandleStegResultat.tilbakeførtMedAksjonspunkter(aksjonspunktDefinisjoner);
             } else {

@@ -34,11 +34,15 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.ArbeidsforholdRef;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidstidMappingInput;
@@ -57,6 +61,7 @@ public class KompletthetForBeregningTjeneste {
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
+    private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
 
     KompletthetForBeregningTjeneste() {
         // CDI
@@ -69,7 +74,8 @@ public class KompletthetForBeregningTjeneste {
                                            @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                            ArbeidsforholdTjeneste arbeidsforholdTjeneste,
                                            InntektArbeidYtelseTjeneste iayTjeneste,
-                                           VilkårResultatRepository vilkårResultatRepository) {
+                                           VilkårResultatRepository vilkårResultatRepository,
+                                           BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
@@ -77,6 +83,7 @@ public class KompletthetForBeregningTjeneste {
         this.iayTjeneste = iayTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
     }
 
     public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggFraRegister(BehandlingReferanse ref) {
@@ -204,7 +211,7 @@ public class KompletthetForBeregningTjeneste {
 
         for (DatoIntervallEntitet periode : relevanteVilkårsperioder) {
             var arbeidsgiverSetMap = finnArbeidsforholdForIdentPåDagFunction.apply(ref, periode.getFomDato());
-            var manglendeVedleggForPeriode = utledManglendeInntektsmeldingerPerDag(relevanteInntektsmeldinger, periode, tilnternArbeidsforhold, arbeidsgiverSetMap, input, ref);
+            var manglendeVedleggForPeriode = utledManglendeInntektsmeldingerPerDag(relevanteInntektsmeldinger, periode, tilnternArbeidsforhold, arbeidsgiverSetMap, input);
 
             result.put(periode, manglendeVedleggForPeriode);
         }
@@ -239,11 +246,11 @@ public class KompletthetForBeregningTjeneste {
             .anyMatch(it -> Objects.equals(at.getArbeidsgiver(), utledIdentifikator(it)) && harFravær(it.getPerioder()));
     }
 
-    private String utledIdentifikator(Arbeid it) {
+    private Arbeidsgiver utledIdentifikator(Arbeid it) {
         if (it.getArbeidsforhold().getOrganisasjonsnummer() != null) {
-            return it.getArbeidsforhold().getOrganisasjonsnummer();
+            return Arbeidsgiver.virksomhet(it.getArbeidsforhold().getOrganisasjonsnummer());
         } else if (it.getArbeidsforhold().getAktørId() != null) {
-            return it.getArbeidsforhold().getAktørId();
+            return Arbeidsgiver.fra(new AktørId(it.getArbeidsforhold().getAktørId()));
         }
         return null;
     }
@@ -256,6 +263,11 @@ public class KompletthetForBeregningTjeneste {
         return iayTjeneste.hentUnikeInntektsmeldingerForSak(saksnummer);
     }
 
+    public List<KompletthetPeriode> hentKompletthetsVurderinger(BehandlingReferanse ref) {
+        var grunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+        return grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of());
+    }
+
     public List<Inntektsmelding> utledInntektsmeldingerSomBenytteMotBeregningForPeriode(BehandlingReferanse referanse, Set<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {
         var inntektsmeldings = inntektsmeldingerRelevantForBeregning.begrensSakInntektsmeldinger(referanse, alleInntektsmeldingerPåSak, periode);
         return inntektsmeldingerRelevantForBeregning.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldings, periode);
@@ -265,8 +277,7 @@ public class KompletthetForBeregningTjeneste {
                                                                                                        DatoIntervallEntitet periode,
                                                                                                        BiFunction<Arbeidsgiver, InternArbeidsforholdRef, V> tilnternArbeidsforhold,
                                                                                                        Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger,
-                                                                                                       InputForKompletthetsvurdering input,
-                                                                                                       BehandlingReferanse referanse) {
+                                                                                                       InputForKompletthetsvurdering input) {
         if (påkrevdeInntektsmeldinger.isEmpty()) {
             return List.of();
         } else {
@@ -291,7 +302,7 @@ public class KompletthetForBeregningTjeneste {
                 .stream()
                 .map(entry -> entry.getValue()
                     .stream()
-                    .map(it -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, entry.getKey().getIdentifikator(), it != null ? it.getReferanse() : null, false))
+                    .map(it -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, entry.getKey(), it != null ? it.getReferanse() : null, false))
                     .collect(Collectors.toList()))
                 .flatMap(Collection::stream)
                 .filter(it -> harFraværFraArbeidetIPerioden(input, periode, it))

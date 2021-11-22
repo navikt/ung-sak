@@ -6,10 +6,10 @@ import java.util.Set;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
-import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 
 /**
  * Grensesnitt for å kjøre behandlingsprosess, herunder gjenopptak, registeroppdatering, koordinering av sakskompleks mv.
@@ -57,6 +57,6 @@ public interface BehandlingProsesseringTjeneste {
 
     void opprettTasksForInitiellRegisterInnhenting(Behandling behandling);
 
-    void feilPågåendeTaskHvisFremtidigTaskEksisterer(Behandling behandling, Set<String> set);
+    void feilPågåendeTaskHvisFremtidigTaskEksisterer(Behandling behandling, Long kjørendeTaskId, Set<String> set);
 
 }

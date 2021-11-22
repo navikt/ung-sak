@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.uttak.Tid;
@@ -414,6 +416,104 @@ class MapArbeidTest {
         assertThat(result).hasSize(1);
         assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
                 Map.of(new LukketPeriode(arbeidsforholdStart, arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)))));
+    }
+
+    @Test
+    void skal_justere_periode_i_henhold_til_arbeidsforholdet_i_aareg_permisjon() {
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(14);
+        var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var brukerAktørId = AktørId.dummy();
+        var arbeidsforholdStart = fom.plusDays(3);
+        var yrkesaktivitetBuilder = YrkesaktivitetBuilder.oppdatere(Optional.empty());
+        iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
+            .leggTilYrkesaktivitet(yrkesaktivitetBuilder
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilPermisjon(yrkesaktivitetBuilder.getPermisjonBuilder()
+                    .medPeriode(arbeidsforholdStart, arbeidsforholdStart.plusDays(2))
+                    .medPermisjonsbeskrivelseType(PermisjonsbeskrivelseType.PERMITTERING)
+                    .medProsentsats(BigDecimal.valueOf(100))
+                    .build())
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, Tid.TIDENES_ENDE))))));
+        var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
+
+        var tidlinjeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
+
+        var journalpostId = new JournalpostId(1L);
+        var kravDokumenter = Set.of(new KravDokument(journalpostId, LocalDateTime.now().minusDays(1), KravDokumentType.SØKNAD));
+        var varighet = Duration.ofHours(3);
+        var arbeidsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+        var arbeidsgiverOrgnr = "000000000";
+        var periodeDel = arbeidsperiode;
+        var virksomhet = Arbeidsgiver.virksomhet(arbeidsgiverOrgnr);
+        var perioderFraSøknader = Set.of(new PerioderFraSøknad(journalpostId,
+                List.of(new UttakPeriode(periodeDel, varighet)),
+                List.of(new ArbeidPeriode(arbeidsperiode, UttakArbeidType.ARBEIDSTAKER, virksomhet, InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(1))),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()));
+
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        input.medInntektArbeidYtelseGrunnlag(grunnlag)
+            .medBruker(brukerAktørId)
+            .medSaksnummer(new Saksnummer("asdf"));
+
+        var result = mapper.map(input);
+        assertThat(result).hasSize(1);
+        assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
+                Map.of(new LukketPeriode(fom, arbeidsforholdStart.minusDays(1)), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)), new LukketPeriode(arbeidsforholdStart.plusDays(3), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)))));
+    }
+
+    @Test
+    void skal_justere_periode_i_henhold_til_arbeidsforholdet_i_aareg_permisjon_2() {
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(14);
+        var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var brukerAktørId = AktørId.dummy();
+        var arbeidsforholdStart = fom.plusDays(3);
+        var yrkesaktivitetBuilder = YrkesaktivitetBuilder.oppdatere(Optional.empty());
+        iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
+            .leggTilYrkesaktivitet(yrkesaktivitetBuilder
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilPermisjon(yrkesaktivitetBuilder.getPermisjonBuilder()
+                    .medPeriode(fom, arbeidsforholdStart)
+                    .medPermisjonsbeskrivelseType(PermisjonsbeskrivelseType.PERMITTERING)
+                    .medProsentsats(BigDecimal.valueOf(100))
+                    .build())
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, Tid.TIDENES_ENDE))))));
+        var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
+
+        var tidlinjeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
+
+        var journalpostId = new JournalpostId(1L);
+        var kravDokumenter = Set.of(new KravDokument(journalpostId, LocalDateTime.now().minusDays(1), KravDokumentType.SØKNAD));
+        var varighet = Duration.ofHours(3);
+        var arbeidsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+        var arbeidsgiverOrgnr = "000000000";
+        var periodeDel = arbeidsperiode;
+        var virksomhet = Arbeidsgiver.virksomhet(arbeidsgiverOrgnr);
+        var perioderFraSøknader = Set.of(new PerioderFraSøknad(journalpostId,
+                List.of(new UttakPeriode(periodeDel, varighet)),
+                List.of(new ArbeidPeriode(arbeidsperiode, UttakArbeidType.ARBEIDSTAKER, virksomhet, InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(1))),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()));
+
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        input.medInntektArbeidYtelseGrunnlag(grunnlag)
+            .medBruker(brukerAktørId)
+            .medSaksnummer(new Saksnummer("asdf"));
+
+        var result = mapper.map(input);
+        assertThat(result).hasSize(1);
+        assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
+                Map.of(new LukketPeriode(arbeidsforholdStart.plusDays(1), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)))));
     }
 
     private Vilkår opprettVilkår(LocalDateTimeline<Boolean> tidlinjeTilVurdering) {

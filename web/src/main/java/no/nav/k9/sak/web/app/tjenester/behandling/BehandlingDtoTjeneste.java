@@ -31,9 +31,7 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
-import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftedeAksjonspunkterDto;
@@ -91,13 +89,11 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 @Dependent
 public class BehandlingDtoTjeneste {
 
-    private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private SøknadRepository søknadRepository;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-    private UttakRepository uttakRepository;
     private TotrinnTjeneste totrinnTjeneste;
 
     /**
@@ -111,19 +107,15 @@ public class BehandlingDtoTjeneste {
     }
 
     @Inject
-    public BehandlingDtoTjeneste(FagsakRepository fagsakRepository,
-                                 BehandlingRepository behandlingRepository,
+    public BehandlingDtoTjeneste(BehandlingRepository behandlingRepository,
                                  BehandlingVedtakRepository behandlingVedtakRepository,
                                  SøknadRepository søknadRepository,
-                                 UttakRepository uttakRepository,
                                  TilbakekrevingRepository tilbakekrevingRepository,
                                  VilkårResultatRepository vilkårResultatRepository,
                                  TotrinnTjeneste totrinnTjeneste,
                                  @Any Instance<InformasjonselementerUtleder> informasjonselementer,
                                  @KonfigVerdi(value = "k9.oppdrag.proxy.url") String k9OppdragProxyUrl) {
 
-        this.fagsakRepository = fagsakRepository;
-        this.uttakRepository = uttakRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadRepository = søknadRepository;
@@ -341,6 +333,7 @@ public class BehandlingDtoTjeneste {
 
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_PATH, "beregningsresultat", uuidQueryParams));
             dto.leggTil(getFraMap(KompletthetForBeregningRestTjeneste.KOMPLETTHET_FOR_BEREGNING_PATH, "kompletthet-beregning", uuidQueryParams));
+            dto.leggTil(getFraMap(KompletthetForBeregningRestTjeneste.KOMPLETTHET_FOR_BEREGNING_PATH_V2, "kompletthet-beregning-v2", uuidQueryParams));
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_UTBETALT_PATH, "beregningsresultat-utbetalt", uuidQueryParams));
             lagBeregningsgrunnlagLink(behandling).ifPresent(dto::leggTil);
             lagBeregningsgrunnlagAlleLink(behandling).ifPresent(dto::leggTil);

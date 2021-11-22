@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -30,11 +32,36 @@ public class KompletthetsTilstandPåPeriodeDto {
     @JsonProperty("status")
     private List<ArbeidsgiverArbeidsforholdStatus> status;
 
+    @Valid
+    @JsonProperty("vurdering")
+    private Vurdering vurdering;
+
+    @Valid
+    @NotNull
+    @JsonProperty("tilVurdering")
+    private Boolean tilVurdering;
+
+    @JsonProperty("begrunnelse")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String begrunnelse;
+
     @JsonCreator
     public KompletthetsTilstandPåPeriodeDto(@JsonProperty("periode") Periode periode,
-                                            @JsonProperty("status") List<ArbeidsgiverArbeidsforholdStatus> status) {
+                                            @JsonProperty("status") List<ArbeidsgiverArbeidsforholdStatus> status,
+                                            @Valid @JsonProperty("vurdering") Vurdering vurdering,
+                                            @Valid @NotNull @JsonProperty("tilVurdering") Boolean tilVurdering,
+                                            @JsonProperty("begrunnelse") @Size(max = 4000)
+                                            @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse) {
         this.periode = periode;
         this.status = status;
+        this.vurdering = vurdering;
+        this.tilVurdering = tilVurdering;
+        this.begrunnelse = begrunnelse;
+    }
+
+    public Boolean getTilVurdering() {
+        return tilVurdering;
     }
 
     public Periode getPeriode() {
@@ -43,5 +70,13 @@ public class KompletthetsTilstandPåPeriodeDto {
 
     public List<ArbeidsgiverArbeidsforholdStatus> getStatus() {
         return status;
+    }
+
+    public Vurdering getVurdering() {
+        return vurdering;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
     }
 }

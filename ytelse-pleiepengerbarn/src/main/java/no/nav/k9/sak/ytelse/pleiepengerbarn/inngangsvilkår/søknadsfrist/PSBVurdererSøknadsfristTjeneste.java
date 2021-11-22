@@ -146,10 +146,10 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
     }
 
     @Override
-    public Set<KravDokument> relevanteKravdokumentForBehandling(BehandlingReferanse referanse, boolean taHensynTilManuellRevurdering) {
+    public Set<KravDokument> relevanteKravdokumentForBehandling(BehandlingReferanse referanse) {
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
 
-        if (taHensynTilManuellRevurdering && behandling.erManueltOpprettet() && behandling.erRevurdering()) {
+        if (behandling.erManueltOpprettet() && behandling.erRevurdering()) {
             return hentPerioderTilVurdering(referanse).keySet();
         }
 

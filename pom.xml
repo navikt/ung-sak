@@ -42,7 +42,7 @@
         <felles.version>0.2.18</felles.version>
         <swagger.version>2.1.11</swagger.version>
         <fp-kontrakter.version>6.0.4</fp-kontrakter.version>
-        <k9format.version>5.5.9</k9format.version>
+        <k9format.version>5.5.13</k9format.version>
     </properties>
 
     <repositories>
@@ -202,7 +202,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kontrakt</artifactId>
-                <version>1.2.70</version>
+                <version>1.2.78</version>
             </dependency>
 
             <dependency>
@@ -411,7 +411,7 @@
             <dependency>
                 <groupId>no.nav.pleiepengerbarn.uttak</groupId>
                 <artifactId>kontrakter</artifactId>
-                <version>1.1.13</version>
+                <version>1.1.14</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
@@ -462,7 +462,7 @@
             <dependency>
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
-                <version>6.6</version>
+                <version>7.0.1</version>
             </dependency>
             <dependency>
                 <groupId>com.papertrailapp</groupId>

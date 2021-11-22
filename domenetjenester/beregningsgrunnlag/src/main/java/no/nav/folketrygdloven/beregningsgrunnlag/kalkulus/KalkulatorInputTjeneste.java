@@ -10,10 +10,12 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.KravperioderMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -29,12 +31,16 @@ public class KalkulatorInputTjeneste {
 
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
+    private boolean skalMappeAlleKrav;
 
     @Inject
     public KalkulatorInputTjeneste(@Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
-                                   @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning) {
+                                   @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
+                                   @KonfigVerdi(value = "MAP_ALLE_KRAV", defaultVerdi = "false") boolean skalMappeAlleKrav
+    ) {
         this.opptjeningForBeregningTjeneste = Objects.requireNonNull(opptjeningForBeregningTjeneste, "opptjeningForBeregningTjeneste");
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
+        this.skalMappeAlleKrav = skalMappeAlleKrav;
     }
 
     protected KalkulatorInputTjeneste() {
@@ -66,8 +72,19 @@ public class KalkulatorInputTjeneste {
         KalkulatorInputDto kalkulatorInputDto = new KalkulatorInputDto(grunnlagDto, opptjeningAktiviteterDto, stp);
 
         kalkulatorInputDto.medYtelsespesifiktGrunnlag(ytelseGrunnlag);
+
+        if (skalMappeAlleKrav) {
+            kalkulatorInputDto.medRefusjonsperioderPrInntektsmelding(KravperioderMapper.map(
+                referanse,
+                vilkårsperiode,
+                sakInntektsmeldinger,
+                imTjeneste,
+                grunnlagDto));
+        }
+
         return kalkulatorInputDto;
     }
+
 
     protected InntektArbeidYtelseGrunnlagDto mapIAYTilKalkulus(BehandlingReferanse referanse,
                                                                DatoIntervallEntitet vilkårsperiode,
@@ -77,6 +94,7 @@ public class KalkulatorInputTjeneste {
                                                                InntektsmeldingerRelevantForBeregning imTjeneste) {
         return new TilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, inntektsmeldinger, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening, imTjeneste, referanse);
     }
+
 
     protected LocalDate finnSkjæringstidspunkt(DatoIntervallEntitet vilkårsperiode) {
         return vilkårsperiode.getFomDato();

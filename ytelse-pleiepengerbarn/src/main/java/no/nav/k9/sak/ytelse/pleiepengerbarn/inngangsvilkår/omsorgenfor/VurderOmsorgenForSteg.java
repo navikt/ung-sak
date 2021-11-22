@@ -8,6 +8,9 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -44,6 +47,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmod
 public class VurderOmsorgenForSteg implements BehandlingSteg {
 
     public static final VilkårType VILKÅRET = VilkårType.OMSORGEN_FOR;
+    private static final Logger log = LoggerFactory.getLogger(VurderOmsorgenForSteg.class);
     private BehandlingRepositoryProvider repositoryProvider;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private OmsorgenForTjeneste omsorgenForTjeneste;
@@ -74,9 +78,11 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         if (skalHaAksjonspunktGrunnetManuellRevurdering(samletOmsorgenForTidslinje, behandling) || harAksjonspunkt(samletOmsorgenForTidslinje, false)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2)));
         } else if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2) && harIkkeLengerAksjonspunkt(behandling, samletOmsorgenForTidslinje)) {
+            log.info("Har aksjonspunt for omsorgen for, men det er ikke relevant lenger");
             // Må manuelt avbryte pga konfig på aksjonspunktet hvis registerdata tilsier at det ikke er noen grunn til å
             // Manuelt avklare dette
             behandling.getAksjonspunktFor(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2).avbryt();
+            behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         }
 
         final List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(kontekst, samletOmsorgenForTidslinje);

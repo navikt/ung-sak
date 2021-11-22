@@ -53,6 +53,9 @@ public enum Venteårsak implements Kodeverdi {
     VENTER_SVAR_PORTEN("VENTER_SVAR_PORTEN", "Sak meldt i Porten, venter på svar"),
     VENTER_SVAR_TEAMS("VENTER_SVAR_TEAMS", "Sak meldt i Teams, venter på svar"),
 
+    VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER("VENTER_ETTERLYS_IM", "Venter på inntektsmeldinger etter etterlysning"),
+    VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER_MED_VARSEL("VENTER_ETTERLYS_IM_VARSEL", "Venter på inntektsmeldinger etter etterlysning med varsel om mulig avslag"),
+
     OPPD_ÅPEN_BEH("OPPD_ÅPEN_BEH", "Venter på oppdatering av åpen behandling"),
     VENT_DEKGRAD_REGEL("VENT_DEKGRAD_REGEL", "Venter på 80% dekningsgrad-regel"),
     VENT_ØKONOMI("VENT_ØKONOMI", "Venter på økonomiløsningen"),

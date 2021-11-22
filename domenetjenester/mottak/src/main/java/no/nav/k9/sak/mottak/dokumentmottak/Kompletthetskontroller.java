@@ -39,8 +39,8 @@ public class Kompletthetskontroller {
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
     }
 
-    public ProsessTaskData asynkVurderKompletthet(Behandling behandling) {
-        preconditionIkkeAksepterKobling(behandling);
+    public ProsessTaskData asynkVurderKompletthet(Long kjørendeTaskId, Behandling behandling) {
+        preconditionIkkeAksepterKobling(kjørendeTaskId, behandling);
 
         // Ta snapshot av gjeldende grunnlag-id-er før oppdateringer
         EndringsresultatSnapshot grunnlagSnapshot = behandlingProsesseringTjeneste.taSnapshotAvBehandlingsgrunnlag(behandling);
@@ -51,8 +51,8 @@ public class Kompletthetskontroller {
         return kompletthetskontrollerTask;
     }
 
-    public void vurderKompletthetOgFortsett(Behandling behandling, Long behandlingId, EndringsresultatSnapshot grunnlagSnapshot) {
-        preconditionIkkeAksepterKobling(behandling);
+    public void vurderKompletthetOgFortsett(Long kjørendeTaskId, Behandling behandling, Long behandlingId, EndringsresultatSnapshot grunnlagSnapshot) {
+        preconditionIkkeAksepterKobling(kjørendeTaskId, behandling);
 
         // Vurder kompletthet etter at dokument knyttet til behandling
         spolKomplettBehandlingTilStartpunkt(behandling, grunnlagSnapshot);
@@ -63,7 +63,7 @@ public class Kompletthetskontroller {
         }
     }
 
-    private void preconditionIkkeAksepterKobling(Behandling behandling) {
+    private void preconditionIkkeAksepterKobling(Long kjørendeTaskId, Behandling behandling) {
         if (behandling.getType() == BehandlingType.UNNTAKSBEHANDLING) {
             throw new UnsupportedOperationException("Kan ikke oppdatere åpen unntaksbehandling");
         }
@@ -71,7 +71,7 @@ public class Kompletthetskontroller {
             throw ProsesseringsFeil.FACTORY.kanIkkePlanleggeNyTaskPgaVentendeTaskerPåBehandling(behandling.getId()).toException();
         } else {
             Set<String> treeAmigos = Set.of(StartBehandlingTask.TASKTYPE, FortsettBehandlingTask.TASKTYPE, GjenopptaBehandlingTask.TASKTYPE);
-            behandlingProsesseringTjeneste.feilPågåendeTaskHvisFremtidigTaskEksisterer(behandling, treeAmigos);
+            behandlingProsesseringTjeneste.feilPågåendeTaskHvisFremtidigTaskEksisterer(behandling, kjørendeTaskId, treeAmigos);
         }
     }
 
