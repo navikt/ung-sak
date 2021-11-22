@@ -54,7 +54,7 @@ public class KompletthetPeriode extends BaseEntitet {
     public KompletthetPeriode(Vurdering vurdering, LocalDate skjæringstidspunkt, String begrunnelse) {
         this.skjæringstidspunkt = Objects.requireNonNull(skjæringstidspunkt);
         this.vurdering = Objects.requireNonNull(vurdering);
-        this.begrunnelse = Objects.requireNonNull(begrunnelse);
+        this.begrunnelse = Objects.equals(Vurdering.UDEFINERT, vurdering) ? begrunnelse : Objects.requireNonNull(begrunnelse);
     }
 
     public Long getId() {
