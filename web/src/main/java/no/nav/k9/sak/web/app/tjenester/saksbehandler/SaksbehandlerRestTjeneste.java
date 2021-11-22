@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
 import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.felles.util.LRUCache;
@@ -49,6 +50,8 @@ public class SaksbehandlerRestTjeneste {
 
     private LRUCache<String, String> cache = new LRUCache<>(100, CACHE_ELEMENT_LIVE_TIME_MS);
 
+    private String systembruker;
+
     private HistorikkRepository historikkRepository;
     private BehandlingRepository behandlingRepository;
     private SykdomVurderingService sykdomVurderingService;
@@ -58,7 +61,12 @@ public class SaksbehandlerRestTjeneste {
     }
 
     @Inject
-    public SaksbehandlerRestTjeneste(HistorikkRepository historikkRepository, BehandlingRepository behandlingRepository, SykdomVurderingService sykdomVurderingService) {
+    public SaksbehandlerRestTjeneste(
+            @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
+            HistorikkRepository historikkRepository,
+            BehandlingRepository behandlingRepository,
+            SykdomVurderingService sykdomVurderingService) {
+        this.systembruker = systembruker;
         this.historikkRepository = historikkRepository;
         this.behandlingRepository = behandlingRepository;
         this.sykdomVurderingService = sykdomVurderingService;
@@ -81,40 +89,36 @@ public class SaksbehandlerRestTjeneste {
                 BehandlingUuidDto behandlingUuid) {
 
         Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).get();
-        List<Historikkinnslag> historikkinnslags = historikkRepository.hentHistorikkForSaksnummer(behandling.getFagsak().getSaksnummer());
+        List<Historikkinnslag> historikkinnslag = historikkRepository.hentHistorikkForSaksnummer(behandling.getFagsak().getSaksnummer());
 
+        LocalDateTimeline<SykdomVurderingVersjon> ktpTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
+        LocalDateTimeline<SykdomVurderingVersjon> toopTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);
 
-        Set<String> unikeIdenter = historikkinnslags.stream().map(i -> i.getOpprettetAv()).collect(Collectors.toSet());
-        unikeIdenter.addAll(historikkinnslags.stream().map(i -> i.getEndretAv()).collect(Collectors.toSet()));
+        Set<String> unikeIdenter = historikkinnslag.stream().map(i -> i.getOpprettetAv()).collect(Collectors.toSet());
+        unikeIdenter.addAll(historikkinnslag.stream().map(i -> i.getEndretAv()).collect(Collectors.toSet()));
+        unikeIdenter.addAll(ktpTimeline.stream().map(i -> i.getValue().getEndretAv()).collect(Collectors.toSet()));
+        unikeIdenter.addAll(toopTimeline.stream().map(i -> i.getValue().getEndretAv()).collect(Collectors.toSet()));
+
+        unikeIdenter.remove(systembruker);
 
         Map<String, String> identTilNavn = new HashMap<>();
 
         unikeIdenter.forEach(ident -> {
-            sjekkOgLeggTil(identTilNavn, ident);
-            sjekkOgLeggTil(identTilNavn, ident);
+            if (ident != null) {
+                if (!identTilNavn.containsKey(ident)) {
+                    String saksbehandlerCachet = cache.get(ident);
+                    if (saksbehandlerCachet != null) {
+                        identTilNavn.put(ident, saksbehandlerCachet);
+                    } else {
+                        LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
+                        String brukernavn = ldapBruker.getDisplayName();
+                        cache.put(ident, brukernavn);
+                    }
+                }
+            }
         });
-
-        LocalDateTimeline<SykdomVurderingVersjon> ktpTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
-        ktpTimeline.forEach(i -> sjekkOgLeggTil(identTilNavn, i.getValue().getEndretAv()));
-
-        LocalDateTimeline<SykdomVurderingVersjon> toopTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);
-        toopTimeline.forEach(i -> sjekkOgLeggTil(identTilNavn, i.getValue().getEndretAv()));
 
         return new SaksbehandlerDto(identTilNavn);
     }
 
-    private void sjekkOgLeggTil(Map<String, String> identTilNavn, String ident) {
-        if (ident != null) {
-            if (!identTilNavn.containsKey(ident)) {
-                String saksbehandlerCachet = cache.get(ident);
-                if (saksbehandlerCachet != null) {
-                    identTilNavn.put(ident, saksbehandlerCachet);
-                } else {
-                    LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
-                    String brukernavn = ldapBruker.getDisplayName();
-                    cache.put(ident, brukernavn);
-                }
-            }
-        }
-    }
 }
