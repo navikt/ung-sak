@@ -32,6 +32,8 @@ import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsyn;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
@@ -102,16 +104,16 @@ public class HentDataTilUttakTjeneste {
 
     public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
         boolean skalMappeHeleTidslinjen = brukUbesluttedeData;
-        
+
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
         var uttakGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
         var pleiebehov = pleiebehovResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
-        
+
         final NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(referanse.getBehandlingId());
         final NavigableSet<DatoIntervallEntitet> perioderTilVurdering = hentPerioderTilVurdering(referanse, skalMappeHeleTidslinjen, behandling);
-        
+
         var utvidetRevurderingPerioder = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(referanse);
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
         var opptjeningsresultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
@@ -132,14 +134,17 @@ public class HentDataTilUttakTjeneste {
         if (brukUbesluttedeData) {
             etablertTilsynPerioder = fjernInnleggelsesperioderFra(etablertTilsynTjeneste.utledGrunnlagForTilsynstidlinje(referanse).getPerioder(), pleiebehov);
         } else {
-            etablertTilsynPerioder = fjernInnleggelsesperioderFra(etablertTilsynRepository.hent(referanse.getBehandlingId()).getEtablertTilsyn().getPerioder(), pleiebehov);
+            etablertTilsynPerioder = fjernInnleggelsesperioderFra(etablertTilsynRepository.hentHvisEksisterer(referanse.getBehandlingId())
+                .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
+                .map(EtablertTilsyn::getPerioder)
+                .orElse(List.of()), pleiebehov);
         }
         final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getFagsakId(), referanse.getPleietrengendeAktørId(), brukUbesluttedeData);
         var rettVedDød = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
 
         var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId())
                 .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
-        
+
         var input = new InputParametere()
             .medBehandling(behandling)
             .medVilkårene(vilkårene)
@@ -168,7 +173,7 @@ public class HentDataTilUttakTjeneste {
         } else {
             søknadsperioder = SykdomUtils.toLocalDateTimeline(finnSykdomsperioder(referanse));
         }
-        
+
         final LocalDateTimeline<Boolean> trukkedeKrav = hentTrukkedeKravTidslinje(referanse, behandling);
         return SykdomUtils.kunPerioderSomIkkeFinnesI(søknadsperioder, trukkedeKrav).stream()
                 .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
