@@ -21,9 +21,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
 import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.felles.util.LRUCache;
 import no.nav.k9.sak.kontrakt.saksbehandler.SaksbehandlerDto;
 import no.nav.k9.sak.kontrakt.saksbehandler.SaksbehandlerQueryDto;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @Path("/saksbehandler")
 @ApplicationScoped
@@ -47,7 +49,7 @@ public class SaksbehandlerRestTjeneste {
         summary = ("Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging.")
     )
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
-    public SaksbehandlerDto getBruker(@NotNull @QueryParam("brukerid") @Parameter(description = "brukerid") @Valid SaksbehandlerQueryDto ident) {
+    public SaksbehandlerDto getBruker(@NotNull @QueryParam("brukerid") @Parameter(description = "brukerid") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksbehandlerQueryDto ident) {
         SaksbehandlerDto saksbehandlerCachet = cache.get(ident.getBrukerid());
         if (saksbehandlerCachet != null) {
             return saksbehandlerCachet;
