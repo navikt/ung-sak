@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -18,7 +20,9 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
+import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt.AvklarKompletthetForBeregningDto;
 import no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt.KompletthetsPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
@@ -65,7 +69,7 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .orElse(false));
         // TODO: Lagre ned de som er avklart OK for fortsettelse eller om det er varsel til AG
         if (benyttNyFlyt) {
-            lagreVurderinger(param.getBehandlingId(), dto);
+            lagreVurderinger(param.getBehandlingId(), perioderMedManglendeGrunnlag, dto);
         }
 
         if (kanFortsette && !benyttNyFlyt) {
@@ -85,11 +89,18 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
         }
     }
 
-    private void lagreVurderinger(Long behandlingId,
+    private void lagreVurderinger(Long behandlingId, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> perioderMedManglendeGrunnlag,
                                   AvklarKompletthetForBeregningDto dto) {
 
-        var kompletthetVurderinger = dto.getPerioder()
+        var perioder = dto.getPerioder()
             .stream()
+            .filter(at -> perioderMedManglendeGrunnlag.entrySet()
+                .stream()
+                .filter(it -> !it.getValue().isEmpty())
+                .anyMatch(it -> it.getKey().overlapper(at.getPeriode().getFom(), at.getPeriode().getTom())))
+            .collect(Collectors.toList());
+
+        var kompletthetVurderinger = perioder.stream()
             .map(it -> new KompletthetPeriode(utledVurderingstype(it), it.getPeriode().getFom(), getBegrunnelse(dto, it)))
             .collect(Collectors.toList());
 
