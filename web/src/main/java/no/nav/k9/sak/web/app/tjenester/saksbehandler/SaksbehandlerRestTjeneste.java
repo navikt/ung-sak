@@ -6,7 +6,9 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -81,28 +83,32 @@ public class SaksbehandlerRestTjeneste {
         Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).get();
         List<Historikkinnslag> historikkinnslags = historikkRepository.hentHistorikkForSaksnummer(behandling.getFagsak().getSaksnummer());
 
-        Map<String, String> identer = new HashMap<>();
 
-        historikkinnslags.forEach(historikkinnslag -> {
-            sjekkOgLeggTil(identer, historikkinnslag.getOpprettetAv());
-            sjekkOgLeggTil(identer, historikkinnslag.getEndretAv());
+        Set<String> unikeIdenter = historikkinnslags.stream().map(i -> i.getOpprettetAv()).collect(Collectors.toSet());
+        unikeIdenter.addAll(historikkinnslags.stream().map(i -> i.getEndretAv()).collect(Collectors.toSet()));
+
+        Map<String, String> identTilNavn = new HashMap<>();
+
+        unikeIdenter.forEach(ident -> {
+            sjekkOgLeggTil(identTilNavn, ident);
+            sjekkOgLeggTil(identTilNavn, ident);
         });
 
         LocalDateTimeline<SykdomVurderingVersjon> ktpTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
-        ktpTimeline.forEach(i -> sjekkOgLeggTil(identer, i.getValue().getEndretAv()));
+        ktpTimeline.forEach(i -> sjekkOgLeggTil(identTilNavn, i.getValue().getEndretAv()));
 
         LocalDateTimeline<SykdomVurderingVersjon> toopTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);
-        toopTimeline.forEach(i -> sjekkOgLeggTil(identer, i.getValue().getEndretAv()));
+        toopTimeline.forEach(i -> sjekkOgLeggTil(identTilNavn, i.getValue().getEndretAv()));
 
-        return new SaksbehandlerDto(identer);
+        return new SaksbehandlerDto(identTilNavn);
     }
 
-    private void sjekkOgLeggTil(Map<String, String> identer, String ident) {
+    private void sjekkOgLeggTil(Map<String, String> identTilNavn, String ident) {
         if (ident != null) {
-            if (!identer.containsKey(ident)) {
+            if (!identTilNavn.containsKey(ident)) {
                 String saksbehandlerCachet = cache.get(ident);
                 if (saksbehandlerCachet != null) {
-                    identer.put(ident, saksbehandlerCachet);
+                    identTilNavn.put(ident, saksbehandlerCachet);
                 } else {
                     LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
                     String brukernavn = ldapBruker.getDisplayName();
