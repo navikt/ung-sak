@@ -47,6 +47,8 @@ public class KompletthetPeriode extends BaseEntitet {
 
     KompletthetPeriode(KompletthetPeriode grunnlagPeriode) {
         this.skjæringstidspunkt = grunnlagPeriode.skjæringstidspunkt;
+        this.vurdering = grunnlagPeriode.vurdering;
+        this.begrunnelse = grunnlagPeriode.begrunnelse;
     }
 
     public KompletthetPeriode(Vurdering vurdering, LocalDate skjæringstidspunkt, String begrunnelse) {
