@@ -75,9 +75,9 @@ public class SaksbehandlerRestTjeneste {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(
-        description = "Returnerer fullt navn for ident",
+        description = "Returnerer fullt navn for identer som har berørt en fagsak",
         tags = "nav-ansatt",
-        summary = ("Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging.")
+        summary = ("Identer hentes fra historikkinnslag og sykdomsvurderinger.")
     )
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
     public SaksbehandlerDto getSaksbehandlere(
