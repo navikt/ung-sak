@@ -52,33 +52,16 @@ public class EndeligAvklaringKompletthetForBeregning implements AksjonspunktOppd
     public OppdateringResultat oppdater(EndeligAvklaringKompletthetForBeregningDto dto, AksjonspunktOppdaterParameter param) {
         var perioderMedManglendeGrunnlag = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(param.getRef());
 
-        var kanFortsette = perioderMedManglendeGrunnlag.entrySet()
-            .stream()
-            .filter(it -> !it.getValue().isEmpty())
-            .allMatch(it -> dto.getPerioder()
-                .stream()
-                .filter(at -> it.getKey().overlapper(at.getPeriode().getFom(), at.getPeriode().getTom()))
-                .map(KompletthetsPeriode::getKanFortsette)
-                .findFirst()
-                .orElse(false));
-        // TODO: Lagre ned de som er avklart OK for fortsettelse eller om det er varsel til AG
         lagreVurderinger(param.getBehandlingId(), perioderMedManglendeGrunnlag, dto);
 
-        if (kanFortsette && !benyttNyFlyt) {
-            lagHistorikkinnslag(param, dto);
+        lagHistorikkinnslag(param, dto);
+        var resultat = OppdateringResultat.utenTransisjon()
+            .medTotrinnHvis(benyttNyFlyt)
+            .build();
 
-            return OppdateringResultat.utenTransisjon()
-                .medTotrinn()
-                .build();
-        } else {
-            var resultat = OppdateringResultat.utenTransisjon()
-                .medTotrinnHvis(benyttNyFlyt)
-                .build();
-
-            resultat.skalRekjøreSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
-            resultat.setSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING); // TODO: Ved fjerning av toggle, endre til å alltid hoppe tilbake
-            return resultat;
-        }
+        resultat.skalRekjøreSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
+        resultat.setSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING); // TODO: Ved fjerning av toggle, endre til å alltid hoppe tilbake
+        return resultat;
     }
 
     private void lagreVurderinger(Long behandlingId, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> perioderMedManglendeGrunnlag,
