@@ -53,6 +53,7 @@ import no.nav.k9.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKild
 import no.nav.k9.sak.web.app.tjenester.punsj.PunsjRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.InitielleLinksRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.saksbehandler.SaksbehandlerRestTjeneste;
 import no.nav.k9.sak.web.server.abac.PipRestTjeneste;
 
 public class RestImplementationClasses {
@@ -62,6 +63,7 @@ public class RestImplementationClasses {
 
         classes.add(FagsakRestTjeneste.class);
         classes.add(NavAnsattRestTjeneste.class);
+        classes.add(SaksbehandlerRestTjeneste.class);
         classes.add(InitielleLinksRestTjeneste.class);
         classes.add(BehandlingRestTjeneste.class);
         classes.add(BehandlingBackendRestTjeneste.class);

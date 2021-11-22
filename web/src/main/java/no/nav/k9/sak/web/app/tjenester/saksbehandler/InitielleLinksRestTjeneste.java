@@ -45,6 +45,7 @@ public class InitielleLinksRestTjeneste {
         lenkene.add(get(NavAnsattRestTjeneste.NAV_ANSATT_PATH, "nav-ansatt"));
         lenkene.add(get(KodeverkRestTjeneste.KODERVERK_PATH, "kodeverk"));
         lenkene.add(get(KodeverkRestTjeneste.ENHETER_PATH, "behandlende-enheter"));
+        lenkene.add(get(SaksbehandlerRestTjeneste.SAKSBEHANDLER_PATH, "saksbehandler-info"));
         List<ResourceLink> saklenker = new ArrayList<>();
         saklenker.add(get(FagsakRestTjeneste.PATH, "fagsak"));
         saklenker.add(get(FagsakRestTjeneste.BRUKER_PATH, "sak-bruker"));

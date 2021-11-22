@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling;
 
 import static no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil.get;
+import static no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil.getApiPath;
 import static no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil.getFraMap;
 import static no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil.post;
 import static no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil.setStandardfelter;
@@ -80,6 +81,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTje
 import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.saksbehandler.SaksbehandlerRestTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
@@ -391,6 +393,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(RettVedDødRestTjeneste.BASEPATH, "rett-ved-dod", uuidQueryParams));
                 dto.leggTil(getFraMap(PleietrengendeRestTjeneste.BASE_PATH, "om-pleietrengende", uuidQueryParams));
                 dto.leggTil(getFraMap(DokumenterMedUstrukturerteDataRestTjeneste.FRITEKSTDOKUMENTER_PATH, "pleiepenger-fritekstdokumenter", uuidQueryParams));
+                dto.leggTil(ResourceLink.get(getApiPath(SaksbehandlerRestTjeneste.SAKSBEHANDLER_PATH), "saksbehandler-info"));
                 leggTilUttakEndepunkt(behandling, dto);
                 break;
             default:
