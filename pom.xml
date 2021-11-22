@@ -202,7 +202,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kontrakt</artifactId>
-                <version>1.2.78</version>
+                <version>1.2.79</version>
             </dependency>
 
             <dependency>
