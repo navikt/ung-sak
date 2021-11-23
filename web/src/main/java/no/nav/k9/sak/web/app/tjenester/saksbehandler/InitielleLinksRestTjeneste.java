@@ -15,6 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import io.swagger.v3.oas.annotations.Operation;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.InitLinksDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
@@ -23,7 +24,6 @@ import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjenest
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 
 
 @Path("/init-fetch")
@@ -36,6 +36,14 @@ public class InitielleLinksRestTjeneste {
         // for CDI proxy
     }
 
+    static ResourceLink get(String path, String rel) {
+        return ResourceLink.get(BehandlingDtoUtil.getApiPath(path), rel);
+    }
+
+    static ResourceLink post(String path, String rel) {
+        return ResourceLink.post(BehandlingDtoUtil.getApiPath(path), rel, null);
+    }
+
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Returnerer ", tags = "init-fetch")
@@ -45,7 +53,6 @@ public class InitielleLinksRestTjeneste {
         lenkene.add(get(NavAnsattRestTjeneste.NAV_ANSATT_PATH, "nav-ansatt"));
         lenkene.add(get(KodeverkRestTjeneste.KODERVERK_PATH, "kodeverk"));
         lenkene.add(get(KodeverkRestTjeneste.ENHETER_PATH, "behandlende-enheter"));
-        lenkene.add(get(SaksbehandlerRestTjeneste.SAKSBEHANDLER_PATH, "saksbehandler-info"));
         List<ResourceLink> saklenker = new ArrayList<>();
         saklenker.add(get(FagsakRestTjeneste.PATH, "fagsak"));
         saklenker.add(get(FagsakRestTjeneste.BRUKER_PATH, "sak-bruker"));
@@ -54,14 +61,6 @@ public class InitielleLinksRestTjeneste {
         saklenker.add(get(DokumentRestTjeneste.DOKUMENTER_PATH, "sak-dokumentliste"));
         saklenker.add(get(BehandlingRestTjeneste.BEHANDLINGER_ALLE, "sak-alle-behandlinger"));
         return new InitLinksDto(lenkene, saklenker);
-    }
-
-    static ResourceLink get(String path, String rel) {
-        return ResourceLink.get(BehandlingDtoUtil.getApiPath(path), rel);
-    }
-
-    static ResourceLink post(String path, String rel) {
-        return ResourceLink.post(BehandlingDtoUtil.getApiPath(path), rel, null);
     }
 
 }
