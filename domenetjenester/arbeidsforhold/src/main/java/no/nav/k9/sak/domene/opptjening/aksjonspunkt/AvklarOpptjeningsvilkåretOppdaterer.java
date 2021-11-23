@@ -110,9 +110,10 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
 
         // Validering før opptjening kan gå videre til beregningsvilkår
         long antall = opptjeningAktiviteter.stream()
-            .filter(oa -> !oa.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD)).count();
+            .filter(oa -> !oa.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD))
+            .filter(oa -> oa.getPeriode().inkluderer(stp) || oa.getPeriode().getTomDato().plusDays(1).equals(stp)).count();
         if (antall == 0 && innvilgelseMerknad != VilkårUtfallMerknad.VM_7847_A) {
-            throw new IllegalArgumentException("Må ha opptjeningsaktivitet for å kunne gå videre til beregingsvilkår. (Dersom 8-47 A er tilgjengelig, kan denne velges.) Skjæringstidspunkt=" + stp);
+            throw new IllegalArgumentException("Må ha opptjeningsaktivitet på skjæringstidspunktet for å kunne gå videre til beregingsvilkår. (Dersom 8-47 A er tilgjengelig, kan denne velges.) Skjæringstidspunkt=" + stp);
         }
         // Validering av 8-47 (dersom valgt)
         if (innvilgelseMerknad != null) {
