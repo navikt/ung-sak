@@ -117,7 +117,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
 
             oppdaterMedIkkeOppfylt(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, param, behandling);
             oppdaterMedIkkeOppfylt(VilkårType.MEDISINSKEVILKÅR_18_ÅR, param, behandling);
-            return OppdateringResultat.utenTransisjon().medTotrinnHvis(skalHaToTrinn).build();
+            return OppdateringResultat.utenTransisjon().medTotrinn().build();
         }
 
         /*
