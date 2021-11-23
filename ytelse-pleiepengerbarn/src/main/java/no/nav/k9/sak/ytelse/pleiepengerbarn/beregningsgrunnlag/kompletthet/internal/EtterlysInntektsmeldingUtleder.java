@@ -39,7 +39,7 @@ class EtterlysInntektsmeldingUtleder {
             var fristTid = FristKalkulerer.regnUtFrist(AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_FOR_BEREGNING, eksisterendeFrist);
 
             return KompletthetsAksjon.automatiskEtterlysning(AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_FOR_BEREGNING, fristTid, ikkeEtterlystEnda, DokumentMalType.ETTERLYS_INNTEKTSMELDING_DOK);
-        } else if (!harEksisterendeFristSomIkkeErUtløpt(eksisterendeFrist) && erIkkeKomplett) {
+        } else if (harEksisterendeFristSomHarUtløpt(eksisterendeFrist) && erIkkeKomplett) {
             return KompletthetsAksjon.uavklart();
         }
 
@@ -55,5 +55,9 @@ class EtterlysInntektsmeldingUtleder {
 
     private boolean harEksisterendeFristSomIkkeErUtløpt(LocalDateTime eksisterendeFrist) {
         return eksisterendeFrist != null && LocalDateTime.now().isBefore(eksisterendeFrist);
+    }
+
+    private boolean harEksisterendeFristSomHarUtløpt(LocalDateTime eksisterendeFrist) {
+        return !harEksisterendeFristSomIkkeErUtløpt(eksisterendeFrist);
     }
 }
