@@ -30,6 +30,7 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     DAGPENGER_INNTEKT("DAGPENGER_INNTEKT", "Dagpenger"),
     FASTSETT_ETTERLØNN_SLUTTPAKKE("FASTSETT_ETTERLØNN_SLUTTPAKKE", "Fastsett søkers månedsinntekt fra etterlønn eller sluttpakke"),
 
+
     /** Søknad og behandling. */
     AVKLARSAKSOPPLYSNINGER("AVKLARSAKSOPPLYSNINGER", "Avklar saksopplysninger"),
     BEHANDLENDE_ENHET("BEHANDLENDE_ENHET", "Behandlende enhet"),
@@ -52,6 +53,7 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     VURDER_ETTERLØNN_SLUTTPAKKE("VURDER_ETTERLØNN_SLUTTPAKKE", "Har søker inntekt fra etterlønn eller sluttpakke"),
     ENDRING_NÆRING("ENDRING_NAERING", "Endring i næringsvirksomheten"),
     BRUTTO_NAERINGSINNTEKT("BRUTTO_NAERINGSINNTEKT", "Brutto næringsinntekt"),
+    KOMPLETTHET("KOMPLETTHET", "Avklar inntektsgrunnlag for skjæringstidspunkt"),
 
     /** Medlemskap og utenlandstilsnitt. */
     ER_SOKER_BOSATT_I_NORGE("ER_SOKER_BOSATT_I_NORGE", "Er søker bosatt i Norge?"),

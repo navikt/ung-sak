@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -15,6 +16,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
@@ -26,6 +28,7 @@ import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt.AvklarKompletthetForBeregningDto;
 import no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt.KompletthetsPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 
 @ApplicationScoped
@@ -69,7 +72,7 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .orElse(false));
         // TODO: Lagre ned de som er avklart OK for fortsettelse eller om det er varsel til AG
         if (benyttNyFlyt) {
-            lagreVurderinger(param.getBehandlingId(), perioderMedManglendeGrunnlag, dto);
+            lagreVurderinger(param, perioderMedManglendeGrunnlag, dto);
         }
 
         if (kanFortsette && !benyttNyFlyt) {
@@ -89,7 +92,8 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
         }
     }
 
-    private void lagreVurderinger(Long behandlingId, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> perioderMedManglendeGrunnlag,
+    private void lagreVurderinger(AksjonspunktOppdaterParameter param,
+                                  Map<DatoIntervallEntitet, List<ManglendeVedlegg>> perioderMedManglendeGrunnlag,
                                   AvklarKompletthetForBeregningDto dto) {
 
         var perioder = dto.getPerioder()
@@ -100,13 +104,15 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .anyMatch(it -> it.getKey().overlapper(at.getPeriode().getFom(), at.getPeriode().getTom())))
             .collect(Collectors.toList());
 
+        lagHistorikkinnslag(param, perioder);
+
         var kompletthetVurderinger = perioder.stream()
             .map(it -> new KompletthetPeriode(utledVurderingstype(it), it.getPeriode().getFom(), getBegrunnelse(dto, it)))
             .collect(Collectors.toList());
 
         log.info("Lagrer {} vurderinger.", kompletthetVurderinger.size());
 
-        grunnlagRepository.lagre(behandlingId, kompletthetVurderinger);
+        grunnlagRepository.lagre(param.getBehandlingId(), kompletthetVurderinger);
     }
 
     private String getBegrunnelse(AvklarKompletthetForBeregningDto dto, KompletthetsPeriode it) {
@@ -127,6 +133,36 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
             .medSkjermlenke(SkjermlenkeType.BEREGNING) // TODO: Sette noe fornuftig avhengig av hvor frontend plasserer dette
             .medBegrunnelse("Behov for inntektsmelding avklart: " + dto.getBegrunnelse());
         historikkTjenesteAdapter.opprettHistorikkInnslag(param.getBehandlingId(), HistorikkinnslagType.FAKTA_ENDRET);
+    }
+
+    private void lagHistorikkinnslag(AksjonspunktOppdaterParameter param, List<KompletthetsPeriode> perioder) {
+        var eksisterendeGrunnlag = grunnlagRepository.hentGrunnlag(param.getBehandlingId());
+
+        for (KompletthetsPeriode periode : perioder) {
+            var eksisterendeValg = utledEksisterendeValg(periode, eksisterendeGrunnlag);
+            historikkTjenesteAdapter.tekstBuilder()
+                .medSkjermlenke(SkjermlenkeType.FAKTA_OM_INNTEKTSMELDING) // TODO: Sette noe fornuftig avhengig av hvor frontend plasserer dette
+                .medEndretFelt(HistorikkEndretFeltType.KOMPLETTHET, formaterDato(periode), eksisterendeValg, utledVurderingstype(periode))
+                .medBegrunnelse(periode.getBegrunnelse());
+            historikkTjenesteAdapter.opprettHistorikkInnslag(param.getBehandlingId(), HistorikkinnslagType.FAKTA_ENDRET);
+        }
+    }
+
+    private String formaterDato(KompletthetsPeriode periode) {
+        return periode.getPeriode().getFom().toString();
+    }
+
+    private Vurdering utledEksisterendeValg(KompletthetsPeriode periode, Optional<BeregningsgrunnlagPerioderGrunnlag> eksisterendeGrunnlag) {
+        if (eksisterendeGrunnlag.isEmpty()) {
+            return null;
+        }
+        var vurderinger = eksisterendeGrunnlag.get().getKompletthetPerioder();
+
+        return vurderinger.stream()
+            .filter(it -> Objects.equals(it.getSkjæringstidspunkt(), periode.getPeriode().getFom()))
+            .map(KompletthetPeriode::getVurdering)
+            .findFirst()
+            .orElse(null);
     }
 
 }

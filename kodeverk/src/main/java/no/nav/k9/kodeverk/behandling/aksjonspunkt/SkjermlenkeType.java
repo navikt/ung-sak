@@ -31,6 +31,7 @@ public enum SkjermlenkeType implements Kodeverdi {
     FAKTA_OM_UTVIDETRETT("FAKTA_OM_UTVIDETRETT", "Omsorgsdager"),
     FAKTA_OM_OMSORGENFOR("FAKTA_OM_OMSORGEN_FOR", "Omsorgen for"),
     FAKTA_OM_OPPTJENING("FAKTA_OM_OPPTJENING", "Opptjening"),
+    FAKTA_OM_INNTEKTSMELDING("FAKTA_OM_INNTEKTSMELDING", "Inntektsmelding"),
     FAKTA_OM_SIMULERING("FAKTA_OM_SIMULERING", "Simulering"),
     FAKTA_OM_UTTAK("FAKTA_OM_UTTAK", "Uttak"),
     FAKTA_OM_VERGE("FAKTA_OM_VERGE", "Verge/fullmektig"),
