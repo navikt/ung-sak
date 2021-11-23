@@ -224,7 +224,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     @Override
     public Optional<BeregningsgrunnlagListe> hentBeregningsgrunnlag(BehandlingReferanse ref) {
         var beregningsgrunnlagPerioderGrunnlag = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
-        if (beregningsgrunnlagPerioderGrunnlag.isPresent()) {
+        if (harGrunnlagsperioder(beregningsgrunnlagPerioderGrunnlag)) {
             var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
             var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
             var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
@@ -241,6 +241,11 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             return Optional.of(tjeneste.hentBeregningsgrunnlagListeDto(ref, bgReferanser));
         }
         return Optional.empty();
+    }
+
+    private boolean harGrunnlagsperioder(Optional<BeregningsgrunnlagPerioderGrunnlag> beregningsgrunnlagPerioderGrunnlag) {
+        return !beregningsgrunnlagPerioderGrunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getGrunnlagPerioder).orElse(Collections.emptyList())
+            .isEmpty();
     }
 
     @Override
