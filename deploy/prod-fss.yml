@@ -212,7 +212,7 @@ spec:
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
     - name: MAP_ALLE_KRAV
-      value: "false"
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
