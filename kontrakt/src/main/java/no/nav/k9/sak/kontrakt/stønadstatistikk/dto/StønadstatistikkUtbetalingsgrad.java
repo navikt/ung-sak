@@ -40,6 +40,11 @@ public class StønadstatistikkUtbetalingsgrad {
     @NotNull
     @Valid
     private int dagsats;
+    
+    @JsonProperty(value = "brukerErMottaker", required = true)
+    @NotNull
+    @Valid
+    private boolean brukerErMottaker;
 
     
     protected StønadstatistikkUtbetalingsgrad() {
@@ -50,12 +55,14 @@ public class StønadstatistikkUtbetalingsgrad {
             Duration normalArbeidstid,
             Duration faktiskArbeidstid,
             BigDecimal utbetalingsgrad,
-            int dagsats) {
+            int dagsats,
+            boolean brukerErMottaker) {
         this.arbeidsforhold = arbeidsforhold;
         this.normalArbeidstid = normalArbeidstid;
         this.faktiskArbeidstid = faktiskArbeidstid;
         this.utbetalingsgrad = utbetalingsgrad;
         this.dagsats = dagsats;
+        this.brukerErMottaker = brukerErMottaker;
     }
     
 
@@ -77,5 +84,9 @@ public class StønadstatistikkUtbetalingsgrad {
 
     public int getDagsats() {
         return dagsats;
+    }
+    
+    public boolean isBrukerErMottaker() {
+        return brukerErMottaker;
     }
 }

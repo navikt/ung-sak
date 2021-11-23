@@ -181,7 +181,8 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
                             u.getNormalArbeidstid(),
                             u.getFaktiskArbeidstid(),
                             utbetalingsgrad,
-                            dagsats
+                            dagsats,
+                            andel.erBrukerMottaker()
                             );
                 }).toList();
             } else {
@@ -191,7 +192,8 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
                         u.getNormalArbeidstid(),
                         u.getFaktiskArbeidstid(),
                         utbetalingsgrad,
-                        0
+                        0,
+                        true
                         ));
             }
         }).flatMap(Collection::stream).toList();
