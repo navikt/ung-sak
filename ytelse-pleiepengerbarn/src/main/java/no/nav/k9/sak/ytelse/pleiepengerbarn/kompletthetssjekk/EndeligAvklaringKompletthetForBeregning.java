@@ -116,6 +116,7 @@ public class EndeligAvklaringKompletthetForBeregning implements AksjonspunktOppd
         return vurderinger.stream()
             .filter(it -> Objects.equals(it.getSkjæringstidspunkt(), periode.getPeriode().getFom()))
             .map(KompletthetPeriode::getVurdering)
+            .filter(it -> !Objects.equals(Vurdering.UDEFINERT, it))
             .findFirst()
             .orElse(null);
     }
