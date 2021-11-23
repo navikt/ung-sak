@@ -84,7 +84,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         if (benyttNyFlyt) {
             return nyKompletthetFlyt(ref, kontekst);
         } else {
-            return legacykompletthetHåndtering(ref);
+            return legacykompletthetHåndtering(ref, kontekst);
         }
     }
 
@@ -192,10 +192,11 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         throw new IllegalArgumentException("Ukjent autopunkt '" + ap + "'");
     }
 
-    private BehandleStegResultat legacykompletthetHåndtering(BehandlingReferanse ref) {
+    private BehandleStegResultat legacykompletthetHåndtering(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
 
         if (perioderTilVurdering.isEmpty()) {
+            avbrytAksjonspunktHvisTilstede(kontekst);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
@@ -206,6 +207,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             .collect(Collectors.toList());
 
         if (relevanteKompletthetsvurderinger.isEmpty()) {
+            avbrytAksjonspunktHvisTilstede(kontekst);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
@@ -213,6 +215,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             .allMatch(it -> it.getValue().isEmpty());
 
         if (erKomplett) {
+            avbrytAksjonspunktHvisTilstede(kontekst);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         } else {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING));

@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
@@ -35,7 +33,6 @@ public class EndeligAvklaringKompletthetForBeregning implements AksjonspunktOppd
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
     private BeregningPerioderGrunnlagRepository grunnlagRepository;
-    private Boolean benyttNyFlyt = false;
 
     EndeligAvklaringKompletthetForBeregning() {
         // for CDI proxy
@@ -44,12 +41,10 @@ public class EndeligAvklaringKompletthetForBeregning implements AksjonspunktOppd
     @Inject
     public EndeligAvklaringKompletthetForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
                                                    HistorikkTjenesteAdapter historikkTjenesteAdapter,
-                                                   BeregningPerioderGrunnlagRepository grunnlagRepository,
-                                                   @KonfigVerdi(value = "KOMPLETTHET_NY_FLYT", defaultVerdi = "false") Boolean benyttNyFlyt) {
+                                                   BeregningPerioderGrunnlagRepository grunnlagRepository) {
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.grunnlagRepository = grunnlagRepository;
-        this.benyttNyFlyt = benyttNyFlyt;
     }
 
     @Override
@@ -58,13 +53,10 @@ public class EndeligAvklaringKompletthetForBeregning implements AksjonspunktOppd
 
         lagreVurderinger(param, perioderMedManglendeGrunnlag, dto);
 
-        var resultat = OppdateringResultat.utenTransisjon()
-            .medTotrinnHvis(benyttNyFlyt)
+        // Rekjører steget etter løsing
+        return OppdateringResultat.utenTransisjon()
+            .medTotrinn()
             .build();
-
-        resultat.skalRekjøreSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
-        resultat.setSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING); // TODO: Ved fjerning av toggle, endre til å alltid hoppe tilbake
-        return resultat;
     }
 
     private void lagreVurderinger(AksjonspunktOppdaterParameter param, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> perioderMedManglendeGrunnlag,

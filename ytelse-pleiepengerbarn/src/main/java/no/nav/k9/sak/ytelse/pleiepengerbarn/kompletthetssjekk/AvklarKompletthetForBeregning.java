@@ -70,9 +70,11 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .map(KompletthetsPeriode::getKanFortsette)
                 .findFirst()
                 .orElse(false));
+
+        boolean toTrinn = kanFortsette;
         // TODO: Lagre ned de som er avklart OK for fortsettelse eller om det er varsel til AG
         if (benyttNyFlyt) {
-            lagreVurderinger(param, perioderMedManglendeGrunnlag, dto);
+            toTrinn = lagreVurderinger(param, perioderMedManglendeGrunnlag, dto);
         }
 
         if (kanFortsette && !benyttNyFlyt) {
@@ -83,7 +85,7 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .build();
         } else {
             var resultat = OppdateringResultat.utenTransisjon()
-                .medTotrinnHvis(benyttNyFlyt)
+                .medTotrinnHvis(benyttNyFlyt && toTrinn)
                 .build();
 
             resultat.skalRekjøreSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
@@ -92,9 +94,9 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
         }
     }
 
-    private void lagreVurderinger(AksjonspunktOppdaterParameter param,
-                                  Map<DatoIntervallEntitet, List<ManglendeVedlegg>> perioderMedManglendeGrunnlag,
-                                  AvklarKompletthetForBeregningDto dto) {
+    private boolean lagreVurderinger(AksjonspunktOppdaterParameter param,
+                                     Map<DatoIntervallEntitet, List<ManglendeVedlegg>> perioderMedManglendeGrunnlag,
+                                     AvklarKompletthetForBeregningDto dto) {
 
         var perioder = dto.getPerioder()
             .stream()
@@ -113,6 +115,8 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
         log.info("Lagrer {} vurderinger.", kompletthetVurderinger.size());
 
         grunnlagRepository.lagre(param.getBehandlingId(), kompletthetVurderinger);
+
+        return !kompletthetVurderinger.stream().allMatch(it -> Objects.equals(it.getVurdering(), Vurdering.UDEFINERT));
     }
 
     private String getBegrunnelse(AvklarKompletthetForBeregningDto dto, KompletthetsPeriode it) {
