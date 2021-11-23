@@ -1,6 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.saksbehandler;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.util.HashMap;
@@ -62,10 +62,10 @@ public class SaksbehandlerRestTjeneste {
 
     @Inject
     public SaksbehandlerRestTjeneste(
-            @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
-            HistorikkRepository historikkRepository,
-            BehandlingRepository behandlingRepository,
-            SykdomVurderingService sykdomVurderingService) {
+        @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
+        HistorikkRepository historikkRepository,
+        BehandlingRepository behandlingRepository,
+        SykdomVurderingService sykdomVurderingService) {
         this.systembruker = systembruker;
         this.historikkRepository = historikkRepository;
         this.behandlingRepository = behandlingRepository;
@@ -79,16 +79,16 @@ public class SaksbehandlerRestTjeneste {
         tags = "nav-ansatt",
         summary = ("Identer hentes fra historikkinnslag og sykdomsvurderinger.")
     )
-    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = FAGSAK, sporingslogg = false)
     public SaksbehandlerDto getSaksbehandlere(
-            @QueryParam(BehandlingUuidDto.NAME)
-            @Parameter(description = BehandlingUuidDto.DESC)
-            @NotNull
-            @Valid
-            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-                BehandlingUuidDto behandlingUuid) {
+        @QueryParam(BehandlingUuidDto.NAME)
+        @Parameter(description = BehandlingUuidDto.DESC)
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            BehandlingUuidDto behandlingUuid) {
 
-        Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).get();
+        Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         List<Historikkinnslag> historikkinnslag = historikkRepository.hentHistorikkForSaksnummer(behandling.getFagsak().getSaksnummer());
 
         LocalDateTimeline<SykdomVurderingVersjon> ktpTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
