@@ -75,10 +75,13 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokument
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
+import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.KortTekst;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
+import no.nav.k9.sak.kontrakt.stønadstatistikk.StønadstatistikkSerializer;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -121,6 +124,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     
     private Pep pep;
     private BrukerTokenProvider tokenProvider;
+    private StønadstatistikkService stønadstatistikkService;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
@@ -137,7 +141,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    SjekkProsessering sjekkProsessering,
                                                    EntityManager entityManager,
                                                    Pep pep,
-                                                   BrukerTokenProvider tokenProvider) {
+                                                   BrukerTokenProvider tokenProvider,
+                                                   StønadstatistikkService stønadstatistikkService) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
@@ -150,6 +155,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.entityManager = entityManager;
         this.pep = pep;
         this.tokenProvider = tokenProvider;
+        this.stønadstatistikkService = stønadstatistikkService;
     }
 
     /**
@@ -203,6 +209,24 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         return Response.ok(new SaksnummerDto(fagsak.getSaksnummer())).build();
     }
 
+    @POST
+    @Path("/stonadstatistikk")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Henter ut stønadstatistikk-JSON.", summary = ("Henter ut stønadstatistikk-JSON."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
+    public Response hentUtStønadstatistikk(
+            @Parameter(description = "Behandling-UUID")
+            @NotNull 
+            @Valid 
+            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            BehandlingIdDto behandlingIdDto) {
+        
+        final var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+        final String json = StønadstatistikkSerializer.toJson(stønadstatistikkService.lagHendelse(behandling.getId()));
+        return Response.ok(json).build();
+    }
+    
     @POST
     @Path("/manuell-revurdering")
     @Consumes(MediaType.TEXT_PLAIN)
