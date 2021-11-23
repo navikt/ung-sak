@@ -48,7 +48,7 @@ public class StønadstatistikkService {
     }
     
     
-    StønadstatistikkHendelse lagHendelse(Long behandlingId) {
+    public StønadstatistikkHendelse lagHendelse(Long behandlingId) {
         final Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         final StønadstatistikkHendelseBygger bygger = forYtelse(behandling.getFagsakYtelseType()).orElseThrow();
         return bygger.lagHendelse(behandling.getUuid());
