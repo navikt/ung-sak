@@ -16,12 +16,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
 import no.nav.k9.kodeverk.historikk.HistorikkAvklartSoeknadsperiodeType;
 import no.nav.k9.kodeverk.historikk.HistorikkBegrunnelseType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
@@ -43,7 +45,6 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDel;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagTekstBuilderFormater;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagTotrinnsvurdering;
-import no.nav.k9.felles.feil.Feil;
 
 public class HistorikkInnslagTekstBuilder {
 
@@ -79,6 +80,7 @@ public class HistorikkInnslagTekstBuilder {
         // Domene : arbeid og beregningsgrunnlag
         new SimpleEntry<>(Inntektskategori.KODEVERK, Inntektskategori.kodeMap()),
         new SimpleEntry<>(VurderArbeidsforholdHistorikkinnslag.KODEVERK, VurderArbeidsforholdHistorikkinnslag.kodeMap()),
+        new SimpleEntry<>(Vurdering.KODEVERK, Vurdering.kodeMap()),
 
         // Domene : Tilbakekreving
         new SimpleEntry<>(TilbakekrevingVidereBehandling.KODEVERK, TilbakekrevingVidereBehandling.kodeMap()));

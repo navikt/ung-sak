@@ -1,5 +1,6 @@
 package no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ public enum Vurdering implements Kodeverdi {
     MANGLENDE_GRUNNLAG("MANGLENDE_GRUNNLAG", "Kan ikke forsett pga manglende grunnlag for å kunne beregne.");
 
     private static final Map<String, Vurdering> KODER = new LinkedHashMap<>();
+    public static final String KODEVERK = "KOMPLETTHET_VURDERING";
 
     static {
         for (var v : values()) {
@@ -49,6 +51,10 @@ public enum Vurdering implements Kodeverdi {
         return ad;
     }
 
+    public static Map<String, Vurdering> kodeMap() {
+        return Collections.unmodifiableMap(KODER);
+    }
+
     public String getKode() {
         return kode;
     }
@@ -60,7 +66,7 @@ public enum Vurdering implements Kodeverdi {
 
     @Override
     public String getKodeverk() {
-        return "KOMPLETTHET_VURDERING";
+        return KODEVERK;
     }
 
     @Override
