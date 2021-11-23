@@ -119,7 +119,7 @@ public class PSBKompletthetSjekkerTjeneste {
         // Varsle avslag
         if (etterlysMedVarselaksjon.harAksjonspunktMedFrist() || etterlysMedVarselaksjon.kanFortsette()) {
             log.info("Behandlingen er IKKE komplett, etterlyser med varsel om avslag.");
-            return etterlysAksjon;
+            return etterlysMedVarselaksjon;
         }
 
         // Manuell avklaring
