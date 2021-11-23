@@ -44,7 +44,7 @@ public class PeriodeMedMangler {
     public String toString() {
         return "PeriodeMedMangler{" +
             "periode=" + periode +
-            ", mangler=" + mangler +
+            ", mangler=" + mangler.size() +
             '}';
     }
 }

@@ -103,7 +103,7 @@ public class PSBKompletthetSjekkerTjeneste {
         var etterlysInntektsmeldingInput = new EtterlysningInput(aksjonspunkter, kompletthetUtleder.utledRelevanteVurderinger(inputMedVurderinger), bestilteBrev);
         var etterlysAksjon = etterlysInntektsmeldingUtleder.utled(etterlysInntektsmeldingInput);
 
-        if (!etterlysAksjon.erUavklart() || etterlysAksjon.kanFortsette()) {
+        if (etterlysAksjon.harAksjonspunktMedFrist() || etterlysAksjon.kanFortsette()) {
             log.info("Behandlingen er IKKE komplett etter vurdering fra saksbehandler, skal sende etterlysninger.");
             return etterlysAksjon;
         }
@@ -117,7 +117,7 @@ public class PSBKompletthetSjekkerTjeneste {
 
         var etterlysMedVarselaksjon = etterlysInntektsmeldingOgVarsleOmAvslagUtleder.utled(etterlysInntektsmeldingInput);
         // Varsle avslag
-        if (!etterlysMedVarselaksjon.erUavklart() || etterlysMedVarselaksjon.kanFortsette()) {
+        if (etterlysMedVarselaksjon.harAksjonspunktMedFrist() || etterlysMedVarselaksjon.kanFortsette()) {
             log.info("Behandlingen er IKKE komplett, etterlyser med varsel om avslag.");
             return etterlysAksjon;
         }

@@ -95,31 +95,36 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             avbrytAksjonspunktHvisTilstede(kontekst);
 
             return BehandleStegResultat.utførtUtenAksjonspunkter();
-        } else if (kompletthetsAksjon.harFrist()) {
-            var perioderMedManglendeVedlegg = kompletthetsAksjon.getPerioderMedMangler();
-            if (!perioderMedManglendeVedlegg.isEmpty()) {
-                var manglendeBestillinger = utledManglendeBestillinger(ref, perioderMedManglendeVedlegg, kompletthetsAksjon);
-
-                bestiltEtterlysningRepository.lagre(manglendeBestillinger);
-                var aktørerDetSkalEtterlysesFra = manglendeBestillinger.stream()
-                    .map(BestiltEtterlysning::getArbeidsgiver)
-                    .collect(Collectors.toSet());
-                for (Arbeidsgiver arbeidsgiver : aktørerDetSkalEtterlysesFra) {
-                    var mottaker = arbeidsgiver != null ? new Mottaker(arbeidsgiver.getIdentifikator(), arbeidsgiver.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID) : new Mottaker(ref.getAktørId().getAktørId(), IdType.AKTØRID);
-                    sendBrev(ref.getBehandlingId(), DokumentMalType.fraKode(kompletthetsAksjon.getDokumentMalType().getKode()), mottaker);
-                }
-            }
+        } else if (kompletthetsAksjon.harAksjonspunktMedFrist()) {
+            bestillBrevForMangler(ref, kompletthetsAksjon);
 
             var aksjonspunktResultat = AksjonspunktResultat.opprettForAksjonspunktMedFrist(kompletthetsAksjon.getAksjonspunktDefinisjon(),
                 utledVenteÅrsak(kompletthetsAksjon),
                 kompletthetsAksjon.getFrist());
+
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(aksjonspunktResultat));
-        } else if (!kompletthetsAksjon.erUavklart()) {
+        } else if (kompletthetsAksjon.harAksjonspunktUtenFrist()) {
             var aksjonspunktResultat = AksjonspunktResultat.opprettForAksjonspunkt(kompletthetsAksjon.getAksjonspunktDefinisjon());
 
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(aksjonspunktResultat));
         } else {
             throw new IllegalStateException("Ugyldig kompletthetstilstand :: " + kompletthetsAksjon);
+        }
+    }
+
+    private void bestillBrevForMangler(BehandlingReferanse ref, KompletthetsAksjon kompletthetsAksjon) {
+        var perioderMedManglendeVedlegg = kompletthetsAksjon.getPerioderMedMangler();
+        if (!perioderMedManglendeVedlegg.isEmpty()) {
+            var manglendeBestillinger = utledManglendeBestillinger(ref, perioderMedManglendeVedlegg, kompletthetsAksjon);
+
+            bestiltEtterlysningRepository.lagre(manglendeBestillinger);
+            var aktørerDetSkalEtterlysesFra = manglendeBestillinger.stream()
+                .map(BestiltEtterlysning::getArbeidsgiver)
+                .collect(Collectors.toSet());
+            for (Arbeidsgiver arbeidsgiver : aktørerDetSkalEtterlysesFra) {
+                var mottaker = arbeidsgiver != null ? new Mottaker(arbeidsgiver.getIdentifikator(), arbeidsgiver.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID) : new Mottaker(ref.getAktørId().getAktørId(), IdType.AKTØRID);
+                sendBrev(ref.getBehandlingId(), DokumentMalType.fraKode(kompletthetsAksjon.getDokumentMalType().getKode()), mottaker);
+            }
         }
     }
 

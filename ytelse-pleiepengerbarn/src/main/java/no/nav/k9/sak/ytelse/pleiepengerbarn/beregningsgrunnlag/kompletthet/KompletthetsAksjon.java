@@ -68,6 +68,14 @@ public class KompletthetsAksjon {
         return frist != null;
     }
 
+    public boolean harAksjonspunktMedFrist() {
+        return harFrist() && aksjonspunktDefinisjon != null;
+    }
+
+    public boolean harAksjonspunktUtenFrist() {
+        return !harFrist() && aksjonspunktDefinisjon != null;
+    }
+
     public AksjonspunktDefinisjon getAksjonspunktDefinisjon() {
         return aksjonspunktDefinisjon;
     }
@@ -82,5 +90,16 @@ public class KompletthetsAksjon {
 
     public List<PeriodeMedMangler> getPerioderMedMangler() {
         return perioderMedMangler;
+    }
+
+    @Override
+    public String toString() {
+        return "KompletthetsAksjon{" +
+            "uavklart=" + uavklart +
+            ", aksjonspunktDefinisjon=" + aksjonspunktDefinisjon +
+            ", dokumentMalType=" + dokumentMalType +
+            ", frist=" + frist +
+            ", mangler=" + perioderMedMangler +
+            '}';
     }
 }
