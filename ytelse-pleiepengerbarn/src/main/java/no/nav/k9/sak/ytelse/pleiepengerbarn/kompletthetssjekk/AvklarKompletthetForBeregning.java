@@ -140,6 +140,10 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
 
         for (KompletthetsPeriode periode : perioder) {
             var eksisterendeValg = utledEksisterendeValg(periode, eksisterendeGrunnlag);
+
+            if (eksisterendeValg == null && !periode.getKanFortsette()) {
+                continue;
+            }
             historikkTjenesteAdapter.tekstBuilder()
                 .medSkjermlenke(SkjermlenkeType.FAKTA_OM_INNTEKTSMELDING) // TODO: Sette noe fornuftig avhengig av hvor frontend plasserer dette
                 .medEndretFelt(HistorikkEndretFeltType.KOMPLETTHET, formaterDato(periode), eksisterendeValg, utledVurderingstype(periode))
