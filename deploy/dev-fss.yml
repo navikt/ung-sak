@@ -216,6 +216,8 @@ spec:
       value: "true"
     - name: MAP_ALLE_KRAV
       value: "true"
+    - name: K9_RAPID_AIVEN
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

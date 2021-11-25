@@ -7,6 +7,8 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.config.SaslConfigs;
+import org.apache.kafka.common.config.SslConfigs;
+import org.apache.kafka.common.security.auth.SecurityProtocol;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,21 +30,47 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
     private String topic;
     private Producer<String, String> producer;
 
-    RapidsBehovKafkaProducer() {}
+    RapidsBehovKafkaProducer() {
+    }
 
     @Inject
     public RapidsBehovKafkaProducer(
         @KonfigVerdi(value = "kafka.behov.topic", defaultVerdi = "k9-rapid-v2", required = false) String topic,
-        @KonfigVerdi("bootstrap.servers") String bootstrapServers,
-        @KonfigVerdi("systembruker.username") String username,
-        @KonfigVerdi("systembruker.password") String password) {
+        @KonfigVerdi("KAFKA_BROKERS") String aivenBootstrapServers,
+        @KonfigVerdi("KAFKA_TRUSTSTORE_PATH") String aivenTruststorePath,
+        @KonfigVerdi("KAFKA_KEYSTORE_PATH") String aivenKeystorePath,
+        @KonfigVerdi("KAFKA_CREDSTORE_PASSWORD") String aivenCredstorePassword,
+        @KonfigVerdi(value = "KAFKA_OVERRIDE_KEYSTORE_PASSWORD", required = false) String overrideKeystorePassword,
+        @KonfigVerdi(value = "BOOTSTRAP_SERVERS", required = false) String onpremBootstrapServers,
+        @KonfigVerdi(value = "K9_RAPID_AIVEN", defaultVerdi = "false") boolean isAivenInUse,
+        @KonfigVerdi(value = "systembruker.username") String username,
+        @KonfigVerdi(value = "systembruker.password") String password) {
         this.clientId = clientId();
         Properties properties = new Properties();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, onpremBootstrapServers);
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, this.clientId);
-        addCredentials(username, password, properties);
         this.topic = topic;
         this.producer = createProducer(properties);
+
+        if (overrideKeystorePassword != null || !isAivenInUse) { // Ikke SSL for onprem & VTP.
+            String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
+            String jaasCfg = String.format(jaasTemplate, username, password);
+            properties.put(SaslConfigs.SASL_JAAS_CONFIG, jaasCfg);
+            properties.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
+            properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL");
+        } else { // Aiven config
+            this.topic = "omsorgspenger.k9-rapid-v2";
+            properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, aivenBootstrapServers);
+            properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name);
+            properties.put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "");
+            properties.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "JKS");
+            properties.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12");
+            properties.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, aivenTruststorePath);
+            properties.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, aivenCredstorePassword);
+            properties.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, aivenKeystorePath);
+            properties.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, aivenCredstorePassword);
+            properties.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, aivenCredstorePassword);
+        }
     }
 
     @Override
@@ -67,16 +95,6 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
             }
         } else {
             return UUID.randomUUID().toString();
-        }
-    }
-
-    private static void addCredentials(String username, String password, Properties properties) {
-        if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
-            String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
-            String jaasCfg = String.format(jaasTemplate, username, password);
-            properties.put(SaslConfigs.SASL_JAAS_CONFIG, jaasCfg);
-            properties.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
-            properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL");
         }
     }
 

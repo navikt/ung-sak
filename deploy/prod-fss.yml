@@ -213,6 +213,8 @@ spec:
       value: "AFMX0|2021-03-01"
     - name: MAP_ALLE_KRAV
       value: "true"
+    - name: K9_RAPID_AIVEN
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
