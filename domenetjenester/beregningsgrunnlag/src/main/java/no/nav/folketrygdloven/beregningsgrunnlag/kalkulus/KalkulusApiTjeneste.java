@@ -49,10 +49,11 @@ public interface KalkulusApiTjeneste {
      *
      * @param behandlingReferanse behandlingreferanse
      * @param bgReferanser per skjæringstidspunkt
+     * @param originalReferanserMap Kobling mellom referanser i denne behandlingen og referanser som har overlappende periode i forrige behandling
      * @param stegType {@link BehandlingStegType}
      * @return KalkulusResultat {@link KalkulusResultat}
      */
-    SamletKalkulusResultat fortsettBeregning(BehandlingReferanse behandlingReferanse, Collection<BgRef> bgReferanser, BehandlingStegType stegType);
+    SamletKalkulusResultat fortsettBeregning(BehandlingReferanse behandlingReferanse, Collection<BgRef> bgReferanser, Map<BgRef, List<BgRef>> originalReferanserMap, BehandlingStegType stegType);
 
     /**
      * @param behandlingReferanse Behandlingreferanse

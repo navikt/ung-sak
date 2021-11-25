@@ -68,8 +68,8 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
     }
 
     @Override
-    public SamletKalkulusResultat fortsettBeregning(BehandlingReferanse referanse, Collection<BgRef> bgReferanser, BehandlingStegType stegType) {
-        return super.fortsettBeregning(referanse, bgReferanser, stegType);
+    public SamletKalkulusResultat fortsettBeregning(BehandlingReferanse referanse, Collection<BgRef> bgReferanser, Map<BgRef, List<BgRef>> originalReferanserMap, BehandlingStegType stegType) {
+        return super.fortsettBeregning(referanse, bgReferanser, originalReferanserMap, stegType);
     }
 
     @Override

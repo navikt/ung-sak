@@ -47,9 +47,7 @@ public class BeregningStegTjeneste {
             .map(p -> new AbstractMap.SimpleEntry<>(p.getFomDato(), p))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
-        List<LocalDate> skjæringstidspunkter = List.copyOf(stpTilPeriode.keySet());
-
-        var kalkulusResultat = kalkulusTjeneste.fortsettBeregning(ref, skjæringstidspunkter, stegType);
+        var kalkulusResultat = kalkulusTjeneste.fortsettBeregning(ref, perioderTilVurdering, stegType);
 
         for (var resultat : kalkulusResultat.getResultater().entrySet()) {
             var eksternReferanse = resultat.getKey();

@@ -77,6 +77,7 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE = "5039";
     public static final String VURDER_FAKTA_FOR_ATFL_SN_KODE = "5058";
+    public static final String VURDER_REFUSJON_BERGRUNN = "5059";
 
     public static final String FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE_KODE = "5042";
 
