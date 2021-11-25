@@ -17,6 +17,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagTekstBuilderFormater;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
@@ -96,7 +97,7 @@ public class EndeligAvklaringKompletthetForBeregning implements AksjonspunktOppd
     }
 
     private String formaterDato(KompletthetsPeriode periode) {
-        return periode.getPeriode().getFom().toString();
+        return HistorikkinnslagTekstBuilderFormater.formatDate(periode.getPeriode().getFom());
     }
 
     private Vurdering utledEksisterendeValg(KompletthetsPeriode periode, Optional<BeregningsgrunnlagPerioderGrunnlag> eksisterendeGrunnlag) {
