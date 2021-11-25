@@ -39,6 +39,7 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 public class OverlapendeYtelserRestTjeneste {
 
     public static final String BASE_PATH = "/behandling/ytelser";
+    public static final String OVERLAPPENDE_YTELSER_PATH = BASE_PATH;
 
     private BehandlingRepository behandlingRepository;
     private OverlappendeYtelserTjeneste overlappendeYtelserTjeneste;
