@@ -82,7 +82,6 @@ public class EndeligAvklaringKompletthetForBeregning implements AksjonspunktOppd
         return it.getKanFortsette() ? Vurdering.KAN_FORTSETTE : Vurdering.MANGLENDE_GRUNNLAG;
     }
 
-
     private void lagHistorikkinnslag(AksjonspunktOppdaterParameter param, List<KompletthetsPeriode> perioder) {
         var eksisterendeGrunnlag = grunnlagRepository.hentGrunnlag(param.getBehandlingId());
 
