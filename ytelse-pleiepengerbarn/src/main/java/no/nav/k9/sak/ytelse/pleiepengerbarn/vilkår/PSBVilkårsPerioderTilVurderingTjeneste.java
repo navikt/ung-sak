@@ -149,13 +149,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     NavigableSet<DatoIntervallEntitet> utledPeriodeEtterHensynÅHaHensyntattFullstendigTidslinje(Set<DatoIntervallEntitet> perioder, NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
-        var fullstendigTidslinje = new LocalDateTimeline<>(datoIntervallEntitets
-            .stream()
-            .map(this::justerMotHelg)
-            .map(DatoIntervallEntitet::toLocalDateInterval)
-            .map(it -> new LocalDateSegment<>(it, true))
-            .collect(Collectors.toList()))
-            .compress()
+        var fullstendigTidslinje = opprettTidslinje(datoIntervallEntitets)
             .toSegments()
             .stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             .collect(Collectors.toCollection(TreeSet::new));
@@ -172,6 +166,18 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             .stream()
             .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private LocalDateTimeline<Boolean> opprettTidslinje(NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
+
+        var tidslinje = new LocalDateTimeline<Boolean>(List.of());
+
+        for (DatoIntervallEntitet periode : datoIntervallEntitets) {
+            var segmentLinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(justerMotHelg(periode).toLocalDateInterval(), true)));
+            tidslinje = tidslinje.combine(segmentLinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        return tidslinje.compress();
     }
 
     private DatoIntervallEntitet justerMotHelg(DatoIntervallEntitet it) {
