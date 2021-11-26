@@ -1,8 +1,10 @@
 package no.nav.k9.sak.kontrakt.beregninginput;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import javax.validation.Valid;
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -35,16 +37,6 @@ public class OverstyrBeregningAktivitet {
     @JsonProperty("arbeidsgiverAktørId")
     private AktørId arbeidsgiverAktørId;
 
-    @JsonProperty(value = "aktivitetstatus")
-    @NotNull
-    @Valid
-    private AktivitetStatus aktivitetStatus;
-
-    @Valid
-    @NotNull
-    @JsonProperty("aktivitetsperiode")
-    private Periode aktivitetsperiode;
-
     @JsonProperty(value = "inntektPrAar")
     @NotNull
     @Min(0)
@@ -56,20 +48,15 @@ public class OverstyrBeregningAktivitet {
     @Max(1000000)
     private Integer refusjonPrAar;
 
-
     public OverstyrBeregningAktivitet() {
     }
 
     public OverstyrBeregningAktivitet(OrgNummer arbeidsgiverOrgnr,
                                       AktørId arbeidsgiverAktørId,
-                                      AktivitetStatus aktivitetStatus,
-                                      Periode aktivitetsperiode,
                                       Integer inntektPrAar, Integer
                                           refusjonPrAar) {
         this.arbeidsgiverOrgnr = arbeidsgiverOrgnr;
         this.arbeidsgiverAktørId = arbeidsgiverAktørId;
-        this.aktivitetStatus = aktivitetStatus;
-        this.aktivitetsperiode = aktivitetsperiode;
         this.inntektPrAar = inntektPrAar;
         this.refusjonPrAar = refusjonPrAar;
     }
@@ -83,14 +70,6 @@ public class OverstyrBeregningAktivitet {
         return arbeidsgiverAktørId;
     }
 
-    public AktivitetStatus getAktivitetStatus() {
-        return aktivitetStatus;
-    }
-
-    public Periode getAktivitetsperiode() {
-        return aktivitetsperiode;
-    }
-
     public Integer getInntektPrAar() {
         return inntektPrAar;
     }
@@ -98,4 +77,23 @@ public class OverstyrBeregningAktivitet {
     public Integer getRefusjonPrAar() {
         return refusjonPrAar;
     }
+
+    @Override
+    public String toString() {
+        return "OverstyrBeregningAktivitet{" +
+            "arbeidsgiverOrgnr=" + arbeidsgiverOrgnr +
+            ", arbeidsgiverAktørId=" + arbeidsgiverAktørId +
+            ", inntektPrAar=" + inntektPrAar +
+            ", refusjonPrAar=" + refusjonPrAar +
+            '}';
+    }
+
+    @AssertTrue(message = "Enten orgnr eller aktørId må være satt")
+    private boolean ok() {
+        var orgnr = getArbeidsgiverOrgnr();
+        var aktørId = getArbeidsgiverAktørId();
+        return orgnr != null || aktørId != null;
+    }
+
+
 }
