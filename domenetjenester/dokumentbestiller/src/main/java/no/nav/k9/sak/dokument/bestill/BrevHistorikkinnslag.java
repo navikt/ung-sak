@@ -15,10 +15,6 @@ import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 public class BrevHistorikkinnslag {
     private HistorikkRepository historikkRepository;
 
-    public BrevHistorikkinnslag() {
-        // for cdi proxy
-    }
-
     @Inject
     public BrevHistorikkinnslag(HistorikkRepository historikkRepository) {
         this.historikkRepository = historikkRepository;
@@ -36,12 +32,5 @@ public class BrevHistorikkinnslag {
             .medBegrunnelse(dokumentMalType.getNavn())
             .build(historikkinnslag);
         historikkRepository.lagre(historikkinnslag);
-    }
-
-    void opprettHistorikkinnslagForManueltBestiltBrev(HistorikkAktør historikkAktør,
-                                                      Behandling behandling,
-                                                      String dokumentMal) {
-        DokumentMalType dokumentMalType = DokumentMalType.fraKode(dokumentMal);
-        opprettHistorikkinnslagForBestiltBrevFraKafka(historikkAktør, behandling, dokumentMalType);
     }
 }
