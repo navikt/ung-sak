@@ -91,7 +91,9 @@ public class KravperioderMapper {
     }
 
     private static Map<Kravnøkkel, List<Inntektsmelding>> grupper(List<Inntektsmelding> inntektsmeldingerMedRefusjonskrav) {
-        Map<Kravnøkkel, List<Inntektsmelding>> resultMap = inntektsmeldingerMedRefusjonskrav.stream().map(im -> new Kravnøkkel(im.getArbeidsgiver(), im.getArbeidsforholdRef()))
+        Map<Kravnøkkel, List<Inntektsmelding>> resultMap = inntektsmeldingerMedRefusjonskrav.stream()
+            .map(im -> new Kravnøkkel(im.getArbeidsgiver(), im.getArbeidsforholdRef()))
+            .distinct()
             .collect(Collectors.toMap(n -> n, n -> new ArrayList<>()));
         inntektsmeldingerMedRefusjonskrav.forEach(im -> {
             var nøkler = finnKeysSomSkalHaInntektsmelding(resultMap, im);
