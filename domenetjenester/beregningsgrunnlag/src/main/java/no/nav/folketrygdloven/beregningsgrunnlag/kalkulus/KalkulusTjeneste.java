@@ -59,7 +59,6 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
@@ -138,19 +137,34 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     @Override
     public SamletKalkulusResultat fortsettBeregning(BehandlingReferanse referanse,
                                                     Collection<BgRef> bgReferanser,
+                                                    Map<BgRef, List<BgRef>> originalReferanserMap,
                                                     BehandlingStegType stegType) {
         if (bgReferanser.isEmpty()) {
             return new SamletKalkulusResultat(Collections.emptyMap(), Collections.emptyMap());
         }
         var bgRefs = BgRef.getRefs(bgReferanser);
         var ytelseType = YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode());
-        var request = new FortsettBeregningListeRequest(referanse.getSaksnummer().getVerdi(), bgRefs, ytelseType, new StegType(stegType.getKode()));
+        var request = new FortsettBeregningListeRequest(
+            referanse.getSaksnummer().getVerdi(),
+            bgRefs,
+            ytelseType,
+            new StegType(stegType.getKode()),
+            lagReferanseMap(originalReferanserMap));
         TilstandListeResponse tilstandResponse = restTjeneste.fortsettBeregning(request);
         if (tilstandResponse.trengerNyInput()) {
-            tilstandResponse = fortsettMedOppdatertInput(referanse, bgReferanser, stegType, ytelseType);
+            tilstandResponse = fortsettMedOppdatertInput(referanse, bgReferanser, stegType, ytelseType, originalReferanserMap);
         }
         return mapFraTilstand(tilstandResponse.getTilstand(), bgReferanser);
 
+    }
+
+    private Map<UUID, List<UUID>> lagReferanseMap(Map<BgRef, List<BgRef>> originalReferanserMap) {
+        return originalReferanserMap.entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                e -> e.getKey().getRef(),
+                e -> e.getValue().stream().map(BgRef::getRef).collect(Collectors.toList()))
+            );
     }
 
     /**
@@ -163,15 +177,23 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
      * @param bgReferanser referanser til bg
      * @param stegType     stegtype
      * @param ytelseType   Ytelsetype
+     * @param originalReferanserMap Kobling mellom referanse for denne behandlingen og referanser som har overlappende periode i forrige behandling.
      * @return Respons fra kalkulus
      */
     private TilstandListeResponse fortsettMedOppdatertInput(BehandlingReferanse referanse,
                                                             Collection<BgRef> bgReferanser,
                                                             BehandlingStegType stegType,
-                                                            YtelseTyperKalkulusStøtterKontrakt ytelseType) {
+                                                            YtelseTyperKalkulusStøtterKontrakt ytelseType,
+                                                            Map<BgRef, List<BgRef>> originalReferanserMap) {
         Map<UUID, KalkulatorInputDto> input = lagInputMap(bgReferanser, referanse);
         List<UUID> referanser = BgRef.getRefs(bgReferanser);
-        var request = new FortsettBeregningListeRequest(referanse.getSaksnummer().getVerdi(), referanser, input, ytelseType, new StegType(stegType.getKode()));
+        var request = new FortsettBeregningListeRequest(
+            referanse.getSaksnummer().getVerdi(),
+            referanser,
+            input,
+            ytelseType,
+            new StegType(stegType.getKode()),
+            lagReferanseMap(originalReferanserMap));
         return restTjeneste.fortsettBeregning(request);
     }
 
@@ -209,7 +231,11 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                                                               Collection<BgRef> bgReferanser,
                                                               BehandlingReferanse referanse) {
         Map<UUID, KalkulatorInputDto> input = lagInputMap(bgReferanser, referanse);
-        var request = new HåndterBeregningListeRequest(requestListe, input, referanse.getSaksnummer().getVerdi(), referanse.getBehandlingUuid());
+        var request = new HåndterBeregningListeRequest(requestListe,
+            input,
+            YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
+            referanse.getSaksnummer().getVerdi(),
+            referanse.getBehandlingUuid());
         return restTjeneste.oppdaterBeregningListe(request);
     }
 
@@ -250,9 +276,9 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         var vilkår = vilkårResultatRepository.hent(referanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
 
         var requestListe = bgReferanser.stream().map(it -> new HentBeregningsgrunnlagDtoForGUIRequest(
-            it.getReferanse(),
-            ytelseSomSkalBeregnes,
-            referanser,
+                it.getReferanse(),
+                ytelseSomSkalBeregnes,
+                referanser,
                 vilkår.finnPeriodeForSkjæringstidspunkt(it.getSkjæringstidspunkt()).getPeriode().getFomDato()))
             .sorted(Comparator.comparing(HentBeregningsgrunnlagDtoForGUIRequest::getVilkårsperiodeFom))
             .collect(Collectors.toList());
