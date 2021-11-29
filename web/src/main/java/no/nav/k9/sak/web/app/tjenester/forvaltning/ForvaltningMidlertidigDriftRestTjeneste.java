@@ -320,6 +320,33 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return Response.ok(resultatString).build();
     }
+    
+    @GET
+    @Path("/antall-aapne-psb-med-soknad")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Henter antallet åpne saker i PSB som har en søknad.", summary = ("Henter antallet åpne saker i PSB som har en søknad."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response antallÅpnePsbMedSøknad() {
+        final Query q = entityManager.createNativeQuery("select COUNT(*)\n"
+                + "from (\n"
+                + "  select\n"
+                + "    f.saksnummer\n"
+                + "  from behandling b inner join mottatt_dokument m ON (\n"
+                + "    m.behandling_id = b.id\n"
+                + "  ) inner join fagsak f ON (\n"
+                + "    f.id = m.fagsak_id\n"
+                + "  )\n"
+                + "  where b.behandling_status = 'UTRED'\n"
+                + "    and m.type = 'PLEIEPENGER_SOKNAD'\n"
+                + "    and m.status = 'GYLDIG'\n"
+                + "    and f.ytelse_type = 'PSB'\n"
+                + "    and b.original_behandling_id IS NOT NULL\n"
+                + "  group by saksnummer\n"
+                + ") f");
+
+        final Object result = q.getSingleResult();
+        return Response.ok(result.toString()).build();
+    }
 
     private final boolean harLesetilgang(String saksnummer, String restApiPath) {
         final AbacAttributtSamling attributter = AbacAttributtSamling.medJwtToken(tokenProvider.getToken().getToken());
