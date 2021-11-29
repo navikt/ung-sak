@@ -327,25 +327,37 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @Operation(description = "Henter antallet åpne saker i PSB som har en søknad.", summary = ("Henter antallet åpne saker i PSB som har en søknad."), tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     public Response antallÅpnePsbMedSøknad() {
-        final Query q = entityManager.createNativeQuery("select COUNT(*)\n"
-                + "from (\n"
+        final Query q = entityManager.createNativeQuery("WITH saker AS (\n"
                 + "  select\n"
-                + "    f.saksnummer\n"
-                + "  from behandling b inner join mottatt_dokument m ON (\n"
+                + "    f.saksnummer, b.original_behandling_id IS NOT NULL AS revurdering, m.id IS NOT NULL AS med_soknad\n"
+                + "  from behandling b inner join fagsak f ON (\n"
+                + "    f.id = b.fagsak_id\n"
+                + "    and f.ytelse_type = 'PSB'\n"
+                + "  ) left outer join mottatt_dokument m ON (\n"
                 + "    m.behandling_id = b.id\n"
-                + "  ) inner join fagsak f ON (\n"
-                + "    f.id = m.fagsak_id\n"
-                + "  )\n"
-                + "  where b.behandling_status = 'UTRED'\n"
                 + "    and m.type = 'PLEIEPENGER_SOKNAD'\n"
                 + "    and m.status = 'GYLDIG'\n"
-                + "    and f.ytelse_type = 'PSB'\n"
-                + "    and b.original_behandling_id IS NOT NULL\n"
-                + "  group by saksnummer\n"
-                + ") f");
+                + "  ) \n"
+                + "  where b.behandling_status = 'UTRED'\n"
+                + "  group by saksnummer, b.original_behandling_id IS NOT NULL, m.id IS NOT NULL\n"
+                + ") \n"
+                + "SELECT (\n"
+                + "    SELECT COUNT(*) FROM saker WHERE revurdering = true AND med_soknad = true\n"
+                + "  ) AS revudering_med_soknad, (\n"
+                + "    SELECT COUNT(*) FROM saker WHERE revurdering = false AND med_soknad = true\n"
+                + "  ) AS forstegang_med_soknad, (\n"
+                + "    SELECT COUNT(*) FROM saker WHERE revurdering = true AND med_soknad = false\n"
+                + "  ) AS revudering_uten_soknad, (\n"
+                + "    SELECT COUNT(*) FROM saker WHERE revurdering = false AND med_soknad = false\n"
+                + "  ) AS forstegang_uten_soknad");
 
-        final Object result = q.getSingleResult();
-        return Response.ok(result.toString()).build();
+        @SuppressWarnings("unchecked")
+        final List<Object[]> result = q.getResultList();
+        final String resultatString = result.stream()
+                .map(a -> a[0].toString() + ";" + a[1].toString() + ";" + a[2].toString() + ";" + a[3].toString())
+                .reduce((a, b) -> a + "\n" + b)
+                .orElse("");
+        return Response.ok(resultatString).build();
     }
 
     private final boolean harLesetilgang(String saksnummer, String restApiPath) {
