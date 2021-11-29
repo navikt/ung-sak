@@ -322,14 +322,13 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
     
     @GET
-    @Path("/antall-aapne-psb-med-soknad")
+    @Path("/aapne-psb-med-soknad")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(description = "Henter antallet åpne saker i PSB som har en søknad.", summary = ("Henter antallet åpne saker i PSB som har en søknad."), tags = "forvaltning")
+    @Operation(description = "Henter åpne saker i PSB.", summary = ("Henter åpne saker i PSB."), tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     public Response antallÅpnePsbMedSøknad() {
-        final Query q = entityManager.createNativeQuery("WITH saker AS (\n"
-                + "  select\n"
-                + "    f.saksnummer, b.original_behandling_id IS NOT NULL AS revurdering, m.id IS NOT NULL AS med_soknad\n"
+        final Query q = entityManager.createNativeQuery("select\n"
+                + "    f.saksnummer, b.original_behandling_id IS NOT NULL AS revurdering, m.id IS NOT NULL AS med_soknad, COUNT(*) AS antall_soknader\n"
                 + "  from behandling b inner join fagsak f ON (\n"
                 + "    f.id = b.fagsak_id\n"
                 + "    and f.ytelse_type = 'PSB'\n"
@@ -339,21 +338,13 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 + "    and m.status = 'GYLDIG'\n"
                 + "  ) \n"
                 + "  where b.behandling_status = 'UTRED'\n"
-                + "  group by saksnummer, b.original_behandling_id IS NOT NULL, m.id IS NOT NULL\n"
-                + ") \n"
-                + "SELECT (\n"
-                + "    SELECT COUNT(*) FROM saker WHERE revurdering = true AND med_soknad = true\n"
-                + "  ) AS revudering_med_soknad, (\n"
-                + "    SELECT COUNT(*) FROM saker WHERE revurdering = false AND med_soknad = true\n"
-                + "  ) AS forstegang_med_soknad, (\n"
-                + "    SELECT COUNT(*) FROM saker WHERE revurdering = true AND med_soknad = false\n"
-                + "  ) AS revudering_uten_soknad, (\n"
-                + "    SELECT COUNT(*) FROM saker WHERE revurdering = false AND med_soknad = false\n"
-                + "  ) AS forstegang_uten_soknad");
+                + "  group by saksnummer, b.original_behandling_id IS NOT NULL, m.id IS NOT NULL");
 
         @SuppressWarnings("unchecked")
         final List<Object[]> result = q.getResultList();
+        final String restApiPath = "/aapne-psb-med-soknad";
         final String resultatString = result.stream()
+                .filter(a -> harLesetilgang(a[0].toString(), restApiPath))
                 .map(a -> a[0].toString() + ";" + a[1].toString() + ";" + a[2].toString() + ";" + a[3].toString())
                 .reduce((a, b) -> a + "\n" + b)
                 .orElse("");
