@@ -338,6 +338,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 + "    and m.status = 'GYLDIG'\n"
                 + "  ) \n"
                 + "  where b.behandling_status = 'UTRED'\n"
+                + "    AND b.original_behandling_id IS NOT NULL\n"
+                + "    AND m.id IS NOT NULL\n"
                 + "  group by saksnummer, b.original_behandling_id IS NOT NULL, m.id IS NOT NULL");
 
         @SuppressWarnings("unchecked")
