@@ -38,7 +38,7 @@
         <changelist>-SNAPSHOT</changelist>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <junit.version>5.8.1</junit.version>
+        <junit.version>5.8.2</junit.version>
         <felles.version>0.2.18</felles.version>
         <swagger.version>2.1.11</swagger.version>
         <fp-kontrakter.version>6.0.4</fp-kontrakter.version>
