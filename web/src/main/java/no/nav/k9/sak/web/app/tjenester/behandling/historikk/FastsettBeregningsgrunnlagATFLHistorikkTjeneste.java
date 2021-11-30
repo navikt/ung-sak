@@ -1,8 +1,10 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -78,11 +80,15 @@ public class FastsettBeregningsgrunnlagATFLHistorikkTjeneste {
 
         if (frilansEndring.flatMap(BeregningsgrunnlagPrStatusOgAndelEndring::getInntektEndring).isPresent()) {
             InntektEndring endringFL = frilansEndring.flatMap(BeregningsgrunnlagPrStatusOgAndelEndring::getInntektEndring).get();
-            historikkAdapter.tekstBuilder()
-                .medNavnOgGjeldendeFra(HistorikkEndretFeltType.FRILANS_INNTEKT, null, fom)
-                .medEndretFelt(HistorikkEndretFeltType.FRILANS_INNTEKT,
-                    endringFL.getFraInntekt().orElse(null),
-                    endringFL.getTilInntekt());
+            BigDecimal fraVerdi = endringFL.getFraInntekt().orElse(null);
+            BigDecimal tilVerdi = endringFL.getTilInntekt();
+            if (!Objects.equals(fraVerdi, tilVerdi)) {
+                historikkAdapter.tekstBuilder()
+                    .medNavnOgGjeldendeFra(HistorikkEndretFeltType.FRILANS_INNTEKT, null, fom)
+                    .medEndretFelt(HistorikkEndretFeltType.FRILANS_INNTEKT,
+                        fraVerdi,
+                        tilVerdi);
+            }
         }
 
         if (!arbeidstakerEndringer.isEmpty()) {
