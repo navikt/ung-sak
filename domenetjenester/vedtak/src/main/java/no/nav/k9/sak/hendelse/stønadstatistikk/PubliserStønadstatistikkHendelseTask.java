@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.PubliserInfotrygdFeedElementTask;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -63,7 +62,6 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
         pd.setGruppe(gruppe);
         pd.setSekvens(lagSekvensnummer(behandling));
         pd.setBehandling(behandling.getFagsak().getSaksnummer().getVerdi(), behandling.getId().toString(), behandling.getAktørId().getId());
-        pd.setProperty(PubliserInfotrygdFeedElementTask.KAFKA_KEY_PROPERTY, saksnummer);
         pd.setCallIdFraEksisterende();
         
         return pd;
@@ -79,7 +77,7 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
     }
     
     private static String tallMedPrefiks(long versjon, int antallSiffer) {
-        if (versjon >= Math.pow(10, antallSiffer)) {
+        if (Long.toString(versjon).length() > antallSiffer) {
             throw new IllegalArgumentException("Versjonsnummeret er for stort");
         }
         return StringUtils.leftPad(Long.toString(versjon), antallSiffer, '0');
