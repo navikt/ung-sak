@@ -1,12 +1,14 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
@@ -50,14 +52,22 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
+        final Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        
+        /*
+         * Denne sjekken kan fjernes når det ikke lenger finnes noen åpne
+         * behandlinger opprettet før angitt tidspunkt.
+         */
+        final boolean opprettetEtterNyHåndtering = behandling.getOpprettetTidspunkt().isAfter(LocalDateTime.of(2021, 11, 30, 21, 15, 0));
+        
         final NavigableSet<DatoIntervallEntitet> perioder;
-        if (brukRelevantPeriode) {
+        if (brukRelevantPeriode && opprettetEtterNyHåndtering) {
             perioder = søknadsperiodeTjeneste.utledPeriode(behandlingId);
         } else {
             perioder = søknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId);
         }
         
-        final var fødselsdato = finnPleietrengendesFødselsdato(behandlingId);
+        final var fødselsdato = finnPleietrengendesFødselsdato(behandling);
         final var periodeSomKanUtledes = new LocalDateInterval(fødselsdato.plusYears(fomAlder), fødselsdato.plusYears(toAlder).minusDays(1));
         
         final var tidslinje = SykdomUtils.toLocalDateTimeline(perioder);
@@ -65,10 +75,9 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
         return tilNavigableSet(resultat);
     }
 
-    private LocalDate finnPleietrengendesFødselsdato(Long behandlingId) {
-        final var behandling = behandlingRepository.hentBehandling(behandlingId);
+    private LocalDate finnPleietrengendesFødselsdato(Behandling behandling) {
         final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunktHvisEksisterer(
-            behandlingId,
+            behandling.getId(),
             behandling.getFagsak().getAktørId(),
             behandling.getFagsak().getPeriode().getFomDato()
         );
