@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.innsyn.InnsynHendelse;
 import no.nav.k9.innsyn.PsbSøknadsinnhold;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -52,6 +53,10 @@ public class PubliserSøknadForBrukerdialoginnsynTask implements ProsessTaskHand
         final long mottattDokumentId = Long.parseLong(pd.getPropertyValue(MOTTATT_DOKUMENT_ID));
         
         final MottattDokument mottattDokument = mottatteDokumentRepository.hentMottattDokument(mottattDokumentId).orElseThrow();
+        if (mottattDokument.getStatus() == DokumentStatus.UGYLDIG) {
+            logger.info("Ignorerer ugyldig dokument: " + mottattDokumentId);
+            return;
+        }
         
         /*
          * Det er fint at vi deserialiserer og reserialiserer søknad. Dette sikrer at vi kun sender
