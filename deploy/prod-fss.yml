@@ -209,6 +209,8 @@ spec:
       value: "true"
     - name: NY_SYKDOM_TOTRINN
       value: "true"
+    - name: ENABLE_STONADSTATISTIKK
+      value: "true"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
     - name: MAP_ALLE_KRAV
