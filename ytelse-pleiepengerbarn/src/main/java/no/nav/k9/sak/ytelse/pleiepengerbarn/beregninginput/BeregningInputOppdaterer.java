@@ -68,11 +68,8 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
 
     @Override
     public OppdateringResultat oppdater(OverstyrInputForBeregningDto dto, AksjonspunktOppdaterParameter param) {
-        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = getPerioderTilVurderingTjeneste(param.getRef().getFagsakYtelseType(), param.getRef().getBehandlingType()).utled(param.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        perioderTilVurdering.stream().filter(p -> dto.getPerioder().stream().map(OverstyrBeregningInputPeriode::getPeriode).map(Periode::getFom).anyMatch(fom -> fom.equals(p.getFomDato())));
         lagreInputOverstyringer(param.getRef(), dto);
         return OppdateringResultat.utenOverhopp();
-
     }
 
     private void lagreInputOverstyringer(BehandlingReferanse ref, OverstyrInputForBeregningDto dto) {
@@ -89,16 +86,16 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
 
     @NotNull
     private InputOverstyringPeriode mapPeriode(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, OverstyrBeregningInputPeriode it) {
-        var vilkårsperiode = perioderTilVurdering.stream().filter(p -> p.getFomDato().equals(it.getPeriode().getFom())).findFirst()
+        var vilkårsperiode = perioderTilVurdering.stream().filter(p -> p.getFomDato().equals(it.getSkjaeringstidspunkt())).findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Fikk inn periode som ikke er til vurdering i behandlingen"));
 
         var opptjeningAktiviteter = finnOpptjeningForBeregningTjeneste(ref.getFagsakYtelseType()).hentEksaktOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode)
             .orElseThrow()
             .getOpptjeningPerioder()
             .stream()
-            .filter(p -> !p.getPeriode().getTom().isBefore(it.getPeriode().getFom()))
+            .filter(p -> !p.getPeriode().getTom().isBefore(it.getSkjaeringstidspunkt()))
             .collect(Collectors.toList());
-        return new InputOverstyringPeriode(it.getPeriode().getFom(), mapAktiviteter(it.getAktivitetliste(), opptjeningAktiviteter));
+        return new InputOverstyringPeriode(it.getSkjaeringstidspunkt(), mapAktiviteter(it.getAktivitetliste(), opptjeningAktiviteter));
     }
 
     private List<InputAktivitetOverstyring> mapAktiviteter(List<OverstyrBeregningAktivitet> aktivitetliste, List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningAktiviteter) {

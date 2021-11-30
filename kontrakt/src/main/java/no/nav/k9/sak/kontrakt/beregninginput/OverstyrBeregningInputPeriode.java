@@ -1,14 +1,13 @@
 package no.nav.k9.sak.kontrakt.beregninginput;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,8 +22,8 @@ public class OverstyrBeregningInputPeriode {
 
     @Valid
     @NotNull
-    @JsonProperty("periode")
-    private Periode periode;
+    @JsonProperty("skjaeringstidspunkt")
+    private LocalDate skjaeringstidspunkt;
 
     @Valid
     @NotNull
@@ -35,13 +34,13 @@ public class OverstyrBeregningInputPeriode {
     public OverstyrBeregningInputPeriode() {
     }
 
-    public OverstyrBeregningInputPeriode(Periode periode, List<OverstyrBeregningAktivitet> aktivitetliste) {
-        this.periode = periode;
+    public OverstyrBeregningInputPeriode(LocalDate skjaeringstidspunkt, List<OverstyrBeregningAktivitet> aktivitetliste) {
+        this.skjaeringstidspunkt = skjaeringstidspunkt;
         this.aktivitetliste = aktivitetliste;
     }
 
-    public Periode getPeriode() {
-        return periode;
+    public LocalDate getSkjaeringstidspunkt() {
+        return skjaeringstidspunkt;
     }
 
     public List<OverstyrBeregningAktivitet> getAktivitetliste() {

@@ -287,6 +287,18 @@ public class FagsakRepository {
         return journalpost.getId();
     }
 
+    public Optional<SakInfotrygdMigrering> hentSakInfotrygdMigrering(Long fagsakId) {
+        TypedQuery<SakInfotrygdMigrering> query = entityManager.createQuery("from SakInfotrygdMigrering where fagsak_id=:fagsakId", SakInfotrygdMigrering.class);
+        query.setParameter("fagsakId", fagsakId); // NOSONAR
+
+        List<SakInfotrygdMigrering> sakInfotrygdMigreringer = query.getResultList();
+        if (sakInfotrygdMigreringer.size() > 1) {
+            throw new IllegalStateException("Fant flere infotrygdmigreringer for fagsak " + fagsakId);
+        }
+
+        return sakInfotrygdMigreringer.isEmpty() ? Optional.empty() : Optional.of(sakInfotrygdMigreringer.get(0));
+    }
+
     public Long lagre(SakInfotrygdMigrering sakInfotrygdMigrering) {
         entityManager.persist(sakInfotrygdMigrering);
         return sakInfotrygdMigrering.getId();
