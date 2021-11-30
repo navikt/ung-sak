@@ -1,3 +1,22 @@
+create table SAK_INFOTRYGD_MIGRERING
+(
+    ID                          bigint                              not null PRIMARY KEY,
+    FAGSAK_ID                   bigint                              not null,
+    SKJAERINGSTIDSPUNKT         DATE                                not null,
+    VERSJON                     bigint       default 0              not null,
+    OPPRETTET_AV                VARCHAR(20)  default 'VL'           not null,
+    OPPRETTET_TID               TIMESTAMP(3) default localtimestamp not null,
+    ENDRET_AV                   VARCHAR(20),
+    ENDRET_TID                  TIMESTAMP(3),
+    constraint FK_SAK_INFOTRYGD_MIGRERING_01
+        foreign key (FAGSAK_ID) references FAGSAK(ID)
+);
+create index IDX_SAK_INFOTRYGD_MIGRERING_01 on SAK_INFOTRYGD_MIGRERING (FAGSAK_ID);
+
+CREATE UNIQUE INDEX UIDX_SAK_INFOTRYGD_MIGRERING_01 ON SAK_INFOTRYGD_MIGRERING (FAGSAK_ID, SKJAERINGSTIDSPUNKT);
+
+create sequence if not exists SEQ_SAK_INFOTRYGD_MIGRERING increment by 50 minvalue 1000000;
+
 create table BG_OVST_INPUT_PERIODER
 (
     ID            bigint                              not null PRIMARY KEY,

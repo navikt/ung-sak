@@ -287,6 +287,11 @@ public class FagsakRepository {
         return journalpost.getId();
     }
 
+    public Long lagre(SakInfotrygdMigrering sakInfotrygdMigrering) {
+        entityManager.persist(sakInfotrygdMigrering);
+        return sakInfotrygdMigrering.getId();
+    }
+
     /**
      * Oppderer status på fagsak.
      *
