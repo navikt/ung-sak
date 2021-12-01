@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -84,8 +85,8 @@ class HentReferanserTjeneste {
      * @param bgReferanser Referanser fra denne behandlingen
      * @return Map fra referanse i denne behandlingen til liste av referanser i original behandling
      */
-    Map<BgRef, List<BgRef>> finnMapTilOriginaleReferanserUtenAvslag(BehandlingReferanse ref,
-                                                                    NavigableSet<DatoIntervallEntitet> vilkårsperioder,
+    Map<UUID, List<UUID>> finnMapTilOriginaleReferanserUtenAvslag(BehandlingReferanse ref,
+                                                                    List<DatoIntervallEntitet> vilkårsperioder,
                                                                     List<BgRef> bgReferanser) {
 
         return ref.getOriginalBehandlingId()
@@ -97,24 +98,24 @@ class HentReferanserTjeneste {
             .orElse(Collections.emptyMap());
     }
 
-    private Map<BgRef, List<BgRef>> finnOrginalReferanserForAllePerioder(NavigableSet<DatoIntervallEntitet> vilkårsperioder,
+    private Map<UUID, List<UUID>> finnOrginalReferanserForAllePerioder(List<DatoIntervallEntitet> vilkårsperioder,
                                                                          List<BgRef> bgReferanser,
                                                                          Optional<BeregningsgrunnlagPerioderGrunnlag> originaltGrunnlag,
                                                                          Optional<Vilkårene> originalVilkår) {
         return vilkårsperioder.stream()
             .collect(Collectors.toMap(
-            p -> finnReferanseFraPeriode(bgReferanser, p),
+            p -> finnReferanseFraPeriode(bgReferanser, p).getRef(),
             p  -> finnReferanserUtenAvslagSomOverlapperPeriode(p, originaltGrunnlag, originalVilkår)));
     }
 
-    private List<BgRef> finnReferanserUtenAvslagSomOverlapperPeriode(DatoIntervallEntitet vilkårsperiode,
-                                                                     Optional<BeregningsgrunnlagPerioderGrunnlag> originaltGrunnlag,
-                                                                     Optional<Vilkårene> originaleVilkår) {
+    private List<UUID> finnReferanserUtenAvslagSomOverlapperPeriode(DatoIntervallEntitet vilkårsperiode,
+                                                                    Optional<BeregningsgrunnlagPerioderGrunnlag> originaltGrunnlag,
+                                                                    Optional<Vilkårene> originaleVilkår) {
         return originaltGrunnlag
             .stream().flatMap(gr -> gr.getGrunnlagPerioder().stream())
             .filter(periode -> vilkårsperiode.inkluderer(periode.getSkjæringstidspunkt()))
             .filter(periode -> harKunOppfylteVilkår(originaleVilkår, periode))
-            .map(p -> new BgRef(p.getEksternReferanse(), p.getSkjæringstidspunkt()))
+            .map(BeregningsgrunnlagPeriode::getEksternReferanse)
             .toList();
     }
 
