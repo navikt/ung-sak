@@ -179,7 +179,14 @@ public class VilkårTjeneste {
         return behandlingRepository.hentBehandling(behandlingId);
     }
 
-    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType, boolean skalIgnorereAvslåttePerioder) {
+    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType,
+                                                                        boolean skalIgnorereAvslåttePerioder) {
+        return utledPerioderTilVurdering(ref, vilkårType, skalIgnorereAvslåttePerioder, false);
+    }
+
+    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType,
+                                                                        boolean skalIgnorereAvslåttePerioder,
+                                                                        boolean skalIgnorereAvslagPåKompletthet) {
         Long behandlingId = ref.getBehandlingId();
         var behandling = hentBehandling(behandlingId);
         var perioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling);
@@ -196,12 +203,15 @@ public class VilkårTjeneste {
             var avslåttePerioder = vilkår.get()
                 .getPerioder()
                 .stream()
-                .filter(it -> Utfall.IKKE_OPPFYLT.equals(it.getUtfall()))
-                .map(VilkårPeriode::getPeriode)
-                .collect(Collectors.toList());
-            perioder.removeAll(avslåttePerioder);
+                .filter(it -> skalFiltreresBort(it, skalIgnorereAvslagPåKompletthet))
+                .map(VilkårPeriode::getPeriode).toList();
+            avslåttePerioder.forEach(perioder::remove);
         }
         return Collections.unmodifiableNavigableSet(perioder);
+    }
+
+    private boolean skalFiltreresBort(VilkårPeriode it, boolean skalIgnoreAvslagPåKompletthet) {
+        return Utfall.IKKE_OPPFYLT.equals(it.getUtfall()) && (skalIgnoreAvslagPåKompletthet || !Avslagsårsak.MANGLENDE_INNTEKTSGRUNNLAG.equals(it.getAvslagsårsak()));
     }
 
     public Optional<Vilkårene> hentHvisEksisterer(Long behandlingId) {
