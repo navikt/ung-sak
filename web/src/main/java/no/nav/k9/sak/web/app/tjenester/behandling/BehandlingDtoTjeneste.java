@@ -20,6 +20,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.formidling.kontrakt.kodeverk.AvsenderApplikasjon;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
@@ -443,14 +444,16 @@ public class BehandlingDtoTjeneste {
         final var FORMIDLING_DOKUMENTDATA_PATH = "/k9/formidling/dokumentdata/api";
 
         final var behandlingUuid = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
-        final var behandlingUuidOgYtelse = Map.of(
-            BehandlingUuidDto.NAME, behandling.getUuid().toString(),
-            "sakstype", behandling.getFagsakYtelseType().getKode());
+        final var standardFormidlingParams = Map.of(
+            BehandlingUuidDto.NAME, behandling.getUuid().toString(), //Deprekert - bruk eksternReferanse
+            "eksternReferanse", behandling.getUuid().toString(),
+            "sakstype", behandling.getFagsakYtelseType().getKode(),
+            "avsenderApplikasjon", AvsenderApplikasjon.K9SAK.name());
 
         List<ResourceLink> links = new ArrayList<>();
-        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/maler", "brev-maler", behandlingUuidOgYtelse));
-        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/tilgjengeligevedtaksbrev", "tilgjengelige-vedtaksbrev", behandlingUuidOgYtelse));
-        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/informasjonsbehov", "informasjonsbehov-vedtaksbrev", behandlingUuidOgYtelse));
+        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/maler", "brev-maler", standardFormidlingParams));
+        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/tilgjengeligevedtaksbrev", "tilgjengelige-vedtaksbrev", standardFormidlingParams));
+        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/informasjonsbehov", "informasjonsbehov-vedtaksbrev", standardFormidlingParams));
         links.add(ResourceLink.get(FORMIDLING_DOKUMENTDATA_PATH, "dokumentdata-hente", behandlingUuid));
         links.add(ResourceLink.post(FORMIDLING_DOKUMENTDATA_PATH + "/" + behandling.getUuid(), "dokumentdata-lagre", null));
         return links;
