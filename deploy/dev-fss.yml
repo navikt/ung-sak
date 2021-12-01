@@ -231,3 +231,7 @@ spec:
 
     - name: PIP_USERS
       value: "srvPDP,srvk9-tilbake,srvsaf,Z993210,Z994080"
+
+    # Pleiepenger infotrygd migrering
+    - name: OVERSTYR_BEREGNING_INPUT_TILLATELSER
+      value: ""

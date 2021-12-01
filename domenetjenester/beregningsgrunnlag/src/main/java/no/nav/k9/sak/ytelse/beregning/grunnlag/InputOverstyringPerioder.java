@@ -28,7 +28,7 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 public class InputOverstyringPerioder extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BG_OVST_INPUTER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BG_OVST_INPUT_PERIODER")
     private Long id;
 
     @Immutable

@@ -174,6 +174,9 @@ public class BeregningPerioderGrunnlagRepository {
         if (oppdatertGrunnlag.getKompletthetHolder() != null) {
             entityManager.persist(oppdatertGrunnlag.getKompletthetHolder());
         }
+        if (oppdatertGrunnlag.getInputOverstyringHolder() != null) {
+            entityManager.persist(oppdatertGrunnlag.getInputOverstyringHolder());
+        }
         entityManager.persist(oppdatertGrunnlag);
         entityManager.flush();
     }

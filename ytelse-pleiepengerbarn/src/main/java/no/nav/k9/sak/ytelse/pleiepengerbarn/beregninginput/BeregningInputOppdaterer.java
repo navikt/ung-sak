@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregninginput;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
@@ -12,9 +13,15 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.jetbrains.annotations.NotNull;
+import org.rocksdb.Env;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
+import no.nav.k9.felles.exception.ManglerTilgangException;
+import no.nav.k9.felles.exception.TekniskException;
+import no.nav.k9.felles.konfigurasjon.env.Cluster;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -39,6 +46,7 @@ import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputAktivitetOverstyring;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
+import no.nav.k9.sikkerhet.oidc.token.bruker.BrukerTokenProvider;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = OverstyrInputForBeregningDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -49,6 +57,8 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
+    private BrukerTokenProvider brukerTokenProvider;
+    private Environment environment;
 
 
     BeregningInputOppdaterer() {
@@ -59,17 +69,27 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
     public BeregningInputOppdaterer(BeregningPerioderGrunnlagRepository grunnlagRepository,
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                     @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
-                                    @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste) {
+                                    @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
+                                    BrukerTokenProvider brukerTokenProvider) {
         this.grunnlagRepository = grunnlagRepository;
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.brukerTokenProvider = brukerTokenProvider;
+        this.environment = Environment.current();
     }
 
     @Override
     public OppdateringResultat oppdater(OverstyrInputForBeregningDto dto, AksjonspunktOppdaterParameter param) {
+        if (!harTillatelseTilÅLøseAksjonspunkt()) {
+            throw new ManglerTilgangException("K9-IF-01", "Har ikke tilgang til å løse aksjonspunkt.");
+        }
         lagreInputOverstyringer(param.getRef(), dto);
         return OppdateringResultat.utenOverhopp();
+    }
+
+    private boolean harTillatelseTilÅLøseAksjonspunkt() {
+        return Arrays.stream(environment.getProperty("OVERSTYR_BEREGNING_INPUT_TILLATELSER", "").split(",")).anyMatch(id -> id.equalsIgnoreCase(brukerTokenProvider.getUserId()));
     }
 
     private void lagreInputOverstyringer(BehandlingReferanse ref, OverstyrInputForBeregningDto dto) {
