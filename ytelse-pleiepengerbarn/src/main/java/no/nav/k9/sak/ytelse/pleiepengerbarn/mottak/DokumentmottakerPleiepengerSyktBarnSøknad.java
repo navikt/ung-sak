@@ -26,6 +26,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
+import no.nav.k9.sak.hendelse.brukerdialoginnsyn.BrukerdialoginnsynService;
 import no.nav.k9.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
@@ -53,6 +54,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     private ProsessTaskRepository prosessTaskRepository;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
+    private BrukerdialoginnsynService brukerdialoginnsynService;
     private boolean skalBrukeUtledetEndringsperiode;
 
     DokumentmottakerPleiepengerSyktBarnSøknad() {
@@ -67,6 +69,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                                               ProsessTaskRepository prosessTaskRepository,
                                               OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
                                               SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+                                              BrukerdialoginnsynService brukerdialoginnsynService,
                                               @KonfigVerdi(value = "ENABLE_UTLEDET_ENDRINGSPERIODE", defaultVerdi = "false") boolean skalBrukeUtledetEndringsperiode) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
@@ -75,6 +78,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
         this.prosessTaskRepository = prosessTaskRepository;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
+        this.brukerdialoginnsynService = brukerdialoginnsynService;
         this.skalBrukeUtledetEndringsperiode = skalBrukeUtledetEndringsperiode;
     }
 
@@ -85,6 +89,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
         var sorterteDokumenter = sorterSøknadsdokumenter(dokumenter);
         for (MottattDokument dokument : sorterteDokumenter) {
             Søknad søknad = søknadParser.parseSøknad(dokument);
+            brukerdialoginnsynService.publiserDokumentHendelse(behandling, dokument);
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);

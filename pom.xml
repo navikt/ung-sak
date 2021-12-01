@@ -418,6 +418,11 @@
                 <artifactId>soknad</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
+            <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>innsyn</artifactId>
+                <version>${k9format.version}</version>
+            </dependency>
 
 
             <!-- Prosjektets egne TEST AVHENGIGHETER -->
