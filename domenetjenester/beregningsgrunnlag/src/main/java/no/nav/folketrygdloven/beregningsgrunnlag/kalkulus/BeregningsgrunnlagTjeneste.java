@@ -81,12 +81,14 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             throw new IllegalArgumentException("Forventer minst en bgReferanse");
         }
 
+        var originalReferanserMap = hentReferanserTjeneste.finnMapTilOriginaleReferanserUtenAvslag(referanse, vilkårsperioder, bgReferanser);
+
         var beregningInput = bgReferanser.stream().map(e -> {
             var bgRef = e.getRef();
             var stp = e.getStp();
             var vilkårsperiode = vilkårsperioder.stream().filter(p -> p.getFomDato().equals(stp)).findFirst().orElseThrow();
             grunnlagRepository.lagre(referanse.getBehandlingId(), new BeregningsgrunnlagPeriode(bgRef, stp));
-            return new StartBeregningInput(bgRef, vilkårsperiode);
+            return new StartBeregningInput(bgRef, vilkårsperiode, originalReferanserMap.get(bgRef));
         }).collect(Collectors.toList());
 
         return finnTjeneste(referanse.getFagsakYtelseType()).startBeregning(referanse, beregningInput);
@@ -99,10 +101,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         }
         List<LocalDate> skjæringstidspunkter = List.copyOf(vilkårsperioder.stream().map(DatoIntervallEntitet::getFomDato).collect(Collectors.toList()));
         var bgReferanser = hentReferanserTjeneste.finnReferanseEllerLagNy(ref.getBehandlingId(), skjæringstidspunkter, true, false);
-        var originalReferanserMap = hentReferanserTjeneste.finnMapTilOriginaleReferanserUtenAvslag(ref, vilkårsperioder, bgReferanser);
-
         var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
-        return tjeneste.fortsettBeregning(ref, bgReferanser, originalReferanserMap,  stegType);
+        return tjeneste.fortsettBeregning(ref, bgReferanser, stegType);
     }
 
     @Override
