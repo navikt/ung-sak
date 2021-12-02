@@ -188,9 +188,6 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     }
 
     private void mapFrilansOgSelvstendigNæring(OpptjeningResultat opptjeningResultat, Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> mellomregning, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
-        if (opptjeningResultat == null) {
-            return;
-        }
         for (LocalDateSegment<Boolean> segment : tidslinjeTilVurdering.toSegments()) {
             var skjæringstidspunkt = segment.getFom();
             var opptjening = opptjeningResultat.finnOpptjening(skjæringstidspunkt);
