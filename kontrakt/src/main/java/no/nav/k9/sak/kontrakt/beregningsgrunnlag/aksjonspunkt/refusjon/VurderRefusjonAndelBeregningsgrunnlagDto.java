@@ -26,15 +26,17 @@ public class VurderRefusjonAndelBeregningsgrunnlagDto {
     @Pattern(regexp = "[\\d]{13}")
     private String arbeidsgiverAktoerId;
 
-    @JsonProperty(value = "arbeidsgiverAktoerId")
+    @JsonProperty(value = "internArbeidsforholdRef")
     @Valid
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String internArbeidsforholdRef;
 
+    @JsonProperty(value = "fastsattRefusjonFom")
     @Valid
     @NotNull
     private LocalDate fastsattRefusjonFom;
 
+    @JsonProperty(value = "delvisRefusjonPrMndFørStart")
     @Valid
     @Min(0)
     @Max(10000000)
