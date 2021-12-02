@@ -14,7 +14,7 @@ spec:
     partitions: 1
     replication: 3  # see min/max requirements
     retentionBytes: -1  # -1 means unlimited
-    retentionHours: 1 
+    retentionHours: 2160
   acl:
     - team: k9saksbehandling
       application: k9-sak
