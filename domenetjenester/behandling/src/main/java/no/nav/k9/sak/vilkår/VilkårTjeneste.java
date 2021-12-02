@@ -158,8 +158,10 @@ public class VilkårTjeneste {
 
     public void settVilkårutfallTilIkkeVurdert(Long behandlingId, VilkårType vilkårType, NavigableSet<DatoIntervallEntitet> vilkårsPerioder) {
         if (vilkårsPerioder.isEmpty()) {
+            log.info("Ingen perioder å tilbakestille.");
             return;
         }
+        log.info("Setter {} til vurdering", vilkårsPerioder);
         Behandling behandling = hentBehandling(behandlingId);
         var vilkårsPerioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling);
         vilkårResultatRepository.tilbakestillPerioder(behandlingId, vilkårType, vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer(), vilkårsPerioder);

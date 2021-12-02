@@ -162,7 +162,7 @@ public class PSBKompletthetSjekkerTjeneste {
         if (aktuellePerioderTilVurdering.isEmpty()) {
             return;
         }
-        log.info("Justerer utfallet på perioder [{}] hvis tidligere avslått pga manglende grunnlag.", aktuellePerioderTilVurdering);
+        log.info("Finner aktuelle perioder {} for tilbakestilling hvis tidligere avslått pga manglende grunnlag.", aktuellePerioderTilVurdering);
         beregningsgrunnlagVilkårTjeneste.settVilkårutfallTilIkkeVurdertHvisTidligereAvslagPåKompletthet(ref.getBehandlingId(), aktuellePerioderTilVurdering);
     }
 
