@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -24,13 +25,18 @@ public class OverlappendeYtelseDto {
     @JsonProperty("ytelseType")
     private FagsakYtelseType ytelseType;
 
+    @NotNull
+    @JsonProperty("kilde")
+    private Fagsystem kilde;
+
     @JsonProperty(value = "overlappendePerioder")
     @Size(max = 100)
     @Valid
     private List<OverlappendeYtelsePeriodeDto> overlappendePerioder = Collections.emptyList();
 
-    public OverlappendeYtelseDto(FagsakYtelseType ytelseType, List<OverlappendeYtelsePeriodeDto> overlappendePerioder) {
+    public OverlappendeYtelseDto(FagsakYtelseType ytelseType, Fagsystem kilde, List<OverlappendeYtelsePeriodeDto> overlappendePerioder) {
         this.ytelseType = ytelseType;
+        this.kilde = kilde;
         this.overlappendePerioder = overlappendePerioder;
     }
 }

@@ -5,6 +5,8 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -20,12 +22,14 @@ import javax.ws.rs.core.MediaType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.vedtak.ekstern.OverlappendeYtelserTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.ytelser.OverlappendeYtelseDto;
@@ -65,13 +69,14 @@ public class OverlapendeYtelserRestTjeneste {
         var overlappendeYtelser = overlappendeYtelserTjeneste.finnOverlappendeYtelser(BehandlingReferanse.fra(behandling));
 
         var overlappendeYtelseDtoer = overlappendeYtelser.entrySet().stream()
-            .sorted(Comparator.comparing(e -> e.getKey().getKode()))
+            .sorted(Comparator.comparing((Map.Entry<Ytelse, NavigableSet<LocalDateInterval>> e) -> e.getKey().getYtelseType().getKode())
+                .thenComparing(e -> e.getKey().getKilde()))
             .map(entry -> {
-                var ytelseType = entry.getKey();
+                var ytelse = entry.getKey();
                 var overlappendePerioder = entry.getValue().stream()
                     .map(dateInterval -> new OverlappendeYtelsePeriodeDto(dateInterval.getFomDato(), dateInterval.getTomDato()))
                     .collect(Collectors.toList());
-                return new OverlappendeYtelseDto(ytelseType, overlappendePerioder);
+                return new OverlappendeYtelseDto(ytelse.getYtelseType(), ytelse.getKilde(), overlappendePerioder);
             })
             .collect(Collectors.toList());
 
