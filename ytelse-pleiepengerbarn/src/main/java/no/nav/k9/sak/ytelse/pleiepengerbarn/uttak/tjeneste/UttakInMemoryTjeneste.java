@@ -14,6 +14,7 @@ import javax.enterprise.inject.Alternative;
 
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
+import no.nav.pleiepengerbarn.uttak.kontrakter.EndrePerioderGrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.SøktUttak;
@@ -77,6 +78,11 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
 
     @Override
     public Simulering simulerUttaksplan(Uttaksgrunnlag request) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Uttaksplan bekreftUttaksplan(EndrePerioderGrunnlag request) {
         throw new UnsupportedOperationException();
     }
 
