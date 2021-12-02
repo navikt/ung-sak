@@ -114,7 +114,7 @@ public class UttakRestKlient {
         }
     }
 
-    public Uttaksplan bekreftUttaksplan(EndrePerioderGrunnlag request) {
+    public Uttaksplan endreUttaksplan(EndrePerioderGrunnlag request) {
         URIBuilder builder = new URIBuilder(endpointSimuleringUttaksplan);
         try {
             HttpPost kall = new HttpPost(builder.build());

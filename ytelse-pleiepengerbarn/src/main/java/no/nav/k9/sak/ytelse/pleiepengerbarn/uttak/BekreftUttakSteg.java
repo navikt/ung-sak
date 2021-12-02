@@ -72,7 +72,7 @@ public class BekreftUttakSteg implements BehandlingSteg {
             var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
 
             var request = new EndrePerioderGrunnlag(behandling.getFagsak().getSaksnummer().getVerdi(), behandling.getUuid().toString(), opprettMap(perioderSomHarBlittAvslått));
-            uttakTjeneste.bekreftUttaksplan(request);
+            uttakTjeneste.endreUttaksplan(request);
         }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();

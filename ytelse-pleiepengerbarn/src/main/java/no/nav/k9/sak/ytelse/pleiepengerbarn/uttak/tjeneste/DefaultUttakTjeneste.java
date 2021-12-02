@@ -39,8 +39,8 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
     }
 
     @Override
-    public Uttaksplan bekreftUttaksplan(EndrePerioderGrunnlag request) {
-        return restKlient.bekreftUttaksplan(request);
+    public Uttaksplan endreUttaksplan(EndrePerioderGrunnlag request) {
+        return restKlient.endreUttaksplan(request);
     }
 
     @Override

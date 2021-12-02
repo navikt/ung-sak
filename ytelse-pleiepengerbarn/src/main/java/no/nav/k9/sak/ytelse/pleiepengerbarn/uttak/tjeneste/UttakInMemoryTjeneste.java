@@ -82,7 +82,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
     }
 
     @Override
-    public Uttaksplan bekreftUttaksplan(EndrePerioderGrunnlag request) {
+    public Uttaksplan endreUttaksplan(EndrePerioderGrunnlag request) {
         throw new UnsupportedOperationException();
     }
 

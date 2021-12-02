@@ -15,7 +15,7 @@ public interface UttakTjeneste {
 
     Simulering simulerUttaksplan(Uttaksgrunnlag request);
 
-    Uttaksplan bekreftUttaksplan(EndrePerioderGrunnlag request);
+    Uttaksplan endreUttaksplan(EndrePerioderGrunnlag request);
 
     void slettUttaksplan(UUID behandlingId);
 
