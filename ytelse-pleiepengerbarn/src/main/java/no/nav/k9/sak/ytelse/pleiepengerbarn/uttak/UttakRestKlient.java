@@ -72,7 +72,7 @@ public class UttakRestKlient {
     private OidcRestClient restKlient;
     private URI endpointUttaksplan;
     private URI endpointSimuleringUttaksplan;
-    private URI endpointBekreftUttaksplan;
+    private URI endpointEndringUttaksplan;
     private String psbUttakToken;
 
     protected UttakRestKlient() {
@@ -86,7 +86,7 @@ public class UttakRestKlient {
         this.restKlient = restKlient;
         this.endpointUttaksplan = toUri(endpoint, "/uttaksplan");
         this.endpointSimuleringUttaksplan = toUri(endpoint, "/uttaksplan/simulering");
-        this.endpointBekreftUttaksplan = toUri(endpoint, "/uttaksplan/endring");
+        this.endpointEndringUttaksplan = toUri(endpoint, "/uttaksplan/endring");
         this.psbUttakToken = psbUttakToken;
     }
 
@@ -115,12 +115,12 @@ public class UttakRestKlient {
     }
 
     public Uttaksplan endreUttaksplan(EndrePerioderGrunnlag request) {
-        URIBuilder builder = new URIBuilder(endpointSimuleringUttaksplan);
+        URIBuilder builder = new URIBuilder(endpointEndringUttaksplan);
         try {
             HttpPost kall = new HttpPost(builder.build());
             var json = objectMapper.writer().writeValueAsString(request);
             kall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
-            return utførOgHent(kall, json, new ObjectReaderResponseHandler<>(endpointBekreftUttaksplan, uttaksplanReader));
+            return utførOgHent(kall, json, new ObjectReaderResponseHandler<>(endpointEndringUttaksplan, uttaksplanReader));
         } catch (IOException | URISyntaxException e) {
             throw RestTjenesteFeil.FEIL.feilKallTilUttak(UUID.fromString(request.getBehandlingUUID()), e).toException();
         }
