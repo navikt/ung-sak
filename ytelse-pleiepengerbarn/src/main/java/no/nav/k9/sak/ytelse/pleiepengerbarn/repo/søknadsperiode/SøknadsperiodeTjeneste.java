@@ -16,6 +16,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -66,10 +67,10 @@ public class SøknadsperiodeTjeneste {
 
     public NavigableSet<DatoIntervallEntitet> utledVurderingsperioderFraSøknadsperioder(Long fagsakId, Set<Søknadsperioder> søknadsperioders) {
         return hentKravperioder(fagsakId, søknadsperioders)
-                .stream()
-                .filter(kp -> !kp.isHarTrukketKrav())
-                .map(Kravperiode::getPeriode)
-                .collect(Collectors.toCollection(TreeSet::new));
+            .stream()
+            .filter(kp -> !kp.isHarTrukketKrav())
+            .map(Kravperiode::getPeriode)
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     public List<Kravperiode> hentKravperioder(Long fagsakId, Long behandlingId) {
@@ -85,10 +86,11 @@ public class SøknadsperiodeTjeneste {
 
     public List<Kravperiode> hentKravperioder(Long fagsakId, Collection<Søknadsperioder> søknadsperioders) {
         final List<MottattDokument> mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(fagsakId)
-                .stream()
-                .filter(it -> Brevkode.PLEIEPENGER_BARN_SOKNAD.equals(it.getType()))
-                .sorted(Comparator.comparing(MottattDokument::getInnsendingstidspunkt))
-                .toList();
+            .stream()
+            .filter(it -> Brevkode.PLEIEPENGER_BARN_SOKNAD.equals(it.getType()))
+            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
+            .sorted(Comparator.comparing(MottattDokument::getInnsendingstidspunkt))
+            .toList();
 
         @SuppressWarnings("unchecked")
         LocalDateTimeline<Kravperiode> tidslinje = LocalDateTimeline.EMPTY_TIMELINE;

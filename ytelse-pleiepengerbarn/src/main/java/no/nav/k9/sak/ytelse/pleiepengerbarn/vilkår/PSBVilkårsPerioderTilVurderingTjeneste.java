@@ -25,7 +25,6 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
@@ -45,7 +44,6 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
@@ -64,7 +62,6 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private VilkårUtleder vilkårUtleder;
     private SøktePerioder søktePerioder;
     private VilkårResultatRepository vilkårResultatRepository;
-    private SøknadsperiodeRepository søknadsperiodeRepository;
     private BehandlingRepository behandlingRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
     private ErEndringPåEtablertTilsynTjeneste etablertTilsynTjeneste;
@@ -80,7 +77,6 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     @Inject
     public PSBVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("PSB") VilkårUtleder vilkårUtleder,
-                                                  SøknadsperiodeRepository søknadsperiodeRepository,
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   BehandlingRepository behandlingRepository,
                                                   SykdomGrunnlagService sykdomGrunnlagService,
@@ -89,12 +85,10 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   BasisPersonopplysningTjeneste basisPersonopplysningsTjeneste,
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   PersoninfoAdapter personinfoAdapter,
-                                                  MottatteDokumentRepository mottatteDokumentRepository,
                                                   SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                                   UttakTjeneste uttakTjeneste,
                                                   @KonfigVerdi(value = "ENABLE_RELEVANT_SYKDOMSPERIODE", defaultVerdi = "false") boolean brukRelevantPeriode) {
         this.vilkårUtleder = vilkårUtleder;
-        this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.behandlingRepository = behandlingRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;

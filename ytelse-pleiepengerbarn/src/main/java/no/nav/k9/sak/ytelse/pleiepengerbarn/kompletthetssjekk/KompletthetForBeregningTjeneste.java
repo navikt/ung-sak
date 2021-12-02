@@ -43,8 +43,8 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidstidMappingInput;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.MapArbeid;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
@@ -60,7 +60,7 @@ public class KompletthetForBeregningTjeneste {
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
-    private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
+    private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
 
     KompletthetForBeregningTjeneste() {
@@ -70,19 +70,19 @@ public class KompletthetForBeregningTjeneste {
     @Inject
     public KompletthetForBeregningTjeneste(@FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                            @FagsakYtelseTypeRef("PSB") InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning,
-                                           UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                                            @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                            ArbeidsforholdTjeneste arbeidsforholdTjeneste,
                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                            VilkårResultatRepository vilkårResultatRepository,
+                                           PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
-        this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
         this.arbeidsforholdTjeneste = arbeidsforholdTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
     }
 
@@ -128,10 +128,10 @@ public class KompletthetForBeregningTjeneste {
         }
 
         var inntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
-        var uttakGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+        var perioderFraSøknad = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(ref);
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(ref);
 
-        var input = new InputForKompletthetsvurdering(skipVurderingMotArbeid, uttakGrunnlag.orElse(null), vurderteSøknadsperioder);
+        var input = new InputForKompletthetsvurdering(skipVurderingMotArbeid, perioderFraSøknad, vurderteSøknadsperioder);
 
         var tidslinje = new LocalDateTimeline<>(vilkårsPerioder.stream()
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
@@ -226,7 +226,7 @@ public class KompletthetForBeregningTjeneste {
             return true;
         }
 
-        var perioderFraSøknadene = input.getUttakGrunnlag().getOppgitteSøknadsperioder().getPerioderFraSøknadene();
+        var perioderFraSøknadene = input.getPerioderFraSøknadene();
         var kravDokumenter = input.getVurderteSøknadsperioder().keySet();
         var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.toLocalDateInterval(), true)));
 
