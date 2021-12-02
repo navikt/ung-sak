@@ -33,7 +33,7 @@ public class BrukerdialoginnsynMeldingProducer {
 
     @Inject
     public BrukerdialoginnsynMeldingProducer(
-            @KonfigVerdi(value = "kafka.stonadstatistikk.topic", defaultVerdi = "dusseldorf.privat-k9-sak-innsyn-v1") String topic,
+            @KonfigVerdi(value = "kafka.brukerdialoginnsyn.topic", defaultVerdi = "dusseldorf.privat-k9-sak-innsyn-v1") String topic,
             @KonfigVerdi("KAFKA_BROKERS") String aivenBootstrapServers,
             @KonfigVerdi("KAFKA_TRUSTSTORE_PATH") String aivenTruststorePath,
             @KonfigVerdi("KAFKA_KEYSTORE_PATH") String aivenKeystorePath,
