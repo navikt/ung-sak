@@ -5,11 +5,14 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.BekreftetBeregningsgrunnlagDto;
 import no.nav.k9.sak.typer.Periode;
 
 public class VurderRefusjonBeregningsgrunnlagDto extends BekreftetBeregningsgrunnlagDto {
 
+    @JsonProperty(value = "fastsatteAndeler")
     @Valid
     @Size(max = 100)
     private List<VurderRefusjonAndelBeregningsgrunnlagDto> fastsatteAndeler;
