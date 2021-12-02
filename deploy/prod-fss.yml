@@ -207,10 +207,6 @@ spec:
       value: "true"
     - name: ENABLE_UTLEDET_ENDRINGSPERIODE
       value: "true"
-    - name: ARBEIDSTID_SJEKK_SNFL
-      value: "true"
-    - name: NY_SYKDOM_TOTRINN
-      value: "true"
     - name: ENABLE_RELEVANT_SYKDOMSPERIODE
       value: "true"
     - name: ENABLE_STONADSTATISTIKK
