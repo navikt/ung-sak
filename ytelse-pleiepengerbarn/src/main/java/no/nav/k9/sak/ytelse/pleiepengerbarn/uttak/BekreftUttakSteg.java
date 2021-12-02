@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -38,6 +39,7 @@ public class BekreftUttakSteg implements BehandlingSteg {
     private VilkårResultatRepository vilkårResultatRepository;
     private UttakTjeneste uttakTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private Boolean enableBekreftUttak;
 
     BekreftUttakSteg() {
         // CDI
@@ -47,11 +49,13 @@ public class BekreftUttakSteg implements BehandlingSteg {
     private BekreftUttakSteg(BehandlingRepository behandlingRepository,
                              VilkårResultatRepository vilkårResultatRepository,
                              UttakTjeneste uttakTjeneste,
-                             @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+                             @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                             @KonfigVerdi(value = "psb.enable.bekreft.uttak", defaultVerdi = "false") Boolean enableBekreftUttak) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.uttakTjeneste = uttakTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.enableBekreftUttak = enableBekreftUttak;
     }
 
     @Override
@@ -64,7 +68,7 @@ public class BekreftUttakSteg implements BehandlingSteg {
 
         var perioderSomHarBlittAvslått = harNoenPerioderTilVurderingBlittAvslåttIBeregning(perioderTilVurdering, beregningsgrunnlagsvilkåret);
 
-        if (!perioderSomHarBlittAvslått.isEmpty()) {
+        if (!perioderSomHarBlittAvslått.isEmpty() && enableBekreftUttak) {
             var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
 
             var request = new EndrePerioderGrunnlag(behandling.getFagsak().getSaksnummer().getVerdi(), behandling.getUuid().toString(), opprettMap(perioderSomHarBlittAvslått));
