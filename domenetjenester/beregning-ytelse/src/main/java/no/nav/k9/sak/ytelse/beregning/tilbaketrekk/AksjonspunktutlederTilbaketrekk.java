@@ -7,6 +7,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
@@ -17,13 +19,16 @@ import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 public class AksjonspunktutlederTilbaketrekk implements AksjonspunktUtleder {
 
     private BeregningsresultatTidslinjetjeneste beregningsresultatTidslinjetjeneste;
+    private Boolean psbDisableVurderTilbaketrekk;
 
     AksjonspunktutlederTilbaketrekk() {
     }
 
     @Inject
-    public AksjonspunktutlederTilbaketrekk(BeregningsresultatTidslinjetjeneste beregningsresultatTidslinjetjeneste) {
+    public AksjonspunktutlederTilbaketrekk(BeregningsresultatTidslinjetjeneste beregningsresultatTidslinjetjeneste,
+                                           @KonfigVerdi(value = "PSB_DISABLE_VURDER_TILBAKETREKK", required = false, defaultVerdi = "false") Boolean psbDisableVurderTilbaketrekk) {
         this.beregningsresultatTidslinjetjeneste = beregningsresultatTidslinjetjeneste;
+        this.psbDisableVurderTilbaketrekk = psbDisableVurderTilbaketrekk;
     }
 
     @Override
@@ -39,6 +44,9 @@ public class AksjonspunktutlederTilbaketrekk implements AksjonspunktUtleder {
     }
 
     private boolean skalVurdereTilbaketrekk(BehandlingReferanse ref) {
+        if (psbDisableVurderTilbaketrekk && ref.getFagsakYtelseType().equals(FagsakYtelseType.PSB)) {
+            return false;
+        }
         LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje =  beregningsresultatTidslinjetjeneste.lagTidslinjeForRevurdering(ref);
         return VurderBehovForÅHindreTilbaketrekkV2.skalVurdereTilbaketrekk(brAndelTidslinje);
     }
