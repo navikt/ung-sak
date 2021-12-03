@@ -1,7 +1,11 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.TreeSet;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -9,6 +13,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -19,11 +24,16 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.BekreftetUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Simuleringsgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Årsak;
 
 @Dependent
 public class SamtidigUttakTjeneste {
@@ -35,50 +45,56 @@ public class SamtidigUttakTjeneste {
     private BehandlingRepository behandlingRepository;
     private BehandlingModellRepository behandlingModellRepository;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
+    private BekreftetUttakTjeneste bekreftetUttakTjeneste;
+    private Boolean benyttNyFlyt;
 
-    
+
     @Inject
     public SamtidigUttakTjeneste(MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
-            UttakTjeneste uttakTjeneste,
-            FagsakRepository fagsakRepository,
-            BehandlingRepository behandlingRepository,
-            BehandlingModellRepository behandlingModellRepository,
-            PleietrengendeKravprioritet pleietrengendeKravprioritet) {
+                                 UttakTjeneste uttakTjeneste,
+                                 FagsakRepository fagsakRepository,
+                                 BehandlingRepository behandlingRepository,
+                                 BehandlingModellRepository behandlingModellRepository,
+                                 PleietrengendeKravprioritet pleietrengendeKravprioritet,
+                                 BekreftetUttakTjeneste bekreftetUttakTjeneste,
+                                 @KonfigVerdi(value = "psb.enable.bekreft.uttak", defaultVerdi = "false") Boolean benyttNyFlyt) {
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.behandlingModellRepository = behandlingModellRepository;
         this.pleietrengendeKravprioritet = pleietrengendeKravprioritet;
+        this.bekreftetUttakTjeneste = bekreftetUttakTjeneste;
+        this.benyttNyFlyt = benyttNyFlyt;
     }
-    
-    
-    public boolean isAnnenSakSomMåBehandlesFørst(BehandlingReferanse ref) {        
+
+
+    public boolean isAnnenSakSomMåBehandlesFørst(BehandlingReferanse ref) {
         final List<Fagsak> andreFagsaker = hentAndreFagsakerPåPleietrengende(ref);
         final List<Behandling> andreÅpneBehandlinger = åpneBehandlingerFra(andreFagsaker);
-        
+
         if (andreÅpneBehandlinger.isEmpty()) {
             return false;
         }
-                
+
         if (anyHarÅpenBehandlingSomIkkeHarKommetTilUttak(andreÅpneBehandlinger)) {
             /*
              * Krever at andre behandlinger kommer til uttak før vi går videre.
-             * 
+             *
              * TODO: Den beste løsningen er å se på kravprioritet om det er nødvendig å vente på
              *       uttak eller ikke. Hvis det må ventes må alle sakene behandles frem til vedtak.
              */
             return true;
         }
-        
+
         if (!isEndringerMedUbesluttedeData(ref)) {
             return false;
         }
-        
+
         if (anyHarÅpenBehandlingSomKanBesluttes(andreÅpneBehandlinger)) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -89,31 +105,31 @@ public class SamtidigUttakTjeneste {
         }
         return fagsaker.stream().filter(f -> !f.getSaksnummer().equals(ref.getSaksnummer())).toList();
     }
-    
+
     private List<Behandling> åpneBehandlingerFra(final List<Fagsak> fagsaker) {
         return fagsaker.stream()
-                .map(f -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(f.getId()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .filter(b -> !b.getStatus().erFerdigbehandletStatus())
-                .toList();
-                
+            .map(f -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(f.getId()))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .filter(b -> !b.getStatus().erFerdigbehandletStatus())
+            .toList();
+
     }
-    
+
     private boolean anyHarÅpenBehandlingSomIkkeHarKommetTilUttak(List<Behandling> åpneBehandlinger) {
         return åpneBehandlinger.stream().anyMatch(behandling -> {
-            final  BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
+            final BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
             return !harKommetTilUttak(ref);
         });
     }
-    
+
     private boolean anyHarÅpenBehandlingSomKanBesluttes(List<Behandling> åpneBehandlinger) {
         return åpneBehandlinger.stream().anyMatch(behandling -> {
-            final  BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
+            final BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
             return !isEndringerMedUbesluttedeData(ref);
         });
     }
-    
+
     /*
     private boolean harUbehandledePerioderMedLavereKravprioritet(BehandlingReferanse ref) {
         final LocalDateTimeline<List<Kravprioritet>> besluttetKravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(ref.getFagsakId(), ref.getPleietrengendeAktørId(), false);
@@ -121,60 +137,86 @@ public class SamtidigUttakTjeneste {
         // Her legges det inn en utregning av hvilke nye perioder der man ikke har kravprio (dvs ikke høyeste prioritering) ... og så sjekkes disse mot perioderTilVurdering.
     }
     */
-    
+
     public boolean isSkalHaTilbakehopp(BehandlingReferanse ref) {
         if (!harKommetTilUttak(ref)) {
             return false;
         }
-        
+
         final Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         final boolean harÅpentVenteaksjonspunkt = behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK).isPresent();
-        
+
         final boolean annenSakSomMåBehandlesFørst = isAnnenSakSomMåBehandlesFørst(ref);
         if (annenSakSomMåBehandlesFørst && !harÅpentVenteaksjonspunkt) {
             // Send til steg for å sette på vent.
             return true;
         }
-        
+
         if (!annenSakSomMåBehandlesFørst && harÅpentVenteaksjonspunkt) {
             // Fremtving at steget skal kjøres på nytt for å fjerne venting.
             return true;
         }
 
         // Det skal kun slippes én behandling gjennom.
-        
+
         final Simulering simulering = simulerUttakKunBesluttet(ref);
-        final boolean uttaksplanEndret = simulering.getUttakplanEndret();
-        return uttaksplanEndret;
+
+        return simulering.getUttakplanEndret();
     }
-    
+
     private boolean harKommetTilUttak(BehandlingReferanse ref) {
         final var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();
         final BehandlingModell modell = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType());
         return !modell.erStegAFørStegB(steg, BehandlingStegType.VURDER_UTTAK);
     }
-    
+
+    private boolean harKommetTilBeregning(BehandlingReferanse ref) {
+        final var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
+        final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();
+        final BehandlingModell modell = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType());
+        return !modell.erStegAFørStegB(steg, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING);
+    }
+
     private boolean erPåUttakssteget(BehandlingReferanse ref) {
         final var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();
         return steg == BehandlingStegType.VURDER_UTTAK;
     }
-    
+
     private Simulering simulerUttak(BehandlingReferanse ref) {
-        final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtUbesluttededataOgMapRequest(ref);
-        final Simulering simulering = uttakTjeneste.simulerUttaksplan(request);
+        final Uttaksgrunnlag uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtUbesluttededataOgMapRequest(ref);
 
-        return simulering;
+        Simuleringsgrunnlag simuleringsgrunnlag = byggRequest(ref, uttaksgrunnlag);
+
+        return uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
     }
-    
+
     private Simulering simulerUttakKunBesluttet(BehandlingReferanse ref) {
-        final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
-        final Simulering simulering = uttakTjeneste.simulerUttaksplan(request);
+        final Uttaksgrunnlag uttaksGrunnlag = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
 
-        return simulering;
+        Simuleringsgrunnlag simuleringsgrunnlag = byggRequest(ref, uttaksGrunnlag);
+
+        return uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
     }
-    
+
+    private Simuleringsgrunnlag byggRequest(BehandlingReferanse ref, Uttaksgrunnlag uttaksGrunnlag) {
+        NavigableSet<DatoIntervallEntitet> avslåttePerioderIBeregning = new TreeSet<>();
+        if (benyttNyFlyt && harKommetTilBeregning(ref)) {
+            avslåttePerioderIBeregning = bekreftetUttakTjeneste.utledPerioderTilVurderingSomBlittAvslåttIBeregning(ref.getBehandlingId());
+        }
+
+        return new Simuleringsgrunnlag(uttaksGrunnlag, opprettMap(avslåttePerioderIBeregning));
+    }
+
+    private Map<LukketPeriode, Årsak> opprettMap(NavigableSet<DatoIntervallEntitet> perioderSomHarBlittAvslått) {
+        var map = new HashMap<LukketPeriode, Årsak>();
+        for (DatoIntervallEntitet periode : perioderSomHarBlittAvslått) {
+            map.put(new LukketPeriode(periode.getFomDato(), periode.getTomDato()), Årsak.FOR_LAV_INNTEKT);
+        }
+        return map;
+    }
+
     public boolean isEndringerMedUbesluttedeData(BehandlingReferanse ref) {
         final Simulering simulering = simulerUttak(ref);
         // Hvis en sak ikke har kommet til uttak betyr det at true returneres her.

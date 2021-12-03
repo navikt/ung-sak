@@ -47,6 +47,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.SøktUttak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Vilkårsperiode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.YtelseType;
 
 @Dependent
 public class MapInputTilUttakTjeneste {
@@ -57,7 +58,7 @@ public class MapInputTilUttakTjeneste {
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
-            @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
+                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
     }
@@ -66,6 +67,7 @@ public class MapInputTilUttakTjeneste {
     public Uttaksgrunnlag hentUtOgMapRequest(BehandlingReferanse referanse) {
         return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, false));
     }
+
     public Uttaksgrunnlag hentUtUbesluttededataOgMapRequest(BehandlingReferanse referanse) {
         return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, true));
     }
@@ -132,6 +134,7 @@ public class MapInputTilUttakTjeneste {
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
 
         return new Uttaksgrunnlag(
+            YtelseType.PSB,
             barn,
             søker,
             behandling.getFagsak().getSaksnummer().getVerdi(),
@@ -201,14 +204,14 @@ public class MapInputTilUttakTjeneste {
             .stream()
             .filter(it -> erRelevantForBehandling(it, innvilgedePerioderMedSykdom))
             .forEach(periode -> {
-                var utfall = switch (periode.getResultat()) {
-                    case OPPFYLT -> Utfall.OPPFYLT;
-                    case IKKE_OPPFYLT -> Utfall.IKKE_OPPFYLT;
-                    case IKKE_VURDERT -> throw new IllegalStateException("Skal ikke komme perioder som ikke er vurdert til uttak.");
-                };
-                map.put(new LukketPeriode(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato()), utfall);
-            }
-        );
+                    var utfall = switch (periode.getResultat()) {
+                        case OPPFYLT -> Utfall.OPPFYLT;
+                        case IKKE_OPPFYLT -> Utfall.IKKE_OPPFYLT;
+                        case IKKE_VURDERT -> throw new IllegalStateException("Skal ikke komme perioder som ikke er vurdert til uttak.");
+                    };
+                    map.put(new LukketPeriode(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato()), utfall);
+                }
+            );
         return map;
     }
 
