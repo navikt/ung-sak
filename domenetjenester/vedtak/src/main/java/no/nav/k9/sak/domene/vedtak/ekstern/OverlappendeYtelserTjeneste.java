@@ -45,8 +45,7 @@ public class OverlappendeYtelserTjeneste {
         this.beregningsresultatRepository = beregningsresultatRepository;
     }
 
-    public Map<Ytelse, NavigableSet<LocalDateInterval>> finnOverlappendeYtelser(BehandlingReferanse ref) {
-        var ytelseTyperSomSjekkesMot = ref.getFagsakYtelseType().hentYtelserForOverlappSjekk();
+    public Map<Ytelse, NavigableSet<LocalDateInterval>> finnOverlappendeYtelser(BehandlingReferanse ref, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
         var tilkjentYtelsePerioder = hentTilkjentYtelsePerioder(ref);
         var aktørYtelse = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId())
             .getAktørYtelseFraRegister(ref.getAktørId());
