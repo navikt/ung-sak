@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.PreconditionBeregningAksjonspunktUtleder;
 import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.vedtak.ekstern.OverlappendeYtelserTjeneste;
@@ -66,8 +68,8 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         YtelseFilter ytelseFilter = lagInfotrygdPSBFilter(aktørYtelse);
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         LocalDateTimeline<Boolean> vilkårsperioderTidslinje = lagPerioderTilVureringTidslinje(perioderTilVurdering);
-        Map<FagsakYtelseType, NavigableSet<LocalDateInterval>> psbOverlapp = overlappendeYtelserTjeneste.doFinnOverlappendeYtelser(vilkårsperioderTidslinje, ytelseFilter);
-        if (!psbOverlapp.isEmpty() && !psbOverlapp.get(FagsakYtelseType.PSB).isEmpty()) {
+        Map<Ytelse, NavigableSet<LocalDateInterval>> psbOverlapp = overlappendeYtelserTjeneste.doFinnOverlappendeYtelser(vilkårsperioderTidslinje, ytelseFilter);
+        if (!psbOverlapp.isEmpty()) {
             lagreOverlappPerioder(param, perioderTilVurdering, psbOverlapp);
             return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT));
         } else {
@@ -75,15 +77,17 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         }
     }
 
-    private void lagreOverlappPerioder(AksjonspunktUtlederInput param, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map<FagsakYtelseType, NavigableSet<LocalDateInterval>> psbOverlapp) {
-        NavigableSet<LocalDateInterval> overlappPerioder = psbOverlapp.get(FagsakYtelseType.PSB);
+    private void lagreOverlappPerioder(AksjonspunktUtlederInput param, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map<Ytelse, NavigableSet<LocalDateInterval>> psbOverlapp) {
+        Set<LocalDateInterval> overlappPerioder = psbOverlapp.values().stream()
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
         Set<LocalDate> stpMedInfotrygdoverlapp = finnStpMedOverlapp(perioderTilVurdering, overlappPerioder);
         stpMedInfotrygdoverlapp.stream().map(stp -> new SakInfotrygdMigrering(param.getRef().getFagsakId(), stp))
                 .forEach(fagsakRepository::lagre);
     }
 
     @NotNull
-    private Set<LocalDate> finnStpMedOverlapp(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, NavigableSet<LocalDateInterval> overlappPerioder) {
+    private Set<LocalDate> finnStpMedOverlapp(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Set<LocalDateInterval> overlappPerioder) {
         return perioderTilVurdering.stream()
             .filter(p -> overlappPerioder.stream().map(ldi -> DatoIntervallEntitet.fraOgMedTilOgMed(ldi.getFomDato(), ldi.getTomDato()))
                 .anyMatch(op -> op.overlapper(p)))
