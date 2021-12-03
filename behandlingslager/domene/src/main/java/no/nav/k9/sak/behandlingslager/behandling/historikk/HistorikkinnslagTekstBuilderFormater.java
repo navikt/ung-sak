@@ -28,7 +28,7 @@ public final class HistorikkinnslagTekstBuilderFormater {
         return verdi.toString();
     }
 
-    private static String formatDate(LocalDate localDate) {
+    public static String formatDate(LocalDate localDate) {
         return DATE_FORMATTER.format(localDate);
     }
 }

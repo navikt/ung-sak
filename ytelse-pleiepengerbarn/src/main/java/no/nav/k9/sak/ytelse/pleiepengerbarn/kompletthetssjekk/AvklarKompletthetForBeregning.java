@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagTekstBuilderFormater;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
@@ -132,6 +133,10 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
         return it.getKanFortsette() ? Vurdering.KAN_FORTSETTE : Vurdering.UDEFINERT;
     }
 
+    private Vurdering utledVurderingstypeForHistorikk(KompletthetsPeriode it) {
+        return it.getKanFortsette() ? Vurdering.KAN_FORTSETTE : Vurdering.UAVKLART;
+    }
+
     private void lagHistorikkinnslag(AksjonspunktOppdaterParameter param, AvklarKompletthetForBeregningDto dto) {
         historikkTjenesteAdapter.tekstBuilder()
             .medSkjermlenke(SkjermlenkeType.BEREGNING) // TODO: Sette noe fornuftig avhengig av hvor frontend plasserer dette
@@ -150,14 +155,14 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
             }
             historikkTjenesteAdapter.tekstBuilder()
                 .medSkjermlenke(SkjermlenkeType.FAKTA_OM_INNTEKTSMELDING) // TODO: Sette noe fornuftig avhengig av hvor frontend plasserer dette
-                .medEndretFelt(HistorikkEndretFeltType.KOMPLETTHET, formaterDato(periode), eksisterendeValg, utledVurderingstype(periode))
+                .medEndretFelt(HistorikkEndretFeltType.KOMPLETTHET, formaterDato(periode), eksisterendeValg, utledVurderingstypeForHistorikk(periode))
                 .medBegrunnelse(periode.getBegrunnelse());
             historikkTjenesteAdapter.opprettHistorikkInnslag(param.getBehandlingId(), HistorikkinnslagType.FAKTA_ENDRET);
         }
     }
 
     private String formaterDato(KompletthetsPeriode periode) {
-        return periode.getPeriode().getFom().toString();
+        return HistorikkinnslagTekstBuilderFormater.formatDate(periode.getPeriode().getFom());
     }
 
     private Vurdering utledEksisterendeValg(KompletthetsPeriode periode, Optional<BeregningsgrunnlagPerioderGrunnlag> eksisterendeGrunnlag) {

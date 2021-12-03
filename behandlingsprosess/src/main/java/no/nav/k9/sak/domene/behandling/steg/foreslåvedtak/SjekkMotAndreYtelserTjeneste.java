@@ -110,7 +110,7 @@ public class SjekkMotAndreYtelserTjeneste {
         var overlappendeYtelser = overlappendeYtelserTjeneste.finnOverlappendeYtelser(BehandlingReferanse.fra(behandling));
         if (!overlappendeYtelser.isEmpty()) {
             String formattert = overlappendeYtelser.keySet().stream()
-                .map(key -> key + "=" + overlappendeYtelser.get(key))
+                .map(key -> "Ytelse=" + key.getYtelseType() + ", kilde=" + key.getKilde() + ", perioder=" + overlappendeYtelser.get(key))
                 .collect(Collectors.joining(", ", "{", "}"));
             logger.info("Behandlingen har overlappende ytelser '{}'", formattert);
         }

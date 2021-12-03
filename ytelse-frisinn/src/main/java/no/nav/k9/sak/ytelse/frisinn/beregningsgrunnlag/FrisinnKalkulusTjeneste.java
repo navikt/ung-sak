@@ -39,7 +39,6 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 
 /**
  * KalkulusTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt
@@ -59,7 +58,6 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
                                    FagsakRepository fagsakRepository,
                                    @FagsakYtelseTypeRef("FRISINN") KalkulatorInputTjeneste kalkulatorInputTjeneste,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                   ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                                    VilkårResultatRepository vilkårResultatRepository,
                                    @FagsakYtelseTypeRef("FRISINN") Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper) {
         super(restTjeneste, fagsakRepository, vilkårResultatRepository, kalkulatorInputTjeneste,
@@ -94,7 +92,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
             } else {
                 // tar en og en
                 var startBeregningRequest = initStartRequest(ref, iayGrunnlag, Set.of() /* frisinn har ikke inntektsmeldinger */
-                    , List.of(new StartBeregningInput(bgReferanse, input.getVilkårsperiode())));
+                    , List.of(new StartBeregningInput(bgReferanse, input.getVilkårsperiode(), List.of())));
 
                 var inputPerRef = startBeregningRequest.getKalkulatorInputPerKoblingReferanse();
                 if (inputPerRef.size() != 1) {
@@ -130,7 +128,8 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
         var startBeregningRequest = new StartBeregningListeRequest(sendTilKalkulus,
             ref.getSaksnummer().getVerdi(),
             new AktørIdPersonident(ref.getAktørId().getId()),
-            YtelseTyperKalkulusStøtterKontrakt.FRISINN);
+            YtelseTyperKalkulusStøtterKontrakt.FRISINN,
+            Map.of());
         List<TilstandResponse> tilstandResponse = getKalkulusRestTjeneste().startBeregning(startBeregningRequest);
         var fraBeregningResponse = mapFraTilstand(tilstandResponse, bgReferanser);
         return fraBeregningResponse;

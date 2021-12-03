@@ -547,8 +547,11 @@ public class HistorikkInnslagTekstBuilder {
         if (opt.isPresent()) {
             return Optional.empty();
         } else {
+            Set<String> eksisterendeKoder = del.getHistorikkinnslagFelt().stream()
+                .map(HistorikkinnslagFelt::getFeltType)
+                .map(HistorikkinnslagFeltType::getKode).collect(Collectors.toSet());
             List<String> feltKoder = fieldList.stream().map(HistorikkinnslagFeltType::getKode).collect(Collectors.toList());
-            return Optional.of(HistorikkInnsalgFeil.FACTORY.manglerMinstEtFeltForHistorikkinnslag(type, feltKoder));
+            return Optional.of(HistorikkInnsalgFeil.FACTORY.manglerMinstEtFeltForHistorikkinnslag(type, feltKoder, eksisterendeKoder));
         }
     }
 

@@ -35,7 +35,6 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.Beregningsgrunnla
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
-import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal.PSBKompletthetSjekkerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.PSBKompletthetsjekker;
 
@@ -120,11 +119,9 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             bestiltEtterlysningRepository.lagre(manglendeBestillinger);
             var aktørerDetSkalEtterlysesFra = manglendeBestillinger.stream()
                 .map(BestiltEtterlysning::getArbeidsgiver)
+                .map(arbeidsgiver -> arbeidsgiver != null ? new Mottaker(arbeidsgiver.getIdentifikator(), arbeidsgiver.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID) : new Mottaker(ref.getAktørId().getAktørId(), IdType.AKTØRID))
                 .collect(Collectors.toSet());
-            for (Arbeidsgiver arbeidsgiver : aktørerDetSkalEtterlysesFra) {
-                var mottaker = arbeidsgiver != null ? new Mottaker(arbeidsgiver.getIdentifikator(), arbeidsgiver.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID) : new Mottaker(ref.getAktørId().getAktørId(), IdType.AKTØRID);
-                sendBrev(ref.getBehandlingId(), DokumentMalType.fraKode(kompletthetsAksjon.getDokumentMalType().getKode()), mottaker);
-            }
+            sendBrev(ref.getBehandlingId(), DokumentMalType.fraKode(kompletthetsAksjon.getDokumentMalType().getKode()), aktørerDetSkalEtterlysesFra);
         }
     }
 
@@ -222,9 +219,10 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         }
     }
 
-    private void sendBrev(Long behandlingId, DokumentMalType dokumentMalType, Mottaker mottaker) {
-        BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, dokumentMalType, new MottakerDto(mottaker.id, mottaker.type.toString()));
-        dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN);
+    private void sendBrev(Long behandlingId, DokumentMalType dokumentMalType, Set<Mottaker> mottakere) {
+        var brevBestillinger = mottakere.stream().map(mottaker -> new BestillBrevDto(behandlingId, dokumentMalType, new MottakerDto(mottaker.id, mottaker.type.toString())))
+            .collect(Collectors.toList());
+        dokumentBestillerApplikasjonTjeneste.bestillDokument(brevBestillinger, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 
 }

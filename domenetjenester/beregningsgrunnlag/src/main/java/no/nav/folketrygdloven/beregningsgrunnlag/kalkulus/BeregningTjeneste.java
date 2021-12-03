@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Optional;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
@@ -43,11 +44,11 @@ public interface BeregningTjeneste {
      * Steg 6. FAST_BERGRUNN (Fastsett beregningsgrunnlag)
      *
      * @param ref {@link BehandlingReferanse}
-     * @param skjæringstidspunkt - skjæringstidspunktet
+     * @param vilkårsperioder Vilkårsperioder til vurdering
      * @param stegType {@link BehandlingStegType}
      * @return SamletKalkulusResultat {@link KalkulusResultat}
      */
-    SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter, BehandlingStegType stegType);
+    SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> vilkårsperioder, BehandlingStegType stegType);
 
     /**
      * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt

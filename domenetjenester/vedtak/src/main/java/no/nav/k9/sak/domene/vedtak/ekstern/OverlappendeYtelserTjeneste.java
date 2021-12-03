@@ -24,6 +24,7 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEnt
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
+import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -44,7 +45,7 @@ public class OverlappendeYtelserTjeneste {
         this.beregningsresultatRepository = beregningsresultatRepository;
     }
 
-    public Map<FagsakYtelseType, NavigableSet<LocalDateInterval>> finnOverlappendeYtelser(BehandlingReferanse ref) {
+    public Map<Ytelse, NavigableSet<LocalDateInterval>> finnOverlappendeYtelser(BehandlingReferanse ref) {
         var ytelseTyperSomSjekkesMot = ref.getFagsakYtelseType().hentYtelserForOverlappSjekk();
         var tilkjentYtelsePerioder = hentTilkjentYtelsePerioder(ref);
         var aktørYtelse = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId())
@@ -62,8 +63,8 @@ public class OverlappendeYtelserTjeneste {
         return doFinnOverlappendeYtelser(tilkjentYtelseTimeline, aktørYtelse.get(), ytelseTyperSomSjekkesMot);
     }
 
-    Map<FagsakYtelseType, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(LocalDateTimeline<Boolean> tilkjentYtelseTimeline, AktørYtelse aktørYtelse, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
-        Map<FagsakYtelseType, NavigableSet<LocalDateInterval>> overlapp = new TreeMap<>();
+    Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(LocalDateTimeline<Boolean> tilkjentYtelseTimeline, AktørYtelse aktørYtelse, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
+        Map<Ytelse, NavigableSet<LocalDateInterval>> overlapp = new TreeMap<>();
         if (!tilkjentYtelseTimeline.isEmpty()) {
 
             var ytelseFilter = new YtelseFilter(aktørYtelse).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType()));
@@ -73,7 +74,7 @@ public class OverlappendeYtelserTjeneste {
                 if (!overlappPeriode.isEmpty()) {
                     if (yt.getYtelseAnvist().isEmpty()) {
                         // er under behandling. flagger hele perioden med overlapp
-                        overlapp.put(yt.getYtelseType(), overlappPeriode);
+                        overlapp.put(yt, overlappPeriode);
                     } else {
                         var anvistSegmenter = yt.getYtelseAnvist().stream()
                             .map(ya -> new LocalDateSegment<>(ya.getAnvistFOM(), ya.getAnvistTOM(), Boolean.TRUE))
@@ -83,7 +84,7 @@ public class OverlappendeYtelserTjeneste {
                         var anvistTimeline = new LocalDateTimeline<>(anvistSegmenter, StandardCombinators::alwaysTrueForMatch);
                         var intersection = anvistTimeline.intersection(tilkjentYtelseTimeline);
                         if (!intersection.isEmpty()) {
-                            overlapp.put(yt.getYtelseType(), intersection.getDatoIntervaller());
+                            overlapp.put(yt, intersection.getDatoIntervaller());
                         }
                     }
                 }

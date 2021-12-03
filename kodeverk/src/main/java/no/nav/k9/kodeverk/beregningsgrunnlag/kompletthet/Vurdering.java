@@ -17,7 +17,8 @@ public enum Vurdering implements Kodeverdi {
 
     UDEFINERT("-", "Udefinert"),
     KAN_FORTSETTE("FORTSETT", "Kan beregnes på bakgrunn av opplysninger fra a-ordningen"),
-    MANGLENDE_GRUNNLAG("MANGLENDE_GRUNNLAG", "Kan ikke forsett pga manglende grunnlag for å kunne beregne.");
+    MANGLENDE_GRUNNLAG("MANGLENDE_GRUNNLAG", "Kan ikke forsett pga manglende grunnlag for å kunne beregne."),
+    UAVKLART("UAVKLART", "Uavklart");
 
     private static final Map<String, Vurdering> KODER = new LinkedHashMap<>();
     public static final String KODEVERK = "KOMPLETTHET_VURDERING";

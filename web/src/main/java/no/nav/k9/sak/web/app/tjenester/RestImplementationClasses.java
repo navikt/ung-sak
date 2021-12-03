@@ -16,6 +16,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYt
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.BeregningsgrunnlagRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.ForvaltningBeregningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.OverlapendeYtelserRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.død.RettVedDødRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.kompletthet.KompletthetForBeregningRestTjeneste;
@@ -104,6 +105,7 @@ public class RestImplementationClasses {
         classes.add(RettVedDødRestTjeneste.class);
         classes.add(PleietrengendeRestTjeneste.class);
         classes.add(PunsjRestTjeneste.class);
+        classes.add(OverlapendeYtelserRestTjeneste.class);
 
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);

@@ -59,7 +59,6 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
@@ -144,7 +143,11 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         }
         var bgRefs = BgRef.getRefs(bgReferanser);
         var ytelseType = YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode());
-        var request = new FortsettBeregningListeRequest(referanse.getSaksnummer().getVerdi(), bgRefs, ytelseType, new StegType(stegType.getKode()));
+        var request = new FortsettBeregningListeRequest(
+            referanse.getSaksnummer().getVerdi(),
+            bgRefs,
+            ytelseType,
+            new StegType(stegType.getKode()));
         TilstandListeResponse tilstandResponse = restTjeneste.fortsettBeregning(request);
         if (tilstandResponse.trengerNyInput()) {
             tilstandResponse = fortsettMedOppdatertInput(referanse, bgReferanser, stegType, ytelseType);
@@ -171,7 +174,12 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                                                             YtelseTyperKalkulusStøtterKontrakt ytelseType) {
         Map<UUID, KalkulatorInputDto> input = lagInputMap(bgReferanser, referanse);
         List<UUID> referanser = BgRef.getRefs(bgReferanser);
-        var request = new FortsettBeregningListeRequest(referanse.getSaksnummer().getVerdi(), referanser, input, ytelseType, new StegType(stegType.getKode()));
+        var request = new FortsettBeregningListeRequest(
+            referanse.getSaksnummer().getVerdi(),
+            referanser,
+            input,
+            ytelseType,
+            new StegType(stegType.getKode()));
         return restTjeneste.fortsettBeregning(request);
     }
 
@@ -209,7 +217,11 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                                                               Collection<BgRef> bgReferanser,
                                                               BehandlingReferanse referanse) {
         Map<UUID, KalkulatorInputDto> input = lagInputMap(bgReferanser, referanse);
-        var request = new HåndterBeregningListeRequest(requestListe, input, referanse.getSaksnummer().getVerdi(), referanse.getBehandlingUuid());
+        var request = new HåndterBeregningListeRequest(requestListe,
+            input,
+            YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
+            referanse.getSaksnummer().getVerdi(),
+            referanse.getBehandlingUuid());
         return restTjeneste.oppdaterBeregningListe(request);
     }
 
@@ -250,9 +262,9 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         var vilkår = vilkårResultatRepository.hent(referanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
 
         var requestListe = bgReferanser.stream().map(it -> new HentBeregningsgrunnlagDtoForGUIRequest(
-            it.getReferanse(),
-            ytelseSomSkalBeregnes,
-            referanser,
+                it.getReferanse(),
+                ytelseSomSkalBeregnes,
+                referanser,
                 vilkår.finnPeriodeForSkjæringstidspunkt(it.getSkjæringstidspunkt()).getPeriode().getFomDato()))
             .sorted(Comparator.comparing(HentBeregningsgrunnlagDtoForGUIRequest::getVilkårsperiodeFom))
             .collect(Collectors.toList());
@@ -315,7 +327,9 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
         AktørIdPersonident aktør = new AktørIdPersonident(fagsak.getAktørId().getId());
 
-        Map<UUID, LocalDate> stpMap = startBeregningInput.stream().collect(Collectors.toMap(StartBeregningInput::getBgReferanse, StartBeregningInput::getSkjæringstidspunkt));
+        var stpMap = startBeregningInput.stream().collect(Collectors.toMap(StartBeregningInput::getBgReferanse, StartBeregningInput::getSkjæringstidspunkt));
+        var referanseRelasjoner = startBeregningInput.stream().collect(Collectors.toMap(StartBeregningInput::getBgReferanse, StartBeregningInput::getOriginalReferanser));
+
         Map<UUID, KalkulatorInputDto> input = getReferanseTilInputMap(behandlingReferanse,
             iayGrunnlag,
             sakInntektsmeldinger, stpMap);
@@ -324,7 +338,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             input,
             fagsak.getSaksnummer().getVerdi(),
             aktør,
-            YtelseTyperKalkulusStøtterKontrakt.fraKode(behandlingReferanse.getFagsakYtelseType().getKode()));
+            YtelseTyperKalkulusStøtterKontrakt.fraKode(behandlingReferanse.getFagsakYtelseType().getKode()),
+            referanseRelasjoner);
     }
 
     private Map<UUID, KalkulatorInputDto> lagInputMap(Collection<BgRef> bgReferanser, BehandlingReferanse referanse) {

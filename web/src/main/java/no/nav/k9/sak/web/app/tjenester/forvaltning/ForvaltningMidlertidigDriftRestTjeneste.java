@@ -320,6 +320,38 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return Response.ok(resultatString).build();
     }
+    
+    @GET
+    @Path("/aapne-psb-med-soknad")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Henter åpne saker i PSB.", summary = ("Henter åpne saker i PSB."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response antallÅpnePsbMedSøknad() {
+        final Query q = entityManager.createNativeQuery("select\n"
+                + "    f.saksnummer, b.original_behandling_id IS NOT NULL AS revurdering, m.id IS NOT NULL AS med_soknad, COUNT(*) AS antall_soknader\n"
+                + "  from behandling b inner join fagsak f ON (\n"
+                + "    f.id = b.fagsak_id\n"
+                + "    and f.ytelse_type = 'PSB'\n"
+                + "  ) left outer join mottatt_dokument m ON (\n"
+                + "    m.behandling_id = b.id\n"
+                + "    and m.type = 'PLEIEPENGER_SOKNAD'\n"
+                + "    and m.status = 'GYLDIG'\n"
+                + "  ) \n"
+                + "  where b.behandling_status = 'UTRED'\n"
+                + "    AND b.original_behandling_id IS NOT NULL\n"
+                + "    AND m.id IS NOT NULL\n"
+                + "  group by saksnummer, b.original_behandling_id IS NOT NULL, m.id IS NOT NULL");
+
+        @SuppressWarnings("unchecked")
+        final List<Object[]> result = q.getResultList();
+        final String restApiPath = "/aapne-psb-med-soknad";
+        final String resultatString = result.stream()
+                .filter(a -> harLesetilgang(a[0].toString(), restApiPath))
+                .map(a -> a[0].toString() + ";" + a[1].toString() + ";" + a[2].toString() + ";" + a[3].toString())
+                .reduce((a, b) -> a + "\n" + b)
+                .orElse("");
+        return Response.ok(resultatString).build();
+    }
 
     private final boolean harLesetilgang(String saksnummer, String restApiPath) {
         final AbacAttributtSamling attributter = AbacAttributtSamling.medJwtToken(tokenProvider.getToken().getToken());

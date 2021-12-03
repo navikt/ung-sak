@@ -6,6 +6,7 @@ import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,19 +68,22 @@ public class PSBKompletthetSjekkerTjeneste {
 
 
     public KompletthetsAksjon utledTilstand(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, false);
         var kompletthetsVurderinger = kompletthetsjekker.utledAlleManglendeVedleggForPerioder(ref);
 
         var inputUtenVurderinger = new VurdererInput(perioderTilVurdering, kompletthetsVurderinger);
         var aksjon = kompletthetUtleder.utled(inputUtenVurderinger);
 
         var grunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+
+        grunnlag = justerTidligereVurderingerEtterOppdatertStatus(ref, perioderTilVurdering, kompletthetsVurderinger, grunnlag);
+
         if (aksjon.kanFortsette()) {
-            deaktiverVurderingerSomIkkeErRelevantePgaNåKomplett(ref.getBehandlingId(), perioderTilVurdering, kompletthetsVurderinger, grunnlag);
 
             log.info("Behandlingen er komplett, kan fortsette.");
             return aksjon;
         }
+        settVilkårsPeriodeTilVurderingHvisTidligereVarAvslagOgTilVurderingNå(ref, perioderTilVurdering, grunnlag);
 
         var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
 
@@ -127,7 +131,45 @@ public class PSBKompletthetSjekkerTjeneste {
         return KompletthetsAksjon.manuellAvklaring(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING);
     }
 
-    private void deaktiverVurderingerSomIkkeErRelevantePgaNåKomplett(Long behandlingId, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> kompletthetsVurderinger, Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlag) {
+    private Optional<BeregningsgrunnlagPerioderGrunnlag> justerTidligereVurderingerEtterOppdatertStatus(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> kompletthetsVurderinger, Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlag) {
+        deaktiverVurderingerSomIkkeErRelevantePgaNåKomplett(ref, perioderTilVurdering, kompletthetsVurderinger, grunnlag);
+        grunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+        settVilkårsPeriodeTilVurderingHvisTidligereVarAvslagOgTilVurderingNå(ref, perioderTilVurdering, grunnlag);
+        return grunnlag;
+    }
+
+    private void settVilkårsPeriodeTilVurderingHvisTidligereVarAvslagOgTilVurderingNå(BehandlingReferanse ref,
+                                                                                      NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
+                                                                                      Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlag) {
+        if (perioderTilVurdering.isEmpty()) {
+            return;
+        }
+        var aktuellePerioderTilVurdering = perioderTilVurdering;
+        if (grunnlag.isPresent()) {
+            var relevanteSkjæringstidspunkterMedAvlsag = grunnlag.get().getKompletthetPerioder()
+                .stream()
+                .filter(it -> Vurdering.MANGLENDE_GRUNNLAG.equals(it.getVurdering()))
+                .map(KompletthetPeriode::getSkjæringstidspunkt)
+                .filter(skjæringstidspunkt -> perioderTilVurdering.stream().anyMatch(at -> Objects.equals(at.getFomDato(), skjæringstidspunkt)))
+                .collect(Collectors.toSet());
+
+            aktuellePerioderTilVurdering = perioderTilVurdering.stream()
+                .filter(it -> relevanteSkjæringstidspunkterMedAvlsag.stream()
+                    .noneMatch(skjæringstidspunkt -> Objects.equals(it.getFomDato(), skjæringstidspunkt)))
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        }
+        if (aktuellePerioderTilVurdering.isEmpty()) {
+            return;
+        }
+        log.info("Finner aktuelle perioder {} for tilbakestilling hvis tidligere avslått pga manglende grunnlag.", aktuellePerioderTilVurdering);
+        beregningsgrunnlagVilkårTjeneste.settVilkårutfallTilIkkeVurdertHvisTidligereAvslagPåKompletthet(ref.getBehandlingId(), aktuellePerioderTilVurdering);
+    }
+
+    private void deaktiverVurderingerSomIkkeErRelevantePgaNåKomplett(BehandlingReferanse ref,
+                                                                     NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
+                                                                     Map<DatoIntervallEntitet, List<ManglendeVedlegg>> kompletthetsVurderinger,
+                                                                     Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlag) {
         if (grunnlag.isEmpty()) {
             return;
         }
@@ -147,7 +189,7 @@ public class PSBKompletthetSjekkerTjeneste {
             .collect(Collectors.toList());
 
         if (!kompletthetPerioder.isEmpty()) {
-            beregningPerioderGrunnlagRepository.deaktiverKompletthetsPerioder(behandlingId, kompletthetPerioder);
+            beregningPerioderGrunnlagRepository.deaktiverKompletthetsPerioder(ref.getBehandlingId(), kompletthetPerioder);
         }
     }
 
@@ -181,7 +223,7 @@ public class PSBKompletthetSjekkerTjeneste {
     private void avslå(KompletthetPeriode periode, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, BehandlingskontrollKontekst kontekst) {
         var relevantPeriode = perioderTilVurdering.stream()
             .filter(it -> it.inkluderer(periode.getSkjæringstidspunkt()))
-            .collect(Collectors.toList());
+            .toList();
 
         if (relevantPeriode.size() > 1) {
             throw new IllegalStateException("Fant flere vilkårsperioder(" + relevantPeriode.size() + ") relevant for " + periode);

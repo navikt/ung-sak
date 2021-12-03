@@ -1,6 +1,8 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -11,9 +13,12 @@ public class StartBeregningInput {
 
     private final DatoIntervallEntitet vilkårsperiode;
 
-    public StartBeregningInput(UUID bgReferanse, DatoIntervallEntitet vilkårsperiode) {
+    private final List<UUID> originalReferanser;
+
+    public StartBeregningInput(UUID bgReferanse, DatoIntervallEntitet vilkårsperiode, List<UUID> originalReferanser) {
         this.bgReferanse = bgReferanse;
         this.vilkårsperiode = vilkårsperiode;
+        this.originalReferanser = originalReferanser;
     }
 
     public UUID getBgReferanse() {
@@ -28,4 +33,7 @@ public class StartBeregningInput {
         return vilkårsperiode.getFomDato();
     }
 
+    public List<UUID> getOriginalReferanser() {
+        return originalReferanser == null ? Collections.emptyList() : originalReferanser;
+    }
 }

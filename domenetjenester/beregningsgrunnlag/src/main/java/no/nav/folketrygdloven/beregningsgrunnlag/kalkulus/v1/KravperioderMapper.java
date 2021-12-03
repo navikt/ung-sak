@@ -1,18 +1,5 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
 
-import static no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper.mapTilAktør;
-import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.KravperioderPrArbeidsforhold;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PerioderForKrav;
@@ -29,6 +16,20 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper.mapTilAktør;
+import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 public class KravperioderMapper {
 
@@ -90,15 +91,25 @@ public class KravperioderMapper {
     }
 
     private static Map<Kravnøkkel, List<Inntektsmelding>> grupper(List<Inntektsmelding> inntektsmeldingerMedRefusjonskrav) {
-        return inntektsmeldingerMedRefusjonskrav.stream()
-            .collect(Collectors.groupingBy(im ->
-                new Kravnøkkel(im.getArbeidsgiver(), im.getArbeidsforholdRef())));
+        Map<Kravnøkkel, List<Inntektsmelding>> resultMap = inntektsmeldingerMedRefusjonskrav.stream()
+            .map(im -> new Kravnøkkel(im.getArbeidsgiver(), im.getArbeidsforholdRef()))
+            .distinct()
+            .collect(Collectors.toMap(n -> n, n -> new ArrayList<>()));
+        inntektsmeldingerMedRefusjonskrav.forEach(im -> {
+            var nøkler = finnKeysSomSkalHaInntektsmelding(resultMap, im);
+            nøkler.forEach(n -> resultMap.get(n).add(im));
+        });
+        return resultMap;
+    }
+
+    private static Set<Kravnøkkel> finnKeysSomSkalHaInntektsmelding(Map<Kravnøkkel, List<Inntektsmelding>> resultMap, Inntektsmelding im) {
+        return resultMap.keySet().stream().filter(n -> n.arbeidsgiver.equals(im.getArbeidsgiver()) && n.referanse.gjelderFor(im.getArbeidsforholdRef())).collect(Collectors.toSet());
     }
 
     private static Map<Kravnøkkel, Inntektsmelding> grupperEneste(List<Inntektsmelding> inntektsmeldingerMedRefusjonskrav) {
         return inntektsmeldingerMedRefusjonskrav.stream()
             .collect(Collectors.toMap(im ->
-                new Kravnøkkel(im.getArbeidsgiver(), im.getArbeidsforholdRef()),
+                    new Kravnøkkel(im.getArbeidsgiver(), im.getArbeidsforholdRef()),
                 im -> im));
     }
 
@@ -147,7 +158,7 @@ public class KravperioderMapper {
 
     private static List<Refusjonsperiode> mapRefusjonsperioder(Inntektsmelding im, LocalDate startdatoRefusjon) {
         ArrayList<LocalDateSegment<BigDecimal>> alleSegmenter = new ArrayList<>();
-        if (!(im.getRefusjonBeløpPerMnd() == null || im.getRefusjonBeløpPerMnd().getVerdi().compareTo(BigDecimal.ZERO) ==0)) {
+        if (!(im.getRefusjonBeløpPerMnd() == null || im.getRefusjonBeløpPerMnd().getVerdi().compareTo(BigDecimal.ZERO) == 0)) {
             alleSegmenter.add(new LocalDateSegment<>(startdatoRefusjon, TIDENES_ENDE, im.getRefusjonBeløpPerMnd().getVerdi()));
         }
 
@@ -176,6 +187,5 @@ public class KravperioderMapper {
             || (ref1 != null && ref2 != null && Objects.equals(ref1.getAbakusReferanse(), ref2.getReferanse()));
     }
 
-    public static record Kravnøkkel (Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef referanse) { }
-
+    public static record Kravnøkkel(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef referanse) { }
 }

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -143,20 +144,50 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     private Set<DatoIntervallEntitet> utledPerioderTilVurderingVedÅHensyntaFullstendigTidslinje(Long behandlingId, Set<DatoIntervallEntitet> perioder) {
-        var fullstendigTidslinje = new LocalDateTimeline<>(utledFullstendigePerioder(behandlingId)
-            .stream()
-            .map(DatoIntervallEntitet::toLocalDateInterval)
-            .map(it -> new LocalDateSegment<>(it, true))
-            .collect(Collectors.toList()));
-        var relevantTidslinje = new LocalDateTimeline<>(perioder.stream()
-            .map(DatoIntervallEntitet::toLocalDateInterval)
-            .map(it -> new LocalDateSegment<>(it, true))
-            .collect(Collectors.toList()));
+        var datoIntervallEntitets = utledFullstendigePerioder(behandlingId);
+        return utledPeriodeEtterHensynÅHaHensyntattFullstendigTidslinje(perioder, datoIntervallEntitets);
+    }
 
-        return fullstendigTidslinje.intersection(relevantTidslinje).compress()
-            .stream()
-            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+    NavigableSet<DatoIntervallEntitet> utledPeriodeEtterHensynÅHaHensyntattFullstendigTidslinje(Set<DatoIntervallEntitet> perioder, NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
+        var fullstendigTidslinje = opprettTidslinje(datoIntervallEntitets)
+            .toSegments()
+            .stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             .collect(Collectors.toCollection(TreeSet::new));
+
+        var relevantTidslinje = new LocalDateTimeline<>(
+            fullstendigTidslinje.stream()
+                .filter(it -> perioder.stream().anyMatch(it::overlapper))
+                .map(DatoIntervallEntitet::toLocalDateInterval)
+                .map(it -> new LocalDateSegment<>(it, true))
+                .collect(Collectors.toList()))
+            .compress();
+
+        return relevantTidslinje.toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private LocalDateTimeline<Boolean> opprettTidslinje(NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
+
+        var tidslinje = new LocalDateTimeline<Boolean>(List.of());
+
+        for (DatoIntervallEntitet periode : datoIntervallEntitets) {
+            var segmentLinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(justerMotHelg(periode).toLocalDateInterval(), true)));
+            tidslinje = tidslinje.combine(segmentLinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        return tidslinje.compress();
+    }
+
+    private DatoIntervallEntitet justerMotHelg(DatoIntervallEntitet it) {
+        if (it.getTomDato().getDayOfWeek().equals(DayOfWeek.FRIDAY)) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato(), it.getTomDato().plusDays(2));
+        }
+        if (it.getTomDato().getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato(), it.getTomDato().plusDays(1));
+        }
+        return it;
     }
 
     @Override
@@ -244,14 +275,14 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         if (uttaksplan == null) {
             return LocalDateTimeline.EMPTY_TIMELINE;
         }
-        
+
         final List<LocalDateSegment<Boolean>> segments = uttaksplan.getPerioder()
             .entrySet()
             .stream()
             .filter(entry -> entry.getValue().getEndringsstatus() != Endringsstatus.UENDRET)
             .map(entry -> new LocalDateSegment<Boolean>(entry.getKey().getFom(), entry.getKey().getTom(), Boolean.TRUE))
             .toList();
-        
+
         return new LocalDateTimeline<Boolean>(segments);
     }
 

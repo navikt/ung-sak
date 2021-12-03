@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'deploy/topics.yml'
+      - 'deploy/topics-q.yml'
 
 jobs:
   deploy-kafka-topics-dev:
@@ -17,7 +18,7 @@ jobs:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: dev-gcp
           VAR: kafka-pool=nav-dev
-          RESOURCE: deploy/topics.yml
+          RESOURCE: deploy/topics-q.yml
 
   deploy-kafka-topics-prod:
     name: Deploy to Aiven Prod
