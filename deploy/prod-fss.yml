@@ -215,6 +215,8 @@ spec:
       value: "AFMX0|2021-03-01"
     - name: MAP_ALLE_KRAV
       value: "true"
+    - name: K9_RAPID_AIVEN
+      value: "false"
     - name: PSB_ENABLE_BEKREFT_UTTAK
       value: "false"
 

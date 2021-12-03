@@ -214,6 +214,8 @@ spec:
       value: "true"
     - name: MAP_ALLE_KRAV
       value: "true"
+    - name: K9_RAPID_AIVEN
+      value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
       value: "true"
     - name: PSB_ENABLE_BEKREFT_UTTAK
