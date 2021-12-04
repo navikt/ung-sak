@@ -125,7 +125,7 @@ public class UttakRestKlient {
     }
 
     public Simulering simulerUttaksplanV2(Simuleringsgrunnlag request) {
-        URIBuilder builder = new URIBuilder(endpointSimuleringUttaksplan);
+        URIBuilder builder = new URIBuilder(endpointSimuleringUttaksplanV2);
         try {
             HttpPost kall = new HttpPost(builder.build());
             var json = objectMapper.writer().writeValueAsString(request);

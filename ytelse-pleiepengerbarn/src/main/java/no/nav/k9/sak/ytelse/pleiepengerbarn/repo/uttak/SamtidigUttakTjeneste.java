@@ -46,7 +46,7 @@ public class SamtidigUttakTjeneste {
     private BehandlingModellRepository behandlingModellRepository;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
     private BekreftetUttakTjeneste bekreftetUttakTjeneste;
-    private Boolean benyttNyFlyt;
+    private Boolean enableAvslagBeregning;
 
 
     @Inject
@@ -65,7 +65,7 @@ public class SamtidigUttakTjeneste {
         this.behandlingModellRepository = behandlingModellRepository;
         this.pleietrengendeKravprioritet = pleietrengendeKravprioritet;
         this.bekreftetUttakTjeneste = bekreftetUttakTjeneste;
-        this.benyttNyFlyt = benyttNyFlyt;
+        this.enableAvslagBeregning = benyttNyFlyt;
     }
 
 
@@ -187,22 +187,30 @@ public class SamtidigUttakTjeneste {
     private Simulering simulerUttak(BehandlingReferanse ref) {
         final Uttaksgrunnlag uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtUbesluttededataOgMapRequest(ref);
 
-        Simuleringsgrunnlag simuleringsgrunnlag = byggRequest(ref, uttaksgrunnlag);
+        if (enableAvslagBeregning) {
+            Simuleringsgrunnlag simuleringsgrunnlag = byggRequest(ref, uttaksgrunnlag);
 
-        return uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
+            return uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
+        } else {
+            return uttakTjeneste.simulerUttaksplan(uttaksgrunnlag);
+        }
     }
 
     private Simulering simulerUttakKunBesluttet(BehandlingReferanse ref) {
         final Uttaksgrunnlag uttaksGrunnlag = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
 
-        Simuleringsgrunnlag simuleringsgrunnlag = byggRequest(ref, uttaksGrunnlag);
+        if (enableAvslagBeregning) {
+            Simuleringsgrunnlag simuleringsgrunnlag = byggRequest(ref, uttaksGrunnlag);
 
-        return uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
+            return uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
+        } else {
+            return uttakTjeneste.simulerUttaksplan(uttaksGrunnlag);
+        }
     }
 
     private Simuleringsgrunnlag byggRequest(BehandlingReferanse ref, Uttaksgrunnlag uttaksGrunnlag) {
         NavigableSet<DatoIntervallEntitet> avslåttePerioderIBeregning = new TreeSet<>();
-        if (benyttNyFlyt && harKommetTilBeregning(ref)) {
+        if (enableAvslagBeregning && harKommetTilBeregning(ref)) {
             avslåttePerioderIBeregning = bekreftetUttakTjeneste.utledPerioderTilVurderingSomBlittAvslåttIBeregning(ref.getBehandlingId());
         }
 
