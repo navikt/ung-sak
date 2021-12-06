@@ -159,7 +159,7 @@ public class KravperioderMapper {
 
     private static List<Refusjonsperiode> mapRefusjonsperioder(Inntektsmelding im, LocalDate startdatoRefusjon) {
         ArrayList<LocalDateSegment<BigDecimal>> alleSegmenter = new ArrayList<>();
-        if (im.getRefusjonOpphører() != null && startdatoRefusjon.isBefore(im.getRefusjonOpphører())) {
+        if (im.getRefusjonOpphører() != null && im.getRefusjonOpphører().isBefore(startdatoRefusjon)) {
             return Collections.emptyList();
         }
         if (!(im.getRefusjonBeløpPerMnd() == null || im.getRefusjonBeløpPerMnd().getVerdi().compareTo(BigDecimal.ZERO) == 0)) {
