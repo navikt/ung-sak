@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -46,6 +47,7 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private FagsakRepository fagsakRepository;
+    private boolean toggleMigrering;
 
     public PSBPreconditionBeregningAksjonspunktUtleder() {
     }
@@ -54,15 +56,20 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
     public PSBPreconditionBeregningAksjonspunktUtleder(OverlappendeYtelserTjeneste overlappendeYtelserTjeneste,
                                                        InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                        @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                                       FagsakRepository fagsakRepository) {
+                                                       FagsakRepository fagsakRepository,
+                                                       @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering) {
         this.overlappendeYtelserTjeneste = overlappendeYtelserTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.fagsakRepository = fagsakRepository;
+        this.toggleMigrering = toggleMigrering;
     }
 
     @Override
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
+        if (!toggleMigrering) {
+            return Collections.emptyList();
+        }
         InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId());
         Optional<AktørYtelse> aktørYtelse = iayGrunnlag.getAktørYtelseFraRegister(param.getAktørId());
         YtelseFilter ytelseFilter = lagInfotrygdPSBFilter(aktørYtelse);

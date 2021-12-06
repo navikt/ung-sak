@@ -220,6 +220,8 @@ spec:
       value: "true"
     - name: PSB_DISABLE_VURDER_TILBAKETREKK
       value: "true"
+    - name: PSB_INFOTRYGD_MIGRERING
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
@@ -234,4 +236,4 @@ spec:
 
     # Pleiepenger infotrygd migrering
     - name: OVERSTYR_BEREGNING_INPUT_TILLATELSER
-      value: ""
+      value: "Z990404,Z990422"

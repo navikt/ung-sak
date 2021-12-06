@@ -219,6 +219,8 @@ spec:
       value: "false"
     - name: PSB_DISABLE_VURDER_TILBAKETREKK
       value: "false"
+    - name: PSB_INFOTRYGD_MIGRERING
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
@@ -230,3 +232,8 @@ spec:
 
     - name: PIP_USERS
       value: "srvPDP,srvk9-tilbake,srvsaf"
+
+
+    # Pleiepenger infotrygd migrering
+    - name: OVERSTYR_BEREGNING_INPUT_TILLATELSER
+      value: ""
