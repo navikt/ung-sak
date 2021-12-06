@@ -188,6 +188,8 @@ spec:
       value: "3030"
 
     # Feature-flag
+    - name: VKY_VED_OVERLAPP_INFOTRYGD
+      value: "true"
     - name: OMP_IM_SJEKK_FORSTE_FRAVAERSDAG
       value: "true"
     - name: PSB_OPPG_OPPTJENING_PRIORITERING
