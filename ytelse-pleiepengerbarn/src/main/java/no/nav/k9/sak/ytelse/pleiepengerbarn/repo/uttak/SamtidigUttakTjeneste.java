@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -228,7 +229,9 @@ public class SamtidigUttakTjeneste {
     public boolean isEndringerMedUbesluttedeData(BehandlingReferanse ref) {
         final Simulering simulering = simulerUttak(ref);
         // Hvis en sak ikke har kommet til uttak betyr det at true returneres her.
-        //log.info("Simulering harForrigeUttaksplan={} endret={}", (simulering.getForrigeUttaksplan() != null), simulering.getUttakplanEndret());
+        if (enableAvslagBeregning && (Environment.current().isDev() || Environment.current().isLocal())) {
+            log.info("Simulering harForrigeUttaksplan={} endret={}", (simulering.getForrigeUttaksplan() != null), simulering.getUttakplanEndret());
+        }
         return simulering.getUttakplanEndret();
     }
 }
