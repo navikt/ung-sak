@@ -21,6 +21,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
@@ -42,6 +44,7 @@ public class OmsorgenForTjeneste {
     private OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository;
     private BehandlingRepository behandlingRepository;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
+    private KantIKantVurderer kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
     OmsorgenForTjeneste() {
         // CDI
@@ -83,7 +86,7 @@ public class OmsorgenForTjeneste {
                 if (datoSegment == null) {
                     return new LocalDateSegment<OmsorgenForVilkårGrunnlag>(datoInterval, datoSegment2.getValue());
                 }
-                
+
                 final OmsorgenForVilkårGrunnlag sg = datoSegment2.getValue();
                 final OmsorgenForVilkårGrunnlag sammensatt = new OmsorgenForVilkårGrunnlag(sg.getRelasjonMellomSøkerOgPleietrengende(), sg.getSøkersAdresser(), sg.getPleietrengendeAdresser(), datoSegment.getValue().getErOmsorgsPerson());
                 return new LocalDateSegment<OmsorgenForVilkårGrunnlag>(datoInterval, sammensatt);
@@ -110,11 +113,11 @@ public class OmsorgenForTjeneste {
         default: throw new IllegalStateException("Uviklerfeil: Ukjen resultat: " + resultat);
         }
     }
-    
+
     public OmsorgenForVilkårGrunnlag oversettSystemdataTilRegelModellOmsorgen(Long behandlingId, AktørId aktørId, NavigableSet<DatoIntervallEntitet> perioder) {
         final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, omsluttendePeriode(perioder)).orElseThrow();
         final var pleietrengende = behandlingRepository.hentBehandling(behandlingId).getFagsak().getPleietrengendeAktørId();
-        
+
         // Lar denne stå her inntil videre selv om vi ikke bruker den:
         final var søkerBostedsadresser = personopplysningerAggregat.getAdresserFor(aktørId)
             .stream()
@@ -128,7 +131,7 @@ public class OmsorgenForTjeneste {
         return new OmsorgenForVilkårGrunnlag(mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
                 mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser), null);
     }
-    
+
     private DatoIntervallEntitet omsluttendePeriode(final NavigableSet<DatoIntervallEntitet> perioder) {
         final var startDato = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElse(LocalDate.now());
         final var sluttDato = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElse(LocalDate.now());

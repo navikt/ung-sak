@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg;
 
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,11 +18,15 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 
 @Dependent
 public class OmsorgenForGrunnlagRepository {
 
+    private KantIKantVurderer påTversAvHelgErKantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
     private EntityManager entityManager;
 
 
@@ -31,7 +36,7 @@ public class OmsorgenForGrunnlagRepository {
         this.entityManager = entityManager;
     }
 
-    
+
     public OmsorgenForGrunnlag hent(Long behandlingId) {
         return hentHvisEksisterer(behandlingId).orElseThrow();
     }
@@ -48,23 +53,23 @@ public class OmsorgenForGrunnlagRepository {
         final Optional<OmsorgenForGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         lagre(behandlingId, omsorgenFor, eksisterendeGrunnlag);
     }
-    
+
     public void lagre(Long behandlingId, OmsorgenForPeriode omsorgenForPeriode) {
         final Optional<OmsorgenForGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         final OmsorgenFor omsorgenFor = eksisterendeGrunnlag.map(og -> new OmsorgenFor(og.getOmsorgenFor())).orElse(new OmsorgenFor());
         tilpassOmsorgenForMedPeriode(omsorgenFor, omsorgenForPeriode);
-        
+
         lagre(behandlingId, omsorgenFor, eksisterendeGrunnlag);
     }
-    
+
     public void lagreNyeVurderinger(Long behandlingId, List<OmsorgenForSaksbehandlervurdering> nyeVurderinger) {
         final Optional<OmsorgenForGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         final OmsorgenFor omsorgenFor = eksisterendeGrunnlag.map(og -> new OmsorgenFor(og.getOmsorgenFor())).orElse(new OmsorgenFor());
         tilpassOmsorgenForMedSaksbehandlervurdering(omsorgenFor, nyeVurderinger);
-        
+
         lagre(behandlingId, omsorgenFor, eksisterendeGrunnlag);
     }
-    
+
     private void lagre(Long behandlingId, OmsorgenFor omsorgenFor, Optional<OmsorgenForGrunnlag> eksisterendeGrunnlag) {
         if (eksisterendeGrunnlag.isPresent()) {
             // deaktiver eksisterende grunnlag
@@ -91,7 +96,31 @@ public class OmsorgenForGrunnlagRepository {
 
         query.setParameter("behandlingId", id);
 
-        return HibernateVerktøy.hentUniktResultat(query);
+        Optional<OmsorgenForGrunnlag> optionalGrunnlag = HibernateVerktøy.hentUniktResultat(query);
+
+        if (optionalGrunnlag.isPresent()) {
+            OmsorgenForGrunnlag omsorgenForGrunnlag = optionalGrunnlag.get();
+            omsorgenForGrunnlag.getOmsorgenFor().setPerioder(reparerHelgehull(omsorgenForGrunnlag.getOmsorgenFor().getPerioder()));
+        }
+
+        return optionalGrunnlag;
+    }
+
+    //Forutsetter at perioder er sortert etter fomDato i stigende rekkefølge
+    List<OmsorgenForPeriode> reparerHelgehull(List<OmsorgenForPeriode> perioder) {
+        OmsorgenForPeriode forrigePeriode = perioder.stream().filter(p -> !p.getResultat().equals(Resultat.IKKE_OPPFYLT)).findFirst().get();
+
+        ListIterator<OmsorgenForPeriode> iterator = perioder.listIterator(perioder.indexOf(forrigePeriode));
+        while (iterator.hasNext()) {
+            OmsorgenForPeriode periode = iterator.next();
+            if (påTversAvHelgErKantIKantVurderer.erKantIKant(forrigePeriode.getPeriode(), periode.getPeriode())) {
+                if (periode.getResultat().equals(Resultat.IKKE_VURDERT) && !forrigePeriode.getResultat().equals(Resultat.IKKE_OPPFYLT)) {
+                    iterator.set(new OmsorgenForPeriode(periode, DatoIntervallEntitet.fra(forrigePeriode.getPeriode().getTomDato().plusDays(1), periode.getPeriode().getTomDato())));
+                }
+            }
+        }
+
+        return perioder;
     }
 
     /**
@@ -107,10 +136,10 @@ public class OmsorgenForGrunnlagRepository {
             lagre(nyBehandlingId, new OmsorgenFor(entitet.getOmsorgenFor()));
         });
     }
-    
-    void tilpassOmsorgenForMedPeriode(OmsorgenFor omsorgenFor, OmsorgenForPeriode periode) {
+
+    void tilpassOmsorgenForMedPeriode(OmsorgenFor omsorgenFor, OmsorgenForPeriode nyPeriode) {
         final LocalDateTimeline<OmsorgenForPeriode> tidslinje = toTidslinje(omsorgenFor);
-        final LocalDateSegment<OmsorgenForPeriode> newSegment = toSegment(periode);
+        final LocalDateSegment<OmsorgenForPeriode> newSegment = toSegment(nyPeriode);
         final LocalDateTimeline<OmsorgenForPeriode> nyTidslinje = tidslinje.combine(newSegment, new LocalDateSegmentCombinator<OmsorgenForPeriode, OmsorgenForPeriode, OmsorgenForPeriode>() {
             @Override
             public LocalDateSegment<OmsorgenForPeriode> combine(LocalDateInterval datoInterval,
@@ -120,10 +149,10 @@ public class OmsorgenForGrunnlagRepository {
                 return toSegment(datoInterval, value);
             }
         }, JoinStyle.CROSS_JOIN);
-        
+
         omsorgenFor.setPerioder(nyTidslinje.compress().stream().map(s -> s.getValue()).collect(Collectors.toList()));
     }
-    
+
     private LocalDateSegment<OmsorgenForPeriode> toSegment(LocalDateInterval datoInterval, OmsorgenForPeriode value) {
         return new LocalDateSegment<OmsorgenForPeriode>(datoInterval, new OmsorgenForPeriode(value, toDatoIntervallEntitet(datoInterval)));
     }
@@ -131,7 +160,7 @@ public class OmsorgenForGrunnlagRepository {
     private DatoIntervallEntitet toDatoIntervallEntitet(LocalDateInterval datoInterval) {
         return DatoIntervallEntitet.fraOgMedTilOgMed(datoInterval.getFomDato(), datoInterval.getTomDato());
     }
-    
+
     void tilpassOmsorgenForMedSaksbehandlervurdering(OmsorgenFor omsorgenFor, List<OmsorgenForSaksbehandlervurdering> saksbehandlervurderinger) {
         final var tidslinje = toTidslinje(omsorgenFor);
         final var tidslinjeForNytt = toTidslinje(saksbehandlervurderinger);
@@ -146,12 +175,12 @@ public class OmsorgenForGrunnlagRepository {
                 if (datoSegment2 == null) {
                     return toSegment(datoInterval, datoSegment.getValue());
                 }
-                
+
                 final OmsorgenForPeriode omsorgenForPeriode = new OmsorgenForPeriode(datoSegment.getValue(), toDatoIntervallEntitet(datoInterval), datoSegment2.getValue());
                 return new LocalDateSegment<OmsorgenForPeriode>(datoInterval, omsorgenForPeriode);
             }
         }, JoinStyle.CROSS_JOIN);
-        
+
         omsorgenFor.setPerioder(nyTidslinje.compress().stream().map(s -> s.getValue()).collect(Collectors.toList()));
     }
 
@@ -168,7 +197,7 @@ public class OmsorgenForGrunnlagRepository {
         final List<LocalDateSegment<OmsorgenForPeriode>> segments = omsorgenFor.getPerioder().stream()
                 .map(p -> toSegment(p))
                 .collect(Collectors.toList());
-        
+
         final var tidslinje = new LocalDateTimeline<OmsorgenForPeriode>(segments);
         return tidslinje;
     }
