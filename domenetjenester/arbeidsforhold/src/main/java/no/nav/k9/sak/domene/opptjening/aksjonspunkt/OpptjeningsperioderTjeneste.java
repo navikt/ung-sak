@@ -25,7 +25,6 @@ import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.InntektFilter;
 import no.nav.k9.sak.domene.iay.modell.Inntektspost;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
@@ -174,21 +173,15 @@ public class OpptjeningsperioderTjeneste {
         Optional<AktørArbeid> aktørArbeidFraRegister = grunnlag.getAktørArbeidFraRegister(aktørId);
         var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), aktørArbeidFraRegister).før(periode.getTomDato());
 
-        var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(periode.getTomDato()).filterPensjonsgivende();
-
         Collection<Yrkesaktivitet> frilansOppdrag = filter.getFrilansOppdrag();
 
-        if (aktørArbeidFraRegister.isPresent() && !inntektFilter.getFiltrertInntektsposter().isEmpty() && !frilansOppdrag.isEmpty()) {
+        if (aktørArbeidFraRegister.isPresent() && !frilansOppdrag.isEmpty()) {
 
             DatoIntervallEntitet frilansPeriode = finnFrilansPeriode(oppgittOpptjening, periode, frilansOppdrag);
 
-            List<Yrkesaktivitet> frilansMedInntekt = frilansOppdrag.stream()
-                .filter(frilans -> harInntektFraVirksomhetForPeriode(frilans, inntektFilter, periode))
-                .collect(Collectors.toList());
             OpptjeningAktivitetType brukType = utledOpptjeningType(mapArbeidOpptjening, ArbeidType.FRILANSER);
             VurderingsStatus status = vurderOpptjening.vurderStatus(new VurderStatusInput(brukType, behandlingReferanse));
-            return frilansMedInntekt.isEmpty() ? Optional.empty()
-                : Optional.of(OpptjeningsperiodeForSaksbehandling.Builder.ny()
+            return Optional.of(OpptjeningsperiodeForSaksbehandling.Builder.ny()
                 .medOpptjeningAktivitetType(brukType)
                 .medVurderingsStatus(status)
                 .medPeriode(frilansPeriode)
@@ -237,12 +230,6 @@ public class OpptjeningsperioderTjeneste {
 
 
         return startDatoFrilans.map(startDato -> DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDatoFrilans));
-    }
-
-    private boolean harInntektFraVirksomhetForPeriode(Yrkesaktivitet frilans, InntektFilter inntektFilter, DatoIntervallEntitet opptjeningsPeriode) {
-        return inntektFilter
-            .filter(i -> frilans.getArbeidsgiver().equals(i.getArbeidsgiver()))
-            .anyMatchFilter((i, ip) -> harInntektpostForPeriode(ip, opptjeningsPeriode));
     }
 
     private boolean harInntektpostForPeriode(Inntektspost ip, DatoIntervallEntitet opptjeningsPeriode) {
