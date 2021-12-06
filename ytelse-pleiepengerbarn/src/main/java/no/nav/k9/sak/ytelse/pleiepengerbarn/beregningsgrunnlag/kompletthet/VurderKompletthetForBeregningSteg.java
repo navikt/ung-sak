@@ -191,7 +191,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     }
 
     private BehandleStegResultat legacykompletthetHåndtering(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, true, true);
 
         if (perioderTilVurdering.isEmpty()) {
             avbrytAksjonspunktHvisTilstede(kontekst);

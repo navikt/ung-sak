@@ -32,6 +32,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
@@ -57,6 +58,7 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
     private KompletthetsjekkerFelles fellesUtil;
     private SøknadRepository søknadRepository;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private FagsakRepository fagsakRepository;
     private Boolean benyttNyFlyt;
 
     PSBKompletthetsjekker() {
@@ -70,13 +72,14 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
                                  KompletthetsjekkerFelles fellesUtil,
                                  SøknadRepository søknadRepository,
                                  @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                 @KonfigVerdi(value = "KOMPLETTHET_NY_FLYT", defaultVerdi = "false") Boolean benyttNyFlyt) {
+                                 FagsakRepository fagsakRepository, @KonfigVerdi(value = "KOMPLETTHET_NY_FLYT", defaultVerdi = "false") Boolean benyttNyFlyt) {
         this.kompletthetssjekkerSøknad = kompletthetssjekkerSøknad;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.fellesUtil = fellesUtil;
         this.søknadRepository = søknadRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.fagsakRepository = fagsakRepository;
         this.benyttNyFlyt = benyttNyFlyt;
     }
 
@@ -123,8 +126,10 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
     }
 
     private TreeSet<DatoIntervallEntitet> utledVilkårsperioderRelevantForBehandling(BehandlingReferanse ref) {
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigrering(ref.getFagsakId());
         return perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
             .stream()
+            .filter(p -> sakInfotrygdMigrering.map(im -> !im.getSkjæringstidspunkt().equals(p.getFomDato())).orElse(true))
             .sorted(Comparator.comparing(DatoIntervallEntitet::getFomDato))
             .collect(Collectors.toCollection(TreeSet::new));
     }
