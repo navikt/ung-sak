@@ -31,6 +31,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class PSBVurderSøknadsfristTjeneste implements SøknadsfristTjeneste {
 
     private VurderSøknadsfristTjeneste<Søknadsperiode> vurderSøknadsfristTjeneste;

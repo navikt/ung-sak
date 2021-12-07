@@ -222,8 +222,10 @@ public class HentDataTilUttakTjeneste {
     private NavigableSet<DatoIntervallEntitet> finnSykdomsperioder(BehandlingReferanse referanse) {
         final var s1 = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         final var s2 = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+        final var s3 = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.I_LIVETS_SLUTTFASE);
         final var resultat = new TreeSet<>(s1);
         resultat.addAll(s2);
+        resultat.addAll(s3);
         return resultat;
     }
 

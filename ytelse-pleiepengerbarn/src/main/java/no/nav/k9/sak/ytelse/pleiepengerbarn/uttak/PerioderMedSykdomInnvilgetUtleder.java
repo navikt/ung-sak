@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -17,6 +18,7 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -62,13 +64,19 @@ public class PerioderMedSykdomInnvilgetUtleder {
 
     private Set<VilkårPeriode> finnInnvilgedePerioder(Vilkårene vilkårene,
                                                       NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
-        var s1 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR).orElseThrow()
-            .getPerioder()
+        var s1 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR)
+            .map(Vilkår::getPerioder)
+            .orElse(List.of())
             .stream();
-        var s2 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR).orElseThrow()
-            .getPerioder()
+        var s2 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR)
+            .map(Vilkår::getPerioder)
+            .orElse(List.of())
             .stream();
-        return Stream.concat(s1, s2)
+        var s3 = vilkårene.getVilkår(VilkårType.I_LIVETS_SLUTTFASE)
+            .map(Vilkår::getPerioder)
+            .orElse(List.of())
+            .stream();
+        return Stream.concat(Stream.concat(s1, s2), s3)
             .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
             .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
             .collect(Collectors.toSet());

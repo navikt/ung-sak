@@ -14,6 +14,7 @@ import no.nav.k9.sak.domene.registerinnhenting.DiffUtvidetBehandlingsgrunnlagTje
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
 
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @ApplicationScoped
 public class PSBDiffUtvidetBehandlingsgrunnlagTjeneste implements DiffUtvidetBehandlingsgrunnlagTjeneste {
 

@@ -40,6 +40,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBere
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements YtelsespesifikkeInntektsmeldingTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(PsbManglendePåkrevdeInntektsmeldingerTjeneste.class);

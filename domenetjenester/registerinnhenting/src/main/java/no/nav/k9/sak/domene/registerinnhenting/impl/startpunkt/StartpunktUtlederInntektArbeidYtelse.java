@@ -28,6 +28,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 @ApplicationScoped
 @GrunnlagRef("InntektArbeidYtelseGrunnlag")
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @FagsakYtelseTypeRef("OMP")
 @FagsakYtelseTypeRef("FRISINN")
 class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {

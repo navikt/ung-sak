@@ -114,7 +114,16 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG_8_47,
         Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT,
         Avslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT),
-
+    PLEIES_I_HJEMMMET(VilkårTypeKoder.K9_VK_13,
+        "Pleies i hjemmet",
+        Map.of(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 9-13"),
+        Avslagsårsak.MANGLENDE_DOKUMENTASJON
+    ),
+    I_LIVETS_SLUTTFASE(VilkårTypeKoder.K9_VK_16,
+        "I livets sluttfase",
+        Map.of(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 9-16 4. ledd"),
+        Avslagsårsak.MANGLENDE_DOKUMENTASJON
+    ),
     UTVIDETRETT(VilkårTypeKoder.K9_VK_9_6, "Utvidet rett",
             Map.of(FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-6 1. ledd",
                 FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-6 2. ledd",

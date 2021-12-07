@@ -36,6 +36,7 @@ import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal.PSBKompletthetSjekkerTjeneste;
 
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @BehandlingStegRef(kode = "KOMPLETT_FOR_BEREGNING")
 @BehandlingTypeRef
 @ApplicationScoped

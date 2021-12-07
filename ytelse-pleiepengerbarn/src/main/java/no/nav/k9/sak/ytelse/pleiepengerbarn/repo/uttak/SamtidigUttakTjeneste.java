@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
@@ -87,7 +86,8 @@ public class SamtidigUttakTjeneste {
     }
 
     private List<Fagsak> hentAndreFagsakerPåPleietrengende(BehandlingReferanse ref) {
-        final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, ref.getPleietrengendeAktørId(), null, null, null);
+        final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(ref.getFagsakYtelseType(), ref.getPleietrengendeAktørId(), null, null, null);
+        //TODO PLS, riktig semantikk (!any vs none)?
         if (fagsaker.stream().noneMatch(f -> f.getSaksnummer().equals(ref.getSaksnummer()))) {
             throw new IllegalStateException("Utviklerfeil: Klarte ikke å finne saken.");
         }

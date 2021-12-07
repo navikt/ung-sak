@@ -11,8 +11,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -39,6 +37,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 @BehandlingStegRef(kode = "INIT_PERIODER")
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class InitierPerioderSteg implements BehandlingSteg {
 
     private final Logger log = LoggerFactory.getLogger(InitierPerioderSteg.class);
@@ -83,8 +82,6 @@ public class InitierPerioderSteg implements BehandlingSteg {
             var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
                 .stream()
                 .filter(it -> it.getBehandlingId().equals(behandlingId))
-                .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
-                .filter(it -> Brevkode.PLEIEPENGER_BARN_SOKNAD.equals(it.getType()))
                 .map(MottattDokument::getJournalpostId)
                 .collect(Collectors.toSet());
 

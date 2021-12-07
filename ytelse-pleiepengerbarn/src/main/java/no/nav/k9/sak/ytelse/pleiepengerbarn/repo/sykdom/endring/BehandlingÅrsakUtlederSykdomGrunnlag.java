@@ -33,6 +33,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnn
 @ApplicationScoped
 @GrunnlagRef("SykdomGrunnlag")
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
 
     private BehandlingRepository behandlingRepository;
