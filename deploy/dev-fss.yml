@@ -219,7 +219,7 @@ spec:
     - name: ENABLE_BRUKERDIALOGINNSYN
       value: "true"
     - name: PSB_ENABLE_BEKREFT_UTTAK
-      value: "false"
+      value: "true"
     - name: PSB_DISABLE_VURDER_TILBAKETREKK
       value: "true"
 
