@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
@@ -46,7 +47,7 @@ public class OmsorgenForGrunnlagRepository {
             return Optional.empty();
         }
 
-        return hentEksisterendeGrunnlag(behandlingId);
+        return hentOgFiksGrunnlag(behandlingId);
     }
 
     public void lagre(Long behandlingId, OmsorgenFor omsorgenFor) {
@@ -89,38 +90,93 @@ public class OmsorgenForGrunnlagRepository {
         entityManager.flush();
     }
 
-    private Optional<OmsorgenForGrunnlag> hentEksisterendeGrunnlag(Long id) {
+    private Optional<OmsorgenForGrunnlag> hentEksisterendeGrunnlag(Long behandlingId) {
         final TypedQuery<OmsorgenForGrunnlag> query = entityManager.createQuery(
             "FROM OmsorgenForGrunnlag s " +
                 "WHERE s.behandlingId = :behandlingId AND s.aktiv = true", OmsorgenForGrunnlag.class);
 
-        query.setParameter("behandlingId", id);
+        query.setParameter("behandlingId", behandlingId);
 
-        Optional<OmsorgenForGrunnlag> optionalGrunnlag = HibernateVerktøy.hentUniktResultat(query);
+        return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    private Optional<OmsorgenForGrunnlag> hentOgFiksGrunnlag(Long behandlingId) {
+        Optional<OmsorgenForGrunnlag> optionalGrunnlag = hentEksisterendeGrunnlag(behandlingId);
 
         if (optionalGrunnlag.isPresent()) {
             OmsorgenForGrunnlag omsorgenForGrunnlag = optionalGrunnlag.get();
-            omsorgenForGrunnlag.getOmsorgenFor().setPerioder(reparerHelgehull(omsorgenForGrunnlag.getOmsorgenFor().getPerioder()));
+
+            List<OmsorgenForPeriode> perioderKopi = omsorgenForGrunnlag.getOmsorgenFor().getPerioder()
+                .stream()
+                .map(p -> new OmsorgenForPeriode(p))
+                .collect(Collectors.toList());
+
+            boolean endret = reparerHelgehull(perioderKopi);
+
+            if (endret) {
+                OmsorgenFor nyOmsorgenFor = new OmsorgenFor(omsorgenForGrunnlag.getOmsorgenFor());
+                nyOmsorgenFor.setPerioder(perioderKopi);
+                return Optional.of(new OmsorgenForGrunnlag(behandlingId, nyOmsorgenFor));
+            }
         }
 
         return optionalGrunnlag;
     }
 
     //Forutsetter at perioder er sortert etter fomDato i stigende rekkefølge
-    List<OmsorgenForPeriode> reparerHelgehull(List<OmsorgenForPeriode> perioder) {
-        OmsorgenForPeriode forrigePeriode = perioder.stream().filter(p -> !p.getResultat().equals(Resultat.IKKE_OPPFYLT)).findFirst().get();
+    boolean reparerHelgehull(List<OmsorgenForPeriode> perioder) {
+        perioder.sort(Comparator.comparing(p -> p.getPeriode().getFomDato()));
+        ListIterator<OmsorgenForPeriode> iterator = perioder.listIterator();
+        boolean endret = false;
 
-        ListIterator<OmsorgenForPeriode> iterator = perioder.listIterator(perioder.indexOf(forrigePeriode));
         while (iterator.hasNext()) {
+            OmsorgenForPeriode forrigePeriode = null;
+            if (iterator.hasPrevious()) {
+                forrigePeriode = perioder.get(iterator.previousIndex());
+            }
             OmsorgenForPeriode periode = iterator.next();
-            if (påTversAvHelgErKantIKantVurderer.erKantIKant(forrigePeriode.getPeriode(), periode.getPeriode())) {
-                if (periode.getResultat().equals(Resultat.IKKE_VURDERT) && !forrigePeriode.getResultat().equals(Resultat.IKKE_OPPFYLT)) {
-                    iterator.set(new OmsorgenForPeriode(periode, DatoIntervallEntitet.fra(forrigePeriode.getPeriode().getTomDato().plusDays(1), periode.getPeriode().getTomDato())));
+
+            if (periode.getResultat() == Resultat.IKKE_VURDERT) {
+                if (iterator.hasNext()) { //foretrekke å vokse mot neste periode, dersom helgehull
+                    OmsorgenForPeriode nestePeriode = perioder.get(iterator.nextIndex());
+                    boolean tilstøtendeMotNeste = periode.getPeriode().getTomDato().plusDays(1).equals(nestePeriode.getPeriode().getFomDato());
+
+                    if (!tilstøtendeMotNeste && påTversAvHelgErKantIKantVurderer.erKantIKant(periode.getPeriode(), nestePeriode.getPeriode())) {
+                        if (nestePeriode.getResultat() != Resultat.IKKE_OPPFYLT) {
+                            OmsorgenForPeriode erstatterPeriode = new OmsorgenForPeriode(periode, DatoIntervallEntitet.fra(periode.getPeriode().getFomDato(), nestePeriode.getPeriode().getFomDato().minusDays(1)));
+                            iterator.set(erstatterPeriode);
+                            periode = erstatterPeriode;
+                            endret = true;
+                        }
+                    }
+                }
+
+                if (forrigePeriode != null) {
+                    boolean tilstøtendeMotForrige = forrigePeriode.getPeriode().getTomDato().plusDays(1).equals(periode.getPeriode().getFomDato());
+
+                    if (!tilstøtendeMotForrige && påTversAvHelgErKantIKantVurderer.erKantIKant(forrigePeriode.getPeriode(), periode.getPeriode())) {
+                        if (!forrigePeriode.getResultat().equals(Resultat.IKKE_OPPFYLT)) {
+                            iterator.set(new OmsorgenForPeriode(periode, DatoIntervallEntitet.fra(forrigePeriode.getPeriode().getTomDato().plusDays(1), periode.getPeriode().getTomDato())));
+                            endret = true;
+                        }
+                    }
+                }
+            }
+
+            if (periode.getResultat() == Resultat.OPPFYLT && iterator.hasNext()) {
+                OmsorgenForPeriode nestePeriode = perioder.get(iterator.nextIndex());
+
+                boolean tilstøtendeMotNeste = periode.getPeriode().getTomDato().plusDays(1).equals(nestePeriode.getPeriode().getFomDato());
+                if (nestePeriode.getResultat() == Resultat.OPPFYLT && !tilstøtendeMotNeste && påTversAvHelgErKantIKantVurderer.erKantIKant(periode.getPeriode(), nestePeriode.getPeriode())) {
+                    //antar siste periode har mest oppdaterter opplysninger å kopiere fra
+                    OmsorgenForPeriode helgeperiode = new OmsorgenForPeriode(nestePeriode, DatoIntervallEntitet.fraOgMedTilOgMed(periode.getPeriode().getTomDato().plusDays(1), nestePeriode.getPeriode().getFomDato().minusDays(1)));
+                    iterator.add(helgeperiode);
+                    endret = true;
                 }
             }
         }
 
-        return perioder;
+        return endret;
     }
 
     /**
