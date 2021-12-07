@@ -75,7 +75,7 @@ public class OppgaveTjeneste {
         }
     }
 
-    public String opprettVkyOppgaveOverlappendeYtelse(BehandlingReferanse ref, String beskrivelse, String oppgavetema, String behandlingstema, String enhetId) {
+    public String opprettVkyOppgaveOverlappendeYtelse(BehandlingReferanse ref, String beskrivelse, String oppgavetema, String behandlingstype, String enhetId) {
         Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         Fagsak fagsak = behandling.getFagsak();
 
@@ -88,7 +88,7 @@ public class OppgaveTjeneste {
             DEFAULT_OPPGAVEFRIST_DAGER,
             oppgavetema
         ).medTildeltEnhetsnr(enhetId)
-            .medBehandlingstema(behandlingstema)
+            .medBehandlingstype(behandlingstype)
             .medOppgavetype(OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE.getKode());
 
         var response = restKlient.opprettetOppgave(request);

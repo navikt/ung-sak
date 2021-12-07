@@ -23,7 +23,7 @@ public class VurderOverlappendeInfotrygdYtelser {
     private static final Logger log = LoggerFactory.getLogger(VurderOverlappendeInfotrygdYtelser.class);
 
     // Felles
-    private static final String BEH_TEMA_SAMHANDLING = "ae0119"; // Samhandling BS-FA-SP
+    private static final String BEH_TYPE_SAMHANDLING = "ae0119"; // Samhandling BS-FA-SP
     // Sykepenger
     private static final String SP_OPPG_TEMA = "SYK";
     private static final String SP_ANSV_ENHET_ID = "4488"; // Landsdekkende enhet for håndtering av Sykepenger
@@ -64,8 +64,8 @@ public class VurderOverlappendeInfotrygdYtelser {
             var beskrivelse = "Ytelse=" + ytelse.getYtelseType() + ", saksnummer=" + ytelse.getSaksnummer() + ", perioder=" + perioder;
 
             var oppgaveId = switch (ytelse.getYtelseType()) {
-                case SYKEPENGER -> oppgaveTjeneste.opprettVkyOppgaveOverlappendeYtelse(ref, beskrivelse, SP_OPPG_TEMA, BEH_TEMA_SAMHANDLING, SP_ANSV_ENHET_ID);
-                case FORELDREPENGER -> oppgaveTjeneste.opprettVkyOppgaveOverlappendeYtelse(ref, beskrivelse, FP_OPPG_TEMA, BEH_TEMA_SAMHANDLING, FP_ANSV_ENHET_ID);
+                case SYKEPENGER -> oppgaveTjeneste.opprettVkyOppgaveOverlappendeYtelse(ref, beskrivelse, SP_OPPG_TEMA, BEH_TYPE_SAMHANDLING, SP_ANSV_ENHET_ID);
+                case FORELDREPENGER -> oppgaveTjeneste.opprettVkyOppgaveOverlappendeYtelse(ref, beskrivelse, FP_OPPG_TEMA, BEH_TYPE_SAMHANDLING, FP_ANSV_ENHET_ID);
                 default -> throw new IllegalArgumentException("Utviklerfeil: Ingen VKY-oppgave for InfoTrygd skal sendes for " + ytelse.getYtelseType());
             };
             log.info("Opprettet VKY-oppgave med oppgaveId={} for overlappende InfoTrygd-ytelse: {}", oppgaveId, beskrivelse);
