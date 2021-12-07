@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.BekreftetUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
@@ -192,7 +194,11 @@ public class SamtidigUttakTjeneste {
             Simuleringsgrunnlag simuleringsgrunnlag = byggRequest(ref, uttaksgrunnlag);
             var simulering = uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
             if (enableAvslagBeregning && (Environment.current().isDev() || Environment.current().isLocal())) {
-                log.info("Simulering harForrigeUttaksplan={} endret={}", (simulering.getForrigeUttaksplan() != null), simulering.getUttakplanEndret());
+                try {
+                    log.info("Simulering harForrigeUttaksplan={} endret={} \n respons: {}", (simulering.getForrigeUttaksplan() != null), simulering.getUttakplanEndret(), JsonObjectMapper.getJson(simulering));
+                } catch (IOException e) {
+                    log.info("Feil ved deserialisering. {}", e.getMessage());
+                }
             }
             return simulering;
         } else {
@@ -207,7 +213,11 @@ public class SamtidigUttakTjeneste {
             Simuleringsgrunnlag simuleringsgrunnlag = byggRequest(ref, uttaksGrunnlag);
             var simulering = uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
             if (enableAvslagBeregning && (Environment.current().isDev() || Environment.current().isLocal())) {
-                log.info("Simulering harForrigeUttaksplan={} endret={}", (simulering.getForrigeUttaksplan() != null), simulering.getUttakplanEndret());
+                try {
+                    log.info("Simulering harForrigeUttaksplan={} endret={} \n respons: {}", (simulering.getForrigeUttaksplan() != null), simulering.getUttakplanEndret(), JsonObjectMapper.getJson(simulering));
+                } catch (IOException e) {
+                    log.info("Feil ved deserialisering. {}", e.getMessage());
+                }
             }
             return simulering;
         } else {
