@@ -27,12 +27,12 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
 @ApplicationScoped
-@BehandlingStegRef(kode = "VURDER_UTTAK")
+@BehandlingStegRef(kode = "VURDER_UTTAK_V2")
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PSB")
-public class VurderUttakSteg implements BehandlingSteg {
+public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
-    private static final Logger log = LoggerFactory.getLogger(VurderUttakSteg.class);
+    private static final Logger log = LoggerFactory.getLogger(VurderUttakIBeregningSteg.class);
 
     private BehandlingRepository behandlingRepository;
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
@@ -41,17 +41,17 @@ public class VurderUttakSteg implements BehandlingSteg {
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private Boolean enableBekreftUttak;
 
-    VurderUttakSteg() {
+    VurderUttakIBeregningSteg() {
         // for proxy
     }
 
     @Inject
-    public VurderUttakSteg(BehandlingRepository behandlingRepository,
-                           MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
-                           UttakTjeneste uttakTjeneste,
-                           EtablertTilsynTjeneste etablertTilsynTjeneste,
-                           SamtidigUttakTjeneste samtidigUttakTjeneste,
-                           @KonfigVerdi(value = "psb.enable.bekreft.uttak", defaultVerdi = "false") Boolean enableBekreftUttak) {
+    public VurderUttakIBeregningSteg(BehandlingRepository behandlingRepository,
+                                     MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
+                                     UttakTjeneste uttakTjeneste,
+                                     EtablertTilsynTjeneste etablertTilsynTjeneste,
+                                     SamtidigUttakTjeneste samtidigUttakTjeneste,
+                                     @KonfigVerdi(value = "psb.enable.bekreft.uttak", defaultVerdi = "false") Boolean enableBekreftUttak) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
@@ -62,7 +62,7 @@ public class VurderUttakSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        if (!enableBekreftUttak) {
+        if (enableBekreftUttak) {
             var behandlingId = kontekst.getBehandlingId();
             var behandling = behandlingRepository.hentBehandling(behandlingId);
             var ref = BehandlingReferanse.fra(behandling);
@@ -75,16 +75,19 @@ public class VurderUttakSteg implements BehandlingSteg {
             final boolean annenSakSomMåBehandlesFørst = samtidigUttakTjeneste.isAnnenSakSomMåBehandlesFørst(ref);
             log.info("annenSakSomMåBehandlesFørst={}", annenSakSomMåBehandlesFørst);
             if (annenSakSomMåBehandlesFørst) {
-                return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK));
+                return BehandleStegResultat.tilbakeførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK));
+                // TODO: Legge tilbake og flytte aksjonspunktet til dette steget
+//                return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK));
             }
+
         }
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (!enableBekreftUttak) {
-            if (!BehandlingStegType.VURDER_UTTAK.equals(tilSteg)) {
+        if (enableBekreftUttak) {
+            if (!BehandlingStegType.VURDER_UTTAK_V2.equals(tilSteg)) {
                 var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
                 uttakTjeneste.slettUttaksplan(behandling.getUuid());
             }
