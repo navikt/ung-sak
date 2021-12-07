@@ -345,10 +345,12 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                 .map(a -> InntektsmeldingBuilder.builder()
                     .medInnsendingstidspunkt(stp.atStartOfDay())
                     .medArbeidsgiver(a.getArbeidsgiver())
+                    .medStartDatoPermisjon(stp)
                     .medRefusjon(a.getRefusjonPrÅr() == null ? BigDecimal.ZERO :
                         a.getRefusjonPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP))
                     .medBeløp(a.getInntektPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP))
                     .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
+                    .medJournalpostId("OVERSTYRT_FOR_INFOTRYGDMIGRERING")
                     .medKanalreferanse("OVERSTYRT_FOR_INFOTRYGDMIGRERING")
                     .build());
         }).collect(Collectors.toSet());
@@ -368,7 +370,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             behandlingReferanse,
             iayGrunnlag,
             sakInntektsmeldinger,
-            finnIkkeOverstyrt(startBeregningInput));
+            startBeregningInput);
 
         return new StartBeregningListeRequest(
             input,
@@ -376,14 +378,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             aktør,
             YtelseTyperKalkulusStøtterKontrakt.fraKode(behandlingReferanse.getFagsakYtelseType().getKode()),
             referanseRelasjoner);
-    }
-
-    private List<StartBeregningInput> finnIkkeOverstyrt(List<StartBeregningInput> startBeregningInput) {
-        return startBeregningInput.stream().filter(i -> i.getInputOverstyringPeriode().isEmpty()).collect(Collectors.toList());
-    }
-
-    private List<StartBeregningInput> finnOverstyrt(List<StartBeregningInput> startBeregningInput) {
-        return startBeregningInput.stream().filter(i -> i.getInputOverstyringPeriode().isPresent()).collect(Collectors.toList());
     }
 
     private Map<UUID, KalkulatorInputDto> lagInput(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag iayGrunnlag, Collection<Inntektsmelding> sakInntektsmeldinger, List<StartBeregningInput> startBeregningInput) {

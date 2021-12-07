@@ -93,7 +93,7 @@ public class PSBKompletthetSjekkerTjeneste {
 
         avslåOgAvkortRelevanteKompletthetsvurderinger(kontekst, perioderTilVurdering, grunnlag);
 
-        var redusertPerioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
+        var redusertPerioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, true, true);
         var inputMedVurderinger = new VurdererInput(redusertPerioderTilVurdering, kompletthetsVurderinger, grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of()), Set.of(Vurdering.KAN_FORTSETTE));
         aksjon = kompletthetUtleder.utled(inputMedVurderinger);
 

@@ -40,12 +40,12 @@ public class OverstyrBeregningAktivitet {
     @JsonProperty(value = "inntektPrAar")
     @NotNull
     @Min(0)
-    @Max(1000000)
+    @Max(100000000)
     private Integer inntektPrAar;
 
     @JsonProperty(value = "refusjonPrAar")
     @Min(0)
-    @Max(1000000)
+    @Max(100000000)
     private Integer refusjonPrAar;
 
     public OverstyrBeregningAktivitet() {

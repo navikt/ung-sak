@@ -218,7 +218,7 @@ public class VilkårTjeneste {
             var periodeFraInfotrygd = vilkår.get()
                 .getPerioder()
                 .stream()
-                .filter(it -> !sakInfotrygdMigrering.get().getSkjæringstidspunkt().equals(it.getSkjæringstidspunkt()))
+                .filter(it -> sakInfotrygdMigrering.get().getSkjæringstidspunkt().equals(it.getSkjæringstidspunkt()))
                 .map(VilkårPeriode::getPeriode).toList();
             periodeFraInfotrygd.forEach(perioder::remove);
         }
