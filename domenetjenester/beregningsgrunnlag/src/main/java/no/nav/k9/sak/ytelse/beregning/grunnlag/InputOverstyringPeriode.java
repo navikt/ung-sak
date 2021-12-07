@@ -34,7 +34,7 @@ public class InputOverstyringPeriode extends BaseEntitet {
 
     @Immutable
     @JoinColumn(name = "BG_OVST_INPUT_PERIODE_ID", nullable = false, updatable = false)
-    @OneToMany(cascade = {CascadeType.ALL})
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<InputAktivitetOverstyring> aktivitetOverstyringer = new ArrayList<>();
 
     @Version
