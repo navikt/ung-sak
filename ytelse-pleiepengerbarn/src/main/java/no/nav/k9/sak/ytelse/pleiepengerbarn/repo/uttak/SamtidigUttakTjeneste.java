@@ -178,7 +178,7 @@ public class SamtidigUttakTjeneste {
         final var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();
         final BehandlingModell modell = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType());
-        return !modell.erStegAFørStegB(steg, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING);
+        return !modell.erStegAFørStegB(steg, BehandlingStegType.BEKREFT_UTTAK);
     }
 
     private boolean erPåUttakssteget(BehandlingReferanse ref) {
