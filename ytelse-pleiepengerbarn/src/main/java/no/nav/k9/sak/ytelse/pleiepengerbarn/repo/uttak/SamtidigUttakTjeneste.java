@@ -229,6 +229,7 @@ public class SamtidigUttakTjeneste {
         NavigableSet<DatoIntervallEntitet> avslåttePerioderIBeregning = new TreeSet<>();
         if (enableAvslagBeregning && harKommetTilBeregning(ref)) {
             avslåttePerioderIBeregning = bekreftetUttakTjeneste.utledPerioderTilVurderingSomBlittAvslåttIBeregning(ref.getBehandlingId());
+            log.info("Simulering avslåtteperioder={}", avslåttePerioderIBeregning);
         }
 
         return new Simuleringsgrunnlag(uttaksGrunnlag, opprettMap(avslåttePerioderIBeregning));
