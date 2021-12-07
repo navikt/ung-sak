@@ -190,8 +190,11 @@ public class SamtidigUttakTjeneste {
 
         if (enableAvslagBeregning) {
             Simuleringsgrunnlag simuleringsgrunnlag = byggRequest(ref, uttaksgrunnlag);
-
-            return uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
+            var simulering = uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
+            if (enableAvslagBeregning && (Environment.current().isDev() || Environment.current().isLocal())) {
+                log.info("Simulering harForrigeUttaksplan={} endret={}", (simulering.getForrigeUttaksplan() != null), simulering.getUttakplanEndret());
+            }
+            return simulering;
         } else {
             return uttakTjeneste.simulerUttaksplan(uttaksgrunnlag);
         }
@@ -202,8 +205,11 @@ public class SamtidigUttakTjeneste {
 
         if (enableAvslagBeregning) {
             Simuleringsgrunnlag simuleringsgrunnlag = byggRequest(ref, uttaksGrunnlag);
-
-            return uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
+            var simulering = uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
+            if (enableAvslagBeregning && (Environment.current().isDev() || Environment.current().isLocal())) {
+                log.info("Simulering harForrigeUttaksplan={} endret={}", (simulering.getForrigeUttaksplan() != null), simulering.getUttakplanEndret());
+            }
+            return simulering;
         } else {
             return uttakTjeneste.simulerUttaksplan(uttaksGrunnlag);
         }
