@@ -340,6 +340,7 @@ public class BehandlingDtoTjeneste {
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_UTBETALT_PATH, "beregningsresultat-utbetalt", uuidQueryParams));
             lagBeregningsgrunnlagLink(behandling).ifPresent(dto::leggTil);
             lagBeregningsgrunnlagAlleLink(behandling).ifPresent(dto::leggTil);
+            lagOverstyrInputBergningLink(behandling).ifPresent(dto::leggTil);
             lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
             lagTilbakekrevingValgLink(behandling).forEach(dto::leggTil);
         }
@@ -429,6 +430,11 @@ public class BehandlingDtoTjeneste {
     private Optional<ResourceLink> lagBeregningsgrunnlagAlleLink(Behandling behandling) {
         var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
         return Optional.of(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_ALLE, "beregningsgrunnlag-alle", queryParams));
+    }
+
+    private Optional<ResourceLink> lagOverstyrInputBergningLink(Behandling behandling) {
+        var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+        return Optional.of(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_OVERSTYR_INPUT, "overstyr-input-beregning", queryParams));
     }
 
     private boolean erRevurderingMedUendretUtfall(BehandlingReferanse ref) {

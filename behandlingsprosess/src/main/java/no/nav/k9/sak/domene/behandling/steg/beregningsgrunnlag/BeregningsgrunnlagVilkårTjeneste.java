@@ -13,6 +13,7 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
@@ -72,11 +73,11 @@ public class BeregningsgrunnlagVilkårTjeneste {
     }
 
     public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, boolean skalIgnorereAvslåttePerioder) {
-        return vilkårTjeneste.utledPerioderTilVurdering(ref, vilkårType, skalIgnorereAvslåttePerioder, true);
+        return vilkårTjeneste.utledPerioderTilVurdering(ref, vilkårType, skalIgnorereAvslåttePerioder, true, false);
     }
 
-    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, boolean skalIgnorereAvslåttePerioder, boolean skalIgnoreAvslagPåKompletthet) {
-        return vilkårTjeneste.utledPerioderTilVurdering(ref, vilkårType, skalIgnorereAvslåttePerioder, skalIgnoreAvslagPåKompletthet);
+    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, boolean skalIgnorereAvslåttePerioder, boolean skalIgnoreAvslagPåKompletthet, boolean skalIgnorerePerioderFraInfotrygd) {
+        return vilkårTjeneste.utledPerioderTilVurdering(ref, vilkårType, skalIgnorereAvslåttePerioder, skalIgnoreAvslagPåKompletthet, skalIgnorerePerioderFraInfotrygd);
     }
 
 }

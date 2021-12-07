@@ -61,7 +61,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
                                    VilkårResultatRepository vilkårResultatRepository,
                                    @FagsakYtelseTypeRef("FRISINN") Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper) {
         super(restTjeneste, fagsakRepository, vilkårResultatRepository, kalkulatorInputTjeneste,
-            inntektArbeidYtelseTjeneste, ytelseGrunnlagMapper);
+            inntektArbeidYtelseTjeneste, ytelseGrunnlagMapper, false);
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
     }
 
@@ -92,7 +92,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
             } else {
                 // tar en og en
                 var startBeregningRequest = initStartRequest(ref, iayGrunnlag, Set.of() /* frisinn har ikke inntektsmeldinger */
-                    , List.of(new StartBeregningInput(bgReferanse, input.getVilkårsperiode(), List.of())));
+                    , List.of(new StartBeregningInput(bgReferanse, input.getVilkårsperiode(), List.of(), null)));
 
                 var inputPerRef = startBeregningRequest.getKalkulatorInputPerKoblingReferanse();
                 if (inputPerRef.size() != 1) {

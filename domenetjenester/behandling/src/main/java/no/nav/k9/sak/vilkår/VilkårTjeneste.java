@@ -34,6 +34,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet.VilkårUtfall;
@@ -47,6 +49,7 @@ public class VilkårTjeneste {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+    private FagsakRepository fagsakRepository;
 
     protected VilkårTjeneste() {
         // CDI Proxy
@@ -55,10 +58,11 @@ public class VilkårTjeneste {
     @Inject
     public VilkårTjeneste(BehandlingRepository behandlingRepository,
                           @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                          VilkårResultatRepository vilkårResultatRepository) {
+                          VilkårResultatRepository vilkårResultatRepository, FagsakRepository fagsakRepository) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårsPerioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.fagsakRepository = fagsakRepository;
     }
 
     public Vilkårene hentVilkårResultat(Long behandlingId) {
@@ -183,15 +187,16 @@ public class VilkårTjeneste {
 
     public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType,
                                                                         boolean skalIgnorereAvslåttePerioder) {
-        return utledPerioderTilVurdering(ref, vilkårType, skalIgnorereAvslåttePerioder, false);
+        return utledPerioderTilVurdering(ref, vilkårType, skalIgnorereAvslåttePerioder, false, false);
     }
 
     public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType,
                                                                         boolean skalIgnorereAvslåttePerioder,
-                                                                        boolean skalIgnorereAvslagPåKompletthet) {
+                                                                        boolean skalIgnorereAvslagPåKompletthet, boolean skalIgnorerePerioderFraInfotrygd) {
         Long behandlingId = ref.getBehandlingId();
         var behandling = hentBehandling(behandlingId);
         var perioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling);
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigrering(ref.getFagsakId());
 
         var vilkår = hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(behandlingId, vilkårType));
@@ -208,6 +213,14 @@ public class VilkårTjeneste {
                 .filter(it -> skalFiltreresBort(it, skalIgnorereAvslagPåKompletthet))
                 .map(VilkårPeriode::getPeriode).toList();
             avslåttePerioder.forEach(perioder::remove);
+        }
+        if (vilkår.isPresent() && sakInfotrygdMigrering.isPresent() && skalIgnorerePerioderFraInfotrygd) {
+            var periodeFraInfotrygd = vilkår.get()
+                .getPerioder()
+                .stream()
+                .filter(it -> sakInfotrygdMigrering.get().getSkjæringstidspunkt().equals(it.getSkjæringstidspunkt()))
+                .map(VilkårPeriode::getPeriode).toList();
+            periodeFraInfotrygd.forEach(perioder::remove);
         }
         return Collections.unmodifiableNavigableSet(perioder);
     }

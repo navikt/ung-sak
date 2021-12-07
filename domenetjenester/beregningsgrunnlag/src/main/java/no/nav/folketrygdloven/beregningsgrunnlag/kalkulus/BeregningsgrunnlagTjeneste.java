@@ -45,6 +45,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 
 @Dependent
 public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
@@ -88,7 +89,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             var stp = e.getStp();
             var vilkårsperiode = vilkårsperioder.stream().filter(p -> p.getFomDato().equals(stp)).findFirst().orElseThrow();
             grunnlagRepository.lagre(referanse.getBehandlingId(), new BeregningsgrunnlagPeriode(bgRef, stp));
-            return new StartBeregningInput(bgRef, vilkårsperiode, originalReferanserMap.get(bgRef));
+            Optional<InputOverstyringPeriode> inputOverstyring = finnInputOverstyring(referanse, stp);
+            return new StartBeregningInput(bgRef, vilkårsperiode, originalReferanserMap.get(bgRef), inputOverstyring.orElse(null));
         }).collect(Collectors.toList());
 
         return finnTjeneste(referanse.getFagsakYtelseType()).startBeregning(referanse, beregningInput);
@@ -206,17 +208,6 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         }
     }
 
-    private boolean harBeregningsgrunnlagOgStp(BeregningsgrunnlagPrReferanse<BeregningsgrunnlagDto> bg) {
-        if (bg.getBeregningsgrunnlag() == null) {
-            return false;
-        }
-        if (bg.getBeregningsgrunnlag().getSkjæringstidspunkt() == null) {
-            log.info("Mottok beregningsgrunnlag uten stp for referanse {}", bg.getEksternReferanse());
-            return false;
-        }
-        return true;
-    }
-
     @Override
     public Optional<BeregningsgrunnlagListe> hentBeregningsgrunnlag(BehandlingReferanse ref) {
         var beregningsgrunnlagPerioderGrunnlag = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
@@ -286,15 +277,34 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         }
     }
 
+    @Override
+    public void gjenopprettInitiell(BehandlingReferanse ref) {
+        grunnlagRepository.gjenopprettInitiell(ref.getBehandlingId());
+    }
+
+    private boolean harBeregningsgrunnlagOgStp(BeregningsgrunnlagPrReferanse<BeregningsgrunnlagDto> bg) {
+        if (bg.getBeregningsgrunnlag() == null) {
+            return false;
+        }
+        if (bg.getBeregningsgrunnlag().getSkjæringstidspunkt() == null) {
+            log.info("Mottok beregningsgrunnlag uten stp for referanse {}", bg.getEksternReferanse());
+            return false;
+        }
+        return true;
+    }
+
+    private Optional<InputOverstyringPeriode> finnInputOverstyring(BehandlingReferanse referanse, LocalDate stp) {
+        Optional<InputOverstyringPeriode> inputOverstyring = grunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).stream()
+            .flatMap(gr -> gr.getInputOverstyringPerioder().stream())
+            .filter(p -> p.getSkjæringstidspunkt().equals(stp))
+            .findFirst();
+        return inputOverstyring;
+    }
+
     private boolean erIkkeInitiellVersjon(Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon, BgRef it) {
         return !initiellVersjon.flatMap(at -> at.finnGrunnlagFor(it.getStp())
                 .map(BeregningsgrunnlagPeriode::getEksternReferanse))
             .equals(Optional.of(it.getRef()));
-    }
-
-    @Override
-    public void gjenopprettInitiell(BehandlingReferanse ref) {
-        grunnlagRepository.gjenopprettInitiell(ref.getBehandlingId());
     }
 
     private KalkulusApiTjeneste finnTjeneste(FagsakYtelseType fagsakYtelseType) {

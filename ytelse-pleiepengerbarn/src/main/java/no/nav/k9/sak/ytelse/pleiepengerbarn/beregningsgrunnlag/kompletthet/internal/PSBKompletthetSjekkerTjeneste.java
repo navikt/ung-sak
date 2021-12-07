@@ -29,6 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysning;
 import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
@@ -50,6 +51,7 @@ public class PSBKompletthetSjekkerTjeneste {
     private final BestiltEtterlysningRepository etterlysningRepository;
     private final PSBKompletthetsjekker kompletthetsjekker;
     private final KompletthetUtleder kompletthetUtleder = new KompletthetUtleder();
+    private final FagsakRepository fagsakRepository;
     private final EtterlysInntektsmeldingUtleder etterlysInntektsmeldingUtleder = new EtterlysInntektsmeldingUtleder();
     private final EtterlysInntektsmeldingOgVarsleOmAvslagUtleder etterlysInntektsmeldingOgVarsleOmAvslagUtleder = new EtterlysInntektsmeldingOgVarsleOmAvslagUtleder();
 
@@ -58,17 +60,19 @@ public class PSBKompletthetSjekkerTjeneste {
                                          BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                          BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                          BestiltEtterlysningRepository etterlysningRepository,
-                                         @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") PSBKompletthetsjekker kompletthetsjekker) {
+                                         @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") PSBKompletthetsjekker kompletthetsjekker,
+                                         FagsakRepository fagsakRepository) {
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.kompletthetsjekker = kompletthetsjekker;
+        this.fagsakRepository = fagsakRepository;
     }
 
 
     public KompletthetsAksjon utledTilstand(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, false);
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, false, true);
         var kompletthetsVurderinger = kompletthetsjekker.utledAlleManglendeVedleggForPerioder(ref);
 
         var inputUtenVurderinger = new VurdererInput(perioderTilVurdering, kompletthetsVurderinger);
@@ -89,7 +93,7 @@ public class PSBKompletthetSjekkerTjeneste {
 
         avslåOgAvkortRelevanteKompletthetsvurderinger(kontekst, perioderTilVurdering, grunnlag);
 
-        var redusertPerioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
+        var redusertPerioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, true, true);
         var inputMedVurderinger = new VurdererInput(redusertPerioderTilVurdering, kompletthetsVurderinger, grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of()), Set.of(Vurdering.KAN_FORTSETTE));
         aksjon = kompletthetUtleder.utled(inputMedVurderinger);
 
