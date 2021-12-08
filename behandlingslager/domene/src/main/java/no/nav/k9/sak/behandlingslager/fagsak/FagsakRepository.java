@@ -299,8 +299,9 @@ public class FagsakRepository {
         return sakInfotrygdMigreringer.isEmpty() ? Optional.empty() : Optional.of(sakInfotrygdMigreringer.get(0));
     }
 
-    public Long lagre(SakInfotrygdMigrering sakInfotrygdMigrering) {
+    public Long lagreOgFlush(SakInfotrygdMigrering sakInfotrygdMigrering) {
         entityManager.persist(sakInfotrygdMigrering);
+        entityManager.flush();
         return sakInfotrygdMigrering.getId();
     }
 

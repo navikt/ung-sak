@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -43,7 +41,6 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 @FagsakYtelseTypeRef("PSB")
 public class PSBPreconditionBeregningAksjonspunktUtleder implements PreconditionBeregningAksjonspunktUtleder {
 
-    private OverlappendeYtelserTjeneste overlappendeYtelserTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private FagsakRepository fagsakRepository;
@@ -53,12 +50,10 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
     }
 
     @Inject
-    public PSBPreconditionBeregningAksjonspunktUtleder(OverlappendeYtelserTjeneste overlappendeYtelserTjeneste,
-                                                       InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+    public PSBPreconditionBeregningAksjonspunktUtleder(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                        @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                        FagsakRepository fagsakRepository,
                                                        @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering) {
-        this.overlappendeYtelserTjeneste = overlappendeYtelserTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.fagsakRepository = fagsakRepository;
@@ -70,42 +65,62 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         if (!toggleMigrering) {
             return Collections.emptyList();
         }
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        if (harEksisterendeMigreringTilVurdering(param, perioderTilVurdering)) {
+            return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT));
+        }
+        var stpMedOverlapp = finnSkjæringstidspunktMedOverlapp(param, perioderTilVurdering);
+        if (stpMedOverlapp.isPresent()) {
+            fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(param.getRef().getFagsakId(), stpMedOverlapp.get()));
+            return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT));
+        }
+        return Collections.emptyList();
+    }
+
+    private Optional<LocalDate> finnSkjæringstidspunktMedOverlapp(AksjonspunktUtlederInput param, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId());
         Optional<AktørYtelse> aktørYtelse = iayGrunnlag.getAktørYtelseFraRegister(param.getAktørId());
         YtelseFilter ytelseFilter = lagInfotrygdPSBFilter(aktørYtelse);
-        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         LocalDateTimeline<Boolean> vilkårsperioderTidslinje = lagPerioderTilVureringTidslinje(perioderTilVurdering);
-        Map<Ytelse, NavigableSet<LocalDateInterval>> psbOverlapp = overlappendeYtelserTjeneste.doFinnOverlappendeYtelser(vilkårsperioderTidslinje, ytelseFilter);
+        Map<Ytelse, NavigableSet<LocalDateInterval>> psbOverlapp = OverlappendeYtelserTjeneste.doFinnOverlappendeYtelser(vilkårsperioderTidslinje, ytelseFilter);
         var kantIKantPeriode = finnKantIKantPeriode(ytelseFilter, perioderTilVurdering);
         if (!psbOverlapp.isEmpty()) {
-            lagreOverlappPerioder(param, perioderTilVurdering, psbOverlapp);
-            return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT));
-        } else if (kantIKantPeriode.isPresent()) {
-            var sakInfotrygdMigrering = new SakInfotrygdMigrering(param.getRef().getFagsakId(), kantIKantPeriode.get().getFomDato());
-            fagsakRepository.lagre(sakInfotrygdMigrering);
-            return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT));
-        } else {
-            return Collections.emptyList();
+            return finnSkjæringstidspunktMedOverlapp(perioderTilVurdering, psbOverlapp);
         }
+        return kantIKantPeriode.map(DatoIntervallEntitet::getFomDato);
+    }
+
+    private boolean harEksisterendeMigreringTilVurdering(AksjonspunktUtlederInput param, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+        var eksisterendeInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigrering(param.getRef().getFagsakId());
+        if (eksisterendeInfotrygdMigrering.isPresent()) {
+            var migrertStp = eksisterendeInfotrygdMigrering.get().getSkjæringstidspunkt();
+            return perioderTilVurdering.stream().map(DatoIntervallEntitet::getFomDato)
+                .anyMatch(migrertStp::equals);
+        }
+        return false;
     }
 
     private Optional<DatoIntervallEntitet> finnKantIKantPeriode(YtelseFilter ytelseFilter, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         return perioderTilVurdering.stream()
             .filter(p -> ytelseFilter.getFiltrertYtelser().stream()
                 .anyMatch(y -> y.getYtelseAnvist().stream().anyMatch(ya -> p.getFomDato().equals(ya.getAnvistTOM().plusDays(1)))))
-                .findFirst();
+            .findFirst();
     }
 
-    private void lagreOverlappPerioder(AksjonspunktUtlederInput param, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map<Ytelse, NavigableSet<LocalDateInterval>> psbOverlapp) {
+    private Optional<LocalDate> finnSkjæringstidspunktMedOverlapp(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map<Ytelse, NavigableSet<LocalDateInterval>> psbOverlapp) {
         Set<LocalDateInterval> overlappPerioder = psbOverlapp.values().stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
         Set<LocalDate> stpMedInfotrygdoverlapp = finnStpMedOverlapp(perioderTilVurdering, overlappPerioder);
-        stpMedInfotrygdoverlapp.stream().map(stp -> new SakInfotrygdMigrering(param.getRef().getFagsakId(), stp))
-                .forEach(fagsakRepository::lagre);
+        if (stpMedInfotrygdoverlapp.isEmpty()) {
+            return Optional.empty();
+        }
+        if (stpMedInfotrygdoverlapp.size() == 1) {
+            return Optional.of(stpMedInfotrygdoverlapp.iterator().next());
+        }
+        throw new IllegalStateException("Fant flere skjæringstidspunkter med overlapp mot PSB i infotrygd");
     }
 
-    @NotNull
     private Set<LocalDate> finnStpMedOverlapp(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Set<LocalDateInterval> overlappPerioder) {
         return perioderTilVurdering.stream()
             .filter(p -> overlappPerioder.stream().map(ldi -> DatoIntervallEntitet.fraOgMedTilOgMed(ldi.getFomDato(), ldi.getTomDato()))
@@ -124,6 +139,6 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
     private YtelseFilter lagInfotrygdPSBFilter(Optional<AktørYtelse> aktørYtelse) {
         return new YtelseFilter(aktørYtelse).filter(y ->
             y.getYtelseType().equals(FagsakYtelseType.PSB) &&
-            y.getKilde().equals(Fagsystem.INFOTRYGD));
+                y.getKilde().equals(Fagsystem.INFOTRYGD));
     }
 }

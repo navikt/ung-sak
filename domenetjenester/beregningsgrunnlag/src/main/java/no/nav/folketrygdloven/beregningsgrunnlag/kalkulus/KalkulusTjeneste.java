@@ -329,9 +329,11 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     private Set<Inntektsmelding> finnInntektsmeldingerForSak(BehandlingReferanse referanse, List<StartBeregningInput> startBeregningInput) {
-        var sakInntektsmeldinger = new HashSet<>(iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer()));
-        sakInntektsmeldinger.addAll(finnOverstyrtInntektsmeldinger(startBeregningInput));
-        return sakInntektsmeldinger;
+        var overstyrteInntektsmeldinger = finnOverstyrtInntektsmeldinger(startBeregningInput);
+        if (!overstyrteInntektsmeldinger.isEmpty()) {
+            return overstyrteInntektsmeldinger;
+        }
+        return new HashSet<>(iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer()));
     }
 
     private Set<Inntektsmelding> finnOverstyrtInntektsmeldinger(List<StartBeregningInput> startBeregningInput) {
