@@ -116,7 +116,9 @@ public class OmsorgenForGrunnlagRepository {
             if (endret) {
                 OmsorgenFor nyOmsorgenFor = new OmsorgenFor(omsorgenForGrunnlag.getOmsorgenFor());
                 nyOmsorgenFor.setPerioder(perioderKopi);
-                return Optional.of(new OmsorgenForGrunnlag(behandlingId, nyOmsorgenFor));
+                OmsorgenForGrunnlag nyttGrunnlag = new OmsorgenForGrunnlag(behandlingId, nyOmsorgenFor);
+                lagre(behandlingId, nyOmsorgenFor);
+                return hentEksisterendeGrunnlag(behandlingId);
             }
         }
 
