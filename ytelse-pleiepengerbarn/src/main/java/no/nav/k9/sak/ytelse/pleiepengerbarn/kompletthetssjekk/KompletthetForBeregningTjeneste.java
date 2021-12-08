@@ -74,9 +74,9 @@ public class KompletthetForBeregningTjeneste {
                                            @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                            ArbeidsforholdTjeneste arbeidsforholdTjeneste,
                                            InntektArbeidYtelseTjeneste iayTjeneste,
-                                           VilkårResultatRepository vilkårResultatRepository,
                                            PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
-                                           BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste, VilkårResultatRepository vilkårResultatRepository,
+                                           BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
+                                           VilkårResultatRepository vilkårResultatRepository,
                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.arbeidsforholdTjeneste = arbeidsforholdTjeneste;
@@ -120,7 +120,7 @@ public class KompletthetForBeregningTjeneste {
         var perioderMedManglendeVedlegg = new HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>>();
 
         // Utled vilkårsperioder
-        var vilkårsPerioder = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref,false, false, true)
+        var vilkårsPerioder = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false, false, true)
             .stream()
             .sorted(Comparator.comparing(DatoIntervallEntitet::getFomDato))
             .collect(Collectors.toCollection(TreeSet::new));
