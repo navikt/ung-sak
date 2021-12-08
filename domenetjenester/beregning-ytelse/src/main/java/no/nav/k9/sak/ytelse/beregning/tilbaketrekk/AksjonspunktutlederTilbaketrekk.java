@@ -19,16 +19,16 @@ import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 public class AksjonspunktutlederTilbaketrekk implements AksjonspunktUtleder {
 
     private BeregningsresultatTidslinjetjeneste beregningsresultatTidslinjetjeneste;
-    private Boolean psbDisableVurderTilbaketrekk;
+    private Boolean disableVurderTilbaketrekk;
 
     AksjonspunktutlederTilbaketrekk() {
     }
 
     @Inject
     public AksjonspunktutlederTilbaketrekk(BeregningsresultatTidslinjetjeneste beregningsresultatTidslinjetjeneste,
-                                           @KonfigVerdi(value = "PSB_DISABLE_VURDER_TILBAKETREKK", required = false, defaultVerdi = "false") Boolean psbDisableVurderTilbaketrekk) {
+                                           @KonfigVerdi(value = "DISABLE_VURDER_TILBAKETREKK", required = false, defaultVerdi = "false") Boolean disableVurderTilbaketrekk) {
         this.beregningsresultatTidslinjetjeneste = beregningsresultatTidslinjetjeneste;
-        this.psbDisableVurderTilbaketrekk = psbDisableVurderTilbaketrekk;
+        this.disableVurderTilbaketrekk = disableVurderTilbaketrekk;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class AksjonspunktutlederTilbaketrekk implements AksjonspunktUtleder {
     }
 
     private boolean skalVurdereTilbaketrekk(BehandlingReferanse ref) {
-        if (psbDisableVurderTilbaketrekk && ref.getFagsakYtelseType().equals(FagsakYtelseType.PSB)) {
+        if (disableVurderTilbaketrekk) {
             return false;
         }
         LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje =  beregningsresultatTidslinjetjeneste.lagTidslinjeForRevurdering(ref);

@@ -219,7 +219,7 @@ spec:
       value: "true"
     - name: PSB_ENABLE_BEKREFT_UTTAK
       value: "false"
-    - name: PSB_DISABLE_VURDER_TILBAKETREKK
+    - name: DISABLE_VURDER_TILBAKETREKK
       value: "false"
     - name: PSB_INFOTRYGD_MIGRERING
       value: "false"
