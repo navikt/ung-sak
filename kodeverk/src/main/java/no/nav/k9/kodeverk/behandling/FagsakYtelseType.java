@@ -265,17 +265,26 @@ public enum FagsakYtelseType implements Kodeverdi {
             OPPLÆRINGSPENGER,
             FRISINN));
 
-    /** Hvilke ytelser som skal sjekkes mot overlapp */
-    private static final Map<FagsakYtelseType, Set<FagsakYtelseType>> OVERLAPPSJEKK_RELATERT_YTELSE = Map.of(
+    /** Hvilke K9-ytelser som skal sjekkes mot overlapp */
+    private static final Map<FagsakYtelseType, Set<FagsakYtelseType>> OVERLAPPSJEKK_RELATERT_YTELSE_K9 = Map.of(
         PLEIEPENGER_SYKT_BARN, Set.of(
-            DAGPENGER,
-            SYKEPENGER,
             PLEIEPENGER_NÆRSTÅENDE,
             OMSORGSPENGER,
-            OPPLÆRINGSPENGER,
-            FORELDREPENGER,
-            SVANGERSKAPSPENGER),
-        OMSORGSPENGER, Set.of(SYKEPENGER)
+            OPPLÆRINGSPENGER),
+        OMSORGSPENGER, Set.of(
+            PLEIEPENGER_NÆRSTÅENDE,
+            PLEIEPENGER_SYKT_BARN,
+            OPPLÆRINGSPENGER)
+    );
+
+    /** Hvilke eksterne ytelser som skal sjekkes mot overlapp */
+    private static final Map<FagsakYtelseType, Set<FagsakYtelseType>> OVERLAPPSJEKK_RELATERT_YTELSE_EKSTERN = Map.of(
+        PLEIEPENGER_SYKT_BARN, Set.of(
+            SYKEPENGER,
+            FORELDREPENGER),
+        OMSORGSPENGER, Set.of(
+            SYKEPENGER,
+            FORELDREPENGER)
     );
 
     /** Hvorvidt data for ektefelle/samboer og pleietrengende skal benyttes for ytelsen. */
@@ -298,8 +307,12 @@ public enum FagsakYtelseType implements Kodeverdi {
         return relatertYtelseTypeSet.contains(this);
     }
 
-    public Set<FagsakYtelseType> hentYtelserForOverlappSjekk() {
-        return OVERLAPPSJEKK_RELATERT_YTELSE.getOrDefault(this, Set.of());
+    public Set<FagsakYtelseType> hentK9YtelserForOverlappSjekk() {
+        return OVERLAPPSJEKK_RELATERT_YTELSE_K9.getOrDefault(this, Set.of());
+    }
+
+    public Set<FagsakYtelseType> hentEksterneYtelserForOverlappSjekk() {
+        return OVERLAPPSJEKK_RELATERT_YTELSE_EKSTERN.getOrDefault(this, Set.of());
     }
 
     public static final class PlainYtelseSerializer extends StdSerializer<FagsakYtelseType> {

@@ -45,8 +45,7 @@ public class OverlappendeYtelserTjeneste {
         this.beregningsresultatRepository = beregningsresultatRepository;
     }
 
-    public Map<Ytelse, NavigableSet<LocalDateInterval>> finnOverlappendeYtelser(BehandlingReferanse ref) {
-        var ytelseTyperSomSjekkesMot = ref.getFagsakYtelseType().hentYtelserForOverlappSjekk();
+    public Map<Ytelse, NavigableSet<LocalDateInterval>> finnOverlappendeYtelser(BehandlingReferanse ref, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
         var tilkjentYtelsePerioder = hentTilkjentYtelsePerioder(ref);
         var aktørYtelse = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId())
             .getAktørYtelseFraRegister(ref.getAktørId());
@@ -60,14 +59,13 @@ public class OverlappendeYtelserTjeneste {
         }
         tilkjentYtelseTimeline = tilkjentYtelseTimeline.compress();
 
-        return doFinnOverlappendeYtelser(tilkjentYtelseTimeline, aktørYtelse.get(), ytelseTyperSomSjekkesMot);
+        return doFinnOverlappendeYtelser(tilkjentYtelseTimeline, new YtelseFilter(aktørYtelse.get()).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType())));
     }
 
-    Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(LocalDateTimeline<Boolean> tilkjentYtelseTimeline, AktørYtelse aktørYtelse, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
+    public Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(LocalDateTimeline<Boolean> tilkjentYtelseTimeline, YtelseFilter ytelseFilter) {
         Map<Ytelse, NavigableSet<LocalDateInterval>> overlapp = new TreeMap<>();
         if (!tilkjentYtelseTimeline.isEmpty()) {
 
-            var ytelseFilter = new YtelseFilter(aktørYtelse).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType()));
             for (var yt : ytelseFilter.getFiltrertYtelser()) {
                 var ytp = yt.getPeriode();
                 var overlappPeriode = innvilgelseOverlapperMedAnnenYtelse(tilkjentYtelseTimeline, ytp);

@@ -1,11 +1,14 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +62,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
@@ -78,7 +82,9 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
 
 /**
@@ -96,6 +102,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     private KalkulatorInputTjeneste kalkulatorInputTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
+    private boolean togglePsbMigrering;
 
     public KalkulusTjeneste() {
     }
@@ -106,7 +113,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                             VilkårResultatRepository vilkårResultatRepository,
                             @FagsakYtelseTypeRef("*") KalkulatorInputTjeneste kalkulatorInputTjeneste,
                             InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                            @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper
+                            @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
+                            @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering
     ) {
         this.restTjeneste = restTjeneste;
         this.fagsakRepository = fagsakRepository;
@@ -114,6 +122,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         this.kalkulatorInputTjeneste = kalkulatorInputTjeneste;
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
+        this.togglePsbMigrering = toggleMigrering;
     }
 
     @Override
@@ -122,7 +131,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             return new SamletKalkulusResultat(Collections.emptyMap(), Collections.emptyMap());
         }
         var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
-        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
+        Set<Inntektsmelding> sakInntektsmeldinger = finnInntektsmeldingerForSak(referanse, startBeregningInput);
         var startBeregningRequest = initStartRequest(
             referanse,
             iayGrunnlag,
@@ -319,6 +328,34 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         return restTjeneste;
     }
 
+    private Set<Inntektsmelding> finnInntektsmeldingerForSak(BehandlingReferanse referanse, List<StartBeregningInput> startBeregningInput) {
+        var sakInntektsmeldinger = new HashSet<>(iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer()));
+        sakInntektsmeldinger.addAll(finnOverstyrtInntektsmeldinger(startBeregningInput));
+        return sakInntektsmeldinger;
+    }
+
+    private Set<Inntektsmelding> finnOverstyrtInntektsmeldinger(List<StartBeregningInput> startBeregningInput) {
+        if (!togglePsbMigrering) {
+            return Collections.emptySet();
+        }
+        return startBeregningInput.stream().flatMap(i -> i.getInputOverstyringPeriode().stream()).flatMap(overstyrtPeriode -> {
+            LocalDate stp = overstyrtPeriode.getSkjæringstidspunkt();
+            return overstyrtPeriode.getAktivitetOverstyringer().stream()
+                .filter(a -> a.getAktivitetStatus().erArbeidstaker())
+                .map(a -> InntektsmeldingBuilder.builder()
+                    .medInnsendingstidspunkt(stp.atStartOfDay())
+                    .medArbeidsgiver(a.getArbeidsgiver())
+                    .medStartDatoPermisjon(stp)
+                    .medRefusjon(a.getRefusjonPrÅr() == null ? BigDecimal.ZERO :
+                        a.getRefusjonPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP))
+                    .medBeløp(a.getInntektPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP))
+                    .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
+                    .medJournalpostId("OVERSTYRT_FOR_INFOTRYGDMIGRERING")
+                    .medKanalreferanse("OVERSTYRT_FOR_INFOTRYGDMIGRERING")
+                    .build());
+        }).collect(Collectors.toSet());
+    }
+
     protected StartBeregningListeRequest initStartRequest(BehandlingReferanse behandlingReferanse,
                                                           InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                           Collection<Inntektsmelding> sakInntektsmeldinger,
@@ -327,12 +364,13 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
         AktørIdPersonident aktør = new AktørIdPersonident(fagsak.getAktørId().getId());
 
-        var stpMap = startBeregningInput.stream().collect(Collectors.toMap(StartBeregningInput::getBgReferanse, StartBeregningInput::getSkjæringstidspunkt));
         var referanseRelasjoner = startBeregningInput.stream().collect(Collectors.toMap(StartBeregningInput::getBgReferanse, StartBeregningInput::getOriginalReferanser));
 
-        Map<UUID, KalkulatorInputDto> input = getReferanseTilInputMap(behandlingReferanse,
+        Map<UUID, KalkulatorInputDto> input = lagInput(
+            behandlingReferanse,
             iayGrunnlag,
-            sakInntektsmeldinger, stpMap);
+            sakInntektsmeldinger,
+            startBeregningInput);
 
         return new StartBeregningListeRequest(
             input,
@@ -340,6 +378,17 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             aktør,
             YtelseTyperKalkulusStøtterKontrakt.fraKode(behandlingReferanse.getFagsakYtelseType().getKode()),
             referanseRelasjoner);
+    }
+
+    private Map<UUID, KalkulatorInputDto> lagInput(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag iayGrunnlag, Collection<Inntektsmelding> sakInntektsmeldinger, List<StartBeregningInput> startBeregningInput) {
+        Map<UUID, LocalDate> stpMap = startBeregningInput.stream()
+            .collect(Collectors.toMap(StartBeregningInput::getBgReferanse, StartBeregningInput::getSkjæringstidspunkt));
+        return getReferanseTilInputMap(
+            behandlingReferanse,
+            iayGrunnlag,
+            sakInntektsmeldinger,
+            stpMap
+        );
     }
 
     private Map<UUID, KalkulatorInputDto> lagInputMap(Collection<BgRef> bgReferanser, BehandlingReferanse referanse) {
@@ -371,15 +420,18 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                 }
 
                 var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårPeriode.getPeriode());
+
+
+                KalkulatorInputDto kalkulatorInputDto = kalkulatorInputTjeneste.byggDto(
+                    behandlingReferanse,
+                    bgReferanse,
+                    iayGrunnlag,
+                    sakInntektsmeldinger,
+                    ytelsesGrunnlag,
+                    vilkårPeriode.getPeriode(),
+                    vilkårsMerknad);
                 return new AbstractMap.SimpleEntry<>(bgReferanse,
-                    kalkulatorInputTjeneste.byggDto(
-                        behandlingReferanse,
-                        bgReferanse,
-                        iayGrunnlag,
-                        sakInntektsmeldinger,
-                        ytelsesGrunnlag,
-                        vilkårPeriode.getPeriode(),
-                        vilkårsMerknad));
+                    kalkulatorInputDto);
             }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
 

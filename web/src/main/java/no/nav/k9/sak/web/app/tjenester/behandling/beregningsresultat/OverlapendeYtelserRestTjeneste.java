@@ -61,12 +61,13 @@ public class OverlapendeYtelserRestTjeneste {
 
 
     @GET
-    @Operation(description = "Hent andre overlappende ytelser som påvirker denne behandlingen", summary = ("Hent andre overlappende ytelser som påvirker denne behandlingen"), tags = "ytelser")
+    @Operation(description = "Hent andre overlappende K9-ytelser som påvirker denne behandlingen", summary = ("Hent andre overlappende K9-ytelser som påvirker denne behandlingen"), tags = "ytelser")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<OverlappendeYtelseDto> hentOverlappendeYtelser(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        var overlappendeYtelser = overlappendeYtelserTjeneste.finnOverlappendeYtelser(BehandlingReferanse.fra(behandling));
+        var ytelseTyperSomSjekkesMot = behandling.getFagsakYtelseType().hentK9YtelserForOverlappSjekk();
+        var overlappendeYtelser = overlappendeYtelserTjeneste.finnOverlappendeYtelser(BehandlingReferanse.fra(behandling), ytelseTyperSomSjekkesMot);
 
         var overlappendeYtelseDtoer = overlappendeYtelser.entrySet().stream()
             .sorted(Comparator.comparing((Map.Entry<Ytelse, NavigableSet<LocalDateInterval>> e) -> e.getKey().getYtelseType().getKode())

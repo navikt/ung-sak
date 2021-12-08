@@ -17,6 +17,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
 import no.nav.pleiepengerbarn.uttak.kontrakter.EndrePerioderGrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Simuleringsgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.SøktUttak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
@@ -44,6 +45,11 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
     @Override
     public Uttaksplan hentUttaksplan(UUID behandlingUuid, boolean slåSammenLikePerioder) {
         return hentUttaksplaner(behandlingUuid).values().stream().findFirst().orElseThrow();
+    }
+
+    @Override
+    public Simulering simulerUttaksplanV2(Simuleringsgrunnlag request) {
+        throw new UnsupportedOperationException();
     }
 
     private Map<Object, Uttaksplan> hentUttaksplaner(UUID behandlingUuid) {
@@ -117,8 +123,8 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
 
     private List<Utbetalingsgrader> mapUtbetalingsgrader(SøktUttak periode, Uttaksgrunnlag input) {
         return input.getArbeid().stream().map(it -> new Utbetalingsgrader(it.getArbeidsforhold(),
-            it.getPerioder().get(periode.getPeriode()).getJobberNormalt(),
-            it.getPerioder().get(periode.getPeriode()).getJobberNormalt(), _100))
+                it.getPerioder().get(periode.getPeriode()).getJobberNormalt(),
+                it.getPerioder().get(periode.getPeriode()).getJobberNormalt(), _100))
             .collect(Collectors.toList());
     }
 }

@@ -20,11 +20,13 @@ import javax.ws.rs.core.MediaType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OverstyrInputBeregningTjeneste;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningInputPeriode;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagKoblingDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -42,8 +44,10 @@ public class BeregningsgrunnlagRestTjeneste {
     static public final String PATH = "/behandling/beregningsgrunnlag";
     static public final String PATH_KOBLINGER = "/behandling/beregningsgrunnlag/koblinger";
     static public final String PATH_ALLE = "/behandling/beregningsgrunnlag/alle";
+    static public final String PATH_OVERSTYR_INPUT = "/behandling/beregningsgrunnlag/overstyrInput";
     private BehandlingRepository behandlingRepository;
     private BeregningTjeneste kalkulusTjeneste;
+    private OverstyrInputBeregningTjeneste overstyrInputBeregningTjeneste;
 
     public BeregningsgrunnlagRestTjeneste() {
         // for resteasy
@@ -51,9 +55,11 @@ public class BeregningsgrunnlagRestTjeneste {
 
     @Inject
     public BeregningsgrunnlagRestTjeneste(BehandlingRepository behandlingRepository,
-                                          BeregningTjeneste kalkulusTjeneste) {
+                                          BeregningTjeneste kalkulusTjeneste,
+                                          OverstyrInputBeregningTjeneste overstyrInputBeregningTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.kalkulusTjeneste = kalkulusTjeneste;
+        this.overstyrInputBeregningTjeneste = overstyrInputBeregningTjeneste;
     }
 
     @GET
@@ -74,6 +80,16 @@ public class BeregningsgrunnlagRestTjeneste {
     public List<BeregningsgrunnlagDto> hentBeregningsgrunnlagene(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         return kalkulusTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling));
+    }
+
+    @GET
+    @Operation(description = "Henter data for overstyring av input til beregning", summary = ("Returnerer data for overstyring av input til beregning."), tags = "beregningsgrunnlag")
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @Path(PATH_OVERSTYR_INPUT)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public OverstyrBeregningInputPeriode hentOverstyrInputBeregning(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        return overstyrInputBeregningTjeneste.getPeriodeForInputOverstyring(behandling);
     }
 
     @GET

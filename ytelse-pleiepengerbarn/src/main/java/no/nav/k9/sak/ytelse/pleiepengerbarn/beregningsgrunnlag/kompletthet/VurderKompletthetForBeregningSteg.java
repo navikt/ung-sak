@@ -119,6 +119,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             bestiltEtterlysningRepository.lagre(manglendeBestillinger);
             var aktørerDetSkalEtterlysesFra = manglendeBestillinger.stream()
                 .map(BestiltEtterlysning::getArbeidsgiver)
+                .distinct()
                 .map(arbeidsgiver -> arbeidsgiver != null ? new Mottaker(arbeidsgiver.getIdentifikator(), arbeidsgiver.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID) : new Mottaker(ref.getAktørId().getAktørId(), IdType.AKTØRID))
                 .collect(Collectors.toSet());
             sendBrev(ref.getBehandlingId(), DokumentMalType.fraKode(kompletthetsAksjon.getDokumentMalType().getKode()), aktørerDetSkalEtterlysesFra);
@@ -190,7 +191,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     }
 
     private BehandleStegResultat legacykompletthetHåndtering(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, true, true);
 
         if (perioderTilVurdering.isEmpty()) {
             avbrytAksjonspunktHvisTilstede(kontekst);

@@ -29,6 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.abakus.ArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
@@ -57,7 +58,7 @@ public class KompletthetForBeregningTjeneste {
     private ArbeidsforholdTjeneste arbeidsforholdTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning;
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
@@ -75,12 +76,13 @@ public class KompletthetForBeregningTjeneste {
                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                            VilkårResultatRepository vilkårResultatRepository,
                                            PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
+                                           BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste, VilkårResultatRepository vilkårResultatRepository,
                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
-        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.arbeidsforholdTjeneste = arbeidsforholdTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
+        this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
@@ -118,7 +120,7 @@ public class KompletthetForBeregningTjeneste {
         var perioderMedManglendeVedlegg = new HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>>();
 
         // Utled vilkårsperioder
-        var vilkårsPerioder = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+        var vilkårsPerioder = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref,false, false, true)
             .stream()
             .sorted(Comparator.comparing(DatoIntervallEntitet::getFomDato))
             .collect(Collectors.toCollection(TreeSet::new));

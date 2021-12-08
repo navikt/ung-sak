@@ -189,6 +189,8 @@ spec:
       value: "3030"
 
     # Feature-flag
+    - name: VKY_VED_OVERLAPP_INFOTRYGD
+      value: "false"
     - name: OMP_IM_SJEKK_FORSTE_FRAVAERSDAG
       value: "false"
     - name: PSB_OPPG_OPPTJENING_PRIORITERING
@@ -207,10 +209,6 @@ spec:
       value: "true"
     - name: ENABLE_UTLEDET_ENDRINGSPERIODE
       value: "true"
-    - name: ARBEIDSTID_SJEKK_SNFL
-      value: "true"
-    - name: NY_SYKDOM_TOTRINN
-      value: "true"
     - name: ENABLE_RELEVANT_SYKDOMSPERIODE
       value: "true"
     - name: ENABLE_STONADSTATISTIKK
@@ -220,6 +218,10 @@ spec:
     - name: MAP_ALLE_KRAV
       value: "true"
     - name: PSB_ENABLE_BEKREFT_UTTAK
+      value: "false"
+    - name: PSB_DISABLE_VURDER_TILBAKETREKK
+      value: "false"
+    - name: PSB_INFOTRYGD_MIGRERING
       value: "false"
 
     # Audit logging
@@ -232,3 +234,8 @@ spec:
 
     - name: PIP_USERS
       value: "srvPDP,srvk9-tilbake,srvsaf"
+
+
+    # Pleiepenger infotrygd migrering
+    - name: OVERSTYR_BEREGNING_INPUT_TILLATELSER
+      value: ""

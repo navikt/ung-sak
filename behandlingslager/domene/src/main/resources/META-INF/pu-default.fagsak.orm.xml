@@ -7,8 +7,12 @@
 
     <sequence-generator name="SEQ_FAGSAK" allocation-size="50" sequence-name="SEQ_FAGSAK"/>
     <sequence-generator name="SEQ_JOURNALPOST" allocation-size="50" sequence-name="SEQ_JOURNALPOST"/>
+    <sequence-generator name="SEQ_SAK_INFOTRYGD_MIGRERING" allocation-size="50" sequence-name="SEQ_SAK_INFOTRYGD_MIGRERING"/>
+
 
     <entity class="no.nav.k9.sak.behandlingslager.fagsak.Fagsak"/>
     <entity class="no.nav.k9.sak.behandlingslager.fagsak.Journalpost"/>
+    <entity class="no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering"/>
+
 
 </entity-mappings>

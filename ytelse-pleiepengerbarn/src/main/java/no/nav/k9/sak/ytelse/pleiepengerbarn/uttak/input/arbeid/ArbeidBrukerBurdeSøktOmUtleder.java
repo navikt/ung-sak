@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
@@ -53,7 +52,6 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
     private OpptjeningRepository opptjeningRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-    private boolean arbeidstidSNFLEnablet;
 
     public ArbeidBrukerBurdeSøktOmUtleder() {
     }
@@ -65,8 +63,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
                                           PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
                                           PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
                                           OpptjeningRepository opptjeningRepository,
-                                          VilkårResultatRepository vilkårResultatRepository,
-                                          @KonfigVerdi(value = "ARBEIDSTID_SJEKK_SNFL", defaultVerdi = "true", required = false) boolean arbeidstidSNFLEnablet) {
+                                          VilkårResultatRepository vilkårResultatRepository) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
@@ -74,7 +71,6 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         this.opptjeningRepository = opptjeningRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
-        this.arbeidstidSNFLEnablet = arbeidstidSNFLEnablet;
     }
 
     public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledMangler(BehandlingReferanse referanse) {
@@ -168,9 +164,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             .filter(it -> ArbeidType.AA_REGISTER_TYPER.contains(it.getArbeidType()))
             .forEach(yrkesaktivitet -> mapYrkesAktivitet(mellomregning, yrkesaktivitet));
 
-        if (arbeidstidSNFLEnablet) {
-            mapFrilansOgSelvstendigNæring(opptjeningResultat, mellomregning, tidslinjeTilVurdering);
-        }
+        mapFrilansOgSelvstendigNæring(opptjeningResultat, mellomregning, tidslinjeTilVurdering);
 
         var helgeTidslinje = Hjelpetidslinjer.lagTidslinjeMedKunHelger(tidslinjeTilVurdering);
 
