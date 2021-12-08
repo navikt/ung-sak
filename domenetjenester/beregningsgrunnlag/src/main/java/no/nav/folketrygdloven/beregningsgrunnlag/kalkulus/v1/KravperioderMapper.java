@@ -149,7 +149,7 @@ public class KravperioderMapper {
                         startDatoArbeid : im.getStartDatoPermisjon().get();
                 }
             } else {
-                startRefusjon = skjæringstidspunktBeregning;
+                startRefusjon = im.getStartDatoPermisjon().orElse(skjæringstidspunktBeregning);
             }
         } else {
             startRefusjon = skjæringstidspunktBeregning;
