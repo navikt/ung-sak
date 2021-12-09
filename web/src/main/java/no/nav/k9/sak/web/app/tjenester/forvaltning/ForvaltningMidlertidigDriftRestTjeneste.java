@@ -352,6 +352,68 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 .orElse("");
         return Response.ok(resultatString).build();
     }
+    
+    @GET
+    @Path("/frisinn/uttrekk-antall")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Adhoc-uttrekk for Frisinn", summary = ("Adhoc-uttrekk for Frisinn."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response antallFrisinnsøknader() {
+        final Query q = entityManager.createNativeQuery("SELECT '2020' aar,\n"
+                + "  count(ansvarlig_saksbehandler) filter (where ansvarlig_saksbehandler is not null) manuell_antall,\n"
+                + "  count(ansvarlig_saksbehandler) filter (where ansvarlig_saksbehandler is null) automatisk_antall\n"
+                + "FROM Mottatt_dokument m INNER JOIN Behandling b on (\n"
+                + "  b.id = m.behandling_id\n"
+                + ")\n"
+                + "WHERE m.type = 'INNTEKTKOMP_FRILANS'\n"
+                + "  AND m.mottatt_tidspunkt < '2021-02-01'\n"
+                + "  AND b.behandling_status IN ('AVSLUTTET', 'FATTER_VEDTAK', 'IVERKSETTER_VEDTAK')\n"
+                + "\n"
+                + "UNION\n"
+                + "\n"
+                + "SELECT '2021' aar,\n"
+                + "  count(ansvarlig_saksbehandler) filter (where ansvarlig_saksbehandler is not null) manuell_antall,\n"
+                + "  count(ansvarlig_saksbehandler) filter (where ansvarlig_saksbehandler is null) automatisk_antall\n"
+                + "FROM Mottatt_dokument m INNER JOIN Behandling b on (\n"
+                + "  b.id = m.behandling_id\n"
+                + ")\n"
+                + "WHERE m.type = 'INNTEKTKOMP_FRILANS'\n"
+                + "  AND m.mottatt_tidspunkt >= '2021-02-01'\n"
+                + "  AND b.behandling_status IN ('AVSLUTTET', 'FATTER_VEDTAK', 'IVERKSETTER_VEDTAK')\n"
+                + "\n"
+                + "UNION\n"
+                + "\n"
+                + "SELECT '2020-ubehandlet' aar,\n"
+                + "  count(ansvarlig_saksbehandler) filter (where ansvarlig_saksbehandler is not null) manuell_antall,\n"
+                + "  count(ansvarlig_saksbehandler) filter (where ansvarlig_saksbehandler is null) automatisk_antall\n"
+                + "FROM Mottatt_dokument m INNER JOIN Behandling b on (\n"
+                + "  b.id = m.behandling_id\n"
+                + ")\n"
+                + "WHERE m.type = 'INNTEKTKOMP_FRILANS'\n"
+                + "  AND m.mottatt_tidspunkt < '2021-02-01'\n"
+                + "  AND b.behandling_status NOT IN ('AVSLUTTET', 'FATTER_VEDTAK', 'IVERKSETTER_VEDTAK')\n"
+                + "\n"
+                + "UNION\n"
+                + "\n"
+                + "SELECT '2021-ubehandlet' aar,\n"
+                + "  count(ansvarlig_saksbehandler) filter (where ansvarlig_saksbehandler is not null) manuell_antall,\n"
+                + "  count(ansvarlig_saksbehandler) filter (where ansvarlig_saksbehandler is null) automatisk_antall\n"
+                + "FROM Mottatt_dokument m INNER JOIN Behandling b on (\n"
+                + "  b.id = m.behandling_id\n"
+                + ")\n"
+                + "WHERE m.type = 'INNTEKTKOMP_FRILANS'\n"
+                + "  AND m.mottatt_tidspunkt >= '2021-02-01'\n"
+                + "  AND b.behandling_status NOT IN ('AVSLUTTET', 'FATTER_VEDTAK', 'IVERKSETTER_VEDTAK')\n"
+                + "\n");
+
+        @SuppressWarnings("unchecked")
+        final List<Object[]> result = q.getResultList();
+        final String resultatString = result.stream()
+                .map(a -> a[0].toString() + ";" + a[1].toString() + ";" + a[2].toString())
+                .reduce((a, b) -> a + "\n" + b)
+                .orElse("");
+        return Response.ok(resultatString).build();
+    }
 
     private final boolean harLesetilgang(String saksnummer, String restApiPath) {
         final AbacAttributtSamling attributter = AbacAttributtSamling.medJwtToken(tokenProvider.getToken().getToken());
