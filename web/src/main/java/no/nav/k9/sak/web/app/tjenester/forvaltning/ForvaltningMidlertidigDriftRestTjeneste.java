@@ -359,6 +359,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @Operation(description = "Adhoc-uttrekk for Frisinn", summary = ("Adhoc-uttrekk for Frisinn."), tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     public Response antallFrisinnsøknader() {
+
         final Query q = entityManager.createNativeQuery("SELECT '2020' aar,\n"
                 + "  count(ansvarlig_saksbehandler) filter (where ansvarlig_saksbehandler is not null) manuell_antall,\n"
                 + "  count(ansvarlig_saksbehandler) filter (where ansvarlig_saksbehandler is null) automatisk_antall\n"
@@ -367,7 +368,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 + ")\n"
                 + "WHERE f.ytelse_type = 'FRISINN'\n"
                 + "  AND b.opprettet_tid < '2021-02-01'\n"
-                + "  AND b.behandling_status IN ('AVSLUTTET', 'FATTER_VEDTAK', 'IVERKSETTER_VEDTAK')\n"
+                + "  AND b.behandling_status IN ('AVSLU', 'FVED', 'IVED')\n"
                 + "\n"
                 + "UNION\n"
                 + "\n"
@@ -379,7 +380,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 + ")\n"
                 + "WHERE f.ytelse_type = 'FRISINN'\n"
                 + "  AND b.opprettet_tid >= '2021-02-01'\n"
-                + "  AND b.behandling_status IN ('AVSLUTTET', 'FATTER_VEDTAK', 'IVERKSETTER_VEDTAK')\n"
+                + "  AND b.behandling_status IN ('AVSLU', 'FVED', 'IVED')\n"
                 + "\n"
                 + "UNION\n"
                 + "\n"
@@ -391,7 +392,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 + ")\n"
                 + "WHERE f.ytelse_type = 'FRISINN'\n"
                 + "  AND b.opprettet_tid < '2021-02-01'\n"
-                + "  AND b.behandling_status NOT IN ('AVSLUTTET', 'FATTER_VEDTAK', 'IVERKSETTER_VEDTAK')\n"
+                + "  AND b.behandling_status NOT IN ('AVSLU', 'FVED', 'IVED')\n"
                 + "\n"
                 + "UNION\n"
                 + "\n"
@@ -403,7 +404,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 + ")\n"
                 + "WHERE f.ytelse_type = 'FRISINN'\n"
                 + "  AND b.opprettet_tid >= '2021-02-01'\n"
-                + "  AND b.behandling_status NOT IN ('AVSLUTTET', 'FATTER_VEDTAK', 'IVERKSETTER_VEDTAK')");
+                + "  AND b.behandling_status NOT IN ('AVSLU', 'FVED', 'IVED')");
 
         @SuppressWarnings("unchecked")
         final List<Object[]> result = q.getResultList();
