@@ -83,7 +83,6 @@ public class PSBKompletthetSjekkerTjeneste {
         grunnlag = justerTidligereVurderingerEtterOppdatertStatus(ref, perioderTilVurdering, kompletthetsVurderinger, grunnlag);
 
         if (aksjon.kanFortsette()) {
-
             log.info("Behandlingen er komplett, kan fortsette.");
             return aksjon;
         }
