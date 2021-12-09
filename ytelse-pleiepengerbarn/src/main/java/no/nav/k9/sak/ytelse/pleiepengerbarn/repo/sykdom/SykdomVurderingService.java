@@ -155,12 +155,12 @@ public class SykdomVurderingService {
                 resterendeVurderingsperioderTidslinje
             );
             resterendeValgfrieVurderingsperioder = toPeriodeList(
-                kunPerioderSomIkkeFinnesI(kunPerioderSomIkkeFinnesI(behandledeSøknadsperioder.intersection(ktpTidslinje), resterendeVurderingsperioderTidslinje), vurderinger)
+                kunPerioderSomIkkeFinnesI(behandledeSøknadsperioder.intersection(ktpTidslinje), resterendeVurderingsperioderTidslinje)
             );
         } else {
             resterendeVurderingsperioder = toPeriodeList(alleResterendeVurderingsperioder);
             resterendeValgfrieVurderingsperioder = toPeriodeList(
-                kunPerioderSomIkkeFinnesI(kunPerioderSomIkkeFinnesI(behandledeSøknadsperioder, alleResterendeVurderingsperioder), vurderinger)
+                kunPerioderSomIkkeFinnesI(behandledeSøknadsperioder, alleResterendeVurderingsperioder)
             );
         }
 
