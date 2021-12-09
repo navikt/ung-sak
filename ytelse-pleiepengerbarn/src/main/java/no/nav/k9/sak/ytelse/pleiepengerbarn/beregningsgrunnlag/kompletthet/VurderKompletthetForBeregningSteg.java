@@ -138,13 +138,18 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             var brukerBrev = arbeidsgiverDetSkalEtterlysesFra.stream()
                 .map(PeriodeMedMangler::getPeriode)
                 .map(it -> new BestiltEtterlysning(ref.getFagsakId(), ref.getBehandlingId(), it, null, aksjon.getDokumentMalType().getKode()))
-                .filter(it -> bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeFraSammeBehandling(it)))
+                .filter(it -> bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeBestiltTidligere(it)))
+                .filter(it -> bestilteEtterlysninger.stream().noneMatch(at -> at.erBestiltTilSammeMottakerIDenneBehandlingen(it)))
                 .collect(Collectors.toSet());
 
             var arbeidsgiverBrev = arbeidsgiverDetSkalEtterlysesFra.stream()
-                .map(it -> it.getMangler().stream().map(mapTilBestilling(ref, aksjon, it)).collect(Collectors.toSet()))
+                .map(it -> it.getMangler()
+                    .stream()
+                    .map(mapTilBestilling(ref, aksjon, it))
+                    .collect(Collectors.toSet()))
                 .flatMap(Collection::stream)
-                .filter(it -> bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeFraSammeBehandling(it)))
+                .filter(it -> erIkkeBestiltTidligere(bestilteEtterlysninger, it))
+                .filter(it -> erIkkeSendtBrevTilSammeMottakerIDenneBehandlingen(bestilteEtterlysninger, it))
                 .collect(Collectors.toSet());
 
             bestilt.addAll(brukerBrev);
@@ -155,6 +160,14 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             throw new IllegalArgumentException("Ukjent aksjonspunkt definisjon " + aksjonspunktDefinisjon);
         }
 
+    }
+
+    private boolean erIkkeSendtBrevTilSammeMottakerIDenneBehandlingen(List<BestiltEtterlysning> bestilteEtterlysninger, BestiltEtterlysning it) {
+        return bestilteEtterlysninger.stream().noneMatch(at -> at.erBestiltTilSammeMottakerIDenneBehandlingen(it));
+    }
+
+    private boolean erIkkeBestiltTidligere(List<BestiltEtterlysning> bestilteEtterlysninger, BestiltEtterlysning it) {
+        return bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeBestiltTidligere(it));
     }
 
     private Function<ManglendeVedlegg, BestiltEtterlysning> mapTilBestilling(BehandlingReferanse ref, KompletthetsAksjon aksjon, PeriodeMedMangler it) {
@@ -202,7 +215,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         var relevanteKompletthetsvurderinger = kompletthetsVurderinger.entrySet()
             .stream()
             .filter(it -> perioderTilVurdering.contains(it.getKey()))
-            .collect(Collectors.toList());
+            .toList();
 
         if (relevanteKompletthetsvurderinger.isEmpty()) {
             avbrytAksjonspunktHvisTilstede(kontekst);

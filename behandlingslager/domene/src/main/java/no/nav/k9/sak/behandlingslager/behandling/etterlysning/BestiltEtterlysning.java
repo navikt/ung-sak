@@ -110,7 +110,7 @@ public class BestiltEtterlysning extends BaseEntitet {
             '}';
     }
 
-    public boolean erTilsvarendeFraSammeBehandling(BestiltEtterlysning etterlysning) {
+    public boolean erTilsvarendeBestiltTidligere(BestiltEtterlysning etterlysning) {
         if (etterlysning == null) {
             return false;
         }
@@ -121,12 +121,11 @@ public class BestiltEtterlysning extends BaseEntitet {
         var periodeErTilsvarende = periode.overlapper(etterlysning.periode);
 
         return Objects.equals(fagsakId, etterlysning.fagsakId) &&
-            Objects.equals(behandlingId, etterlysning.behandlingId) &&
             arbeidsgiverErLik &&
             periodeErTilsvarende;
     }
 
-    public boolean erTilsvarendeFraAnnenBehandling(BestiltEtterlysning etterlysning) {
+    public boolean erBestiltTilSammeMottakerIDenneBehandlingen(BestiltEtterlysning etterlysning) {
         if (etterlysning == null) {
             return false;
         }
@@ -134,11 +133,9 @@ public class BestiltEtterlysning extends BaseEntitet {
             return false;
         }
         var arbeidsgiverErLik = Objects.equals(arbeidsgiver, etterlysning.arbeidsgiver);
-        var periodeErTilsvarende = periode.overlapper(etterlysning.periode);
 
         return Objects.equals(fagsakId, etterlysning.fagsakId) &&
-            !Objects.equals(behandlingId, etterlysning.behandlingId) &&
-            arbeidsgiverErLik &&
-            periodeErTilsvarende;
+            Objects.equals(behandlingId, etterlysning.behandlingId) &&
+            arbeidsgiverErLik;
     }
 }
