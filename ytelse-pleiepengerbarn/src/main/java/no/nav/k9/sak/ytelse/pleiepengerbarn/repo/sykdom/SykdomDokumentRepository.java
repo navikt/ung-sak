@@ -96,7 +96,7 @@ public class SykdomDokumentRepository {
     public List<SykdomDokument> hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(AktørId pleietrengende) {
         return hentDokumenterSomErRelevanteForSykdom(pleietrengende)
             .stream()
-            .filter(d -> !harKvittertDokumentForEksisterendeVurderinger(d) && !d.isDuplikat())
+            .filter(d -> !harKvittertDokumentForEksisterendeVurderinger(d))
             .collect(Collectors.toList());
     }
 
