@@ -196,7 +196,7 @@ public class VilkårTjeneste {
         Long behandlingId = ref.getBehandlingId();
         var behandling = hentBehandling(behandlingId);
         var perioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigrering(ref.getFagsakId());
+        var sakInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(ref.getFagsakId());
 
         var vilkår = hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(behandlingId, vilkårType));
@@ -214,11 +214,11 @@ public class VilkårTjeneste {
                 .map(VilkårPeriode::getPeriode).toList();
             avslåttePerioder.forEach(perioder::remove);
         }
-        if (vilkår.isPresent() && sakInfotrygdMigrering.isPresent() && skalIgnorerePerioderFraInfotrygd) {
+        if (vilkår.isPresent() && skalIgnorerePerioderFraInfotrygd) {
             var periodeFraInfotrygd = vilkår.get()
                 .getPerioder()
                 .stream()
-                .filter(it -> sakInfotrygdMigrering.get().getSkjæringstidspunkt().equals(it.getSkjæringstidspunkt()))
+                .filter(it -> sakInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).anyMatch(stp -> it.getSkjæringstidspunkt().equals(stp)))
                 .map(VilkårPeriode::getPeriode).toList();
             periodeFraInfotrygd.forEach(perioder::remove);
         }
