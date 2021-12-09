@@ -128,6 +128,25 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     }
 
     @Test
+    void skal_returnere_aksjonspunkt_ved_overlapp_med_flere_perioder() {
+        when(perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
+            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30))))));
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.plusDays(30)));
+        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.plusDays(2)));
+        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.plusDays(20)));
+
+        var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
+
+        assertThat(aksjonspunkter.size()).isEqualTo(1);
+        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT);
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(2);
+        assertThat(sakInfotrygdMigrering.stream().anyMatch(s -> s.getSkjæringstidspunkt().equals(STP))).isTrue();
+        assertThat(sakInfotrygdMigrering.stream().anyMatch(s -> s.getSkjæringstidspunkt().equals(STP.plusDays(20)))).isTrue();
+    }
+
+    @Test
     void skal_ikkje_returnere_aksjonspunkt_med_overlapp_for_periode_som_ikke_vurderes() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusDays(10)));
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.minusDays(10)));

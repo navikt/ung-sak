@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -68,17 +69,8 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var eksisterendeInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(param.getRef().getFagsakId());
         var eksisterendeMigreringTilVurdering = finnEksisterendeMigreringTilVurdering(perioderTilVurdering, eksisterendeInfotrygdMigreringer);
-        if (eksisterendeMigreringTilVurdering.isPresent()) {
-            var sakInfotrygdMigrering = eksisterendeMigreringTilVurdering.get();
-            var skjæringstidspunkt = perioderTilVurdering.stream()
-                .filter(p -> p.inkluderer(sakInfotrygdMigrering.getSkjæringstidspunkt()))
-                .findFirst()
-                .map(DatoIntervallEntitet::getFomDato)
-                .orElseThrow();
-            if (!skjæringstidspunkt.equals(sakInfotrygdMigrering.getSkjæringstidspunkt())) {
-                sakInfotrygdMigrering.setSkjæringstidspunkt(skjæringstidspunkt);
-                fagsakRepository.lagreOgFlush(sakInfotrygdMigrering);
-            }
+        if (!eksisterendeMigreringTilVurdering.isEmpty()) {
+            eksisterendeMigreringTilVurdering.forEach(oppdaterSkjæringstidspunkt(perioderTilVurdering));
             return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT));
         }
         var stpMedOverlapp = finnSkjæringstidspunktMedOverlapp(param, perioderTilVurdering);
@@ -87,6 +79,19 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
             return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT));
         }
         return Collections.emptyList();
+    }
+
+    private Consumer<SakInfotrygdMigrering> oppdaterSkjæringstidspunkt(NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+        return sakInfotrygdMigrering -> {
+        var skjæringstidspunkt = perioderTilVurdering.stream()
+            .filter(p -> p.inkluderer(sakInfotrygdMigrering.getSkjæringstidspunkt()))
+            .findFirst()
+            .map(DatoIntervallEntitet::getFomDato)
+            .orElseThrow();
+        if (!skjæringstidspunkt.equals(sakInfotrygdMigrering.getSkjæringstidspunkt())) {
+            sakInfotrygdMigrering.setSkjæringstidspunkt(skjæringstidspunkt);
+            fagsakRepository.lagreOgFlush(sakInfotrygdMigrering);
+        }};
     }
 
     private Optional<LocalDate> finnSkjæringstidspunktMedOverlapp(AksjonspunktUtlederInput param, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
@@ -102,14 +107,16 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         return kantIKantPeriode.map(DatoIntervallEntitet::getFomDato);
     }
 
-    private Optional<SakInfotrygdMigrering> finnEksisterendeMigreringTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer) {
-        var tilVurdering = eksisterendeInfotrygdMigreringer.stream()
+    private List<SakInfotrygdMigrering> finnEksisterendeMigreringTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer) {
+        var migreringTilVurdering = eksisterendeInfotrygdMigreringer.stream()
             .filter(sim -> perioderTilVurdering.stream().anyMatch(periode -> periode.inkluderer(sim.getSkjæringstidspunkt())))
             .collect(Collectors.toList());
-        if (tilVurdering.size() > 1) {
-            throw new IllegalStateException("Forventer maksimalt en migrering til vurdering");
+        var antallPerioderMedOverlapp = perioderTilVurdering.stream().filter(periode -> migreringTilVurdering.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt)
+            .anyMatch(periode::inkluderer)).count();
+        if (migreringTilVurdering.size() > antallPerioderMedOverlapp) {
+            throw new IllegalStateException("Forventer maksimalt en migrering til vurdering per periode");
         }
-        return tilVurdering.isEmpty() ? Optional.empty() : Optional.of(tilVurdering.get(0));
+        return migreringTilVurdering;
     }
 
     private Optional<DatoIntervallEntitet> finnKantIKantPeriode(YtelseFilter ytelseFilter, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
