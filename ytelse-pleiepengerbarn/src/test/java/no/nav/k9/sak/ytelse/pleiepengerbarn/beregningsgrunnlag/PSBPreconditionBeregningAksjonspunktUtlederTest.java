@@ -65,7 +65,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         fagsakRepository = new FagsakRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
 
-        fagsak = Fagsak.opprettNy(FagsakYtelseType.DAGPENGER, new AktørId(123L), new Saksnummer("987"));
+        fagsak = Fagsak.opprettNy(FagsakYtelseType.DAGPENGER, new AktørId(123L), new Saksnummer("987"), STP, STP.plusDays(10));
         fagsakRepository.opprettNy(fagsak);
         behandling = Behandling.forFørstegangssøknad(fagsak).medBehandlingStatus(BehandlingStatus.UTREDES).build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
@@ -82,8 +82,8 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
         assertThat(aksjonspunkter.size()).isEqualTo(0);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigrering(fagsak.getId());
-        assertThat(sakInfotrygdMigrering).isEmpty();
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(sakInfotrygdMigrering.size()).isZero();
     }
 
     @Test
@@ -94,9 +94,9 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
         assertThat(aksjonspunkter.size()).isEqualTo(1);
         assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigrering(fagsak.getId());
-        assertThat(sakInfotrygdMigrering).isPresent();
-        assertThat(sakInfotrygdMigrering.get().getSkjæringstidspunkt()).isEqualTo(STP);
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
+        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP);
     }
 
     @Test
@@ -108,9 +108,23 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
         assertThat(aksjonspunkter.size()).isEqualTo(1);
         assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigrering(fagsak.getId());
-        assertThat(sakInfotrygdMigrering).isPresent();
-        assertThat(sakInfotrygdMigrering.get().getSkjæringstidspunkt()).isEqualTo(STP);
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
+        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP);
+    }
+
+    @Test
+    void skal_returnere_aksjonspunkt_ved_overlapp_og_oppdatere_eksisterende_sakinfotrygdmigrering() {
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.plusDays(2)));
+        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.plusDays(2)));
+
+        var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
+
+        assertThat(aksjonspunkter.size()).isEqualTo(1);
+        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT);
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
+        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP);
     }
 
     @Test
@@ -121,9 +135,9 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
         assertThat(aksjonspunkter.size()).isEqualTo(0);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigrering(fagsak.getId());
-        assertThat(sakInfotrygdMigrering).isPresent();
-        assertThat(sakInfotrygdMigrering.get().getSkjæringstidspunkt()).isEqualTo(STP.minusDays(10));
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
+        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP.minusDays(10));
     }
 
     @Test
@@ -133,8 +147,8 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
         assertThat(aksjonspunkter.size()).isEqualTo(0);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigrering(fagsak.getId());
-        assertThat(sakInfotrygdMigrering).isEmpty();
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(sakInfotrygdMigrering.size()).isZero();
     }
 
     @Test
@@ -145,9 +159,9 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
         assertThat(aksjonspunkter.size()).isEqualTo(1);
         assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigrering(fagsak.getId());
-        assertThat(sakInfotrygdMigrering).isPresent();
-        assertThat(sakInfotrygdMigrering.get().getSkjæringstidspunkt()).isEqualTo(STP);
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
+        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP);
     }
 
     private void lagInfotrygdPsbYtelse(DatoIntervallEntitet periode) {

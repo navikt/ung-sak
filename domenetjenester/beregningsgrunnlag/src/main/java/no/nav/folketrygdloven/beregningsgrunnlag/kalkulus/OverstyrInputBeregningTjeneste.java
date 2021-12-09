@@ -57,20 +57,17 @@ public class OverstyrInputBeregningTjeneste {
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
-    public OverstyrBeregningInputPeriode getPeriodeForInputOverstyring(Behandling behandling) {
-
-        Optional<SakInfotrygdMigrering> sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigrering(behandling.getFagsakId());
-        if (sakInfotrygdMigrering.isEmpty()) {
-            return null;
-        }
-        LocalDate migrertStp = sakInfotrygdMigrering.get().getSkjæringstidspunkt();
-        List<OpptjeningAktiviteter.OpptjeningPeriode> arbeidsaktiviteter = finnArbeidsaktiviteterForOverstyring(behandling, migrertStp);
-        Optional<InputOverstyringPeriode> overstyrtInputPeriode = finnEksisterendeOverstyring(behandling, migrertStp);
-        var overstyrteAktiviteter = arbeidsaktiviteter.stream()
-            .map(a -> mapTilOverstyrAktiviteter(overstyrtInputPeriode, a))
-            .collect(Collectors.toList());
-        return new OverstyrBeregningInputPeriode(migrertStp, overstyrteAktiviteter);
-
+    public List<OverstyrBeregningInputPeriode> getPerioderForInputOverstyring(Behandling behandling) {
+        List<SakInfotrygdMigrering> sakInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(behandling.getFagsakId());
+        return sakInfotrygdMigreringer.stream().map(sakInfotrygdMigrering -> {
+            LocalDate migrertStp = sakInfotrygdMigrering.getSkjæringstidspunkt();
+            List<OpptjeningAktiviteter.OpptjeningPeriode> arbeidsaktiviteter = finnArbeidsaktiviteterForOverstyring(behandling, migrertStp);
+            Optional<InputOverstyringPeriode> overstyrtInputPeriode = finnEksisterendeOverstyring(behandling, migrertStp);
+            var overstyrteAktiviteter = arbeidsaktiviteter.stream()
+                .map(a -> mapTilOverstyrAktiviteter(overstyrtInputPeriode, a))
+                .collect(Collectors.toList());
+            return new OverstyrBeregningInputPeriode(migrertStp, overstyrteAktiviteter);
+        }).collect(Collectors.toList());
     }
 
     private Optional<InputOverstyringPeriode> finnEksisterendeOverstyring(Behandling behandling, LocalDate migrertStp) {

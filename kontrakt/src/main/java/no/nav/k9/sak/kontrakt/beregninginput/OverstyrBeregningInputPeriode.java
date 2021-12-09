@@ -27,7 +27,7 @@ public class OverstyrBeregningInputPeriode {
 
     @Valid
     @NotNull
-    @Size(min = 1)
+    @Size()
     @JsonProperty("aktivitetliste")
     private List<OverstyrBeregningAktivitet> aktivitetliste;
 

@@ -87,9 +87,9 @@ public class BeregningsgrunnlagRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(PATH_OVERSTYR_INPUT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public OverstyrBeregningInputPeriode hentOverstyrInputBeregning(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+    public List<OverstyrBeregningInputPeriode> hentOverstyrInputBeregning(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        return overstyrInputBeregningTjeneste.getPeriodeForInputOverstyring(behandling);
+        return overstyrInputBeregningTjeneste.getPerioderForInputOverstyring(behandling);
     }
 
     @GET

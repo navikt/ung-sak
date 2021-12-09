@@ -99,6 +99,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = getPerioderTilVurderingTjeneste(fagsakYtelseType, ref.getBehandlingType())
             .utled(behandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var overstyrtePerioder = dto.getPerioder().stream()
+            .filter(it -> !it.getAktivitetliste().isEmpty())
             .map(it -> mapPeriode(ref, iayGrunnlag, perioderTilVurdering, it))
             .collect(Collectors.toList());
         grunnlagRepository.lagreInputOverstyringer(behandlingId, overstyrtePerioder);
