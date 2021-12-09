@@ -37,7 +37,8 @@ public class SykdomAksjonspunkt {
             !manglerDiagnosekode &&
             !manglerGodkjentLegeerklæring &&
             !manglerVurderingAvKontinuerligTilsynOgPleie &&
-            !manglerVurderingAvToOmsorgspersoner;
+            !manglerVurderingAvToOmsorgspersoner &&
+            !nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
     }
 
     public boolean isHarUklassifiserteDokumenter() {
