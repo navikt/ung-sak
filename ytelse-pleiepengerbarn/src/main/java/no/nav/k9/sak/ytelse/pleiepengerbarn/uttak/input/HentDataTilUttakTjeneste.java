@@ -31,6 +31,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynGrunnlag;
@@ -44,7 +45,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 
 @Dependent
@@ -53,7 +53,7 @@ public class HentDataTilUttakTjeneste {
     private FagsakRepository fagsakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private PleiebehovResultatRepository pleiebehovResultatRepository;
-    private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
+    private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
     private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
     private BehandlingRepository behandlingRepository;
@@ -70,7 +70,7 @@ public class HentDataTilUttakTjeneste {
     @Inject
     public HentDataTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
                                     PleiebehovResultatRepository pleiebehovResultatRepository,
-                                    UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
+                                    PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
                                     UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
                                     PersonopplysningTjeneste personopplysningTjeneste,
                                     BehandlingRepository behandlingRepository,
@@ -86,7 +86,7 @@ public class HentDataTilUttakTjeneste {
                                     SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
-        this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
+        this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.behandlingRepository = behandlingRepository;
@@ -107,7 +107,6 @@ public class HentDataTilUttakTjeneste {
 
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
-        var uttakGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
         var pleiebehov = pleiebehovResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
 
@@ -143,7 +142,8 @@ public class HentDataTilUttakTjeneste {
         var rettVedDød = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
 
         var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId())
-                .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
+            .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
+        var perioderFraSøknad = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(referanse);
 
         var input = new InputParametere()
             .medBehandling(behandling)
@@ -155,13 +155,13 @@ public class HentDataTilUttakTjeneste {
             .medPerioderSomSkalTilbakestilles(perioderSomSkalTilbakestilles)
             .medPersonopplysninger(personopplysningerAggregat)
             .medRelaterteSaker(relaterteFagsaker)
-            .medUttaksGrunnlag(uttakGrunnlag)
+            .medPerioderFraSøknad(perioderFraSøknad)
             .medEtablertTilsynPerioder(etablertTilsynPerioder)
             .medKravprioritet(kravprioritet)
             .medIAYGrunnlag(inntektArbeidYtelseGrunnlag)
             .medOpptjeningsresultat(opptjeningsresultat.orElse(null))
             .medRettPleiepengerVedDødGrunnlag(rettVedDød.orElse(null))
-            .medUnntakEtablertTilsynForPleietrengende(unntakEtablertTilsynForPleietrengende);
+            .medUnntakEtablertTilsynForPleietrengende(unntakEtablertTilsynForPleietrengende.orElse(null));
 
         return input;
     }
@@ -176,8 +176,8 @@ public class HentDataTilUttakTjeneste {
 
         final LocalDateTimeline<Boolean> trukkedeKrav = hentTrukkedeKravTidslinje(referanse, behandling);
         return SykdomUtils.kunPerioderSomIkkeFinnesI(søknadsperioder, trukkedeKrav).stream()
-                .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
-                .collect(Collectors.toCollection(TreeSet::new));
+            .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private LocalDateTimeline<Boolean> hentTrukkedeKravTidslinje(BehandlingReferanse referanse, Behandling behandling) {

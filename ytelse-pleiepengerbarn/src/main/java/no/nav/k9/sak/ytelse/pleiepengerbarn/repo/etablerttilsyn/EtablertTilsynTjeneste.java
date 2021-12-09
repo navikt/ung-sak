@@ -16,7 +16,8 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.tilsyn.Kilde;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.PeriodeFraSøknadForPleietrengendeTjeneste.FagsakKravDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForPleietrengendeTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForPleietrengendeTjeneste.FagsakKravDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.delt.UtledetEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynGrunnlag;
@@ -105,7 +106,14 @@ public class EtablertTilsynTjeneste {
     private LocalDateTimeline<UtledetEtablertTilsyn> byggTidslinje(Saksnummer søkersSaksnummer, List<FagsakKravDokument> fagsakKravDokumenter) {
         var resultatTimeline = new LocalDateTimeline<UtledetEtablertTilsyn>(List.of());
         for (FagsakKravDokument kravDokument : fagsakKravDokumenter) {
-            for (var periode : kravDokument.getPerioderFraSøknad().getTilsynsordning().stream().map(Tilsynsordning::getPerioder).flatMap(Collection::stream).collect(Collectors.toList())) {
+            var tilsynsordningPerioder = kravDokument.getPerioderFraSøknad()
+                .getTilsynsordning()
+                .stream()
+                .map(Tilsynsordning::getPerioder)
+                .flatMap(Collection::stream)
+                .toList();
+
+            for (var periode : tilsynsordningPerioder) {
                 final var kilde = søkersSaksnummer.equals(kravDokument.getFagsak().getSaksnummer()) ? Kilde.SØKER : Kilde.ANDRE;
                 final var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), new UtledetEtablertTilsyn(periode.getVarighet(), kilde, kravDokument.getKravDokument().getJournalpostId()))));
                 resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);

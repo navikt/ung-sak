@@ -37,8 +37,8 @@ import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.PerioderMedSykdomInnvilgetUtleder;
 
@@ -48,7 +48,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
-    private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
+    private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
     private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
     private OpptjeningRepository opptjeningRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -60,13 +60,13 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     public ArbeidBrukerBurdeSøktOmUtleder(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                           @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                           @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
-                                          UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
+                                          PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
                                           PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
                                           OpptjeningRepository opptjeningRepository,
                                           VilkårResultatRepository vilkårResultatRepository) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
-        this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
+        this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
         this.perioderMedSykdomInnvilgetUtleder = perioderMedSykdomInnvilgetUtleder;
         this.opptjeningRepository = opptjeningRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -76,9 +76,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledMangler(BehandlingReferanse referanse) {
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
-        var uttakGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
-        var perioderFraSøknader = uttakGrunnlag.getOppgitteSøknadsperioder()
-            .getPerioderFraSøknadene();
+        var perioderFraSøknader = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(referanse);
         var perioderTilVurdering = finnSykdomsperioder(referanse);
         var opptjeningResultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
 
