@@ -130,7 +130,7 @@ public class SykdomVurderingService {
         final LocalDateTimeline<SykdomVurderingVersjon> vurderinger = hentVurderinger(sykdomVurderingType, behandling);
         final LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
 
-        final LocalDateTimeline<Boolean> perioderTilVurdering = utledPerioderTilVurderingMedOmsorgenFor(behandling);
+        final LocalDateTimeline<Boolean> perioderTilVurdering = utledPerioderTilVurderingUtenOmsorgenFor(behandling);
         final List<Periode> nyeSøknadsperioder = Collections.emptyList(); // TODO;nyeSøknadsperioder
         final List<Periode> alleSøknadsperioder = behandledeSøknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
         final LocalDateTimeline<Boolean> innleggelseUnder18årTidslinje = hentInnleggelseUnder18årTidslinje(behandling);
@@ -146,8 +146,7 @@ public class SykdomVurderingService {
         final List<Periode> resterendeValgfrieVurderingsperioder;
         if (sykdomVurderingType == SykdomVurderingType.TO_OMSORGSPERSONER) {
             // Kun vurder perioder for TO_OMSORGSPERSONER hvis det ligger en KTP-vurdering i bunn:
-            final LocalDateTimeline<Boolean> ktpTidslinje = toLocalDateTimeline(hentKontinuerligTilsynOgPleiePerioder(behandling));
-            alleResterendeVurderingsperioder = alleResterendeVurderingsperioder.intersection(ktpTidslinje);
+            alleResterendeVurderingsperioder = alleResterendeVurderingsperioder.intersection(toLocalDateTimeline(hentKontinuerligTilsynOgPleiePerioder(behandling)));
 
             final LocalDateTimeline<?> flereOmsorgspersoner = harAndreSakerEnn(behandling.getFagsak().getSaksnummer(), behandledeSøknadsperioder);
             final LocalDateTimeline<Boolean> resterendeVurderingsperioderTidslinje = alleResterendeVurderingsperioder.intersection(flereOmsorgspersoner);
@@ -155,13 +154,11 @@ public class SykdomVurderingService {
                 resterendeVurderingsperioderTidslinje
             );
             resterendeValgfrieVurderingsperioder = toPeriodeList(
-                kunPerioderSomIkkeFinnesI(behandledeSøknadsperioder.intersection(ktpTidslinje), resterendeVurderingsperioderTidslinje)
+                kunPerioderSomIkkeFinnesI(alleResterendeVurderingsperioder, resterendeVurderingsperioderTidslinje)
             );
         } else {
             resterendeVurderingsperioder = toPeriodeList(alleResterendeVurderingsperioder);
-            resterendeValgfrieVurderingsperioder = toPeriodeList(
-                kunPerioderSomIkkeFinnesI(behandledeSøknadsperioder, alleResterendeVurderingsperioder)
-            );
+            resterendeValgfrieVurderingsperioder = List.of();
         }
 
         return new SykdomVurderingerOgPerioder(
@@ -185,7 +182,7 @@ public class SykdomVurderingService {
         return pleietrengendePersonopplysning.getFødselsdato();
     }
 
-    private LocalDateTimeline<Boolean> utledPerioderTilVurderingMedOmsorgenFor(Behandling behandling) {
+    private LocalDateTimeline<Boolean> utledPerioderTilVurderingUtenOmsorgenFor(Behandling behandling) {
         final var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
         final var perioderTilVurderingUnder18 = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         final var perioderTilVurdering18 = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR);
