@@ -29,6 +29,9 @@ public class BestiltEtterlysningRepository {
     }
 
     public void lagre(Set<BestiltEtterlysning> bestiltEtterlysninger) {
+        if (bestiltEtterlysninger.isEmpty()) {
+            return;
+        }
         var fagsakId = finnFagsakId(bestiltEtterlysninger);
         var tidligereBestiltEtterlysninger = hentFor(fagsakId);
         var persistedSomething = false;
@@ -45,7 +48,10 @@ public class BestiltEtterlysningRepository {
     }
 
     private Long finnFagsakId(Set<BestiltEtterlysning> bestiltEtterlysninger) {
-        var fagsakIder = bestiltEtterlysninger.stream().map(BestiltEtterlysning::getFagsakId).collect(Collectors.toSet());
+        var fagsakIder = bestiltEtterlysninger.stream()
+            .map(BestiltEtterlysning::getFagsakId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
         if (fagsakIder.size() == 1) {
             return fagsakIder.iterator().next();
         }
