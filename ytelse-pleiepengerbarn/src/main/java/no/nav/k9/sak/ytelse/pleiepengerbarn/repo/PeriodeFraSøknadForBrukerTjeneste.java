@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo;
 
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -52,7 +51,7 @@ public class PeriodeFraSøknadForBrukerTjeneste {
             .getPerioderFraSøknadene()
             .stream()
             .filter(it -> kravDokumenter.stream().anyMatch(krav -> Objects.equals(krav.getJournalpostId(), it.getJournalpostId())))
-            .collect(Collectors.toCollection(TreeSet::new));
+            .collect(Collectors.toSet());
     }
 
     /**
@@ -79,7 +78,7 @@ public class PeriodeFraSøknadForBrukerTjeneste {
             .stream()
             .filter(it -> kravDokumenter.stream().anyMatch(krav -> Objects.equals(krav.getJournalpostId(), it.getJournalpostId())))
             .map(it -> new KravDokumentMedData(finnKravDokument(kravDokumenter, it.getJournalpostId()), it))
-            .collect(Collectors.toCollection(TreeSet::new));
+            .collect(Collectors.toSet());
     }
 
     private KravDokument finnKravDokument(Set<KravDokument> kravDokumenter, JournalpostId journalpostId) {
