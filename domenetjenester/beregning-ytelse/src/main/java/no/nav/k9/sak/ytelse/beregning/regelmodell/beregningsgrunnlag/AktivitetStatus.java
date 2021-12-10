@@ -12,6 +12,7 @@ public enum AktivitetStatus {
     ATFL_SN("Kombinasjon av arbeidstaker/frilanser og selvstendig næringsdrivende"),
     DP("Dagpenger"),
     SP_AV_DP("Sykepenger av dagpenger"),
+    PSB_AV_DP("Pleiepenger av dagpenger"),
     AAP("Mottaker av arbeidsavklaringspenger"),
     BA("Brukers andel"),
     MS("Militær/Sivil"),

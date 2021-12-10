@@ -202,7 +202,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kontrakt</artifactId>
-                <version>1.2.90</version>
+                <version>1.2.91</version>
             </dependency>
 
             <dependency>
@@ -411,7 +411,7 @@
             <dependency>
                 <groupId>no.nav.pleiepengerbarn.uttak</groupId>
                 <artifactId>kontrakter</artifactId>
-                <version>1.1.16</version>
+                <version>1.1.17</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
