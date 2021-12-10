@@ -77,13 +77,11 @@ public class MapInputTilUttakTjeneste {
 
         var behandling = input.getBehandling();
         var vurderteSøknadsperioder = input.getVurderteSøknadsperioder();
-        var uttaksPerioderGrunnlag = input.getUttaksGrunnlag();
         var personopplysningerAggregat = input.getPersonopplysningerAggregat();
 
         // Henter ut alt og lager tidlinje av denne for så å ta ut den delen som er relevant
         // NB! Kan gi issues ved lange fagsaker mtp ytelse
-        var perioderFraSøknader = uttaksPerioderGrunnlag.getOppgitteSøknadsperioder()
-            .getPerioderFraSøknadene();
+        var perioderFraSøknader = input.getPerioderFraSøknad();
         var kravDokumenter = vurderteSøknadsperioder.keySet();
 
         evaluerDokumenter(perioderFraSøknader, kravDokumenter);
