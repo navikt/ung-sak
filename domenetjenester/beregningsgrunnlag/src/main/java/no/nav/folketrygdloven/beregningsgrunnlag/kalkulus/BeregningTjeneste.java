@@ -30,7 +30,7 @@ public interface BeregningTjeneste {
      * Steg 1. FASTSETT_STP_BER
      *
      * @param referanse {@link BehandlingReferanse}
-     * @param ytelseGrunnlag - ytelsespesifikt grunnlag per skjæringstidspunkt
+     * @param vilkårsperioder - alle perioder til vurdering
      * @return SamletKalkulusResultat {@link KalkulusResultat}
      */
     SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, List<DatoIntervallEntitet> vilkårsperioder);
@@ -39,9 +39,10 @@ public interface BeregningTjeneste {
      * Kjører en beregning videre fra gitt steg <br>
      * Steg 2. KOFAKBER (Kontroller fakta for beregning)<br>
      * Steg 3. FORS_BERGRUNN (Foreslå beregningsgrunnlag)<br>
-     * Steg 4. VURDER_REF_BERGRUNN (Vurder vilkår og refusjon)<br>
-     * Steg 5. FORDEL_BERGRUNN (Fordel beregningsgrunnlag)<br>
-     * Steg 6. FAST_BERGRUNN (Fastsett beregningsgrunnlag)
+     * Steg 4. VURDER_VILKAR_BERGRUNN (Vurder vilkår)<br>
+     * Steg 5. VURDER_REF_BERGRUNN (Vurder refusjon)<br>
+     * Steg 6. FORDEL_BERGRUNN (Fordel beregningsgrunnlag)<br>
+     * Steg 7. FAST_BERGRUNN (Fastsett beregningsgrunnlag)
      *
      * @param ref {@link BehandlingReferanse}
      * @param vilkårsperioder Vilkårsperioder til vurdering
