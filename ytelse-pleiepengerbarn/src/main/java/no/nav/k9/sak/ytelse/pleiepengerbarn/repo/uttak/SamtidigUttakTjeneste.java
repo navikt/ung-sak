@@ -1,11 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.TreeSet;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -25,16 +21,12 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.BekreftetUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
-import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Simuleringsgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Årsak;
 
 @Dependent
 public class SamtidigUttakTjeneste {
@@ -101,7 +93,7 @@ public class SamtidigUttakTjeneste {
 
     private List<Fagsak> hentAndreFagsakerPåPleietrengende(BehandlingReferanse ref) {
         final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, ref.getPleietrengendeAktørId(), null, null, null);
-        if (!fagsaker.stream().anyMatch(f -> f.getSaksnummer().equals(ref.getSaksnummer()))) {
+        if (fagsaker.stream().noneMatch(f -> f.getSaksnummer().equals(ref.getSaksnummer()))) {
             throw new IllegalStateException("Utviklerfeil: Klarte ikke å finne saken.");
         }
         return fagsaker.stream().filter(f -> !f.getSaksnummer().equals(ref.getSaksnummer())).toList();
@@ -172,13 +164,6 @@ public class SamtidigUttakTjeneste {
         return !modell.erStegAFørStegB(steg, enableAvslagBeregning ? BehandlingStegType.VURDER_UTTAK_V2 : BehandlingStegType.VURDER_UTTAK);
     }
 
-    private boolean harKommetTilBeregning(BehandlingReferanse ref) {
-        final var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
-        final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();
-        final BehandlingModell modell = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType());
-        return !modell.erStegAFørStegB(steg, BehandlingStegType.BEKREFT_UTTAK);
-    }
-
     private boolean erPåUttakssteget(BehandlingReferanse ref) {
         final var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();
@@ -188,48 +173,13 @@ public class SamtidigUttakTjeneste {
     private Simulering simulerUttak(BehandlingReferanse ref) {
         final Uttaksgrunnlag uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtUbesluttededataOgMapRequest(ref);
 
-        if (enableAvslagBeregning) {
-            Simuleringsgrunnlag simuleringsgrunnlag = byggRequest(ref, uttaksgrunnlag);
-            var simulering = uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
-            if (enableAvslagBeregning && (Environment.current().isDev() || Environment.current().isLocal())) {
-                log.info("Simulering harForrigeUttaksplan={} endret={}", (simulering.getForrigeUttaksplan() != null), simulering.getUttakplanEndret());
-            }
-            return simulering;
-        } else {
-            return uttakTjeneste.simulerUttaksplan(uttaksgrunnlag);
-        }
+        return uttakTjeneste.simulerUttaksplan(uttaksgrunnlag);
     }
 
     private Simulering simulerUttakKunBesluttet(BehandlingReferanse ref) {
         final Uttaksgrunnlag uttaksGrunnlag = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
 
-        if (enableAvslagBeregning) {
-            Simuleringsgrunnlag simuleringsgrunnlag = byggRequest(ref, uttaksGrunnlag);
-            var simulering = uttakTjeneste.simulerUttaksplanV2(simuleringsgrunnlag);
-            if (enableAvslagBeregning && (Environment.current().isDev() || Environment.current().isLocal())) {
-                log.info("Simulering harForrigeUttaksplan={} endret={}", (simulering.getForrigeUttaksplan() != null), simulering.getUttakplanEndret());
-            }
-            return simulering;
-        } else {
-            return uttakTjeneste.simulerUttaksplan(uttaksGrunnlag);
-        }
-    }
-
-    private Simuleringsgrunnlag byggRequest(BehandlingReferanse ref, Uttaksgrunnlag uttaksGrunnlag) {
-        NavigableSet<DatoIntervallEntitet> avslåttePerioderIBeregning = new TreeSet<>();
-        if (enableAvslagBeregning && harKommetTilBeregning(ref)) {
-            avslåttePerioderIBeregning = bekreftetUttakTjeneste.utledPerioderTilVurderingSomBlittAvslåttIBeregning(ref.getBehandlingId());
-        }
-
-        return new Simuleringsgrunnlag(uttaksGrunnlag, opprettMap(avslåttePerioderIBeregning));
-    }
-
-    private Map<LukketPeriode, Årsak> opprettMap(NavigableSet<DatoIntervallEntitet> perioderSomHarBlittAvslått) {
-        var map = new HashMap<LukketPeriode, Årsak>();
-        for (DatoIntervallEntitet periode : perioderSomHarBlittAvslått) {
-            map.put(new LukketPeriode(periode.getFomDato(), periode.getTomDato()), Årsak.FOR_LAV_INNTEKT);
-        }
-        return map;
+        return uttakTjeneste.simulerUttaksplan(uttaksGrunnlag);
     }
 
     public boolean isEndringerMedUbesluttedeData(BehandlingReferanse ref) {
