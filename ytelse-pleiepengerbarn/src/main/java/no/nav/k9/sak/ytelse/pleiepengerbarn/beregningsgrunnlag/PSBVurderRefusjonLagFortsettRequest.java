@@ -21,11 +21,13 @@ import no.nav.folketrygdloven.kalkulus.request.v1.FortsettBeregningListeRequest;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @FagsakYtelseTypeRef("PSB")
+@BehandlingTypeRef
 @BehandlingStegRef(kode = "VURDER_REF_BERGRUNN")
 @ApplicationScoped
 class PSBVurderRefusjonLagFortsettRequest implements LagFortsettRequest {
@@ -37,7 +39,8 @@ class PSBVurderRefusjonLagFortsettRequest implements LagFortsettRequest {
     }
 
     @Inject
-    public PSBVurderRefusjonLagFortsettRequest(PSBYtelsesspesifiktGrunnlagMapper ytelsesspesifiktGrunnlagMapper, BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
+    public PSBVurderRefusjonLagFortsettRequest(@FagsakYtelseTypeRef("PSB") PSBYtelsesspesifiktGrunnlagMapper ytelsesspesifiktGrunnlagMapper,
+                                               BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
         this.ytelsesspesifiktGrunnlagMapper = ytelsesspesifiktGrunnlagMapper;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
     }

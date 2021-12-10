@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
@@ -21,6 +22,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtel
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulatorInputTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.LagFortsettRequest;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.StartBeregningInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
@@ -59,9 +61,10 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
                                    @FagsakYtelseTypeRef("FRISINN") KalkulatorInputTjeneste kalkulatorInputTjeneste,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    VilkårResultatRepository vilkårResultatRepository,
+                                   @Any Instance<LagFortsettRequest> lagFortsettRequestInstancer,
                                    @FagsakYtelseTypeRef("FRISINN") Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper) {
         super(restTjeneste, fagsakRepository, vilkårResultatRepository, kalkulatorInputTjeneste,
-            inntektArbeidYtelseTjeneste, ytelseGrunnlagMapper, false);
+            inntektArbeidYtelseTjeneste, ytelseGrunnlagMapper, lagFortsettRequestInstancer, false);
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
     }
 

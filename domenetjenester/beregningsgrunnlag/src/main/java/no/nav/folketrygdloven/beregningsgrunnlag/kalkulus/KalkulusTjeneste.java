@@ -22,7 +22,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
@@ -74,7 +73,6 @@ import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -104,6 +102,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     private KalkulatorInputTjeneste kalkulatorInputTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
+    private Instance<LagFortsettRequest> lagFortsettRequestInstancer;
     private boolean togglePsbMigrering;
 
     public KalkulusTjeneste() {
@@ -116,6 +115,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                             @FagsakYtelseTypeRef("*") KalkulatorInputTjeneste kalkulatorInputTjeneste,
                             InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                             @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
+                            @Any Instance<LagFortsettRequest> lagFortsettRequestInstancer,
                             @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering
     ) {
         this.restTjeneste = restTjeneste;
@@ -124,6 +124,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         this.kalkulatorInputTjeneste = kalkulatorInputTjeneste;
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
+        this.lagFortsettRequestInstancer = lagFortsettRequestInstancer;
         this.togglePsbMigrering = toggleMigrering;
     }
 
@@ -468,10 +469,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     private FortsettBeregningListeRequest getFortsettBeregningListeRequest(BehandlingReferanse referanse, Collection<BgRef> bgReferanser, BehandlingStegType stegType) {
-        var lagRequest = CDI.current().select(LagFortsettRequest.class, new BehandlingStegRef.BehandlingStegRefLiteral(stegType));
-        return FagsakYtelseTypeRef.Lookup.find(lagRequest, referanse.getFagsakYtelseType())
-            .orElse(new DefaultLagFortsettRequest())
-            .lagRequest(referanse, bgReferanser, stegType);
+        var lagRequest = LagFortsettRequest.finnTjeneste(lagFortsettRequestInstancer, referanse.getFagsakYtelseType(), referanse.getBehandlingType(), stegType);
+        return lagRequest.lagRequest(referanse, bgReferanser, stegType);
     }
 
     public Map<UUID, GrunnbeløpReguleringStatus> kontrollerBehovForGregulering(List<UUID> koblingerÅSpørreMot, Saksnummer saksnummer) {
