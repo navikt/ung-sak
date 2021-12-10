@@ -128,7 +128,10 @@ public class PersonopplysningGrunnlagDiff {
     }
 
     private List<PersonAdresseEntitet> hentAdresserFør(PersonopplysningGrunnlagEntitet grunnlag, Set<AktørId> personer, LocalDate stp) {
-        return registerVersjon(grunnlag).map(PersonInformasjonEntitet::getAdresser).orElse(Collections.emptyList()).stream()
+        return registerVersjon(grunnlag)
+            .map(PersonInformasjonEntitet::getAdresser)
+            .orElse(Collections.emptyList())
+            .stream()
             .filter(adr -> personer.contains(adr.getAktørId()))
             .filter(adr -> stp == null || adr.getPeriode().getFomDato().isBefore(stp))
             .collect(Collectors.toList());
@@ -170,7 +173,13 @@ public class PersonopplysningGrunnlagDiff {
     }
 
     private Set<AktørId> fellesAktører() {
-        Set<AktørId> første = registerVersjon(grunnlag1).map(PersonInformasjonEntitet::getPersonopplysninger).orElse(Collections.emptyList()).stream().map(PersonopplysningEntitet::getAktørId).collect(Collectors.toSet());
+        Set<AktørId> første = registerVersjon(grunnlag1)
+            .map(PersonInformasjonEntitet::getPersonopplysninger)
+            .orElse(Collections.emptyList())
+            .stream()
+            .map(PersonopplysningEntitet::getAktørId)
+            .collect(Collectors.toSet());
+
         return registerVersjon(grunnlag2).map(PersonInformasjonEntitet::getPersonopplysninger).orElse(Collections.emptyList()).stream()
             .map(PersonopplysningEntitet::getAktørId)
             .filter(første::contains)
