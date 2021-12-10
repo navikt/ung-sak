@@ -119,7 +119,8 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
          *
          * ...men dette har ikke blitt prioritert.
          */
-        kvitterUtAlleDokumenterSomLiggerPåPleietrengende(behandling);
+        // Saksbehandler må igjen kvittere ut dokumenter manuelt for å sikre at de har blitt vurdert:
+        //kvitterUtAlleDokumenterSomLiggerPåPleietrengende(behandling);
 
         lagHistorikkinnslag(param, "Sykdom manuelt behandlet.");
 
