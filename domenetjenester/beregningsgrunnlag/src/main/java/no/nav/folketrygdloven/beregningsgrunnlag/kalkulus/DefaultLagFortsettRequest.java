@@ -16,9 +16,9 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 @FagsakYtelseTypeRef
 @BehandlingTypeRef
-@BehandlingStegRef(kode = "VURDER_REF_BERGRUNN")
+@BehandlingStegRef(kode = "*")
 @ApplicationScoped
-class DefaultLagFortsettRequest implements LagFortsettRequest {
+public class DefaultLagFortsettRequest implements LagFortsettRequest {
 
     @Override
     public FortsettBeregningListeRequest lagRequest(BehandlingReferanse referanse, Collection<BgRef> bgReferanser, BehandlingStegType stegType) {
