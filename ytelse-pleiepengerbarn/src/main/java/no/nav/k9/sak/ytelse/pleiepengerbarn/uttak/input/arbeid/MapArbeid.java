@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -145,25 +146,30 @@ public class MapArbeid {
             .filter(it -> harDagpengerPåSkjæringstidspunktet(it, opptjeningResultat))
             .collect(Collectors.toList()) : List.of();
 
-        List<VilkårPeriode> sykepengerFraDagpengerOgIkkeDagpengerPåSkjæringstidspunktet = vilkår != null ? vilkår.getPerioder().stream()
-            .filter(it -> it.getPeriode().overlapper(periode))
-            .filter(it -> harSykepengerFraDagpengerPåSkjæringstidspunktet(it, opptjeningResultat, dagpengerPåSkjæringstidspunktet))
-            .collect(Collectors.toList()) : List.of();
-
-        List<VilkårPeriode> kunYtelsePåSkjæringstidspunktet = vilkår != null ? vilkår.getPerioder().stream()
-            .filter(it -> it.getPeriode().overlapper(periode))
-            .filter(it -> harKunYtelsePåSkjæringstidspunktet(it, opptjeningResultat))
-            .collect(Collectors.toList()) : List.of();
+        Predicate<VilkårPeriode> harSykepengerAvDagpengerFilter = vilkårPeriode -> harYtelseTypeUtenDagpengerPåSkjæringstidspunktet(vilkårPeriode, opptjeningResultat, dagpengerPåSkjæringstidspunktet, OpptjeningAktivitetType.SYKEPENGER_AV_DAGPENGER);
+        var sykepengerFraDagpengerOgIkkeDagpengerPåSkjæringstidspunktet = filtrerPeriode(vilkår, periode, harSykepengerAvDagpengerFilter);
+        Predicate<VilkårPeriode> harPleiepengerAvDagpengerFilter = vilkårPeriode -> harYtelseTypeUtenDagpengerPåSkjæringstidspunktet(vilkårPeriode, opptjeningResultat, dagpengerPåSkjæringstidspunktet, OpptjeningAktivitetType.PLEIEPENGER_AV_DAGPENGER);
+        var pleiepengerFraDagpengerOgIkkeDagpengerPåSkjæringstidspunktet = filtrerPeriode(vilkår, periode, harPleiepengerAvDagpengerFilter);
+        Predicate<VilkårPeriode> kunYtelseFilter = vilkårPeriode -> harKunYtelsePåSkjæringstidspunktet(vilkårPeriode, opptjeningResultat);
+        var kunYtelsePåSkjæringstidspunktet = filtrerPeriode(vilkår, periode, kunYtelseFilter);
 
         var midlertidigInaktivPeriode = mapInaktivePerioder(arbeidsforhold, midlertidigInaktivVilkårsperioder);
         mapPerioderMedType(arbeidsforhold, dagpengerPåSkjæringstidspunktet, UttakArbeidType.DAGPENGER);
         mapPerioderMedType(arbeidsforhold, sykepengerFraDagpengerOgIkkeDagpengerPåSkjæringstidspunktet, UttakArbeidType.SYKEPENGER_AV_DAGPENGER);
+        mapPerioderMedType(arbeidsforhold, pleiepengerFraDagpengerOgIkkeDagpengerPåSkjæringstidspunktet, UttakArbeidType.PLEIEPENGER_AV_DAGPENGER);
         mapPerioderMedType(arbeidsforhold, kunYtelsePåSkjæringstidspunktet, UttakArbeidType.KUN_YTELSE);
 
         kravDokumenter.stream()
             .sorted(KravDokument::compareTo)
             .forEachOrdered(at -> prosesserDokument(perioderFraSøknader, periode, arbeidsforhold, midlertidigInaktivPeriode, at, input));
         arbeidsforholdPerPeriode.put(periode, arbeidsforhold);
+    }
+
+    private List<VilkårPeriode> filtrerPeriode(Vilkår vilkår, DatoIntervallEntitet periode, Predicate<VilkårPeriode> periodeFilter) {
+        return vilkår != null ? vilkår.getPerioder().stream()
+            .filter(it -> it.getPeriode().overlapper(periode))
+            .filter(periodeFilter)
+            .collect(Collectors.toList()) : List.of();
     }
 
     private void leggTilAnsettSomInaktivPerioder(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivPerioder) {
@@ -186,9 +192,10 @@ public class MapArbeid {
         }
     }
 
-    private boolean harSykepengerFraDagpengerPåSkjæringstidspunktet(VilkårPeriode vilkårPeriode,
-                                                                    OpptjeningResultat opptjeningResultat,
-                                                                    List<VilkårPeriode> dagpengerPåSkjæringstidspunktet) {
+    private boolean harYtelseTypeUtenDagpengerPåSkjæringstidspunktet(VilkårPeriode vilkårPeriode,
+                                                                     OpptjeningResultat opptjeningResultat,
+                                                                     List<VilkårPeriode> dagpengerPåSkjæringstidspunktet,
+                                                                     OpptjeningAktivitetType ytelsetype) {
 
         Optional<Opptjening> opptjening = finnOpptjeningForPeriode(vilkårPeriode, opptjeningResultat);
         if (opptjening.isEmpty()) {
@@ -201,7 +208,7 @@ public class MapArbeid {
 
         return opptjening.get().getOpptjeningAktivitet()
             .stream()
-            .filter(it -> OpptjeningAktivitetType.SYKEPENGER_AV_DAGPENGER.equals(it.getAktivitetType()))
+            .filter(it -> ytelsetype.equals(it.getAktivitetType()))
             .anyMatch(it -> DatoIntervallEntitet.fraOgMedTilOgMed(vilkårPeriode.getSkjæringstidspunkt().minusDays(1), vilkårPeriode.getSkjæringstidspunkt().minusDays(1)).overlapper(it.getFom(), it.getTom()));
     }
 
