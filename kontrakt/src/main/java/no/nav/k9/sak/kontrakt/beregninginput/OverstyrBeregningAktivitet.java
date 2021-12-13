@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.beregninginput;
 
+import java.time.LocalDate;
+
 import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Max;
@@ -39,17 +41,21 @@ public class OverstyrBeregningAktivitet {
     @Max(100000000)
     private Integer refusjonPrAar;
 
+    @JsonProperty(value = "opphørRefusjon")
+    private LocalDate opphørRefusjon;
+
     public OverstyrBeregningAktivitet() {
     }
 
     public OverstyrBeregningAktivitet(OrgNummer arbeidsgiverOrgnr,
                                       AktørId arbeidsgiverAktørId,
                                       Integer inntektPrAar, Integer
-                                          refusjonPrAar) {
+                                          refusjonPrAar, LocalDate opphørRefusjon) {
         this.arbeidsgiverOrgnr = arbeidsgiverOrgnr;
         this.arbeidsgiverAktørId = arbeidsgiverAktørId;
         this.inntektPrAar = inntektPrAar;
         this.refusjonPrAar = refusjonPrAar;
+        this.opphørRefusjon = opphørRefusjon;
     }
 
 
@@ -67,6 +73,10 @@ public class OverstyrBeregningAktivitet {
 
     public Integer getRefusjonPrAar() {
         return refusjonPrAar;
+    }
+
+    public LocalDate getOpphørRefusjon() {
+        return opphørRefusjon;
     }
 
     @Override

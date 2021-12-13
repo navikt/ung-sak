@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.beregning.grunnlag;
 
+import java.time.LocalDate;
+
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
@@ -41,6 +43,9 @@ public class InputAktivitetOverstyring extends BaseEntitet {
     @AttributeOverrides(@AttributeOverride(name = "verdi", column = @Column(name = "refusjon_pr_aar")))
     private Beløp refusjonPrÅr;
 
+    @Column(name = "opphoer_refusjon")
+    private LocalDate opphørRefusjon;
+
     @Convert(converter= AktivitetStatusKodeverdiConverter.class)
     @Column(name="aktivitet_status", nullable = false)
     private AktivitetStatus aktivitetStatus;
@@ -52,6 +57,7 @@ public class InputAktivitetOverstyring extends BaseEntitet {
     })
     private DatoIntervallEntitet periode;
 
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -62,11 +68,12 @@ public class InputAktivitetOverstyring extends BaseEntitet {
     public InputAktivitetOverstyring(Arbeidsgiver arbeidsgiver,
                                      Beløp inntektPrÅr,
                                      Beløp refusjonPrÅr,
-                                     AktivitetStatus aktivitetStatus,
+                                     LocalDate opphørRefusjon, AktivitetStatus aktivitetStatus,
                                      DatoIntervallEntitet periode) {
         this.arbeidsgiver = arbeidsgiver;
         this.inntektPrÅr = inntektPrÅr;
         this.refusjonPrÅr = refusjonPrÅr;
+        this.opphørRefusjon = opphørRefusjon;
         this.aktivitetStatus = aktivitetStatus;
         this.periode = periode;
     }
@@ -76,6 +83,7 @@ public class InputAktivitetOverstyring extends BaseEntitet {
         this.arbeidsgiver = inputAktivitetOverstyring.getArbeidsgiver();
         this.inntektPrÅr = inputAktivitetOverstyring.getInntektPrÅr();
         this.refusjonPrÅr = inputAktivitetOverstyring.getRefusjonPrÅr();
+        this.opphørRefusjon = inputAktivitetOverstyring.getOpphørRefusjon();
         this.periode = inputAktivitetOverstyring.getPeriode();
     }
 
@@ -97,5 +105,9 @@ public class InputAktivitetOverstyring extends BaseEntitet {
 
     public DatoIntervallEntitet getPeriode() {
         return periode;
+    }
+
+    public LocalDate getOpphørRefusjon() {
+        return opphørRefusjon;
     }
 }

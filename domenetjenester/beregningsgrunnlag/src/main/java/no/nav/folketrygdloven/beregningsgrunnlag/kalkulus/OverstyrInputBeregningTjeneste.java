@@ -104,8 +104,9 @@ public class OverstyrInputBeregningTjeneste {
             a.getArbeidsgiverOrgNummer() == null ? null : new OrgNummer(a.getArbeidsgiverOrgNummer()),
             a.getArbeidsgiverAktørId() == null ? null : new AktørId(a.getArbeidsgiverAktørId()),
             matchendeOverstyring.map(InputAktivitetOverstyring::getInntektPrÅr).map(Beløp::getVerdi).map(BigDecimal::intValue).orElse(null),
-            matchendeOverstyring.map(InputAktivitetOverstyring::getRefusjonPrÅr).map(Beløp::getVerdi).map(BigDecimal::intValue).orElse(null)
-        );
+            matchendeOverstyring.map(InputAktivitetOverstyring::getRefusjonPrÅr).map(Beløp::getVerdi).map(BigDecimal::intValue).orElse(null),
+            matchendeOverstyring.map(InputAktivitetOverstyring::getOpphørRefusjon).orElse(null)
+            );
     }
 
     private boolean matcherArbeidsgiver(InputAktivitetOverstyring overstyrt, OpptjeningAktiviteter.OpptjeningPeriode a) {
