@@ -57,7 +57,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
                                MottatteDokumentRepository mottatteDokumentRepository,
                                SøknadsperiodeRepository søknadsperiodeRepository,
                                UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
-                               @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste) {
+                               @FagsakYtelseTypeRef("PSB") @FagsakYtelseTypeRef("PPN") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadsperiodeRepository = søknadsperiodeRepository;

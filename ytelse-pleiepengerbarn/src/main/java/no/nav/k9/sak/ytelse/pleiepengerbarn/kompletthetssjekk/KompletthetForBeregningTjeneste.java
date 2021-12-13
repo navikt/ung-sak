@@ -69,9 +69,10 @@ public class KompletthetForBeregningTjeneste {
     }
 
     @Inject
-    public KompletthetForBeregningTjeneste(@FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                           @FagsakYtelseTypeRef("PSB") InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning,
-                                           @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
+    public KompletthetForBeregningTjeneste(//FIXME PLS trenger instance-inject
+                                           @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                           @FagsakYtelseTypeRef("PSB")  @FagsakYtelseTypeRef("PPN")InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning,
+                                           @FagsakYtelseTypeRef("PSB")  @FagsakYtelseTypeRef("PPN")VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                            ArbeidsforholdTjeneste arbeidsforholdTjeneste,
                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                            PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,

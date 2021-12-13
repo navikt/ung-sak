@@ -41,7 +41,7 @@ public class PSBVurderSøknadsfristTjeneste implements SøknadsfristTjeneste {
     }
 
     @Inject
-    public PSBVurderSøknadsfristTjeneste(@FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> vurderSøknadsfristTjeneste) {
+    public PSBVurderSøknadsfristTjeneste(@FagsakYtelseTypeRef("PSB") @FagsakYtelseTypeRef("PPN") VurderSøknadsfristTjeneste<Søknadsperiode> vurderSøknadsfristTjeneste) {
         this.vurderSøknadsfristTjeneste = vurderSøknadsfristTjeneste;
     }
 

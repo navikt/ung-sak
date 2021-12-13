@@ -22,43 +22,35 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
 @ApplicationScoped
 @GrunnlagRef("SykdomGrunnlag")
-@FagsakYtelseTypeRef("PSB")
-class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
+@FagsakYtelseTypeRef("PPN")
+class PLSStartpunktUtleder implements EndringStartpunktUtleder {
 
-    private static final Logger log = LoggerFactory.getLogger(StartpunktUtlederPleiepengerSyktBarn.class);
+    private static final Logger log = LoggerFactory.getLogger(PLSStartpunktUtleder.class);
 
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
     private VilkårResultatRepository vilkårResultatRepository;
-    private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
-    private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
 
-    StartpunktUtlederPleiepengerSyktBarn() {
+    PLSStartpunktUtleder() {
         // For CDI
     }
 
     @Inject
-    StartpunktUtlederPleiepengerSyktBarn(SykdomGrunnlagRepository sykdomGrunnlagRepository,
-                                         SykdomGrunnlagService sykdomGrunnlagService,
-                                         VilkårResultatRepository vilkårResultatRepository,
-                                         ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
-                                         EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
-                                         SamtidigUttakTjeneste samtidigUttakTjeneste) {
+    PLSStartpunktUtleder(SykdomGrunnlagRepository sykdomGrunnlagRepository,
+                         SykdomGrunnlagService sykdomGrunnlagService,
+                         VilkårResultatRepository vilkårResultatRepository,
+                         SamtidigUttakTjeneste samtidigUttakTjeneste) {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
-        this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
     }
 
@@ -69,45 +61,22 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
         result.add(sykdomStartpunk);
         log.info("Kjører diff av sykdom, funnet følgende resultat = {}", sykdomStartpunk);
 
-        StartpunktType tilsynStartpunkt = utledStartpunktForEtablertTilsyn(ref);
-        result.add(tilsynStartpunkt);
-        log.info("Kjører diff av etablertTilsyn, funnet følgende resultat = {}", tilsynStartpunkt);
-
         StartpunktType uttakStartpunkt = utledStartpunktForUttak(ref);
         log.info("Kjører diff av uttak, funnet følgende resultat = {}", uttakStartpunkt);
         result.add(uttakStartpunkt);
-
-        StartpunktType nattevåkBeredskapStartpunkt = utledStartpunktForNattevåkOgBeredskap(ref);
-        result.add(nattevåkBeredskapStartpunkt);
-        log.info("Kjører diff av nattevåk & beredskap, funnet følgende resultat = {}", nattevåkBeredskapStartpunkt);
 
         return result.stream()
             .min(Comparator.comparing(StartpunktType::getRangering))
             .orElse(StartpunktType.UDEFINERT);
     }
 
-    private StartpunktType utledStartpunktForNattevåkOgBeredskap(BehandlingReferanse ref) {
-        return endringUnntakEtablertTilsynTjeneste.harEndringerSidenBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId()) ? StartpunktType.UTTAKSVILKÅR : StartpunktType.UDEFINERT;
-    }
-
-    private StartpunktType utledStartpunktForEtablertTilsyn(BehandlingReferanse referanse) {
-        var erUhåndterteEndringer = erEndringPåEtablertTilsynTjeneste.erEndringerSidenBehandling(referanse);
-
-        if (erUhåndterteEndringer) {
+    private StartpunktType utledStartpunktForUttak(BehandlingReferanse ref) {
+        if (samtidigUttakTjeneste.isSkalHaTilbakehopp(ref)) {
             return StartpunktType.UTTAKSVILKÅR;
         } else {
             return StartpunktType.UDEFINERT;
         }
     }
-
-    private StartpunktType utledStartpunktForUttak(BehandlingReferanse ref) {
-        if (samtidigUttakTjeneste.isSkalHaTilbakehopp(ref)) {
-            return StartpunktType.UTTAKSVILKÅR_VURDERING;
-        } else {
-            return StartpunktType.UDEFINERT;
-        }
-    }
-
 
     private StartpunktType utledStartpunktForSykdom(BehandlingReferanse ref) {
         var sykdomGrunnlag = sykdomGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
@@ -118,8 +87,7 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
         var sykdomGrunnlagSammenlikningsresultat = sykdomGrunnlagService.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
         var erIngenEndringIGrunnlaget = sykdomGrunnlagSammenlikningsresultat.getDiffPerioder().isEmpty();
-        var startpunktType = erIngenEndringIGrunnlaget ? StartpunktType.UDEFINERT : StartpunktType.INNGANGSVILKÅR_MEDISINSK;
-        return startpunktType;
+        return erIngenEndringIGrunnlaget ? StartpunktType.UDEFINERT : StartpunktType.INNGANGSVILKÅR_MEDISINSK;
     }
 
     private List<Periode> utledVurderingsperiode(Long behandlingId) {
@@ -127,23 +95,13 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
         if (vilkårene.isEmpty()) {
             return List.of();
         }
-        var vurderingsperioder = vilkårene.get().getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR)
+        return vilkårene.get().getVilkår(VilkårType.I_LIVETS_SLUTTFASE)
             .map(Vilkår::getPerioder)
             .orElse(List.of())
             .stream()
             .map(VilkårPeriode::getPeriode)
             .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
             .collect(Collectors.toCollection(ArrayList::new));
-
-        vurderingsperioder.addAll(vilkårene.get().getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR)
-            .map(Vilkår::getPerioder)
-            .orElse(List.of())
-            .stream()
-            .map(VilkårPeriode::getPeriode)
-            .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
-            .collect(Collectors.toList()));
-
-        return vurderingsperioder;
     }
 
 }

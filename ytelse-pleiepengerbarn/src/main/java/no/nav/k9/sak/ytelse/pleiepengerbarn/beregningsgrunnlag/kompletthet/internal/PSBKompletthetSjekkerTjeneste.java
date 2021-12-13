@@ -60,7 +60,7 @@ public class PSBKompletthetSjekkerTjeneste {
                                          BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                          BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                          BestiltEtterlysningRepository etterlysningRepository,
-                                         @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") PSBKompletthetsjekker kompletthetsjekker,
+                                         @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") @FagsakYtelseTypeRef("PPN") PSBKompletthetsjekker kompletthetsjekker,
                                          FagsakRepository fagsakRepository) {
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;

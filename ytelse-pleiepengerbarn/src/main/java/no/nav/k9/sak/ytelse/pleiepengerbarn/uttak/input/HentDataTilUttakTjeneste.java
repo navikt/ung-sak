@@ -81,7 +81,8 @@ public class HentDataTilUttakTjeneste {
                                     OpptjeningRepository opptjeningRepository,
                                     RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                    @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
+                                    @FagsakYtelseTypeRef("PSB") @FagsakYtelseTypeRef("PPN") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
+                                    //FIXME PLS trenger instance-inject
                                     @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                     SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;

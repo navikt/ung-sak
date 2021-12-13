@@ -56,6 +56,7 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
 
     @Inject
     public PsbManglendePåkrevdeInntektsmeldingerTjeneste(BehandlingRepository behandlingRepository,
+                                                         //FIXME PLS trenger instance-inject
                                                          @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                          KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
         this.behandlingRepository = behandlingRepository;

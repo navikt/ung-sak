@@ -40,7 +40,7 @@ public class PleietrengendeKravprioritet {
     @Inject
     public PleietrengendeKravprioritet(FagsakRepository fagsakRepository,
             BehandlingRepository behandlingRepository,
-                @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste) {
+                @FagsakYtelseTypeRef("PSB") @FagsakYtelseTypeRef("PPN")  VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
