@@ -68,22 +68,16 @@ public class MapInputTilUttakTjenestePLS {
     public Uttaksgrunnlag hentUtOgMapRequest(BehandlingReferanse referanse) {
         return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, false));
     }
-    public Uttaksgrunnlag hentUtUbesluttededataOgMapRequest(BehandlingReferanse referanse) {
-        return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, true));
-    }
-
 
     private Uttaksgrunnlag toRequestData(InputParametere input) {
 
         var behandling = input.getBehandling();
         var vurderteSøknadsperioder = input.getVurderteSøknadsperioder();
-        var uttaksPerioderGrunnlag = input.getUttaksGrunnlag();
         var personopplysningerAggregat = input.getPersonopplysningerAggregat();
 
         // Henter ut alt og lager tidlinje av denne for så å ta ut den delen som er relevant
         // NB! Kan gi issues ved lange fagsaker mtp ytelse
-        var perioderFraSøknader = uttaksPerioderGrunnlag.getOppgitteSøknadsperioder()
-            .getPerioderFraSøknadene();
+        var perioderFraSøknader = input.getPerioderFraSøknad();
         var kravDokumenter = vurderteSøknadsperioder.keySet();
 
         evaluerDokumenter(perioderFraSøknader, kravDokumenter);
@@ -125,9 +119,9 @@ public class MapInputTilUttakTjenestePLS {
         final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(input.getEtablertTilsynPerioder());
 
         var innvilgedePerioderMedSykdom = finnInnvilgedePerioderSykdom(input.getVilkårene());
-        // TODO PLS: Sett til PROSENT_6000
+
         var pleiebehov = innvilgedePerioderMedSykdom.stream()
-            .collect(Collectors.toMap(e -> toLukketPeriode(e), e -> Pleiebehov.PROSENT_200));
+            .collect(Collectors.toMap(this::toLukketPeriode, e -> Pleiebehov.PROSENT_6000));
 
         var unntakEtablertTilsynForPleietrengende = input.getUnntakEtablertTilsynForPleietrengende().orElse(null);
         var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);

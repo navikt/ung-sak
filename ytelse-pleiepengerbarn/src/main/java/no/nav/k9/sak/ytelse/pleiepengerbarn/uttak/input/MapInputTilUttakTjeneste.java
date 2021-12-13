@@ -19,7 +19,6 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -152,19 +151,13 @@ public class MapInputTilUttakTjeneste {
     }
 
     private Set<DatoIntervallEntitet> finnInnvilgedePerioderSykdom(Vilkårene vilkårene) {
-        var s1 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR)
-            .map(Vilkår::getPerioder)
-            .orElse(List.of())
+        var s1 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR).orElseThrow()
+            .getPerioder()
             .stream();
-        var s2 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR)
-            .map(Vilkår::getPerioder)
-            .orElse(List.of())
+        var s2 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR).orElseThrow()
+            .getPerioder()
             .stream();
-        var s3 = vilkårene.getVilkår(VilkårType.I_LIVETS_SLUTTFASE)
-            .map(Vilkår::getPerioder)
-            .orElse(List.of())
-            .stream();
-        return Stream.concat(Stream.concat(s1, s2), s3)
+        return Stream.concat(s1, s2)
             .filter(it -> no.nav.k9.kodeverk.vilkår.Utfall.OPPFYLT.equals(it.getUtfall()))
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toSet());

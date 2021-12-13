@@ -23,7 +23,6 @@ import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -33,7 +32,6 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.Beregningsgrunnla
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
-import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.ArbeidsforholdRef;
@@ -69,10 +67,8 @@ public class KompletthetForBeregningTjeneste {
     }
 
     @Inject
-    public KompletthetForBeregningTjeneste(//FIXME PLS trenger instance-inject
-                                           @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                           @FagsakYtelseTypeRef("PSB")  @FagsakYtelseTypeRef("PPN")InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning,
-                                           @FagsakYtelseTypeRef("PSB")  @FagsakYtelseTypeRef("PPN")VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
+    public KompletthetForBeregningTjeneste(@FagsakYtelseTypeRef("PSB") @FagsakYtelseTypeRef("PPN") InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning,
+                                           @FagsakYtelseTypeRef("PSB") @FagsakYtelseTypeRef("PPN") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                            ArbeidsforholdTjeneste arbeidsforholdTjeneste,
                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                            PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,

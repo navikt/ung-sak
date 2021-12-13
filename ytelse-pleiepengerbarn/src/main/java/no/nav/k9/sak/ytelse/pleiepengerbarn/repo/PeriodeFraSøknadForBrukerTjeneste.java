@@ -22,7 +22,7 @@ public class PeriodeFraSøknadForBrukerTjeneste {
     private final UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
 
     @Inject
-    public PeriodeFraSøknadForBrukerTjeneste(@FagsakYtelseTypeRef("PSB") PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
+    public PeriodeFraSøknadForBrukerTjeneste(@FagsakYtelseTypeRef("PSB") @FagsakYtelseTypeRef("PPN") PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
                                              UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository) {
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;

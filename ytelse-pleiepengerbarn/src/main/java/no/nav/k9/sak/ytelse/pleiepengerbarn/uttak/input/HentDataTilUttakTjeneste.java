@@ -9,6 +9,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -16,7 +18,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
@@ -59,7 +60,7 @@ public class HentDataTilUttakTjeneste {
     private BehandlingRepository behandlingRepository;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private OpptjeningRepository opptjeningRepository;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
     private EtablertTilsynRepository etablertTilsynRepository;
@@ -82,8 +83,7 @@ public class HentDataTilUttakTjeneste {
                                     RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                     @FagsakYtelseTypeRef("PSB") @FagsakYtelseTypeRef("PPN") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
-                                    //FIXME PLS trenger instance-inject
-                                    @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                    @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                     SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
@@ -97,7 +97,7 @@ public class HentDataTilUttakTjeneste {
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.opptjeningRepository = opptjeningRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
@@ -111,6 +111,7 @@ public class HentDataTilUttakTjeneste {
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
         var pleiebehov = pleiebehovResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
 
+        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = perioderTilVurderingTjeneste(referanse);
         final NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(referanse.getBehandlingId());
         final NavigableSet<DatoIntervallEntitet> perioderTilVurdering = hentPerioderTilVurdering(referanse, skalMappeHeleTidslinjen, behandling);
 
@@ -221,6 +222,7 @@ public class HentDataTilUttakTjeneste {
     }
 
     private NavigableSet<DatoIntervallEntitet> finnSykdomsperioder(BehandlingReferanse referanse) {
+        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = perioderTilVurderingTjeneste(referanse);
         final var s1 = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         final var s2 = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         final var s3 = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.I_LIVETS_SLUTTFASE);
@@ -244,5 +246,9 @@ public class HentDataTilUttakTjeneste {
             resultat.put(new LukketPeriode(s.getFom(), s.getTom()), s.getValue().stream().map(kp -> kp.getAktuellBehandlingUuid().toString()).collect(Collectors.toList()));
         });
         return resultat;
+    }
+
+    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste(BehandlingReferanse behandlingReferanse){
+        return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandlingReferanse.getFagsakYtelseType(), behandlingReferanse.getBehandlingType());
     }
 }
