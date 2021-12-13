@@ -7,8 +7,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
@@ -19,16 +17,13 @@ import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 public class AksjonspunktutlederTilbaketrekk implements AksjonspunktUtleder {
 
     private BeregningsresultatTidslinjetjeneste beregningsresultatTidslinjetjeneste;
-    private Boolean disableVurderTilbaketrekk;
 
     AksjonspunktutlederTilbaketrekk() {
     }
 
     @Inject
-    public AksjonspunktutlederTilbaketrekk(BeregningsresultatTidslinjetjeneste beregningsresultatTidslinjetjeneste,
-                                           @KonfigVerdi(value = "DISABLE_VURDER_TILBAKETREKK", required = false, defaultVerdi = "false") Boolean disableVurderTilbaketrekk) {
+    public AksjonspunktutlederTilbaketrekk(BeregningsresultatTidslinjetjeneste beregningsresultatTidslinjetjeneste) {
         this.beregningsresultatTidslinjetjeneste = beregningsresultatTidslinjetjeneste;
-        this.disableVurderTilbaketrekk = disableVurderTilbaketrekk;
     }
 
     @Override
@@ -44,10 +39,7 @@ public class AksjonspunktutlederTilbaketrekk implements AksjonspunktUtleder {
     }
 
     private boolean skalVurdereTilbaketrekk(BehandlingReferanse ref) {
-        if (disableVurderTilbaketrekk) {
-            return false;
-        }
-        LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje =  beregningsresultatTidslinjetjeneste.lagTidslinjeForRevurdering(ref);
+        LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje = beregningsresultatTidslinjetjeneste.lagTidslinjeForRevurdering(ref);
         return VurderBehovForÅHindreTilbaketrekkV2.skalVurdereTilbaketrekk(brAndelTidslinje);
     }
 }
