@@ -13,15 +13,11 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.jetbrains.annotations.NotNull;
-import org.rocksdb.Env;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.k9.felles.exception.ManglerTilgangException;
-import no.nav.k9.felles.exception.TekniskException;
-import no.nav.k9.felles.konfigurasjon.env.Cluster;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -138,6 +134,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
             mapArbeidsgiver(a),
             mapBeløp(a.getInntektPrAar()),
             mapBeløp(a.getRefusjonPrAar()),
+            a.getOpphørRefusjon(),
             AktivitetStatus.ARBEIDSTAKER,
             finnMinMaksPeriode(opptjeningsaktivitetForArbeidsgiver));
     }

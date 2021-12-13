@@ -346,7 +346,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                     .medArbeidsgiver(a.getArbeidsgiver())
                     .medStartDatoPermisjon(stp)
                     .medRefusjon(a.getRefusjonPrÅr() == null ? BigDecimal.ZERO :
-                        a.getRefusjonPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP))
+                        a.getRefusjonPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP), a.getOpphørRefusjon())
                     .medBeløp(a.getInntektPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP))
                     .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
                     .medJournalpostId("OVERSTYRT_FOR_INFOTRYGDMIGRERING")
