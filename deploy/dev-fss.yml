@@ -238,4 +238,4 @@ spec:
 
     # Pleiepenger infotrygd migrering
     - name: OVERSTYR_BEREGNING_INPUT_TILLATELSER
-      value: "Z990404,Z990422"
+      value: "Z990404,Z990422,Z994004"
