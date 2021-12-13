@@ -136,8 +136,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         // Validering av 8-47 (dersom valgt)
         if (innvilgelseMerknad != null) {
             long antallAktiviteterPåStp = opptjeningAktiviteter.stream()
-                .filter(oa -> oa.getPeriode().getTomDato().plusDays(1).isEqual(stp)
-                    || oa.getPeriode().getTomDato().plusDays(1).isAfter(stp))
+                .filter(oa -> oa.getPeriode().inkluderer(stp))
                 .filter(oa -> !oa.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD))
                 .count();
             if (antallAktiviteterPåStp == 0) {
