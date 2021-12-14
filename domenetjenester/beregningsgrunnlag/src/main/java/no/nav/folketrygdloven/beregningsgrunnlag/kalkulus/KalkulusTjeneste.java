@@ -327,10 +327,17 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
     private Set<Inntektsmelding> finnInntektsmeldingerForSak(BehandlingReferanse referanse, List<StartBeregningInput> startBeregningInput) {
         var overstyrteInntektsmeldinger = finnOverstyrtInntektsmeldinger(startBeregningInput);
-        if (!overstyrteInntektsmeldinger.isEmpty()) {
-            return overstyrteInntektsmeldinger;
-        }
-        return new HashSet<>(iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer()));
+        var inntektsmeldingerForSak = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
+        var utvalgteInntektsmeldinger = inntektsmeldingerForSak.stream()
+            .filter(im -> harIMSomOverstyrer(im, overstyrteInntektsmeldinger))
+            .collect(Collectors.toCollection(HashSet::new));
+        utvalgteInntektsmeldinger.addAll(overstyrteInntektsmeldinger);
+        return utvalgteInntektsmeldinger;
+    }
+
+    private boolean harIMSomOverstyrer(Inntektsmelding im, Set<Inntektsmelding> overstyrteInntektsmeldinger) {
+        return overstyrteInntektsmeldinger.stream().anyMatch(overstyrtIM -> overstyrtIM.getStartDatoPermisjon().equals(im.getStartDatoPermisjon())
+            && overstyrtIM.gjelderSammeArbeidsforhold(im));
     }
 
     private Set<Inntektsmelding> finnOverstyrtInntektsmeldinger(List<StartBeregningInput> startBeregningInput) {
