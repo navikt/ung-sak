@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
@@ -37,10 +37,11 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.PSBInfotrygdMigreringTjeneste;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class InfotrygdMigreringTjenesteTest {
+class PSBInfotrygdMigreringTjenesteTest {
 
     public static final LocalDate STP = LocalDate.now();
     @Inject
@@ -53,7 +54,7 @@ class InfotrygdMigreringTjenesteTest {
     private Behandling behandling;
     private Fagsak fagsak;
 
-    private InfotrygdMigreringTjeneste tjeneste;
+    private PSBInfotrygdMigreringTjeneste tjeneste;
 
 
     @BeforeEach
@@ -68,14 +69,14 @@ class InfotrygdMigreringTjenesteTest {
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         when(perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
-        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, true);
+        tjeneste = new PSBInfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, true);
     }
 
     @Test
     void skal_ikkje_opprette_med_toggle_av() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP));
 
-        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, false);
+        tjeneste = new PSBInfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, false);
         tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
 
         var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
