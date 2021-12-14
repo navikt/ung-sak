@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -26,6 +27,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKa
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.behandling.steg.avklarfakta.InfotrygdMigreringTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
@@ -35,7 +37,9 @@ import no.nav.k9.sak.domene.vedtak.ekstern.OverlappendeYtelserTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 
-public class InfotrygdMigreringTjeneste {
+@FagsakYtelseTypeRef("PSB")
+@ApplicationScoped
+public class PSBInfotrygdMigreringTjeneste implements InfotrygdMigreringTjeneste {
 
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
@@ -45,20 +49,21 @@ public class InfotrygdMigreringTjeneste {
 
     private boolean toggleMigrering;
 
-    public InfotrygdMigreringTjeneste() {
+    public PSBInfotrygdMigreringTjeneste() {
     }
 
     @Inject
-    public InfotrygdMigreringTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                      @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                      FagsakRepository fagsakRepository,
-                                      @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering) {
+    public PSBInfotrygdMigreringTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                         @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                         FagsakRepository fagsakRepository,
+                                         @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.toggleMigrering = toggleMigrering;
     }
 
+    @Override
     public void finnOgOpprettMigrertePerioder(Long behandlingId, AktørId aktørId, Long fagsakId) {
         if (toggleMigrering) {
             NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
