@@ -6,9 +6,12 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -35,6 +38,7 @@ import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
+import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -45,7 +49,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 @ExtendWith(JpaExtension.class)
 class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
-    public static final LocalDate STP = LocalDate.now();
+    public static final LocalDate STP = LocalDate.of(2022, 2, 1);
     @Inject
     private EntityManager entityManager;
 
@@ -64,67 +68,36 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
         fagsakRepository = new FagsakRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
-
         fagsak = Fagsak.opprettNy(FagsakYtelseType.DAGPENGER, new AktørId(123L), new Saksnummer("987"), STP, STP.plusDays(10));
         fagsakRepository.opprettNy(fagsak);
         behandling = Behandling.forFørstegangssøknad(fagsak).medBehandlingStatus(BehandlingStatus.UTREDES).build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         when(perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
-        utleder = new PSBPreconditionBeregningAksjonspunktUtleder(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, true);
+        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
+            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
+        utleder = new PSBPreconditionBeregningAksjonspunktUtleder(iayTjeneste,
+            perioderTilVurderingTjeneste,
+            fagsakRepository, true);
     }
 
     @Test
     void skal_ikkje_returnere_aksjonspunkt_med_toggle_av() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP));
-
         utleder = new PSBPreconditionBeregningAksjonspunktUtleder(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, false);
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
         assertThat(aksjonspunkter.size()).isEqualTo(0);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isZero();
     }
 
     @Test
-    void skal_returnere_aksjonspunkt_ved_overlapp() {
+    void skal_returnere_aksjonspunkt_eksisterende_migrering() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP));
+        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(behandling.getFagsakId(), STP));
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
         assertThat(aksjonspunkter.size()).isEqualTo(1);
         assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
-        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP);
-    }
-
-    @Test
-    void skal_returnere_aksjonspunkt_ved_overlapp_der_sakinfotrygdmigrering_finnes_fra_før() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP));
-        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
-
-        var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
-
-        assertThat(aksjonspunkter.size()).isEqualTo(1);
-        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
-        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP);
-    }
-
-    @Test
-    void skal_returnere_aksjonspunkt_ved_overlapp_og_oppdatere_eksisterende_sakinfotrygdmigrering() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.plusDays(2)));
-        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.plusDays(2)));
-
-        var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
-
-        assertThat(aksjonspunkter.size()).isEqualTo(1);
-        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
-        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP);
     }
 
     @Test
@@ -132,7 +105,11 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         when(perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30))))));
+        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
+            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30))))));
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.plusDays(30)));
+
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.plusDays(2)));
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.plusDays(20)));
 
@@ -140,68 +117,81 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
         assertThat(aksjonspunkter.size()).isEqualTo(1);
         assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isEqualTo(2);
-        assertThat(sakInfotrygdMigrering.stream().anyMatch(s -> s.getSkjæringstidspunkt().equals(STP))).isTrue();
-        assertThat(sakInfotrygdMigrering.stream().anyMatch(s -> s.getSkjæringstidspunkt().equals(STP.plusDays(20)))).isTrue();
     }
 
     @Test
     void skal_ikkje_returnere_aksjonspunkt_med_overlapp_for_periode_som_ikke_vurderes() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusDays(10)));
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusDays(10), STP.minusDays(3)));
+        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
+            .thenReturn(new TreeSet<>((Set.of(
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusDays(10), STP.minusDays(3)),
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.minusDays(10)));
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
         assertThat(aksjonspunkter.size()).isEqualTo(0);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
-        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP.minusDays(10));
     }
 
     @Test
     void skal_ikkje_returnere_aksjonspunkt_uten_overlapp() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusDays(10)));
-
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(2), STP.minusMonths(2).plusDays(2)));
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
         assertThat(aksjonspunkter.size()).isEqualTo(0);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isZero();
     }
 
     @Test
-    void skal_returnere_aksjonspunkt_for_kant_i_kant() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusDays(1)));
+    void skal_returnere_ventepunkt_når_periode_i_samme_år_som_ikke_er_søkt_for() {
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusMonths(1).plusDays(10)));
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
         assertThat(aksjonspunkter.size()).isEqualTo(1);
-        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT);
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
-        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP);
+        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_PÅ_SØKNAD_FOR_PERIODE);
     }
 
+    @Test
+    void skal_returnere_ventepunkt_når_periode_etter_migrering_som_ikke_er_søkt_for() {
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusMonths(1), STP.plusMonths(1).plusDays(10)));
+        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
+
+        var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
+
+        assertThat(aksjonspunkter.size()).isEqualTo(1);
+        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_PÅ_SØKNAD_FOR_PERIODE);
+    }
+
+
     private void lagInfotrygdPsbYtelse(DatoIntervallEntitet periode) {
+        lagInfotrygdPsbYtelsePerioder(List.of(periode));
+    }
+
+
+    private void lagInfotrygdPsbYtelsePerioder(List<DatoIntervallEntitet> perioder) {
         var iayBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         var aktørYtelseBuilder = InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder.oppdatere(Optional.empty());
         var ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty());
 
-        var anvistBuilder = ytelseBuilder.getAnvistBuilder();
-        var ytelseAnvist = anvistBuilder.medAnvistPeriode(periode)
-            .medBeløp(BigDecimal.TEN)
-            .medDagsats(BigDecimal.TEN)
-            .medUtbetalingsgradProsent(BigDecimal.valueOf(100))
-            .build();
-        ytelseBuilder.medYtelseAnvist(ytelseAnvist)
-            .medPeriode(periode)
+        var fom = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(Comparator.naturalOrder()).orElseThrow();
+        var tom = perioder.stream().map(DatoIntervallEntitet::getFomDato).max(Comparator.naturalOrder()).orElseThrow();
+
+        ytelseBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
             .medKilde(Fagsystem.INFOTRYGD)
             .medYtelseType(FagsakYtelseType.PSB);
+
+        perioder.stream().map(periode -> ytelseBuilder.getAnvistBuilder().medAnvistPeriode(periode)
+                .medBeløp(BigDecimal.TEN)
+                .medDagsats(BigDecimal.TEN)
+                .medUtbetalingsgradProsent(BigDecimal.valueOf(100))
+                .build())
+            .forEach(ytelseBuilder::medYtelseAnvist);
 
         aktørYtelseBuilder.leggTilYtelse(ytelseBuilder)
             .medAktørId(fagsak.getAktørId());
         iayBuilder.leggTilAktørYtelse(aktørYtelseBuilder);
         iayTjeneste.lagreIayAggregat(behandling.getId(), iayBuilder);
     }
+
+
 }
