@@ -16,6 +16,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class StønadstatistikkUtbetalingsgrad {
     
+    @JsonProperty(value = "aktivitetStatus", required = true)
+    @Valid
+    private String aktivitetStatus;
+    
     @JsonProperty(value = "arbeidsforhold", required = true)
     @NotNull
     @Valid
@@ -51,12 +55,14 @@ public class StønadstatistikkUtbetalingsgrad {
         
     }
     
-    public StønadstatistikkUtbetalingsgrad(StønadstatistikkArbeidsforhold arbeidsforhold,
+    public StønadstatistikkUtbetalingsgrad(String aktivitetStatus,
+            StønadstatistikkArbeidsforhold arbeidsforhold,
             Duration normalArbeidstid,
             Duration faktiskArbeidstid,
             BigDecimal utbetalingsgrad,
             int dagsats,
             boolean brukerErMottaker) {
+        this.aktivitetStatus = aktivitetStatus;
         this.arbeidsforhold = arbeidsforhold;
         this.normalArbeidstid = normalArbeidstid;
         this.faktiskArbeidstid = faktiskArbeidstid;
@@ -64,7 +70,10 @@ public class StønadstatistikkUtbetalingsgrad {
         this.dagsats = dagsats;
         this.brukerErMottaker = brukerErMottaker;
     }
-    
+
+    public String getAktivitetStatus() {
+        return aktivitetStatus;
+    }
 
     public StønadstatistikkArbeidsforhold getArbeidsforhold() {
         return arbeidsforhold;
