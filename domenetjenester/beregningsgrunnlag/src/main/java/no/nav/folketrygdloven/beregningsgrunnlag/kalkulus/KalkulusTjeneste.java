@@ -329,7 +329,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         var overstyrteInntektsmeldinger = finnOverstyrtInntektsmeldinger(startBeregningInput);
         var inntektsmeldingerForSak = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
         var utvalgteInntektsmeldinger = inntektsmeldingerForSak.stream()
-            .filter(im -> harIMSomOverstyrer(im, overstyrteInntektsmeldinger))
+            .filter(im -> !harIMSomOverstyrer(im, overstyrteInntektsmeldinger))
             .collect(Collectors.toCollection(HashSet::new));
         utvalgteInntektsmeldinger.addAll(overstyrteInntektsmeldinger);
         return utvalgteInntektsmeldinger;
