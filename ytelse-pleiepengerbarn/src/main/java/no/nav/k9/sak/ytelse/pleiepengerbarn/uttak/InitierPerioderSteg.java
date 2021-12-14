@@ -34,7 +34,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderHolder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.InfotrygdMigreringTjeneste;
 
 @ApplicationScoped
 @BehandlingStegRef(kode = "INIT_PERIODER")
@@ -49,7 +48,6 @@ public class InitierPerioderSteg implements BehandlingSteg {
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
-    private InfotrygdMigreringTjeneste infotrygdMigreringTjeneste;
 
     InitierPerioderSteg() {
         // for proxy
@@ -60,14 +58,12 @@ public class InitierPerioderSteg implements BehandlingSteg {
                                MottatteDokumentRepository mottatteDokumentRepository,
                                SøknadsperiodeRepository søknadsperiodeRepository,
                                UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
-                               @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
-                               InfotrygdMigreringTjeneste infotrygdMigreringTjeneste) {
+                               @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
-        this.infotrygdMigreringTjeneste = infotrygdMigreringTjeneste;
     }
 
     @Override
@@ -100,7 +96,6 @@ public class InitierPerioderSteg implements BehandlingSteg {
             var uttakPerioderHolder = mapUttaksPerioderRelevantForBehandlingen(uttaksPerioderGrunnlag, mottatteDokumenter);
             uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandlingId, uttakPerioderHolder);
         }
-        infotrygdMigreringTjeneste.finnOgOpprettMigrertePerioder(behandlingId, behandling.getAktørId(), behandling.getFagsakId());
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 

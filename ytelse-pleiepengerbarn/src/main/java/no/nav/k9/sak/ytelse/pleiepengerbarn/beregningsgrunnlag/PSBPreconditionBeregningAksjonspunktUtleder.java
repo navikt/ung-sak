@@ -8,15 +8,18 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -38,8 +41,10 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 public class PSBPreconditionBeregningAksjonspunktUtleder implements PreconditionBeregningAksjonspunktUtleder {
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private PSBOpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private FagsakRepository fagsakRepository;
+
 
     private boolean toggleMigrering;
 
@@ -48,9 +53,11 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
 
     @Inject
     public PSBPreconditionBeregningAksjonspunktUtleder(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                                       @FagsakYtelseTypeRef("PSB") PSBOpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste,
                                                        @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                        FagsakRepository fagsakRepository,
                                                        @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering) {
+        this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
         this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.toggleMigrering = toggleMigrering;
@@ -77,10 +84,35 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         }
 
         if (!eksisterendeMigreringTilVurdering.isEmpty()) {
-
+            var harKunDagpenger = harBrukerKunPleiepengerAvDagpenger(param, perioderTilVurdering, eksisterendeMigreringTilVurdering);
+            if (harKunDagpenger) {
+                return Collections.emptyList();
+            }
             return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT));
         }
         return Collections.emptyList();
+    }
+
+    private boolean harBrukerKunPleiepengerAvDagpenger(AksjonspunktUtlederInput param, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, List<SakInfotrygdMigrering> eksisterendeMigreringTilVurdering) {
+        return eksisterendeMigreringTilVurdering.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt)
+            .filter(stp -> perioderTilVurdering.stream().anyMatch(p -> p.getFomDato().equals(stp)))
+            .allMatch(stp -> {
+                var opptjeningAktiviteter = opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(param.getRef(),
+                    inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId()),
+                    perioderTilVurdering.stream().filter(p -> p.getFomDato().equals(stp)).findFirst().orElseThrow());
+                if (opptjeningAktiviteter.isEmpty()) {
+                    return false;
+                }
+                var aktiviteterPåStp = opptjeningAktiviteter.get().getOpptjeningPerioder().stream()
+                    .filter(oa -> !oa.getPeriode().getTom().isBefore(stp))
+                    .collect(Collectors.toList());
+                if (aktiviteterPåStp.isEmpty()) {
+                    return false;
+                }
+                return aktiviteterPåStp
+                    .stream()
+                    .allMatch(oa -> oa.getType().equals(OpptjeningAktivitetType.PLEIEPENGER_AV_DAGPENGER));
+            });
     }
 
     private List<YtelseAnvist> finnAnvistePerioderFraInfotrygdUtenSøknad(AksjonspunktUtlederInput param, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, List<SakInfotrygdMigrering> eksisterendeMigreringTilVurdering) {

@@ -134,6 +134,16 @@ public class MapYtelseperioderTjeneste {
             return OpptjeningAktivitetType.SYKEPENGER;
         }
 
+        if (FagsakYtelseType.PLEIEPENGER_SYKT_BARN.equals(ytelse.getYtelseType())) {
+            boolean harPSBBasertPåDP = ytelse.getYtelseGrunnlag().flatMap(YtelseGrunnlag::getArbeidskategori)
+                .stream().anyMatch(a -> Arbeidskategori.DAGPENGER.equals(a) || Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER.equals(a));
+            if (harPSBBasertPåDP) {
+                return OpptjeningAktivitetType.PLEIEPENGER_AV_DAGPENGER;
+            }
+            return OpptjeningAktivitetType.PLEIEPENGER;
+        }
+
+
         return OpptjeningAktivitetType.hentFraFagsakYtelseTyper()
             .getOrDefault(ytelse.getYtelseType(), Collections.singleton(UDEFINERT)).stream().findFirst().orElse(UDEFINERT);
     }
