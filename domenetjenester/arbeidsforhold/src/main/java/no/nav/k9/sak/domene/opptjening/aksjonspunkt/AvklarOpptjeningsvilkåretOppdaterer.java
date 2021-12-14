@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -69,7 +70,8 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
             var innvilgelseMerknad = VilkårUtfallMerknad.fraKode(vilkårPeriodeVurdering.getInnvilgelseMerknadKode());
 
             Utfall nyttUtfall = vilkårPeriodeVurdering.isErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-            lagHistorikkInnslag(param, nyttUtfall, vilkårPeriodeVurdering.getBegrunnelse());
+            HistorikkEndretFeltVerdiType tilVerdiHistorikk = finnTilVerdiHistorikk(vilkårPeriodeVurdering, innvilgelseMerknad);
+            lagHistorikkInnslag(param, tilVerdiHistorikk, vilkårPeriodeVurdering.getBegrunnelse());
 
             if (nyttUtfall.equals(Utfall.OPPFYLT)) {
                 sjekkOmVilkåretKanSettesTilOppfylt(param.getRef(), opptjeningPeriode, innvilgelseMerknad);
@@ -78,6 +80,22 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         }
         builder.leggTil(vilkårBuilder);
         return OppdateringResultat.utenOverhopp();
+    }
+
+    private HistorikkEndretFeltVerdiType finnTilVerdiHistorikk(VilkårPeriodeVurderingDto vilkårPeriodeVurdering, VilkårUtfallMerknad innvilgelseMerknad) {
+        HistorikkEndretFeltVerdiType tilVerdiHistorikk;
+        if (!vilkårPeriodeVurdering.isErVilkarOk()) {
+            tilVerdiHistorikk = HistorikkEndretFeltVerdiType.IKKE_OPPFYLT;
+        } else {
+            if (innvilgelseMerknad != null && innvilgelseMerknad.equals(VilkårUtfallMerknad.VM_7847_A)) {
+                tilVerdiHistorikk = HistorikkEndretFeltVerdiType.OPPFYLT_8_47_A;
+            } else if (innvilgelseMerknad != null && innvilgelseMerknad.equals(VilkårUtfallMerknad.VM_7847_B)) {
+                tilVerdiHistorikk = HistorikkEndretFeltVerdiType.OPPFYLT_8_47_B;
+            } else {
+                tilVerdiHistorikk = HistorikkEndretFeltVerdiType.OPPFYLT;
+            }
+        }
+        return tilVerdiHistorikk;
     }
 
     // TODO: Bedre løsning på sikt at endepunkt opptjening-v2 kobler sammen vilkårsperioder med opptjeningsperioder.
@@ -118,8 +136,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         // Validering av 8-47 (dersom valgt)
         if (innvilgelseMerknad != null) {
             long antallAktiviteterPåStp = opptjeningAktiviteter.stream()
-                .filter(oa -> oa.getPeriode().getTomDato().plusDays(1).isEqual(stp)
-                    || oa.getPeriode().getTomDato().plusDays(1).isAfter(stp))
+                .filter(oa -> oa.getPeriode().inkluderer(stp))
                 .filter(oa -> !oa.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD))
                 .count();
             if (antallAktiviteterPåStp == 0) {
@@ -134,7 +151,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         }
     }
 
-    private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, Utfall nyVerdi, String begrunnelse) {
+    private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, HistorikkEndretFeltVerdiType nyVerdi, String begrunnelse) {
         historikkAdapter.tekstBuilder()
             .medEndretFelt(HistorikkEndretFeltType.OPPTJENINGSVILKARET, null, nyVerdi);
 

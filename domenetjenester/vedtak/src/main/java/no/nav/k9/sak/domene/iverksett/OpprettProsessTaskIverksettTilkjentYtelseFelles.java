@@ -16,6 +16,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
+import no.nav.k9.sak.domene.vedtak.ekstern.VurderOverlappendeInfotrygdYtelserTask;
 import no.nav.k9.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
@@ -71,6 +72,7 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
         // Da denne sender tilkjent ytelse til fp.oppdrag via kafka
         // taskData.addNesteSekvensiell(new ProsessTaskData(SendTilkjentYtelseTask.TASKTYPE));
 
+        taskData.addNesteSekvensiell(new ProsessTaskData(VurderOverlappendeInfotrygdYtelserTask.TASKTYPE));
         if (skalVurdereOppgaveTilArena(behandling)) {
             taskData.addNesteSekvensiell(new ProsessTaskData(VurderOppgaveArenaTask.TASKTYPE));
         }

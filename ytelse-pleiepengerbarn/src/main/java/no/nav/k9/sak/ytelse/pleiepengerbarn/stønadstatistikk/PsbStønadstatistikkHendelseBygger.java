@@ -83,17 +83,17 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
             logger.info("Lager ikke StønadstatistikkHendelse siden behandingen er henlagt: " + behandlingUuid.toString());
             return null;
         }
-        
+
         final PersonIdent søker = aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getAktørId()).get();
         final PersonIdent pleietrengende= aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getPleietrengendeAktørId()).get();
         final List<SykdomDiagnosekode> diagnosekoder = hentDiagnosekoder(behandlingUuid);
         final LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> periodetidslinje = stønadstatistikkPeriodetidslinjebygger.lagTidslinjeFor(behandling);
-        
+
         final UUID forrigeBehandlingUuid = finnForrigeBehandlingUuid(behandling);
         final BehandlingVedtak behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
         final LocalDateTime vedtakstidspunkt = behandlingVedtak.getVedtakstidspunkt();
-        
-        
+
+
         final StønadstatistikkHendelse stønadstatistikkHendelse = new StønadstatistikkHendelse(
                 behandling.getFagsakYtelseType(),
                 søker,
@@ -106,7 +106,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
                 vedtakstidspunkt,
                 mapPerioder(periodetidslinje)
                 );
-        
+
         return stønadstatistikkHendelse;
     }
 
@@ -131,7 +131,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     private List<StønadstatistikkPeriode> mapPerioder(LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> periodetidslinje) {
         return periodetidslinje.toSegments().stream().map(entry -> mapPeriode(entry)).toList();
     }
-    
+
     private StønadstatistikkPeriode mapPeriode(LocalDateSegment<InformasjonTilStønadstatistikkHendelse> ds) {
         final UttaksperiodeInfo info = ds.getValue().getUttaksperiodeInfo();
         final BigDecimal bruttoBeregningsgrunnlag = (ds.getValue().getBeregningsgrunnlagDto() != null) ? ds.getValue().getBeregningsgrunnlagDto().getÅrsinntektVisningstall() : BigDecimal.valueOf(-1);
@@ -170,7 +170,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
             var a = u.getArbeidsforhold();
             final Arbeidsforhold arbeidsforholdFraUttaksplan = MapFraUttaksplan.buildArbeidsforhold(toUttakArbeidType(u), u);
             final BigDecimal utbetalingsgrad = u.getUtbetalingsgrad();
-            
+
             if (skalFinnesAndeler(utbetalingsgrad)) {
                 final List<BeregningsresultatAndel> andeler = finnAndeler(AktivitetStatus.fraKode(a.getType()), arbeidsforholdFraUttaksplan, beregningsresultatAndeler);
                 return andeler.stream().map(andel -> {
@@ -202,7 +202,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     private boolean skalFinnesAndeler(final BigDecimal utbetalingsgrad) {
         return utbetalingsgrad.compareTo(BigDecimal.valueOf(0)) > 0;
     }
-    
+
     private UttakArbeidType toUttakArbeidType(Utbetalingsgrader data) {
         var type = UttakArbeidType.fraKode(data.getArbeidsforhold().getType());
         if (UttakArbeidType.IKKE_YRKESAKTIV.equals(type)) {
@@ -214,17 +214,15 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     private List<BeregningsresultatAndel> finnAndeler(AktivitetStatus aktivitetFraUttaksplan, Arbeidsforhold arbeidsforholdFraUttaksplan, List<BeregningsresultatAndel> beregningsresultatAndeler) {
         final List<BeregningsresultatAndel> kandidater = beregningsresultatAndeler.stream()
                 .filter(a -> {
-                    if (!a.getAktivitetStatus().erArbeidstaker()
-                            && !a.getAktivitetStatus().erFrilanser()
-                            &&  aktivitetFraUttaksplan == a.getAktivitetStatus()) {
-                        return true;
+                    if (a.getAktivitetStatus().erArbeidstaker() || a.getAktivitetStatus().erFrilanser()) {
+                        final Arbeidsforhold beregningsarbeidsforhold = toArbeidsforhold(a);
+                        return aktivitetFraUttaksplan == a.getAktivitetStatus() && arbeidsforholdFraUttaksplan.gjelderFor(beregningsarbeidsforhold);
+                    } else {
+                        return aktivitetFraUttaksplan == a.getAktivitetStatus();
                     }
-                    
-                    final Arbeidsforhold beregningsarbeidsforhold = toArbeidsforhold(a);
-                    return arbeidsforholdFraUttaksplan.gjelderFor(beregningsarbeidsforhold);
                 })
                 .toList();
-        
+
         return kandidater;
     }
 
@@ -247,11 +245,11 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     private List<String> mapÅrsaker(Set<Årsak> årsaker) {
         return årsaker.stream().map(å -> å.toString()).toList();
     }
-    
+
     private List<StønadstatistikkInngangsvilkår> mapInngangsvilkår(Map<String, Utfall> inngangsvilkår) {
         return inngangsvilkår.entrySet().stream().map(entry -> new StønadstatistikkInngangsvilkår(entry.getKey(), mapUtfall(entry.getValue()))).toList();
     }
-    
+
     private StønadstatistikkGraderingMotTilsyn mapGraderingMotTilsyn(GraderingMotTilsyn graderingMotTilsyn) {
         if (graderingMotTilsyn == null) {
             return null;

@@ -72,6 +72,27 @@ public class BeregningPerioderGrunnlagRepository {
         }
     }
 
+    public void lagreInputOverstyringer(Long behandlingId, List<InputOverstyringPeriode> perioder) {
+        var grunnlagOptional = hentGrunnlag(behandlingId);
+        var aktivtGrunnlag = grunnlagOptional.orElse(new BeregningsgrunnlagPerioderGrunnlag());
+
+        var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(aktivtGrunnlag);
+        for (InputOverstyringPeriode periode : perioder) {
+            builder.leggTilInputOverstyring(periode);
+        }
+
+        var differ = differ();
+
+        if (builder.erForskjellig(aktivtGrunnlag, differ)) {
+            grunnlagOptional.ifPresent(this::deaktiverEksisterende);
+
+            lagre(builder, behandlingId, true);
+        } else {
+            log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
+        }
+    }
+
+
     public void ryddMotVilkår(Long behandlingId) {
         var grunnlagOptional = hentGrunnlag(behandlingId);
         var aktivtGrunnlag = grunnlagOptional.orElse(new BeregningsgrunnlagPerioderGrunnlag());
@@ -152,6 +173,9 @@ public class BeregningPerioderGrunnlagRepository {
         }
         if (oppdatertGrunnlag.getKompletthetHolder() != null) {
             entityManager.persist(oppdatertGrunnlag.getKompletthetHolder());
+        }
+        if (oppdatertGrunnlag.getInputOverstyringHolder() != null) {
+            entityManager.persist(oppdatertGrunnlag.getInputOverstyringHolder());
         }
         entityManager.persist(oppdatertGrunnlag);
         entityManager.flush();

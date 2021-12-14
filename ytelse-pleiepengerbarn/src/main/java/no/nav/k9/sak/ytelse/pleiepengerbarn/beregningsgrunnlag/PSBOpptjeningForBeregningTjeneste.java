@@ -8,8 +8,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
@@ -31,7 +29,7 @@ import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
-public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
+public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
     private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
     private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
@@ -42,12 +40,12 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
         OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD,
         OpptjeningAktivitetType.ARBEIDSAVKLARING));
 
-    protected PsbOpptjeningForBeregningTjeneste() {
+    protected PSBOpptjeningForBeregningTjeneste() {
         // For proxy
     }
 
     @Inject
-    public PsbOpptjeningForBeregningTjeneste(OpptjeningsperioderTjeneste opptjeningsperioderTjeneste, OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
+    public PSBOpptjeningForBeregningTjeneste(OpptjeningsperioderTjeneste opptjeningsperioderTjeneste, OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
         this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
         this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
     }

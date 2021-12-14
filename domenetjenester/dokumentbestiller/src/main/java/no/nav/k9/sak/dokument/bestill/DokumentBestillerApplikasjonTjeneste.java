@@ -2,6 +2,8 @@ package no.nav.k9.sak.dokument.bestill;
 
 import static no.nav.k9.sak.dokument.bestill.vedtak.VedtaksbrevUtleder.velgDokumentMalForVedtak;
 
+import java.util.List;
+
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -48,6 +50,10 @@ public class DokumentBestillerApplikasjonTjeneste {
     }
 
     public void bestillDokument(BestillBrevDto bestillBrevDto, HistorikkAktør aktør) {
+        dokumentKafkaBestiller.bestillBrevFraKafka(bestillBrevDto, aktør);
+    }
+
+    public void bestillDokument(List<BestillBrevDto> bestillBrevDto, HistorikkAktør aktør) {
         dokumentKafkaBestiller.bestillBrevFraKafka(bestillBrevDto, aktør);
     }
 }

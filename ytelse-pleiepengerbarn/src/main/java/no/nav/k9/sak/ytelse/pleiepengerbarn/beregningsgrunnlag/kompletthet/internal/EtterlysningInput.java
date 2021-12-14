@@ -57,11 +57,12 @@ class EtterlysningInput {
         var relevanteBrevbestillinger = etterlysningerBestilt.entrySet()
             .stream()
             .filter(it -> it.getKey().overlapper(entry.getKey()))
-            .collect(Collectors.toList());
+            .toList();
 
         var manglerFortsattIkkeEtterlyst = entry.getValue()
             .stream()
-            .filter(it -> relevanteBrevbestillinger.stream().map(Map.Entry::getValue)
+            .filter(it -> relevanteBrevbestillinger.stream()
+                .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
                 .noneMatch(bt -> Objects.equals(bt.getDokumentType(), relevantBrevType) && Objects.equals(it.getArbeidsgiver(), bt.getArbeidsgiver())))
             .collect(Collectors.toList());

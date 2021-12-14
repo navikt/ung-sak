@@ -95,6 +95,8 @@ spec:
       value: privat-k9-vedtakhendelse
     - name: KAFKA_STONADSTATISTIKK_TOPIC
       value: k9saksbehandling.aapen-k9-stonadstatistikk-v1
+    - name: KAFKA_BRUKERDIALOGINNSYN_TOPIC
+      value: dusseldorf.privat-k9-sak-innsyn-v1
 
     # Baseurl
     - name: SCHEMA_REGISTRY_URL
@@ -186,6 +188,8 @@ spec:
       value: "3030"
 
     # Feature-flag
+    - name: VKY_VED_OVERLAPP_INFOTRYGD
+      value: "true"
     - name: OMP_IM_SJEKK_FORSTE_FRAVAERSDAG
       value: "true"
     - name: PSB_OPPG_OPPTJENING_PRIORITERING
@@ -204,10 +208,6 @@ spec:
       value: "true"
     - name: ENABLE_UTLEDET_ENDRINGSPERIODE
       value: "true"
-    - name: ARBEIDSTID_SJEKK_SNFL
-      value: "true"
-    - name: NY_SYKDOM_TOTRINN
-      value: "true"
     - name: ENABLE_STONADSTATISTIKK
       value: "true"
     - name: ENABLE_RELEVANT_SYKDOMSPERIODE
@@ -215,6 +215,14 @@ spec:
     - name: KOMPLETTHET_NY_FLYT
       value: "true"
     - name: MAP_ALLE_KRAV
+      value: "true"
+    - name: ENABLE_BRUKERDIALOGINNSYN
+      value: "true"
+    - name: PSB_ENABLE_BEKREFT_UTTAK
+      value: "true"
+    - name: DISABLE_VURDER_TILBAKETREKK
+      value: "true"
+    - name: PSB_INFOTRYGD_MIGRERING
       value: "true"
 
     # Audit logging
@@ -227,3 +235,7 @@ spec:
 
     - name: PIP_USERS
       value: "srvPDP,srvk9-tilbake,srvsaf,Z993210,Z994080"
+
+    # Pleiepenger infotrygd migrering
+    - name: OVERSTYR_BEREGNING_INPUT_TILLATELSER
+      value: "Z990404,Z990422,Z994004"

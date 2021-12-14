@@ -54,7 +54,6 @@ public class MedlemskapPerioderEntitet extends BaseEntitet implements Comparable
     private LocalDate beslutningsdato;
 
     @ChangeTracked
-    
     @Column(name = "er_medlem", nullable = false)
     private boolean erMedlem;
 

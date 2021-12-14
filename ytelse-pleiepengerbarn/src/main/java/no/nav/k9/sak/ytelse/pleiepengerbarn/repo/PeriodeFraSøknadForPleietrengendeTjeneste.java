@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,9 +37,9 @@ public class PeriodeFraSøknadForPleietrengendeTjeneste {
 
     @Inject
     public PeriodeFraSøknadForPleietrengendeTjeneste(FagsakRepository fagsakRepository,
-                                  BehandlingRepository behandlingRepository,
-                                  UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
-                                  @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjenester) {
+                                                     BehandlingRepository behandlingRepository,
+                                                     UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
+                                                     @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjenester) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
@@ -104,15 +104,15 @@ public class PeriodeFraSøknadForPleietrengendeTjeneste {
         public int compareTo(FagsakKravDokument o) {
             return kravDokument.compareTo(o.kravDokument);
         }
-        
+
         public Fagsak getFagsak() {
             return fagsak;
         }
-        
+
         public KravDokument getKravDokument() {
             return kravDokument;
         }
-        
+
         public PerioderFraSøknad getPerioderFraSøknad() {
             return perioderFraSøknad;
         }

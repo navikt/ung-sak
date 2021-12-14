@@ -80,7 +80,7 @@ public class SjekkMotAndreYtelserTjeneste {
     }
 
     private boolean skalSjekkeOverlappendeYtelser(Behandling behandling) {
-        return !behandling.getFagsakYtelseType().hentYtelserForOverlappSjekk().isEmpty();
+        return !behandling.getFagsakYtelseType().hentK9YtelserForOverlappSjekk().isEmpty();
     }
 
     private void opprettHistorikkinnslagOmVurderingFørVedtak(Behandling behandling, HistorikkinnslagType historikkInnslagsType, OppgaveÅrsak begrunnelse, List<Historikkinnslag> historikkInnslagFraRepo) {
@@ -107,10 +107,11 @@ public class SjekkMotAndreYtelserTjeneste {
 
 
     private boolean harOverlappendeYtelser(Behandling behandling) {
-        var overlappendeYtelser = overlappendeYtelserTjeneste.finnOverlappendeYtelser(BehandlingReferanse.fra(behandling));
+        var ytelseTyperSomSjekkesMot = behandling.getFagsakYtelseType().hentK9YtelserForOverlappSjekk();
+        var overlappendeYtelser = overlappendeYtelserTjeneste.finnOverlappendeYtelser(BehandlingReferanse.fra(behandling), ytelseTyperSomSjekkesMot);
         if (!overlappendeYtelser.isEmpty()) {
             String formattert = overlappendeYtelser.keySet().stream()
-                .map(key -> key + "=" + overlappendeYtelser.get(key))
+                .map(key -> "Ytelse=" + key.getYtelseType() + ", kilde=" + key.getKilde() + ", saksnummer=" + key.getSaksnummer() + ", perioder=" + overlappendeYtelser.get(key))
                 .collect(Collectors.joining(", ", "{", "}"));
             logger.info("Behandlingen har overlappende ytelser '{}'", formattert);
         }

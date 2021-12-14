@@ -45,6 +45,11 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
     @JoinColumn(name = "bg_komplett_id", nullable = false, updatable = false)
     private KompletthetPerioder kompletthetPerioder;
 
+    @ChangeTracked
+    @ManyToOne
+    @JoinColumn(name = "bg_ovst_input_id", nullable = false, updatable = false)
+    private InputOverstyringPerioder inputOverstyringPerioder;
+
     @Column(name = "aktiv", nullable = false, updatable = true)
     private boolean aktiv = true;
 
@@ -58,6 +63,7 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
     BeregningsgrunnlagPerioderGrunnlag(BeregningsgrunnlagPerioderGrunnlag eksisterende) {
         this.grunnlagPerioder = eksisterende.grunnlagPerioder != null ? new BeregningsgrunnlagPerioder(eksisterende.grunnlagPerioder) : null;
         this.kompletthetPerioder = eksisterende.kompletthetPerioder != null ? new KompletthetPerioder(eksisterende.kompletthetPerioder) : null;
+        this.inputOverstyringPerioder = eksisterende.inputOverstyringPerioder != null ? new InputOverstyringPerioder(eksisterende.inputOverstyringPerioder) : null;
     }
 
     void setBehandlingId(Long behandlingId) {
@@ -72,6 +78,10 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
         return kompletthetPerioder;
     }
 
+    InputOverstyringPerioder getInputOverstyringHolder() {
+        return inputOverstyringPerioder;
+    }
+
     public List<BeregningsgrunnlagPeriode> getGrunnlagPerioder() {
         if (grunnlagPerioder == null) {
             return List.of();
@@ -84,6 +94,13 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
             return List.of();
         }
         return kompletthetPerioder.getKompletthetPerioder();
+    }
+
+    public List<InputOverstyringPeriode> getInputOverstyringPerioder() {
+        if (inputOverstyringPerioder == null) {
+            return List.of();
+        }
+        return inputOverstyringPerioder.getInputOverstyringPerioder();
     }
 
     public Optional<BeregningsgrunnlagPeriode> finnGrunnlagFor(LocalDate skjæringstidspunkt) {
@@ -113,6 +130,13 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
         }
     }
 
+    void deaktiverInputOverstyring(LocalDate skjæringstidspunkt) {
+        Objects.requireNonNull(skjæringstidspunkt);
+        if (this.inputOverstyringPerioder != null) {
+            this.inputOverstyringPerioder.deaktiver(skjæringstidspunkt);
+        }
+    }
+
     void leggTil(BeregningsgrunnlagPeriode periode) {
         Objects.requireNonNull(periode);
         if (this.grunnlagPerioder == null) {
@@ -128,6 +152,15 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
         }
         this.kompletthetPerioder.leggTil(periode);
     }
+
+    void leggTil(InputOverstyringPeriode periode) {
+        Objects.requireNonNull(periode);
+        if (this.inputOverstyringPerioder == null) {
+            this.inputOverstyringPerioder = new InputOverstyringPerioder();
+        }
+        this.inputOverstyringPerioder.leggTil(periode);
+    }
+
 
     void setIkkeAktivt() {
         this.aktiv = false;

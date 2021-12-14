@@ -24,6 +24,7 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEnt
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
+import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -44,8 +45,7 @@ public class OverlappendeYtelserTjeneste {
         this.beregningsresultatRepository = beregningsresultatRepository;
     }
 
-    public Map<FagsakYtelseType, NavigableSet<LocalDateInterval>> finnOverlappendeYtelser(BehandlingReferanse ref) {
-        var ytelseTyperSomSjekkesMot = ref.getFagsakYtelseType().hentYtelserForOverlappSjekk();
+    public Map<Ytelse, NavigableSet<LocalDateInterval>> finnOverlappendeYtelser(BehandlingReferanse ref, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
         var tilkjentYtelsePerioder = hentTilkjentYtelsePerioder(ref);
         var aktørYtelse = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId())
             .getAktørYtelseFraRegister(ref.getAktørId());
@@ -59,21 +59,20 @@ public class OverlappendeYtelserTjeneste {
         }
         tilkjentYtelseTimeline = tilkjentYtelseTimeline.compress();
 
-        return doFinnOverlappendeYtelser(tilkjentYtelseTimeline, aktørYtelse.get(), ytelseTyperSomSjekkesMot);
+        return doFinnOverlappendeYtelser(tilkjentYtelseTimeline, new YtelseFilter(aktørYtelse.get()).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType())));
     }
 
-    Map<FagsakYtelseType, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(LocalDateTimeline<Boolean> tilkjentYtelseTimeline, AktørYtelse aktørYtelse, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
-        Map<FagsakYtelseType, NavigableSet<LocalDateInterval>> overlapp = new TreeMap<>();
+    public static Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(LocalDateTimeline<Boolean> tilkjentYtelseTimeline, YtelseFilter ytelseFilter) {
+        Map<Ytelse, NavigableSet<LocalDateInterval>> overlapp = new TreeMap<>();
         if (!tilkjentYtelseTimeline.isEmpty()) {
 
-            var ytelseFilter = new YtelseFilter(aktørYtelse).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType()));
             for (var yt : ytelseFilter.getFiltrertYtelser()) {
                 var ytp = yt.getPeriode();
                 var overlappPeriode = innvilgelseOverlapperMedAnnenYtelse(tilkjentYtelseTimeline, ytp);
                 if (!overlappPeriode.isEmpty()) {
                     if (yt.getYtelseAnvist().isEmpty()) {
                         // er under behandling. flagger hele perioden med overlapp
-                        overlapp.put(yt.getYtelseType(), overlappPeriode);
+                        overlapp.put(yt, overlappPeriode);
                     } else {
                         var anvistSegmenter = yt.getYtelseAnvist().stream()
                             .map(ya -> new LocalDateSegment<>(ya.getAnvistFOM(), ya.getAnvistTOM(), Boolean.TRUE))
@@ -83,7 +82,7 @@ public class OverlappendeYtelserTjeneste {
                         var anvistTimeline = new LocalDateTimeline<>(anvistSegmenter, StandardCombinators::alwaysTrueForMatch);
                         var intersection = anvistTimeline.intersection(tilkjentYtelseTimeline);
                         if (!intersection.isEmpty()) {
-                            overlapp.put(yt.getYtelseType(), intersection.getDatoIntervaller());
+                            overlapp.put(yt, intersection.getDatoIntervaller());
                         }
                     }
                 }
@@ -92,7 +91,7 @@ public class OverlappendeYtelserTjeneste {
         return overlapp;
     }
 
-    private NavigableSet<LocalDateInterval> innvilgelseOverlapperMedAnnenYtelse(LocalDateTimeline<Boolean> vilkårPeriode, DatoIntervallEntitet ytp) {
+    private static NavigableSet<LocalDateInterval> innvilgelseOverlapperMedAnnenYtelse(LocalDateTimeline<Boolean> vilkårPeriode, DatoIntervallEntitet ytp) {
         return vilkårPeriode.getDatoIntervaller()
             .stream()
             .map(it -> it.overlap(new LocalDateInterval(ytp.getFomDato(), ytp.getTomDato())))

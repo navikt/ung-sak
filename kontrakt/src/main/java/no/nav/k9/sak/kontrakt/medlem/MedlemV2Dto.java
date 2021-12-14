@@ -33,15 +33,21 @@ public class MedlemV2Dto {
     }
 
     public List<MedlemskapPerioderDto> getMedlemskapPerioder() {
+        if (medlemskapPerioder == null) {
+            return List.of();
+        }
         return Collections.unmodifiableList(medlemskapPerioder);
-    }
-
-    public Set<MedlemPeriodeDto> getPerioder() {
-        return Collections.unmodifiableSet(perioder);
     }
 
     public void setMedlemskapPerioder(List<MedlemskapPerioderDto> medlemskapPerioder) {
         this.medlemskapPerioder = List.copyOf(medlemskapPerioder);
+    }
+
+    public Set<MedlemPeriodeDto> getPerioder() {
+        if (perioder == null) {
+            return Set.of();
+        }
+        return Collections.unmodifiableSet(perioder);
     }
 
     public void setPerioder(Set<MedlemPeriodeDto> perioder) {

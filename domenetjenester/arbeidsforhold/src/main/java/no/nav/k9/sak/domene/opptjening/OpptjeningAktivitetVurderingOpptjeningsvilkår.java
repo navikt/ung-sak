@@ -19,7 +19,8 @@ public class OpptjeningAktivitetVurderingOpptjeningsvilkår implements Opptjenin
             case ARBEID -> arbeidVurderer.vurderArbeid(input);
             case NÆRING, FRILANS -> VurderingsStatus.TIL_VURDERING;
             // Ytelser til livsopphold fra NAV likestilles med arbeidsaktivitet
-            case ARBEIDSAVKLARING, DAGPENGER, FORELDREPENGER, FRISINN, OMSORGSPENGER, OPPLÆRINGSPENGER, PLEIEPENGER, SVANGERSKAPSPENGER, SYKEPENGER, SYKEPENGER_AV_DAGPENGER -> VurderingsStatus.TIL_VURDERING;
+            case ARBEIDSAVKLARING, DAGPENGER, FORELDREPENGER, FRISINN, OMSORGSPENGER, OPPLÆRINGSPENGER,
+                PLEIEPENGER, PLEIEPENGER_AV_DAGPENGER, SVANGERSKAPSPENGER, SYKEPENGER, SYKEPENGER_AV_DAGPENGER -> VurderingsStatus.TIL_VURDERING;
             // Alle andre opptjeningsaktiviteter underkjennes mht automatisk vilkårsvurdering
             default -> VurderingsStatus.UNDERKJENT;
         };

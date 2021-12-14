@@ -90,7 +90,7 @@ public class ArbeidsgiverRestTjeneste {
                 content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ArbeidsgiverOversiktDto.class)))
         })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public ArbeidsgiverOversiktDto getArbeidsgiverOpplysninger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)  @Valid BehandlingUuidDto uuidDto) {
+    public ArbeidsgiverOversiktDto getArbeidsgiverOpplysninger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) @Valid BehandlingUuidDto uuidDto) {
         Behandling behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());
 
         Set<Arbeidsgiver> arbeidsgivere = new HashSet<>();
@@ -179,7 +179,7 @@ public class ArbeidsgiverRestTjeneste {
             if (arbeidsgiver.getErVirksomhet()) {
                 return new ArbeidsgiverOpplysningerDto(arbeidsgiver.getIdentifikator(), opplysninger.getNavn());
             } else {
-                return new ArbeidsgiverOpplysningerDto(arbeidsgiver.getIdentifikator(), opplysninger.getNavn(), opplysninger.getFødselsdato());
+                return new ArbeidsgiverOpplysningerDto(arbeidsgiver.getIdentifikator(), opplysninger.getAlternativIdentifikator(), opplysninger.getNavn(), opplysninger.getFødselsdato());
             }
         } catch (Exception e) {
             return new ArbeidsgiverOpplysningerDto(arbeidsgiver.getIdentifikator(), "Feil ved oppslag");

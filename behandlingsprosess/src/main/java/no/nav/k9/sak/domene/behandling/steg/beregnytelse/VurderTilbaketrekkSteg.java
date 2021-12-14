@@ -5,6 +5,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -15,6 +16,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.AksjonspunktutlederTilbaketrekk;
 
@@ -27,6 +30,8 @@ public class VurderTilbaketrekkSteg implements BehandlingSteg {
 
     private AksjonspunktutlederTilbaketrekk aksjonspunktutlederTilbaketrekk;
     private BehandlingRepository behandlingRepository;
+    private BeregningsresultatRepository beregningsresultatRepository;
+    private boolean disableVurderTilbaketrekk;
 
     VurderTilbaketrekkSteg() {
         // for CDI proxy
@@ -34,9 +39,13 @@ public class VurderTilbaketrekkSteg implements BehandlingSteg {
 
     @Inject
     public VurderTilbaketrekkSteg(AksjonspunktutlederTilbaketrekk aksjonspunktutlederTilbaketrekk,
-                                  BehandlingRepository behandlingRepository) {
+                                  BehandlingRepository behandlingRepository,
+                                  BeregningsresultatRepository beregningsresultatRepository,
+                                  @KonfigVerdi(value = "DISABLE_VURDER_TILBAKETREKK", required = false, defaultVerdi = "false") Boolean disableVurderTilbaketrekk) {
         this.aksjonspunktutlederTilbaketrekk = aksjonspunktutlederTilbaketrekk;
         this.behandlingRepository = behandlingRepository;
+        this.beregningsresultatRepository = beregningsresultatRepository;
+        this.disableVurderTilbaketrekk = disableVurderTilbaketrekk;
     }
 
     @Override
@@ -44,7 +53,32 @@ public class VurderTilbaketrekkSteg implements BehandlingSteg {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
-        List<AksjonspunktResultat> aksjonspunkter = aksjonspunktutlederTilbaketrekk.utledAksjonspunkterFor(new AksjonspunktUtlederInput(ref));
-        return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter);
+        if (disableVurderTilbaketrekk) {
+            if (bleLøstIForrigeBehandling(ref)) {
+                // Kopierer valget som ble tatt sist og oppretter ikke aksjonspunkt
+                kopierLøsningFraForrigeBehandling(ref);
+            }
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        } else {
+            List<AksjonspunktResultat> aksjonspunkter = aksjonspunktutlederTilbaketrekk.utledAksjonspunkterFor(new AksjonspunktUtlederInput(ref));
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter);
+        }
     }
+
+    private boolean bleLøstIForrigeBehandling(BehandlingReferanse ref) {
+        var originalBeslutning = ref.getOriginalBehandlingId()
+            .flatMap(oid -> beregningsresultatRepository.hentBeregningsresultatAggregat(oid))
+            .flatMap(BehandlingBeregningsresultatEntitet::skalHindreTilbaketrekk);
+        return originalBeslutning.isPresent();
+    }
+
+    private void kopierLøsningFraForrigeBehandling(BehandlingReferanse ref) {
+        var originalBeslutning = ref.getOriginalBehandlingId()
+            .flatMap(oid -> beregningsresultatRepository.hentBeregningsresultatAggregat(oid))
+            .flatMap(BehandlingBeregningsresultatEntitet::skalHindreTilbaketrekk)
+            .orElseThrow();
+        var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
+        beregningsresultatRepository.lagreMedTilbaketrekk(behandling, originalBeslutning);
+    }
+
 }

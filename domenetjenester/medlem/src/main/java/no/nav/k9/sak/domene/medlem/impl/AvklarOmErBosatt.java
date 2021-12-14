@@ -69,15 +69,14 @@ public class AvklarOmErBosatt {
         }
         final MedlemskapOppgittTilknytningEntitet oppgittTilknytning = medlemskapOppgittTilknytningEntitet
             .orElseThrow(IllegalStateException::new);
-        if (oppgittTilknytning.harMinstEttUtenlandsopphold())
+        if (oppgittTilknytning.harMinstEttUtenlandsopphold()) {
             return NEI;
+        }
 
         return JA;
     }
 
     private Utfall erFrivilligMedlemEllerIkkeMedlem(Long behandlingId, LocalDate vurderingsdato) {
-
-
         Optional<MedlemskapAggregat> medlemskap = medlemskapRepository.hentMedlemskap(behandlingId);
 
         Collection<MedlemskapPerioderEntitet> medlemskapsPerioder = medlemskap.isPresent()

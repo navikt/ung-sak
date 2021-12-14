@@ -31,6 +31,10 @@
             <artifactId>soknad</artifactId>
         </dependency>
         <dependency>
+            <groupId>no.nav.k9</groupId>
+            <artifactId>innsyn</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.nav.k9.felles.integrasjon</groupId>
             <artifactId>k9-saf-klient</artifactId>
         </dependency>

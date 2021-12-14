@@ -117,6 +117,10 @@ public class SykdomDokument {
     public SykdomDokument getDuplikatAvDokument() {
         return getInformasjon().getDuplikatAvDokument();
     }
+    
+    public boolean isDuplikat() {
+        return getInformasjon().getDuplikatAvDokument() != null;
+    }
 
     public UUID getBehandlingUuid() {
         return behandlingUuid;

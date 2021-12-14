@@ -193,10 +193,10 @@ class SøknadOversetter {
         final List<Søknadsperiode> søknadsperiodeliste = new ArrayList<>();
         søknadsperioder.stream()
             .map(s -> new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFraOgMed(), s.getTilOgMed())))
-            .forEach(p -> søknadsperiodeliste.add(p));
+            .forEach(søknadsperiodeliste::add);
         trekkKravPerioder.stream()
             .map(s -> new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFraOgMed(), s.getTilOgMed()), true))
-            .forEach(p -> søknadsperiodeliste.add(p));
+            .forEach(søknadsperiodeliste::add);
 
         søknadsperiodeRepository.lagre(behandlingId, new Søknadsperioder(journalpostId, søknadsperiodeliste.toArray(new Søknadsperiode[0])));
     }
@@ -273,10 +273,6 @@ class SøknadOversetter {
     }
 
     private void lagreUttakOgPerioder(Søknad soknad, Optional<Periode> maksSøknadsperiode, JournalpostId journalpostId, final Long behandlingId, Long fagsakId) {
-        // TODO etter18feb: LovbestemtFerie
-
-        // TODO 18feb: Arbeidstid
-        // TODO etter18feb: UttakPeriodeInfo
         var perioderFraSøknad = new MapSøknadUttakPerioder(tpsTjeneste, soknad, journalpostId).getPerioderFraSøknad();
         uttakPerioderGrunnlagRepository.lagre(behandlingId, perioderFraSøknad);
 

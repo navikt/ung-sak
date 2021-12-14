@@ -47,25 +47,30 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.SøktUttak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Vilkårsperiode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.YtelseType;
 
 @Dependent
 public class MapInputTilUttakTjeneste {
 
     private HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private String unntak;
+    private Boolean enableBekreftUttak;
 
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
-            @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
+                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
+                                    @KonfigVerdi(value = "psb.enable.bekreft.uttak", defaultVerdi = "false") Boolean enableBekreftUttak) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
+        this.enableBekreftUttak = enableBekreftUttak;
     }
 
 
     public Uttaksgrunnlag hentUtOgMapRequest(BehandlingReferanse referanse) {
         return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, false));
     }
+
     public Uttaksgrunnlag hentUtUbesluttededataOgMapRequest(BehandlingReferanse referanse) {
         return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, true));
     }
@@ -75,13 +80,11 @@ public class MapInputTilUttakTjeneste {
 
         var behandling = input.getBehandling();
         var vurderteSøknadsperioder = input.getVurderteSøknadsperioder();
-        var uttaksPerioderGrunnlag = input.getUttaksGrunnlag();
         var personopplysningerAggregat = input.getPersonopplysningerAggregat();
 
         // Henter ut alt og lager tidlinje av denne for så å ta ut den delen som er relevant
         // NB! Kan gi issues ved lange fagsaker mtp ytelse
-        var perioderFraSøknader = uttaksPerioderGrunnlag.getOppgitteSøknadsperioder()
-            .getPerioderFraSøknadene();
+        var perioderFraSøknader = input.getPerioderFraSøknad();
         var kravDokumenter = vurderteSøknadsperioder.keySet();
 
         evaluerDokumenter(perioderFraSøknader, kravDokumenter);
@@ -132,6 +135,7 @@ public class MapInputTilUttakTjeneste {
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
 
         return new Uttaksgrunnlag(
+            YtelseType.PSB,
             barn,
             søker,
             behandling.getFagsak().getSaksnummer().getVerdi(),
@@ -201,14 +205,14 @@ public class MapInputTilUttakTjeneste {
             .stream()
             .filter(it -> erRelevantForBehandling(it, innvilgedePerioderMedSykdom))
             .forEach(periode -> {
-                var utfall = switch (periode.getResultat()) {
-                    case OPPFYLT -> Utfall.OPPFYLT;
-                    case IKKE_OPPFYLT -> Utfall.IKKE_OPPFYLT;
-                    case IKKE_VURDERT -> throw new IllegalStateException("Skal ikke komme perioder som ikke er vurdert til uttak.");
-                };
-                map.put(new LukketPeriode(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato()), utfall);
-            }
-        );
+                    var utfall = switch (periode.getResultat()) {
+                        case OPPFYLT -> Utfall.OPPFYLT;
+                        case IKKE_OPPFYLT -> Utfall.IKKE_OPPFYLT;
+                        case IKKE_VURDERT -> throw new IllegalStateException("Skal ikke komme perioder som ikke er vurdert til uttak.");
+                    };
+                    map.put(new LukketPeriode(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato()), utfall);
+                }
+            );
         return map;
     }
 
@@ -261,7 +265,7 @@ public class MapInputTilUttakTjeneste {
     private HashMap<String, List<Vilkårsperiode>> toInngangsvilkår(Vilkårene vilkårene) {
         final HashMap<String, List<Vilkårsperiode>> inngangsvilkår = new HashMap<>();
         vilkårene.getVilkårene().forEach(v -> {
-            if (v.getVilkårType() == VilkårType.BEREGNINGSGRUNNLAGVILKÅR) {
+            if (v.getVilkårType() == VilkårType.BEREGNINGSGRUNNLAGVILKÅR && !enableBekreftUttak) {
                 return;
             }
             final List<Vilkårsperiode> vilkårsperioder = v.getPerioder()

@@ -35,7 +35,6 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.Beregningsgrunnla
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
-import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal.PSBKompletthetSjekkerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.PSBKompletthetsjekker;
 
@@ -120,11 +119,10 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             bestiltEtterlysningRepository.lagre(manglendeBestillinger);
             var aktørerDetSkalEtterlysesFra = manglendeBestillinger.stream()
                 .map(BestiltEtterlysning::getArbeidsgiver)
+                .distinct()
+                .map(arbeidsgiver -> arbeidsgiver != null ? new Mottaker(arbeidsgiver.getIdentifikator(), arbeidsgiver.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID) : new Mottaker(ref.getAktørId().getAktørId(), IdType.AKTØRID))
                 .collect(Collectors.toSet());
-            for (Arbeidsgiver arbeidsgiver : aktørerDetSkalEtterlysesFra) {
-                var mottaker = arbeidsgiver != null ? new Mottaker(arbeidsgiver.getIdentifikator(), arbeidsgiver.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID) : new Mottaker(ref.getAktørId().getAktørId(), IdType.AKTØRID);
-                sendBrev(ref.getBehandlingId(), DokumentMalType.fraKode(kompletthetsAksjon.getDokumentMalType().getKode()), mottaker);
-            }
+            sendBrev(ref.getBehandlingId(), DokumentMalType.fraKode(kompletthetsAksjon.getDokumentMalType().getKode()), aktørerDetSkalEtterlysesFra);
         }
     }
 
@@ -140,13 +138,18 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             var brukerBrev = arbeidsgiverDetSkalEtterlysesFra.stream()
                 .map(PeriodeMedMangler::getPeriode)
                 .map(it -> new BestiltEtterlysning(ref.getFagsakId(), ref.getBehandlingId(), it, null, aksjon.getDokumentMalType().getKode()))
-                .filter(it -> bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeFraSammeBehandling(it)))
+                .filter(it -> bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeBestiltTidligere(it)))
+                .filter(it -> bestilteEtterlysninger.stream().noneMatch(at -> at.erBestiltTilSammeMottakerIDenneBehandlingen(it)))
                 .collect(Collectors.toSet());
 
             var arbeidsgiverBrev = arbeidsgiverDetSkalEtterlysesFra.stream()
-                .map(it -> it.getMangler().stream().map(mapTilBestilling(ref, aksjon, it)).collect(Collectors.toSet()))
+                .map(it -> it.getMangler()
+                    .stream()
+                    .map(mapTilBestilling(ref, aksjon, it))
+                    .collect(Collectors.toSet()))
                 .flatMap(Collection::stream)
-                .filter(it -> bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeFraSammeBehandling(it)))
+                .filter(it -> erIkkeBestiltTidligere(bestilteEtterlysninger, it))
+                .filter(it -> erIkkeSendtBrevTilSammeMottakerIDenneBehandlingen(bestilteEtterlysninger, it))
                 .collect(Collectors.toSet());
 
             bestilt.addAll(brukerBrev);
@@ -157,6 +160,14 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             throw new IllegalArgumentException("Ukjent aksjonspunkt definisjon " + aksjonspunktDefinisjon);
         }
 
+    }
+
+    private boolean erIkkeSendtBrevTilSammeMottakerIDenneBehandlingen(List<BestiltEtterlysning> bestilteEtterlysninger, BestiltEtterlysning it) {
+        return bestilteEtterlysninger.stream().noneMatch(at -> at.erBestiltTilSammeMottakerIDenneBehandlingen(it));
+    }
+
+    private boolean erIkkeBestiltTidligere(List<BestiltEtterlysning> bestilteEtterlysninger, BestiltEtterlysning it) {
+        return bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeBestiltTidligere(it));
     }
 
     private Function<ManglendeVedlegg, BestiltEtterlysning> mapTilBestilling(BehandlingReferanse ref, KompletthetsAksjon aksjon, PeriodeMedMangler it) {
@@ -193,7 +204,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     }
 
     private BehandleStegResultat legacykompletthetHåndtering(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, true, true);
 
         if (perioderTilVurdering.isEmpty()) {
             avbrytAksjonspunktHvisTilstede(kontekst);
@@ -204,7 +215,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         var relevanteKompletthetsvurderinger = kompletthetsVurderinger.entrySet()
             .stream()
             .filter(it -> perioderTilVurdering.contains(it.getKey()))
-            .collect(Collectors.toList());
+            .toList();
 
         if (relevanteKompletthetsvurderinger.isEmpty()) {
             avbrytAksjonspunktHvisTilstede(kontekst);
@@ -222,9 +233,10 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         }
     }
 
-    private void sendBrev(Long behandlingId, DokumentMalType dokumentMalType, Mottaker mottaker) {
-        BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, dokumentMalType, new MottakerDto(mottaker.id, mottaker.type.toString()));
-        dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN);
+    private void sendBrev(Long behandlingId, DokumentMalType dokumentMalType, Set<Mottaker> mottakere) {
+        var brevBestillinger = mottakere.stream().map(mottaker -> new BestillBrevDto(behandlingId, dokumentMalType, new MottakerDto(mottaker.id, mottaker.type.toString())))
+            .collect(Collectors.toList());
+        dokumentBestillerApplikasjonTjeneste.bestillDokument(brevBestillinger, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 
 }

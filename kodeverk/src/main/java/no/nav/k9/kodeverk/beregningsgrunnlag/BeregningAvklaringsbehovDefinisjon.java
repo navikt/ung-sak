@@ -74,6 +74,9 @@ public enum BeregningAvklaringsbehovDefinisjon implements Kodeverdi {
     FASTSETT_BEREGNINGSGRUNNLAG_TIDSBEGRENSET_ARBEIDSFORHOLD(
             BeregningAvklaringsbehovKodeDefinition.FASTSETT_BEREGNINGSGRUNNLAG_TIDSBEGRENSET_ARBEIDSFORHOLD_KODE,
             "Fastsett beregningsgrunnlag for tidsbegrenset arbeidsforhold"),
+    VURDER_REFUSJON_BERGRUNN(
+        BeregningAvklaringsbehovKodeDefinition.VURDER_REFUSJON_BERGRUNN,
+        "Vurder endring i refusjon refusjon"),
 
     UNDEFINED,
     ;

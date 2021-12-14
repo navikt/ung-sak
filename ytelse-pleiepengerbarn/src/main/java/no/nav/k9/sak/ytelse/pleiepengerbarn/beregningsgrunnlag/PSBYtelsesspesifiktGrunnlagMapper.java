@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
 import java.math.BigDecimal;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,16 +31,16 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
-public class PsbYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<PleiepengerSyktBarnGrunnlag> {
+public class PSBYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<PleiepengerSyktBarnGrunnlag> {
 
     private UttakTjeneste uttakRestKlient;
 
-    public PsbYtelsesspesifiktGrunnlagMapper() {
+    public PSBYtelsesspesifiktGrunnlagMapper() {
         // for proxy
     }
 
     @Inject
-    public PsbYtelsesspesifiktGrunnlagMapper(UttakTjeneste uttakRestKlient) {
+    public PSBYtelsesspesifiktGrunnlagMapper(UttakTjeneste uttakRestKlient) {
         this.uttakRestKlient = uttakRestKlient;
     }
 
@@ -48,16 +48,19 @@ public class PsbYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtel
     public PleiepengerSyktBarnGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         var uttaksplan = uttakRestKlient.hentUttaksplan(ref.getBehandlingUuid(), false);
 
-        var utbetalingsgrader = uttaksplan.getPerioder()
-            .entrySet()
-            .stream()
-            .filter(it -> vilkårsperiode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getKey().getFom(), it.getKey().getTom())))
-            .flatMap(e -> lagUtbetalingsgrad(e.getKey(), e.getValue()).entrySet().stream())
-            .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())))
-            .entrySet()
-            .stream()
-            .map(e -> new UtbetalingsgradPrAktivitetDto(e.getKey(), e.getValue()))
-            .collect(Collectors.toList());
+        List<UtbetalingsgradPrAktivitetDto> utbetalingsgrader = new ArrayList<>();
+        if (uttaksplan != null) {
+            utbetalingsgrader = uttaksplan.getPerioder()
+                .entrySet()
+                .stream()
+                .filter(it -> vilkårsperiode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getKey().getFom(), it.getKey().getTom())))
+                .flatMap(e -> lagUtbetalingsgrad(e.getKey(), e.getValue()).entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())))
+                .entrySet()
+                .stream()
+                .map(e -> new UtbetalingsgradPrAktivitetDto(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
+        }
 
         return new PleiepengerSyktBarnGrunnlag(utbetalingsgrader);
     }

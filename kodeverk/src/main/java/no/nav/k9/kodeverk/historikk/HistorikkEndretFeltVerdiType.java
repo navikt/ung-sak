@@ -59,6 +59,10 @@ public enum HistorikkEndretFeltVerdiType implements Kodeverdi {
     IKKE_OPPFYLT("IKKE_OPPFYLT", "ikke oppfylt"),
     OPPFYLT("OPPFYLT", "oppfylt"),
 
+    /** Vilkår - Opptjening. */
+    OPPFYLT_8_47_A("OPPFYLT_8_47_A", "oppfylt jf § 8-47 bokstav A"),
+    OPPFYLT_8_47_B("OPPFYLT_8_47_B", "oppfylt jf § 8-47 bokstav B"),
+
     /** Risk. */
     INGEN_INNVIRKNING("INGEN_INNVIRKNING", "Faresignalene hadde ingen innvirkning på behandlingen"),
     INNVIRKNING("INNVIRKNING", "Faresignalene hadde innvirkning på behandlingen"),

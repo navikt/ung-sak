@@ -114,6 +114,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     FORDEL_BEREGNINGSGRUNNLAG(AksjonspunktKodeDefinisjon.FORDEL_BEREGNINGSGRUNNLAG_KODE,
             AksjonspunktType.MANUELL, "Fordel beregningsgrunnlag", BehandlingStatus.UTREDES, BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG, VurderingspunktType.UT,
             UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_FORDELING, TOTRINN, EnumSet.of(OMP, PSB)),
+    VURDER_REFUSJON_BERGRUNN(AksjonspunktKodeDefinisjon.VURDER_REFUSJON_BERGRUNN_KODE,
+        AksjonspunktType.MANUELL, "Vurder refusjon beregningsgrunnlag", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_REF_BERGRUNN, VurderingspunktType.UT,
+        UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_FORDELING, TOTRINN, EnumSet.of(PSB)),
     FASTSETT_BEREGNINGSGRUNNLAG_TIDSBEGRENSET_ARBEIDSFORHOLD(
             AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_TIDSBEGRENSET_ARBEIDSFORHOLD_KODE, AksjonspunktType.MANUELL,
             "Fastsett beregningsgrunnlag for tidsbegrenset arbeidsforhold", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG,
@@ -303,6 +306,12 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_OMS_UTVIDET_RETT(AksjonspunktKodeDefinisjon.VURDER_OMS_UTVIDET_RETT,
             AksjonspunktType.MANUELL, "Utvidet Rett", BehandlingStatus.UTREDES, BehandlingStegType.MANUELL_VILKÅRSVURDERING, VurderingspunktType.UT,
             VilkårType.UTVIDETRETT, SkjermlenkeType.FAKTA_OM_UTVIDETRETT, TOTRINN, EnumSet.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO)),
+    OVERSTYR_BEREGNING_INPUT(AksjonspunktKodeDefinisjon.OVERSTYR_BEREGNING_INPUT,
+        AksjonspunktType.MANUELL, "Overstyr input beregning", BehandlingStatus.UTREDES, BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT,
+        UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, TOTRINN, EnumSet.of(PSB)),
+    AUTO_VENT_PÅ_SØKNAD_FOR_PERIODE(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_SØKNAD_FOR_PERIODE,
+        AksjonspunktType.AUTOPUNKT, "Venter på punsjet søknad", BehandlingStatus.UTREDES, BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT,
+        UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, ENTRINN, TILBAKE, AVBRYTES, EnumSet.of(PSB)),
 
     // Gruppe: 92xx - Pleiepenger
     VURDER_NATTEVÅK(AksjonspunktKodeDefinisjon.VURDER_NATTEVÅK, AksjonspunktType.MANUELL,
