@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
+package no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.when;
@@ -23,6 +23,7 @@ import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning.InntektskategoriHistorikkTjeneste;
 
 public class InntektskategoriHistorikkTjenesteTest {
 

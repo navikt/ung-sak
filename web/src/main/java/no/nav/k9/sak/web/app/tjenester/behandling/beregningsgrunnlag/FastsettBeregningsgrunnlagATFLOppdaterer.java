@@ -21,7 +21,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLDtoer;
-import no.nav.k9.sak.web.app.tjenester.behandling.historikk.FastsettBeregningsgrunnlagATFLHistorikkTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning.FastsettBeregningsgrunnlagATFLHistorikkTjeneste;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = FastsettBeregningsgrunnlagATFLDtoer.class, adapter = AksjonspunktOppdaterer.class)

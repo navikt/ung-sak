@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
+package no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -82,8 +82,8 @@ public class VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste {
 
         næringEndring.ifPresent(inntektEndring ->
             historikkAdapter.tekstBuilder().medEndretFelt(HistorikkEndretFeltType.BRUTTO_NAERINGSINNTEKT,
-                varigEndretNæringEndring.getFraVerdi() != null && varigEndretNæringEndring.getFraVerdi() ? inntektEndring.getFraInntekt().orElse(null) : null,
-                inntektEndring.getTilInntekt()));
+                varigEndretNæringEndring.getFraVerdi() != null && varigEndretNæringEndring.getFraVerdi() ? inntektEndring.getFraBeløp().orElse(null) : null,
+                inntektEndring.getTilBeløp()));
     }
 
     private HistorikkEndretFeltVerdiType konvertBooleanTilVarigEndringEndretVerdiType(Boolean endringNæring) {

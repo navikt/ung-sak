@@ -4,8 +4,8 @@ import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 public class InntektskategoriEndring {
 
-    private Inntektskategori fraVerdi;
-    private Inntektskategori tilVerdi;
+    private final Inntektskategori fraVerdi;
+    private final Inntektskategori tilVerdi;
 
     public InntektskategoriEndring(Inntektskategori fraVerdi, Inntektskategori tilVerdi) {
         this.fraVerdi = fraVerdi;

@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 
 public class RefusjonEndring {
 
-    private BigDecimal fraRefusjon;
-    private BigDecimal tilRefusjon;
+    private final BigDecimal fraRefusjon;
+    private final BigDecimal tilRefusjon;
 
     public RefusjonEndring(BigDecimal fraRefusjon, BigDecimal tilRefusjon) {
         this.fraRefusjon = fraRefusjon;

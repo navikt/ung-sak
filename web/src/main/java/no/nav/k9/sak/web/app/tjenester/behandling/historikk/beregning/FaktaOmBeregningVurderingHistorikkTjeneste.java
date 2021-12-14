@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
+package no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning;
 
 import static no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType.ENDRING_TIDSBEGRENSET_ARBEIDSFORHOLD;
 import static no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType.FRILANSVIRKSOMHET;
