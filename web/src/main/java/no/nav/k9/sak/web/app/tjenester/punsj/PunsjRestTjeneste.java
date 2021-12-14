@@ -54,7 +54,7 @@ public class PunsjRestTjeneste {
     @Path("/journalpost/uferdig")
     @Consumes(MediaType.APPLICATION_JSON)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getUferdigJournalpostIderPrAktoer(@Parameter(description = "Inneholder kode til brevmal og data som skal flettes inn i brevet") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) UferdigJournalpostSøkDto dto) {
+    public Response getUferdigJournalpostIderPrAktoer(@Parameter(description = "Inneholder aktørIder, der det blir søket etter uferdig journalposter i punsj") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) UferdigJournalpostSøkDto dto) {
         if (dto.getAktorIdDto() != null && dto.getAktorIdDto().getAktorId() != null) {
             Optional<JournalpostIderDto> uferdigJournalpostIderPåAktør = klient.getUferdigJournalpostIderPåAktør(dto.getAktorIdDto().getAktorId(), dto.getAktorIdDtoBarn() != null ? dto.getAktorIdDtoBarn().getAktorId() : null);
             if (uferdigJournalpostIderPåAktør.isPresent()) {
