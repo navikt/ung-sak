@@ -22,6 +22,10 @@ public class JournalpostIderDto {
     @Valid
     private List<JournalpostIdDto> journalpostIder;
 
+    @JsonProperty(value = "journalpostIderBarn")
+    @Size(max = 100)
+    @Valid
+    private List<JournalpostIdDto> journalpostIderBarn;
 
     public JournalpostIderDto() {
        // cdi
@@ -33,5 +37,13 @@ public class JournalpostIderDto {
 
     public void setJournalpostIder(List<JournalpostIdDto> journalpostIder) {
         this.journalpostIder = journalpostIder;
+    }
+
+    public List<JournalpostIdDto> getJournalpostIderBarn() {
+        return journalpostIderBarn;
+    }
+
+    public void setJournalpostIderBarn(List<JournalpostIdDto> journalpostIderBarn) {
+        this.journalpostIderBarn = journalpostIderBarn;
     }
 }

@@ -70,12 +70,15 @@ public class PunsjRestKlient {
     }
 
 
-    public Optional<JournalpostIderDto> getUferdigJournalpostIderPåAktør(String aktørId) {
+    public Optional<JournalpostIderDto> getUferdigJournalpostIderPåAktør(String aktørId, String aktørIdBarn) {
         Objects.requireNonNull(aktørId);
-        URIBuilder builder = new URIBuilder(toUri(punsjEndpoint, "/journalpost/uferdig/"+aktørId));
+        URIBuilder builder = new URIBuilder(toUri(punsjEndpoint, "/journalpost/uferdig/" + aktørId));
 
         try {
             HttpGet kall = new HttpGet(builder.build());
+            if (aktørIdBarn != null) {
+                kall.addHeader("X-Nav-AktorId-barn", aktørIdBarn);
+            }
             try (var httpResponse = restClient.execute(kall)) {
                 int responseCode = httpResponse.getStatusLine().getStatusCode();
                 if (isOk(responseCode)) {

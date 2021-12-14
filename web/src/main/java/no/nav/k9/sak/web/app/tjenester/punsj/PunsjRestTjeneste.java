@@ -54,9 +54,12 @@ public class PunsjRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path("/journalpost/uferdig")
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getUferdigJournalpostIderPrAktoer(@NotNull @QueryParam("aktoerId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørIdDto) {
+    public Response getUferdigJournalpostIderPrAktoer(
+        @NotNull @QueryParam("aktoerId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørIdDto,
+        @QueryParam("aktoerIdBarn") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørIdDtoBarn
+    ) {
         if (aktørIdDto != null && aktørIdDto.getAktorId() != null) {
-            Optional<JournalpostIderDto> uferdigJournalpostIderPåAktør = klient.getUferdigJournalpostIderPåAktør(aktørIdDto.getAktorId());
+            Optional<JournalpostIderDto> uferdigJournalpostIderPåAktør = klient.getUferdigJournalpostIderPåAktør(aktørIdDto.getAktorId(), aktørIdDtoBarn != null ? aktørIdDtoBarn.getAktorId() : null);
             if (uferdigJournalpostIderPåAktør.isPresent()) {
                 return Response.ok(uferdigJournalpostIderPåAktør.get()).build();
             }
