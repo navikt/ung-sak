@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -20,16 +20,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
@@ -38,12 +44,15 @@ import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
-import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseBuilder;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
+import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.opptjening.PSBOppgittOpptjeningFilter;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -59,6 +68,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = mock(VilkårsPerioderTilVurderingTjeneste.class);
     private Behandling behandling;
     private Fagsak fagsak;
+    private PSBOpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste;
 
     private PSBPreconditionBeregningAksjonspunktUtleder utleder;
 
@@ -76,14 +86,20 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
-        utleder = new PSBPreconditionBeregningAksjonspunktUtleder(iayTjeneste,
-            perioderTilVurderingTjeneste,
+
+        opptjeningForBeregningTjeneste = mock(PSBOpptjeningForBeregningTjeneste.class);
+        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
+            .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
+                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.PLEIEPENGER, new Periode(STP.minusMonths(1), STP),
+                    null, null, null)))));
+
+        utleder = new PSBPreconditionBeregningAksjonspunktUtleder(iayTjeneste, opptjeningForBeregningTjeneste, perioderTilVurderingTjeneste,
             fagsakRepository, true);
     }
 
     @Test
     void skal_ikkje_returnere_aksjonspunkt_med_toggle_av() {
-        utleder = new PSBPreconditionBeregningAksjonspunktUtleder(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, false);
+        utleder = new PSBPreconditionBeregningAksjonspunktUtleder(iayTjeneste, opptjeningForBeregningTjeneste, perioderTilVurderingTjeneste, fagsakRepository, false);
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
         assertThat(aksjonspunkter.size()).isEqualTo(0);
@@ -161,6 +177,21 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         assertThat(aksjonspunkter.size()).isEqualTo(1);
         assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_PÅ_SØKNAD_FOR_PERIODE);
     }
+
+    @Test
+    void skal_ikke_returnere_aksjonspunt_ved_dagpenger_av_pleiepenger() {
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.plusDays(10)));
+        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
+            .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
+                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.PLEIEPENGER_AV_DAGPENGER, new Periode(STP.minusMonths(1), STP.plusDays(10)),
+                    null, null, null)))));
+        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
+
+        var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
+
+        assertThat(aksjonspunkter.size()).isEqualTo(0);
+    }
+
 
 
     private void lagInfotrygdPsbYtelse(DatoIntervallEntitet periode) {
