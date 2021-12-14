@@ -6,22 +6,24 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 
-@ExtendWith(CdiAwareExtension.class)
-@ExtendWith(JpaExtension.class)
 class ReparerHelgehullTest {
-    @Inject
+
     private OmsorgenForGrunnlagRepository repo;
+
+    @BeforeEach
+    void setRepo() {
+        repo = new OmsorgenForGrunnlagRepository(Mockito.mock(EntityManager.class));
+    }
 
     @Test
     void BaseCase() {

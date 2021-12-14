@@ -124,7 +124,6 @@ public class OmsorgenForGrunnlagRepository {
         return optionalGrunnlag;
     }
 
-    //Forutsetter at perioder er sortert etter fomDato i stigende rekkefølge
     boolean reparerHelgehull(List<OmsorgenForPeriode> perioder) {
         perioder.sort(Comparator.comparing(p -> p.getPeriode().getFomDato()));
         ListIterator<OmsorgenForPeriode> iterator = perioder.listIterator();
