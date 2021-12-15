@@ -246,13 +246,13 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public List<BeregningsgrunnlagKobling> hentKoblingerForInnvilgedePerioder(BehandlingReferanse ref) {
+    public List<BeregningsgrunnlagKobling> hentKoblingerForPerioder(BehandlingReferanse ref, boolean ignorerAvslått) {
         var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
         var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
 
         var skjæringstidspunkter = vilkår.getPerioder()
             .stream()
-            .filter(it -> !Objects.equals(it.getUtfall(), Utfall.IKKE_OPPFYLT))
+            .filter(it -> !ignorerAvslått || !Objects.equals(it.getUtfall(), Utfall.IKKE_OPPFYLT))
             .map(VilkårPeriode::getSkjæringstidspunkt)
             .sorted()
             .distinct()

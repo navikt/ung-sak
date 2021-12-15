@@ -43,6 +43,7 @@ public class BeregningsgrunnlagRestTjeneste {
 
     static public final String PATH = "/behandling/beregningsgrunnlag";
     static public final String PATH_KOBLINGER = "/behandling/beregningsgrunnlag/koblinger";
+    static public final String PATH_KOBLINGER_FRISINN = "/behandling/beregningsgrunnlag/koblingerFRSISINN";
     static public final String PATH_ALLE = "/behandling/beregningsgrunnlag/alle";
     static public final String PATH_OVERSTYR_INPUT = "/behandling/beregningsgrunnlag/overstyrInput";
     private BehandlingRepository behandlingRepository;
@@ -93,17 +94,31 @@ public class BeregningsgrunnlagRestTjeneste {
     }
 
     @GET
-    @Operation(description = "Henter alle koblingene for angitt behandling", summary = ("Henter alle koblingene for angitt behandling"), tags = "beregningsgrunnlag")
+    @Operation(description = "Henter invilgede koblingene for angitt behandling", summary = ("Henter invilgede koblingene for angitt behandling"), tags = "beregningsgrunnlag")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(PATH_KOBLINGER)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<BeregningsgrunnlagKoblingDto> hentNøkkelknippe(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
 
-        return kalkulusTjeneste.hentKoblingerForInnvilgedePerioder(BehandlingReferanse.fra(behandling))
+        return kalkulusTjeneste.hentKoblingerForPerioder(BehandlingReferanse.fra(behandling), true)
             .stream()
             .map(it -> new BeregningsgrunnlagKoblingDto(it.getSkjæringstidspunkt(), it.getReferanse()))
             .collect(Collectors.toList());
     }
+
+    @GET
+    @Operation(description = "Henter alle koblingene for angitt behandling", summary = ("Henter alle koblingene for angitt behandling"), tags = "beregningsgrunnlag")
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @Path(PATH_KOBLINGER_FRISINN)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public List<BeregningsgrunnlagKoblingDto> hentNøkkelknippeMedAvslåttFRISINN(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        return kalkulusTjeneste.hentKoblingerForPerioder(BehandlingReferanse.fra(behandling), false)
+            .stream()
+            .map(it -> new BeregningsgrunnlagKoblingDto(it.getSkjæringstidspunkt(), it.getReferanse()))
+            .collect(Collectors.toList());
+    }
+
 
 }

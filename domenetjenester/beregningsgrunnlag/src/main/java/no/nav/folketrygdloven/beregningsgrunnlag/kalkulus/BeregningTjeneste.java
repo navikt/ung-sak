@@ -76,7 +76,7 @@ public interface BeregningTjeneste {
 
     List<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter);
 
-    List<BeregningsgrunnlagKobling> hentKoblingerForInnvilgedePerioder(BehandlingReferanse ref);
+    List<BeregningsgrunnlagKobling> hentKoblingerForPerioder(BehandlingReferanse ref, boolean ignorerAvslått);
 
     /** Deaktiverer beregningsgrunnlaget og tilhørende input. Fører til at man ikke har noen aktive beregningsgrunnlag.
      *
