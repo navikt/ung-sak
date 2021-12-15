@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -65,7 +66,7 @@ class PerioderMedInaktivitetUtlederTest {
     }
 
     @Test
-    void skal_ikke_utlede_aktivitet_hvis_ikke_aktiv_på_stp() {
+    void skal_ikke_utlede_aktivitet_hvis_ikke_aktiv_dagen_før_stp() {
         var fom = LocalDate.now();
         var tom = LocalDate.now().plusDays(14);
         var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
@@ -85,6 +86,30 @@ class PerioderMedInaktivitetUtlederTest {
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(0);
+    }
+
+    @Test
+    void skal_utlede_aktivitet_hvis_ikke_aktivitet_slutter_dagen_før_stp() {
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(14);
+        var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var brukerAktørId = AktørId.dummy();
+        iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
+            .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom.minusDays(10), fom.minusDays(1)))))));
+        var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
+
+        var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag);
+        var utledetTidslinje = utleder.utled(input);
+
+        assertThat(utledetTidslinje).hasSize(1);
+        var key = utledetTidslinje.keySet().iterator().next();
+        var segmenter = utledetTidslinje.get(key).toSegments().stream().map(LocalDateSegment::getLocalDateInterval).toList();
+        assertThat(segmenter).contains(new LocalDateInterval(fom, tom));
     }
 
     @Test
