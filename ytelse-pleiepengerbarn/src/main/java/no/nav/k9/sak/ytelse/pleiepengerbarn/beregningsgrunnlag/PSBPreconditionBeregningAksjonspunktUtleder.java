@@ -8,12 +8,10 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -35,6 +33,7 @@ import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.Beløp;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
@@ -70,11 +69,14 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
             return Collections.emptyList();
         }
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+
+        if (perioderTilVurdering.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         var eksisterendeInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(param.getRef().getFagsakId());
-
         var eksisterendeMigreringTilVurdering = finnEksisterendeMigreringTilVurdering(perioderTilVurdering, eksisterendeInfotrygdMigreringer);
-
-        List<YtelseAnvist> anvistePeriodeSomManglerSøknad = finnAnvistePerioderFraInfotrygdUtenSøknad(param, perioderTilVurdering, eksisterendeMigreringTilVurdering);
+        List<YtelseAnvist> anvistePeriodeSomManglerSøknad = finnAnvistePerioderFraInfotrygdUtenSøknad(param, perioderTilVurdering);
 
         if (!anvistePeriodeSomManglerSøknad.isEmpty()) {
             return List.of(AksjonspunktResultat.opprettForAksjonspunktMedFrist(
@@ -90,6 +92,7 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
             }
             return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT));
         }
+
         return Collections.emptyList();
     }
 
@@ -115,29 +118,30 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
             });
     }
 
-    private List<YtelseAnvist> finnAnvistePerioderFraInfotrygdUtenSøknad(AksjonspunktUtlederInput param, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, List<SakInfotrygdMigrering> eksisterendeMigreringTilVurdering) {
+    private List<YtelseAnvist> finnAnvistePerioderFraInfotrygdUtenSøknad(AksjonspunktUtlederInput param, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         var fullstendigePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(param.getBehandlingId());
         var førsteStpTilVurdering = perioderTilVurdering.stream().map(DatoIntervallEntitet::getFomDato).min(Comparator.naturalOrder()).orElseThrow();
-        var førsteMigrerteTilVurdering = eksisterendeMigreringTilVurdering.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt)
-            .min(Comparator.naturalOrder());
         InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId());
         Optional<AktørYtelse> aktørYtelse = iayGrunnlag.getAktørYtelseFraRegister(param.getAktørId());
         YtelseFilter ytelseFilter = lagInfotrygdPSBFilter(aktørYtelse);
         var anvistePerioderUtenSøknad = ytelseFilter.getFiltrertYtelser().stream()
             .flatMap(y -> y.getYtelseAnvist().stream())
-            .filter(ya -> harAnvisningEtterMigrertPeriode(førsteMigrerteTilVurdering, ya) || harAnvisningSammeÅrSomFørsteSøknad(førsteStpTilVurdering, ya))
-            .filter(ya -> fullstendigePerioder.stream().noneMatch(p -> p.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(ya.getAnvistFOM(), ya.getAnvistTOM()))))
+            .filter(ya -> !ya.getBeløp().map(Beløp::erNullEllerNulltall).orElse(true))
+            .filter(ya -> harAnvisningSammeÅrSomFørstePeriodeTilVurdering(førsteStpTilVurdering, ya))
+            .filter(ya -> !dekkesAvSøknad(fullstendigePerioder, ya, førsteStpTilVurdering.getYear()))
             .collect(Collectors.toList());
         return anvistePerioderUtenSøknad;
     }
 
-    private boolean harAnvisningSammeÅrSomFørsteSøknad(LocalDate førsteStpTilVurdering, YtelseAnvist ya) {
-        return ya.getAnvistTOM().getYear() == førsteStpTilVurdering.getYear();
+    private boolean dekkesAvSøknad(NavigableSet<DatoIntervallEntitet> fullstendigePerioder, YtelseAnvist ya, int year) {
+        var anvistFom = ya.getAnvistFOM().getYear() < year ? LocalDate.of(year, 1, 1) : ya.getAnvistFOM();
+        return fullstendigePerioder.stream().anyMatch(p -> p.getFomDato().equals(anvistFom) && !p.getTomDato().isBefore(ya.getAnvistTOM()));
     }
 
-    private Boolean harAnvisningEtterMigrertPeriode(Optional<LocalDate> førsteMigrerteTilVurdering, YtelseAnvist ya) {
-        return førsteMigrerteTilVurdering.map(stp -> ya.getAnvistFOM().isAfter(stp)).orElse(false);
+    private boolean harAnvisningSammeÅrSomFørstePeriodeTilVurdering(LocalDate førsteStpTilVurdering, YtelseAnvist ya) {
+        return ya.getAnvistTOM().getYear() >= førsteStpTilVurdering.getYear() && ya.getAnvistFOM().getYear() <= førsteStpTilVurdering.getYear();
     }
+
 
     private List<SakInfotrygdMigrering> finnEksisterendeMigreringTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer) {
         var migreringTilVurdering = eksisterendeInfotrygdMigreringer.stream()
