@@ -252,13 +252,13 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
         var skjæringstidspunkter = vilkår.getPerioder()
             .stream()
-            .filter(it -> !Objects.equals(it.getUtfall(), Utfall.IKKE_OPPFYLT))
             .map(VilkårPeriode::getSkjæringstidspunkt)
             .sorted()
             .distinct()
             .collect(Collectors.toList());
-        var referanser = hentReferanserTjeneste.finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkter, true, false);
+        var referanser = hentReferanserTjeneste.finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkter, false, false);
         return referanser.stream()
+            .filter(it -> !it.erGenerertReferanse())
             .map(it -> new BeregningsgrunnlagKobling(it.getStp(), it.getRef()))
             .collect(Collectors.toList());
     }
