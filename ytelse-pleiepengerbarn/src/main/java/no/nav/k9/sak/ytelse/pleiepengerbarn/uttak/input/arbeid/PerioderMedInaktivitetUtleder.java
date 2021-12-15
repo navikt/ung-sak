@@ -59,19 +59,20 @@ public class PerioderMedInaktivitetUtleder {
                     .collect(Collectors.toList());
                 var arbeidsgiverTidslinje = new LocalDateTimeline<>(arbeidsforholdUtenStartPåStp);
 
-                var yrkesaktivIPeriodeMedYtelse = arbeidsgiverTidslinje.intersection(periodeMedYtelse.getLocalDateInterval());
+                var justertSegment = new LocalDateSegment<>(periodeMedYtelse.getFom().minusDays(1), periodeMedYtelse.getTom(), periodeMedYtelse.getValue());
+                var yrkesaktivIPeriodeMedYtelse = arbeidsgiverTidslinje.intersection(justertSegment.getLocalDateInterval());
 
                 if (yrkesaktivIPeriodeMedYtelse.isEmpty()) {
                     continue;
                 }
 
-                var ikkeAktivPeriode = new LocalDateTimeline<>(List.of(periodeMedYtelse)).disjoint(yrkesaktivIPeriodeMedYtelse);
+                var ikkeAktivPeriode = new LocalDateTimeline<>(List.of(justertSegment)).disjoint(yrkesaktivIPeriodeMedYtelse);
 
                 if (ikkeAktivPeriode.isEmpty()) {
                     continue;
                 }
 
-                if (ikkeAktivPeriode.toSegments().stream().noneMatch(it -> Objects.equals(it.getFom(), periodeMedYtelse.getFom()))) {
+                if (ikkeAktivPeriode.toSegments().stream().noneMatch(it -> Objects.equals(it.getFom(), justertSegment.getFom()))) {
                     var segmenter = ikkeAktivPeriode.toSegments()
                         .stream()
                         .map(it -> new LocalDateSegment<>(it.getLocalDateInterval(),
@@ -91,7 +92,7 @@ public class PerioderMedInaktivitetUtleder {
         var segmenter = yrkesaktivitet.getAnsettelsesPeriode()
             .stream()
             .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), true))
-            .collect(Collectors.toList());
+            .toList();
         // Har ikke helt kontroll på aa-reg mtp overlapp her så better safe than sorry
         for (LocalDateSegment<Boolean> segment : segmenter) {
             var arbeidsforholdTidslinje = new LocalDateTimeline<>(List.of(segment));
@@ -110,7 +111,7 @@ public class PerioderMedInaktivitetUtleder {
         var relevantePermitteringer = yrkesaktivitet.getPermisjon().stream()
             .filter(it -> Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.PERMITTERING))
             .filter(it -> erStørreEllerLik100Prosent(it.getProsentsats()))
-            .collect(Collectors.toList());
+            .toList();
 
         for (Permisjon permisjon : relevantePermitteringer) {
             var permittert = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(permisjon.getFraOgMed(), permisjon.getTilOgMed(), true)));
