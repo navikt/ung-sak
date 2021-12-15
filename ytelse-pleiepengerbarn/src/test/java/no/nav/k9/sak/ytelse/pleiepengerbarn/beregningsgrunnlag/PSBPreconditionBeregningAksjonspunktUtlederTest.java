@@ -107,7 +107,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
     @Test
     void skal_returnere_aksjonspunkt_eksisterende_migrering() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP));
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP));
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(behandling.getFagsakId(), STP));
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
@@ -124,9 +124,12 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30))))));
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.plusDays(30)));
+        lagInfotrygdPsbYtelsePerioder(List.of(
+            DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
+            DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30))
+            ));
 
-        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.plusDays(2)));
+        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.plusDays(20)));
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
@@ -180,10 +183,10 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
     @Test
     void skal_ikke_returnere_aksjonspunt_ved_dagpenger_av_pleiepenger() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.plusDays(10)));
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)));
         when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
-                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.PLEIEPENGER_AV_DAGPENGER, new Periode(STP.minusMonths(1), STP.plusDays(10)),
+                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.PLEIEPENGER_AV_DAGPENGER, new Periode(STP, STP.plusDays(10)),
                     null, null, null)))));
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
 
@@ -205,7 +208,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         var ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty());
 
         var fom = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(Comparator.naturalOrder()).orElseThrow();
-        var tom = perioder.stream().map(DatoIntervallEntitet::getFomDato).max(Comparator.naturalOrder()).orElseThrow();
+        var tom = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(Comparator.naturalOrder()).orElseThrow();
 
         ytelseBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
             .medKilde(Fagsystem.INFOTRYGD)
