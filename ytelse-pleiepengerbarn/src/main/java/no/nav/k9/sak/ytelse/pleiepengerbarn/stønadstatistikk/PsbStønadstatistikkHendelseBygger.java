@@ -171,12 +171,22 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
             final Arbeidsforhold arbeidsforholdFraUttaksplan = MapFraUttaksplan.buildArbeidsforhold(toUttakArbeidType(u), u);
             final BigDecimal utbetalingsgrad = u.getUtbetalingsgrad();
 
-            if (skalFinnesAndeler(utbetalingsgrad)) {
+            /* 
+             * Sjekk på om beregningsresultatAndeler != null gjøres grunnet
+             * tidligere feil der uttaksgraden ikke ble satt til 0 når det
+             * var avslag i beregning.
+             * 
+             * Vi trenger denne sjekken videre for å kunne støtte full eksport.
+             */
+            if (beregningsresultatAndeler != null && skalFinnesAndeler(utbetalingsgrad)) {
                 final List<BeregningsresultatAndel> andeler = finnAndeler(AktivitetStatus.fraKode(a.getType()), arbeidsforholdFraUttaksplan, beregningsresultatAndeler);
                 return andeler.stream().map(andel -> {
-                    final StønadstatistikkArbeidsforhold arbeidsforhold = new StønadstatistikkArbeidsforhold(a.getType(), a.getOrganisasjonsnummer(), a.getAktørId(), andel.getArbeidsforholdRef().getReferanse());
+                    // TODO: andel.getArbeidsforholdRef().getReferanse() må byttes til eksternReferanse.
+                    final String arbeidsforholdRef = (andel.getArbeidsforholdRef() != null) ? andel.getArbeidsforholdRef().getReferanse() : null;
+                    final StønadstatistikkArbeidsforhold arbeidsforhold = new StønadstatistikkArbeidsforhold(a.getType(), a.getOrganisasjonsnummer(), a.getAktørId(), arbeidsforholdRef);
                     final int dagsats = andel.getDagsats();
                     return new StønadstatistikkUtbetalingsgrad(
+                            andel.getAktivitetStatus().getKode(),
                             arbeidsforhold,
                             u.getNormalArbeidstid(),
                             u.getFaktiskArbeidstid(),
@@ -188,6 +198,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
             } else {
                 final StønadstatistikkArbeidsforhold arbeidsforhold = new StønadstatistikkArbeidsforhold(a.getType(), a.getOrganisasjonsnummer(), a.getAktørId(), a.getArbeidsforholdId());
                 return List.of(new StønadstatistikkUtbetalingsgrad(
+                        null,
                         arbeidsforhold,
                         u.getNormalArbeidstid(),
                         u.getFaktiskArbeidstid(),
