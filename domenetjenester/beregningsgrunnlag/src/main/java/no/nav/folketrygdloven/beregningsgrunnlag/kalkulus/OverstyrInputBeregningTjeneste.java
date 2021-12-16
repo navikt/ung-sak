@@ -91,7 +91,11 @@ public class OverstyrInputBeregningTjeneste {
 
         return opptjeningAktiviteter.stream()
             .flatMap(a -> a.getOpptjeningPerioder().stream())
+            .filter(a -> !a.getPeriode().getTom().isBefore(migrertStp))
             .filter(a -> a.getType().equals(OpptjeningAktivitetType.ARBEID))
+            .collect(Collectors.groupingBy(a -> a.getArbeidsgiverOrgNummer() != null ? a.getArbeidsgiverOrgNummer() : a.getArbeidsgiverAktørId()))
+            .entrySet().stream()
+            .flatMap(e -> e.getValue().stream().findFirst().stream())
             .collect(Collectors.toList());
     }
 
