@@ -185,7 +185,7 @@ public class KompletthetForBeregningTjeneste {
         if (tidslinje.isEmpty()) {
             return orginalRelevantPeriode;
         }
-        var intersection = tidslinje.intersection(new LocalDateInterval(periode.getFomDato().minusWeeks(4), periode.getTomDato().plusWeeks(4)));
+        var intersection = tidslinje.intersection(new LocalDateInterval(orginalRelevantPeriode.getFomDato(), orginalRelevantPeriode.getTomDato()));
         if (intersection.isEmpty()) {
             return orginalRelevantPeriode;
         }
