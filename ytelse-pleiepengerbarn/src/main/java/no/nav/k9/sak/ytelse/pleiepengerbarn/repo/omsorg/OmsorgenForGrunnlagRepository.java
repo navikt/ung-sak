@@ -125,29 +125,27 @@ public class OmsorgenForGrunnlagRepository {
 
     boolean fyllHelgehull(List<OmsorgenForPeriode> perioder) {
         boolean endret = false;
-        if (perioder.size() >= 2) {
             perioder.sort(Comparator.comparing(p -> p.getPeriode().getFomDato()));
             ListIterator<OmsorgenForPeriode> iterator = perioder.listIterator();
 
-            OmsorgenForPeriode forrigePeriode = iterator.next();
+            OmsorgenForPeriode periode = iterator.next();
 
             while (iterator.hasNext()) {
-                forrigePeriode = perioder.get(iterator.previousIndex());
-                OmsorgenForPeriode periode = iterator.next();
+                OmsorgenForPeriode nestePeriode = iterator.next();
 
-                boolean tilstøtende = forrigePeriode.getPeriode().getTomDato().plusDays(1).equals(periode.getPeriode().getFomDato());
+                boolean tilstøtende = periode.getPeriode().getTomDato().plusDays(1).equals(nestePeriode.getPeriode().getFomDato());
                 if (!tilstøtende) {
                     //foretrekker å utvide IKKE_OPPFYLT periode, ellers voks alltid periode fremover
-                    if (forrigePeriode.getResultat() != Resultat.IKKE_OPPFYLT && periode.getResultat() == Resultat.IKKE_OPPFYLT) {
-                        perioder.set(iterator.previousIndex(), new OmsorgenForPeriode(periode, DatoIntervallEntitet.fra(forrigePeriode.getPeriode().getTomDato().plusDays(1), periode.getPeriode().getTomDato())));
+                    if (periode.getResultat() != Resultat.IKKE_OPPFYLT && nestePeriode.getResultat() == Resultat.IKKE_OPPFYLT) {
+                        perioder.set(iterator.previousIndex(), new OmsorgenForPeriode(nestePeriode, DatoIntervallEntitet.fra(periode.getPeriode().getTomDato().plusDays(1), nestePeriode.getPeriode().getTomDato())));
                         endret = true;
-                    } else if (påTversAvHelgErKantIKantVurderer.erKantIKant(forrigePeriode.getPeriode(), periode.getPeriode())) {
-                        perioder.set(iterator.previousIndex()-1, new OmsorgenForPeriode(forrigePeriode, DatoIntervallEntitet.fra(forrigePeriode.getPeriode().getFomDato(), periode.getPeriode().getFomDato().minusDays(1))));
+                    } else if (påTversAvHelgErKantIKantVurderer.erKantIKant(periode.getPeriode(), nestePeriode.getPeriode())) {
+                        perioder.set(iterator.previousIndex()-1, new OmsorgenForPeriode(periode, DatoIntervallEntitet.fra(periode.getPeriode().getFomDato(), nestePeriode.getPeriode().getFomDato().minusDays(1))));
                         endret = true;
                     }
                 }
+                periode = nestePeriode;
             }
-        }
         return endret;
     }
 

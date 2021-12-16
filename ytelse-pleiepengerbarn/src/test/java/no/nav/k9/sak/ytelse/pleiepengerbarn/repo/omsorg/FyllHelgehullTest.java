@@ -16,7 +16,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 
-class ReparerHelgehullTest {
+class FyllHelgehullTest {
 
     private OmsorgenForGrunnlagRepository repo;
 
