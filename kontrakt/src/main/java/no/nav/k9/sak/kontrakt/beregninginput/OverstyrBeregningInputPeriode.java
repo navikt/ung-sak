@@ -31,12 +31,28 @@ public class OverstyrBeregningInputPeriode {
     @JsonProperty("aktivitetliste")
     private List<OverstyrBeregningAktivitet> aktivitetliste;
 
+    @Valid
+    @JsonProperty("harKategoriNæring")
+    private Boolean harKategoriNæring;
+
+    @Valid
+    @JsonProperty("harKategoriFrilans")
+    private Boolean harKategoriFrilans;
+
+
     public OverstyrBeregningInputPeriode() {
     }
 
     public OverstyrBeregningInputPeriode(LocalDate skjaeringstidspunkt, List<OverstyrBeregningAktivitet> aktivitetliste) {
         this.skjaeringstidspunkt = skjaeringstidspunkt;
         this.aktivitetliste = aktivitetliste;
+    }
+
+    public OverstyrBeregningInputPeriode(LocalDate skjaeringstidspunkt, List<OverstyrBeregningAktivitet> aktivitetliste, Boolean harKategoriNæring, Boolean harKategoriFrilans) {
+        this.skjaeringstidspunkt = skjaeringstidspunkt;
+        this.aktivitetliste = aktivitetliste;
+        this.harKategoriNæring = harKategoriNæring;
+        this.harKategoriFrilans = harKategoriFrilans;
     }
 
     public LocalDate getSkjaeringstidspunkt() {

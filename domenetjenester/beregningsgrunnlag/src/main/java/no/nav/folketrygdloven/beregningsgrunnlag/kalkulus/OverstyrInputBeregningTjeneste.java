@@ -12,6 +12,8 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -19,9 +21,15 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.Ytelse;
+import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
+import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlag;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningAktivitet;
 import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningInputPeriode;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -40,6 +48,7 @@ public class OverstyrInputBeregningTjeneste {
     private BeregningPerioderGrunnlagRepository grunnlagRepository;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
+    private PåTversAvHelgErKantIKantVurderer kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
     public OverstyrInputBeregningTjeneste() {
     }
@@ -66,8 +75,43 @@ public class OverstyrInputBeregningTjeneste {
             var overstyrteAktiviteter = arbeidsaktiviteter.stream()
                 .map(a -> mapTilOverstyrAktiviteter(overstyrtInputPeriode, a))
                 .collect(Collectors.toList());
-            return new OverstyrBeregningInputPeriode(migrertStp, overstyrteAktiviteter);
+
+            var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandling.getId());
+            var ytelseGrunnlag = finnYtelseGrunnlagForMigrering(behandling, migrertStp, iayGrunnlag);
+            var harKategoriNæring = harNæring(ytelseGrunnlag);
+            var harKategoriFrilans = harFrilans(ytelseGrunnlag);
+            return new OverstyrBeregningInputPeriode(migrertStp, overstyrteAktiviteter, harKategoriNæring, harKategoriFrilans);
         }).collect(Collectors.toList());
+    }
+
+    private boolean harNæring(YtelseGrunnlag ytelseGrunnlag) {
+        return ytelseGrunnlag.getArbeidskategori().stream().anyMatch(ak -> ak.equals(Arbeidskategori.SELVSTENDIG_NÆRINGSDRIVENDE)
+            || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_FISKER)
+            || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER)
+            || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE));
+    }
+
+
+    private boolean harFrilans(YtelseGrunnlag ytelseGrunnlag) {
+        return ytelseGrunnlag.getArbeidskategori().stream().anyMatch(ak -> ak.equals(Arbeidskategori.FRILANSER)
+            || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER));
+    }
+
+
+    private YtelseGrunnlag finnYtelseGrunnlagForMigrering(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
+        var ytelseGrunnlagListe = new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandling.getAktørId()))
+            .filter(y -> y.getYtelseType().equals(FagsakYtelseType.PSB) && y.getKilde().equals(Fagsystem.INFOTRYGD))
+            .filter(y -> y.getYtelseAnvist().stream().anyMatch(ya -> {
+                var stpIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(migrertStp, migrertStp);
+                var anvistIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(ya.getAnvistFOM(), ya.getAnvistTOM());
+                return anvistIntervall.inkluderer(migrertStp) || kantIKantVurderer.erKantIKant(anvistIntervall, stpIntervall);
+            })).getFiltrertYtelser().stream()
+            .flatMap(y -> y.getYtelseGrunnlag().stream())
+            .collect(Collectors.toList());
+        if (ytelseGrunnlagListe.size() != 1) {
+            throw new IllegalStateException("Fant mer enn ett ytelsegrunnlag fra infotrygd for PSB. Fant " + ytelseGrunnlagListe.size());
+        }
+        return ytelseGrunnlagListe.get(0);
     }
 
     private Optional<InputOverstyringPeriode> finnEksisterendeOverstyring(Behandling behandling, LocalDate migrertStp) {
@@ -110,7 +154,7 @@ public class OverstyrInputBeregningTjeneste {
             matchendeOverstyring.map(InputAktivitetOverstyring::getInntektPrÅr).map(Beløp::getVerdi).map(BigDecimal::intValue).orElse(null),
             matchendeOverstyring.map(InputAktivitetOverstyring::getRefusjonPrÅr).map(Beløp::getVerdi).map(BigDecimal::intValue).orElse(null),
             matchendeOverstyring.map(InputAktivitetOverstyring::getOpphørRefusjon).orElse(null)
-            );
+        );
     }
 
     private boolean matcherArbeidsgiver(InputAktivitetOverstyring overstyrt, OpptjeningAktiviteter.OpptjeningPeriode a) {
