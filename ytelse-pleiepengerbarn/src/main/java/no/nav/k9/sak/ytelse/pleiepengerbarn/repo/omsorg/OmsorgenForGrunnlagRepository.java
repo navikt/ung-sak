@@ -110,12 +110,11 @@ public class OmsorgenForGrunnlagRepository {
                 .map(p -> new OmsorgenForPeriode(p))
                 .collect(Collectors.toList());
 
-            boolean endret = reparerHelgehull(perioderKopi);
+            boolean endret = fyllHelgehull(perioderKopi);
 
             if (endret) {
                 OmsorgenFor nyOmsorgenFor = new OmsorgenFor(omsorgenForGrunnlag.getOmsorgenFor());
                 nyOmsorgenFor.setPerioder(perioderKopi);
-                OmsorgenForGrunnlag nyttGrunnlag = new OmsorgenForGrunnlag(behandlingId, nyOmsorgenFor);
                 lagre(behandlingId, nyOmsorgenFor);
                 return hentEksisterendeGrunnlag(behandlingId);
             }
@@ -124,58 +123,31 @@ public class OmsorgenForGrunnlagRepository {
         return optionalGrunnlag;
     }
 
-    boolean reparerHelgehull(List<OmsorgenForPeriode> perioder) {
-        perioder.sort(Comparator.comparing(p -> p.getPeriode().getFomDato()));
-        ListIterator<OmsorgenForPeriode> iterator = perioder.listIterator();
+    boolean fyllHelgehull(List<OmsorgenForPeriode> perioder) {
         boolean endret = false;
+        if (perioder.size() >= 2) {
+            perioder.sort(Comparator.comparing(p -> p.getPeriode().getFomDato()));
+            ListIterator<OmsorgenForPeriode> iterator = perioder.listIterator();
 
-        while (iterator.hasNext()) {
-            OmsorgenForPeriode forrigePeriode = null;
-            if (iterator.hasPrevious()) {
+            OmsorgenForPeriode forrigePeriode = iterator.next();
+
+            while (iterator.hasNext()) {
                 forrigePeriode = perioder.get(iterator.previousIndex());
-            }
-            OmsorgenForPeriode periode = iterator.next();
+                OmsorgenForPeriode periode = iterator.next();
 
-            if (periode.getResultat() == Resultat.IKKE_VURDERT) {
-                if (iterator.hasNext()) { //foretrekke å vokse mot neste periode, dersom helgehull
-                    OmsorgenForPeriode nestePeriode = perioder.get(iterator.nextIndex());
-                    boolean tilstøtendeMotNeste = periode.getPeriode().getTomDato().plusDays(1).equals(nestePeriode.getPeriode().getFomDato());
-
-                    if (!tilstøtendeMotNeste && påTversAvHelgErKantIKantVurderer.erKantIKant(periode.getPeriode(), nestePeriode.getPeriode())) {
-                        if (nestePeriode.getResultat() != Resultat.IKKE_OPPFYLT) {
-                            OmsorgenForPeriode erstatterPeriode = new OmsorgenForPeriode(periode, DatoIntervallEntitet.fra(periode.getPeriode().getFomDato(), nestePeriode.getPeriode().getFomDato().minusDays(1)));
-                            iterator.set(erstatterPeriode);
-                            periode = erstatterPeriode;
-                            endret = true;
-                        }
+                boolean tilstøtende = forrigePeriode.getPeriode().getTomDato().plusDays(1).equals(periode.getPeriode().getFomDato());
+                if (!tilstøtende) {
+                    //foretrekker å utvide IKKE_OPPFYLT periode, ellers voks alltid periode fremover
+                    if (forrigePeriode.getResultat() != Resultat.IKKE_OPPFYLT && periode.getResultat() == Resultat.IKKE_OPPFYLT) {
+                        perioder.set(iterator.previousIndex(), new OmsorgenForPeriode(periode, DatoIntervallEntitet.fra(forrigePeriode.getPeriode().getTomDato().plusDays(1), periode.getPeriode().getTomDato())));
+                        endret = true;
+                    } else if (påTversAvHelgErKantIKantVurderer.erKantIKant(forrigePeriode.getPeriode(), periode.getPeriode())) {
+                        perioder.set(iterator.previousIndex()-1, new OmsorgenForPeriode(forrigePeriode, DatoIntervallEntitet.fra(forrigePeriode.getPeriode().getFomDato(), periode.getPeriode().getFomDato().minusDays(1))));
+                        endret = true;
                     }
-                }
-
-                if (forrigePeriode != null) {
-                    boolean tilstøtendeMotForrige = forrigePeriode.getPeriode().getTomDato().plusDays(1).equals(periode.getPeriode().getFomDato());
-
-                    if (!tilstøtendeMotForrige && påTversAvHelgErKantIKantVurderer.erKantIKant(forrigePeriode.getPeriode(), periode.getPeriode())) {
-                        if (!forrigePeriode.getResultat().equals(Resultat.IKKE_OPPFYLT)) {
-                            iterator.set(new OmsorgenForPeriode(periode, DatoIntervallEntitet.fra(forrigePeriode.getPeriode().getTomDato().plusDays(1), periode.getPeriode().getTomDato())));
-                            endret = true;
-                        }
-                    }
-                }
-            }
-
-            if (periode.getResultat() == Resultat.OPPFYLT && iterator.hasNext()) {
-                OmsorgenForPeriode nestePeriode = perioder.get(iterator.nextIndex());
-
-                boolean tilstøtendeMotNeste = periode.getPeriode().getTomDato().plusDays(1).equals(nestePeriode.getPeriode().getFomDato());
-                if (nestePeriode.getResultat() == Resultat.OPPFYLT && !tilstøtendeMotNeste && påTversAvHelgErKantIKantVurderer.erKantIKant(periode.getPeriode(), nestePeriode.getPeriode())) {
-                    //antar siste periode har mest oppdaterter opplysninger å kopiere fra
-                    OmsorgenForPeriode helgeperiode = new OmsorgenForPeriode(nestePeriode, DatoIntervallEntitet.fraOgMedTilOgMed(periode.getPeriode().getTomDato().plusDays(1), nestePeriode.getPeriode().getFomDato().minusDays(1)));
-                    iterator.add(helgeperiode);
-                    endret = true;
                 }
             }
         }
-
         return endret;
     }
 
