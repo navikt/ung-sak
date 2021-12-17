@@ -309,7 +309,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     OVERSTYR_BEREGNING_INPUT(AksjonspunktKodeDefinisjon.OVERSTYR_BEREGNING_INPUT,
         AksjonspunktType.MANUELL, "Overstyr input beregning", BehandlingStatus.UTREDES, BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, TOTRINN, EnumSet.of(PSB)),
-    AUTO_VENT_PÅ_SØKNAD_FOR_PERIODE(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_SØKNAD_FOR_PERIODE,
+    AUTO_VENT_PÅ_KOMPLETT_SØKNAD_VED_OVERGANG_FRA_INFOTRYGD(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_SØKNAD_FOR_PERIODE,
         AksjonspunktType.AUTOPUNKT, "Venter på punsjet søknad", BehandlingStatus.UTREDES, BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, ENTRINN, TILBAKE, AVBRYTES, EnumSet.of(PSB)),
 
