@@ -127,7 +127,7 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
                                                        YtelseFilter psbInfotrygdFilter, Long behandlingId) {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
         return eksisterendeMigreringTilVurdering.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt)
-            .allMatch(stp -> harNæringIInfotrygd(perioderTilVurdering, psbInfotrygdFilter, stp) &&
+            .anyMatch(stp -> harNæringIInfotrygd(perioderTilVurdering, psbInfotrygdFilter, stp) &&
                 !harOppgittNæringISøknad(iayGrunnlag, behandlingId, stp)
             );
     }
@@ -137,7 +137,7 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
                                                        YtelseFilter psbInfotrygdFilter, Long behandlingId) {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
         return eksisterendeMigreringTilVurdering.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt)
-            .allMatch(stp -> harFrilansIInfotrygd(perioderTilVurdering, psbInfotrygdFilter, stp) &&
+            .anyMatch(stp -> harFrilansIInfotrygd(perioderTilVurdering, psbInfotrygdFilter, stp) &&
                 !harOppgittFrilansISøknad(iayGrunnlag, behandlingId, stp)
             );
     }

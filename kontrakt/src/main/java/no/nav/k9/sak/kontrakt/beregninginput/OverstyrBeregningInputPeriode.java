@@ -62,4 +62,13 @@ public class OverstyrBeregningInputPeriode {
     public List<OverstyrBeregningAktivitet> getAktivitetliste() {
         return aktivitetliste;
     }
+
+    public Boolean getHarKategoriNæring() {
+        return harKategoriNæring;
+    }
+
+    public Boolean getHarKategoriFrilans() {
+        return harKategoriFrilans;
+    }
+    
 }
