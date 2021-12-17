@@ -69,8 +69,13 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
         final boolean annenSakSomMåBehandlesFørst = samtidigUttakTjeneste.isAnnenSakSomMåBehandlesFørst(ref);
         log.info("annenSakSomMåBehandlesFørst={}", annenSakSomMåBehandlesFørst);
+
         if (annenSakSomMåBehandlesFørst) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK));
+        } else if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK)) {
+            behandling.getAksjonspunktFor(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK)
+                .avbryt();
+            behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
