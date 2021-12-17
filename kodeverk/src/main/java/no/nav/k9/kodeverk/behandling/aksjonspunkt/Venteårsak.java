@@ -89,6 +89,13 @@ public enum Venteårsak implements Kodeverdi {
     FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2019("FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2019", "Mangler funksjonalitet for å behandle saken."),
     FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2020("FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2020", "Mangler funksjonalitet for å behandle saken."),
     FRISINN_VARIANT_ENDRET_INNTEKTSTYPE("FRISINN_VARIANT_ENDRET_INNTEKTSTYPE", "Mangler funksjonalitet for å behandle saken."),
+
+    // PSB INFOTRYGD MIGRERING
+    MANGLER_SØKNAD_FOR_PERIODER_I_INFOTRYGD("AVV_SOKN_IT_PERIODER", "Avventer søknad for alle perioder i infotrygd i inneværende år. Må spesialhåndteres."),
+    MANGLER_SØKNADOPPLYSNING_NÆRING("AVV_SOKN_NAERING", "Avventer søknad for næring ved direkte overgang fra infotrygd. Må spesialhåndteres."),
+    MANGLER_SØKNADOPPLYSNING_FRILANS("AVV_SOKN_FRILANS", "Avventer søknad for frilans ved direkte overgang fra infotrygd. Må spesialhåndteres."),
+
+
     ;
     public static final String KODEVERK = "VENT_AARSAK";
     private static final Map<String, Venteårsak> KODER = new LinkedHashMap<>();
