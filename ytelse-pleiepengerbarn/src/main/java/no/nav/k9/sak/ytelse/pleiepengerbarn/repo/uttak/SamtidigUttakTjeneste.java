@@ -9,8 +9,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -39,7 +37,6 @@ public class SamtidigUttakTjeneste {
     private BehandlingModellRepository behandlingModellRepository;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
     private BekreftetUttakTjeneste bekreftetUttakTjeneste;
-    private Boolean enableAvslagBeregning;
 
 
     @Inject
@@ -49,8 +46,7 @@ public class SamtidigUttakTjeneste {
                                  BehandlingRepository behandlingRepository,
                                  BehandlingModellRepository behandlingModellRepository,
                                  PleietrengendeKravprioritet pleietrengendeKravprioritet,
-                                 BekreftetUttakTjeneste bekreftetUttakTjeneste,
-                                 @KonfigVerdi(value = "psb.enable.bekreft.uttak", defaultVerdi = "false") Boolean benyttNyFlyt) {
+                                 BekreftetUttakTjeneste bekreftetUttakTjeneste) {
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.fagsakRepository = fagsakRepository;
@@ -58,7 +54,6 @@ public class SamtidigUttakTjeneste {
         this.behandlingModellRepository = behandlingModellRepository;
         this.pleietrengendeKravprioritet = pleietrengendeKravprioritet;
         this.bekreftetUttakTjeneste = bekreftetUttakTjeneste;
-        this.enableAvslagBeregning = benyttNyFlyt;
     }
 
 
@@ -161,13 +156,13 @@ public class SamtidigUttakTjeneste {
         final var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();
         final BehandlingModell modell = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType());
-        return !modell.erStegAFørStegB(steg, enableAvslagBeregning ? BehandlingStegType.VURDER_UTTAK_V2 : BehandlingStegType.VURDER_UTTAK);
+        return !modell.erStegAFørStegB(steg, BehandlingStegType.VURDER_UTTAK_V2);
     }
 
     private boolean erPåUttakssteget(BehandlingReferanse ref) {
         final var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();
-        return steg == BehandlingStegType.VURDER_UTTAK;
+        return steg == BehandlingStegType.VURDER_UTTAK_V2;
     }
 
     private Simulering simulerUttak(BehandlingReferanse ref) {
@@ -185,9 +180,6 @@ public class SamtidigUttakTjeneste {
     public boolean isEndringerMedUbesluttedeData(BehandlingReferanse ref) {
         final Simulering simulering = simulerUttak(ref);
         // Hvis en sak ikke har kommet til uttak betyr det at true returneres her.
-        if (enableAvslagBeregning && (Environment.current().isDev() || Environment.current().isLocal())) {
-            log.info("Simulering harForrigeUttaksplan={} endret={}", (simulering.getForrigeUttaksplan() != null), simulering.getUttakplanEndret());
-        }
         return simulering.getUttakplanEndret();
     }
 }

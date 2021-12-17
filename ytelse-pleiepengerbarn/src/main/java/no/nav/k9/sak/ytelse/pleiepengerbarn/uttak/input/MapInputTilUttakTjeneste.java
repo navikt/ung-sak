@@ -54,16 +54,13 @@ public class MapInputTilUttakTjeneste {
 
     private HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private String unntak;
-    private Boolean enableBekreftUttak;
 
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
-                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
-                                    @KonfigVerdi(value = "psb.enable.bekreft.uttak", defaultVerdi = "false") Boolean enableBekreftUttak) {
+                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
-        this.enableBekreftUttak = enableBekreftUttak;
     }
 
 
@@ -265,9 +262,6 @@ public class MapInputTilUttakTjeneste {
     private HashMap<String, List<Vilkårsperiode>> toInngangsvilkår(Vilkårene vilkårene) {
         final HashMap<String, List<Vilkårsperiode>> inngangsvilkår = new HashMap<>();
         vilkårene.getVilkårene().forEach(v -> {
-            if (v.getVilkårType() == VilkårType.BEREGNINGSGRUNNLAGVILKÅR && !enableBekreftUttak) {
-                return;
-            }
             final List<Vilkårsperiode> vilkårsperioder = v.getPerioder()
                 .stream()
                 .map(vp -> new Vilkårsperiode(new LukketPeriode(vp.getFom(), vp.getTom()), mapUtfall(v.getVilkårType(), vp)))

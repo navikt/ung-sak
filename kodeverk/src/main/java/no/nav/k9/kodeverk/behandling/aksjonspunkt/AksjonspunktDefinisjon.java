@@ -327,7 +327,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         "Bruker har ikke oppgitt alle arbeidsgiverne sine", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
         VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, ENTRINN, FORBLI, AVBRYTES, EnumSet.of(PSB)),
     VENT_ANNEN_PSB_SAK(AksjonspunktKodeDefinisjon.VENT_ANNEN_PSB_SAK_KODE, AksjonspunktType.MANUELL,
-        "En annen sak tilknyttet barnet må behandles frem til uttak, eller besluttes, før denne saken kan behandles videre.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR,
+        "En annen sak tilknyttet barnet må behandles frem til uttak, eller besluttes, før denne saken kan behandles videre.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK_V2, VurderingspunktType.UT, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(PSB)),
 
 
