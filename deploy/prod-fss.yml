@@ -223,6 +223,8 @@ spec:
       value: "false"
     - name: PSB_INFOTRYGD_MIGRERING
       value: "false"
+    - name: KOMPLETTHET_NY_FLYT
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
