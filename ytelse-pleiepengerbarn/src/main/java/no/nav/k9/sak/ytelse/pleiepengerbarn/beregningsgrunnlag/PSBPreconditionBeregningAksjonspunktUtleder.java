@@ -90,7 +90,7 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         List<YtelseAnvist> anvistePeriodeSomManglerSøknad = finnAnvistePerioderFraInfotrygdUtenSøknad(param, perioderTilVurdering, psbInfotrygdFilter);
 
         if (!anvistePeriodeSomManglerSøknad.isEmpty()) {
-            return List.of(ventepunkt());
+            return List.of(ventepunkt(Venteårsak.MANGLER_SØKNAD_FOR_PERIODER_I_INFOTRYGD));
         }
 
         if (!eksisterendeMigreringTilVurdering.isEmpty()) {
@@ -103,7 +103,7 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
                 eksisterendeMigreringTilVurdering,
                 psbInfotrygdFilter, param.getBehandlingId());
             if (harNæringUtenSøknad || harFrilansUtenSøknad) {
-                return List.of(ventepunkt());
+                return List.of(ventepunkt(harNæringUtenSøknad ? Venteårsak.MANGLER_SØKNADOPPLYSNING_NÆRING : Venteårsak.MANGLER_SØKNADOPPLYSNING_FRILANS));
             }
             var harKunDagpenger = harBrukerKunPleiepengerAvDagpenger(param, perioderTilVurdering, eksisterendeMigreringTilVurdering);
             if (harKunDagpenger) {
@@ -115,10 +115,10 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         return Collections.emptyList();
     }
 
-    private AksjonspunktResultat ventepunkt() {
+    private AksjonspunktResultat ventepunkt(Venteårsak venteårsak) {
         return AksjonspunktResultat.opprettForAksjonspunktMedFrist(
             AksjonspunktDefinisjon.AUTO_VENT_PÅ_KOMPLETT_SØKNAD_VED_OVERGANG_FRA_INFOTRYGD,
-            Venteårsak.AVV_DOK,
+            venteårsak,
             LocalDateTime.now().plusMonths(3));
     }
 
