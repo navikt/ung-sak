@@ -218,7 +218,7 @@ spec:
     - name: MAP_ALLE_KRAV
       value: "true"
     - name: PSB_ENABLE_BEKREFT_UTTAK
-      value: "false"
+      value: "true"
     - name: DISABLE_VURDER_TILBAKETREKK
       value: "false"
     - name: PSB_INFOTRYGD_MIGRERING
