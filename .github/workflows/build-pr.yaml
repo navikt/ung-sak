@@ -50,7 +50,7 @@ jobs:
         run: |
           mvn verify -e --batch-mode --settings ./.github/.m2/settings.xml -DtrimStackTrace=false --file pom.xml -Dfile.encoding=UTF-8
         env:
-          GH_ACCESS_TOKEN: ${{ secrets.READER_TOKEN }}
+          GH_ACCESS_TOKEN: ${{ secrets.GH_PAT }}
           DATASOURCE_HOST: localhost
           DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
 
