@@ -23,7 +23,7 @@ services:
     restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - /workspace/.devcontainer/db:/docker-entrypoint-initdb.d
+      - ./db:/docker-entrypoint-initdb.d/
     environment:
       TZ: "UTC"
       PGTZ: "UTC"
@@ -33,4 +33,4 @@ services:
 
 # Persist database information after your VM shuts down (just these two lines!)
 volumes:
-  postgres_data:
+  postgres_data: null
