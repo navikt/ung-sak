@@ -42,7 +42,7 @@
         <junit.version>5.8.2</junit.version>
         <felles.version>0.2.18</felles.version>
         <swagger.version>2.1.11</swagger.version>
-        <fp-kontrakter.version>6.0.7</fp-kontrakter.version>
+        <fp-kontrakter.version>6.1.1</fp-kontrakter.version>
         <k9format.version>5.5.20</k9format.version>
     </properties>
 
