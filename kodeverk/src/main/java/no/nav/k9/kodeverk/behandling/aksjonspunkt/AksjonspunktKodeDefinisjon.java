@@ -96,6 +96,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE = "5068";
     public static final String VURDER_TILBAKETREKK_KODE = "5090";
 
+    /** p.t. ikke i bruk i K9 */
+    @Deprecated
     public static final String VURDER_FARESIGNALER_KODE = "5095";
 
     public static final String AUTO_VENT_BRUKER_70_ÅR = "7035";

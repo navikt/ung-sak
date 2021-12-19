@@ -51,6 +51,8 @@ public enum SkjermlenkeType implements Kodeverdi {
     UTLAND("UTLAND", "Endret utland"),
     UTTAK("UTTAK", "Uttak"),
     VEDTAK("VEDTAK", "Vedtak"),
+    /** @deprecated pt. ikke i bruk i K9 */
+    @Deprecated
     VURDER_FARESIGNALER("VURDER_FARESIGNALER", "Vurder faresignaler"),
     VURDER_NATTEVÅK("VURDER_NATTEVÅK", "Vurder nattevåk"),
     VURDER_BEREDSKAP("VURDER_BEREDSKAP", "Vurder beredskap"),

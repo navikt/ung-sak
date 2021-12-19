@@ -79,12 +79,6 @@ spec:
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
       value: privat-k9-aksjonspunkthendelse
-    - name: KAFKA_HISTORIKKINNSLAG_TOPIC
-      value: privat-k9-historikkinnslag-q1
-    - name: KAFKA_RISIKOKLASSIFISERING_TOPIC
-      value: privat-k9-risk-utfor-q1
-    - name: KAFKA_KONTROLL_RESULTAT_TOPIC
-      value: privat-k9-kontroll-resultat-q1
     - name: KAFKA_DOKUMENTBESTILLING_TOPIC
       value: privat-k9-dokumenthendelse
     - name: KAFKA_INFOTRYGDFEED_TOPIC

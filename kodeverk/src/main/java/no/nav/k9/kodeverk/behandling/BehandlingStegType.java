@@ -59,6 +59,8 @@ public enum BehandlingStegType implements Kodeverdi {
     START_STEG("START", "Start behandling prosess", UTREDES),
     VARSEL_REVURDERING("VRSLREV", "Varsel om revurdering", UTREDES),
     VULOMED("VULOMED", "Vurder løpende medlemskap", UTREDES),
+    /** @deprecated pt. ikke i bruk i K9 */
+    @Deprecated(forRemoval=true)
     VURDER_FARESIGNALER("VURDER_FARESIGNALER", "Vurder faresignaler", UTREDES),
     VURDER_INNSYN("VURDINNSYN", "Vurder innsynskrav", UTREDES),
     VURDER_KOMPLETTHET("VURDERKOMPLETT", "Vurder kompletthet", UTREDES),

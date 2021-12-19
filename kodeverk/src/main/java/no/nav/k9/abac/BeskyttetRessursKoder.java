@@ -12,7 +12,6 @@ public class BeskyttetRessursKoder {
     public static final String OPPGAVESTYRING = "no.nav.abac.attributter.k9.oppgavestyring";
     public static final String PIP = "pip.tjeneste.kan.kun.kalles.av.pdp.servicebruker";
     public static final String OPPGAVESTYRING_AVDELINGENHET = "no.nav.abac.attributter.k9.oppgavestyring.avdelingsenhet";
-    public static final String RISIKOKLASSIFISERING = "no.nav.abac.attributter.k9.risikoklassifisering";
     public static final String UTTAKSPLAN = "no.nav.abac.attributter.resource.k9.uttaksplan";
 
     /**

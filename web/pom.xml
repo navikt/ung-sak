@@ -65,10 +65,6 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
-            <artifactId>risikoklassifisering</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
             <artifactId>datavarehus</artifactId>
         </dependency>
 
