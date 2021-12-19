@@ -168,17 +168,7 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-                <artifactId>fp-topics-behandlingsprosess</artifactId>
-                <version>${fp-kontrakter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
                 <artifactId>hendelse-historikk-innslag</artifactId>
-                <version>${fp-kontrakter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-                <artifactId>hendelser-kontroll-resultat</artifactId>
                 <version>${fp-kontrakter.version}</version>
             </dependency>
 
@@ -430,11 +420,6 @@
             <dependency>
                 <groupId>no.nav.k9.sak</groupId>
                 <artifactId>dokumentbestiller</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9.sak</groupId>
-                <artifactId>risikoklassifisering</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

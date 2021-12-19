@@ -85,12 +85,6 @@ spec:
       value: privat-k9-infotrygdFeedHendelse
     - name: KAFKA_FATTEVEDTAK_TOPIC
       value: privat-familie-vedtakFattet-v1
-    - name: KAFKA_HISTORIKKINNSLAG_TOPIC
-      value: privat-k9-historikkinnslag-p
-    - name: KAFKA_RISIKOKLASSIFISERING_TOPIC
-      value: privat-k9-risk-utfor-p
-    - name: KAFKA_KONTROLL_RESULTAT_TOPIC
-      value: privat-k9-kontroll-resultat-p
     - name: KAFKA_VEDTAKHENDELSE_TOPIC
       value: privat-k9-vedtakhendelse
     - name: KAFKA_STONADSTATISTIKK_TOPIC

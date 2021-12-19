@@ -40,7 +40,6 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.BEREGN_YTELSE)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
-            .medSteg(BehandlingStegType.VURDER_FARESIGNALER)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
