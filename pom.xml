@@ -43,7 +43,7 @@
         <felles.version>0.2.18</felles.version>
         <swagger.version>2.1.11</swagger.version>
         <fp-kontrakter.version>6.0.7</fp-kontrakter.version>
-        <k9format.version>5.5.20</k9format.version>
+        <k9format.version>5.7.1</k9format.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -133,20 +133,6 @@
             </dependency>
 
             <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter</groupId>
-                <artifactId>fp-kontrakter-root</artifactId>
-                <version>${fp-kontrakter.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-                <artifactId>fp-topics</artifactId>
-                <version>${fp-kontrakter.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-            <dependency>
                 <groupId>no.nav.k9.oppdrag.kontrakt</groupId>
                 <artifactId>oppdrag-kontrakter</artifactId>
                 <version>1.4</version>
@@ -160,6 +146,20 @@
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>eksterne-kontrakter</artifactId>
                 <version>0.0.15</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.foreldrepenger.kontrakter</groupId>
+                <artifactId>fp-kontrakter-root</artifactId>
+                <version>${fp-kontrakter.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
+                <artifactId>fp-topics</artifactId>
+                <version>${fp-kontrakter.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
@@ -181,11 +181,7 @@
                 <artifactId>hendelser-kontroll-resultat</artifactId>
                 <version>${fp-kontrakter.version}</version>
             </dependency>
-            <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter</groupId>
-                <artifactId>inntektsmelding-v1</artifactId>
-                <version>${fp-kontrakter.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
@@ -379,32 +375,11 @@
                 <artifactId>ytelse-omsorgspenger</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>no.nav.k9.sak.ytelse</groupId>
-                <artifactId>ytelse-pleiepengerbarn</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9.sak.ytelse</groupId>
-                <artifactId>ytelse-unntaksbehandling</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>no.nav.fpsak.nare</groupId>
-                <artifactId>fpsak-nare-core</artifactId>
-                <version>2.1.5</version>
-            </dependency>
 
             <dependency>
                 <groupId>no.nav.k9</groupId>
                 <artifactId>soknad-frisinn</artifactId>
                 <version>${k9format.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.pleiepengerbarn.uttak</groupId>
-                <artifactId>kontrakter</artifactId>
-                <version>1.1.17</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
@@ -416,7 +391,33 @@
                 <artifactId>innsyn</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
+           <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>inntektsmelding-v1</artifactId>
+                <version>${k9format.version}</version>
+            </dependency>
 
+            <dependency>
+                <groupId>no.nav.k9.sak.ytelse</groupId>
+                <artifactId>ytelse-pleiepengerbarn</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak.ytelse</groupId>
+                <artifactId>ytelse-unntaksbehandling</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.pleiepengerbarn.uttak</groupId>
+                <artifactId>kontrakter</artifactId>
+                <version>1.1.17</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.fpsak.nare</groupId>
+                <artifactId>fpsak-nare-core</artifactId>
+                <version>2.1.5</version>
+            </dependency>
 
             <!-- Prosjektets egne TEST AVHENGIGHETER -->
             <!-- NB: Definer scope der det brukes, ikke her. -->
@@ -783,6 +784,7 @@
                                     </classpath>
                                 </java>
                             </target>
+                            <skip>${maven.deploy.skip}</skip>
                         </configuration>
                     </execution>
                     <execution>
@@ -804,6 +806,7 @@
                                     </classpath>
                                 </java>
                             </target>
+                            <skip>${maven.deploy.skip}</skip>
                         </configuration>
                     </execution>
                 </executions>
@@ -836,7 +839,7 @@
             <id>jar-module</id>
             <activation>
                 <file>
-                    <exists>src/main/java</exists>
+                    <exists>./export-kontrakt</exists>
                 </file>
             </activation>
             <build>
@@ -967,4 +970,3 @@
         </repository>
     </distributionManagement>
 </project>
-
