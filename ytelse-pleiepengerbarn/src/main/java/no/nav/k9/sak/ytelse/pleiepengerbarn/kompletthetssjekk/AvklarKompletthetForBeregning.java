@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
@@ -41,7 +40,6 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
     private BeregningPerioderGrunnlagRepository grunnlagRepository;
-    private Boolean benyttNyFlyt = false;
 
     AvklarKompletthetForBeregning() {
         // for CDI proxy
@@ -50,12 +48,10 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
     @Inject
     public AvklarKompletthetForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
                                          HistorikkTjenesteAdapter historikkTjenesteAdapter,
-                                         BeregningPerioderGrunnlagRepository grunnlagRepository,
-                                         @KonfigVerdi(value = "KOMPLETTHET_NY_FLYT", defaultVerdi = "false") Boolean benyttNyFlyt) {
+                                         BeregningPerioderGrunnlagRepository grunnlagRepository) {
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.grunnlagRepository = grunnlagRepository;
-        this.benyttNyFlyt = benyttNyFlyt;
     }
 
     @Override
@@ -72,13 +68,10 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .findFirst()
                 .orElse(false));
 
-        boolean toTrinn = kanFortsette;
         // TODO: Lagre ned de som er avklart OK for fortsettelse eller om det er varsel til AG
-        if (benyttNyFlyt) {
-            toTrinn = lagreVurderinger(param, perioderMedManglendeGrunnlag, dto);
-        }
+        boolean toTrinn = lagreVurderinger(param, perioderMedManglendeGrunnlag, dto);
 
-        if (kanFortsette && !benyttNyFlyt) {
+        if (kanFortsette) {
             lagHistorikkinnslag(param, dto);
 
             return OppdateringResultat.utenTransisjon()
@@ -86,7 +79,7 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
                 .build();
         } else {
             var resultat = OppdateringResultat.utenTransisjon()
-                .medTotrinnHvis(benyttNyFlyt && toTrinn)
+                .medTotrinnHvis(toTrinn)
                 .build();
 
             resultat.skalRekjøreSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
