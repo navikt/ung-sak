@@ -186,12 +186,16 @@ public class VilkårResultatBuilder {
             return new LocalDateSegment<>(iv, nyVilkårPeriode);
         });
 
-        var vilkårPerioder = nyTimeline.toSegments().stream().map(s -> s.getValue()).collect(Collectors.toList());
+        var vilkårPerioder = nyTimeline.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
         vilkår.setPerioder(vilkårPerioder);
     }
 
     public void slettVilkårPerioder(VilkårType vilkårType, DatoIntervallEntitet periode) {
         var slettTimeline = new LocalDateTimeline<>(new LocalDateInterval(periode.getFomDato(), periode.getTomDato()), Boolean.TRUE);
         slettPerioder(vilkårType, slettTimeline);
+    }
+
+    public KantIKantVurderer getKantIKantVurderer() {
+        return kantIKantVurderer;
     }
 }

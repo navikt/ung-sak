@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk;
 
+import java.util.ArrayList;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -21,6 +22,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -135,11 +137,46 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             if (!perioderSomSkalTilbakestilles.isEmpty()) {
                 vilkårBuilder = vilkårBuilder.tilbakestill(perioderSomSkalTilbakestilles);
             }
-            for (VilkårPeriode innvilgetPeriode : innvilgedePerioder) {
-                vilkårBuilder = vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(innvilgetPeriode.getPeriode())
-                    .medPeriode(innvilgetPeriode.getPeriode()));
+            var innvilgetTidslinje = utledTidslinje(innvilgedePerioder, resultatBuilder.getKantIKantVurderer());
+            for (DatoIntervallEntitet innvilgetPeriode : innvilgetTidslinje) {
+                vilkårBuilder = vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(innvilgetPeriode)
+                    .medPeriode(innvilgetPeriode));
             }
             resultatBuilder.leggTil(vilkårBuilder);
         }
     }
+
+    private NavigableSet<DatoIntervallEntitet> utledTidslinje(Set<VilkårPeriode> innvilgedePerioder, KantIKantVurderer kantIKantVurderer) {
+        DatoIntervallEntitet periode = null;
+        var vilkårPerioder = new ArrayList<DatoIntervallEntitet>();
+
+        for (VilkårPeriode vilkårPeriode : innvilgedePerioder) {
+            if (periode == null) {
+                periode = vilkårPeriode.getPeriode();
+            } else if (kantIKantVurderer.erKantIKant(vilkårPeriode.getPeriode(), periode)) {
+                periode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), vilkårPeriode.getTom());
+            } else {
+                vilkårPerioder.add(periode);
+                periode = vilkårPeriode.getPeriode();
+            }
+        }
+        if (periode != null) {
+            vilkårPerioder.add(periode);
+        }
+        return adjustAndCompress(vilkårPerioder);
+    }
+
+    private NavigableSet<DatoIntervallEntitet> adjustAndCompress(ArrayList<DatoIntervallEntitet> vilkårPerioder) {
+        var segmenter = vilkårPerioder.stream()
+            .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true))
+            .toList();
+
+        return new LocalDateTimeline<>(segmenter)
+            .compress()
+            .toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
 }
