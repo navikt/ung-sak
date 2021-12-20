@@ -31,7 +31,7 @@
         <!-- kontrakter -->
         <dependency>
             <groupId>no.nav.folketrygdloven.kalkulus</groupId>
-            <artifactId>kontrakt</artifactId>
+            <artifactId>kalkulus-kontrakt</artifactId>
         </dependency>
 
         <!-- Prosjekt avhengigheter -->
