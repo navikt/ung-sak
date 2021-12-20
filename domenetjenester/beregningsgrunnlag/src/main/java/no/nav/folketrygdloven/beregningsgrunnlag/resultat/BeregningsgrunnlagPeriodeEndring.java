@@ -6,8 +6,8 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 
 public class BeregningsgrunnlagPeriodeEndring {
 
-    private List<BeregningsgrunnlagPrStatusOgAndelEndring> beregningsgrunnlagPrStatusOgAndelEndringer;
-    private Periode periode;
+    private final List<BeregningsgrunnlagPrStatusOgAndelEndring> beregningsgrunnlagPrStatusOgAndelEndringer;
+    private final Periode periode;
 
     public BeregningsgrunnlagPeriodeEndring(List<BeregningsgrunnlagPrStatusOgAndelEndring> beregningsgrunnlagPrStatusOgAndelEndringer, Periode periode) {
         this.beregningsgrunnlagPrStatusOgAndelEndringer = beregningsgrunnlagPrStatusOgAndelEndringer;

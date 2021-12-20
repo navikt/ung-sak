@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
+package no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,7 +7,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningsgrunnlagPrStatusOgAndelEndring;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.InntektEndring;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeløpEndring;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -33,65 +33,65 @@ class InntektHistorikkTjeneste {
     }
 
     public void lagHistorikkOmEndret(HistorikkInnslagTekstBuilder tekstBuilder, List<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer, BeregningsgrunnlagPrStatusOgAndelEndring andelEndring) {
-        Optional<InntektEndring> inntektEndring = andelEndring.getInntektEndring();
+        Optional<BeløpEndring> inntektEndring = andelEndring.getInntektEndring();
         inntektEndring.ifPresent(endring -> opprettInntektHistorikk(tekstBuilder, arbeidsforholdOverstyringer, andelEndring, endring));
     }
 
-    private void opprettInntektHistorikk(HistorikkInnslagTekstBuilder tekstBuilder, List<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer, BeregningsgrunnlagPrStatusOgAndelEndring andelEndring, InntektEndring inntektEndring) {
+    private void opprettInntektHistorikk(HistorikkInnslagTekstBuilder tekstBuilder, List<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer, BeregningsgrunnlagPrStatusOgAndelEndring andelEndring, BeløpEndring beløpEndring) {
         if (andelEndring.getAktivitetStatus().erArbeidstaker()) {
-            opprettHistorikkArbeidstakerInntekt(tekstBuilder, arbeidsforholdOverstyringer, andelEndring, inntektEndring);
+            opprettHistorikkArbeidstakerInntekt(tekstBuilder, arbeidsforholdOverstyringer, andelEndring, beløpEndring);
         } else if (andelEndring.getAktivitetStatus().erFrilanser()) {
-            opprettHistorikkFrilansinntekt(tekstBuilder, inntektEndring);
+            opprettHistorikkFrilansinntekt(tekstBuilder, beløpEndring);
         } else if (AktivitetStatus.DAGPENGER.equals(andelEndring.getAktivitetStatus())) {
-            opprettHistorikkDagpengeinntekt(tekstBuilder, inntektEndring);
+            opprettHistorikkDagpengeinntekt(tekstBuilder, beløpEndring);
         } else {
             tekstBuilder.medEndretFelt(HistorikkEndretFeltType.INNTEKT_FRA_ARBEIDSFORHOLD,
                 andelEndring.getAktivitetStatus().getNavn(),
-                inntektEndring.getFraMånedsinntekt(),
-                inntektEndring.getTilMånedsinntekt());
+                beløpEndring.getFraMånedsbeløp(),
+                beløpEndring.getTilMånedsbeløp());
         }
     }
 
-    private void opprettHistorikkArbeidstakerInntekt(HistorikkInnslagTekstBuilder tekstBuilder, List<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer, BeregningsgrunnlagPrStatusOgAndelEndring andelEndring, InntektEndring inntektEndring) {
+    private void opprettHistorikkArbeidstakerInntekt(HistorikkInnslagTekstBuilder tekstBuilder, List<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer, BeregningsgrunnlagPrStatusOgAndelEndring andelEndring, BeløpEndring beløpEndring) {
         if (OpptjeningAktivitetType.ETTERLØNN_SLUTTPAKKE.equals(andelEndring.getArbeidsforholdType())) {
-            opprettHistorikkEtterlønnSluttpakke(tekstBuilder, inntektEndring);
+            opprettHistorikkEtterlønnSluttpakke(tekstBuilder, beløpEndring);
         } else if (andelEndring.getArbeidsgiver().isPresent()) {
             opprettHistorikkArbeidsinntekt(
                 tekstBuilder,
                 arbeidsforholdOverstyringer,
                 andelEndring,
-                inntektEndring);
+                beløpEndring);
         }
     }
 
-    private void opprettHistorikkDagpengeinntekt(HistorikkInnslagTekstBuilder tekstBuilder, InntektEndring inntektEndring) {
+    private void opprettHistorikkDagpengeinntekt(HistorikkInnslagTekstBuilder tekstBuilder, BeløpEndring beløpEndring) {
         tekstBuilder.medEndretFelt(HistorikkEndretFeltType.DAGPENGER_INNTEKT,
-            inntektEndring.getFraMånedsinntekt(),
-            inntektEndring.getTilMånedsinntekt());
+            beløpEndring.getFraMånedsbeløp(),
+            beløpEndring.getTilMånedsbeløp());
     }
 
-    private void opprettHistorikkEtterlønnSluttpakke(HistorikkInnslagTekstBuilder tekstBuilder, InntektEndring inntektEndring) {
+    private void opprettHistorikkEtterlønnSluttpakke(HistorikkInnslagTekstBuilder tekstBuilder, BeløpEndring beløpEndring) {
         tekstBuilder.medEndretFelt(HistorikkEndretFeltType.FASTSETT_ETTERLØNN_SLUTTPAKKE,
-            inntektEndring.getFraMånedsinntekt(),
-            inntektEndring.getTilMånedsinntekt());
+            beløpEndring.getFraMånedsbeløp(),
+            beløpEndring.getTilMånedsbeløp());
     }
 
-    private void opprettHistorikkFrilansinntekt(HistorikkInnslagTekstBuilder tekstBuilder, InntektEndring inntektEndring) {
+    private void opprettHistorikkFrilansinntekt(HistorikkInnslagTekstBuilder tekstBuilder, BeløpEndring beløpEndring) {
         tekstBuilder.medEndretFelt(
             HistorikkEndretFeltType.FRILANS_INNTEKT,
-            inntektEndring.getFraMånedsinntekt(),
-            inntektEndring.getTilMånedsinntekt());
+            beløpEndring.getFraMånedsbeløp(),
+            beløpEndring.getTilMånedsbeløp());
     }
 
-    private void opprettHistorikkArbeidsinntekt(HistorikkInnslagTekstBuilder tekstBuilder, List<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer, BeregningsgrunnlagPrStatusOgAndelEndring andelEndring, InntektEndring inntektEndring) {
+    private void opprettHistorikkArbeidsinntekt(HistorikkInnslagTekstBuilder tekstBuilder, List<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer, BeregningsgrunnlagPrStatusOgAndelEndring andelEndring, BeløpEndring beløpEndring) {
         String arbeidsforholdInfo = arbeidsgiverHistorikkinnslag.lagArbeidsgiverHistorikkinnslagTekst(
             andelEndring.getArbeidsgiver().get(),
             andelEndring.getArbeidsforholdRef(),
             arbeidsforholdOverstyringer);
         tekstBuilder.medEndretFelt(HistorikkEndretFeltType.INNTEKT_FRA_ARBEIDSFORHOLD,
             arbeidsforholdInfo,
-            inntektEndring.getFraMånedsinntekt(),
-            inntektEndring.getTilMånedsinntekt());
+            beløpEndring.getFraMånedsbeløp(),
+            beløpEndring.getTilMånedsbeløp());
     }
 
 }

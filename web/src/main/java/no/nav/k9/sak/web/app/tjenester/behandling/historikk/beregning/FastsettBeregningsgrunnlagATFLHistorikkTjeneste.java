@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
+package no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,7 +13,7 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningsgrunnlagEndring;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningsgrunnlagPrStatusOgAndelEndring;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.InntektEndring;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeløpEndring;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -79,9 +79,9 @@ public class FastsettBeregningsgrunnlagATFLHistorikkTjeneste {
 
 
         if (frilansEndring.flatMap(BeregningsgrunnlagPrStatusOgAndelEndring::getInntektEndring).isPresent()) {
-            InntektEndring endringFL = frilansEndring.flatMap(BeregningsgrunnlagPrStatusOgAndelEndring::getInntektEndring).get();
-            BigDecimal fraVerdi = endringFL.getFraInntekt().orElse(null);
-            BigDecimal tilVerdi = endringFL.getTilInntekt();
+            BeløpEndring endringFL = frilansEndring.flatMap(BeregningsgrunnlagPrStatusOgAndelEndring::getInntektEndring).get();
+            BigDecimal fraVerdi = endringFL.getFraBeløp().orElse(null);
+            BigDecimal tilVerdi = endringFL.getTilBeløp();
             if (!Objects.equals(fraVerdi, tilVerdi)) {
                 historikkAdapter.tekstBuilder()
                     .medNavnOgGjeldendeFra(HistorikkEndretFeltType.FRILANS_INNTEKT, null, fom)
@@ -108,8 +108,8 @@ public class FastsettBeregningsgrunnlagATFLHistorikkTjeneste {
                     endretAndel.getArbeidsgiver(),
                     Optional.ofNullable(endretAndel.getArbeidsforholdRef()),
                     arbeidsforholOverstyringer);
-                var fra = endretAndel.getInntektEndring().get().getFraInntekt();
-                var til = endretAndel.getInntektEndring().get().getTilInntekt();
+                var fra = endretAndel.getInntektEndring().get().getFraBeløp();
+                var til = endretAndel.getInntektEndring().get().getTilBeløp();
                 if (fra.isEmpty() || fra.get().compareTo(til) != 0) {
                     historikkAdapter.tekstBuilder()
                         .medNavnOgGjeldendeFra(HistorikkEndretFeltType.INNTEKT_FRA_ARBEIDSFORHOLD, null, fom)

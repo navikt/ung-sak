@@ -10,22 +10,22 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class BeregningsgrunnlagPrStatusOgAndelEndring {
 
-    private InntektEndring inntektEndring;
-    private InntektskategoriEndring inntektskategoriEndring;
-    private AktivitetStatus aktivitetStatus;
-    private OpptjeningAktivitetType arbeidsforholdType;
-    private Arbeidsgiver arbeidsgiver;
-    private InternArbeidsforholdRef arbeidsforholdRef;
-    private RefusjonEndring refusjonEndring;
+    private final BeløpEndring beløpEndring;
+    private final InntektskategoriEndring inntektskategoriEndring;
+    private final AktivitetStatus aktivitetStatus;
+    private final OpptjeningAktivitetType arbeidsforholdType;
+    private final Arbeidsgiver arbeidsgiver;
+    private final InternArbeidsforholdRef arbeidsforholdRef;
+    private final RefusjonEndring refusjonEndring;
 
-    public BeregningsgrunnlagPrStatusOgAndelEndring(InntektEndring inntektEndring,
+    public BeregningsgrunnlagPrStatusOgAndelEndring(BeløpEndring beløpEndring,
                                                     InntektskategoriEndring inntektskategoriEndring,
                                                     RefusjonEndring refusjonEndring,
                                                     AktivitetStatus aktivitetStatus,
                                                     OpptjeningAktivitetType arbeidsforholdType,
                                                     Arbeidsgiver arbeidsgiver,
                                                     InternArbeidsforholdRef arbeidsforholdRef) {
-        this.inntektEndring = inntektEndring;
+        this.beløpEndring = beløpEndring;
         this.inntektskategoriEndring = inntektskategoriEndring;
         this.aktivitetStatus = aktivitetStatus;
         this.arbeidsforholdType = arbeidsforholdType;
@@ -34,8 +34,8 @@ public class BeregningsgrunnlagPrStatusOgAndelEndring {
         this.refusjonEndring = refusjonEndring;
     }
 
-    public Optional<InntektEndring> getInntektEndring() {
-        return Optional.ofNullable(inntektEndring);
+    public Optional<BeløpEndring> getInntektEndring() {
+        return Optional.ofNullable(beløpEndring);
     }
 
     public Optional<InntektskategoriEndring> getInntektskategoriEndring() {

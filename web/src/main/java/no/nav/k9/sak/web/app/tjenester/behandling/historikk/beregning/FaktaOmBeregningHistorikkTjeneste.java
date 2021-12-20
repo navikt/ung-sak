@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
+package no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning;
 
 import java.util.List;
 

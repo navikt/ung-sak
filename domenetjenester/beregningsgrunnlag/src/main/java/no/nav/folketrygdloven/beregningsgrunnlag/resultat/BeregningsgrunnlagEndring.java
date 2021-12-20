@@ -4,7 +4,7 @@ import java.util.List;
 
 public class BeregningsgrunnlagEndring {
 
-    private List<BeregningsgrunnlagPeriodeEndring> beregningsgrunnlagPeriodeEndringer;
+    private final List<BeregningsgrunnlagPeriodeEndring> beregningsgrunnlagPeriodeEndringer;
 
     public BeregningsgrunnlagEndring(List<BeregningsgrunnlagPeriodeEndring> beregningsgrunnlagPeriodeEndringer) {
         this.beregningsgrunnlagPeriodeEndringer = beregningsgrunnlagPeriodeEndringer;
