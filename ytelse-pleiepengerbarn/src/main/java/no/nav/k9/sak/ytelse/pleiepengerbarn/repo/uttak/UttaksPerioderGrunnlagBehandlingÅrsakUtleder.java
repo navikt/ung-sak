@@ -11,7 +11,7 @@ import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak.BehandlingÅrsakUtleder;
 
 @ApplicationScoped
-@GrunnlagRef("UttaksPerioderGrunnlag")
+@GrunnlagRef("UttakPerioderGrunnlag")
 @FagsakYtelseTypeRef("PSB")
 public class UttaksPerioderGrunnlagBehandlingÅrsakUtleder implements BehandlingÅrsakUtleder {
 
