@@ -33,7 +33,7 @@ public class MapEndringsresultat {
     }
 
     private static no.nav.folketrygdloven.beregningsgrunnlag.resultat.RefusjonoverstyringEndring mapEndringRefusjon(RefusjonoverstyringEndring refusjonoverstyringEndring) {
-        if (refusjonoverstyringEndring.getRefusjonperiodeEndringer() ==  null) {
+        if (refusjonoverstyringEndring ==  null) {
             return null;
         }
         return new no.nav.folketrygdloven.beregningsgrunnlag.resultat.RefusjonoverstyringEndring(
