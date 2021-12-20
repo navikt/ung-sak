@@ -7,6 +7,7 @@ import java.util.Objects;
 public class ArkivDokument {
     private String dokumentId;
     private String tittel;
+    private String brevkode;
     private List<ArkivDokumentHentbart> tilgjengeligSom; // hvilke formater som er tilgjengelig fra joark
     private List<ArkivDokumentVedlegg> interneVedlegg; // sammensatt dokument der vedlegg er scannet inn i ett dokument
 
@@ -20,6 +21,14 @@ public class ArkivDokument {
 
     public String getTittel() {
         return tittel;
+    }
+
+    public String getBrevkode() {
+        return brevkode;
+    }
+
+    public void setBrevkode(String brevkode) {
+        this.brevkode = brevkode;
     }
 
     public void setTittel(String tittel) {
@@ -77,6 +86,11 @@ public class ArkivDokument {
 
         public Builder medTittel(String tittel) {
             this.arkivDokument.setTittel(tittel);
+            return this;
+        }
+
+        public Builder medBrevkode(String brevkode) {
+            this.arkivDokument.setBrevkode(brevkode);
             return this;
         }
 

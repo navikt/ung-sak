@@ -184,6 +184,7 @@ public class DokumentRestTjeneste {
         dto.setJournalpostId(arkivJournalPost.getJournalpostId());
         dto.setDokumentId(arkivDokument.getDokumentId());
         dto.setTittel(arkivDokument.getTittel());
+        dto.setBrevkode(arkivDokument.getBrevkode());
         dto.setKommunikasjonsretning(arkivJournalPost.getKommunikasjonsretning());
         dto.setTidspunkt(arkivJournalPost.getTidspunkt());
 
