@@ -56,7 +56,7 @@ public class InngangsvilkårFellesTjeneste {
         var tjeneste = getPerioderTilVurderingTjeneste(behandling);
         var perioderTilVurdering = tjeneste.utled(behandlingId, vilkårType);
 
-        if (enableForlengelse) {
+        if (enableForlengelse && behandling.getOriginalBehandlingId().isPresent()) {
             // Trekk fra periodene som er forlengelse
             var forlengelseTjeneste = ForlengelseTjeneste.finnTjeneste(this.forlengelseTjeneste, behandling.getFagsakYtelseType(), behandling.getType());
 

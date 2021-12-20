@@ -87,14 +87,14 @@ public class VilkårPeriodeBuilder {
 
     public VilkårPeriodeBuilder forlengelseAv(VilkårPeriode eksisteredeVurdering) {
         this.entitet.setManueltVurdert(eksisteredeVurdering.getErManueltVurdert());
-        this.entitet.setUtfall(eksisteredeVurdering.getUtfall());
-        this.entitet.setOverstyrtUtfall(eksisteredeVurdering.getOverstyrtUtfall());
         this.entitet.setAvslagsårsak(eksisteredeVurdering.getAvslagsårsak());
-        this.entitet.setBegrunnelse(eksisteredeVurdering.getBegrunnelse());
-        this.entitet.setUtfallMerknad(eksisteredeVurdering.getMerknad());
         this.entitet.setMerknadParametere(eksisteredeVurdering.getMerknadParametere());
         this.entitet.setRegelEvaluering(eksisteredeVurdering.getRegelEvaluering());
         this.entitet.setRegelInput(eksisteredeVurdering.getRegelInput());
+        this.entitet.setUtfall(eksisteredeVurdering.getUtfall());
+        this.entitet.setOverstyrtUtfall(eksisteredeVurdering.getOverstyrtUtfall());
+        this.entitet.setBegrunnelse(eksisteredeVurdering.getBegrunnelse());
+        this.entitet.setUtfallMerknad(eksisteredeVurdering.getMerknad());
         return this;
     }
 
