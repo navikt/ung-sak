@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
 import no.nav.k9.formidling.kontrakt.kodeverk.Mottaker;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -31,12 +30,10 @@ import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysnin
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagSteg;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal.PSBKompletthetSjekkerTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.PSBKompletthetsjekker;
 
 @FagsakYtelseTypeRef("PSB")
 @BehandlingStegRef(kode = "KOMPLETT_FOR_BEREGNING")
@@ -45,12 +42,9 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.PSBKompletthetsjek
 public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
-    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private PSBKompletthetSjekkerTjeneste kompletthetSjekkerTjeneste;
     private BestiltEtterlysningRepository bestiltEtterlysningRepository;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
-    private PSBKompletthetsjekker kompletthetsjekker;
-    private boolean benyttNyFlyt = false;
 
     protected VurderKompletthetForBeregningSteg() {
         // for CDI proxy
@@ -58,20 +52,14 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
 
     @Inject
     public VurderKompletthetForBeregningSteg(BehandlingRepository behandlingRepository,
-                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                              PSBKompletthetSjekkerTjeneste kompletthetSjekkerTjeneste,
                                              BestiltEtterlysningRepository bestiltEtterlysningRepository,
-                                             DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
-                                             @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") PSBKompletthetsjekker kompletthetsjekker,
-                                             @KonfigVerdi(value = "KOMPLETTHET_NY_FLYT", defaultVerdi = "false") Boolean benyttNyFlyt) {
+                                             DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
 
         this.behandlingRepository = behandlingRepository;
-        this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.kompletthetSjekkerTjeneste = kompletthetSjekkerTjeneste;
         this.bestiltEtterlysningRepository = bestiltEtterlysningRepository;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
-        this.kompletthetsjekker = kompletthetsjekker;
-        this.benyttNyFlyt = benyttNyFlyt;
     }
 
     @Override
@@ -80,11 +68,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var ref = BehandlingReferanse.fra(behandling);
 
-        if (benyttNyFlyt) {
-            return nyKompletthetFlyt(ref, kontekst);
-        } else {
-            return legacykompletthetHåndtering(ref, kontekst);
-        }
+        return nyKompletthetFlyt(ref, kontekst);
     }
 
     private BehandleStegResultat nyKompletthetFlyt(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
@@ -201,36 +185,6 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             return Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER;
         }
         throw new IllegalArgumentException("Ukjent autopunkt '" + ap + "'");
-    }
-
-    private BehandleStegResultat legacykompletthetHåndtering(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, true, true);
-
-        if (perioderTilVurdering.isEmpty()) {
-            avbrytAksjonspunktHvisTilstede(kontekst);
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-
-        var kompletthetsVurderinger = kompletthetsjekker.utledAlleManglendeVedleggForPerioder(ref);
-        var relevanteKompletthetsvurderinger = kompletthetsVurderinger.entrySet()
-            .stream()
-            .filter(it -> perioderTilVurdering.contains(it.getKey()))
-            .toList();
-
-        if (relevanteKompletthetsvurderinger.isEmpty()) {
-            avbrytAksjonspunktHvisTilstede(kontekst);
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-
-        var erKomplett = relevanteKompletthetsvurderinger.stream()
-            .allMatch(it -> it.getValue().isEmpty());
-
-        if (erKomplett) {
-            avbrytAksjonspunktHvisTilstede(kontekst);
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        } else {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING));
-        }
     }
 
     private void sendBrev(Long behandlingId, DokumentMalType dokumentMalType, Set<Mottaker> mottakere) {

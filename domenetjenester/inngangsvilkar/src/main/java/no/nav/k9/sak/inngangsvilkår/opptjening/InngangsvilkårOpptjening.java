@@ -9,10 +9,10 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.vilkår.VilkårTypeKoder;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.Inngangsvilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
-import no.nav.k9.sak.inngangsvilkår.VilkårTypeRef;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef

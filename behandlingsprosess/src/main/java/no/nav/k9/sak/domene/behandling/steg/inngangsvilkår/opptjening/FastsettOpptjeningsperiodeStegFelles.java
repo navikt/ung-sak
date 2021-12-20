@@ -47,6 +47,15 @@ public abstract class FastsettOpptjeningsperiodeStegFelles extends Inngangsvilk�
     }
 
     @Override
+    protected void håndterForlengelse(BehandlingskontrollKontekst kontekst, Behandling behandling, DatoIntervallEntitet periode) {
+        var opptjeningResultat = opptjeningRepository.finnOpptjening(behandling.getOriginalBehandlingId().orElseThrow()).orElseThrow();
+
+        var opptjening = opptjeningResultat.finnOpptjening(periode.getFomDato()).orElseThrow();
+
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, opptjening.getFom(), opptjening.getTom(), true);
+    }
+
+    @Override
     public List<VilkårType> vilkårHåndtertAvSteg() {
         return STØTTEDE_VILKÅR;
     }
