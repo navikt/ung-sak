@@ -53,10 +53,6 @@
 			<groupId>no.nav.foreldrepenger.abakus</groupId>
 			<artifactId>abakus-kontrakt</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-            <artifactId>fp-topics-manifest</artifactId>
-        </dependency>
 
 		<dependency>
             <groupId>no.nav.k9.felles.sikkerhet</groupId>
