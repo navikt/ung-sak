@@ -33,12 +33,18 @@ public class MapEndringsresultat {
     }
 
     private static no.nav.folketrygdloven.beregningsgrunnlag.resultat.RefusjonoverstyringEndring mapEndringRefusjon(RefusjonoverstyringEndring refusjonoverstyringEndring) {
+        if (refusjonoverstyringEndring.getRefusjonperiodeEndringer() ==  null) {
+            return null;
+        }
         return new no.nav.folketrygdloven.beregningsgrunnlag.resultat.RefusjonoverstyringEndring(
             mapRefusjonOverstyringPerioder(refusjonoverstyringEndring.getRefusjonperiodeEndringer())
         );
     }
 
     private static List<RefusjonoverstyringPeriodeEndring> mapRefusjonOverstyringPerioder(List<no.nav.folketrygdloven.kalkulus.response.v1.håndtering.RefusjonoverstyringPeriodeEndring> refusjonperiodeEndringer) {
+        if (refusjonperiodeEndringer == null) {
+            return null;
+        }
         return refusjonperiodeEndringer.stream().map(MapEndringsresultat::mapRefusjonPeriodeEndring).collect(Collectors.toList());
     }
 
