@@ -206,8 +206,6 @@ spec:
       value: "true"
     - name: ENABLE_RELEVANT_SYKDOMSPERIODE
       value: "true"
-    - name: KOMPLETTHET_NY_FLYT
-      value: "true"
     - name: MAP_ALLE_KRAV
       value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
@@ -217,6 +215,8 @@ spec:
     - name: DISABLE_VURDER_TILBAKETREKK
       value: "true"
     - name: PSB_INFOTRYGD_MIGRERING
+      value: "true"
+    - name: FORLENGELSE_ENABLET
       value: "true"
 
     # Audit logging
