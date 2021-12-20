@@ -58,16 +58,6 @@ public class VurderBeregningsgrunnlagVilkårSteg implements BeregningsgrunnlagSt
         return BehandleStegResultat.utførtMedAksjonspunktResultater(callback.aksjonspunktResultater);
     }
 
-    @Override
-    public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (!tilSteg.equals(VURDER_VILKAR_BERGRUNN)) {
-            Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            var ref = BehandlingReferanse.fra(behandling);
-            beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false)
-                .forEach(periode -> beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, periode));
-        }
-    }
-
     class HåndterResultat implements FortsettBeregningResultatCallback {
 
         private List<AksjonspunktResultat> aksjonspunktResultater = new ArrayList<>();
