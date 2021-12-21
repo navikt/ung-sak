@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
-import static org.assertj.core.api.AssertionsForClassTypes.anyOf;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;

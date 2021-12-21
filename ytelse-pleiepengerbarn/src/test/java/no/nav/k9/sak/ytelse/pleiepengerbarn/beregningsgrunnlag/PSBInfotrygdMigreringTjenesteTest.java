@@ -69,6 +69,8 @@ class PSBInfotrygdMigreringTjenesteTest {
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         when(perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
+        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
+            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
         tjeneste = new PSBInfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, true);
     }
 
@@ -123,6 +125,9 @@ class PSBInfotrygdMigreringTjenesteTest {
         when(perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30))))));
+        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
+            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30))))));
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.plusDays(30)));
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.plusDays(2)));
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.plusDays(20)));
@@ -137,6 +142,11 @@ class PSBInfotrygdMigreringTjenesteTest {
 
     @Test
     void skal_opprette_med_overlapp_for_periode_som_ikke_vurderes() {
+        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
+            .thenReturn(new TreeSet<>((Set.of(
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusDays(10))
+                ))));
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusDays(10)));
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.minusDays(10)));
 
@@ -145,6 +155,21 @@ class PSBInfotrygdMigreringTjenesteTest {
         var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
         assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
         assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP.minusDays(10));
+    }
+
+    @Test
+    void skal_fjerne_overlapp_for_periode_som_ikke_er_søkt_for() {
+        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
+            .thenReturn(new TreeSet<>((Set.of(
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
+            ))));
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusDays(10)));
+        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.minusMonths(1)));
+
+        tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
+
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(0);
     }
 
     @Test
