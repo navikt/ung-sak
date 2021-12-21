@@ -3,12 +3,14 @@ package no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.K9FormidlingKlient;
 import no.nav.k9.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto;
 
 @ApplicationScoped
@@ -16,14 +18,16 @@ import no.nav.k9.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto;
 public class ForeslåVedtakAksjonspunktOppdaterer implements AksjonspunktOppdaterer<ForeslaVedtakAksjonspunktDto> {
 
     private VedtaksbrevHåndterer vedtaksbrevHåndterer;
+    private K9FormidlingKlient formidlingKlient;
 
     ForeslåVedtakAksjonspunktOppdaterer() {
         // for CDI proxy
     }
 
     @Inject
-    public ForeslåVedtakAksjonspunktOppdaterer(VedtaksbrevHåndterer vedtaksbrevHåndterer) {
+    public ForeslåVedtakAksjonspunktOppdaterer(VedtaksbrevHåndterer vedtaksbrevHåndterer, K9FormidlingKlient formidlingKlient) {
         this.vedtaksbrevHåndterer = vedtaksbrevHåndterer;
+        this.formidlingKlient = formidlingKlient;
     }
 
     @Override
@@ -34,15 +38,20 @@ public class ForeslåVedtakAksjonspunktOppdaterer implements AksjonspunktOppdate
 
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         if (behandling.getFagsakYtelseType().equals(FagsakYtelseType.PSB)) {
-            builder.medTotrinn();
+            if (dto.isSkalBrukeOverstyrendeFritekstBrev() || trengerManueltBrev(behandling)) {
+                builder.medTotrinn();
+            }
         }
 
         vedtaksbrevHåndterer.oppdaterVedtaksbrev(dto, param, builder);
 
         vedtaksbrevHåndterer.oppdaterVedtaksvarsel(dto, param.getBehandlingId());
 
-
         return builder.build();
     }
 
+    private boolean trengerManueltBrev(Behandling behandling) {
+        InformasjonsbehovListeDto informasjonsbehov = formidlingKlient.hentInformasjonsbehov(behandling.getUuid(), behandling.getFagsakYtelseType());
+        return !informasjonsbehov.getInformasjonsbehov().isEmpty();
+    }
 }
