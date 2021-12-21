@@ -66,8 +66,10 @@ public class PSBInfotrygdMigreringTjeneste implements InfotrygdMigreringTjeneste
     @Override
     public void finnOgOpprettMigrertePerioder(Long behandlingId, AktørId aktørId, Long fagsakId) {
         if (toggleMigrering) {
+
             NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
             var eksisterendeInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(fagsakId);
+            deaktiverMigreringerUtenSøknad(behandlingId, eksisterendeInfotrygdMigreringer);
             var eksisterendeMigreringTilVurdering = finnEksisterendeMigreringTilVurdering(perioderTilVurdering, eksisterendeInfotrygdMigreringer);
             if (!eksisterendeMigreringTilVurdering.isEmpty()) {
                 eksisterendeMigreringTilVurdering.forEach(oppdaterSkjæringstidspunkt(perioderTilVurdering));
@@ -76,6 +78,17 @@ public class PSBInfotrygdMigreringTjeneste implements InfotrygdMigreringTjeneste
                 stpMedOverlapp.ifPresent(localDate -> fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsakId, localDate)));
             }
         }
+    }
+
+    private void deaktiverMigreringerUtenSøknad(Long behandlingId, List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer) {
+        var fullstendigePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandlingId);
+        var migreringUtenSøknad = eksisterendeInfotrygdMigreringer.stream()
+            .filter(sim -> fullstendigePerioder.stream().noneMatch(periode -> periode.inkluderer(sim.getSkjæringstidspunkt())))
+            .collect(Collectors.toList());
+        migreringUtenSøknad.forEach(m -> {
+            m.setAktiv(false);
+            fagsakRepository.lagreOgFlush(m);
+        });
     }
 
     private Consumer<SakInfotrygdMigrering> oppdaterSkjæringstidspunkt(NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {

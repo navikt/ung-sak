@@ -30,6 +30,9 @@ public class SakInfotrygdMigrering extends BaseEntitet {
     @Column(name = "skjaeringstidspunkt", nullable = false)
     private LocalDate skjæringstidspunkt;
 
+    @Column(name = "aktiv")
+    private Boolean aktiv;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -40,6 +43,7 @@ public class SakInfotrygdMigrering extends BaseEntitet {
     public SakInfotrygdMigrering(Long fagsakId, LocalDate skjæringstidspunkt) {
         this.fagsakId = fagsakId;
         this.skjæringstidspunkt = skjæringstidspunkt;
+        this.aktiv = true;
     }
 
     public Long getId() {
@@ -57,5 +61,9 @@ public class SakInfotrygdMigrering extends BaseEntitet {
 
     public void setSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
         this.skjæringstidspunkt = skjæringstidspunkt;
+    }
+
+    public void setAktiv(boolean aktiv) {
+        this.aktiv = aktiv;
     }
 }
