@@ -38,6 +38,7 @@ import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.opptjening.PSBOppgittOpptjeningFilter;
 
 @ApplicationScoped
@@ -87,10 +88,16 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         var eksisterendeInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(param.getRef().getFagsakId());
         var eksisterendeMigreringTilVurdering = finnEksisterendeMigreringTilVurdering(perioderTilVurdering, eksisterendeInfotrygdMigreringer);
         var psbInfotrygdFilter = finnPSBInfotryd(param);
-        List<YtelseAnvist> anvistePeriodeSomManglerSøknad = finnAnvistePerioderFraInfotrygdUtenSøknad(param, perioderTilVurdering, psbInfotrygdFilter);
+        var psbInfotrygAnnenPartdFilter = finnPSBInfotrydAnnenPart(param);
 
+        List<YtelseAnvist> anvistePeriodeSomManglerSøknad = finnAnvistePerioderFraInfotrygdUtenSøknad(param, perioderTilVurdering, psbInfotrygdFilter);
         if (!anvistePeriodeSomManglerSøknad.isEmpty()) {
             return List.of(ventepunkt(Venteårsak.MANGLER_SØKNAD_FOR_PERIODER_I_INFOTRYGD));
+        }
+
+        List<YtelseAnvist> anvistePeriodeAnnenPartSomManglerSøknad = finnAnvistePerioderFraInfotrygdUtenSøknad(param, perioderTilVurdering, psbInfotrygAnnenPartdFilter);
+        if (!anvistePeriodeAnnenPartSomManglerSøknad.isEmpty()) {
+            return List.of(ventepunkt(Venteårsak.MANGLER_SØKNAD_FOR_PERIODER_I_INFOTRYGD_ANNEN_PART));
         }
 
         if (!eksisterendeMigreringTilVurdering.isEmpty()) {
@@ -231,6 +238,14 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
     private YtelseFilter finnPSBInfotryd(AksjonspunktUtlederInput param) {
         InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId());
         Optional<AktørYtelse> aktørYtelse = iayGrunnlag.getAktørYtelseFraRegister(param.getAktørId());
+        YtelseFilter ytelseFilter = lagInfotrygdPSBFilter(aktørYtelse);
+        return ytelseFilter;
+    }
+
+    private YtelseFilter finnPSBInfotrydAnnenPart(AksjonspunktUtlederInput param) {
+        InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId());
+        var relatertPersonAktørId = param.getRef().getRelatertPersonAktørId();
+        Optional<AktørYtelse> aktørYtelse = iayGrunnlag.getAktørYtelseFraRegister(relatertPersonAktørId);
         YtelseFilter ytelseFilter = lagInfotrygdPSBFilter(aktørYtelse);
         return ytelseFilter;
     }

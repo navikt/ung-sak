@@ -92,6 +92,7 @@ public enum Venteårsak implements Kodeverdi {
 
     // PSB INFOTRYGD MIGRERING
     MANGLER_SØKNAD_FOR_PERIODER_I_INFOTRYGD("AVV_SOKN_IT_PERIODER", "Avventer søknad for alle perioder i infotrygd i inneværende år. Må spesialhåndteres."),
+    MANGLER_SØKNAD_FOR_PERIODER_I_INFOTRYGD_ANNEN_PART("AVV_SOKN_IT_PERIODER_ANNEN_PART", "Avventer søknad for alle perioder for annen part i infotrygd i inneværende år. Må spesialhåndteres."),
     MANGLER_SØKNADOPPLYSNING_NÆRING("AVV_SOKN_NAERING", "Avventer søknad for næring ved direkte overgang fra infotrygd. Må spesialhåndteres."),
     MANGLER_SØKNADOPPLYSNING_FRILANS("AVV_SOKN_FRILANS", "Avventer søknad for frilans ved direkte overgang fra infotrygd. Må spesialhåndteres."),
 
