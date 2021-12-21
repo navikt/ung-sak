@@ -152,7 +152,7 @@ public class SamtidigUttakTjeneste {
         return simulering.getUttakplanEndret();
     }
 
-    private boolean harKommetTilUttak(BehandlingReferanse ref) {
+    public boolean harKommetTilUttak(BehandlingReferanse ref) {
         final var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();
         final BehandlingModell modell = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType());

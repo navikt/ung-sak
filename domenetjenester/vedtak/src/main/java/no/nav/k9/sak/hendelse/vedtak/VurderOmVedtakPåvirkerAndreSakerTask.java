@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.abakus.vedtak.ytelse.Ytelse;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -26,6 +27,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler {
 
     public static final String TASKNAME = "iverksetteVedtak.vurderRevurderingAndreSøknader";
+    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
     private static final Logger log = LoggerFactory.getLogger(VurderOmVedtakPåvirkerAndreSakerTask.class);
 
     private BehandlingRepository behandlingRepository;
@@ -48,6 +50,7 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
     public void doTask(ProsessTaskData prosessTaskData) {
         var vedtakHendelse = JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), Ytelse.class);
         var fagsakYtelseType = FagsakYtelseType.fromString(vedtakHendelse.getType().getKode());
+        LOG_CONTEXT.add("ytelseType", fagsakYtelseType);
 
         var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste.finnTjeneste(fagsakYtelseType);
         var kandidaterTilRevurdering = vurderOmVedtakPåvirkerSakerTjeneste.utledSakerSomErKanVærePåvirket(vedtakHendelse);

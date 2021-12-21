@@ -39,6 +39,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet.VilkårUtfall;
+import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @Dependent
@@ -47,6 +48,7 @@ public class VilkårTjeneste {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(VilkårTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
+    private Instance<ForlengelseTjeneste> forlengelseTjenester;
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private FagsakRepository fagsakRepository;
@@ -58,8 +60,10 @@ public class VilkårTjeneste {
     @Inject
     public VilkårTjeneste(BehandlingRepository behandlingRepository,
                           @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                          @Any Instance<ForlengelseTjeneste> forlengelseTjenester,
                           VilkårResultatRepository vilkårResultatRepository, FagsakRepository fagsakRepository) {
         this.behandlingRepository = behandlingRepository;
+        this.forlengelseTjenester = forlengelseTjenester;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårsPerioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.fagsakRepository = fagsakRepository;
