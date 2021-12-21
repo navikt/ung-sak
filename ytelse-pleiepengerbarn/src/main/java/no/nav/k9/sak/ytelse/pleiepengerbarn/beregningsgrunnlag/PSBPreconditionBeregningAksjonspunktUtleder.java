@@ -44,6 +44,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.opptjening.PSBOppgittOpptjeningFilte
 @FagsakYtelseTypeRef("PSB")
 public class PSBPreconditionBeregningAksjonspunktUtleder implements PreconditionBeregningAksjonspunktUtleder {
 
+    public static final int ÅR_2022 = 2022;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private PSBOpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
@@ -219,11 +220,10 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
 
     private List<YtelseAnvist> finnAnvistePerioderFraInfotrygdUtenSøknad(AksjonspunktUtlederInput param, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, YtelseFilter psbInfotrygdFilter) {
         var fullstendigePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(param.getBehandlingId());
-        var førsteStpTilVurdering = perioderTilVurdering.stream().map(DatoIntervallEntitet::getFomDato).min(Comparator.naturalOrder()).orElseThrow();
         var anvistePerioderUtenSøknad = psbInfotrygdFilter.getFiltrertYtelser().stream()
             .flatMap(y -> y.getYtelseAnvist().stream())
-            .filter(ya -> harAnvisningSammeÅrSomFørstePeriodeTilVurdering(førsteStpTilVurdering, ya))
-            .filter(ya -> !dekkesAvSøknad(fullstendigePerioder, ya, førsteStpTilVurdering.getYear()))
+            .filter(ya -> harAnvisningIÅr(ya, ÅR_2022))
+            .filter(ya -> !dekkesAvSøknad(fullstendigePerioder, ya, ÅR_2022))
             .collect(Collectors.toList());
         return anvistePerioderUtenSøknad;
     }
@@ -241,8 +241,8 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         return fullstendigePerioder.stream().anyMatch(p -> p.getFomDato().equals(anvistFom) && !p.getTomDato().isBefore(ya.getAnvistTOM()));
     }
 
-    private boolean harAnvisningSammeÅrSomFørstePeriodeTilVurdering(LocalDate førsteStpTilVurdering, YtelseAnvist ya) {
-        return ya.getAnvistTOM().getYear() >= førsteStpTilVurdering.getYear() && ya.getAnvistFOM().getYear() <= førsteStpTilVurdering.getYear();
+    private boolean harAnvisningIÅr(YtelseAnvist ya, int år) {
+        return ya.getAnvistTOM().getYear() >= år && ya.getAnvistFOM().getYear() <= år;
     }
 
 
