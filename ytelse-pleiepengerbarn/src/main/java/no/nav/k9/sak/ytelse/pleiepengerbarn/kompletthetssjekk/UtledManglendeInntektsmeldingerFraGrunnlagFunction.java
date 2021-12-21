@@ -42,7 +42,7 @@ public class UtledManglendeInntektsmeldingerFraGrunnlagFunction implements BiFun
         inntektArbeidYtelseGrunnlag.ifPresent(grunnlag -> {
 
             var filterFør = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(referanse.getAktørId()))
-                .før(vurderingsdato);
+                .før(vurderingsdato.plusDays(1));
 
             filterFør.getYrkesaktiviteter().stream()
                 .filter(ya -> ArbeidType.AA_REGISTER_TYPER.contains(ya.getArbeidType()))
