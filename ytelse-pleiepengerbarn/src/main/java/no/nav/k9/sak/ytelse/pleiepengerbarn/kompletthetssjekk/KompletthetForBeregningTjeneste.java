@@ -209,7 +209,7 @@ public class KompletthetForBeregningTjeneste {
         var tilnternArbeidsforhold = new FinnEksternReferanse(iayTjeneste, ref.getBehandlingId());
         var relevanteVilkårsperioder = vilkårsPerioder.stream()
             .filter(it -> relevantPeriode.overlapper(it.getFomDato(), it.getTomDato()))
-            .collect(Collectors.toList());
+            .toList();
 
         for (DatoIntervallEntitet periode : relevanteVilkårsperioder) {
             var arbeidsgiverSetMap = finnArbeidsforholdForIdentPåDagFunction.apply(ref, periode.getFomDato());
