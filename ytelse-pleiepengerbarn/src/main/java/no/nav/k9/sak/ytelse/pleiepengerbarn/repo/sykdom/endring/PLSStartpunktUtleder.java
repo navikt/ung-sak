@@ -37,7 +37,6 @@ class PLSStartpunktUtleder implements EndringStartpunktUtleder {
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
     private VilkårResultatRepository vilkårResultatRepository;
-    private SamtidigUttakTjeneste samtidigUttakTjeneste;
 
     PLSStartpunktUtleder() {
         // For CDI
@@ -51,7 +50,6 @@ class PLSStartpunktUtleder implements EndringStartpunktUtleder {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.samtidigUttakTjeneste = samtidigUttakTjeneste;
     }
 
     @Override
@@ -71,11 +69,13 @@ class PLSStartpunktUtleder implements EndringStartpunktUtleder {
     }
 
     private StartpunktType utledStartpunktForUttak(BehandlingReferanse ref) {
-        if (samtidigUttakTjeneste.isSkalHaTilbakehopp(ref)) {
-            return StartpunktType.UTTAKSVILKÅR;
-        } else {
-            return StartpunktType.UDEFINERT;
-        }
+        //TODO PLS trengs det tilbakehopp her i noen tilfeller?
+//        if (samtidigUttakTjeneste.isSkalHaTilbakehopp(ref)) {
+//            return StartpunktType.UTTAKSVILKÅR;
+//        } else {
+//            return StartpunktType.UDEFINERT;
+//        }
+        return StartpunktType.UDEFINERT;
     }
 
     private StartpunktType utledStartpunktForSykdom(BehandlingReferanse ref) {

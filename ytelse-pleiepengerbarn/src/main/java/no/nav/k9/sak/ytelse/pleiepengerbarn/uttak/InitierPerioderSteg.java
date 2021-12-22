@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -23,8 +24,8 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokument
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
-import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
@@ -46,7 +47,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
-    private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
+    private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
 
     InitierPerioderSteg() {
         // for proxy
@@ -57,7 +58,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
                                MottatteDokumentRepository mottatteDokumentRepository,
                                SøknadsperiodeRepository søknadsperiodeRepository,
                                UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
-                               @FagsakYtelseTypeRef("PSB") @FagsakYtelseTypeRef("PPN") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste) {
+                               @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadsperiodeRepository = søknadsperiodeRepository;

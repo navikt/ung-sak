@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -18,13 +19,11 @@ import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.perioder.KravDokument;
-import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -35,12 +34,12 @@ public class PleietrengendeKravprioritet {
 
     private final FagsakRepository fagsakRepository;
     private final BehandlingRepository behandlingRepository;
-    private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
+    private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
 
     @Inject
     public PleietrengendeKravprioritet(FagsakRepository fagsakRepository,
-            BehandlingRepository behandlingRepository,
-                @FagsakYtelseTypeRef("PSB") @FagsakYtelseTypeRef("PPN")  VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste) {
+                                       BehandlingRepository behandlingRepository,
+                                       @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
@@ -93,8 +92,8 @@ public class PleietrengendeKravprioritet {
             fagsakTidslinje = fagsakTidslinje.union(periodetidslinje, new LocalDateSegmentCombinator<Kravprioritet, Kravprioritet, Kravprioritet>() {
                 @Override
                 public LocalDateSegment<Kravprioritet> combine(LocalDateInterval datoInterval,
-                        LocalDateSegment<Kravprioritet> datoSegment,
-                        LocalDateSegment<Kravprioritet> datoSegment2) {
+                                                               LocalDateSegment<Kravprioritet> datoSegment,
+                                                               LocalDateSegment<Kravprioritet> datoSegment2) {
                     if (datoSegment == null) {
                         return new LocalDateSegment<>(datoInterval, datoSegment2.getValue());
                     }
@@ -116,8 +115,8 @@ public class PleietrengendeKravprioritet {
         return new LocalDateSegmentCombinator<List<Kravprioritet>, Kravprioritet, List<Kravprioritet>>() {
             @Override
             public LocalDateSegment<List<Kravprioritet>> combine(LocalDateInterval datoInterval,
-                    LocalDateSegment<List<Kravprioritet>> datoSegment,
-                    LocalDateSegment<Kravprioritet> datoSegment2) {
+                                                                 LocalDateSegment<List<Kravprioritet>> datoSegment,
+                                                                 LocalDateSegment<Kravprioritet> datoSegment2) {
 
                 if (datoSegment == null) {
                     return new LocalDateSegment<>(datoInterval, List.of(datoSegment2.getValue()));
@@ -155,7 +154,7 @@ public class PleietrengendeKravprioritet {
 
         /**
          * Gir siste gjeldende behandling der kravet inngår.
-         *
+         * <p>
          * Dette er den åpne behandlingen for søker, og siste besluttede
          * behandling for andre søkere.
          */

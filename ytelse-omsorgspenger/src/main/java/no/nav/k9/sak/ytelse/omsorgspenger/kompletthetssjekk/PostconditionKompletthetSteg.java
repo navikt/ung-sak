@@ -1,8 +1,6 @@
-package no.nav.k9.sak.domene.behandling.steg.kompletthet;
+package no.nav.k9.sak.ytelse.omsorgspenger.kompletthetssjekk;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -18,16 +16,15 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
-import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @BehandlingStegRef(kode = "POSTCONDITION_KOMPLETTHET")
 @BehandlingTypeRef
-@FagsakYtelseTypeRef
+@FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
 public class PostconditionKompletthetSteg implements BehandlingSteg {
 
-    private Instance<Kompletthetsjekker> kompletthetsjekkerInstances;
+    private OmsorgspengerKompletthetsjekker kompletthetsjekker;
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private HenleggBehandlingTjeneste henleggBehandlingTjeneste;
@@ -36,11 +33,11 @@ public class PostconditionKompletthetSteg implements BehandlingSteg {
     }
 
     @Inject
-    public PostconditionKompletthetSteg(@Any Instance<Kompletthetsjekker> kompletthetsjekker,
+    public PostconditionKompletthetSteg(@FagsakYtelseTypeRef("OMP") OmsorgspengerKompletthetsjekker kompletthetsjekker,
                                         BehandlingRepositoryProvider provider,
                                         SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                         HenleggBehandlingTjeneste henleggBehandlingTjeneste) {
-        this.kompletthetsjekkerInstances = kompletthetsjekker;
+        this.kompletthetsjekker = kompletthetsjekker;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = provider.getBehandlingRepository();
         this.henleggBehandlingTjeneste = henleggBehandlingTjeneste;
@@ -56,7 +53,6 @@ public class PostconditionKompletthetSteg implements BehandlingSteg {
 
         Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-        Kompletthetsjekker kompletthetsjekker = getKompletthetsjekker(ref);
 
         if (kompletthetsjekker.ingenSøknadsperioder(ref)) {
             henleggBehandlingTjeneste.lagHistorikkInnslagForHenleggelseFraSteg(behandling.getId(), BehandlingResultatType.HENLAGT_MASKINELT, "Kan ikke fortsette uten søknadsperioder");
@@ -65,8 +61,4 @@ public class PostconditionKompletthetSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private Kompletthetsjekker getKompletthetsjekker(BehandlingReferanse ref) {
-        return BehandlingTypeRef.Lookup.find(Kompletthetsjekker.class, kompletthetsjekkerInstances, ref.getFagsakYtelseType(), ref.getBehandlingType())
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + Kompletthetsjekker.class.getSimpleName() + " for " + ref.getBehandlingUuid()));
-    }
 }

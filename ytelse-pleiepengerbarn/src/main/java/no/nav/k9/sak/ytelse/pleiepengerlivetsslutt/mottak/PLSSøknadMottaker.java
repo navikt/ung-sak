@@ -17,18 +17,17 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @FagsakYtelseTypeRef("PPN")
 @ApplicationScoped
-public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<PLSSøknadInnsending> {
+public class PLSSøknadMottaker implements SøknadMottakTjeneste<PLSSøknadInnsending> {
 
     private SaksnummerRepository saksnummerRepository;
     private FagsakTjeneste fagsakTjeneste;
 
-
-    protected PleiepengerBarnSøknadMottaker() {
+    protected PLSSøknadMottaker() {
         // for proxy
     }
 
     @Inject
-    public PleiepengerBarnSøknadMottaker(SaksnummerRepository saksnummerRepository,FagsakTjeneste fagsakTjeneste) {
+    public PLSSøknadMottaker(SaksnummerRepository saksnummerRepository, FagsakTjeneste fagsakTjeneste) {
         this.saksnummerRepository = saksnummerRepository;
         this.fagsakTjeneste = fagsakTjeneste;
     }

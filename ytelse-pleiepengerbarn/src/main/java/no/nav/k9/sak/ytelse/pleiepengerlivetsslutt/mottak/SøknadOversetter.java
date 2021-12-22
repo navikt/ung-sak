@@ -34,7 +34,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
-import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.pls.v1.Pleietrengende;
@@ -52,12 +51,9 @@ class SøknadOversetter {
     private FagsakRepository fagsakRepository;
     private boolean skalBrukeUtledetEndringsperiode;
 
-    SøknadOversetter() {
-        // for CDI proxy
-    }
-
     @Inject
-    SøknadOversetter(SøknadsperiodeRepository søknadsperiodeRepository, BehandlingRepositoryProvider repositoryProvider,
+    SøknadOversetter(SøknadsperiodeRepository søknadsperiodeRepository,
+                     BehandlingRepositoryProvider repositoryProvider,
                      UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                      TpsTjeneste tpsTjeneste,
                      @KonfigVerdi(value = "ENABLE_UTLEDET_ENDRINGSPERIODE", defaultVerdi = "false") boolean skalBrukeUtledetEndringsperiode) {
@@ -75,19 +71,12 @@ class SøknadOversetter {
         var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
 
-        PleiepengerSyktBarn ytelse = søknad.getYtelse();
-        // TODO: Tore erstatt med ny søknad
-        PleipengerLivetsSluttfase ytelsePls = new PleipengerLivetsSluttfase()
-            .medPleietrengende(new Pleietrengende(NorskIdentitetsnummer.of(ytelse.getBarn().getPersonIdent().getVerdi())))
-            .medArbeidstid(ytelse.getArbeidstid())
-            .medOpptjeningAktivitet(ytelse.getOpptjeningAktivitet())
-            .medBosteder(ytelse.getBosteder())
-            .medUtenlandsopphold(ytelse.getUtenlandsopphold());
+        PleipengerLivetsSluttfase ytelse = søknad.getYtelse();
 
-        var mapper = new MapSøknadUttakPerioder(tpsTjeneste, søknad, ytelsePls, journalpostId);
+        var mapper = new MapSøknadUttakPerioder(tpsTjeneste, søknad, ytelse, journalpostId);
         var perioderFraSøknad = mapper.getPerioderFraSøknad();
 
-        final List<Periode> søknadsperioder= perioderFraSøknad.getArbeidPerioder().stream().map(it -> it.getPeriode()).map(di -> new Periode(di.getFomDato(), di.getTomDato())).collect(Collectors.toList());
+        final List<Periode> søknadsperioder = perioderFraSøknad.getArbeidPerioder().stream().map(it -> it.getPeriode()).map(di -> new Periode(di.getFomDato(), di.getTomDato())).collect(Collectors.toList());
         final var maksSøknadsperiode = finnMaksperiode(søknadsperioder);
 
         // TODO: Stopp barn som mangler norskIdentitetsnummer i k9-punsj ... eller støtt fødselsdato her?
@@ -118,11 +107,11 @@ class SøknadOversetter {
         // TODO etter18feb: lagreOpptjeningForSnOgFl(ytelse.getArbeidAktivitet());
 
         // TODO: Hvorfor er getBosteder() noe annet enn getUtenlandsopphold ??
-        lagreMedlemskapinfo(ytelsePls.getBosteder(), behandlingId, mottattDato);
+        lagreMedlemskapinfo(ytelse.getBosteder(), behandlingId, mottattDato);
 
-        lagrePleietrengende(fagsakId, ytelsePls.getPleietrengende());
+        lagrePleietrengende(fagsakId, ytelse.getPleietrengende());
 
-        lagreUttakOgPerioder(søknad, ytelsePls, maksSøknadsperiode, journalpostId, behandlingId, fagsakId);
+        lagreUttakOgPerioder(søknad, ytelse, maksSøknadsperiode, journalpostId, behandlingId, fagsakId);
     }
 
     private Optional<Periode> finnMaksperiode(List<Periode> perioder) {
