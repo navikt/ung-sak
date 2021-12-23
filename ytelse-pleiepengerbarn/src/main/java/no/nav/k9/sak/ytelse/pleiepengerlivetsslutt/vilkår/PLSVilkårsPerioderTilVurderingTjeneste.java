@@ -1,10 +1,13 @@
 package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.vilkår;
 
+import java.time.DayOfWeek;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -26,6 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
@@ -33,8 +37,12 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
+import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.MaksSøktePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SøktePerioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Endringsstatus;
@@ -45,15 +53,17 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 @ApplicationScoped
 public class PLSVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
+    // TODO PLS: Samle felles logikk med PSBVilkårsPerioderTilVurderingTjeneste, eller forenkle denne radikalt
+
     private final PåTversAvHelgErKantIKantVurderer erKantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
-    private final Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
+    private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
     private VilkårUtleder vilkårUtleder;
     private SøktePerioder søktePerioder;
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
+    private SykdomGrunnlagService sykdomGrunnlagService;
 
-    // TODO PLS: Riktig å gjenbruke dette fra PSB???
     private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private UttakTjeneste uttakTjeneste;
@@ -66,17 +76,22 @@ public class PLSVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     public PLSVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("PPN") VilkårUtleder vilkårUtleder,
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   BehandlingRepository behandlingRepository,
+                                                  SykdomGrunnlagService sykdomGrunnlagService,
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                                   UttakTjeneste uttakTjeneste) {
         this.vilkårUtleder = vilkårUtleder;
         this.behandlingRepository = behandlingRepository;
+        this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.uttakTjeneste = uttakTjeneste;
 
-        this.søktePerioder = new SøktePerioder(søknadsperiodeTjeneste);
+        søktePerioder = new SøktePerioder(søknadsperiodeTjeneste);
+        var maksSøktePeriode = new MaksSøktePeriode(søknadsperiodeTjeneste);
+
+        vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, maksSøktePeriode);
     }
 
     @Override
@@ -94,7 +109,7 @@ public class PLSVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         var referanse = BehandlingReferanse.fra(behandling);
-        if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
+        if (skalVurdereBerørtePerioderPåPleietrengende(behandling)) {
             var berørtePerioder = utledUtvidetPeriode(referanse);
             perioderTilVurdering.addAll(berørtePerioder);
         }
@@ -111,20 +126,50 @@ public class PLSVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     private Set<DatoIntervallEntitet> utledPerioderTilVurderingVedÅHensyntaFullstendigTidslinje(Long behandlingId, Set<DatoIntervallEntitet> perioder) {
-        var fullstendigTidslinje = new LocalDateTimeline<>(utledFullstendigePerioder(behandlingId)
-            .stream()
-            .map(DatoIntervallEntitet::toLocalDateInterval)
-            .map(it -> new LocalDateSegment<>(it, true))
-            .collect(Collectors.toList()));
-        var relevantTidslinje = new LocalDateTimeline<>(perioder.stream()
-            .map(DatoIntervallEntitet::toLocalDateInterval)
-            .map(it -> new LocalDateSegment<>(it, true))
-            .collect(Collectors.toList()));
+        var datoIntervallEntitets = utledFullstendigePerioder(behandlingId);
+        return utledPeriodeEtterHensynÅHaHensyntattFullstendigTidslinje(perioder, datoIntervallEntitets);
+    }
 
-        return fullstendigTidslinje.intersection(relevantTidslinje).compress()
-            .stream()
-            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+    NavigableSet<DatoIntervallEntitet> utledPeriodeEtterHensynÅHaHensyntattFullstendigTidslinje(Set<DatoIntervallEntitet> perioder, NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
+        var fullstendigTidslinje = opprettTidslinje(datoIntervallEntitets)
+            .toSegments()
+            .stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             .collect(Collectors.toCollection(TreeSet::new));
+
+        var relevantTidslinje = new LocalDateTimeline<>(
+            fullstendigTidslinje.stream()
+                .filter(it -> perioder.stream().anyMatch(it::overlapper))
+                .map(DatoIntervallEntitet::toLocalDateInterval)
+                .map(it -> new LocalDateSegment<>(it, true))
+                .collect(Collectors.toList()))
+            .compress();
+
+        return relevantTidslinje.toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private LocalDateTimeline<Boolean> opprettTidslinje(NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
+
+        var tidslinje = new LocalDateTimeline<Boolean>(List.of());
+
+        for (DatoIntervallEntitet periode : datoIntervallEntitets) {
+            var segmentLinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(justerMotHelg(periode).toLocalDateInterval(), true)));
+            tidslinje = tidslinje.combine(segmentLinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        return tidslinje.compress();
+    }
+
+    private DatoIntervallEntitet justerMotHelg(DatoIntervallEntitet it) {
+        if (it.getTomDato().getDayOfWeek().equals(DayOfWeek.FRIDAY)) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato(), it.getTomDato().plusDays(2));
+        }
+        if (it.getTomDato().getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato(), it.getTomDato().plusDays(1));
+        }
+        return it;
     }
 
     @Override
@@ -139,9 +184,26 @@ public class PLSVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
-        // TODO PLS: Vurder hvordan denne skal se ut, om det trengs ekstra perioder
+        final var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingUuid());
+
         final var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        return perioder;
+        final var vurderingsperioderTimeline = SykdomUtils.toLocalDateTimeline(perioder);
+        List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
+
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagService.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder)
+            .getDiffPerioder();
+
+        final LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
+
+        var ekstraPerioder = utvidedePerioder.stream()
+            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom())).collect(Collectors.toCollection(TreeSet::new));
+
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId())
+            .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+        if (vilkårene.isPresent()) {
+            return utledVilkårsPerioderFraPerioderTilVurdering(referanse.getBehandlingId(), vilkårene.get(), ekstraPerioder);
+        }
+        return ekstraPerioder;
     }
 
     @Override
@@ -162,7 +224,7 @@ public class PLSVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     public NavigableSet<PeriodeMedÅrsak> utledRevurderingPerioder(BehandlingReferanse referanse) {
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
         var periodeMedÅrsaks = new TreeSet<PeriodeMedÅrsak>();
-        if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
+        if (skalVurdereBerørtePerioderPåPleietrengende(behandling)) {
             periodeMedÅrsaks.addAll(utledUtvidetPeriode(referanse)
                 .stream()
                 .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON))
@@ -205,11 +267,19 @@ public class PLSVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     private LocalDateTimeline<Boolean> utledUtvidetPeriodeForSykdom(BehandlingReferanse referanse) {
-        // TODO PLS: Vurder om dette er relevant
-        return new LocalDateTimeline<>(List.of());
+        var forrigeVedtatteBehandling = behandlingRepository.hentBehandling(referanse.getOriginalBehandlingId().orElseThrow()).getUuid();
+        var vedtattSykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(forrigeVedtatteBehandling);
+        var pleietrengende = referanse.getPleietrengendeAktørId();
+        var vilkårene = vilkårResultatRepository.hent(referanse.getId());
+        var vurderingsperioder = utledVurderingsperiode(vilkårene);
+
+        var utledetGrunnlag = sykdomGrunnlagService.utledGrunnlagMedManglendeOmsorgFjernet(referanse.getSaksnummer(), referanse.getBehandlingUuid(), referanse.getBehandlingId(), pleietrengende, vurderingsperioder);
+
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagService.sammenlignGrunnlag(Optional.of(vedtattSykdomGrunnlagBehandling.getGrunnlag()), utledetGrunnlag).getDiffPerioder();
+        return endringerISøktePerioder;
     }
 
-    private boolean skalVurdereBerørtePerioderPåBarnet(Behandling behandling) {
+    private boolean skalVurdereBerørtePerioderPåPleietrengende(Behandling behandling) {
         return behandling.getOriginalBehandlingId().isPresent();
     }
 
@@ -233,4 +303,13 @@ public class PLSVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
+    private List<Periode> utledVurderingsperiode(Vilkårene vilkårene) {
+        return vilkårene.getVilkår(VilkårType.I_LIVETS_SLUTTFASE)
+            .map(Vilkår::getPerioder)
+            .orElse(List.of())
+            .stream()
+            .map(VilkårPeriode::getPeriode)
+            .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
+            .collect(Collectors.toCollection(ArrayList::new));
+    }
 }
