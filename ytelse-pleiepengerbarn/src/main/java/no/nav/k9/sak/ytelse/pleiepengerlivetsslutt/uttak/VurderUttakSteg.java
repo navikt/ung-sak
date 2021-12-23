@@ -24,7 +24,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
 @ApplicationScoped
-@BehandlingStegRef(kode = "VURDER_UTTAK")
+@BehandlingStegRef(kode = "VURDER_UTTAK_V2")
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PPN")
 public class VurderUttakSteg implements BehandlingSteg {
