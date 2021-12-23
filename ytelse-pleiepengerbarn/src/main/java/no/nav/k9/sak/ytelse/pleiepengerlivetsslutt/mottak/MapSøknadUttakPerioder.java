@@ -48,7 +48,7 @@ class MapSøknadUttakPerioder {
     }
 
 
-    private Collection<ArbeidPeriode> mapOppgittArbeidstid(Arbeidstid arbeidstid) {
+    private Collection<ArbeidPeriode> mapFraværsperioder(Arbeidstid arbeidstid) {
         if (arbeidstid == null) {
             return null;
         }
@@ -132,22 +132,22 @@ class MapSøknadUttakPerioder {
     }
 
     public PerioderFraSøknad getPerioderFraSøknad() {
-        var arbeidperioder = mapOppgittArbeidstid(ytelse.getArbeidstid());
+        var fraværsperioder = mapFraværsperioder(ytelse.getArbeidstid());
         Collection<Tilsynsordning> tilsynsordning = List.of();
-        Collection<UttakPeriode> uttaksperioder = arbeidperioder.stream()
-            .map(arbeidPeriode -> {
-                // TODO PLS: Fikse arbedstid slik at den passer dette formatet
-                var jobberNormaltTimerPerDag = arbeidPeriode.getJobberNormaltTimerPerDag();
-                var faktiskArbeidTimerPerDag = arbeidPeriode.getFaktiskArbeidTimerPerDag();
-                var oppgittTilsyn = jobberNormaltTimerPerDag.minus(faktiskArbeidTimerPerDag); // aka. getTimerPleieAvBarnetPerDag
-                return new UttakPeriode(arbeidPeriode.getPeriode(), oppgittTilsyn);
+        Collection<UttakPeriode> uttaksperioder = fraværsperioder.stream()
+            .map(fraværsperiode -> {
+                // Omregner fraværsperiode til uttaksperiode
+                var jobberNormaltTimerPerDag = fraværsperiode.getJobberNormaltTimerPerDag();
+                var faktiskArbeidTimerPerDag = fraværsperiode.getFaktiskArbeidTimerPerDag();
+                var fraværTimerPerDag = jobberNormaltTimerPerDag.minus(faktiskArbeidTimerPerDag);
+                return new UttakPeriode(fraværsperiode.getPeriode(), fraværTimerPerDag);
             })
             .collect(Collectors.toList());
         Collection<FeriePeriode> ferie = List.of();
         List<BeredskapPeriode> beredskap = List.of();
         List<NattevåkPeriode> nattevåk = List.of();
 
-        return new PerioderFraSøknad(journalpostId, uttaksperioder, arbeidperioder, tilsynsordning, ferie, beredskap, nattevåk);
+        return new PerioderFraSøknad(journalpostId, uttaksperioder, fraværsperioder, tilsynsordning, ferie, beredskap, nattevåk);
     }
 
 }
