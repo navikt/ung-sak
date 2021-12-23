@@ -4,14 +4,13 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -84,9 +83,12 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
 
         var gjeldendeSykdomVurdering = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.LIVETS_SLUTTFASE, behandling.getFagsak().getPleietrengendeAktørId());
         var sykdomVurderingSegmenter = gjeldendeSykdomVurdering.toSegments();
-        // TODO PLS: Kopiere over tidligere vurdering til nye perioder
+
         var harVurdering = !sykdomVurderingSegmenter.isEmpty()
-            && sykdomVurderingSegmenter.stream().map(LocalDateSegment::getValue).filter(Objects::nonNull).allMatch(it -> it.getResultat() == Resultat.OPPFYLT || it.getResultat() == Resultat.IKKE_OPPFYLT);
+            && sykdomVurderingSegmenter
+            .stream()
+            .allMatch(sykdomVurderingSegment -> sykdomVurderingSegment.getValue() != null
+                && Set.of(Resultat.OPPFYLT, Resultat.IKKE_OPPFYLT).contains(sykdomVurderingSegment.getValue().getResultat()));
         if (!harVurdering || behandling.erManueltOpprettet()) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING_LIVETS_SLUTTFASE)));
         }

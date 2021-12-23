@@ -4,20 +4,20 @@ import no.nav.k9.sak.inngangsvilkår.VilkårGrunnlag;
 
 public class PleiesHjemmeVilkårGrunnlag implements VilkårGrunnlag {
 
-    private final Boolean erPleietIHjemmet;
+    private final Boolean pleiesHjemme;
 
-    public PleiesHjemmeVilkårGrunnlag(Boolean erPleietIHjemmet) {
-        this.erPleietIHjemmet = erPleietIHjemmet;
+    public PleiesHjemmeVilkårGrunnlag(Boolean pleiesHjemme) {
+        this.pleiesHjemme = pleiesHjemme;
     }
 
-    public Boolean getErPleietIHjemmet() {
-        return erPleietIHjemmet;
+    public Boolean getPleiesHjemme() {
+        return pleiesHjemme;
     }
 
     @Override
     public String toString() {
-        return "OmsorgenForGrunnlag{" +
-            "erPleietIHjemmet=" + erPleietIHjemmet +
+        return "PleiesHjemmeVilkårGrunnlag{" +
+            "pleiesHjemme=" + pleiesHjemme +
             '}';
     }
 

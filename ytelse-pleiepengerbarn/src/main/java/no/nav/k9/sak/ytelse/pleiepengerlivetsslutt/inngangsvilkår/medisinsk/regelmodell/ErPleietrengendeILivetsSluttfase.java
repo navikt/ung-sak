@@ -7,7 +7,7 @@ import no.nav.fpsak.nare.specification.LeafSpecification;
 @RuleDocumentation(ErPleietrengendeILivetsSluttfase.ID)
 public class ErPleietrengendeILivetsSluttfase extends LeafSpecification<MedisinskvilkårGrunnlag> {
 
-    static final String ID = "PSB_VK_9.10.1";
+    static final String ID = "PLS_VK_9.16.1";
 
     ErPleietrengendeILivetsSluttfase() {
         super(ID);

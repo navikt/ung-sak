@@ -77,17 +77,6 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
             .map(e -> e.getKey())
             .collect(Collectors.toList());
 
-        if (avslåtteVilkår.isEmpty()) {
-            return false;
-        }
-
-        if (avslåtteVilkår.stream().anyMatch(v -> v != VilkårType.I_LIVETS_SLUTTFASE)) {
-            return true;
-        }
-
-        final var ingenAvSykdomsvilkåreneErOppfylt = harIngenOppfylteVilkårsPerioder(vilkårTidslinjer.get(VilkårType.I_LIVETS_SLUTTFASE));
-
-
-        return ingenAvSykdomsvilkåreneErOppfylt;
+        return !avslåtteVilkår.isEmpty();
     }
 }

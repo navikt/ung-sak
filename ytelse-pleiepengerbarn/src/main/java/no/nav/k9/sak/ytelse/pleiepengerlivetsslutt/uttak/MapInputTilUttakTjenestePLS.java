@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.uttak;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,20 +13,13 @@ import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.HentDataTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.InputParametere;
@@ -36,7 +28,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.InaktivitetUtlede
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.MapArbeid;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.PerioderMedInaktivitetUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.ferie.MapFerie;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.tilsyn.MapTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.uttak.MapUttak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Barn;
@@ -54,16 +45,12 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.YtelseType;
 public class MapInputTilUttakTjenestePLS {
 
     private HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
-    private String unntak;
 
 
     @Inject
-    public MapInputTilUttakTjenestePLS(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
-                                       @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
+    public MapInputTilUttakTjenestePLS(HentDataTilUttakTjeneste hentDataTilUttakTjeneste) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
-        this.unntak = unntak;
     }
-
 
     public Uttaksgrunnlag hentUtOgMapRequest(BehandlingReferanse referanse) {
         return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, false));
@@ -116,16 +103,11 @@ public class MapInputTilUttakTjenestePLS {
 
         final HashMap<String, List<Vilkårsperiode>> inngangsvilkår = toInngangsvilkår(input.getVilkårene());
 
-        final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(input.getEtablertTilsynPerioder());
-
         var innvilgedePerioderMedSykdom = finnInnvilgedePerioderSykdom(input.getVilkårene());
 
         var pleiebehov = innvilgedePerioderMedSykdom.stream()
             .collect(Collectors.toMap(this::toLukketPeriode, e -> Pleiebehov.PROSENT_6000));
 
-        var unntakEtablertTilsynForPleietrengende = input.getUnntakEtablertTilsynForPleietrengende().orElse(null);
-        var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
-        var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
         final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
 
@@ -141,9 +123,9 @@ public class MapInputTilUttakTjenestePLS {
             pleiebehov,
             lovbestemtFerie,
             inngangsvilkår,
-            tilsynsperioder,
-            beredskapsperioder,
-            nattevåksperioder,
+            Map.of(), // tilsynsperioder
+            Map.of(), // beredskapsperioder
+            Map.of(), // nattevåksperioder
             kravprioritet
         );
     }
@@ -175,42 +157,6 @@ public class MapInputTilUttakTjenestePLS {
         return resultat;
     }
 
-    private Map<LukketPeriode, Utfall> tilBeredskap(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Set<DatoIntervallEntitet> innvilgedePerioderMedSykdom) {
-        if (unntakEtablertTilsynForPleietrengende == null || unntakEtablertTilsynForPleietrengende.getBeredskap() == null) {
-            return Map.of();
-        }
-        return tilUnntakEtablertTilsynMap(unntakEtablertTilsynForPleietrengende.getBeredskap(), innvilgedePerioderMedSykdom);
-    }
-
-    private Map<LukketPeriode, Utfall> tilNattevåk(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Set<DatoIntervallEntitet> innvilgedePerioderMedSykdom) {
-        if (unntakEtablertTilsynForPleietrengende == null || unntakEtablertTilsynForPleietrengende.getNattevåk() == null) {
-            return Map.of();
-        }
-        return tilUnntakEtablertTilsynMap(unntakEtablertTilsynForPleietrengende.getNattevåk(), innvilgedePerioderMedSykdom);
-    }
-
-    private Map<LukketPeriode, Utfall> tilUnntakEtablertTilsynMap(UnntakEtablertTilsyn unntakEtablertTilsyn, Set<DatoIntervallEntitet> innvilgedePerioderMedSykdom) {
-        var map = new HashMap<LukketPeriode, Utfall>();
-        unntakEtablertTilsyn.getPerioder()
-            .stream()
-            .filter(it -> erRelevantForBehandling(it, innvilgedePerioderMedSykdom))
-            .forEach(periode -> {
-                var utfall = switch (periode.getResultat()) {
-                    case OPPFYLT -> Utfall.OPPFYLT;
-                    case IKKE_OPPFYLT -> Utfall.IKKE_OPPFYLT;
-                    case IKKE_VURDERT -> throw new IllegalStateException("Skal ikke komme perioder som ikke er vurdert til uttak.");
-                };
-                map.put(new LukketPeriode(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato()), utfall);
-            }
-        );
-        return map;
-    }
-
-    private boolean erRelevantForBehandling(UnntakEtablertTilsynPeriode it, Set<DatoIntervallEntitet> innvilgedePerioderMedSykdom) {
-        return Set.of(Resultat.OPPFYLT, Resultat.IKKE_OPPFYLT).contains(it.getResultat())
-            || innvilgedePerioderMedSykdom.stream().anyMatch(at -> at.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFomDato(), it.getPeriode().getTomDato())));
-    }
-
     private void evaluerDokumenter(Set<PerioderFraSøknad> perioderFraSøknader, Set<KravDokument> kravDokumenter) {
         var journalpostIds = perioderFraSøknader.stream().map(PerioderFraSøknad::getJournalpostId).collect(Collectors.toSet());
 
@@ -231,25 +177,8 @@ public class MapInputTilUttakTjenestePLS {
         return new ArrayList<>(timeline.compress().toSegments());
     }
 
-    private Map<LukketPeriode, Pleiebehov> toPleiebehov(List<EtablertPleieperiode> pleiebehov) {
-        final Map<LukketPeriode, Pleiebehov> tilsynsbehov = new HashMap<>();
-        pleiebehov.forEach(p -> {
-            tilsynsbehov.put(toLukketPeriode(p.getPeriode()), mapToPleiebehov(p.getGrad()));
-        });
-        return tilsynsbehov;
-    }
-
     private LukketPeriode toLukketPeriode(DatoIntervallEntitet periode) {
         return new LukketPeriode(periode.getFomDato(), periode.getTomDato());
-    }
-
-    private Pleiebehov mapToPleiebehov(Pleiegrad grad) {
-        return switch (grad) {
-            case INGEN -> Pleiebehov.PROSENT_0;
-            case KONTINUERLIG_TILSYN -> Pleiebehov.PROSENT_100;
-            case UTVIDET_KONTINUERLIG_TILSYN, INNLEGGELSE -> Pleiebehov.PROSENT_200;
-            default -> throw new IllegalStateException("Ukjent Pleiegrad: " + grad);
-        };
     }
 
     private HashMap<String, List<Vilkårsperiode>> toInngangsvilkår(Vilkårene vilkårene) {

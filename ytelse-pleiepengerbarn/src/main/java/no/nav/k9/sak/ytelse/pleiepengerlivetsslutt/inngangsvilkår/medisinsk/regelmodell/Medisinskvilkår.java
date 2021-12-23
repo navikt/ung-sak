@@ -13,8 +13,7 @@ import no.nav.k9.sak.inngangsvilkår.Oppfylt;
 @RuleDocumentation(value = Medisinskvilkår.ID, specificationReference = "https://confluence.adeo.no/pages/viewpage.action?pageId=173827808")
 public class Medisinskvilkår implements RuleService<MedisinskvilkårGrunnlag> {
 
-    // TODO PLS: Korrigere paragraf
-    public static final String ID = "PSB_VK 9.10";
+    public static final String ID = "PLS_VK 9.16.1";
 
     static final RuleReasonRef MANGLENDE_DOKUMENTASJON = new RuleReasonRefImpl("1019", "Manglende dokumentasjon");
 

@@ -34,8 +34,6 @@ public class InngangsvilkårUtleder implements VilkårUtleder {
         OPPTJENINGSVILKÅRET,
         BEREGNINGSGRUNNLAGVILKÅR);
 
-    public InngangsvilkårUtleder() {
-    }
 
     @Override
     public UtledeteVilkår utledVilkår(Behandling behandling) {

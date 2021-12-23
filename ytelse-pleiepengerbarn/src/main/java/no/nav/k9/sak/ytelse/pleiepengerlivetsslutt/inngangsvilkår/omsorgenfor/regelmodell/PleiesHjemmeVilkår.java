@@ -13,7 +13,7 @@ import no.nav.k9.sak.inngangsvilkår.Oppfylt;
 @RuleDocumentation(value = PleiesHjemmeVilkår.ID, specificationReference = "")
 public class PleiesHjemmeVilkår implements RuleService<PleiesHjemmeVilkårGrunnlag> {
 
-    public static final String ID = "PSB_VK 9.10";
+    public static final String ID = "PLS_VK 9.13";
 
     static final RuleReasonRef MANGLENDE_DOKUMENTASJON = new RuleReasonRefImpl("1019", "Manglende dokumentasjon");
 
@@ -26,8 +26,8 @@ public class PleiesHjemmeVilkår implements RuleService<PleiesHjemmeVilkårGrunn
     @Override
     public Specification<PleiesHjemmeVilkårGrunnlag> getSpecification() {
         Ruleset<PleiesHjemmeVilkårGrunnlag> rs = new Ruleset<>();
-        return rs.hvisRegel(ErPleietrengendeHjemme.ID, "Er pleietrengende hjemme?")
-            .hvis(new ErPleietrengendeHjemme(), new Oppfylt())
+        return rs.hvisRegel(PleiesPleietrengendeHjemme.ID, "Er pleietrengende hjemme?")
+            .hvis(new PleiesPleietrengendeHjemme(), new Oppfylt())
             .ellers(new IkkeOppfylt(MANGLENDE_DOKUMENTASJON));
     }
 }
