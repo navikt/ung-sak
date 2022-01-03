@@ -159,7 +159,7 @@ public class PleietrengendeKravprioritet {
          * Dette er den åpne behandlingen for søker, og siste besluttede
          * behandling for andre søkere.
          */
-        private Behandling getAktuellBehandling() {
+        public Behandling getAktuellBehandling() {
             return aktuellBehandling;
         }
         
