@@ -218,6 +218,8 @@ spec:
       value: "true"
     - name: FORLENGELSE_ENABLET
       value: "true"
+    - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

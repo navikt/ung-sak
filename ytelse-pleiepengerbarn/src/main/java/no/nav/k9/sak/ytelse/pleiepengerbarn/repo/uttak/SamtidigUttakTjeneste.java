@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -19,7 +20,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
@@ -34,7 +34,8 @@ public class SamtidigUttakTjeneste {
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private BehandlingModellRepository behandlingModellRepository;
-    private PleietrengendeKravprioritet pleietrengendeKravprioritet;
+    private SamtidigUttakOverlappsjekker samtidigUttakOverlappsjekker;
+    private boolean enableRelevantsjekk;
 
 
     @Inject
@@ -43,13 +44,15 @@ public class SamtidigUttakTjeneste {
                                  FagsakRepository fagsakRepository,
                                  BehandlingRepository behandlingRepository,
                                  BehandlingModellRepository behandlingModellRepository,
-                                 PleietrengendeKravprioritet pleietrengendeKravprioritet) {
+                                 SamtidigUttakOverlappsjekker samtidigUttakOverlappsjekker,
+                                 @KonfigVerdi(value = "ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK", defaultVerdi = "false") boolean enableRelevantsjekk) {
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.behandlingModellRepository = behandlingModellRepository;
-        this.pleietrengendeKravprioritet = pleietrengendeKravprioritet;
+        this.samtidigUttakOverlappsjekker = samtidigUttakOverlappsjekker;
+        this.enableRelevantsjekk = enableRelevantsjekk;
     }
 
 
@@ -61,12 +64,13 @@ public class SamtidigUttakTjeneste {
             return false;
         }
 
+        if (enableRelevantsjekk && !samtidigUttakOverlappsjekker.isHarRelevantOverlappMedAndreUbehandledeSaker(ref)) {
+            return false;
+        }
+        
         if (anyHarÅpenBehandlingSomIkkeHarKommetTilUttak(andreÅpneBehandlinger)) {
             /*
-             * Krever at andre behandlinger kommer til uttak før vi går videre.
-             *
-             * TODO: Den beste løsningen er å se på kravprioritet om det er nødvendig å vente på
-             *       uttak eller ikke. Hvis det må ventes må alle sakene behandles frem til vedtak.
+             * Krever at andre behandlinger, med relevant overlapp, kommer til uttak før vi går videre.
              */
             return true;
         }
@@ -114,14 +118,6 @@ public class SamtidigUttakTjeneste {
         });
     }
 
-    /*
-    private boolean harUbehandledePerioderMedLavereKravprioritet(BehandlingReferanse ref) {
-        final LocalDateTimeline<List<Kravprioritet>> besluttetKravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(ref.getFagsakId(), ref.getPleietrengendeAktørId(), false);
-        final LocalDateTimeline<List<Kravprioritet>> ubesluttetKravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(ref.getFagsakId(), ref.getPleietrengendeAktørId(), true);
-        // Her legges det inn en utregning av hvilke nye perioder der man ikke har kravprio (dvs ikke høyeste prioritering) ... og så sjekkes disse mot perioderTilVurdering.
-    }
-    */
-
     public boolean isSkalHaTilbakehopp(BehandlingReferanse ref) {
         if (!harKommetTilUttak(ref)) {
             return false;
@@ -153,12 +149,6 @@ public class SamtidigUttakTjeneste {
         final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();
         final BehandlingModell modell = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType());
         return !modell.erStegAFørStegB(steg, BehandlingStegType.VURDER_UTTAK_V2);
-    }
-
-    private boolean erPåUttakssteget(BehandlingReferanse ref) {
-        final var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
-        final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();
-        return steg == BehandlingStegType.VURDER_UTTAK_V2;
     }
 
     private Simulering simulerUttak(BehandlingReferanse ref) {
