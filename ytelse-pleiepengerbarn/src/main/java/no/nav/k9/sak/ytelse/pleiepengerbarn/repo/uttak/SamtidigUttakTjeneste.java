@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -34,6 +35,7 @@ public class SamtidigUttakTjeneste {
     private BehandlingRepository behandlingRepository;
     private BehandlingModellRepository behandlingModellRepository;
     private SamtidigUttakOverlappsjekker samtidigUttakOverlappsjekker;
+    private boolean enableRelevantsjekk;
 
 
     @Inject
@@ -42,13 +44,15 @@ public class SamtidigUttakTjeneste {
                                  FagsakRepository fagsakRepository,
                                  BehandlingRepository behandlingRepository,
                                  BehandlingModellRepository behandlingModellRepository,
-                                 SamtidigUttakOverlappsjekker samtidigUttakOverlappsjekker) {
+                                 SamtidigUttakOverlappsjekker samtidigUttakOverlappsjekker,
+                                 @KonfigVerdi(value = "ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK", defaultVerdi = "false") boolean enableRelevantsjekk) {
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.behandlingModellRepository = behandlingModellRepository;
         this.samtidigUttakOverlappsjekker = samtidigUttakOverlappsjekker;
+        this.enableRelevantsjekk = enableRelevantsjekk;
     }
 
 
@@ -60,7 +64,7 @@ public class SamtidigUttakTjeneste {
             return false;
         }
 
-        if (!samtidigUttakOverlappsjekker.isHarRelevantOverlappMedAndreUbehandledeSaker(ref)) {
+        if (enableRelevantsjekk && !samtidigUttakOverlappsjekker.isHarRelevantOverlappMedAndreUbehandledeSaker(ref)) {
             return false;
         }
         
