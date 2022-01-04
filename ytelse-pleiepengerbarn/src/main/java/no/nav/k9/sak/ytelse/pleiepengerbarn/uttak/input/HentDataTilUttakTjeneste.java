@@ -1,8 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.TreeSet;
@@ -44,7 +42,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
-import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 
 @Dependent
 public class HentDataTilUttakTjeneste {
@@ -148,6 +145,7 @@ public class HentDataTilUttakTjeneste {
         var input = new InputParametere()
             .medBehandling(behandling)
             .medVilkårene(vilkårene)
+            .medDefinerendeVilkår(perioderTilVurderingTjeneste.definerendeVilkår())
             .medPleiebehov(pleiebehov.map(pb -> pb.getPleieperioder().getPerioder()).orElse(List.of()))
             .medPerioderTilVurdering(perioderTilVurdering)
             .medUtvidetPerioderRevurdering(utvidetRevurderingPerioder)
@@ -221,28 +219,12 @@ public class HentDataTilUttakTjeneste {
 
     private NavigableSet<DatoIntervallEntitet> finnSykdomsperioder(BehandlingReferanse referanse) {
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = perioderTilVurderingTjeneste(referanse);
-        final var s1 = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
-        final var s2 = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR);
-        final var s3 = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.I_LIVETS_SLUTTFASE);
-        final var resultat = new TreeSet<>(s1);
-        resultat.addAll(s2);
-        resultat.addAll(s3);
-        return resultat;
-    }
-
-    public Map<LukketPeriode, List<String>> deprecatedMapKravprioritetsliste(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
-        final Map<LukketPeriode, List<String>> resultat = new HashMap<>();
-        kravprioritet.forEach(s -> {
-            resultat.put(new LukketPeriode(s.getFom(), s.getTom()), s.getValue().stream().map(kp -> kp.getSaksnummer().getVerdi()).collect(Collectors.toList()));
-        });
-        return resultat;
-    }
-
-    public Map<LukketPeriode, List<String>> mapKravprioritetsliste(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
-        final Map<LukketPeriode, List<String>> resultat = new HashMap<>();
-        kravprioritet.forEach(s -> {
-            resultat.put(new LukketPeriode(s.getFom(), s.getTom()), s.getValue().stream().map(kp -> kp.getAktuellBehandlingUuid().toString()).collect(Collectors.toList()));
-        });
+        var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
+        final var resultat = new TreeSet<DatoIntervallEntitet>();
+        for (VilkårType vilkårType : definerendeVilkår) {
+            final var periode = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), vilkårType);
+            resultat.addAll(periode);
+        }
         return resultat;
     }
 

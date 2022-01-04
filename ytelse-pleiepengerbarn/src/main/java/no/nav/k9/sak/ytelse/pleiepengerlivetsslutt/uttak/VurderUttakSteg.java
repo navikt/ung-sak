@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
@@ -32,7 +33,7 @@ public class VurderUttakSteg implements BehandlingSteg {
     private static final Logger log = LoggerFactory.getLogger(VurderUttakSteg.class);
 
     private BehandlingRepository behandlingRepository;
-    private MapInputTilUttakTjenestePLS mapInputTilUttakTjeneste;
+    private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
     private UttakTjeneste uttakTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
 
@@ -42,7 +43,7 @@ public class VurderUttakSteg implements BehandlingSteg {
 
     @Inject
     public VurderUttakSteg(BehandlingRepository behandlingRepository,
-                           MapInputTilUttakTjenestePLS mapInputTilUttakTjeneste,
+                           MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
                            UttakTjeneste uttakTjeneste,
                            SamtidigUttakTjeneste samtidigUttakTjeneste) {
         this.behandlingRepository = behandlingRepository;

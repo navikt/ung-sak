@@ -17,14 +17,10 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.MapTilBrevkode;
@@ -37,16 +33,16 @@ public class SøknadsperiodeTjeneste {
     private FagsakRepository fagsakRepository;
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private Instance<MapTilBrevkode> mapTilBrevkode;
+    private Instance<MapTilBrevkode> brevkodeMappere;
 
 
     @Inject
-    public SøknadsperiodeTjeneste(BehandlingRepository behandlingRepository, FagsakRepository fagsakRepository, SøknadsperiodeRepository søknadsperiodeRepository, MottatteDokumentRepository mottatteDokumentRepository, @Any Instance<MapTilBrevkode> mapTilBrevkode) {
+    public SøknadsperiodeTjeneste(BehandlingRepository behandlingRepository, FagsakRepository fagsakRepository, SøknadsperiodeRepository søknadsperiodeRepository, MottatteDokumentRepository mottatteDokumentRepository, @Any Instance<MapTilBrevkode> brevkodeMappere) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.mapTilBrevkode = mapTilBrevkode;
+        this.brevkodeMappere = brevkodeMappere;
     }
 
 
@@ -98,7 +94,7 @@ public class SøknadsperiodeTjeneste {
 
     public List<Kravperiode> hentKravperioder(Long fagsakId, Collection<Søknadsperioder> søknadsperioders) {
         var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
-        var brevkode = finnBrevkodeMapper(fagsak).getBrevkode();
+        var brevkode = MapTilBrevkode.finnBrevkodeMapper(brevkodeMappere, fagsak.getYtelseType()).getBrevkode();
         final List<MottattDokument> mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(fagsakId)
                 .stream()
                 .filter(it -> brevkode.equals(it.getType()))
@@ -145,8 +141,4 @@ public class SøknadsperiodeTjeneste {
         }
     }
 
-    private MapTilBrevkode finnBrevkodeMapper(Fagsak fagsak) {
-        return FagsakYtelseTypeRef.Lookup.find(mapTilBrevkode, fagsak.getYtelseType())
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + MapTilBrevkode.class.getSimpleName() + " for ytelseType=" + fagsak.getYtelseType()));
-    }
 }

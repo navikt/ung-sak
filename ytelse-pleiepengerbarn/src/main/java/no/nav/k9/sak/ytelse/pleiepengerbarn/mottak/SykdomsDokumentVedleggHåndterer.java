@@ -23,7 +23,6 @@ import no.nav.k9.felles.integrasjon.saf.Kanal;
 import no.nav.k9.felles.integrasjon.saf.LogiskVedleggResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.RelevantDatoResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
@@ -42,17 +41,17 @@ public class SykdomsDokumentVedleggHåndterer {
     private SykdomDokumentRepository sykdomDokumentRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
     private SafTjeneste safTjeneste;
-    private Instance<MapTilBrevkode> mapTilBrevkode;
+    private Instance<MapTilBrevkode> brevkodeMappere;
 
     @Inject
     public SykdomsDokumentVedleggHåndterer(SykdomDokumentRepository sykdomDokumentRepository,
                                            SykdomVurderingRepository sykdomVurderingRepository,
                                            SafTjeneste safTjeneste,
-                                           @Any Instance<MapTilBrevkode> mapTilBrevkode) {
+                                           @Any Instance<MapTilBrevkode> brevkodeMappere) {
         this.safTjeneste = safTjeneste;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
-        this.mapTilBrevkode = mapTilBrevkode;
+        this.brevkodeMappere = brevkodeMappere;
     }
 
     public void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger) {
@@ -77,7 +76,7 @@ public class SykdomsDokumentVedleggHåndterer {
                 .dato()
                 .datotype());
         var journalpost = safTjeneste.hentJournalpostInfo(query, projection);
-        var brevkode = finnBrevkodeMapper(behandling).getBrevkode();
+        var brevkode = MapTilBrevkode.finnBrevkodeMapper(brevkodeMappere, behandling.getFagsakYtelseType()).getBrevkode();
         final LocalDateTime mottattDato = utledMottattDato(journalpost);
 
         log.info("Fant {} vedlegg på søknad", journalpost.getDokumenter().size());
@@ -146,8 +145,4 @@ public class SykdomsDokumentVedleggHåndterer {
                 .getDato();
     }
 
-    private MapTilBrevkode finnBrevkodeMapper(Behandling behandling) {
-        return FagsakYtelseTypeRef.Lookup.find(mapTilBrevkode, behandling.getFagsakYtelseType())
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + MapTilBrevkode.class.getSimpleName() + " for ytelseType=" + behandling.getFagsakYtelseType()));
-    }
 }

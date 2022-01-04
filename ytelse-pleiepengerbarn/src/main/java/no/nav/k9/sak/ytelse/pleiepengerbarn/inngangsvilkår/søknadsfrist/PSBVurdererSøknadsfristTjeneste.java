@@ -51,7 +51,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private AvklartSøknadsfristRepository avklartSøknadsfristRepository;
-    private Instance<MapTilBrevkode> mapTilBrevkode;
+    private Instance<MapTilBrevkode> brevkodeMappere;
 
     PSBVurdererSøknadsfristTjeneste() {
         // CDI
@@ -62,12 +62,12 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
                                            MottatteDokumentRepository mottatteDokumentRepository,
                                            AvklartSøknadsfristRepository avklartSøknadsfristRepository,
                                            BehandlingRepository behandlingRepository,
-                                           @Any Instance<MapTilBrevkode> mapTilBrevkode) {
+                                           @Any Instance<MapTilBrevkode> brevkodeMappere) {
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.avklartSøknadsfristRepository = avklartSøknadsfristRepository;
         this.behandlingRepository = behandlingRepository;
-        this.mapTilBrevkode = mapTilBrevkode;
+        this.brevkodeMappere = brevkodeMappere;
     }
 
     @Override
@@ -81,7 +81,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
     public Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
         var result = new HashMap<KravDokument, List<SøktPeriode<Søknadsperiode>>>();
 
-        var brevkode = finnBrevkodeMapper(referanse).getBrevkode();
+        var brevkode = MapTilBrevkode.finnBrevkodeMapper(brevkodeMappere, referanse.getFagsakYtelseType()).getBrevkode();
 
         var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(referanse.getFagsakId())
             .stream()
@@ -160,7 +160,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
             return hentPerioderTilVurdering(referanse).keySet();
         }
 
-        var brevkode = finnBrevkodeMapper(referanse).getBrevkode();
+        var brevkode = MapTilBrevkode.finnBrevkodeMapper(brevkodeMappere, referanse.getFagsakYtelseType()).getBrevkode();
 
         return mottatteDokumentRepository.hentMottatteDokumentForBehandling(referanse.getFagsakId(), referanse.getBehandlingId(), List.of(brevkode), false, DokumentStatus.GYLDIG)
             .stream()
@@ -217,10 +217,5 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
         var fraværPeriode = new Søknadsperiode(segment.getFom(), segment.getTom());
 
         return new VurdertSøktPeriode<>(periode, segment.getValue().getUtfall(), fraværPeriode);
-    }
-
-    private MapTilBrevkode finnBrevkodeMapper(BehandlingReferanse ref) {
-        return FagsakYtelseTypeRef.Lookup.find(mapTilBrevkode, ref.getFagsakYtelseType())
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + MapTilBrevkode.class.getSimpleName() + " for ytelseType=" + ref.getFagsakYtelseType()));
     }
 }
