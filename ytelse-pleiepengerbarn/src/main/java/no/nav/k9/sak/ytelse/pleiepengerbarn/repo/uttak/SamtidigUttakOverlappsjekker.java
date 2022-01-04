@@ -82,7 +82,7 @@ public class SamtidigUttakOverlappsjekker {
                 return true;
             }
         }
-        throw new IllegalStateException("Dette skal ikke kunne skje.");
+        throw new IllegalStateException("Dette skal ikke kunne skje fordi det er en forutsetning om at ref.getSaksnummer finnes i 'kravprioritetsliste'.");
     }
     
     private boolean harIkkeAndreprioritet(BehandlingReferanse ref, List<Kravprioritet> kravprioritetsliste) {
