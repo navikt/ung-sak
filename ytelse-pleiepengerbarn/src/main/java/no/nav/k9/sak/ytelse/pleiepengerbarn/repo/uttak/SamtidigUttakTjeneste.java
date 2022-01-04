@@ -19,8 +19,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.BekreftetUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
@@ -44,8 +42,6 @@ public class SamtidigUttakTjeneste {
                                  FagsakRepository fagsakRepository,
                                  BehandlingRepository behandlingRepository,
                                  BehandlingModellRepository behandlingModellRepository,
-                                 PleietrengendeKravprioritet pleietrengendeKravprioritet,
-                                 BekreftetUttakTjeneste bekreftetUttakTjeneste,
                                  SamtidigUttakOverlappsjekker samtidigUttakOverlappsjekker) {
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
