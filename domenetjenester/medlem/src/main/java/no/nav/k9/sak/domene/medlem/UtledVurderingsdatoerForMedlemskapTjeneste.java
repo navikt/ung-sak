@@ -7,12 +7,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
@@ -22,14 +22,13 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
-import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
@@ -45,20 +44,18 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 @Dependent
 public class UtledVurderingsdatoerForMedlemskapTjeneste {
 
-    private Instance<MedlemEndringssjekker> alleEndringssjekkere;
     private MedlemskapRepository medlemskapRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private BehandlingRepository behandlingRepository;
+    private MedlemEndringssjekker endringssjekker = new MedlemEndringssjekker();
 
     @Inject
     public UtledVurderingsdatoerForMedlemskapTjeneste(BehandlingRepository behandlingRepository,
                                                       MedlemskapRepository medlemskapRepository,
-                                                      @Any Instance<MedlemEndringssjekker> alleEndringssjekkere,
                                                       PersonopplysningTjeneste personopplysningTjeneste,
                                                       @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
-        this.alleEndringssjekkere = alleEndringssjekkere;
         this.medlemskapRepository = medlemskapRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
@@ -82,8 +79,6 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
     public Set<LocalDate> finnVurderingsdatoer(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        var endringssjekker = FagsakYtelseTypeRef.Lookup.find(alleEndringssjekkere, behandling.getFagsakYtelseType())
-            .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + behandling.getFagsakYtelseType().getKode()));
         var vilkårsPerioder = getPerioderTilVurderingTjeneste(behandling)
             .utled(behandlingId, VilkårType.MEDLEMSKAPSVILKÅRET);
         var tidligsteStp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo);
@@ -106,13 +101,13 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
 
     Map<LocalDate, Set<VurderingsÅrsak>> finnVurderingsdatoerMedÅrsak(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var endringssjekker = FagsakYtelseTypeRef.Lookup.find(alleEndringssjekkere, behandling.getFagsakYtelseType())
-            .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + behandling.getFagsakYtelseType().getKode()));
         Map<LocalDate, Set<VurderingsÅrsak>> datoer = new HashMap<>();
 
         var vilkårsPerioder = getPerioderTilVurderingTjeneste(behandling)
             .utled(behandlingId, VilkårType.MEDLEMSKAPSVILKÅRET);
-        var tidligsteStp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo);
+        var tidligsteStp = vilkårsPerioder.stream()
+            .map(DatoIntervallEntitet::getFomDato)
+            .min(LocalDate::compareTo);
         if (tidligsteStp.isEmpty()) {
             return Map.of();
         }
@@ -135,7 +130,8 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         if (personopplysningerOpt.isPresent()) {
             PersonopplysningerAggregat personopplysningerAggregat = personopplysningerOpt.get();
 
-            utledetResultat.putAll(hentEndringForStatsborgerskap(personopplysningerAggregat, revurdering));
+            var behandlingReferanse = BehandlingReferanse.fra(revurdering);
+            utledetResultat.putAll(hentEndringForStatsborgerskap(personopplysningerAggregat, behandlingReferanse));
             mergeResultat(utledetResultat, hentEndringForPersonstatus(personopplysningerAggregat, revurdering));
             mergeResultat(utledetResultat, hentEndringForAdresse(personopplysningerAggregat, revurdering));
         }
@@ -158,40 +154,49 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         Optional<MedlemskapAggregat> førsteVersjon = medlemskapRepository.hentFørsteVersjonAvMedlemskap(revurderingId);
         Optional<MedlemskapAggregat> sisteVersjon = medlemskapRepository.hentMedlemskap(revurderingId);
 
-        Set<MedlemskapPerioderEntitet> første = førsteVersjon.map(MedlemskapAggregat::getRegistrertMedlemskapPerioder).orElse(Collections.emptySet());
-        Set<MedlemskapPerioderEntitet> siste = sisteVersjon.map(MedlemskapAggregat::getRegistrertMedlemskapPerioder).orElse(Collections.emptySet());
+        Set<MedlemskapPerioderEntitet> første = førsteVersjon.map(MedlemskapAggregat::getRegistrertMedlemskapPerioder)
+            .orElse(Collections.emptySet());
+        Set<MedlemskapPerioderEntitet> siste = sisteVersjon.map(MedlemskapAggregat::getRegistrertMedlemskapPerioder)
+            .orElse(Collections.emptySet());
 
-        List<LocalDateSegment<MedlemskapPerioderEntitet>> førsteListe = første.stream().map(r -> new LocalDateSegment<>(r.getFom(), r.getTom(), r))
+        List<LocalDateSegment<MedlData>> førsteListe = første.stream()
+            .map(r -> new LocalDateSegment<>(r.getFom(), r.getTom(), new MedlData(r)))
             .collect(Collectors.toList());
-        List<LocalDateSegment<MedlemskapPerioderEntitet>> sisteListe = siste.stream().map(r -> new LocalDateSegment<>(r.getFom(), r.getTom(), r))
+        List<LocalDateSegment<MedlData>> sisteListe = siste.stream()
+            .map(r -> new LocalDateSegment<>(r.getFom(), r.getTom(), new MedlData(r)))
             .collect(Collectors.toList());
 
-        LocalDateTimeline<MedlemskapPerioderEntitet> førsteTidsserie = new LocalDateTimeline<>(førsteListe, this::slåSammenMedlemskapPerioder);
-        LocalDateTimeline<MedlemskapPerioderEntitet> andreTidsserie = new LocalDateTimeline<>(sisteListe, this::slåSammenMedlemskapPerioder);
+        LocalDateTimeline<MedlData> førsteTidsserie = new LocalDateTimeline<>(førsteListe, this::slåSammenMedlemskapPerioder).compress();
+        LocalDateTimeline<MedlData> andreTidsserie = new LocalDateTimeline<>(sisteListe, this::slåSammenMedlemskapPerioder).compress();
 
-        LocalDateTimeline<MedlemskapPerioderEntitet> resultat = førsteTidsserie.combine(andreTidsserie,
+        LocalDateTimeline<MedlData> resultat = førsteTidsserie.combine(andreTidsserie,
             (di, førsteVersjon1, sisteVersjon1) -> sjekkForEndringIMedl(di, førsteVersjon1, sisteVersjon1, endringssjekker),
             LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         return utledResultat(resultat);
     }
 
-    private Map<LocalDate, Set<VurderingsÅrsak>> utledResultat(LocalDateTimeline<MedlemskapPerioderEntitet> resultat) {
+    private Map<LocalDate, Set<VurderingsÅrsak>> utledResultat(LocalDateTimeline<MedlData> resultat) {
         final Map<LocalDate, Set<VurderingsÅrsak>> utledetResultat = new HashMap<>();
-        NavigableSet<LocalDateInterval> datoIntervaller = resultat.getDatoIntervaller();
-        for (LocalDateInterval localDateInterval : datoIntervaller) {
-            LocalDateSegment<MedlemskapPerioderEntitet> perioden = resultat.getSegment(localDateInterval);
+        var datoIntervaller = resultat.compress().toSegments();
 
-            utledetResultat.put(perioden.getFom(), Set.of(VurderingsÅrsak.MEDL_PERIODE));
+        for (LocalDateSegment<MedlData> perioden : datoIntervaller) {
+
+            if (perioden.getValue() != null) {
+                utledetResultat.put(perioden.getFom(), Set.of(VurderingsÅrsak.MEDL_PERIODE));
+            }
         }
         return utledetResultat;
     }
 
     private Map<LocalDate, Set<VurderingsÅrsak>> hentEndringForAdresse(PersonopplysningerAggregat personopplysningerAggregat, Behandling revurdering) {
         List<PersonAdresseEntitet> adresser = personopplysningerAggregat.getAdresserFor(revurdering.getAktørId())
-            .stream().sorted(Comparator.comparing(s -> s.getPeriode().getFomDato()))
-            .collect(Collectors.toList());
+            .stream()
+            .sorted(Comparator.comparing(s -> s.getPeriode().getFomDato()))
+            .toList();
+
         final Map<LocalDate, Set<VurderingsÅrsak>> utledetResultat = new HashMap<>();
+
         IntStream.range(0, adresser.size() - 1).forEach(i -> {
             if (i != adresser.size() - 1) { // sjekker om det er siste element
                 PersonAdresseEntitet førsteElement = adresser.get(i);
@@ -206,8 +211,10 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
 
     private Map<LocalDate, Set<VurderingsÅrsak>> hentEndringForPersonstatus(PersonopplysningerAggregat personopplysningerAggregat, Behandling revurdering) {
         List<PersonstatusEntitet> personstatus = personopplysningerAggregat.getPersonstatuserFor(revurdering.getAktørId())
-            .stream().sorted(Comparator.comparing(s -> s.getPeriode().getFomDato()))
-            .collect(Collectors.toList());
+            .stream()
+            .sorted(Comparator.comparing(s -> s.getPeriode().getFomDato()))
+            .toList();
+
         final Map<LocalDate, Set<VurderingsÅrsak>> utledetResultat = new HashMap<>();
         IntStream.range(0, personstatus.size() - 1).forEach(i -> {
             if (i != personstatus.size() - 1) { // sjekker om det er siste element
@@ -224,27 +231,51 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         return utledetResultat;
     }
 
-    private Map<LocalDate, Set<VurderingsÅrsak>> hentEndringForStatsborgerskap(PersonopplysningerAggregat personopplysningerAggregat, Behandling revurdering) {
-        List<StatsborgerskapEntitet> statsborgerskap = personopplysningerAggregat.getStatsborgerskapFor(revurdering.getAktørId())
-            .stream().sorted(Comparator.comparing(s -> s.getPeriode().getFomDato()))
-            .collect(Collectors.toList());
+    // PDL har flere samtidige statsborgerskap - dermed må man sjekke region ved hvert brudd
+    private Map<LocalDate, Set<VurderingsÅrsak>> hentEndringForStatsborgerskap(PersonopplysningerAggregat aggregat, BehandlingReferanse ref) {
+        var statsborgerskapene = aggregat.getStatsborgerskapFor(ref.getAktørId());
+
+        var regionTidslinje = mapStatsborgerskapTilTidslinje(statsborgerskapene)
+            .compress();
+
         final Map<LocalDate, Set<VurderingsÅrsak>> utledetResultat = new HashMap<>();
-        IntStream.range(0, statsborgerskap.size() - 1).forEach(i -> {
-            if (i != statsborgerskap.size() - 1) { // sjekker om det er siste element
-                StatsborgerskapEntitet førsteElement = statsborgerskap.get(i);
-                StatsborgerskapEntitet nesteElement = statsborgerskap.get(i + 1);
-                if (!førsteElement.getStatsborgerskap().equals(nesteElement.getStatsborgerskap())) {
-                    utledetResultat.put(nesteElement.getPeriode().getFomDato(), Set.of(VurderingsÅrsak.STATSBORGERSKAP));
-                }
-            }
-        });
+        regionTidslinje.toSegments().forEach(it -> utledetResultat.put(it.getFom(), Set.of(VurderingsÅrsak.STATSBORGERSKAP)));
+
         return utledetResultat;
     }
 
-    private LocalDateSegment<MedlemskapPerioderEntitet> sjekkForEndringIMedl(@SuppressWarnings("unused") LocalDateInterval di, // NOSONAR
-                                                                             LocalDateSegment<MedlemskapPerioderEntitet> førsteVersjon,
-                                                                             LocalDateSegment<MedlemskapPerioderEntitet> sisteVersjon,
-                                                                             MedlemEndringssjekker endringssjekker) {
+    private LocalDateTimeline<Region> mapStatsborgerskapTilTidslinje(List<StatsborgerskapEntitet> statsborgerskapene) {
+        var tidslinje = new LocalDateTimeline<Region>(List.of());
+
+        for (StatsborgerskapEntitet statsborgerskapEntitet : statsborgerskapene) {
+            tidslinje = tidslinje.combine(new LocalDateSegment<>(statsborgerskapEntitet.getPeriode().toLocalDateInterval(), statsborgerskapEntitet.getRegion()), this::combineRegioner, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        return tidslinje;
+    }
+
+    private LocalDateSegment<Region> combineRegioner(LocalDateInterval di, LocalDateSegment<Region> firstSegment, LocalDateSegment<Region> secondSegment) {
+        if (firstSegment == secondSegment) {
+            return firstSegment;
+        }
+        if (firstSegment != null && secondSegment == null) {
+            return firstSegment;
+        }
+        if (firstSegment == null) {
+            return secondSegment;
+        }
+
+        var region = Stream.of(firstSegment.getValue(), secondSegment.getValue())
+            .min(Comparator.comparing(Region::getRank))
+            .orElse(Region.TREDJELANDS_BORGER);
+
+        return new LocalDateSegment<>(di, region);
+    }
+
+    private LocalDateSegment<MedlData> sjekkForEndringIMedl(@SuppressWarnings("unused") LocalDateInterval di,
+                                                            LocalDateSegment<MedlData> førsteVersjon,
+                                                            LocalDateSegment<MedlData> sisteVersjon,
+                                                            MedlemEndringssjekker endringssjekker) {
 
         // må alltid sjekke datoer med overlapp
         if (førsteVersjon != null && førsteVersjon.getValue().getKildeType() == null) {
@@ -273,39 +304,33 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
     }
 
     // Ligger her som en guard mot dårlig datakvalitet i medl.. Skal nemlig aldri inntreffe
-    private LocalDateSegment<MedlemskapPerioderEntitet> slåSammenMedlemskapPerioder(LocalDateInterval di,
-                                                                                    LocalDateSegment<MedlemskapPerioderEntitet> førsteVersjon,
-                                                                                    LocalDateSegment<MedlemskapPerioderEntitet> sisteVersjon) {
+    private LocalDateSegment<MedlData> slåSammenMedlemskapPerioder(LocalDateInterval di,
+                                                                   LocalDateSegment<MedlData> førsteVersjon,
+                                                                   LocalDateSegment<MedlData> sisteVersjon) {
         if (førsteVersjon == null) {
             return sisteVersjon;
         } else if (sisteVersjon == null) {
             return førsteVersjon;
         }
 
-        MedlemskapPerioderEntitet senesteBesluttetPeriode = finnMedlemskapPeriodeMedSenestBeslutningsdato(førsteVersjon, sisteVersjon);
-        MedlemskapPerioderBuilder builder = new MedlemskapPerioderBuilder(senesteBesluttetPeriode);
-        builder.medPeriode(di.getFomDato(), di.getTomDato());
-        builder.medKildeType(senesteBesluttetPeriode.getKildeType());
+        var kildeType = finnMedlemskapPeriodeMedSenestBeslutningsdato(førsteVersjon, sisteVersjon);
 
-        return new LocalDateSegment<>(di.getFomDato(), di.getTomDato(), builder.build());
+        return new LocalDateSegment<>(di, kildeType);
     }
 
-    private MedlemskapPerioderEntitet finnMedlemskapPeriodeMedSenestBeslutningsdato(LocalDateSegment<MedlemskapPerioderEntitet> førsteVersjon,
-                                                                                    LocalDateSegment<MedlemskapPerioderEntitet> sisteVersjon) {
-        MedlemskapPerioderEntitet riktigEntitetVerdi;
+    private MedlData finnMedlemskapPeriodeMedSenestBeslutningsdato(LocalDateSegment<MedlData> førsteVersjon,
+                                                                   LocalDateSegment<MedlData> sisteVersjon) {
         LocalDate førsteBeslutningsdato = førsteVersjon.getValue().getBeslutningsdato();
         LocalDate sisteBeslutningsdato = sisteVersjon.getValue().getBeslutningsdato();
         if (førsteBeslutningsdato != null && førsteBeslutningsdato.isAfter(sisteBeslutningsdato)) {
-            riktigEntitetVerdi = førsteVersjon.getValue();
+            return førsteVersjon.getValue();
         } else {
-            riktigEntitetVerdi = sisteVersjon.getValue();
+            return sisteVersjon.getValue();
         }
-        return riktigEntitetVerdi;
     }
 
     private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
-        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType())
-            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
+        return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
     }
 
 }
