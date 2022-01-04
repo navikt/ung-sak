@@ -100,7 +100,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
             .allMatch(sykdomVurderingSegment -> sykdomVurderingSegment.getValue() != null
                 && Set.of(Resultat.OPPFYLT, Resultat.IKKE_OPPFYLT).contains(sykdomVurderingSegment.getValue().getResultat()));
         if (!harVurdering || behandling.erManueltOpprettet()) {
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING_LIVETS_SLUTTFASE)));
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
         var builder = Vilkårene.builderFraEksisterende(vilkårene);
