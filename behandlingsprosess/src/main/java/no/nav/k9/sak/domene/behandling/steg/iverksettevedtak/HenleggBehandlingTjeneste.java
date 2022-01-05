@@ -23,7 +23,6 @@ import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -39,7 +38,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
-import no.nav.k9.sak.kontrakt.behandling.KravDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveSendTilInfotrygdTask;
 
@@ -214,9 +212,5 @@ public class HenleggBehandlingTjeneste {
 
         historikkinnslag.setAktør(aktør);
         historikkRepository.lagre(historikkinnslag);
-    }
-
-    public void henleggDokumenterAvSaksbehandler(BehandlingReferanse ref, BehandlingResultatType årsakKode, List<KravDto> krav) {
-
     }
 }
