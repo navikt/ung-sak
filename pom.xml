@@ -42,7 +42,7 @@
         <junit.version>5.8.2</junit.version>
         <felles.version>0.2.18</felles.version>
         <swagger.version>2.1.12</swagger.version>
-        <k9format.version>5.7.1</k9format.version>
+        <k9format.version>5.7.3</k9format.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
