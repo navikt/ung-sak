@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -90,6 +91,8 @@ public class PunsjRestKlient {
             String json = JsonObjectMapper.getJson(søk);
             HttpPost httpPost = new HttpPost(builder.build());
             httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+            httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+            httpPost.setHeader(HttpHeaders.ACCEPT, "application/json");
 
             try (var httpResponse = restClient.execute(httpPost)) {
                 int responseCode = httpResponse.getStatusLine().getStatusCode();
