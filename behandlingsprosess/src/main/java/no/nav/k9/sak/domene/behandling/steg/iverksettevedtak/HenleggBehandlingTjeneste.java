@@ -2,8 +2,8 @@ package no.nav.k9.sak.domene.behandling.steg.iverksettevedtak;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -55,6 +56,7 @@ public class HenleggBehandlingTjeneste {
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester;
+    private Boolean enablePsbHenleggelse;
 
     public HenleggBehandlingTjeneste() {
         // for CDI proxy
@@ -67,7 +69,8 @@ public class HenleggBehandlingTjeneste {
                                      FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                      ProsessTaskRepository prosessTaskRepository,
                                      MottatteDokumentRepository mottatteDokumentRepository,
-                                     @Any Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester) {
+                                     @Any Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester,
+                                     @KonfigVerdi(value = "HENLEGGELSE_PSB_ENABLET", defaultVerdi = "false") Boolean enablePsbHenleggelse) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -78,15 +81,18 @@ public class HenleggBehandlingTjeneste {
         this.historikkRepository = repositoryProvider.getHistorikkRepository();
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.henleggelsePostopsTjenester = henleggelsePostopsTjenester;
+        this.enablePsbHenleggelse = enablePsbHenleggelse;
     }
 
     public void henleggBehandlingAvSaksbehandler(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        if (behandling.getFagsakYtelseType() == FagsakYtelseType.PSB) {
+        if (behandling.getFagsakYtelseType() == FagsakYtelseType.PSB && !enablePsbHenleggelse) {
             throw new IllegalArgumentException("Det er p.t. ikke støttet å henlegge behandlinger for fagsak Pleiepenger sykt barn.");
         }
+
+        validerÅrsakMotKrav(årsakKode, behandling);
 
         var søknad = søknadRepository.hentSøknadHvisEksisterer(behandling.getId());
         if (søknad.isEmpty()) {
@@ -99,6 +105,19 @@ public class HenleggBehandlingTjeneste {
         fagsakProsessTaskRepository.ryddProsessTasks(behandling.getFagsakId(), behandling.getId());  // rydd tidligere tasks (eks. registerinnhenting, etc)
 
         doHenleggBehandling(behandlingId, årsakKode, begrunnelse, HistorikkAktør.SAKSBEHANDLER);
+    }
+
+    private void validerÅrsakMotKrav(BehandlingResultatType årsakKode, Behandling behandling) {
+        if (Objects.equals(BehandlingResultatType.HENLAGT_FEILOPPRETTET, årsakKode)) {
+            var gyldigeDokumenterPåBehandling = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
+                .stream()
+                .filter(it -> Objects.equals(it.getBehandlingId(), behandling.getId()))
+                .toList();
+
+            if (!gyldigeDokumenterPåBehandling.isEmpty()) {
+                throw new IllegalStateException("Prøver å henlegge behandling som feilopprettet men det finnes gyldige/ubehandlede dokumenter på sak");
+            }
+        }
     }
 
     private void doHenleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse, HistorikkAktør historikkAktør) {
@@ -122,15 +141,18 @@ public class HenleggBehandlingTjeneste {
     }
 
     private void henleggDokumenter(Behandling behandling) {
-        Set<Brevkode> kravdokumentTyper = new HashSet<>();
-        kravdokumentTyper.addAll(Brevkode.SØKNAD_TYPER);
-        kravdokumentTyper.add(Brevkode.INNTEKTSMELDING);
+
+        Set<Brevkode> kravdokumentTyper = new HashSet<>(Brevkode.SØKNAD_TYPER);
+
+        if (Objects.equals(behandling.getFagsakYtelseType(), FagsakYtelseType.OMP)) {
+            kravdokumentTyper.add(Brevkode.INNTEKTSMELDING);
+        }
 
         List<MottattDokument> gyldigeDokumenterFagsak = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId());
         List<MottattDokument> gyldigeKravdokumenterBehandling = gyldigeDokumenterFagsak.stream()
             .filter(dok -> behandling.getId().equals(dok.getBehandlingId()))
             .filter(dok -> kravdokumentTyper.contains(dok.getType()))
-            .collect(Collectors.toList());
+            .toList();
 
         log.info("Henlegger behandling og {} dokumenter", gyldigeDokumenterFagsak.size());
         for (MottattDokument kravdokument : gyldigeKravdokumenterBehandling) {

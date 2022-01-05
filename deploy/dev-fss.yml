@@ -220,6 +220,8 @@ spec:
       value: "true"
     - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
       value: "true"
+    - name: HENLEGGELSE_PSB_ENABLET
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
