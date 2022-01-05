@@ -57,6 +57,7 @@ public class PunsjRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path("/journalpost/uferdig")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getUferdigJournalpostIderPrAktoer(@Parameter(description = "Inneholder aktørIder, der det blir søket etter uferdig journalposter i punsj") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) UferdigJournalpostSøkDto dto) {
         if (dto.getAktorIdDto() != null && dto.getAktorIdDto().getAktorId() != null) {
