@@ -29,6 +29,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 @BehandlingStegRef(kode = "VURDER_UTTAK_V2")
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
     private static final Logger log = LoggerFactory.getLogger(VurderUttakIBeregningSteg.class);
