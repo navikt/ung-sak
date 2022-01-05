@@ -25,6 +25,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @ApplicationScoped
 public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandlingsresultatTjeneste {
 
@@ -88,13 +89,12 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
             return false;
         }
 
-        if (avslåtteVilkår.stream().anyMatch(v -> v != VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR && v != VilkårType.MEDISINSKEVILKÅR_18_ÅR)) {
+        var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
+        if (avslåtteVilkår.stream().anyMatch(v -> !definerendeVilkår.contains(v))) {
             return true;
         }
 
-        final var ingenAvSykdomsvilkåreneErOppfylt = harIngenOppfylteVilkårsPerioder(vilkårTidslinjer.get(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR))
-            && harIngenOppfylteVilkårsPerioder(vilkårTidslinjer.get(VilkårType.MEDISINSKEVILKÅR_18_ÅR));
-
+        final var ingenAvSykdomsvilkåreneErOppfylt = definerendeVilkår.stream().allMatch(v -> harIngenOppfylteVilkårsPerioder(vilkårTidslinjer.get(v)));
 
         return ingenAvSykdomsvilkåreneErOppfylt;
     }
