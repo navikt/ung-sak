@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKa
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedlemskap;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
@@ -27,6 +28,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
 
     private BehandlingRepositoryProvider mockProvider = mock(BehandlingRepositoryProvider.class); // Brukes ikke, men kan ikke være null
     private BeregningPerioderGrunnlagRepository mockrep = mock(BeregningPerioderGrunnlagRepository.class); // Brukes ikke, men kan ikke være null
+    private AksjonspunktutlederForMedlemskap mockUtleder = mock(AksjonspunktutlederForMedlemskap.class); // Brukes ikke, men kan ikke være null
     private PostSykdomOgKontinuerligTilsynSteg steg = new PostSykdomOgKontinuerligTilsynSteg(mockProvider, mockrep, new VilkårsPerioderTilVurderingTjeneste() {
         @Override
         public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
@@ -47,7 +49,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         public KantIKantVurderer getKantIKantVurderer() {
             return new PåTversAvHelgErKantIKantVurderer();
         }
-    });
+    }, mockUtleder);
 
     @Test
     void skal_justere_utfall_ved_perioder_med_avslag_på_medisinsk() {
