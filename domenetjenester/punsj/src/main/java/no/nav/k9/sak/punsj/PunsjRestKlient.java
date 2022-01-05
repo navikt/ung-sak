@@ -91,7 +91,6 @@ public class PunsjRestKlient {
             String json = JsonObjectMapper.getJson(søk);
             HttpPost httpPost = new HttpPost(builder.build());
             httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
-            httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
             httpPost.setHeader(HttpHeaders.ACCEPT, "application/json");
 
             try (var httpResponse = restClient.execute(httpPost)) {
