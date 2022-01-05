@@ -145,7 +145,7 @@ public class HentDataTilUttakTjeneste {
         var input = new InputParametere()
             .medBehandling(behandling)
             .medVilkårene(vilkårene)
-            .medDefinerendeVilkår(perioderTilVurderingTjeneste.definerendeVilkår())
+            .medDefinerendeVilkår(perioderTilVurderingTjeneste.definerendeVilkår(behandling.getId()))
             .medPleiebehov(pleiebehov.map(pb -> pb.getPleieperioder().getPerioder()).orElse(List.of()))
             .medPerioderTilVurdering(perioderTilVurdering)
             .medUtvidetPerioderRevurdering(utvidetRevurderingPerioder)
@@ -219,7 +219,7 @@ public class HentDataTilUttakTjeneste {
 
     private NavigableSet<DatoIntervallEntitet> finnSykdomsperioder(BehandlingReferanse referanse) {
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = perioderTilVurderingTjeneste(referanse);
-        var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
+        var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår(referanse.getBehandlingId());
         final var resultat = new TreeSet<DatoIntervallEntitet>();
         for (VilkårType vilkårType : definerendeVilkår) {
             final var periode = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), vilkårType);

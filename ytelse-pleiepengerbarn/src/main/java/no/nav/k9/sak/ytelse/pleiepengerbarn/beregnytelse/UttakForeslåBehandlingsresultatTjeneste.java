@@ -48,7 +48,7 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
 
     @Override
     protected DatoIntervallEntitet getMaksPeriode(Long behandlingId) {
-        var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
+        var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår(behandlingId);
         var timeline = new LocalDateTimeline<Boolean>(List.of());
 
         for (VilkårType vilkårType : definerendeVilkår) {
@@ -89,7 +89,7 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
             return false;
         }
 
-        var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
+        var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår(ref.getBehandlingId());
         if (avslåtteVilkår.stream().anyMatch(v -> !definerendeVilkår.contains(v))) {
             return true;
         }
