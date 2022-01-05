@@ -154,7 +154,7 @@
             <dependency>
 			    <groupId>no.nav.foreldrepenger.kontrakter</groupId>
 			    <artifactId>fp-feed-vedtak-tjenestespesifikasjon</artifactId>
-                <version>6.1.1</version>
+                <version>6.1.2</version>
 		    </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
