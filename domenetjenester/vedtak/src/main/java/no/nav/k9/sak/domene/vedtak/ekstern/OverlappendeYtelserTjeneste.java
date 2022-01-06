@@ -23,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsr
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -47,6 +46,9 @@ public class OverlappendeYtelserTjeneste {
 
     public Map<Ytelse, NavigableSet<LocalDateInterval>> finnOverlappendeYtelser(BehandlingReferanse ref, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
         var tilkjentYtelsePerioder = hentTilkjentYtelsePerioder(ref);
+        if (tilkjentYtelsePerioder.isEmpty()) {
+            return Map.of();
+        }
         var aktørYtelse = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId())
             .getAktørYtelseFraRegister(ref.getAktørId());
         if (tilkjentYtelsePerioder.isEmpty() || aktørYtelse.isEmpty()) {
