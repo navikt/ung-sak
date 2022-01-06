@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulatorInputTjeneste;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -44,6 +46,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang.InfotrygdMigreringTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang.IntervallMedBehandlingstema;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang.infotrygd.InfotrygdService;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -79,7 +82,7 @@ class InfotrygdMigreringTjenesteTest {
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
-        when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any())).thenReturn(Collections.emptyMap());
+        when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any())).thenReturn(Collections.emptyMap());
         tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, infotrygdService);
     }
 
@@ -208,13 +211,26 @@ class InfotrygdMigreringTjenesteTest {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)));
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
 
-        when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any()))
-            .thenReturn(Map.of(AktørId.dummy(), List.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)))));
+        when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any()))
+            .thenReturn(Map.of(AktørId.dummy(),
+                List.of(new IntervallMedBehandlingstema(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), "PN"))));
 
         var aksjonspunkter = tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling, STP));
 
         assertThat(aksjonspunkter.size()).isEqualTo(1);
         assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART);
+    }
+
+    @Test
+    void skal_kaste_feil_når_annen_part_har_overlappende_periode_i_infotrygd_på_gammel_ordning() {
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)));
+        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
+
+        when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any()))
+            .thenReturn(Map.of(AktørId.dummy(),
+                List.of(new IntervallMedBehandlingstema(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), "PB"))));
+
+        assertThrows(IllegalStateException.class, () ->  tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling, STP)));
     }
 
 

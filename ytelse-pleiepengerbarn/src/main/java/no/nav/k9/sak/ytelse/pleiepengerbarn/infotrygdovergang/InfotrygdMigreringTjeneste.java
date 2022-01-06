@@ -18,10 +18,13 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import com.sun.el.stream.Stream;
+
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.arbeidsforhold.TemaUnderkategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -51,6 +54,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class InfotrygdMigreringTjeneste {
 
 
+    public static final String GAMMEL_ORDNING_KODE = "PB";
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private FagsakRepository fagsakRepository;
@@ -84,15 +88,26 @@ public class InfotrygdMigreringTjeneste {
         var grunnlagsperioderPrAktør = infotrygdService.finnGrunnlagsperioderForAndreAktører(
             ref.getPleietrengendeAktørId(),
             ref.getAktørId(),
-            LocalDate.now().minusYears(1));
+            LocalDate.now().minusYears(1),
+            Set.of("PN", GAMMEL_ORDNING_KODE));
+
+        if (harBerørtSakPåGammelOrdning(grunnlagsperioderPrAktør)) {
+            throw new IllegalStateException("Fant berørt sak på gammel ordning");
+        }
+
         var aksjonspunkter = new ArrayList<AksjonspunktResultat>();
 
-        var harAnnenAktørMedOverlappendeInfotrygdperiode = grunnlagsperioderPrAktør.entrySet()
+
+        var migrertePerioderTilVurdering = perioderTilVurdering.stream()
+            .filter(p -> eksisterendeMigreringTilVurdering.stream().anyMatch(im -> im.getSkjæringstidspunkt().equals(p.getFomDato())))
+            .collect(Collectors.toList());
+
+        var harAnnenAktørMedOverlappendeInfotrygdperiode = grunnlagsperioderPrAktør.values()
             .stream()
-            .filter(e -> !e.getKey().equals(ref.getAktørId()))
-            .flatMap(e -> e.getValue().stream())
-            .anyMatch(p -> eksisterendeMigreringTilVurdering.stream()
-                .anyMatch(im -> p.inkluderer(im.getSkjæringstidspunkt())));
+            .flatMap(Collection::stream)
+            .map(IntervallMedBehandlingstema::intervall)
+            .anyMatch(infotrygdPeriode -> migrertePerioderTilVurdering.stream()
+                .anyMatch(infotrygdPeriode::overlapper));
 
         if (harAnnenAktørMedOverlappendeInfotrygdperiode) {
             aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART));
@@ -105,6 +120,11 @@ public class InfotrygdMigreringTjeneste {
             aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE));
         }
         return aksjonspunkter;
+    }
+
+    private boolean harBerørtSakPåGammelOrdning(Map<AktørId, List<IntervallMedBehandlingstema>> grunnlagsperioderPrAktør) {
+        return grunnlagsperioderPrAktør.values().stream()
+            .flatMap(Collection::stream).anyMatch(p -> p.behandlingstema().equals(GAMMEL_ORDNING_KODE));
     }
 
     public void finnOgOpprettMigrertePerioder(Long behandlingId, AktørId aktørId, Long fagsakId) {

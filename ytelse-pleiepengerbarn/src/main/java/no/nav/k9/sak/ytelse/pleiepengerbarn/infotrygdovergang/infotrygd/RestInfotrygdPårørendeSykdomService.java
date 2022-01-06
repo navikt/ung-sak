@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.arbeidsforhold.TemaUnderkategori;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 
@@ -27,7 +28,7 @@ public class RestInfotrygdPårørendeSykdomService implements InfotrygdPårøren
     }
 
     @Override
-    public Map<String, List<Periode>> hentRelevanteGrunnlagsperioderPrSøkeridentForAndreSøkere(InfotrygdPårørendeSykdomRequest request, PersonIdent ekskludertPersonIdent) {
+    public Map<String, List<PeriodeMedBehandlingstema>> hentRelevanteGrunnlagsperioderPrSøkeridentForAndreSøkere(InfotrygdPårørendeSykdomRequest request, PersonIdent ekskludertPersonIdent) {
         var vedtakPleietrengende = hentRelevantePleietrengendeVedtakIInfotrygd(request);
         var hentGrunnlagRequests = vedtakPleietrengende.stream().map(VedtakPleietrengende::getSoekerFnr).distinct()
             .filter(fnr -> !fnr.equals(ekskludertPersonIdent.getIdent()))
@@ -37,13 +38,13 @@ public class RestInfotrygdPårørendeSykdomService implements InfotrygdPårøren
                 .relevanteBehandlingstemaer(request.getRelevanteBehandlingstemaer())
                 .build())
             .collect(Collectors.toSet());
-        var grunnlagsperioderPrIdent = new HashMap<String, List<Periode>>();
+        var grunnlagsperioderPrIdent = new HashMap<String, List<PeriodeMedBehandlingstema>>();
         for (InfotrygdPårørendeSykdomRequest r : hentGrunnlagRequests) {
             List<PårørendeSykdom> grunnlagliste = client.getGrunnlagForPleietrengende(r);
             var grunnlagsperioder = grunnlagliste.stream()
                 .map(PårørendeSykdom::generelt)
                 .filter(gr -> erRelevant(gr, request.getRelevanteBehandlingstemaer()))
-                .map(GrunnlagPårørendeSykdomInfotrygd::getPeriode)
+                .map(gr -> new PeriodeMedBehandlingstema(gr.getPeriode(), gr.getBehandlingstema().getKode()))
                 .collect(Collectors.toList());
             if (!grunnlagliste.isEmpty()) {
                 grunnlagsperioderPrIdent.put(r.getFødselsnummer(), grunnlagsperioder);
