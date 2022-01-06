@@ -1,15 +1,14 @@
-package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.omsorgenfor;
+package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.pleiesihjemmet;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -30,12 +29,16 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
-import no.nav.k9.sak.inngangsvilkår.VilkårUtfallOversetter;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.omsorgenfor.regelmodell.PleiesHjemmeVilkår;
-import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.omsorgenfor.regelmodell.PleiesHjemmeVilkårGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.pleiesihjemmet.regelmodell.Pleielokasjon;
+import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.pleiesihjemmet.regelmodell.PleiesHjemmeVilkårResultat;
 
-@BehandlingStegRef(kode = "VURDER_OMSORG_FOR")
+@BehandlingStegRef(kode = "VURDER_PLEIES_HJEMME")
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PPN")
 @ApplicationScoped
@@ -46,7 +49,9 @@ public class VurderPleiesIHjemmetSteg implements BehandlingSteg {
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-    private VilkårUtfallOversetter utfallOversetter;
+    private SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private PleiebehovResultatRepository resultatRepository;
+    private PleiesHjemmeVilkårTjeneste pleiesHjemmeVilkårTjeneste = new PleiesHjemmeVilkårTjeneste();
 
     VurderPleiesIHjemmetSteg() {
         // CDI
@@ -54,50 +59,53 @@ public class VurderPleiesIHjemmetSteg implements BehandlingSteg {
 
     @Inject
     public VurderPleiesIHjemmetSteg(BehandlingRepositoryProvider repositoryProvider,
-                                    @FagsakYtelseTypeRef("PPN") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+                                    @FagsakYtelseTypeRef("PPN") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                    SykdomGrunnlagRepository sykdomGrunnlagRepository,
+                                    PleiebehovResultatRepository resultatRepository) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
-        this.utfallOversetter = new VilkårUtfallOversetter();
+        this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
+        this.resultatRepository = resultatRepository;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
+        var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var sykdomGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandling.getUuid()).orElseThrow();
+        var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
 
-        final List<VilkårData> resultat = new ArrayList<>();
+        var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
+        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);
+
         for (DatoIntervallEntitet periode : perioder) {
-            // "Pleies hjemme" vurderes automatisk som oppfylt ved at bruker har svart Ja på at pleietrengende pleies hjemme
-            // - får ellers ikke lov til å sende søknad i søknadsdialog
-            var grunnlag = new PleiesHjemmeVilkårGrunnlag(true);
-            final var evaluation = new PleiesHjemmeVilkår().evaluer(grunnlag);
-            final var vilkårData = utfallOversetter.oversett(VilkårType.PLEIES_I_HJEMMMET, evaluation, grunnlag, periode);
-            resultat.add(vilkårData);
-        }
+            var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VILKÅRET);
+            var vilkårData = pleiesHjemmeVilkårTjeneste.vurderPerioder(periode, sykdomGrunnlagBehandling);
 
-        final Vilkårene oppdaterteVilkår = oppdaterVilkårene(kontekst, resultat);
-        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
+            oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårBuilder, vilkårResultatBuilder);
+            oppdaterResultatStruktur(kontekst, periode, vilkårData);
+        }
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårResultatBuilder.build());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private Vilkårene oppdaterVilkårene(BehandlingskontrollKontekst kontekst, final List<VilkårData> vilkårData) {
-        final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        final VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene)
-            .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
-            .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
-        final VilkårBuilder vilkårBuilder = builder.hentBuilderFor(VILKÅRET);
+    private void oppdaterResultatStruktur(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, VilkårData vilkårData) {
+        var nåværendeResultat = resultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
+        var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
+        builder.tilbakeStill(periodeTilVurdering);
+        final var vilkårresultat = ((PleiesHjemmeVilkårResultat) vilkårData.getEkstraVilkårresultat());
 
-        for (VilkårData data : vilkårData) {
-            oppdaterBehandlingMedVilkårresultat(data, vilkårBuilder);
-        }
-
-        builder.leggTil(vilkårBuilder);
-        return builder.build();
+        vilkårresultat.getPleieperioder().forEach(periode -> {
+            Pleiegrad pleiegrad = periode.getPleielokasjon() == Pleielokasjon.HJEMME ? Pleiegrad.TILSYN_LIVETS_SLUTT : Pleiegrad.INGEN;
+            var etablertPleieperiode = new EtablertPleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), pleiegrad);
+            builder.leggTil(etablertPleieperiode);
+        });
+        resultatRepository.lagreOgFlush(kontekst.getBehandlingId(), builder);
     }
 
-    private void oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, VilkårBuilder vilkårBuilder) {
+    private void oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, VilkårBuilder vilkårBuilder, VilkårResultatBuilder vilkårResultatBuilder) {
         final var periode = vilkårData.getPeriode();
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
             .medUtfall(vilkårData.getUtfallType())
@@ -106,6 +114,7 @@ public class VurderPleiesIHjemmetSteg implements BehandlingSteg {
             .medRegelInput(vilkårData.getRegelInput())
             .medAvslagsårsak(vilkårData.getAvslagsårsak())
             .medMerknad(vilkårData.getVilkårUtfallMerknad()));
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
     }
 
     @Override

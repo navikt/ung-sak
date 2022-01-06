@@ -13,8 +13,6 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
-import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -40,9 +38,6 @@ import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
@@ -133,19 +128,8 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         for (DatoIntervallEntitet periode : perioder) {
             final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(vilkåret, periode, sykdomGrunnlagBehandling);
             oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårBuilder);
-            oppdaterResultatStruktur(behandlingId, periode, vilkårData);
         }
         builder.leggTil(vilkårBuilder);
-    }
-
-    private void oppdaterResultatStruktur(Long behandlingId, DatoIntervallEntitet periodeTilVurdering, VilkårData vilkårData) {
-        final var nåværendeResultat = resultatRepository.hentHvisEksisterer(behandlingId);
-        var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
-        builder.tilbakeStill(periodeTilVurdering);
-
-        var pleiegrad = vilkårData.getUtfallType() == Utfall.OPPFYLT ? Pleiegrad.TILSYN_LIVETS_SLUTT : Pleiegrad.INGEN;
-        builder.leggTil(new EtablertPleieperiode(periodeTilVurdering, pleiegrad));
-        resultatRepository.lagreOgFlush(behandlingId, builder);
     }
 
     private void oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, VilkårBuilder vilkårBuilder) {
