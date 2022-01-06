@@ -92,7 +92,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         }
 
         @Override
-        public Set<VilkårType> definerendeVilkår(Long behandlingId) {
+        public Set<VilkårType> definerendeVilkår() {
             return Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         }
 
