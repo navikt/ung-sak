@@ -142,7 +142,7 @@ public class DokumentRestTjeneste {
             return;
         }
         var behandlingId = behandlinger.stream()
-            .filter(it -> it.getAvsluttetDato().isAfter(dto.getTidspunkt()) || it.getAvsluttetDato().equals(dto.getTidspunkt()))
+            .filter(it -> it.getAvsluttetDato() != null && (it.getAvsluttetDato().isAfter(dto.getTidspunkt()) || it.getAvsluttetDato().equals(dto.getTidspunkt())))
             .max(Comparator.comparing(Behandling::getAvsluttetDato, Comparator.nullsLast(Comparator.naturalOrder())))
             .map(Behandling::getId)
             .orElse(behandlinger.stream().filter(it -> !it.erSaksbehandlingAvsluttet()).map(Behandling::getId).findFirst().orElse(null));
