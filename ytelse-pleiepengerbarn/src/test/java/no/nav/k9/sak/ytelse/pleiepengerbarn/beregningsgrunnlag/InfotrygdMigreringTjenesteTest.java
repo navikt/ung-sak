@@ -43,12 +43,12 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.avklarfakta.PSBInfotrygdMigreringTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygd.InfotrygdService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang.InfotrygdMigreringTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang.infotrygd.InfotrygdService;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class PSBInfotrygdMigreringTjenesteTest {
+class InfotrygdMigreringTjenesteTest {
 
     public static final LocalDate STP = LocalDate.of(2022, 2,1);
     @Inject
@@ -62,7 +62,7 @@ class PSBInfotrygdMigreringTjenesteTest {
     private Fagsak fagsak;
     private InfotrygdService infotrygdService = mock(InfotrygdService.class);
 
-    private PSBInfotrygdMigreringTjeneste tjeneste;
+    private InfotrygdMigreringTjeneste tjeneste;
 
 
     @BeforeEach
@@ -80,18 +80,7 @@ class PSBInfotrygdMigreringTjenesteTest {
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
         when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any())).thenReturn(Collections.emptyMap());
-        tjeneste = new PSBInfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, infotrygdService, true);
-    }
-
-    @Test
-    void skal_ikkje_opprette_med_toggle_av() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP));
-
-        tjeneste = new PSBInfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, infotrygdService, false);
-        tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
-
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isZero();
+        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, infotrygdService);
     }
 
     @Test

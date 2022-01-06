@@ -1,53 +1,66 @@
-package no.nav.k9.sak.domene.behandling.steg.avklarfakta;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingskontroll.StartpunktRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@BehandlingStegRef(kode = "KOARB")
+@BehandlingStegRef(kode = "OVERGANG_FRA_INFOTRYGD")
+@FagsakYtelseTypeRef("PSB")
 @BehandlingTypeRef
-@FagsakYtelseTypeRef
-@StartpunktRef("KONTROLLER_ARBEIDSFORHOLD")
 @ApplicationScoped
-class KontrollerArbeidsforholdStegImpl implements KontrollerArbeidsforholdSteg {
+public class OvergangFraInfotrygdSteg implements BehandlingSteg {
 
-    private KontrollerFaktaAksjonspunktUtleder tjeneste;
+
     private BehandlingRepository behandlingRepository;
+    private InfotrygdMigreringTjeneste infotrygdMigreringTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private boolean toggleMigrering;
 
 
-    KontrollerArbeidsforholdStegImpl() {
+    OvergangFraInfotrygdSteg() {
         // for CDI proxy
     }
 
     @Inject
-    KontrollerArbeidsforholdStegImpl(BehandlingRepository behandlingRepository,
-                                     SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                     @StartpunktRef("KONTROLLER_ARBEIDSFORHOLD") KontrollerArbeidsforholdTjenesteImpl tjeneste) {
+    public OvergangFraInfotrygdSteg(BehandlingRepository behandlingRepository,
+                             InfotrygdMigreringTjeneste infotrygdMigreringTjeneste,
+                             SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                            @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering) {
         this.behandlingRepository = behandlingRepository;
+        this.infotrygdMigreringTjeneste = infotrygdMigreringTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
-        this.tjeneste = tjeneste;
+        this.toggleMigrering = toggleMigrering;
     }
 
+
+    /**
+     * Returner statuskode med ev nye aksjonspunkter funnet i dette steget.
+     *
+     * @param kontekst
+     */
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+        if (!toggleMigrering) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        infotrygdMigreringTjeneste.finnOgOpprettMigrertePerioder(kontekst.getBehandlingId(), kontekst.getAktørId(), kontekst.getFagsakId());
         Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-        return BehandleStegResultat.utførtMedAksjonspunktResultater(tjeneste.utledAksjonspunkter(ref));
+        return BehandleStegResultat.utførtMedAksjonspunktResultater(infotrygdMigreringTjeneste.utledAksjonspunkter(ref));
     }
 
 }

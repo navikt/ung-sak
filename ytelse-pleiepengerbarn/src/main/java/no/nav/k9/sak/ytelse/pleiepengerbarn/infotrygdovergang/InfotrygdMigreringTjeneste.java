@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.avklarfakta;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -21,7 +21,6 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -35,7 +34,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKa
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.behandling.steg.avklarfakta.InfotrygdMigreringTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
@@ -45,12 +43,12 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.vedtak.ekstern.OverlappendeYtelserTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang.infotrygd.InfotrygdService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygd.InfotrygdService;
 import no.nav.k9.sak.typer.Saksnummer;
 
-@FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
-public class PSBInfotrygdMigreringTjeneste implements InfotrygdMigreringTjeneste {
+public class InfotrygdMigreringTjeneste {
 
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
@@ -59,30 +57,21 @@ public class PSBInfotrygdMigreringTjeneste implements InfotrygdMigreringTjeneste
     private final KantIKantVurderer kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
     private InfotrygdService infotrygdService;
 
-    private boolean toggleMigrering;
-
-    public PSBInfotrygdMigreringTjeneste() {
+    public InfotrygdMigreringTjeneste() {
     }
 
     @Inject
-    public PSBInfotrygdMigreringTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                         @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                         FagsakRepository fagsakRepository,
-                                         InfotrygdService infotrygdService,
-                                         @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering) {
+    public InfotrygdMigreringTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                      @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                      FagsakRepository fagsakRepository,
+                                      InfotrygdService infotrygdService) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.infotrygdService = infotrygdService;
-        this.toggleMigrering = toggleMigrering;
     }
 
-    @Override
     public List<AksjonspunktResultat> utledAksjonspunkter(BehandlingReferanse ref) {
-
-        if (!toggleMigrering) {
-            return Collections.emptyList();
-        }
 
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var infotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(ref.getFagsakId());
@@ -118,21 +107,18 @@ public class PSBInfotrygdMigreringTjeneste implements InfotrygdMigreringTjeneste
         return aksjonspunkter;
     }
 
-    @Override
     public void finnOgOpprettMigrertePerioder(Long behandlingId, AktørId aktørId, Long fagsakId) {
-        if (toggleMigrering) {
 
-            NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-            var eksisterendeInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(fagsakId);
-            deaktiverMigreringerUtenSøknad(behandlingId, eksisterendeInfotrygdMigreringer);
-            var eksisterendeMigreringTilVurdering = finnEksisterendeMigreringTilVurdering(perioderTilVurdering, eksisterendeInfotrygdMigreringer);
-            if (!eksisterendeMigreringTilVurdering.isEmpty()) {
-                eksisterendeMigreringTilVurdering.forEach(oppdaterSkjæringstidspunkt(perioderTilVurdering));
-            } else {
-                var saksnummer = fagsakRepository.finnEksaktFagsak(fagsakId).getSaksnummer();
-                var stpMedOverlapp = finnSkjæringstidspunktMedOverlapp(saksnummer, perioderTilVurdering, behandlingId, aktørId);
-                stpMedOverlapp.ifPresent(localDate -> fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsakId, localDate)));
-            }
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var eksisterendeInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(fagsakId);
+        deaktiverMigreringerUtenSøknad(behandlingId, eksisterendeInfotrygdMigreringer);
+        var eksisterendeMigreringTilVurdering = finnEksisterendeMigreringTilVurdering(perioderTilVurdering, eksisterendeInfotrygdMigreringer);
+        if (!eksisterendeMigreringTilVurdering.isEmpty()) {
+            eksisterendeMigreringTilVurdering.forEach(oppdaterSkjæringstidspunkt(perioderTilVurdering));
+        } else {
+            var saksnummer = fagsakRepository.finnEksaktFagsak(fagsakId).getSaksnummer();
+            var stpMedOverlapp = finnSkjæringstidspunktMedOverlapp(saksnummer, perioderTilVurdering, behandlingId, aktørId);
+            stpMedOverlapp.ifPresent(localDate -> fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsakId, localDate)));
         }
     }
 

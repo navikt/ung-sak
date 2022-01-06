@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygd;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang.infotrygd;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;

@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygd;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang.infotrygd;
 
 import java.time.LocalDate;
 import java.util.Objects;

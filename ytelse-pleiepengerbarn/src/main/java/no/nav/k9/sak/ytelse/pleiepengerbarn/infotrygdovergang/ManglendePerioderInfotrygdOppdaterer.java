@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.avklarfakta;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang;
 
 import java.util.Arrays;
 
