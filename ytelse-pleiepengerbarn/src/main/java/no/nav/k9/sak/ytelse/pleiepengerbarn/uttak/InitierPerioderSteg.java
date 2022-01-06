@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.MapTilBrevkode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
@@ -48,6 +50,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
+    private Instance<MapTilBrevkode> brevkodeMappere;
 
     InitierPerioderSteg() {
         // for proxy
@@ -58,11 +61,13 @@ public class InitierPerioderSteg implements BehandlingSteg {
                                MottatteDokumentRepository mottatteDokumentRepository,
                                SøknadsperiodeRepository søknadsperiodeRepository,
                                UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
+                               @Any Instance<MapTilBrevkode> brevkodeMappere,
                                @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
+        this.brevkodeMappere = brevkodeMappere;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
     }
 
@@ -80,9 +85,11 @@ public class InitierPerioderSteg implements BehandlingSteg {
             uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandlingId, uttaksPerioderGrunnlag.getOppgitteSøknadsperioder());
         } else {
             var kravDokumenterMedPerioder = søknadsfristTjeneste.hentPerioderTilVurdering(referanse);
+            var brevkode = MapTilBrevkode.finnBrevkodeMapper(brevkodeMappere, referanse.getFagsakYtelseType()).getBrevkode();
             var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
                 .stream()
                 .filter(it -> it.getBehandlingId().equals(behandlingId))
+                .filter(it -> brevkode.equals(it.getType()))
                 .map(MottattDokument::getJournalpostId)
                 .collect(Collectors.toSet());
 
