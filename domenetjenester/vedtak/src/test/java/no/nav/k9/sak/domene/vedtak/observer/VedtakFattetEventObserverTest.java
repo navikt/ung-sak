@@ -32,6 +32,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.typer.AktørId;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -89,6 +90,8 @@ public class VedtakFattetEventObserverTest {
     private Behandling lagBehandling() {
         Behandling behandling = mock(Behandling.class);
         when(behandling.getId()).thenReturn(123L);
+        when(behandling.getFagsakId()).thenReturn(123L);
+        when(behandling.getAktørId()).thenReturn(AktørId.dummy());
         when(behandling.erYtelseBehandling()).thenReturn(true);
 
         when(behandlingRepository.hentBehandlingHvisFinnes(123L)).thenReturn(Optional.of(behandling));
