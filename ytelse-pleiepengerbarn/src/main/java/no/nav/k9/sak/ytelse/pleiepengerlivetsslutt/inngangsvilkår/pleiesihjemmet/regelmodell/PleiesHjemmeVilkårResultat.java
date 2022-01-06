@@ -4,7 +4,7 @@ import java.util.List;
 
 public class PleiesHjemmeVilkårResultat {
 
-    public static final String PERIODER_PLEIES_HJEMME = "resultat.perioder.pleies.hjemme";
+    public static final String PLEIEPERIODER_MED_PLEIELOKASJON = "resultat.pleieperioder";
 
     private List<PleiePeriode> pleieperioder;
 

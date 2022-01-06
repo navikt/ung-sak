@@ -19,7 +19,7 @@ public class ErPleietrengendeIHjemmet extends LeafSpecification<PleiesHjemmeMell
         //    pleietrengende pleies hjemme - ellers får ikke bruker lov til å sende søknad i Søknadsdialog
         // Men dersom innleggelse registreres, vil dette trekkes fra periodene hvor pleietrengende pleies hjemme
 
-        final var ikkePleiesHjemme = mellomregning.getPerioderMedPleielokasjon()
+        final var ikkePleiesHjemme = mellomregning.getBeregnedePerioderMedPleielokasjon()
             .stream()
             .allMatch(p -> Pleielokasjon.INNLAGT.equals(p.getPleielokasjon()));
 

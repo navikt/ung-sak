@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.pleiesihjemm
 
 import java.util.List;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.sak.inngangsvilkår.VilkårGrunnlag;
 import no.nav.k9.sak.typer.Periode;
 
@@ -22,10 +21,6 @@ public class PleiesHjemmeVilkårGrunnlag implements VilkårGrunnlag {
 
     public Periode getVilkårsperiode() {
         return vilkårsperiode;
-    }
-
-    public LocalDateInterval getInterval() {
-        return new LocalDateInterval(vilkårsperiode.getFom(), vilkårsperiode.getTom());
     }
 
     @Override

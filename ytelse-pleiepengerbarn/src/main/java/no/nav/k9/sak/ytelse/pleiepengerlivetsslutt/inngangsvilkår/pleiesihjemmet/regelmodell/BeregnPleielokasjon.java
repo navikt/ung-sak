@@ -21,7 +21,7 @@ public class BeregnPleielokasjon extends LeafSpecification<PleiesHjemmeMellomreg
 
         grunnlag.getInnleggelsesPerioder().forEach(mellomregning::addInnleggelsePeriode);
         // Perioder hvor pleietrengende ikke er innlagt antas å pleies hjemme (søker har "Ja" i Søknadsdialog på dette)
-        evaluation.setEvaluationProperty(PleiesHjemmeVilkårResultat.PERIODER_PLEIES_HJEMME, mellomregning.getPerioderPleiesIHjemmet());
+        evaluation.setEvaluationProperty(PleiesHjemmeVilkårResultat.PLEIEPERIODER_MED_PLEIELOKASJON, mellomregning.getBeregnedePerioderMedPleielokasjon());
 
         return evaluation;
     }

@@ -84,14 +84,14 @@ public class VurderPleiesIHjemmetSteg implements BehandlingSteg {
             var vilkårData = pleiesHjemmeVilkårTjeneste.vurderPerioder(periode, sykdomGrunnlagBehandling);
 
             oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårBuilder, vilkårResultatBuilder);
-            oppdaterResultatStruktur(kontekst, periode, vilkårData);
+            oppdaterPleiebehovResultat(kontekst, periode, vilkårData);
         }
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårResultatBuilder.build());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private void oppdaterResultatStruktur(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, VilkårData vilkårData) {
+    private void oppdaterPleiebehovResultat(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, VilkårData vilkårData) {
         var nåværendeResultat = resultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
         var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
         builder.tilbakeStill(periodeTilVurdering);
