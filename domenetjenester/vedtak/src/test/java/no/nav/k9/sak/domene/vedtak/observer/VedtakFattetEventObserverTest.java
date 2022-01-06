@@ -21,17 +21,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.sak.typer.AktørId;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -55,7 +56,7 @@ public class VedtakFattetEventObserverTest {
 
     @BeforeEach
     public void setup() {
-        vedtakFattetEventObserver = new VedtakFattetEventObserver(prosessTaskRepository, behandlingRepository);
+        vedtakFattetEventObserver = new VedtakFattetEventObserver(prosessTaskRepository);
     }
 
     @Test
@@ -89,6 +90,8 @@ public class VedtakFattetEventObserverTest {
     private Behandling lagBehandling() {
         Behandling behandling = mock(Behandling.class);
         when(behandling.getId()).thenReturn(123L);
+        when(behandling.getFagsakId()).thenReturn(123L);
+        when(behandling.getAktørId()).thenReturn(AktørId.dummy());
         when(behandling.erYtelseBehandling()).thenReturn(true);
 
         when(behandlingRepository.hentBehandlingHvisFinnes(123L)).thenReturn(Optional.of(behandling));

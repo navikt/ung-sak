@@ -1,7 +1,5 @@
 package no.nav.k9.sak.domene.vedtak.observer;
 
-import java.util.Optional;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -9,54 +7,45 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 
 @ApplicationScoped
 public class VedtakFattetEventObserver {
 
     private ProsessTaskRepository taskRepository;
-    private BehandlingRepository behandlingRepository;
 
     public VedtakFattetEventObserver() {
     }
 
     @Inject
-    public VedtakFattetEventObserver(ProsessTaskRepository taskRepository, BehandlingRepository behandlingRepository) {
+    public VedtakFattetEventObserver(ProsessTaskRepository taskRepository) {
         this.taskRepository = taskRepository;
-        this.behandlingRepository = behandlingRepository;
     }
 
     public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
         if (IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
-            opprettTaskForPubliseringAvVedtak(event.getBehandlingId());
+            opprettTaskForPubliseringAvVedtak(event);
 
-            if (erBehandlingAvRettTypeForAbakus(event.getBehandlingId())) {
-                opprettTaskForPubliseringAvVedtakMedYtelse(event.getBehandlingId());
+            if (erBehandlingAvRettTypeForAbakus(event)) {
+                opprettTaskForPubliseringAvVedtakMedYtelse(event);
             }
         }
     }
 
-    private boolean erBehandlingAvRettTypeForAbakus(Long behandlingId) {
-        final Optional<Behandling> optBehandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
-        if (optBehandling.isPresent()) {
-            final Behandling behandling = optBehandling.get();
-            return behandling.erYtelseBehandling();
-        }
-        return false;
+    private boolean erBehandlingAvRettTypeForAbakus(BehandlingVedtakEvent event) {
+        return event.getBehandling().erYtelseBehandling();
     }
 
-    private void opprettTaskForPubliseringAvVedtakMedYtelse(Long behandlingId) {
+    private void opprettTaskForPubliseringAvVedtakMedYtelse(BehandlingVedtakEvent event) {
         final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtattYtelseHendelseTask.TASKTYPE);
-        taskData.setProperty("behandlingId", behandlingId.toString());
+        taskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().toString());
         taskData.setCallIdFraEksisterende();
         taskRepository.lagre(taskData);
     }
 
-    private void opprettTaskForPubliseringAvVedtak(Long behandlingId) {
+    private void opprettTaskForPubliseringAvVedtak(BehandlingVedtakEvent event) {
         final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtakHendelseTask.TASKTYPE);
-        taskData.setProperty("behandlingId", behandlingId.toString());
+        taskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().toString());
         taskData.setCallIdFraEksisterende();
         taskRepository.lagre(taskData);
     }
