@@ -85,7 +85,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
     }
 
     private boolean harTillatelseTilÅLøseAksjonspunkt() {
-        return Arrays.stream(environment.getProperty("OVERSTYR_BEREGNING_INPUT_TILLATELSER", "").split(",")).anyMatch(id -> id.equalsIgnoreCase(brukerTokenProvider.getUserId()));
+        return Arrays.stream(environment.getProperty("INFOTRYGD_MIGRERING_TILLATELSER", "").split(",")).anyMatch(id -> id.equalsIgnoreCase(brukerTokenProvider.getUserId()));
     }
 
     private void lagreInputOverstyringer(BehandlingReferanse ref, OverstyrInputForBeregningDto dto) {

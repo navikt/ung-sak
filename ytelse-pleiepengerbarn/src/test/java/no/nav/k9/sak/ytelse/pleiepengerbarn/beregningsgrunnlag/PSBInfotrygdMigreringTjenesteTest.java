@@ -206,6 +206,7 @@ class PSBInfotrygdMigreringTjenesteTest {
     @Test
     void skal_returnere_aksjonspunkt_når_periode_i_samme_år_som_ikke_er_søkt_for() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusMonths(1).plusDays(10)));
+        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
 
         var aksjonspunkter = tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling, STP));
 

@@ -235,5 +235,5 @@ spec:
 
 
     # Pleiepenger infotrygd migrering
-    - name: OVERSTYR_BEREGNING_INPUT_TILLATELSER
+    - name: INFOTRYGD_MIGRERING_TILLATELSER
       value: ""
