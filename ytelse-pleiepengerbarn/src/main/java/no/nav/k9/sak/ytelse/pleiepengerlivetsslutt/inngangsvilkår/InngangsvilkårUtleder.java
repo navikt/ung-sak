@@ -7,7 +7,6 @@ import static no.nav.k9.kodeverk.vilkår.VilkårType.I_LIVETS_SLUTTFASE;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDLEMSKAPSVILKÅRET;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.OPPTJENINGSPERIODEVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.OPPTJENINGSVILKÅRET;
-import static no.nav.k9.kodeverk.vilkår.VilkårType.PLEIES_I_HJEMMMET;
 
 import java.util.List;
 
@@ -26,7 +25,6 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 public class InngangsvilkårUtleder implements VilkårUtleder {
 
     private static final List<VilkårType> YTELSE_VILKÅR = asList(
-        PLEIES_I_HJEMMMET,
         ALDERSVILKÅR,
         I_LIVETS_SLUTTFASE,
         MEDLEMSKAPSVILKÅRET,

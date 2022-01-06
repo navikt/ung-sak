@@ -8,15 +8,15 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.sak.inngangsvilkår.VilkårGrunnlag;
 
 @RuleDocumentationGrunnlag
-public class MedisinskvilkårGrunnlag implements VilkårGrunnlag {
+public class MedisinskVilkårGrunnlag implements VilkårGrunnlag {
 
     private final LocalDate fom;
     private final LocalDate tom;
 
     private List<LocalDateInterval> relevantLivetsSlutt = List.of();
+    private List<PleiePeriode> innleggelsesPerioder;
 
-    public
-    MedisinskvilkårGrunnlag(LocalDate fom, LocalDate tom) {
+    public MedisinskVilkårGrunnlag(LocalDate fom, LocalDate tom) {
         this.fom = fom;
         this.tom = tom;
     }
@@ -37,8 +37,17 @@ public class MedisinskvilkårGrunnlag implements VilkårGrunnlag {
         return relevantLivetsSlutt;
     }
 
-    public MedisinskvilkårGrunnlag medLivetsSluttBehov(List<LocalDateInterval> relevantLivetsSlutt) {
+    public List<PleiePeriode> getInnleggelsesPerioder() {
+        return innleggelsesPerioder;
+    }
+
+    public MedisinskVilkårGrunnlag medLivetsSluttBehov(List<LocalDateInterval> relevantLivetsSlutt) {
         this.relevantLivetsSlutt = relevantLivetsSlutt;
+        return this;
+    }
+
+    public MedisinskVilkårGrunnlag medInnleggelsesPerioder(List<PleiePeriode> innleggelsesPerioder) {
+        this.innleggelsesPerioder = innleggelsesPerioder;
         return this;
     }
 
@@ -47,7 +56,8 @@ public class MedisinskvilkårGrunnlag implements VilkårGrunnlag {
     public String toString() {
         return "MedisinskvilkårGrunnlag{" +
             "fom=" + fom +
-            ", tom=" + tom +
+            ", relevantLivetsSlutt=" + relevantLivetsSlutt +
+            ", innleggelsesPerioder=" + innleggelsesPerioder +
             '}';
     }
 }

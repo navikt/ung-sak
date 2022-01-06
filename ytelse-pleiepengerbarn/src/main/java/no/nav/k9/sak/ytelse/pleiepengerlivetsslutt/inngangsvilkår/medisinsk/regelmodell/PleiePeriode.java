@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.pleiesihjemmet.regelmodell;
+package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell;
 
 import java.time.LocalDate;
 import java.util.Objects;

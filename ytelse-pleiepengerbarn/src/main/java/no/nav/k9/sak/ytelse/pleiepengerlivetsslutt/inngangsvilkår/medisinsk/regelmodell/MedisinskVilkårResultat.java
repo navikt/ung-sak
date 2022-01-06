@@ -1,8 +1,8 @@
-package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.pleiesihjemmet.regelmodell;
+package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell;
 
 import java.util.List;
 
-public class PleiesHjemmeVilkårResultat {
+public class MedisinskVilkårResultat {
 
     public static final String PLEIEPERIODER_MED_PLEIELOKASJON = "resultat.pleieperioder";
 

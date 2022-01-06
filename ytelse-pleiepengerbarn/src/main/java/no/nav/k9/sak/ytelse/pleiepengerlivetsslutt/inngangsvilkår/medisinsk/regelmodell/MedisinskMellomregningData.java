@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.pleiesihjemmet.regelmodell;
+package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell;
 
 import java.util.List;
 import java.util.Objects;
@@ -7,20 +7,18 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 
-class PleiesHjemmeMellomregningData {
+public class MedisinskMellomregningData {
 
-    private final PleiesHjemmeVilkårGrunnlag grunnlag;
+    private final MedisinskVilkårGrunnlag grunnlag;
     private LocalDateTimeline<Pleielokasjon> pleiesHjemmetidslinje;
 
-    PleiesHjemmeMellomregningData(PleiesHjemmeVilkårGrunnlag grunnlag) {
+    MedisinskMellomregningData(MedisinskVilkårGrunnlag grunnlag) {
         Objects.requireNonNull(grunnlag);
         this.grunnlag = grunnlag;
-        var fom = grunnlag.getVilkårsperiode().getFom();
-        var tom = grunnlag.getVilkårsperiode().getTom();
-        this.pleiesHjemmetidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, Pleielokasjon.HJEMME)));
+        this.pleiesHjemmetidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(grunnlag.getFom(), grunnlag.getTom(), Pleielokasjon.HJEMME)));
     }
 
-    PleiesHjemmeVilkårGrunnlag getGrunnlag() {
+    public MedisinskVilkårGrunnlag getGrunnlag() {
         return grunnlag;
     }
 
@@ -41,7 +39,7 @@ class PleiesHjemmeMellomregningData {
     }
 
 
-    void oppdaterResultat(PleiesHjemmeVilkårResultat resultatStruktur) {
+    void oppdaterResultat(MedisinskVilkårResultat resultatStruktur) {
         Objects.requireNonNull(resultatStruktur);
 
         resultatStruktur.setPleieperioder(getBeregnedePerioderMedPleielokasjon());

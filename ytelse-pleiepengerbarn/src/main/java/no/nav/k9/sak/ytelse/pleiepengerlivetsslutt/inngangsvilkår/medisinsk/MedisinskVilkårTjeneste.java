@@ -5,24 +5,23 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtfallOversetter;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
-import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.Medisinskvilkår;
-import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskvilkårGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkår;
+import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 
 public class MedisinskVilkårTjeneste {
 
-    private InngangsvilkårOversetter inngangsvilkårOversetter = new InngangsvilkårOversetter();
     private VilkårUtfallOversetter utfallOversetter = new VilkårUtfallOversetter();
-
-    MedisinskVilkårTjeneste() {
-
-    }
+    private InngangsvilkårOversetter inngangsvilkårOversetter = new InngangsvilkårOversetter();
 
     public VilkårData vurderPerioder(VilkårType vilkåret, DatoIntervallEntitet periodeTilVurdering, SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
-        MedisinskvilkårGrunnlag grunnlag = inngangsvilkårOversetter.oversettTilRegelModellMedisinsk(periodeTilVurdering, sykdomGrunnlagBehandling);
+        MedisinskVilkårGrunnlag grunnlag = inngangsvilkårOversetter.oversettTilRegelModellMedisinsk(periodeTilVurdering, sykdomGrunnlagBehandling);
+        MedisinskVilkårResultat vilkårResultat = new MedisinskVilkårResultat();
 
-        final var evaluation = new Medisinskvilkår().evaluer(grunnlag, null);
+        final var evaluation = new MedisinskVilkår().evaluer(grunnlag, vilkårResultat);
 
         final var vilkårData = utfallOversetter.oversett(vilkåret, evaluation, grunnlag, periodeTilVurdering);
+        vilkårData.setEkstraVilkårresultat(vilkårResultat);
         return vilkårData;
     }
 }

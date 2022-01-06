@@ -5,16 +5,18 @@ import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
 
 @RuleDocumentation(ErPleietrengendeILivetsSluttfase.ID)
-public class ErPleietrengendeILivetsSluttfase extends LeafSpecification<MedisinskvilkårGrunnlag> {
+public class ErPleietrengendeILivetsSluttfase extends LeafSpecification<MedisinskMellomregningData> {
 
-    static final String ID = "PLS_VK_9.16.1";
+    public static final String ID = "PLS_VK_9.16.1";
 
-    ErPleietrengendeILivetsSluttfase() {
+    public ErPleietrengendeILivetsSluttfase() {
         super(ID);
     }
 
     @Override
-    public Evaluation evaluate(MedisinskvilkårGrunnlag grunnlag) {
+    public Evaluation evaluate(MedisinskMellomregningData mellomregning) {
+        final var grunnlag = mellomregning.getGrunnlag();
+
         if (grunnlag.getRelevantVurderingLivetsSlutt().stream().anyMatch(it -> it.overlaps(grunnlag.getInterval()))) {
             return ja();
         }

@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -38,10 +39,15 @@ import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
+import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
+import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.Pleielokasjon;
 
 @BehandlingStegRef(kode = "VURDER_MEDISINSK")
 @BehandlingTypeRef
@@ -128,6 +134,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         for (DatoIntervallEntitet periode : perioder) {
             final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(vilkåret, periode, sykdomGrunnlagBehandling);
             oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårBuilder);
+            oppdaterPleiebehovResultat(behandlingId, periode, vilkårData);
         }
         builder.leggTil(vilkårBuilder);
     }
@@ -142,6 +149,20 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
             .medRegelInput(vilkårData.getRegelInput())
             .medAvslagsårsak(vilkårData.getAvslagsårsak())
             .medMerknad(vilkårData.getVilkårUtfallMerknad()));
+    }
+
+    private void oppdaterPleiebehovResultat(Long behandlingId, DatoIntervallEntitet periodeTilVurdering, VilkårData vilkårData) {
+        var nåværendeResultat = resultatRepository.hentHvisEksisterer(behandlingId);
+        var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
+        builder.tilbakeStill(periodeTilVurdering);
+        final var vilkårresultat = ((MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat());
+
+        vilkårresultat.getPleieperioder().forEach(periode -> {
+            Pleiegrad pleiegrad = periode.getPleielokasjon() == Pleielokasjon.HJEMME ? Pleiegrad.TILSYN_LIVETS_SLUTT : Pleiegrad.INGEN;
+            var etablertPleieperiode = new EtablertPleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), pleiegrad);
+            builder.leggTil(etablertPleieperiode);
+        });
+        resultatRepository.lagreOgFlush(behandlingId, builder);
     }
 
     @Override
