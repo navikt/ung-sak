@@ -19,47 +19,36 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.BeredskapPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.FeriePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.NattevåkPeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.Tilsynsordning;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.TilsynsordningPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
-import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.psb.v1.Beredskap;
 import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie;
 import no.nav.k9.søknad.ytelse.psb.v1.Nattevåk;
-import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.k9.søknad.ytelse.psb.v1.Uttak;
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstaker;
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid;
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo;
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.TilsynPeriodeInfo;
 
-class MapSøknadUttakPerioder {
+public class MapSøknadUttakPerioder {
     private TpsTjeneste tpsTjeneste;
-    @SuppressWarnings("unused")
-    private Søknad søknad;
-    private PleiepengerSyktBarn ytelse;
-    private JournalpostId journalpostId;
 
-    MapSøknadUttakPerioder(TpsTjeneste tpsTjeneste, Søknad søknad, JournalpostId journalpostId) {
+    public MapSøknadUttakPerioder(TpsTjeneste tpsTjeneste) {
         this.tpsTjeneste = tpsTjeneste;
-        this.søknad = søknad;
-        this.ytelse = søknad.getYtelse();
-        this.journalpostId = journalpostId;
     }
 
     private static <T> List<T> nullableList(List<T> input) {
         return input != null ? input : Collections.emptyList();
     }
 
-    private Collection<Tilsynsordning> mapOppgittTilsynsordning(no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning input) {
+    Collection<Tilsynsordning> mapOppgittTilsynsordning(no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning input) {
         if (input == null || input.getPerioder() == null || input.getPerioder().isEmpty()) {
             return List.of();
         }
@@ -75,7 +64,7 @@ class MapSøknadUttakPerioder {
         return new TilsynsordningPeriode(periode.getFraOgMed(), periode.getTilOgMed(), tilsynPeriodeInfo == null ? Duration.ofHours(0) : tilsynPeriodeInfo.getEtablertTilsynTimerPerDag());
     }
 
-    private Collection<ArbeidPeriode> mapOppgittArbeidstid(Arbeidstid arbeidstid) {
+    public Collection<ArbeidPeriode> mapOppgittArbeidstid(Arbeidstid arbeidstid) {
         if (arbeidstid == null) {
             return null;
         }
@@ -158,7 +147,7 @@ class MapSøknadUttakPerioder {
         return null;
     }
 
-    private Collection<FeriePeriode> mapFerie(List<Periode> søknadsperioder, LovbestemtFerie input) {
+    Collection<FeriePeriode> mapFerie(List<Periode> søknadsperioder, LovbestemtFerie input) {
         LocalDateTimeline<Boolean> ferieTidslinje = toFerieTidslinje(input.getPerioder());
 
         /*
@@ -190,7 +179,7 @@ class MapSøknadUttakPerioder {
         );
     }
 
-    private List<BeredskapPeriode> mapBeredskap(Beredskap beredskap) {
+    List<BeredskapPeriode> mapBeredskap(Beredskap beredskap) {
         final List<BeredskapPeriode> beredskapsperioder = beredskap.getPerioder()
             .entrySet()
             .stream()
@@ -208,7 +197,7 @@ class MapSøknadUttakPerioder {
         return beredskapsperioder;
     }
 
-    private List<NattevåkPeriode> mapNattevåk(Nattevåk nattevåk) {
+    List<NattevåkPeriode> mapNattevåk(Nattevåk nattevåk) {
         final List<NattevåkPeriode> nattevåkperioder = nattevåk.getPerioder()
             .entrySet()
             .stream()
@@ -226,7 +215,7 @@ class MapSøknadUttakPerioder {
         return nattevåkperioder;
     }
 
-    private Collection<UttakPeriode> mapUttak(Uttak uttak) {
+    Collection<UttakPeriode> mapUttak(Uttak uttak) {
         if (uttak == null || uttak.getPerioder() == null) {
             return List.of();
         }
@@ -234,17 +223,6 @@ class MapSøknadUttakPerioder {
             .entrySet()
             .stream()
             .map(it -> new UttakPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getKey().getFraOgMed(), it.getKey().getTilOgMed()), it.getValue().getTimerPleieAvBarnetPerDag())).collect(Collectors.toList());
-    }
-
-    public PerioderFraSøknad getPerioderFraSøknad() {
-        var arbeidperioder = mapOppgittArbeidstid(ytelse.getArbeidstid());
-        var tilsynsordning = mapOppgittTilsynsordning(ytelse.getTilsynsordning());
-        var uttaksperioder = mapUttak(ytelse.getUttak());
-        var ferie = mapFerie(ytelse.getSøknadsperiodeList(), ytelse.getLovbestemtFerie());
-        var beredskap = mapBeredskap(ytelse.getBeredskap());
-        var nattevåk = mapNattevåk(ytelse.getNattevåk());
-
-        return new PerioderFraSøknad(journalpostId, uttaksperioder, arbeidperioder, tilsynsordning, ferie, beredskap, nattevåk);
     }
 
 }
