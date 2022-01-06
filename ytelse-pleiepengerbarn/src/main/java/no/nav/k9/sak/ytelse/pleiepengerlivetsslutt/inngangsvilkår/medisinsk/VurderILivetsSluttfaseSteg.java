@@ -158,7 +158,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         final var vilkårresultat = ((MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat());
 
         vilkårresultat.getPleieperioder().forEach(periode -> {
-            Pleiegrad pleiegrad = periode.getPleielokasjon() == Pleielokasjon.HJEMME ? Pleiegrad.TILSYN_LIVETS_SLUTT : Pleiegrad.INGEN;
+            Pleiegrad pleiegrad = periode.getPleielokasjon() == Pleielokasjon.HJEMME ? Pleiegrad.LIVETS_SLUTT_TILSYN : Pleiegrad.INGEN;
             var etablertPleieperiode = new EtablertPleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), pleiegrad);
             builder.leggTil(etablertPleieperiode);
         });
