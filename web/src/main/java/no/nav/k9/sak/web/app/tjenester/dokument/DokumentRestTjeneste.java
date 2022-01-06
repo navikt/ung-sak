@@ -142,8 +142,8 @@ public class DokumentRestTjeneste {
             return;
         }
         var behandlingId = behandlinger.stream()
-            .filter(it -> it.getAvsluttetDato().isBefore(dto.getTidspunkt()) || it.getAvsluttetDato().equals(dto.getTidspunkt()))
-            .max(Comparator.comparing(Behandling::getAvsluttetDato))
+            .filter(it -> it.getAvsluttetDato() == null || (it.getAvsluttetDato().isBefore(dto.getTidspunkt()) || it.getAvsluttetDato().equals(dto.getTidspunkt())))
+            .max(Comparator.comparing(Behandling::getAvsluttetDato, Comparator.nullsFirst(Comparator.reverseOrder())))
             .map(Behandling::getId)
             .orElse(null);
 
