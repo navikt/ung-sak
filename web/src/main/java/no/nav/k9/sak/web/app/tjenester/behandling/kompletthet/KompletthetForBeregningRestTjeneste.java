@@ -156,7 +156,7 @@ public class KompletthetForBeregningRestTjeneste {
             .stream()
             .map(im -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(im.getArbeidsgiver().getIdentifikator(),
                 im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), Status.MOTTATT, im.getJournalpostId()))
-            .collect(Collectors.toList()));
+            .toList());
 
         return resultat;
     }
