@@ -47,7 +47,6 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
     private Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere;
-    private Instance<InfotrygdMigreringTjeneste> infotrygdMigreringTjenester;
 
 
     protected VurderPreconditionBeregningSteg() {
@@ -60,21 +59,18 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                            @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                            @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
-                                           @Any Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere,
-                                           @Any Instance<InfotrygdMigreringTjeneste> infotrygdMigreringTjenester) {
+                                           @Any Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.aksjonspunktUtledere = aksjonspunktUtledere;
-        this.infotrygdMigreringTjenester = infotrygdMigreringTjenester;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        markerMigrertePerioderFraInfotrygd(behandling);
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         var vilkåret = vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET)
             .orElseThrow();
@@ -98,10 +94,6 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         return BehandleStegResultat.utførtMedAksjonspunktResultater(finnAksjonspunkter(behandling));
     }
 
-    private void markerMigrertePerioderFraInfotrygd(Behandling behandling) {
-        InfotrygdMigreringTjeneste.finnTjeneste(infotrygdMigreringTjenester, behandling.getFagsakYtelseType())
-            .ifPresent(tjeneste -> tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId()));
-    }
 
     private boolean ingenBeregningsAktiviteter(OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste, VilkårPeriode it, InntektArbeidYtelseGrunnlag grunnlag, BehandlingReferanse referanse) {
         var opptjeningAktiviteter = opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(referanse, grunnlag, it.getPeriode());

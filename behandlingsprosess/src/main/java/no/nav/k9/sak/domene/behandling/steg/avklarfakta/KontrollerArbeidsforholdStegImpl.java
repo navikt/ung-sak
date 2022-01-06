@@ -1,8 +1,12 @@
 package no.nav.k9.sak.domene.behandling.steg.avklarfakta;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -29,6 +33,8 @@ class KontrollerArbeidsforholdStegImpl implements KontrollerArbeidsforholdSteg {
     private KontrollerFaktaAksjonspunktUtleder tjeneste;
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private Instance<InfotrygdMigreringTjeneste> infotrygdMigreringTjenester;
+
 
     KontrollerArbeidsforholdStegImpl() {
         // for CDI proxy
@@ -37,10 +43,12 @@ class KontrollerArbeidsforholdStegImpl implements KontrollerArbeidsforholdSteg {
     @Inject
     KontrollerArbeidsforholdStegImpl(BehandlingRepository behandlingRepository,
                                      SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                     @StartpunktRef("KONTROLLER_ARBEIDSFORHOLD") KontrollerArbeidsforholdTjenesteImpl tjeneste) {
+                                     @StartpunktRef("KONTROLLER_ARBEIDSFORHOLD") KontrollerArbeidsforholdTjenesteImpl tjeneste,
+                                     @Any Instance<InfotrygdMigreringTjeneste> infotrygdMigreringTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.tjeneste = tjeneste;
+        this.infotrygdMigreringTjenester = infotrygdMigreringTjenester;
     }
 
     @Override
@@ -49,7 +57,20 @@ class KontrollerArbeidsforholdStegImpl implements KontrollerArbeidsforholdSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-        List<AksjonspunktResultat> aksjonspunktResultat = tjeneste.utledAksjonspunkter(ref);
-        return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultat);
+        var aksjonspunktresultat = new ArrayList<AksjonspunktResultat>();
+        aksjonspunktresultat.addAll(markerMigrertePerioderFraInfotrygd(ref));
+        aksjonspunktresultat.addAll(tjeneste.utledAksjonspunkter(ref));
+        return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktresultat);
     }
+
+    private List<AksjonspunktResultat> markerMigrertePerioderFraInfotrygd(BehandlingReferanse ref) {
+        var infotrygdMigreringTjeneste = InfotrygdMigreringTjeneste.finnTjeneste(infotrygdMigreringTjenester, ref.getFagsakYtelseType());
+        return infotrygdMigreringTjeneste
+            .map(tjeneste -> {
+                tjeneste.finnOgOpprettMigrertePerioder(ref.getBehandlingId(), ref.getAktørId(), ref.getFagsakId());
+                return tjeneste.utledAksjonspunkter(ref);
+            }).orElse(Collections.emptyList());
+
+    }
+
 }

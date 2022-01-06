@@ -1,7 +1,12 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.avklarfakta;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -19,7 +24,10 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
@@ -31,11 +39,13 @@ import no.nav.k9.sak.domene.behandling.steg.avklarfakta.InfotrygdMigreringTjenes
 import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
+import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.vedtak.ekstern.OverlappendeYtelserTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygd.InfotrygdService;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @FagsakYtelseTypeRef("PSB")
@@ -47,6 +57,7 @@ public class PSBInfotrygdMigreringTjeneste implements InfotrygdMigreringTjeneste
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private FagsakRepository fagsakRepository;
     private final KantIKantVurderer kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
+    private InfotrygdService infotrygdService;
 
     private boolean toggleMigrering;
 
@@ -57,11 +68,54 @@ public class PSBInfotrygdMigreringTjeneste implements InfotrygdMigreringTjeneste
     public PSBInfotrygdMigreringTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                          @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                          FagsakRepository fagsakRepository,
+                                         InfotrygdService infotrygdService,
                                          @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.fagsakRepository = fagsakRepository;
+        this.infotrygdService = infotrygdService;
         this.toggleMigrering = toggleMigrering;
+    }
+
+    @Override
+    public List<AksjonspunktResultat> utledAksjonspunkter(BehandlingReferanse ref) {
+
+        if (!toggleMigrering) {
+            return Collections.emptyList();
+        }
+
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var infotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(ref.getFagsakId());
+        var eksisterendeMigreringTilVurdering = finnEksisterendeMigreringTilVurdering(perioderTilVurdering, infotrygdMigreringer);
+
+        if (eksisterendeMigreringTilVurdering.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        var grunnlagsperioderPrAktør = infotrygdService.finnGrunnlagsperioderForAndreAktører(
+            ref.getPleietrengendeAktørId(),
+            ref.getAktørId(),
+            LocalDate.now().minusYears(1));
+        var aksjonspunkter = new ArrayList<AksjonspunktResultat>();
+
+        var harAnnenAktørMedOverlappendeInfotrygdperiode = grunnlagsperioderPrAktør.entrySet()
+            .stream()
+            .filter(e -> !e.getKey().equals(ref.getAktørId()))
+            .flatMap(e -> e.getValue().stream())
+            .anyMatch(p -> eksisterendeMigreringTilVurdering.stream()
+                .anyMatch(im -> p.inkluderer(im.getSkjæringstidspunkt())));
+
+        if (harAnnenAktørMedOverlappendeInfotrygdperiode) {
+            aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART));
+        }
+
+        var psbInfotrygdFilter = finnPSBInfotryd(ref.getBehandlingId(), ref.getAktørId());
+        List<YtelseAnvist> anvistePeriodeSomManglerSøknad = finnAnvistePerioderFraInfotrygdUtenSøknad(perioderTilVurdering, psbInfotrygdFilter, ref.getBehandlingId());
+
+        if (!anvistePeriodeSomManglerSøknad.isEmpty()) {
+            aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE));
+        }
+        return aksjonspunkter;
     }
 
     @Override
@@ -108,9 +162,7 @@ public class PSBInfotrygdMigreringTjeneste implements InfotrygdMigreringTjeneste
     }
 
     private Optional<LocalDate> finnSkjæringstidspunktMedOverlapp(Saksnummer saksnummer, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Long behandlingId, AktørId aktørId) {
-        InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
-        Optional<AktørYtelse> aktørYtelse = iayGrunnlag.getAktørYtelseFraRegister(aktørId);
-        YtelseFilter ytelseFilter = lagInfotrygdPSBFilter(aktørYtelse);
+        YtelseFilter ytelseFilter = finnPSBInfotryd(behandlingId, aktørId);
         LocalDateTimeline<Boolean> vilkårsperioderTidslinje = lagPerioderTilVureringTidslinje(perioderTilVurdering);
         Map<Ytelse, NavigableSet<LocalDateInterval>> psbOverlapp = OverlappendeYtelserTjeneste.doFinnOverlappendeYtelser(saksnummer, vilkårsperioderTidslinje, ytelseFilter);
         var kantIKantPeriode = finnKantIKantPeriode(ytelseFilter, perioderTilVurdering);
@@ -170,10 +222,39 @@ public class PSBInfotrygdMigreringTjeneste implements InfotrygdMigreringTjeneste
         return new LocalDateTimeline<>(segmenter);
     }
 
+    private YtelseFilter finnPSBInfotryd(Long behandlingId, AktørId aktørId) {
+        InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
+        Optional<AktørYtelse> aktørYtelse = iayGrunnlag.getAktørYtelseFraRegister(aktørId);
+        YtelseFilter ytelseFilter = lagInfotrygdPSBFilter(aktørYtelse);
+        return ytelseFilter;
+    }
+
+
     private YtelseFilter lagInfotrygdPSBFilter(Optional<AktørYtelse> aktørYtelse) {
         return new YtelseFilter(aktørYtelse).filter(y ->
             y.getYtelseType().equals(FagsakYtelseType.PSB) &&
                 y.getKilde().equals(Fagsystem.INFOTRYGD));
+    }
+
+    private List<YtelseAnvist> finnAnvistePerioderFraInfotrygdUtenSøknad(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, YtelseFilter psbInfotrygdFilter, Long behandlingId) {
+        var fullstendigePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandlingId);
+        var førsteStpTilVurdering = perioderTilVurdering.stream().map(DatoIntervallEntitet::getFomDato).min(Comparator.naturalOrder()).orElseThrow();
+        var anvistePerioderUtenSøknad = psbInfotrygdFilter.getFiltrertYtelser().stream()
+            .flatMap(y -> y.getYtelseAnvist().stream())
+            .filter(ya -> harAnvisningSammeÅrSomFørstePeriodeTilVurdering(førsteStpTilVurdering, ya))
+            .filter(ya -> !dekkesAvSøknad(fullstendigePerioder, ya, førsteStpTilVurdering.getYear()))
+            .collect(Collectors.toList());
+        return anvistePerioderUtenSøknad;
+    }
+
+    private boolean dekkesAvSøknad(NavigableSet<DatoIntervallEntitet> fullstendigePerioder, YtelseAnvist ya, int year) {
+        var førsteMandagIÅret = LocalDate.of(year, 1, 1).with(TemporalAdjusters.dayOfWeekInMonth(1, DayOfWeek.MONDAY));
+        var anvistFom = ya.getAnvistFOM().isBefore(førsteMandagIÅret) ? førsteMandagIÅret : ya.getAnvistFOM();
+        return fullstendigePerioder.stream().anyMatch(p -> p.getFomDato().equals(anvistFom) && !p.getTomDato().isBefore(ya.getAnvistTOM()));
+    }
+
+    private boolean harAnvisningSammeÅrSomFørstePeriodeTilVurdering(LocalDate førsteStpTilVurdering, YtelseAnvist ya) {
+        return ya.getAnvistTOM().getYear() >= førsteStpTilVurdering.getYear() && ya.getAnvistFOM().getYear() <= førsteStpTilVurdering.getYear();
     }
 
 }

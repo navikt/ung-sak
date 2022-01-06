@@ -151,6 +151,8 @@ spec:
       value: http://k9-formidling.k9saksbehandling/k9/formidling
     - name : K9_PUNSJ_URL
       value: https://k9-punsj.dev.adeo.no/api
+    - name: INFOTRYGD_BS_BASE_URI
+      value: https://k9-infotrygd.dev.intern.nav.no
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL

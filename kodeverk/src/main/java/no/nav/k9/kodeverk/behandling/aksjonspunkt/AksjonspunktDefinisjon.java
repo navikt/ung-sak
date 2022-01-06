@@ -311,9 +311,15 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     OVERSTYR_BEREGNING_INPUT(AksjonspunktKodeDefinisjon.OVERSTYR_BEREGNING_INPUT,
         AksjonspunktType.MANUELL, "Overstyr input beregning", BehandlingStatus.UTREDES, BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, TOTRINN, EnumSet.of(PSB)),
-    AUTO_VENT_PÅ_KOMPLETT_SØKNAD_VED_OVERGANG_FRA_INFOTRYGD(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_SØKNAD_FOR_PERIODE,
+    AUTO_VENT_PÅ_KOMPLETT_SØKNAD_VED_OVERGANG_FRA_INFOTRYGD(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_KOMPLETT_SØKNAD_FOR_PERIODE,
         AksjonspunktType.AUTOPUNKT, "Venter på punsjet søknad", BehandlingStatus.UTREDES, BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, ENTRINN, TILBAKE, AVBRYTES, EnumSet.of(PSB)),
+    TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE(AksjonspunktKodeDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE,
+        AksjonspunktType.MANUELL, "Mangler søknad for periode i inneværende år", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, VurderingspunktType.UT,
+        UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, TOTRINN, EnumSet.of(PSB)),
+    TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART(AksjonspunktKodeDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART,
+        AksjonspunktType.MANUELL, "Mangler søknad for annen parts periode", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, VurderingspunktType.UT,
+        UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, TOTRINN, EnumSet.of(PSB)),
 
     // Gruppe: 92xx - Pleiepenger
     VURDER_NATTEVÅK(AksjonspunktKodeDefinisjon.VURDER_NATTEVÅK, AksjonspunktType.MANUELL,
