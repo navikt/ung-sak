@@ -100,9 +100,12 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
     }
 
     private boolean harIngenPerioderForMedisinsk(Vilkårene vilkårene) {
-        var perioderMedisinskUnder18 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR).map(Vilkår::getPerioder).orElse(List.of());
-        var perioderMedisinskOver18 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR).map(Vilkår::getPerioder).orElse(List.of());
+        return vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()
+            .stream()
+            .allMatch(it -> harIngenPerioder(it, vilkårene));
+    }
 
-        return perioderMedisinskUnder18.isEmpty() && perioderMedisinskOver18.isEmpty();
+    private boolean harIngenPerioder(VilkårType vilkårType, Vilkårene vilkårene) {
+        return vilkårene.getVilkår(vilkårType).map(Vilkår::getPerioder).orElse(List.of()).isEmpty();
     }
 }
