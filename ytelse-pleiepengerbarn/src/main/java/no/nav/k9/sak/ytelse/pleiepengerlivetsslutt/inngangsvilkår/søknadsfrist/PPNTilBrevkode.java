@@ -8,7 +8,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.MapTil
 
 @FagsakYtelseTypeRef("PPN")
 @ApplicationScoped
-class PLSTilBrevkode implements MapTilBrevkode {
+class PPNTilBrevkode implements MapTilBrevkode {
 
     @Override
     public Brevkode getBrevkode() {

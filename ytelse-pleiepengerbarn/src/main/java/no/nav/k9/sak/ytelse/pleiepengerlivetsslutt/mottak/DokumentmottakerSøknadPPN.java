@@ -41,9 +41,9 @@ import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase;
 @ApplicationScoped
 @FagsakYtelseTypeRef("PPN")
 @DokumentGruppeRef(Brevkode.SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE_KODE)
-class DokumentmottakerSøknadPLS implements Dokumentmottaker {
+class DokumentmottakerSøknadPPN implements Dokumentmottaker {
 
-    private Logger logger = LoggerFactory.getLogger(DokumentmottakerSøknadPLS.class);
+    private Logger logger = LoggerFactory.getLogger(DokumentmottakerSøknadPPN.class);
     private SøknadOversetter søknadOversetter;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SøknadParser søknadParser;
@@ -51,12 +51,12 @@ class DokumentmottakerSøknadPLS implements Dokumentmottaker {
     private ProsessTaskRepository prosessTaskRepository;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
 
-    DokumentmottakerSøknadPLS() {
+    DokumentmottakerSøknadPPN() {
         // for CDI proxy
     }
 
     @Inject
-    DokumentmottakerSøknadPLS(MottatteDokumentRepository mottatteDokumentRepository,
+    DokumentmottakerSøknadPPN(MottatteDokumentRepository mottatteDokumentRepository,
                               SøknadParser søknadParser,
                               SøknadOversetter søknadOversetter,
                               SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,

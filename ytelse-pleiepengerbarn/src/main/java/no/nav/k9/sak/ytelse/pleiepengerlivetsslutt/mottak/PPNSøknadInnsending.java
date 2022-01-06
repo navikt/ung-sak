@@ -19,8 +19,8 @@ import no.nav.k9.søknad.Søknad;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-@JsonTypeName(PLSSøknadInnsending.YTELSE_TYPE)
-public class PLSSøknadInnsending extends InnsendingInnhold {
+@JsonTypeName(PPNSøknadInnsending.YTELSE_TYPE)
+public class PPNSøknadInnsending extends InnsendingInnhold {
 
     public static final String YTELSE_TYPE = "PPN";
 
@@ -30,12 +30,12 @@ public class PLSSøknadInnsending extends InnsendingInnhold {
     @Valid
     private Søknad søknad;
 
-    public PLSSøknadInnsending() {
+    public PPNSøknadInnsending() {
         super(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE);
     }
 
     @JsonCreator
-    public PLSSøknadInnsending(@JsonProperty(value = "søknad", required = true) @NotNull @Valid Søknad søknad) {
+    public PPNSøknadInnsending(@JsonProperty(value = "søknad", required = true) @NotNull @Valid Søknad søknad) {
         this();
         this.søknad = søknad;
     }

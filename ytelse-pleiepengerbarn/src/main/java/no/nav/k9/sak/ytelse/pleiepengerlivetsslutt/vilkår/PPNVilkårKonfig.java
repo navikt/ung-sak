@@ -18,18 +18,18 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SøktePerioder;
 
 @FagsakYtelseTypeRef("PPN")
 @ApplicationScoped
-class PLSVilkårKonfig implements PleiepengerVilkårKonfig {
+class PPNVilkårKonfig implements PleiepengerVilkårKonfig {
 
     private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
     private VilkårUtleder vilkårUtleder;
     private SøktePerioder søktePerioder;
 
-    PLSVilkårKonfig() {
+    PPNVilkårKonfig() {
         // CDI
     }
 
     @Inject
-    public PLSVilkårKonfig(@FagsakYtelseTypeRef("PPN") VilkårUtleder vilkårUtleder,
+    public PPNVilkårKonfig(@FagsakYtelseTypeRef("PPN") VilkårUtleder vilkårUtleder,
                            SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
 
         this.vilkårUtleder = vilkårUtleder;
