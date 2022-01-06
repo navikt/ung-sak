@@ -42,7 +42,7 @@ public class ManglendePerioderAnnenPartInfotrygdOppdaterer implements Aksjonspun
         }
         historikkTjenesteAdapter.tekstBuilder()
             .medBegrunnelse(dto.getBegrunnelse())
-            .medSkjermlenke(SkjermlenkeType.OVERSTYR_INPUT_BEREGNING);
+            .medSkjermlenke(SkjermlenkeType.INFOTRYGD_MIGRERING);
         return OppdateringResultat.utenOverhopp();
     }
 

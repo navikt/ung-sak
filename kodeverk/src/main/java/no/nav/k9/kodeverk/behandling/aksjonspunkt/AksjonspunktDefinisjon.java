@@ -316,10 +316,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, ENTRINN, TILBAKE, AVBRYTES, EnumSet.of(PSB)),
     TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE(AksjonspunktKodeDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE,
         AksjonspunktType.MANUELL, "Mangler søknad for periode i inneværende år", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, TOTRINN, EnumSet.of(PSB)),
+        UTEN_VILKÅR, SkjermlenkeType.INFOTRYGD_MIGRERING, TOTRINN, EnumSet.of(PSB)),
     TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART(AksjonspunktKodeDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART,
         AksjonspunktType.MANUELL, "Mangler søknad for annen parts periode", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, TOTRINN, EnumSet.of(PSB)),
+        UTEN_VILKÅR, SkjermlenkeType.INFOTRYGD_MIGRERING, TOTRINN, EnumSet.of(PSB)),
 
     // Gruppe: 92xx - Pleiepenger
     VURDER_NATTEVÅK(AksjonspunktKodeDefinisjon.VURDER_NATTEVÅK, AksjonspunktType.MANUELL,
