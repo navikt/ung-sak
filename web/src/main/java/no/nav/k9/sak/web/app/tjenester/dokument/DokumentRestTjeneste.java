@@ -143,7 +143,7 @@ public class DokumentRestTjeneste {
         }
         var behandlingId = behandlinger.stream()
             .filter(it -> it.getAvsluttetDato() == null || (it.getAvsluttetDato().isBefore(dto.getTidspunkt()) || it.getAvsluttetDato().equals(dto.getTidspunkt())))
-            .max(Comparator.comparing(Behandling::getAvsluttetDato, Comparator.nullsFirst(Comparator.reverseOrder())))
+            .max(Comparator.comparing(Behandling::getAvsluttetDato, Comparator.nullsLast(Comparator.naturalOrder())))
             .map(Behandling::getId)
             .orElse(null);
 
