@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 
 @JsonInclude(value = Include.NON_ABSENT)
@@ -37,7 +36,6 @@ public class UferdigJournalpostSøkDto {
         this.aktorIdDtoBarn = aktorIdDtoBarn;
     }
 
-    @AbacAttributt(value = "aktorIdDto", masker = true)
     public AktørIdDto getAktorIdDto() {
         return aktorIdDto;
     }
@@ -46,7 +44,6 @@ public class UferdigJournalpostSøkDto {
         this.aktorIdDto = aktorIdDto;
     }
 
-    @AbacAttributt(value = "aktorIdDtoBarn", masker = true)
     public AktørIdDto getAktorIdDtoBarn() {
         return aktorIdDtoBarn;
     }
