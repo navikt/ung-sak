@@ -118,7 +118,7 @@ public class SøknadDtoTjeneste {
 
     public List<Periode> hentSøknadperioderPåFagsak(FagsakYtelseType ytelsetype, PersonIdent ident, PersonIdent pleietrengendeAktørIdent) {
         AktørId aktørId = finnAktørId(ident);
-        AktørId pleietrengendeAktør = finnAktørId(pleietrengendeAktørIdent);
+        AktørId pleietrengendeAktør = pleietrengendeAktørIdent != null ? finnAktørId(pleietrengendeAktørIdent) : null;
 
         return finnSisteFagsakPå(ytelsetype, aktørId, pleietrengendeAktør)
             .flatMap(fagsak -> repositoryProvider.getBehandlingRepository().hentSisteBehandlingForFagsakId(fagsak.getId()))
