@@ -11,7 +11,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -31,6 +30,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.exception.TekniskException;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -62,7 +62,6 @@ public class DokumentRestTjeneste {
 
     public static final String DOKUMENTER_PATH = "/dokument/hent-dokumentliste";
     public static final String DOKUMENT_PATH = "/dokument/hent-dokument";
-    public static final String DOKUMENTER_BEHANDLING_PATH = "/dokument/hent-dokument-behandling";
     public static final String SAKSNUMMER_PARAM = "saksnummer";
     public static final String JOURNALPOST_ID_PARAM = "journalpostId";
     public static final String DOKUMENT_ID_PARAM = "dokumentId";
@@ -73,6 +72,7 @@ public class DokumentRestTjeneste {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private VirksomhetTjeneste virksomhetTjeneste;
     private BehandlingRepository behandlingRepository;
+    private Boolean enablePsbHenleggelse;
 
     public DokumentRestTjeneste() {
         // For Rest-CDI
@@ -84,13 +84,15 @@ public class DokumentRestTjeneste {
                                 FagsakRepository fagsakRepository,
                                 MottatteDokumentRepository mottatteDokumentRepository,
                                 VirksomhetTjeneste virksomhetTjeneste,
-                                BehandlingRepository behandlingRepository) {
+                                BehandlingRepository behandlingRepository,
+                                @KonfigVerdi(value = "BEHANDLINGID_DOKUMENTLIST_ENABLET", defaultVerdi = "false") Boolean enablePsbHenleggelse) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.virksomhetTjeneste = virksomhetTjeneste;
         this.behandlingRepository = behandlingRepository;
+        this.enablePsbHenleggelse = enablePsbHenleggelse;
     }
 
     @GET
@@ -110,8 +112,7 @@ public class DokumentRestTjeneste {
 
             Fagsak fagsak = fagsakOpt.get();
 
-            Set<Long> åpneBehandlinger = behandlingRepository.hentBehandlingerSomIkkeErAvsluttetForFagsakId(fagsakId).stream().map(Behandling::getId)
-                .collect(Collectors.toSet());
+            var behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsakId);
 
             // Burde brukt map på dokumentid, men den lagres ikke i praksis.
             Map<JournalpostId, List<MottattDokument>> mottattedokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsakId).stream()
@@ -125,12 +126,31 @@ public class DokumentRestTjeneste {
             journalPostList.forEach(arkivJournalPost -> {
                 dokumentResultat.addAll(mapFraArkivJournalPost(saksnummer, arkivJournalPost, mottattedokumenter, inntektsmeldinger));
             });
-            dokumentResultat.sort(Comparator.comparing(DokumentDto::getTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())));
 
-            return dokumentResultat;
+            return dokumentResultat.stream()
+                .peek(it -> leggTilBehandling(it, behandlinger))
+                .sorted(Comparator.comparing(DokumentDto::getTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())))
+                .collect(Collectors.toList());
+
         } catch (ManglerTilgangException e) {
             throw DokumentRestTjenesteFeil.FACTORY.applikasjonHarIkkeTilgangTilHentJournalpostListeTjeneste(e).toException();
         }
+    }
+
+    private void leggTilBehandling(DokumentDto dto, List<Behandling> behandlinger) {
+        if (!enablePsbHenleggelse) {
+            return;
+        }
+        var behandlingId = behandlinger.stream()
+            .filter(it -> it.getAvsluttetDato().isBefore(dto.getTidspunkt()) || it.getAvsluttetDato().equals(dto.getTidspunkt()))
+            .max(Comparator.comparing(Behandling::getAvsluttetDato))
+            .map(Behandling::getId)
+            .orElse(null);
+
+        var result = new ArrayList<Long>();
+        result.add(behandlingId);
+
+        dto.setBehandlinger(result);
     }
 
     private Map<JournalpostId, List<Inntektsmelding>> finnInntektsmeldinger(Fagsak fagsak) {
