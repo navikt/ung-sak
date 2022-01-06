@@ -81,7 +81,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         var perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(ref.getBehandlingId());
 
         var kravdokumenterMedPeriode = søknadsfristTjeneste.hentPerioderTilVurdering(ref);
-        var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår(ref.getBehandlingId());
+        var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
 
         var perioderTilVurdering = definerendeVilkår.stream()
             .map(it -> perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), it))

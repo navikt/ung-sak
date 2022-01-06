@@ -65,9 +65,8 @@ public interface VilkårsPerioderTilVurderingTjeneste {
      * Definerer perioden(e) til behandling for brev
      *
      * @return vilkårene
-     * @param behandlingId
      */
-    default Set<VilkårType> definerendeVilkår(Long behandlingId) {
+    default Set<VilkårType> definerendeVilkår() {
         return Set.of(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
     }
 }
