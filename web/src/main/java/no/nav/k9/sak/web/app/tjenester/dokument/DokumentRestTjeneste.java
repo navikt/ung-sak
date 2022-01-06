@@ -4,13 +4,18 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.io.ByteArrayInputStream;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -33,6 +38,8 @@ import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -141,16 +148,49 @@ public class DokumentRestTjeneste {
         if (!enablePsbHenleggelse) {
             return;
         }
-        var behandlingId = behandlinger.stream()
-            .filter(it -> it.getAvsluttetDato() != null && (it.getAvsluttetDato().isAfter(dto.getTidspunkt()) || it.getAvsluttetDato().equals(dto.getTidspunkt())))
-            .max(Comparator.comparing(Behandling::getAvsluttetDato, Comparator.nullsLast(Comparator.naturalOrder())))
-            .map(Behandling::getId)
-            .orElse(behandlinger.stream().filter(it -> !it.erSaksbehandlingAvsluttet()).map(Behandling::getId).findFirst().orElse(null));
+        var behandlingTidslinje = opprettTidslinje(behandlinger);
+        var behandlingId = utledBehandling(dto, behandlingTidslinje);
 
         var result = new ArrayList<Long>();
         result.add(behandlingId);
 
         dto.setBehandlinger(result);
+    }
+
+    Long utledBehandling(DokumentDto dto, NavigableSet<BehandlingPeriode> behandlingTidslinje) {
+        if (Objects.equals(dto.getKommunikasjonsretning(), Kommunikasjonsretning.UT)) {
+            // finn nærmeste TOM
+            return behandlingTidslinje.stream()
+                .min(Comparator.comparing(it -> distanseTilTom(dto.getTidspunkt(), it)))
+                .map(BehandlingPeriode::getBehandlingId)
+                .orElse(null);
+        }
+
+        return behandlingTidslinje.stream()
+            .filter(it -> it.getTom().isAfter(dto.getTidspunkt()))
+            .min(Comparator.comparing(it -> distanseTilTom(dto.getTidspunkt(), it)))
+            .map(BehandlingPeriode::getBehandlingId)
+            .orElse(null);
+    }
+
+    private Long distanseTilTom(LocalDateTime dato, BehandlingPeriode periode) {
+        return Math.abs(ChronoUnit.MILLIS.between(dato, periode.getTom()));
+    }
+
+    private NavigableSet<BehandlingPeriode> opprettTidslinje(List<Behandling> behandlinger) {
+        var tidslinje = new TreeSet<BehandlingPeriode>();
+
+        var sorted = new ArrayList<>(behandlinger);
+        sorted.sort(Comparator.comparing(Behandling::getAvsluttetDato, Comparator.nullsLast(Comparator.naturalOrder())));
+
+        LocalDateTime fom = Tid.TIDENES_BEGYNNELSE.atStartOfDay();
+        for (Behandling behandling : sorted) {
+            var tom = behandling.getAvsluttetDato() != null ? behandling.getAvsluttetDato() : Tid.TIDENES_ENDE.atStartOfDay();
+            tidslinje.add(new BehandlingPeriode(fom, tom, behandling.getId()));
+            fom = tom.plusNanos(1);
+        }
+
+        return tidslinje;
     }
 
     private Map<JournalpostId, List<Inntektsmelding>> finnInntektsmeldinger(Fagsak fagsak) {
