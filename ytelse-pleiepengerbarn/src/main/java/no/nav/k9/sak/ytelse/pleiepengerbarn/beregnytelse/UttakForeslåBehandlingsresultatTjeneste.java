@@ -70,7 +70,7 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
             return true;
         }
 
-        var harIngenPerioderForMedisinsk = harIngenPerioderForMedisinsk(vilkårene);
+        var harIngenPerioderForMedisinsk = harIngenPerioderForMedisinsk(vilkårene, ref);
         if (harIngenPerioderForMedisinsk) {
             return true;
         }
@@ -99,8 +99,8 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
         return ingenAvSykdomsvilkåreneErOppfylt;
     }
 
-    private boolean harIngenPerioderForMedisinsk(Vilkårene vilkårene) {
-        return vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()
+    private boolean harIngenPerioderForMedisinsk(Vilkårene vilkårene, BehandlingReferanse ref) {
+        return vilkårsPerioderTilVurderingTjeneste.definerendeVilkår(ref.getBehandlingId())
             .stream()
             .allMatch(it -> harIngenPerioder(it, vilkårene));
     }
