@@ -230,6 +230,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
 
         var vilkårsresultatBuilder = Vilkårene.builder();
+        leggTilVilkårMedUtfall(Utfall.OPPFYLT, vilkårsresultatBuilder, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, null);
         if (utfall.equals(Utfall.OPPFYLT)) {
             leggTilVilkårMedUtfall(utfall, vilkårsresultatBuilder, VilkårType.OPPTJENINGSVILKÅRET, null);
             leggTilVilkårMedUtfall(utfall, vilkårsresultatBuilder, VilkårType.MEDLEMSKAPSVILKÅRET, null);
