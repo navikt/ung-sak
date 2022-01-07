@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.kravperioder;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -8,13 +9,12 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.Dependent;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
 import no.nav.k9.sak.kontrakt.krav.KravDokumentType;
@@ -27,10 +27,16 @@ import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Periode;
 
-@Dependent
 public class UtledStatusPåPerioderTjeneste {
 
+    private final Boolean kantIKantVurdererEnablet;
+
+    public UtledStatusPåPerioderTjeneste(Boolean kantIKantVurdererEnablet) {
+        this.kantIKantVurdererEnablet = kantIKantVurdererEnablet;
+    }
+
     public StatusForPerioderPåBehandling utled(Behandling behandling,
+                                               KantIKantVurderer kantIKantVurderer,
                                                Set<KravDokument> kravdokumenter,
                                                Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
                                                NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
@@ -42,9 +48,9 @@ public class UtledStatusPåPerioderTjeneste {
 
         var tidslinje = new LocalDateTimeline<ÅrsakerTilVurdering>(List.of());
         var relevanteTidslinjer = relevanteDokumenterMedPeriode.stream()
-            .map(entry -> tilSegments(entry, ÅrsakTilVurdering.FØRSTEGANGSVURDERING))
+            .map(entry -> tilSegments(entry, kantIKantVurderer, ÅrsakTilVurdering.FØRSTEGANGSVURDERING))
             .map(LocalDateTimeline::new)
-            .collect(Collectors.toList());
+            .toList();
 
         for (LocalDateTimeline<ÅrsakerTilVurdering> linje : relevanteTidslinjer) {
             tidslinje = tidslinje.combine(linje, this::mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
@@ -57,9 +63,9 @@ public class UtledStatusPåPerioderTjeneste {
         tidslinje = tidslinje.combine(new LocalDateTimeline<>(tilbakestillingSegmenter), this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         var endringFraBruker = andreRelevanteDokumenterForPeriodenTilVurdering.stream()
-            .map(entry -> tilSegments(entry, utledRevurderingÅrsak(behandling)))
+            .map(entry -> tilSegments(entry, kantIKantVurderer, utledRevurderingÅrsak(behandling)))
             .map(LocalDateTimeline::new)
-            .collect(Collectors.toList());
+            .toList();
 
         for (LocalDateTimeline<ÅrsakerTilVurdering> linje : endringFraBruker) {
             tidslinje = tidslinje.combine(linje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
@@ -153,20 +159,49 @@ public class UtledStatusPåPerioderTjeneste {
         return new LocalDateSegment<>(interval, new ÅrsakerTilVurdering(årsaker));
     }
 
-    private List<LocalDateSegment<ÅrsakerTilVurdering>> tilSegments(Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> entry, ÅrsakTilVurdering årsakTilVurdering) {
-        var tidslinjer = entry.getValue()
+    private List<LocalDateSegment<ÅrsakerTilVurdering>> tilSegments(Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> entry,
+                                                                    KantIKantVurderer kantIKantVurderer,
+                                                                    ÅrsakTilVurdering årsakTilVurdering) {
+        var segmenter = entry.getValue()
             .stream()
-            .map(it -> new LocalDateTimeline<>(List.of(new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(årsakTilVurdering))))))
-            .collect(Collectors.toList());
+            .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(årsakTilVurdering))))
+            .toList();
 
         var tidslinjen = new LocalDateTimeline<ÅrsakerTilVurdering>(List.of());
-        for (LocalDateTimeline<ÅrsakerTilVurdering> tidslinje : tidslinjer) {
-            tidslinjen = tidslinjen.combine(tidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenter) {
+            tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
+
+        if (kantIKantVurdererEnablet) {
+            var segmenterSomMangler = utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
+            for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenterSomMangler) {
+                tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
+        }
+
         return tidslinjen.compress()
             .toSegments()
             .stream()
             .toList();
+    }
+
+    private List<LocalDateSegment<ÅrsakerTilVurdering>> utledHullSomMåTettes(LocalDateTimeline<ÅrsakerTilVurdering> tidslinjen, KantIKantVurderer kantIKantVurderer) {
+        var segmenter = tidslinjen.compress().toSegments();
+
+        LocalDateSegment<ÅrsakerTilVurdering> periode = null;
+        var resultat = new ArrayList<LocalDateSegment<ÅrsakerTilVurdering>>();
+
+        for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenter) {
+            if (periode == null) {
+                periode = segment;
+            } else if (kantIKantVurderer.erKantIKant(DatoIntervallEntitet.fra(segment.getLocalDateInterval()), DatoIntervallEntitet.fra(periode.getLocalDateInterval()))) {
+                resultat.add(new LocalDateSegment<>(periode.getFom(), segment.getTom(), periode.getValue()));
+            } else {
+                periode = segment;
+            }
+        }
+
+        return resultat;
     }
 
     private Set<Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>>> utledKravdokumenterRelevantForPeriodeTilVurdering(Set<KravDokument> kravdokumenter,

@@ -224,6 +224,8 @@ spec:
       value: "true"
     - name: BEHANDLINGID_DOKUMENTLIST_ENABLET
       value: "true"
+    - name: PERIODER_KANT_I_KANT_VURDERER_ENABLET
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
