@@ -288,12 +288,17 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
 
     // PDL har flere samtidige statsborgerskap - dermed må man sjekke region ved hvert brudd
     private Map<LocalDate, Set<VurderingsÅrsak>> hentEndringForStatsborgerskap(PersonopplysningerAggregat aggregat, BehandlingReferanse ref) {
+        final Map<LocalDate, Set<VurderingsÅrsak>> utledetResultat = new HashMap<>();
         var statsborgerskapene = aggregat.getStatsborgerskapFor(ref.getAktørId());
+
+        if (statsborgerskapene.size() == 1) {
+            // Aldri endring
+            return utledetResultat;
+        }
 
         var regionTidslinje = mapStatsborgerskapTilTidslinje(statsborgerskapene)
             .compress();
 
-        final Map<LocalDate, Set<VurderingsÅrsak>> utledetResultat = new HashMap<>();
         regionTidslinje.toSegments().forEach(it -> utledetResultat.put(it.getFom(), Set.of(VurderingsÅrsak.STATSBORGERSKAP)));
 
         return utledetResultat;
