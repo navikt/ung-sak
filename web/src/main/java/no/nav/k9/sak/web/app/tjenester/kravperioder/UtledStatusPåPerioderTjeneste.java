@@ -67,8 +67,7 @@ public class UtledStatusPåPerioderTjeneste {
             .toList();
 
         var endringFraBrukerTidslinje = mergeTidslinjer(endringFraBruker, kantIKantVurderer, this::mergeSegmentsAndreDokumenter);
-        tidslinje = tidslinje.combine(endringFraBrukerTidslinje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN)
-            .compress();
+        tidslinje = tidslinje.combine(endringFraBrukerTidslinje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         for (PeriodeMedÅrsak entry : revurderingPerioderFraAndreParter) {
             var endringFraAndreParter = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(entry.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.mapFra(entry.getÅrsak()))))));
@@ -76,7 +75,8 @@ public class UtledStatusPåPerioderTjeneste {
                 .compress();
         }
 
-        var perioder = tidslinje.toSegments()
+        var perioder = tidslinje.compress()
+            .toSegments()
             .stream()
             .map(it -> new PeriodeMedÅrsaker(new Periode(it.getFom(), it.getTom()), it.getValue() != null ? it.getValue().getÅrsaker() : Set.of()))
             .collect(Collectors.toList());
