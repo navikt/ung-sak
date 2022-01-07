@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -52,9 +53,7 @@ public class UtledStatusPåPerioderTjeneste {
             .map(LocalDateTimeline::new)
             .toList();
 
-        for (LocalDateTimeline<ÅrsakerTilVurdering> linje : relevanteTidslinjer) {
-            tidslinje = tidslinje.combine(linje, this::mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
+        tidslinje = mergeTidslinjer(relevanteTidslinjer, kantIKantVurderer, this::mergeSegments);
 
         var tilbakestillingSegmenter = perioderSomSkalTilbakestilles.stream()
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.TRUKKET_KRAV))))
@@ -67,9 +66,9 @@ public class UtledStatusPåPerioderTjeneste {
             .map(LocalDateTimeline::new)
             .toList();
 
-        for (LocalDateTimeline<ÅrsakerTilVurdering> linje : endringFraBruker) {
-            tidslinje = tidslinje.combine(linje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
+        var endringFraBrukerTidslinje = mergeTidslinjer(endringFraBruker, kantIKantVurderer, this::mergeSegmentsAndreDokumenter);
+        tidslinje = tidslinje.combine(endringFraBrukerTidslinje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
         for (PeriodeMedÅrsak entry : revurderingPerioderFraAndreParter) {
             var endringFraAndreParter = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(entry.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.mapFra(entry.getÅrsak()))))));
             tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN)
@@ -89,6 +88,20 @@ public class UtledStatusPåPerioderTjeneste {
             .collect(Collectors.toCollection(TreeSet::new));
 
         return new StatusForPerioderPåBehandling(perioderTilVurderingKombinert.stream().map(DatoIntervallEntitet::tilPeriode).collect(Collectors.toSet()), perioder, mapKravTilDto(relevanteDokumenterMedPeriode));
+    }
+
+    private LocalDateTimeline<ÅrsakerTilVurdering> mergeTidslinjer(List<LocalDateTimeline<ÅrsakerTilVurdering>> relevanteTidslinjer, KantIKantVurderer kantIKantVurderer, LocalDateSegmentCombinator<ÅrsakerTilVurdering, ÅrsakerTilVurdering, ÅrsakerTilVurdering> mergeSegments) {
+        var tidslinjen = new LocalDateTimeline<ÅrsakerTilVurdering>(List.of());
+        for (LocalDateTimeline<ÅrsakerTilVurdering> linje : relevanteTidslinjer) {
+            tidslinjen = tidslinjen.combine(linje, mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+        if (kantIKantVurdererEnablet) {
+            var segmenterSomMangler = utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
+            for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenterSomMangler) {
+                tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
+        }
+        return tidslinjen;
     }
 
     private ÅrsakTilVurdering utledRevurderingÅrsak(Behandling behandling) {
