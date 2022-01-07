@@ -36,6 +36,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.vedtak.ekstern.OverlappendeYtelserTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
@@ -74,7 +75,8 @@ public class PSBInfotrygdMigreringTjeneste implements InfotrygdMigreringTjeneste
             if (!eksisterendeMigreringTilVurdering.isEmpty()) {
                 eksisterendeMigreringTilVurdering.forEach(oppdaterSkjæringstidspunkt(perioderTilVurdering));
             } else {
-                var stpMedOverlapp = finnSkjæringstidspunktMedOverlapp(perioderTilVurdering, behandlingId, aktørId);
+                var saksnummer = fagsakRepository.finnEksaktFagsak(fagsakId).getSaksnummer();
+                var stpMedOverlapp = finnSkjæringstidspunktMedOverlapp(saksnummer, perioderTilVurdering, behandlingId, aktørId);
                 stpMedOverlapp.ifPresent(localDate -> fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsakId, localDate)));
             }
         }
@@ -105,12 +107,12 @@ public class PSBInfotrygdMigreringTjeneste implements InfotrygdMigreringTjeneste
         };
     }
 
-    private Optional<LocalDate> finnSkjæringstidspunktMedOverlapp(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Long behandlingId, AktørId aktørId) {
+    private Optional<LocalDate> finnSkjæringstidspunktMedOverlapp(Saksnummer saksnummer, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Long behandlingId, AktørId aktørId) {
         InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
         Optional<AktørYtelse> aktørYtelse = iayGrunnlag.getAktørYtelseFraRegister(aktørId);
         YtelseFilter ytelseFilter = lagInfotrygdPSBFilter(aktørYtelse);
         LocalDateTimeline<Boolean> vilkårsperioderTidslinje = lagPerioderTilVureringTidslinje(perioderTilVurdering);
-        Map<Ytelse, NavigableSet<LocalDateInterval>> psbOverlapp = OverlappendeYtelserTjeneste.doFinnOverlappendeYtelser(vilkårsperioderTidslinje, ytelseFilter);
+        Map<Ytelse, NavigableSet<LocalDateInterval>> psbOverlapp = OverlappendeYtelserTjeneste.doFinnOverlappendeYtelser(saksnummer, vilkårsperioderTidslinje, ytelseFilter);
         var kantIKantPeriode = finnKantIKantPeriode(ytelseFilter, perioderTilVurdering);
         if (!psbOverlapp.isEmpty()) {
             return finnSkjæringstidspunktMedOverlapp(perioderTilVurdering, psbOverlapp);

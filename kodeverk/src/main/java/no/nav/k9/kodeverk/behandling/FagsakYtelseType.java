@@ -268,6 +268,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     /** Hvilke K9-ytelser som skal sjekkes mot overlapp */
     private static final Map<FagsakYtelseType, Set<FagsakYtelseType>> OVERLAPPSJEKK_RELATERT_YTELSE_K9 = Map.of(
         PLEIEPENGER_SYKT_BARN, Set.of(
+            PLEIEPENGER_SYKT_BARN,
             PLEIEPENGER_NÆRSTÅENDE,
             OMSORGSPENGER,
             OPPLÆRINGSPENGER),
