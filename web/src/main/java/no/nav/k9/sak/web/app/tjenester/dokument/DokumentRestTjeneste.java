@@ -151,10 +151,12 @@ public class DokumentRestTjeneste {
         var behandlingTidslinje = opprettTidslinje(behandlinger);
         var behandlingId = utledBehandling(dto, behandlingTidslinje);
 
-        var result = new ArrayList<Long>();
-        result.add(behandlingId);
+        if (behandlingId != null) {
+            var result = new ArrayList<Long>();
+            result.add(behandlingId);
 
-        dto.setBehandlinger(result);
+            dto.setBehandlinger(result);
+        }
     }
 
     Long utledBehandling(DokumentDto dto, NavigableSet<BehandlingPeriode> behandlingTidslinje) {
