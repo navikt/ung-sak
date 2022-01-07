@@ -373,9 +373,9 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
             return førsteVersjon;
         }
 
-        var kildeType = finnMedlemskapPeriodeMedSenestBeslutningsdato(førsteVersjon, sisteVersjon);
+        var data = finnMedlemskapPeriodeMedSenestBeslutningsdato(førsteVersjon, sisteVersjon);
 
-        return new LocalDateSegment<>(di, kildeType);
+        return new LocalDateSegment<>(di, data);
     }
 
     private MedlData finnMedlemskapPeriodeMedSenestBeslutningsdato(LocalDateSegment<MedlData> førsteVersjon,
