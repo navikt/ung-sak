@@ -10,6 +10,9 @@ import no.nav.k9.kodeverk.medlem.MedlemskapType;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
+/*
+ * Benyttes til diffing og i timeline (siden den
+ */
 public class MedlData {
 
     @ChangeTracked
@@ -43,17 +46,6 @@ public class MedlData {
         this.dekningType = entitet.getDekningType();
         this.kildeType = entitet.getKildeType();
         this.medlId = entitet.getMedlId();
-    }
-
-    public MedlData(MedlData forfeder) {
-        this.beslutningsdato = forfeder.beslutningsdato;
-        this.erMedlem = forfeder.erMedlem;
-        this.lovvalgLand = forfeder.lovvalgLand;
-        this.studieLand = forfeder.studieLand;
-        this.medlemskapType = forfeder.medlemskapType;
-        this.dekningType = forfeder.dekningType;
-        this.kildeType = forfeder.kildeType;
-        this.medlId = forfeder.medlId;
     }
 
     public LocalDate getBeslutningsdato() {
