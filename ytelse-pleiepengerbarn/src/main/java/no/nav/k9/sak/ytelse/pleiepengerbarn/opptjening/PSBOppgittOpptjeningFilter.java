@@ -12,6 +12,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -38,11 +40,12 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
     private VilkårTjeneste vilkårTjeneste;
     private BehandlingRepository behandlingRepository;
-    private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
+    private Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester;
     private boolean lansertNyPrioritering;
 
     PSBOppgittOpptjeningFilter() {
@@ -52,11 +55,11 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     @Inject
     public PSBOppgittOpptjeningFilter(VilkårTjeneste vilkårTjeneste,
                                       BehandlingRepository behandlingRepository,
-                                      @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
+                                      @Any Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester,
                                       @KonfigVerdi(value = "PSB_OPPG_OPPTJENING_PRIORITERING", defaultVerdi = "true") boolean lansertNyPrioritering) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
-        this.søknadsfristTjeneste = søknadsfristTjeneste;
+        this.søknadsfristTjenester = søknadsfristTjenester;
         this.lansertNyPrioritering = lansertNyPrioritering;
     }
 
@@ -67,7 +70,9 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
         var vilkårsperiode = finnVilkårsperiodeForOpptjening(ref, stp);
-        Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokMedFravær = søknadsfristTjeneste.hentPerioderTilVurdering(ref);
+        var tjeneste = FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ref.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalStateException("Har ikke " + getClass().getSimpleName() + " for ytelse=" + ref.getFagsakYtelseType()));
+        Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokMedFravær = tjeneste.hentPerioderTilVurdering(ref);
         if (lansertNyPrioritering) {
             finnOppgittOpptjeningLansert(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
         }
@@ -80,7 +85,9 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     @Override
     public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
-        Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokMedFravær = søknadsfristTjeneste.hentPerioderTilVurdering(ref);
+        var tjeneste = FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ref.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalStateException("Har ikke " + getClass().getSimpleName() + " for ytelse=" + ref.getFagsakYtelseType()));
+        Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokMedFravær = tjeneste.hentPerioderTilVurdering(ref);
         if (lansertNyPrioritering) {
             finnOppgittOpptjeningLansert(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
         }

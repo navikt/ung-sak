@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
@@ -36,6 +37,7 @@ import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal.PSBKompletthetSjekkerTjeneste;
 
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @BehandlingStegRef(kode = "KOMPLETT_FOR_BEREGNING")
 @BehandlingTypeRef
 @ApplicationScoped

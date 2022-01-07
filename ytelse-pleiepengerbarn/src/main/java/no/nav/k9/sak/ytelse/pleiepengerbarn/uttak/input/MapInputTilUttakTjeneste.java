@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -19,6 +19,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -123,7 +124,7 @@ public class MapInputTilUttakTjeneste {
 
         final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(input.getEtablertTilsynPerioder());
 
-        var innvilgedePerioderMedSykdom = finnInnvilgedePerioderSykdom(input.getVilkårene());
+        var innvilgedePerioderMedSykdom = finnInnvilgedePerioderSykdom(input.getVilkårene(), input.getDefinerendeVilkårtyper());
 
         var unntakEtablertTilsynForPleietrengende = input.getUnntakEtablertTilsynForPleietrengende().orElse(null);
         var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
@@ -132,7 +133,7 @@ public class MapInputTilUttakTjeneste {
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
 
         return new Uttaksgrunnlag(
-            YtelseType.PSB,
+            mapTilYtelseType(behandling),
             barn,
             søker,
             behandling.getFagsak().getSaksnummer().getVerdi(),
@@ -150,17 +151,25 @@ public class MapInputTilUttakTjeneste {
         );
     }
 
-    private Set<DatoIntervallEntitet> finnInnvilgedePerioderSykdom(Vilkårene vilkårene) {
-        var s1 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR).orElseThrow()
-            .getPerioder()
-            .stream();
-        var s2 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR).orElseThrow()
-            .getPerioder()
-            .stream();
-        return Stream.concat(s1, s2)
-            .filter(it -> no.nav.k9.kodeverk.vilkår.Utfall.OPPFYLT.equals(it.getUtfall()))
-            .map(VilkårPeriode::getPeriode)
-            .collect(Collectors.toSet());
+    private YtelseType mapTilYtelseType(Behandling behandling) {
+        return switch (behandling.getFagsakYtelseType()) {
+            case PLEIEPENGER_SYKT_BARN -> YtelseType.PSB;
+            case PLEIEPENGER_NÆRSTÅENDE -> YtelseType.PLS;
+            default -> throw new IllegalStateException("Ikke støttet ytelse for uttak Pleiepenger: " + behandling.getFagsakYtelseType());
+        };
+    }
+
+    private Set<DatoIntervallEntitet> finnInnvilgedePerioderSykdom(Vilkårene vilkårene, Set<VilkårType> definerendeVilkårtyper) {
+        final var resultat = new TreeSet<DatoIntervallEntitet>();
+        for (VilkårType vilkårType : definerendeVilkårtyper) {
+            var innvilgedePerioder = vilkårene.getVilkår(vilkårType).orElseThrow().getPerioder()
+                .stream()
+                .filter(it -> no.nav.k9.kodeverk.vilkår.Utfall.OPPFYLT.equals(it.getUtfall()))
+                .map(VilkårPeriode::getPeriode)
+                .collect(Collectors.toSet());
+            resultat.addAll(innvilgedePerioder);
+        }
+        return resultat;
     }
 
     private RettVedDød utledRettVedDød(InputParametere input) {
@@ -255,6 +264,7 @@ public class MapInputTilUttakTjeneste {
             case INGEN -> Pleiebehov.PROSENT_0;
             case KONTINUERLIG_TILSYN -> Pleiebehov.PROSENT_100;
             case UTVIDET_KONTINUERLIG_TILSYN, INNLEGGELSE -> Pleiebehov.PROSENT_200;
+            case LIVETS_SLUTT_TILSYN -> Pleiebehov.PROSENT_6000;
             default -> throw new IllegalStateException("Ukjent Pleiegrad: " + grad);
         };
     }

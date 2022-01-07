@@ -61,7 +61,7 @@ public enum FagsakYtelseType implements Kodeverdi {
             requireNull(relatertPersonAktørId, "relatertPerson");
         }
     },
-    PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger nærstående", null, "OMS") {
+    PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger nærstående", "PP", "OMS") {
         @Override
         public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
             requireNonNull(pleietrengendeAktørId, "pleietrengende");

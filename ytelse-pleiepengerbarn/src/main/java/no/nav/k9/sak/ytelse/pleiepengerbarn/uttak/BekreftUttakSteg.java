@@ -13,6 +13,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 @BehandlingStegRef(kode = "BEKREFT_UTTAK")
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class BekreftUttakSteg implements BehandlingSteg {
 
 

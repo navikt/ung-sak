@@ -69,7 +69,7 @@ public class SykdomGrunnlagRepository {
         List<SykdomDokument> godkjenteLegeerklæringer = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId).stream()
                 .filter(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS)
                 .collect(Collectors.toList());
-        
+
         return new SykdomGrunnlag(
             UUID.randomUUID(),
             søktePerioder.stream().map(p -> new SykdomSøktPeriode(p.getFom(), p.getTom())).collect(Collectors.toList()),
@@ -107,9 +107,11 @@ public class SykdomGrunnlagRepository {
     private List<SykdomVurderingVersjon> hentVurderinger(AktørId pleietrengende) {
         final LocalDateTimeline<SykdomVurderingVersjon> ktpVurderinger = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, pleietrengende);
         final LocalDateTimeline<SykdomVurderingVersjon> tooVurderinger = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.TO_OMSORGSPERSONER, pleietrengende);
+        final LocalDateTimeline<SykdomVurderingVersjon> sluVurderinger = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.LIVETS_SLUTTFASE, pleietrengende);
 
         final List<SykdomVurderingVersjon> vurderinger = ktpVurderinger.stream().map(LocalDateSegment::getValue).distinct().collect(Collectors.toCollection(ArrayList::new));
         vurderinger.addAll(tooVurderinger.stream().map(LocalDateSegment::getValue).distinct().collect(Collectors.toList()));
+        vurderinger.addAll(sluVurderinger.stream().map(LocalDateSegment::getValue).distinct().collect(Collectors.toList()));
         return vurderinger;
     }
 
@@ -135,7 +137,7 @@ public class SykdomGrunnlagRepository {
             .map(id -> EndringsresultatSnapshot.medSnapshot(SykdomGrunnlag.class, id))
             .orElse(EndringsresultatSnapshot.utenSnapshot(SykdomGrunnlag.class));
     }
-    
+
     public boolean harHattGodkjentLegeerklæringMedUnntakAv(AktørId pleietrengende, UUID behandlingUuid) {
         final TypedQuery<Long> q = entityManager.createQuery(
                 "select l.id "

@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
@@ -33,6 +34,7 @@ public class InputParametere {
     private Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> vurderteSøknadsperioder;
     private NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
     private Vilkårene vilkårene;
+    private Set<VilkårType> definerendeVilkårtyper;
     private UttaksPerioderGrunnlag uttaksGrunnlag;
     private List<EtablertPleieperiode> pleiebehov;
     private Set<Saksnummer> relaterteSaker;
@@ -92,6 +94,15 @@ public class InputParametere {
 
     public Vilkårene getVilkårene() {
         return vilkårene;
+    }
+
+    public InputParametere medDefinerendeVilkår(Set<VilkårType> definerendeVilkårtyper) {
+        this.definerendeVilkårtyper = Objects.requireNonNull(definerendeVilkårtyper);
+        return this;
+    }
+
+    public Set<VilkårType> getDefinerendeVilkårtyper() {
+        return definerendeVilkårtyper;
     }
 
     public InputParametere medUttaksGrunnlag(UttaksPerioderGrunnlag uttaksPerioderGrunnlag) {

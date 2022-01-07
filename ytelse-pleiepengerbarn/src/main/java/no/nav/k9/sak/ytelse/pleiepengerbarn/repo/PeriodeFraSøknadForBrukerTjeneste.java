@@ -5,10 +5,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
@@ -22,7 +22,7 @@ public class PeriodeFraSøknadForBrukerTjeneste {
     private final UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
 
     @Inject
-    public PeriodeFraSøknadForBrukerTjeneste(@FagsakYtelseTypeRef("PSB") PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
+    public PeriodeFraSøknadForBrukerTjeneste(@Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
                                              UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository) {
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;

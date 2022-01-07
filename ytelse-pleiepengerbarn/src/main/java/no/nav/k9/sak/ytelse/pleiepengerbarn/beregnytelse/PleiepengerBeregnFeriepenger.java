@@ -1,11 +1,12 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 
-import javax.enterprise.context.ApplicationScoped;
-
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @ApplicationScoped
 public class PleiepengerBeregnFeriepenger extends BeregnFeriepengerTjeneste {
 

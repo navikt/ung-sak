@@ -10,11 +10,11 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
-class MaksSøktePeriode implements VilkårsPeriodiseringsFunksjon {
+public class MaksSøktePeriode implements VilkårsPeriodiseringsFunksjon {
 
     private SøknadsperiodeTjeneste søktePerioder;
 
-    MaksSøktePeriode(SøknadsperiodeTjeneste søktePerioder) {
+    public MaksSøktePeriode(SøknadsperiodeTjeneste søktePerioder) {
         this.søktePerioder = søktePerioder;
     }
 

@@ -23,6 +23,7 @@ import no.nav.k9.sak.trigger.Trigger;
 @ApplicationScoped
 @GrunnlagRef("ProsessTriggere")
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @FagsakYtelseTypeRef("OMP")
 class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
 
