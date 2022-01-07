@@ -26,6 +26,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerio
 @ApplicationScoped
 public class PPNVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårsPerioderTilVurderingTjeneste {
 
+    // MERK: DERSOM PPN og PSB begynner å divergere, må det vurderes å erstatte arv med komposisjon
+
     PPNVilkårsPerioderTilVurderingTjeneste() {
         // CDI
     }
