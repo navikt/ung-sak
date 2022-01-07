@@ -26,6 +26,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class OverlappendeYtelserTjeneste {
@@ -51,7 +52,7 @@ public class OverlappendeYtelserTjeneste {
         }
         var aktørYtelse = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId())
             .getAktørYtelseFraRegister(ref.getAktørId());
-        if (tilkjentYtelsePerioder.isEmpty() || aktørYtelse.isEmpty()) {
+        if (aktørYtelse.isEmpty()) {
             return Map.of();
         }
 
@@ -61,14 +62,18 @@ public class OverlappendeYtelserTjeneste {
         }
         tilkjentYtelseTimeline = tilkjentYtelseTimeline.compress();
 
-        return doFinnOverlappendeYtelser(tilkjentYtelseTimeline, new YtelseFilter(aktørYtelse.get()).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType())));
+        return doFinnOverlappendeYtelser(ref.getSaksnummer(), tilkjentYtelseTimeline, new YtelseFilter(aktørYtelse.get()).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType())));
     }
 
-    public static Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(LocalDateTimeline<Boolean> tilkjentYtelseTimeline, YtelseFilter ytelseFilter) {
+    public static Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(Saksnummer saksnummer, LocalDateTimeline<Boolean> tilkjentYtelseTimeline, YtelseFilter ytelseFilter) {
         Map<Ytelse, NavigableSet<LocalDateInterval>> overlapp = new TreeMap<>();
         if (!tilkjentYtelseTimeline.isEmpty()) {
 
             for (var yt : ytelseFilter.getFiltrertYtelser()) {
+                if (saksnummer.equals(yt.getSaksnummer())) {
+                    // Skal ikke sjekke overlappende ytelser i IAY mot egen fagsak
+                    continue;
+                }
                 var ytp = yt.getPeriode();
                 var overlappPeriode = innvilgelseOverlapperMedAnnenYtelse(tilkjentYtelseTimeline, ytp);
                 if (!overlappPeriode.isEmpty()) {
