@@ -149,7 +149,7 @@
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>eksterne-kontrakter</artifactId>
-                <version>0.0.18</version>
+                <version>0.0.19</version>
             </dependency>
             <dependency>
 			    <groupId>no.nav.foreldrepenger.kontrakter</groupId>
