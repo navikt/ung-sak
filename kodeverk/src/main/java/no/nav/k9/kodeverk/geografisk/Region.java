@@ -185,4 +185,7 @@ public enum Region implements Kodeverdi {
         return regionKoder;
     }
 
+    public int getRank() {
+        return rangerRegion(this);
+    }
 }
