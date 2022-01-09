@@ -43,7 +43,7 @@ public class KontrollerFaktaTjeneste implements KontrollerFaktaAksjonspunktUtled
 
     @Inject
     public KontrollerFaktaTjeneste(@Any Instance<KontrollerFaktaUtledere> utlederTjenester,
-                                   BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
+                                          BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
         this.utlederTjenester = utlederTjenester;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
     }
