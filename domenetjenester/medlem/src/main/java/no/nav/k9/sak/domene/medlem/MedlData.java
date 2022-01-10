@@ -85,12 +85,12 @@ public class MedlData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MedlData medlData = (MedlData) o;
-        return erMedlem == medlData.erMedlem && Objects.equals(beslutningsdato, medlData.beslutningsdato) && Objects.equals(lovvalgLand, medlData.lovvalgLand) && Objects.equals(studieLand, medlData.studieLand) && medlemskapType == medlData.medlemskapType && dekningType == medlData.dekningType && kildeType == medlData.kildeType && Objects.equals(medlId, medlData.medlId);
+        return erMedlem == medlData.erMedlem && Objects.equals(lovvalgLand, medlData.lovvalgLand) && Objects.equals(studieLand, medlData.studieLand) && medlemskapType == medlData.medlemskapType && dekningType == medlData.dekningType && kildeType == medlData.kildeType && Objects.equals(medlId, medlData.medlId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(beslutningsdato, erMedlem, lovvalgLand, studieLand, medlemskapType, dekningType, kildeType, medlId);
+        return Objects.hash(erMedlem, lovvalgLand, studieLand, medlemskapType, dekningType, kildeType, medlId);
     }
 
     @Override
