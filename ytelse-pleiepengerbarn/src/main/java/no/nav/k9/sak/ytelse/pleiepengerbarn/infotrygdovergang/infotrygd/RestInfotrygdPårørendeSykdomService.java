@@ -11,8 +11,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.arbeidsforhold.TemaUnderkategori;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 
 @Dependent
@@ -44,7 +42,7 @@ public class RestInfotrygdPårørendeSykdomService implements InfotrygdPårøren
             var grunnlagsperioder = grunnlagliste.stream()
                 .map(PårørendeSykdom::generelt)
                 .filter(gr -> erRelevant(gr, request.getRelevanteBehandlingstemaer()))
-                .map(gr -> new PeriodeMedBehandlingstema(gr.getPeriode(), gr.getBehandlingstema().getKode()))
+                .flatMap(gr -> gr.getVedtak().stream().map(v -> new PeriodeMedBehandlingstema(v.periode(), gr.getBehandlingstema().getKode())))
                 .collect(Collectors.toList());
             if (!grunnlagliste.isEmpty()) {
                 grunnlagsperioderPrIdent.put(r.getFødselsnummer(), grunnlagsperioder);

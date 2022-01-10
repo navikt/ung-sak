@@ -81,8 +81,16 @@ public class InfotrygdMigreringTjeneste {
         var infotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(ref.getFagsakId());
         var eksisterendeMigreringTilVurdering = finnEksisterendeMigreringTilVurdering(perioderTilVurdering, infotrygdMigreringer);
 
+        var psbInfotrygdFilter = finnPSBInfotryd(ref.getBehandlingId(), ref.getAktørId());
+        List<YtelseAnvist> anvistePeriodeSomManglerSøknad = finnAnvistePerioderFraInfotrygdUtenSøknad(perioderTilVurdering, psbInfotrygdFilter, ref.getBehandlingId());
+
+        var aksjonspunkter = new ArrayList<AksjonspunktResultat>();
+        if (!anvistePeriodeSomManglerSøknad.isEmpty()) {
+            aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE));
+        }
+
         if (eksisterendeMigreringTilVurdering.isEmpty()) {
-            return Collections.emptyList();
+            return aksjonspunkter;
         }
 
         var grunnlagsperioderPrAktør = infotrygdService.finnGrunnlagsperioderForAndreAktører(
@@ -95,7 +103,6 @@ public class InfotrygdMigreringTjeneste {
             throw new IllegalStateException("Fant berørt sak på gammel ordning");
         }
 
-        var aksjonspunkter = new ArrayList<AksjonspunktResultat>();
 
 
         var migrertePerioderTilVurdering = perioderTilVurdering.stream()
@@ -113,12 +120,6 @@ public class InfotrygdMigreringTjeneste {
             aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART));
         }
 
-        var psbInfotrygdFilter = finnPSBInfotryd(ref.getBehandlingId(), ref.getAktørId());
-        List<YtelseAnvist> anvistePeriodeSomManglerSøknad = finnAnvistePerioderFraInfotrygdUtenSøknad(perioderTilVurdering, psbInfotrygdFilter, ref.getBehandlingId());
-
-        if (!anvistePeriodeSomManglerSøknad.isEmpty()) {
-            aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE));
-        }
         return aksjonspunkter;
     }
 

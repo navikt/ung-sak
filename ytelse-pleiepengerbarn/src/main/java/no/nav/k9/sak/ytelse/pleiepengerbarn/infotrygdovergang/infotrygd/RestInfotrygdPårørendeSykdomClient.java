@@ -34,7 +34,7 @@ class RestInfotrygdPårørendeSykdomClient implements InfotrygdPårørendeSykdom
     private URI baseUri;
 
     @Inject
-    RestInfotrygdPårørendeSykdomClient(OidcRestClient httpClient, @KonfigVerdi("INFOTRYGD_BS_BASE_URI") URI baseUri) {
+    RestInfotrygdPårørendeSykdomClient(OidcRestClient httpClient, @KonfigVerdi("infotrygd.bs.base.uri") URI baseUri) {
         this.httpClient = httpClient;
         this.baseUri = baseUri;
     }
