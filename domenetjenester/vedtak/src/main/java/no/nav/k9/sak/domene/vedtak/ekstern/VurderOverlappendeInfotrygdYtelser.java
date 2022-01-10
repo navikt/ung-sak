@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.vedtak.ekstern;
 
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.stream.Collectors;
@@ -55,7 +56,7 @@ public class VurderOverlappendeInfotrygdYtelser {
         var overlappendeEksterneYtelser = overlappendeYtelserTjeneste.finnOverlappendeYtelser(ref, eksterneYtelserSomSjekkesMot)
             .entrySet()
             .stream()
-            .filter(entry -> entry.getKey().getKilde() != Fagsystem.K9SAK)
+            .filter(entry -> List.of(Fagsystem.INFOTRYGD, Fagsystem.VLSP).contains(entry.getKey().getKilde()))
             .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 
         for (Map.Entry<Ytelse, NavigableSet<LocalDateInterval>> entry : overlappendeEksterneYtelser.entrySet()) {
