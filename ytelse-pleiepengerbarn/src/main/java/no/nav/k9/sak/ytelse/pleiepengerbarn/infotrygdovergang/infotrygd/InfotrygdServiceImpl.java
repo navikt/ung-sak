@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -45,12 +47,18 @@ public class InfotrygdServiceImpl implements InfotrygdService {
 
         return perioderPrIdent.entrySet().stream()
             .filter(e -> personIdentTjeneste.hentAktørForFnr(new PersonIdent(e.getKey())).isPresent())
-            .collect(Collectors.toMap(e -> personIdentTjeneste.hentAktørForFnr(new PersonIdent(e.getKey())).get(),
-                e -> e.getValue().stream().map(p ->
-                        new IntervallMedBehandlingstema(
-                            DatoIntervallEntitet.fraOgMedTilOgMed(p.periode().getFom(), p.periode().getTom()),
-                            p.behandlingstema()))
-                    .collect(Collectors.toList())));
+            .collect(Collectors.groupingBy(e -> personIdentTjeneste.hentAktørForFnr(new PersonIdent(e.getKey())).get(),
+                Collectors.flatMapping(intervallMedBehandlingstemaStream(), Collectors.toList())));
+    }
+
+    private Function<Map.Entry<String, List<PeriodeMedBehandlingstema>>, Stream<? extends IntervallMedBehandlingstema>> intervallMedBehandlingstemaStream() {
+        return e -> e.getValue().stream().map(this::mapTilIntervallMedBehandlingstema);
+    }
+
+    private IntervallMedBehandlingstema mapTilIntervallMedBehandlingstema(PeriodeMedBehandlingstema p) {
+        return new IntervallMedBehandlingstema(
+            DatoIntervallEntitet.fraOgMedTilOgMed(p.periode().getFom(), p.periode().getTom()),
+            p.behandlingstema());
     }
 
 }

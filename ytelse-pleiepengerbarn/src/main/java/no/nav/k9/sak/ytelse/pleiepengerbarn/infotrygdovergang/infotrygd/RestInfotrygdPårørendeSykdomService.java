@@ -6,10 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+
+import org.jetbrains.annotations.NotNull;
 
 import no.nav.k9.sak.typer.PersonIdent;
 
@@ -28,31 +33,24 @@ public class RestInfotrygdPårørendeSykdomService implements InfotrygdPårøren
     @Override
     public Map<String, List<PeriodeMedBehandlingstema>> hentRelevanteGrunnlagsperioderPrSøkeridentForAndreSøkere(InfotrygdPårørendeSykdomRequest request, PersonIdent ekskludertPersonIdent) {
         var vedtakPleietrengende = hentRelevantePleietrengendeVedtakIInfotrygd(request);
-        var hentGrunnlagRequests = vedtakPleietrengende.stream().map(VedtakPleietrengende::getSoekerFnr).distinct()
+        var fnrSoekere = vedtakPleietrengende.stream().map(VedtakPleietrengende::getSoekerFnr).distinct()
             .filter(fnr -> !fnr.equals(ekskludertPersonIdent.getIdent()))
-            .map(fnr -> InfotrygdPårørendeSykdomRequest.builder().fødselsnummer(fnr)
-                .fraOgMed(request.getFraOgMed())
-                .tilOgMed(request.getTilOgMed())
-                .relevanteBehandlingstemaer(request.getRelevanteBehandlingstemaer())
-                .build())
-            .collect(Collectors.toSet());
-        var grunnlagsperioderPrIdent = new HashMap<String, List<PeriodeMedBehandlingstema>>();
-        for (InfotrygdPårørendeSykdomRequest r : hentGrunnlagRequests) {
-            List<PårørendeSykdom> grunnlagliste = client.getGrunnlagForPleietrengende(r);
-            var grunnlagsperioder = grunnlagliste.stream()
-                .map(PårørendeSykdom::generelt)
-                .filter(gr -> erRelevant(gr, request.getRelevanteBehandlingstemaer()))
-                .flatMap(gr -> gr.getVedtak().stream().map(v -> new PeriodeMedBehandlingstema(v.periode(), gr.getBehandlingstema().getKode())))
-                .collect(Collectors.toList());
-            if (!grunnlagliste.isEmpty()) {
-                grunnlagsperioderPrIdent.put(r.getFødselsnummer(), grunnlagsperioder);
-            }
-        }
-        return grunnlagsperioderPrIdent;
+            .collect(Collectors.toList());
+        var hentGrunnlagRequest = new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), fnrSoekere);
+            List<PårørendeSykdom> grunnlagliste = client.getGrunnlagForPleietrengende(hentGrunnlagRequest);
+        return grunnlagliste.stream()
+            .filter(gr -> erRelevant(gr, request.getRelevanteBehandlingstemaer()))
+            .collect(Collectors.groupingBy(
+                PårørendeSykdom::foedselsnummerSoeker,
+                Collectors.flatMapping(mapTilPeriodeMedBehandlingstema(), Collectors.toList())));
+    }
+
+    private Function<PårørendeSykdom, Stream<PeriodeMedBehandlingstema>> mapTilPeriodeMedBehandlingstema() {
+        return gr -> gr.vedtak().stream().map(v -> new PeriodeMedBehandlingstema(v.periode(), gr.behandlingstema().getKode()));
     }
 
     private List<VedtakPleietrengende> hentRelevantePleietrengendeVedtakIInfotrygd(InfotrygdPårørendeSykdomRequest request) {
-        List<VedtakPleietrengende> response = client.getVedtakForPleietrengende(request);
+        List<VedtakPleietrengende> response = client.getVedtakForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer())));
 
         List<VedtakPleietrengende> vedtak = new ArrayList<>();
         for (VedtakPleietrengende vp : response) {
@@ -69,14 +67,14 @@ public class RestInfotrygdPårørendeSykdomService implements InfotrygdPårøren
     }
 
 
-    private boolean erRelevant(GrunnlagPårørendeSykdomInfotrygd grunnlag, Set<String> relevanteBehandlingstemaer) {
-        if (grunnlag.getTema() == null || grunnlag.getBehandlingstema() == null) {
+    private boolean erRelevant(PårørendeSykdom grunnlag, Set<String> relevanteBehandlingstemaer) {
+        if (grunnlag.tema() == null || grunnlag.behandlingstema() == null) {
             return false;
         }
-        if (!Objects.equals(grunnlag.getTema().getKode(), "BS")) {
+        if (!Objects.equals(grunnlag.tema().getKode(), "BS")) {
             return false;
         }
-        return relevanteBehandlingstemaer.contains(grunnlag.getBehandlingstema().getKode());
+        return relevanteBehandlingstemaer.contains(grunnlag.behandlingstema().getKode());
     }
 
 

@@ -19,7 +19,7 @@ class JsonConverter {
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    SakResponse sakResponse(String json) {
+    List<SakResponse> sakResponse(String json) {
         return convert(json, new TypeReference<>() {
         });
     }
