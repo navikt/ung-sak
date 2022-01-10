@@ -5,7 +5,7 @@ create table if not exists UP_UTENLANDSOPPHOLD_PERIODE
     fom             date                        NOT NULL,
     tom             date                        NOT NULL,
     aktiv           BOOLEAN                     NOT NULL,
-    landkode        varchar(3)                  NOT NULL,
+    land            varchar(3)                  NOT NULL,
     aarsak          varchar(100)                ,
     versjon         bigint                      NOT NULL DEFAULT 0,
     opprettet_av    varchar(20)                 NOT NULL DEFAULT 'VL'::character varying,

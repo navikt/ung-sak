@@ -13,6 +13,8 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.uttak.UtenlandsoppholdÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -237,9 +239,9 @@ class MapSøknadUttakPerioder {
                     entry.getKey().getFraOgMed(),
                     entry.getKey().getTilOgMed(),
                     true,
-                    entry.getValue().getLand().toString(),
-                    entry.getValue().getÅrsak().toString()))
-            .collect(Collectors.toList());
+                    Landkoder.fraKode(entry.getValue().getLand().getLandkode()),
+                    UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
+                .collect(Collectors.toList());
 
         if (utenlandsopphold.getPerioderSomSkalSlettes() != null) {
             utenlandsoppholdPerioder.addAll(utenlandsopphold.getPerioderSomSkalSlettes()
@@ -250,8 +252,8 @@ class MapSøknadUttakPerioder {
                         entry.getKey().getFraOgMed(),
                         entry.getKey().getTilOgMed(),
                         false,
-                        entry.getValue().getLand().toString(),
-                        entry.getValue().getÅrsak().toString()))
+                        Landkoder.fraKode(entry.getValue().getLand().getLandkode()),
+                        UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
                 .collect(Collectors.toList()));
         }
         return utenlandsoppholdPerioder;

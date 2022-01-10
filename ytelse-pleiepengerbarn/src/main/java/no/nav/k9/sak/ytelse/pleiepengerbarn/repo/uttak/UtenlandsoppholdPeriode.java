@@ -6,6 +6,7 @@ import java.util.Objects;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -17,8 +18,12 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Immutable;
 
 import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.uttak.UtenlandsoppholdÅrsak;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
+import no.nav.k9.sak.behandlingslager.kodeverk.LandkoderKodeverdiConverter;
+import no.nav.k9.sak.behandlingslager.kodeverk.UtenlandsoppholdÅrsakConverter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "UtenlandsoppholdPeriode")
@@ -40,11 +45,13 @@ public class UtenlandsoppholdPeriode extends BaseEntitet implements IndexKey {
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv;
 
-    @Column(name = "landkode", nullable = false)
-    private String landkode;
+    @Convert(converter = LandkoderKodeverdiConverter.class)
+    @Column(name="land", nullable = false)
+    private Landkoder land = Landkoder.UDEFINERT;
 
+    @Convert(converter = UtenlandsoppholdÅrsakConverter.class)
     @Column(name = "aarsak")
-    private String årsak;
+    private UtenlandsoppholdÅrsak årsak;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -53,31 +60,25 @@ public class UtenlandsoppholdPeriode extends BaseEntitet implements IndexKey {
     UtenlandsoppholdPeriode() {
     }
 
-    public UtenlandsoppholdPeriode(DatoIntervallEntitet periode, boolean aktiv, String landkode, String årsak) {
+    public UtenlandsoppholdPeriode(DatoIntervallEntitet periode, boolean aktiv, Landkoder land, UtenlandsoppholdÅrsak årsak) {
         this.periode = periode;
-        this.landkode = landkode;
+        this.aktiv = aktiv;
+        this.land = land;
         this.årsak = årsak;
     }
 
-    public UtenlandsoppholdPeriode(LocalDate fom, LocalDate tom, boolean aktiv, String landkode, String årsak) {
-        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), aktiv, landkode, årsak);
+    public UtenlandsoppholdPeriode(LocalDate fom, LocalDate tom, boolean aktiv, Landkoder land, UtenlandsoppholdÅrsak årsak) {
+        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), aktiv, land, årsak);
     }
 
     public UtenlandsoppholdPeriode(UtenlandsoppholdPeriode utenlandsoppholdPeriode) {
-        this(utenlandsoppholdPeriode.periode, utenlandsoppholdPeriode.aktiv, utenlandsoppholdPeriode.landkode, utenlandsoppholdPeriode.årsak);
+        this(utenlandsoppholdPeriode.periode, utenlandsoppholdPeriode.aktiv, utenlandsoppholdPeriode.land, utenlandsoppholdPeriode.årsak);
     }
 
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }
 
-    public String getLandkode() {
-        return landkode;
-    }
-
-    public String getÅrsak() {
-        return årsak;
-    }
 
     @Override
     public String getIndexKey() {
@@ -89,12 +90,12 @@ public class UtenlandsoppholdPeriode extends BaseEntitet implements IndexKey {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UtenlandsoppholdPeriode that = (UtenlandsoppholdPeriode) o;
-        return getPeriode().equals(that.getPeriode()) && landkode.equals(that.landkode) && Objects.equals(årsak, that.årsak);
+        return getPeriode().equals(that.getPeriode()) && land.equals(that.land) && Objects.equals(årsak, that.årsak);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPeriode(), landkode, årsak);
+        return Objects.hash(getPeriode(), land, årsak);
     }
 
     @Override
@@ -105,5 +106,4 @@ public class UtenlandsoppholdPeriode extends BaseEntitet implements IndexKey {
             ", versjon=" + versjon +
             '>';
     }
-
 }
