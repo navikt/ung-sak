@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 
@@ -24,11 +25,12 @@ public class VedtakFattetEventObserver {
 
     public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
         if (IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
-            opprettTaskForPubliseringAvVedtak(event);
+            var gruppe = new ProsessTaskGruppe(opprettTaskForPubliseringAvVedtak(event));
 
             if (erBehandlingAvRettTypeForAbakus(event)) {
-                opprettTaskForPubliseringAvVedtakMedYtelse(event);
+                gruppe.addNesteSekvensiell(opprettTaskForPubliseringAvVedtakMedYtelse(event));
             }
+            taskRepository.lagre(gruppe);
         }
     }
 
@@ -36,17 +38,17 @@ public class VedtakFattetEventObserver {
         return event.getBehandling().erYtelseBehandling();
     }
 
-    private void opprettTaskForPubliseringAvVedtakMedYtelse(BehandlingVedtakEvent event) {
+    private ProsessTaskData opprettTaskForPubliseringAvVedtakMedYtelse(BehandlingVedtakEvent event) {
         final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtattYtelseHendelseTask.TASKTYPE);
         taskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().toString());
         taskData.setCallIdFraEksisterende();
-        taskRepository.lagre(taskData);
+        return taskData;
     }
 
-    private void opprettTaskForPubliseringAvVedtak(BehandlingVedtakEvent event) {
+    private ProsessTaskData opprettTaskForPubliseringAvVedtak(BehandlingVedtakEvent event) {
         final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtakHendelseTask.TASKTYPE);
         taskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().toString());
         taskData.setCallIdFraEksisterende();
-        taskRepository.lagre(taskData);
+        return taskData;
     }
 }

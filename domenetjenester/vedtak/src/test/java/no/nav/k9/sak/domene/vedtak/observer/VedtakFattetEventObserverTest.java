@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,7 @@ import org.mockito.quality.Strictness;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -50,7 +51,7 @@ public class VedtakFattetEventObserverTest {
     private BehandlingVedtakRepository vedtakRepository;
 
     @Captor
-    ArgumentCaptor<ProsessTaskData> prosessDataCaptor;
+    ArgumentCaptor<ProsessTaskGruppe> prosessTaskGruppeCaptorCaptor;
 
     VedtakFattetEventObserver vedtakFattetEventObserver;
 
@@ -64,8 +65,10 @@ public class VedtakFattetEventObserverTest {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.INNVILGET);
         vedtakFattetEventObserver.observerBehandlingVedtak(behandlingVedtakEvent);
 
-        verify(prosessTaskRepository, times(2)).lagre(prosessDataCaptor.capture());
-        assertThat(prosessDataCaptor.getAllValues().stream().map(ProsessTaskData::getTaskType))
+        verify(prosessTaskRepository, times(1)).lagre(prosessTaskGruppeCaptorCaptor.capture());
+        assertThat(prosessTaskGruppeCaptorCaptor.getAllValues().stream().map(ProsessTaskGruppe::getTasks)
+            .flatMap(Collection::stream)
+            .map(it -> it.getTask().getTaskType()))
             .containsExactlyInAnyOrder(PubliserVedtattYtelseHendelseTask.TASKTYPE, PubliserVedtakHendelseTask.TASKTYPE);
     }
 
@@ -74,7 +77,7 @@ public class VedtakFattetEventObserverTest {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IKKE_IVERKSATT, VedtakResultatType.INNVILGET);
         vedtakFattetEventObserver.observerBehandlingVedtak(behandlingVedtakEvent);
 
-        verify(prosessTaskRepository, never()).lagre(any(ProsessTaskData.class));
+        verify(prosessTaskRepository, never()).lagre(any(ProsessTaskGruppe.class));
     }
 
     @Test
@@ -82,8 +85,10 @@ public class VedtakFattetEventObserverTest {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.AVSLAG);
         vedtakFattetEventObserver.observerBehandlingVedtak(behandlingVedtakEvent);
 
-        verify(prosessTaskRepository, times(2)).lagre(prosessDataCaptor.capture());
-        assertThat(prosessDataCaptor.getAllValues().stream().map(ProsessTaskData::getTaskType))
+        verify(prosessTaskRepository, times(1)).lagre(prosessTaskGruppeCaptorCaptor.capture());
+        assertThat(prosessTaskGruppeCaptorCaptor.getAllValues().stream().map(ProsessTaskGruppe::getTasks)
+            .flatMap(Collection::stream)
+            .map(it -> it.getTask().getTaskType()))
             .containsExactly(PubliserVedtakHendelseTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
     }
 
