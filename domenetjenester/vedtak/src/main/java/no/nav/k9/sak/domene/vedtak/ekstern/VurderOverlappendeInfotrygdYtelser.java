@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.vedtak.ekstern;
 
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.stream.Collectors;
@@ -50,15 +51,15 @@ public class VurderOverlappendeInfotrygdYtelser {
      */
     public void vurder(Behandling behandling) {
         var ref = BehandlingReferanse.fra(behandling);
-        var ytelseTyperSomSjekkesMot = behandling.getFagsakYtelseType().hentEksterneYtelserForOverlappSjekk();
+        var eksterneYtelserSomSjekkesMot = behandling.getFagsakYtelseType().hentEksterneYtelserForOverlappSjekk();
 
-        var overlappendeYtelserInfoTrygd = overlappendeYtelserTjeneste.finnOverlappendeYtelser(ref, ytelseTyperSomSjekkesMot)
+        var overlappendeEksterneYtelser = overlappendeYtelserTjeneste.finnOverlappendeYtelser(ref, eksterneYtelserSomSjekkesMot)
             .entrySet()
             .stream()
-            .filter(entry -> entry.getKey().getKilde() == Fagsystem.INFOTRYGD)
+            .filter(entry -> List.of(Fagsystem.INFOTRYGD, Fagsystem.VLSP).contains(entry.getKey().getKilde()))
             .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 
-        for (Map.Entry<Ytelse, NavigableSet<LocalDateInterval>> entry : overlappendeYtelserInfoTrygd.entrySet()) {
+        for (Map.Entry<Ytelse, NavigableSet<LocalDateInterval>> entry : overlappendeEksterneYtelser.entrySet()) {
             var ytelse = entry.getKey();
             var perioder = entry.getValue();
             var beskrivelse = "Ytelse=" + ytelse.getYtelseType() + ", saksnummer=" + ytelse.getSaksnummer() + ", perioder=" + perioder;
