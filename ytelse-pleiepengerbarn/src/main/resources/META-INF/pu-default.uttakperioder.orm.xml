@@ -9,6 +9,7 @@
 	<sequence-generator name="SEQ_UP_UTTAKSPERIODER_HOLDER" allocation-size="50" sequence-name="SEQ_UP_UTTAKSPERIODER_HOLDER" />
 	<sequence-generator name="SEQ_UP_TILSYNSORDNING" allocation-size="50" sequence-name="SEQ_UP_TILSYNSORDNING" />
 	<sequence-generator name="SEQ_UP_TILSYNSORDNING_PERIODE" allocation-size="50" sequence-name="SEQ_UP_TILSYNSORDNING_PERIODE" />
+	<sequence-generator name="SEQ_UP_UTENLANDSOPPHOLD_PERIODE" allocation-size="50" sequence-name="SEQ_UP_UTENLANDSOPPHOLD_PERIODE" />
 	<sequence-generator name="SEQ_UP_FERIE_PERIODE" allocation-size="50" sequence-name="SEQ_UP_FERIE_PERIODE" />
 	<sequence-generator name="SEQ_UP_BEREDSKAP_PERIODE" allocation-size="50" sequence-name="SEQ_UP_BEREDSKAP_PERIODE" />
 	<sequence-generator name="SEQ_UP_NATTEVAAK_PERIODE" allocation-size="50" sequence-name="SEQ_UP_NATTEVAAK_PERIODE" />
@@ -25,6 +26,7 @@
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderHolder" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtenlandsoppholdPeriode" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.FeriePeriode" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.BeredskapPeriode" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.NattevåkPeriode" />
