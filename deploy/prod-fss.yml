@@ -217,7 +217,7 @@ spec:
       value: "true"
     - name: PSB_INFOTRYGD_MIGRERING
       value: "false"
-    - name: FORLENGELSE_ENABLET
+    - name: FORLENGELSE_OPPTJENING_ENABLET
       value: "false"
 
     # Audit logging

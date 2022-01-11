@@ -216,7 +216,7 @@ spec:
       value: "true"
     - name: PSB_INFOTRYGD_MIGRERING
       value: "true"
-    - name: FORLENGELSE_ENABLET
+    - name: FORLENGELSE_OPPTJENING_ENABLET
       value: "true"
     - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
       value: "true"

@@ -39,7 +39,7 @@ public class InngangsvilkårFellesTjeneste {
                                         BehandlingRepository behandlingRepository,
                                         @Any Instance<ForlengelseTjeneste> forlengelseTjeneste,
                                         @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
-                                        @KonfigVerdi(value = "forlengelse.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
+                                        @KonfigVerdi(value = "forlengelse.opptjening.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
         this.regelOrkestrerer = regelOrkestrerer;
         this.behandlingRepository = behandlingRepository;
         this.forlengelseTjeneste = forlengelseTjeneste;
