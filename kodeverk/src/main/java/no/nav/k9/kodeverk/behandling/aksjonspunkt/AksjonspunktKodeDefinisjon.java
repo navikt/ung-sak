@@ -112,7 +112,9 @@ public class AksjonspunktKodeDefinisjon {
     public static final String MANGLER_AKTIVITETER = "9203";
     public static final String VENT_ANNEN_PSB_SAK_KODE = "9290";
     public static final String OVERSTYR_BEREGNING_INPUT = "9005";
-    public static final String AUTO_VENT_PÅ_SØKNAD_FOR_PERIODE = "9006";
+    public static final String AUTO_VENT_PÅ_KOMPLETT_SØKNAD_FOR_PERIODE = "9006";
+    public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE = "9007";
+    public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART = "9008";
 
 
     // OMS

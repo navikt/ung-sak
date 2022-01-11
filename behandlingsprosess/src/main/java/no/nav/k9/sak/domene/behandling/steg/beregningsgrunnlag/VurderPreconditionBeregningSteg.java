@@ -30,7 +30,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.behandling.steg.avklarfakta.InfotrygdMigreringTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -47,7 +46,6 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
     private Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere;
-    private Instance<InfotrygdMigreringTjeneste> infotrygdMigreringTjenester;
 
 
     protected VurderPreconditionBeregningSteg() {
@@ -60,21 +58,18 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                            @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                            @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
-                                           @Any Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere,
-                                           @Any Instance<InfotrygdMigreringTjeneste> infotrygdMigreringTjenester) {
+                                           @Any Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.aksjonspunktUtledere = aksjonspunktUtledere;
-        this.infotrygdMigreringTjenester = infotrygdMigreringTjenester;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        markerMigrertePerioderFraInfotrygd(behandling);
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         var vilkåret = vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET)
             .orElseThrow();
@@ -98,10 +93,6 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         return BehandleStegResultat.utførtMedAksjonspunktResultater(finnAksjonspunkter(behandling));
     }
 
-    private void markerMigrertePerioderFraInfotrygd(Behandling behandling) {
-        InfotrygdMigreringTjeneste.finnTjeneste(infotrygdMigreringTjenester, behandling.getFagsakYtelseType())
-            .ifPresent(tjeneste -> tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId()));
-    }
 
     private boolean ingenBeregningsAktiviteter(OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste, VilkårPeriode it, InntektArbeidYtelseGrunnlag grunnlag, BehandlingReferanse referanse) {
         var opptjeningAktiviteter = opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(referanse, grunnlag, it.getPeriode());
