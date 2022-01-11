@@ -64,7 +64,7 @@ class RestInfotrygdPårørendeSykdomClient implements InfotrygdPårørendeSykdom
         // tilOgMed er 'optional'
 
         try {
-            URIBuilder builder = new URIBuilder(toUri(baseUri, "/journalpost/uferdig"));
+            URIBuilder builder = new URIBuilder(toUri(baseUri, path));
             var json = JsonObjectMapper.getJson(request);
             HttpPost httpPost = new HttpPost(builder.build());
             httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
