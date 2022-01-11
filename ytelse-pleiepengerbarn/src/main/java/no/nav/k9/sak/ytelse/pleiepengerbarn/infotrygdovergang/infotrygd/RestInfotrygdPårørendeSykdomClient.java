@@ -47,7 +47,7 @@ class RestInfotrygdPårørendeSykdomClient implements InfotrygdPårørendeSykdom
 
     @Override
     public List<PårørendeSykdom> getGrunnlagForPleietrengende(PersonRequest request) {
-        String json = getJson("/paaroerendeSykdom/grunnlag", request);
+        String json = getJson("/grunnlag", request);
         return jsonConverter.grunnlagBarnResponse(json);
     }
 
