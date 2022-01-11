@@ -27,15 +27,17 @@ public class OppgittOpptjeningFilter {
 
     private OppgittOpptjening oppgittOpptjening;
     private OppgittOpptjening overstyrtOppgittOpptjening;
+    private boolean frisinnNyttStpToggle;
 
 
-    public OppgittOpptjeningFilter(OppgittOpptjening oppgittOpptjening, OppgittOpptjening overstyrtOppgittOpptjening) {
+    public OppgittOpptjeningFilter(OppgittOpptjening oppgittOpptjening, OppgittOpptjening overstyrtOppgittOpptjening, boolean frisinnNyttStpToggle) {
         this.oppgittOpptjening = oppgittOpptjening;
         this.overstyrtOppgittOpptjening = overstyrtOppgittOpptjening;
+        this.frisinnNyttStpToggle = frisinnNyttStpToggle;
     }
 
-    public OppgittOpptjeningFilter(Optional<OppgittOpptjening> oppgittOpptjening, Optional<OppgittOpptjening> overstyrtOppgittOpptjening) {
-        this(oppgittOpptjening.orElse(null), overstyrtOppgittOpptjening.orElse(null));
+    public OppgittOpptjeningFilter(Optional<OppgittOpptjening> oppgittOpptjening, Optional<OppgittOpptjening> overstyrtOppgittOpptjening, boolean frisinnNyttStpToggle) {
+        this(oppgittOpptjening.orElse(null), overstyrtOppgittOpptjening.orElse(null), frisinnNyttStpToggle);
     }
 
 
@@ -43,12 +45,13 @@ public class OppgittOpptjeningFilter {
      * Brukes for FRISINN
      *
      * @return OppgittOpptjening
+     * @param stp
      */
-    public OppgittOpptjening getOppgittOpptjeningFrisinn() {
+    public OppgittOpptjening getOppgittOpptjeningFrisinn(LocalDate stp) {
         if (overstyrtOppgittOpptjening == null) {
             return oppgittOpptjening;
         }
-        OppgittOpptjening slåttSammenGammelOverstyrtMedNytilkommet = leggTilNyeOpptjeningerHvisTilkommet();
+        OppgittOpptjening slåttSammenGammelOverstyrtMedNytilkommet = leggTilNyeOpptjeningerHvisTilkommet(frisinnNyttStpToggle ? stp : SKJÆRINGSTIDSPUNKT);
         return slåttSammenGammelOverstyrtMedNytilkommet;
     }
 
@@ -64,7 +67,7 @@ public class OppgittOpptjeningFilter {
         return Optional.ofNullable(oppgittOpptjening);
     }
 
-    private OppgittOpptjening leggTilNyeOpptjeningerHvisTilkommet() {
+    private OppgittOpptjening leggTilNyeOpptjeningerHvisTilkommet(LocalDate stp) {
         var builder = nyFraEksisterende(overstyrtOppgittOpptjening, overstyrtOppgittOpptjening.getEksternReferanse(), overstyrtOppgittOpptjening.getOpprettetTidspunkt());
 
         var senesteOverstyrtPeriodeFL = overstyrtOppgittOpptjening.getFrilans()
@@ -86,8 +89,8 @@ public class OppgittOpptjeningFilter {
         builder.leggTilOppgittArbeidsforhold(oppgittArbeidsforholdBuilders);
 
         // Historiske opptjening
-        var historiskPeriodeSN = oppgittOpptjening.getEgenNæring().stream().map(OppgittEgenNæring::getPeriode).filter(periode -> periode.getTomDato().isBefore(SKJÆRINGSTIDSPUNKT)).findFirst();
-        var historiskOverstyrtPeriodeSN = overstyrtOppgittOpptjening.getEgenNæring().stream().map(OppgittEgenNæring::getPeriode).filter(periode -> periode.getTomDato().isBefore(SKJÆRINGSTIDSPUNKT)).findFirst();
+        var historiskPeriodeSN = oppgittOpptjening.getEgenNæring().stream().map(OppgittEgenNæring::getPeriode).filter(periode -> periode.getTomDato().isBefore(stp)).findFirst();
+        var historiskOverstyrtPeriodeSN = overstyrtOppgittOpptjening.getEgenNæring().stream().map(OppgittEgenNæring::getPeriode).filter(periode -> periode.getTomDato().isBefore(stp)).findFirst();
 
         finnHistoriskSNPeriodeSomSkalLeggesTil(historiskPeriodeSN, historiskOverstyrtPeriodeSN)
             .ifPresent(builder::leggTilEgneNæringer);

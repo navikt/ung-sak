@@ -237,3 +237,9 @@ spec:
     # Pleiepenger infotrygd migrering
     - name: INFOTRYGD_MIGRERING_TILLATELSER
       value: ""
+
+
+
+    # FRISINN NYE REGLER 2022
+    - name: FRISINN_NYTT_STP_TOGGLE
+        value: "false"

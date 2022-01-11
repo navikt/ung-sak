@@ -16,6 +16,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter.OpptjeningPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningsaktiviteterPerYtelse;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -44,14 +45,17 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
         OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD));
     private OpptjeningsperioderTjenesteFRISINN opptjeningsperioderTjeneste;
+    private boolean nyttStpToggle;
 
     protected FrisinnOpptjeningForBeregningTjeneste() {
         // For proxy
     }
 
     @Inject
-    public FrisinnOpptjeningForBeregningTjeneste(OpptjeningsperioderTjenesteFRISINN opptjeningsperioderTjeneste) {
+    public FrisinnOpptjeningForBeregningTjeneste(OpptjeningsperioderTjenesteFRISINN opptjeningsperioderTjeneste,
+                                                 @KonfigVerdi(value = "FRISINN_NYTT_STP_TOGGLE", defaultVerdi = "false", required = false) boolean nyttStpToggle) {
         this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
+        this.nyttStpToggle = nyttStpToggle;
     }
 
     @Override
@@ -69,8 +73,8 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
 
     @Override
     public Optional<OppgittOpptjening> finnOppgittOpptjening(BehandlingReferanse referanse, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
-        OppgittOpptjeningFilter oppgittOpptjeningFilter = new OppgittOpptjeningFilter(iayGrunnlag.getOppgittOpptjening(), iayGrunnlag.getOverstyrtOppgittOpptjening());
-        return Optional.ofNullable(oppgittOpptjeningFilter.getOppgittOpptjeningFrisinn());
+        OppgittOpptjeningFilter oppgittOpptjeningFilter = new OppgittOpptjeningFilter(iayGrunnlag.getOppgittOpptjening(), iayGrunnlag.getOverstyrtOppgittOpptjening(), nyttStpToggle);
+        return Optional.ofNullable(oppgittOpptjeningFilter.getOppgittOpptjeningFrisinn(stp));
     }
 
     private List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregningFrisinn(BehandlingReferanse behandlingReferanse,
