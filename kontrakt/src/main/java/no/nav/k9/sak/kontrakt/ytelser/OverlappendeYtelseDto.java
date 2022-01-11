@@ -30,7 +30,7 @@ public class OverlappendeYtelseDto {
     @JsonProperty("kilde")
     private Fagsystem kilde;
 
-    @JsonProperty(value = "overlappendePerioder")
+    @JsonProperty(value = "saksnummer")
     @Size(max = 100)
     @Valid
     private Saksnummer saksnummer;
