@@ -62,7 +62,7 @@ public class VurderOverlappendeInfotrygdYtelser {
         for (Map.Entry<Ytelse, NavigableSet<LocalDateInterval>> entry : overlappendeEksterneYtelser.entrySet()) {
             var ytelse = entry.getKey();
             var perioder = entry.getValue();
-            var beskrivelse = "Ytelse=" + ytelse.getYtelseType() + ", saksnummer=" + ytelse.getSaksnummer() +  ", antall ytelser anvist=" + ytelse.getYtelseAnvist().size() + ", perioder=" + perioder;
+            var beskrivelse = "K9-ytelse '" + behandling.getFagsakYtelseType().getNavn() + "' er innvilget for saksnummer " + ref.getSaksnummer() +  " for periodene " + perioder;
 
             var oppgaveId = switch (ytelse.getYtelseType()) {
                 case SYKEPENGER -> oppgaveTjeneste.opprettVkyOppgaveOverlappendeYtelse(ref, beskrivelse, SP_OPPG_TEMA, BEH_TYPE_SAMHANDLING, SP_ANSV_ENHET_ID);
