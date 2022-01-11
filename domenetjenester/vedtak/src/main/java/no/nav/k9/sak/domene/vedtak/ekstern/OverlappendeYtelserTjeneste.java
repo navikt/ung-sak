@@ -78,7 +78,7 @@ public class OverlappendeYtelserTjeneste {
                 var overlappPeriode = innvilgelseOverlapperMedAnnenYtelse(tilkjentYtelseTimeline, ytp);
                 if (!overlappPeriode.isEmpty()) {
                     if (yt.getYtelseAnvist().isEmpty()) {
-                        // har ingen utbetaling (kan skyldes både at ytelse ikke har utbetaling, eller at ytelsetype ikke er av type kontantytelse)
+                        // har ingen utbetaling (kan skyldes både at ytelse er under behandling, eller at ytelsetype ikke er av type kontantytelse)
                         continue;
                     } else {
                         var anvistSegmenter = yt.getYtelseAnvist().stream()
