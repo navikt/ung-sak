@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -50,6 +50,7 @@ public class InfotrygdMigreringTjeneste {
 
 
     public static final String GAMMEL_ORDNING_KODE = "PB";
+    public static final int ÅR_2022 = 2022;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private FagsakRepository fagsakRepository;
@@ -97,7 +98,6 @@ public class InfotrygdMigreringTjeneste {
         if (harBerørtSakPåGammelOrdning(grunnlagsperioderPrAktør)) {
             throw new IllegalStateException("Fant berørt sak på gammel ordning");
         }
-
 
 
         var migrertePerioderTilVurdering = perioderTilVurdering.stream()
@@ -240,23 +240,29 @@ public class InfotrygdMigreringTjeneste {
 
     private List<YtelseAnvist> finnAnvistePerioderFraInfotrygdUtenSøknad(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, YtelseFilter psbInfotrygdFilter, Long behandlingId) {
         var fullstendigePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandlingId);
-        var førsteStpTilVurdering = perioderTilVurdering.stream().map(DatoIntervallEntitet::getFomDato).min(Comparator.naturalOrder()).orElseThrow();
+        if (!harPerioderTilVurderingIEllerEtterÅr(perioderTilVurdering, ÅR_2022)) {
+            return Collections.emptyList();
+        }
         var anvistePerioderUtenSøknad = psbInfotrygdFilter.getFiltrertYtelser().stream()
             .flatMap(y -> y.getYtelseAnvist().stream())
-            .filter(ya -> harAnvisningSammeÅrSomFørstePeriodeTilVurdering(førsteStpTilVurdering, ya))
-            .filter(ya -> !dekkesAvSøknad(fullstendigePerioder, ya, førsteStpTilVurdering.getYear()))
+            .filter(ya -> harAnvisningIEllerEtterÅr(ya, ÅR_2022))
+            .filter(ya -> !dekkesAvSøknad(fullstendigePerioder, ya, ÅR_2022))
             .collect(Collectors.toList());
         return anvistePerioderUtenSøknad;
     }
 
-    private boolean dekkesAvSøknad(NavigableSet<DatoIntervallEntitet> fullstendigePerioder, YtelseAnvist ya, int year) {
-        var førsteMandagIÅret = LocalDate.of(year, 1, 1).with(TemporalAdjusters.dayOfWeekInMonth(1, DayOfWeek.MONDAY));
+    private boolean harPerioderTilVurderingIEllerEtterÅr(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, int år) {
+        return perioderTilVurdering.stream().anyMatch(p -> p.getFomDato().getYear() <= år && p.getTomDato().getYear() >= år);
+    }
+
+    private boolean dekkesAvSøknad(NavigableSet<DatoIntervallEntitet> fullstendigePerioder, YtelseAnvist ya, int år) {
+        var førsteMandagIÅret = LocalDate.of(år, 1, 1).with(TemporalAdjusters.dayOfWeekInMonth(1, DayOfWeek.MONDAY));
         var anvistFom = ya.getAnvistFOM().isBefore(førsteMandagIÅret) ? førsteMandagIÅret : ya.getAnvistFOM();
         return fullstendigePerioder.stream().anyMatch(p -> p.getFomDato().equals(anvistFom) && !p.getTomDato().isBefore(ya.getAnvistTOM()));
     }
 
-    private boolean harAnvisningSammeÅrSomFørstePeriodeTilVurdering(LocalDate førsteStpTilVurdering, YtelseAnvist ya) {
-        return ya.getAnvistTOM().getYear() >= førsteStpTilVurdering.getYear() && ya.getAnvistFOM().getYear() <= førsteStpTilVurdering.getYear();
+    private boolean harAnvisningIEllerEtterÅr(YtelseAnvist ya, int år) {
+        return ya.getAnvistTOM().getYear() >= år && ya.getAnvistFOM().getYear() <= år;
     }
 
 }
