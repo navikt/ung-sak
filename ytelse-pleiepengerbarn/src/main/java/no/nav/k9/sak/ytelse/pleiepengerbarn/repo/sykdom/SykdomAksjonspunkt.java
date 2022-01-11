@@ -68,4 +68,15 @@ public class SykdomAksjonspunkt {
     public boolean isNyttDokumentHarIkkekontrollertEksisterendeVurderinger() {
         return nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
     }
+
+    public static SykdomAksjonspunkt bareFalse() {
+        return new SykdomAksjonspunkt(
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false);
+    }
 }

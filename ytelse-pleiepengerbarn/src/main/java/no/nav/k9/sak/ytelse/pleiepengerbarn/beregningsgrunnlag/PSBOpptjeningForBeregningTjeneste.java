@@ -29,6 +29,7 @@ import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
     private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();

@@ -24,6 +24,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 @ApplicationScoped
 @GrunnlagRef("MedlemskapAggregat")
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @FagsakYtelseTypeRef("OMP")
 @FagsakYtelseTypeRef("FRISINN")
 class StartpunktUtlederMedlemskap implements EndringStartpunktUtleder {

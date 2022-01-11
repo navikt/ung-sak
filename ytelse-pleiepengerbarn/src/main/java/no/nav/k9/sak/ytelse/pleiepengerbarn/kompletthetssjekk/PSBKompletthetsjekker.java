@@ -24,6 +24,7 @@ import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 @ApplicationScoped
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class PSBKompletthetsjekker implements Kompletthetsjekker {
 
     private KompletthetssjekkerSøknad kompletthetssjekkerSøknad;

@@ -6,13 +6,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -25,8 +25,9 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokument
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
-import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.MapTilBrevkode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
@@ -39,6 +40,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 @BehandlingStegRef(kode = "INIT_PERIODER")
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class InitierPerioderSteg implements BehandlingSteg {
 
     private final Logger log = LoggerFactory.getLogger(InitierPerioderSteg.class);
@@ -47,7 +49,8 @@ public class InitierPerioderSteg implements BehandlingSteg {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
-    private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
+    private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
+    private Instance<MapTilBrevkode> brevkodeMappere;
 
     InitierPerioderSteg() {
         // for proxy
@@ -58,11 +61,13 @@ public class InitierPerioderSteg implements BehandlingSteg {
                                MottatteDokumentRepository mottatteDokumentRepository,
                                SøknadsperiodeRepository søknadsperiodeRepository,
                                UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
-                               @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste) {
+                               @Any Instance<MapTilBrevkode> brevkodeMappere,
+                               @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
+        this.brevkodeMappere = brevkodeMappere;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
     }
 
@@ -80,11 +85,11 @@ public class InitierPerioderSteg implements BehandlingSteg {
             uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandlingId, uttaksPerioderGrunnlag.getOppgitteSøknadsperioder());
         } else {
             var kravDokumenterMedPerioder = søknadsfristTjeneste.hentPerioderTilVurdering(referanse);
+            var brevkode = MapTilBrevkode.finnBrevkodeMapper(brevkodeMappere, referanse.getFagsakYtelseType()).getBrevkode();
             var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId())
                 .stream()
                 .filter(it -> it.getBehandlingId().equals(behandlingId))
-                .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
-                .filter(it -> Brevkode.PLEIEPENGER_BARN_SOKNAD.equals(it.getType()))
+                .filter(it -> brevkode.equals(it.getType()))
                 .map(MottattDokument::getJournalpostId)
                 .collect(Collectors.toSet());
 

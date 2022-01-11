@@ -151,6 +151,8 @@ spec:
       value: http://k9-formidling.k9saksbehandling/k9/formidling
     - name: K9_PUNSJ_URL
       value: https://k9-punsj.nais.adeo.no/api
+    - name: INFOTRYGD_BS_BASE_URI
+      value: https://k9-infotrygd.intern.nav.no
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
@@ -217,7 +219,7 @@ spec:
       value: "true"
     - name: PSB_INFOTRYGD_MIGRERING
       value: "false"
-    - name: FORLENGELSE_ENABLET
+    - name: FORLENGELSE_OPPTJENING_ENABLET
       value: "false"
 
     # Audit logging
@@ -233,5 +235,5 @@ spec:
 
 
     # Pleiepenger infotrygd migrering
-    - name: OVERSTYR_BEREGNING_INPUT_TILLATELSER
+    - name: INFOTRYGD_MIGRERING_TILLATELSER
       value: ""

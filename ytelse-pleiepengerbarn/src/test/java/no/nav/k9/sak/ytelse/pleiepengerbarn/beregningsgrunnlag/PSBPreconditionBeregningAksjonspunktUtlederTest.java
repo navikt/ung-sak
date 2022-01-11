@@ -163,16 +163,6 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     }
 
     @Test
-    void skal_returnere_ventepunkt_når_periode_i_samme_år_som_ikke_er_søkt_for() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusMonths(1).plusDays(10)), Arbeidskategori.ARBEIDSTAKER);
-
-        var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
-
-        assertThat(aksjonspunkter.size()).isEqualTo(1);
-        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_PÅ_KOMPLETT_SØKNAD_VED_OVERGANG_FRA_INFOTRYGD);
-    }
-
-    @Test
     void skal_returnere_ventepunkt_når_periode_etter_migrering_som_ikke_er_søkt_for() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusMonths(1), STP.plusMonths(1).plusDays(10)), Arbeidskategori.ARBEIDSTAKER);
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));

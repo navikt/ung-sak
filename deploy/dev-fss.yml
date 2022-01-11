@@ -151,6 +151,8 @@ spec:
       value: http://k9-formidling.k9saksbehandling/k9/formidling
     - name : K9_PUNSJ_URL
       value: https://k9-punsj.dev.adeo.no/api
+    - name: INFOTRYGD_BS_BASE_URI
+      value: https://k9-infotrygd.dev.intern.nav.no
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
@@ -216,11 +218,15 @@ spec:
       value: "true"
     - name: PSB_INFOTRYGD_MIGRERING
       value: "true"
-    - name: FORLENGELSE_ENABLET
+    - name: FORLENGELSE_OPPTJENING_ENABLET
       value: "true"
     - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
       value: "true"
     - name: HENLEGGELSE_PSB_ENABLET
+      value: "true"
+    - name: BEHANDLINGID_DOKUMENTLIST_ENABLET
+      value: "true"
+    - name: PERIODER_KANT_I_KANT_VURDERER_ENABLET
       value: "true"
 
     # Audit logging
@@ -235,5 +241,5 @@ spec:
       value: "srvPDP,srvk9-tilbake,srvsaf,Z993210,Z994080"
 
     # Pleiepenger infotrygd migrering
-    - name: OVERSTYR_BEREGNING_INPUT_TILLATELSER
+    - name: INFOTRYGD_MIGRERING_TILLATELSER
       value: "Z990404,Z990422,Z994004"

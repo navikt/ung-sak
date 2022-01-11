@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -19,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.AksjonspunktÅrsak;
@@ -40,12 +41,13 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBere
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements YtelsespesifikkeInntektsmeldingTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(PsbManglendePåkrevdeInntektsmeldingerTjeneste.class);
     private static final Environment ENV = Environment.current();
     private final boolean devLoggingPotensieltSensitivt = !ENV.isProd();
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private BehandlingRepository behandlingRepository;
 
@@ -55,10 +57,10 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
 
     @Inject
     public PsbManglendePåkrevdeInntektsmeldingerTjeneste(BehandlingRepository behandlingRepository,
-                                                         @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                                         @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                                          KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
         this.behandlingRepository = behandlingRepository;
-        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
     }
 
@@ -74,6 +76,7 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
         var behandling = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId());
 
         var unikeInntektsmeldingerForFagsak = kompletthetForBeregningTjeneste.hentAlleUnikeInntektsmeldingerForFagsak(behandling.getFagsak().getSaksnummer());
+        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, input.getReferanse().getFagsakYtelseType(), input.getReferanse().getBehandlingType());
         var periodeTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
         var grunnlag = grunnlagOptional.get();

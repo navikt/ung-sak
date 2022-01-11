@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -52,10 +53,11 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     @Inject
     public PerioderTilBehandlingMedKildeRestTjeneste(BehandlingRepository behandlingRepository,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                                     SøknadsfristTjenesteProvider søknadsfristTjenesteProvider) {
+                                                     SøknadsfristTjenesteProvider søknadsfristTjenesteProvider,
+                                                     @KonfigVerdi(value = "PERIODER_KANT_I_KANT_VURDERER_ENABLET", defaultVerdi = "false") Boolean kantIKantVurdererEnablet) {
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
-        this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste();
+        this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(kantIKantVurdererEnablet);
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
@@ -91,8 +93,9 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         perioderTilVurdering.addAll(perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref));
 
         var revurderingPerioderFraAndreParter = perioderTilVurderingTjeneste.utledRevurderingPerioder(ref);
+        var kantIKantVurderer = perioderTilVurderingTjeneste.getKantIKantVurderer();
 
-        var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(behandling, kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering, perioderSomSkalTilbakestilles, revurderingPerioderFraAndreParter);
+        var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(behandling, kantIKantVurderer, kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering, perioderSomSkalTilbakestilles, revurderingPerioderFraAndreParter);
 
         return statusForPerioderPåBehandling;
     }

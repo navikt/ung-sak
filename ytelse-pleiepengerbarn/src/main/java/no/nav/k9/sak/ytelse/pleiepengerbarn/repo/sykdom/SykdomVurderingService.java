@@ -68,6 +68,10 @@ public class SykdomVurderingService {
         // XXX: Denne er kastet sammen og bør trolig skrives enklere
         final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
 
+        if (behandling.getStatus().erFerdigbehandletStatus()) {
+            return SykdomAksjonspunkt.bareFalse();
+        }
+
         final boolean harUklassifiserteDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
         final boolean manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring(pleietrengende);
         final boolean manglerDiagnosekode = sykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnosekoder().isEmpty();

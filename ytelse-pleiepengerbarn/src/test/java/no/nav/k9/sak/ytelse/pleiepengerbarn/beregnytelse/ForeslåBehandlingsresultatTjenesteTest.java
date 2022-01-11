@@ -92,6 +92,11 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         }
 
         @Override
+        public Set<VilkårType> definerendeVilkår() {
+            return Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+        }
+
+        @Override
         public int maksMellomliggendePeriodeAvstand() {
             return 0;
         }
@@ -230,6 +235,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
 
         var vilkårsresultatBuilder = Vilkårene.builder();
+        leggTilVilkårMedUtfall(Utfall.OPPFYLT, vilkårsresultatBuilder, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, null);
         if (utfall.equals(Utfall.OPPFYLT)) {
             leggTilVilkårMedUtfall(utfall, vilkårsresultatBuilder, VilkårType.OPPTJENINGSVILKÅRET, null);
             leggTilVilkårMedUtfall(utfall, vilkårsresultatBuilder, VilkårType.MEDLEMSKAPSVILKÅRET, null);

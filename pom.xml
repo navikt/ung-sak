@@ -42,7 +42,7 @@
         <junit.version>5.8.2</junit.version>
         <felles.version>0.2.18</felles.version>
         <swagger.version>2.1.12</swagger.version>
-        <k9format.version>5.7.1</k9format.version>
+        <k9format.version>5.7.4</k9format.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -64,7 +64,7 @@
             <dependency>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
-                <version>8.3.0</version>
+                <version>8.4.0</version>
             </dependency>
 
             <dependency>
@@ -139,7 +139,7 @@
             <dependency>
                 <groupId>no.nav.k9.oppdrag.kontrakt</groupId>
                 <artifactId>oppdrag-kontrakter</artifactId>
-                <version>1.4</version>
+                <version>1.4.2</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.aarskvantum</groupId>
@@ -149,33 +149,33 @@
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>eksterne-kontrakter</artifactId>
-                <version>0.0.15</version>
+                <version>0.0.19</version>
             </dependency>
             <dependency>
 			    <groupId>no.nav.foreldrepenger.kontrakter</groupId>
 			    <artifactId>fp-feed-vedtak-tjenestespesifikasjon</artifactId>
-                <version>6.1.1</version>
+                <version>6.1.3</version>
 		    </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
                 <artifactId>hendelse-historikk-innslag</artifactId>
-                <version>6.1.1</version>
+                <version>6.1.3</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>1.3.14</version>
+                <version>1.3.26</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt</artifactId>
-                <version>1.3.3</version>
+                <version>1.4.0</version>
             </dependency>
 
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
-                <version>5.0.0</version>
+                <version>5.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.threeten</groupId>
@@ -628,7 +628,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.2.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -787,7 +787,7 @@
                     <dependency>
                         <groupId>no.nav.k9.dev</groupId>
                         <artifactId>dev-jakarta-transform</artifactId>
-                        <version>0.4.5</version>
+                        <version>0.6.0</version>
                     </dependency>
                     <dependency>
                         <groupId>ant-contrib</groupId>

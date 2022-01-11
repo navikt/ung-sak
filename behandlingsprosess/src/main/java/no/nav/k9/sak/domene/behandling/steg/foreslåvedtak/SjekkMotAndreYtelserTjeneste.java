@@ -111,7 +111,7 @@ public class SjekkMotAndreYtelserTjeneste {
         var overlappendeYtelser = overlappendeYtelserTjeneste.finnOverlappendeYtelser(BehandlingReferanse.fra(behandling), ytelseTyperSomSjekkesMot);
         if (!overlappendeYtelser.isEmpty()) {
             String formattert = overlappendeYtelser.keySet().stream()
-                .map(key -> "Ytelse=" + key.getYtelseType() + ", kilde=" + key.getKilde() + ", saksnummer=" + key.getSaksnummer() + ", perioder=" + overlappendeYtelser.get(key))
+                .map(key -> "Ytelse=" + key.getYtelseType() + ", kilde=" + key.getKilde() + ", saksnummer=" + key.getSaksnummer() + ", antall ytelser anvist=" + key.getYtelseAnvist().size() + ", perioder=" + overlappendeYtelser.get(key))
                 .collect(Collectors.joining(", ", "{", "}"));
             logger.info("Behandlingen har overlappende ytelser '{}'", formattert);
         }

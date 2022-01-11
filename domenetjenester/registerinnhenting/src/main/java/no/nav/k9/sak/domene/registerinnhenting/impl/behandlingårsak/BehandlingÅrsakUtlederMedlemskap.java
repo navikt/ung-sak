@@ -18,6 +18,7 @@ import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 @ApplicationScoped
 @GrunnlagRef("MedlemskapAggregat")
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @FagsakYtelseTypeRef("OMP")
 @FagsakYtelseTypeRef("FRISINN")
 class BehandlingÅrsakUtlederMedlemskap implements BehandlingÅrsakUtleder {

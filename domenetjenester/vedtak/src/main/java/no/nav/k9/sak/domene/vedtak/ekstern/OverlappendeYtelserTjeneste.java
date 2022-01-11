@@ -23,10 +23,10 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsr
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class OverlappendeYtelserTjeneste {
@@ -47,9 +47,12 @@ public class OverlappendeYtelserTjeneste {
 
     public Map<Ytelse, NavigableSet<LocalDateInterval>> finnOverlappendeYtelser(BehandlingReferanse ref, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
         var tilkjentYtelsePerioder = hentTilkjentYtelsePerioder(ref);
+        if (tilkjentYtelsePerioder.isEmpty()) {
+            return Map.of();
+        }
         var aktørYtelse = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId())
             .getAktørYtelseFraRegister(ref.getAktørId());
-        if (tilkjentYtelsePerioder.isEmpty() || aktørYtelse.isEmpty()) {
+        if (aktørYtelse.isEmpty()) {
             return Map.of();
         }
 
@@ -59,20 +62,24 @@ public class OverlappendeYtelserTjeneste {
         }
         tilkjentYtelseTimeline = tilkjentYtelseTimeline.compress();
 
-        return doFinnOverlappendeYtelser(tilkjentYtelseTimeline, new YtelseFilter(aktørYtelse.get()).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType())));
+        return doFinnOverlappendeYtelser(ref.getSaksnummer(), tilkjentYtelseTimeline, new YtelseFilter(aktørYtelse.get()).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType())));
     }
 
-    public static Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(LocalDateTimeline<Boolean> tilkjentYtelseTimeline, YtelseFilter ytelseFilter) {
+    public static Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(Saksnummer saksnummer, LocalDateTimeline<Boolean> tilkjentYtelseTimeline, YtelseFilter ytelseFilter) {
         Map<Ytelse, NavigableSet<LocalDateInterval>> overlapp = new TreeMap<>();
         if (!tilkjentYtelseTimeline.isEmpty()) {
 
             for (var yt : ytelseFilter.getFiltrertYtelser()) {
+                if (saksnummer.equals(yt.getSaksnummer())) {
+                    // Skal ikke sjekke overlappende ytelser i IAY mot egen fagsak
+                    continue;
+                }
                 var ytp = yt.getPeriode();
                 var overlappPeriode = innvilgelseOverlapperMedAnnenYtelse(tilkjentYtelseTimeline, ytp);
                 if (!overlappPeriode.isEmpty()) {
                     if (yt.getYtelseAnvist().isEmpty()) {
-                        // er under behandling. flagger hele perioden med overlapp
-                        overlapp.put(yt, overlappPeriode);
+                        // har ingen utbetaling (kan skyldes både at ytelse ikke har utbetaling, eller at ytelsetype ikke er av type kontantytelse)
+                        continue;
                     } else {
                         var anvistSegmenter = yt.getYtelseAnvist().stream()
                             .map(ya -> new LocalDateSegment<>(ya.getAnvistFOM(), ya.getAnvistTOM(), Boolean.TRUE))

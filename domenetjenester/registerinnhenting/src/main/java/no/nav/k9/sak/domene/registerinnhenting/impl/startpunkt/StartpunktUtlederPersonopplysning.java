@@ -23,6 +23,7 @@ import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 @ApplicationScoped
 @GrunnlagRef("PersonInformasjon")
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @FagsakYtelseTypeRef("OMP")
 @FagsakYtelseTypeRef("FRISINN")
 class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {

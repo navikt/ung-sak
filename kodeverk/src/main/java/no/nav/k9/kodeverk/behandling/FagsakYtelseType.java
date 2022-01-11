@@ -61,7 +61,7 @@ public enum FagsakYtelseType implements Kodeverdi {
             requireNull(relatertPersonAktørId, "relatertPerson");
         }
     },
-    PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger nærstående", null, "OMS") {
+    PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger nærstående", "PP", "OMS") {
         @Override
         public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
             requireNonNull(pleietrengendeAktørId, "pleietrengende");
@@ -268,6 +268,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     /** Hvilke K9-ytelser som skal sjekkes mot overlapp */
     private static final Map<FagsakYtelseType, Set<FagsakYtelseType>> OVERLAPPSJEKK_RELATERT_YTELSE_K9 = Map.of(
         PLEIEPENGER_SYKT_BARN, Set.of(
+            PLEIEPENGER_SYKT_BARN,
             PLEIEPENGER_NÆRSTÅENDE,
             OMSORGSPENGER,
             OPPLÆRINGSPENGER),

@@ -32,6 +32,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 @ApplicationScoped
 @GrunnlagRef("SykdomGrunnlag")
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
 
     private static final Logger log = LoggerFactory.getLogger(StartpunktUtlederPleiepengerSyktBarn.class);

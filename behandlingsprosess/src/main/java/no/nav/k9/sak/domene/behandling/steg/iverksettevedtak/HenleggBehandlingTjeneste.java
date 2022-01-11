@@ -88,7 +88,7 @@ public class HenleggBehandlingTjeneste {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        if (behandling.getFagsakYtelseType() == FagsakYtelseType.PSB && !enablePsbHenleggelse) {
+        if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE).contains(behandling.getFagsakYtelseType())) {
             throw new IllegalArgumentException("Det er p.t. ikke støttet å henlegge behandlinger for fagsak Pleiepenger sykt barn.");
         }
 
