@@ -13,9 +13,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import org.jetbrains.annotations.NotNull;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -28,8 +31,11 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -54,6 +60,7 @@ public class InfotrygdMigreringTjeneste {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private FagsakRepository fagsakRepository;
+    private BehandlingRepository behandlingRepository;
     private final KantIKantVurderer kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
     private InfotrygdService infotrygdService;
 
@@ -64,18 +71,17 @@ public class InfotrygdMigreringTjeneste {
     public InfotrygdMigreringTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                       @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                       FagsakRepository fagsakRepository,
-                                      InfotrygdService infotrygdService) {
+                                      BehandlingRepository behandlingRepository, InfotrygdService infotrygdService) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.fagsakRepository = fagsakRepository;
+        this.behandlingRepository = behandlingRepository;
         this.infotrygdService = infotrygdService;
     }
 
     public List<AksjonspunktResultat> utledAksjonspunkter(BehandlingReferanse ref) {
 
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        var infotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(ref.getFagsakId());
-        var eksisterendeMigreringTilVurdering = finnEksisterendeMigreringTilVurdering(perioderTilVurdering, infotrygdMigreringer);
 
         var psbInfotrygdFilter = finnPSBInfotryd(ref.getBehandlingId(), ref.getAktørId());
         List<YtelseAnvist> anvistePeriodeSomManglerSøknad = finnAnvistePerioderFraInfotrygdUtenSøknad(perioderTilVurdering, psbInfotrygdFilter, ref.getBehandlingId());
@@ -83,10 +89,6 @@ public class InfotrygdMigreringTjeneste {
         var aksjonspunkter = new ArrayList<AksjonspunktResultat>();
         if (!anvistePeriodeSomManglerSøknad.isEmpty()) {
             aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE));
-        }
-
-        if (eksisterendeMigreringTilVurdering.isEmpty()) {
-            return aksjonspunkter;
         }
 
         var grunnlagsperioderPrAktør = infotrygdService.finnGrunnlagsperioderForAndreAktører(
@@ -99,23 +101,52 @@ public class InfotrygdMigreringTjeneste {
             throw new IllegalStateException("Fant berørt sak på gammel ordning");
         }
 
-
-        var migrertePerioderTilVurdering = perioderTilVurdering.stream()
-            .filter(p -> eksisterendeMigreringTilVurdering.stream().anyMatch(im -> im.getSkjæringstidspunkt().equals(p.getFomDato())))
-            .collect(Collectors.toList());
-
-        var harAnnenAktørMedOverlappendeInfotrygdperiode = grunnlagsperioderPrAktør.values()
+        var ikkeSøktMedOverlappMap = grunnlagsperioderPrAktør.entrySet()
             .stream()
-            .flatMap(Collection::stream)
-            .map(IntervallMedBehandlingstema::intervall)
-            .anyMatch(infotrygdPeriode -> migrertePerioderTilVurdering.stream()
-                .anyMatch(infotrygdPeriode::overlapper));
+            .collect(Collectors.toMap(Map.Entry::getKey,
+                e -> finnIkkeSøktOverlapp(perioderTilVurdering, getInfotrygdPerioder(e), e.getKey())));
+
+        var harAnnenAktørMedOverlappendeInfotrygdperiode = ikkeSøktMedOverlappMap.values().stream().anyMatch(v -> !v.isEmpty());
 
         if (harAnnenAktørMedOverlappendeInfotrygdperiode) {
             aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART));
         }
 
         return aksjonspunkter;
+    }
+
+    @NotNull
+    private List<DatoIntervallEntitet> getInfotrygdPerioder(Map.Entry<AktørId, List<IntervallMedBehandlingstema>> e) {
+        return e.getValue().stream().map(IntervallMedBehandlingstema::intervall).collect(Collectors.toList());
+    }
+
+    private List<DatoIntervallEntitet> finnIkkeSøktOverlapp(NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
+                                                            List<DatoIntervallEntitet> infotrygdperioder, AktørId annenPartAktørId) {
+        var annenPartFagsakId = fagsakRepository.hentForBruker(annenPartAktørId).stream().filter(f -> f.getYtelseType().equals(FagsakYtelseType.PSB))
+            .findFirst()
+            .map(Fagsak::getId);
+
+        var annenPartSøktePerioderStream = annenPartFagsakId.flatMap(behandlingRepository::hentSisteBehandlingForFagsakId)
+            .map(Behandling::getId)
+            .stream()
+            .flatMap(id -> perioderTilVurderingTjeneste.utledFullstendigePerioder(id).stream());
+        var annenPartSøktTidslinje = lagTidslinje(annenPartSøktePerioderStream);
+        var annenPartInfotrygdTidslinje = lagTidslinje(infotrygdperioder.stream());
+        var tilVurderingTidslinje = lagTidslinje(perioderTilVurdering.stream());
+
+        return annenPartInfotrygdTidslinje.intersection(tilVurderingTidslinje)
+            .disjoint(annenPartSøktTidslinje)
+            .toSegments()
+            .stream()
+            .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
+            .collect(Collectors.toList());
+    }
+
+    private LocalDateTimeline<Boolean> lagTidslinje(Stream<DatoIntervallEntitet> annenPartSøktePerioderStream) {
+        var annenPartSøktePerioderSegments = annenPartSøktePerioderStream
+            .map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), true))
+            .collect(Collectors.toList());
+        return new LocalDateTimeline<>(annenPartSøktePerioderSegments);
     }
 
     private boolean harBerørtSakPåGammelOrdning(Map<AktørId, List<IntervallMedBehandlingstema>> grunnlagsperioderPrAktør) {
