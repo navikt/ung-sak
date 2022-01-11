@@ -77,7 +77,7 @@ public class OverlapendeYtelserRestTjeneste {
                 var overlappendePerioder = entry.getValue().stream()
                     .map(dateInterval -> new OverlappendeYtelsePeriodeDto(dateInterval.getFomDato(), dateInterval.getTomDato()))
                     .collect(Collectors.toList());
-                return new OverlappendeYtelseDto(ytelse.getYtelseType(), ytelse.getKilde(), overlappendePerioder);
+                return new OverlappendeYtelseDto(ytelse.getYtelseType(), ytelse.getKilde(), ytelse.getSaksnummer(), overlappendePerioder);
             })
             .collect(Collectors.toList());
 
