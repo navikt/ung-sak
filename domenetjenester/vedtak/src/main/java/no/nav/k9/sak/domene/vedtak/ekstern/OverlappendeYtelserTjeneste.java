@@ -78,8 +78,8 @@ public class OverlappendeYtelserTjeneste {
                 var overlappPeriode = innvilgelseOverlapperMedAnnenYtelse(tilkjentYtelseTimeline, ytp);
                 if (!overlappPeriode.isEmpty()) {
                     if (yt.getYtelseAnvist().isEmpty()) {
-                        // er under behandling. flagger hele perioden med overlapp
-                        overlapp.put(yt, overlappPeriode);
+                        // har ingen utbetaling (kan skyldes både at ytelse ikke har utbetaling, eller at ytelsetype ikke er av type kontantytelse)
+                        continue;
                     } else {
                         var anvistSegmenter = yt.getYtelseAnvist().stream()
                             .map(ya -> new LocalDateSegment<>(ya.getAnvistFOM(), ya.getAnvistTOM(), Boolean.TRUE))
