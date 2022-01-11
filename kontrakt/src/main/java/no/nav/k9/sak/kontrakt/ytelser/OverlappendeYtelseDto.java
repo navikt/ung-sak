@@ -31,7 +31,6 @@ public class OverlappendeYtelseDto {
     private Fagsystem kilde;
 
     @JsonProperty(value = "saksnummer")
-    @Size(max = 100)
     @Valid
     private Saksnummer saksnummer;
 
