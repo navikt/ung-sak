@@ -22,7 +22,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulatorInputTjeneste;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -74,7 +73,7 @@ class InfotrygdMigreringTjenesteTest {
         fagsakRepository = new FagsakRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
 
-        fagsak = Fagsak.opprettNy(FagsakYtelseType.DAGPENGER, new AktørId(123L), new Saksnummer("987"), STP, STP.plusDays(10));
+        fagsak = Fagsak.opprettNy(FagsakYtelseType.PSB, new AktørId(123L), new Saksnummer("987"), STP, STP.plusDays(10));
         fagsakRepository.opprettNy(fagsak);
         behandling = Behandling.forFørstegangssøknad(fagsak).medBehandlingStatus(BehandlingStatus.UTREDES).build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
@@ -83,7 +82,7 @@ class InfotrygdMigreringTjenesteTest {
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
         when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any())).thenReturn(Collections.emptyMap());
-        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, infotrygdService);
+        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, behandlingRepository, infotrygdService);
     }
 
     @Test
@@ -233,6 +232,33 @@ class InfotrygdMigreringTjenesteTest {
         assertThrows(IllegalStateException.class, () ->  tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling, STP)));
     }
 
+    @Test
+    void skal_ikke_gi_aksjonspunt_når_annen_part_har_overlappende_periode_i_infotrygd_som_er_søkt_om() {
+        lagUtenInfotrygdPsbYtelse();
+        var annenPartAktørId = new AktørId(345L);
+        when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any()))
+            .thenReturn(Map.of(annenPartAktørId,
+                List.of(new IntervallMedBehandlingstema(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), "PN"))));
+        var annenPartfagsak = Fagsak.opprettNy(FagsakYtelseType.PSB, annenPartAktørId, new Saksnummer("456"), STP, STP.plusDays(10));
+        fagsakRepository.opprettNy(annenPartfagsak);
+        var annenPartbehandling = Behandling.forFørstegangssøknad(annenPartfagsak).medBehandlingStatus(BehandlingStatus.UTREDES).build();
+        behandlingRepository.lagre(annenPartbehandling, behandlingRepository.taSkriveLås(annenPartbehandling));
+        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(annenPartbehandling.getId()))
+            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
+
+
+        var aksjonspunkter = tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling, STP));
+        assertThat(aksjonspunkter.size()).isEqualTo(0);
+    }
+
+
+
+    private void lagUtenInfotrygdPsbYtelse() {
+        var iayBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var aktørYtelseBuilder = InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder.oppdatere(Optional.empty());
+        iayBuilder.leggTilAktørYtelse(aktørYtelseBuilder);
+        iayTjeneste.lagreIayAggregat(behandling.getId(), iayBuilder);
+    }
 
 
     private void lagInfotrygdPsbYtelse(DatoIntervallEntitet periode) {
