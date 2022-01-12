@@ -1,7 +1,10 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -19,8 +22,10 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Endringsstatus;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
@@ -66,7 +71,7 @@ public class SamtidigUttakTjeneste {
         if (enableRelevantsjekk && !samtidigUttakOverlappsjekker.isHarRelevantOverlappMedAndreUbehandledeSaker(ref)) {
             return false;
         }
-        
+
         if (anyHarÅpenBehandlingSomIkkeHarKommetTilUttak(andreÅpneBehandlinger)) {
             /*
              * Krever at andre behandlinger, med relevant overlapp, kommer til uttak før vi går videre.
@@ -167,5 +172,17 @@ public class SamtidigUttakTjeneste {
         final Simulering simulering = simulerUttak(ref);
         // Hvis en sak ikke har kommet til uttak betyr det at true returneres her.
         return simulering.getUttakplanEndret();
+    }
+
+    public NavigableSet<DatoIntervallEntitet> perioderMedEndringerMedUbesluttedeData(BehandlingReferanse ref) {
+        final Simulering simulering = simulerUttak(ref);
+        // Hvis en sak ikke har kommet til uttak betyr det at true returneres her.
+        if (simulering.getUttakplanEndret()) {
+            return simulering.getSimulertUttaksplan().getPerioder().entrySet().stream()
+                .filter(entry -> entry.getValue().getEndringsstatus() == Endringsstatus.ENDRET)
+                .map(entry -> DatoIntervallEntitet.fraOgMedTilOgMed(entry.getKey().getFom(), entry.getKey().getTom()))
+                .collect(Collectors.toCollection(TreeSet::new));
+        }
+        return new TreeSet<>();
     }
 }

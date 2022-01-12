@@ -2,7 +2,10 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -22,6 +25,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.hendelse.vedtak.SakMedPeriode;
 import no.nav.k9.sak.hendelse.vedtak.VurderOmVedtakPåvirkerSakerTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
@@ -102,6 +107,38 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
         return result;
     }
 
+    @Override
+    public List<SakMedPeriode> utledSakerMedPerioderSomErKanVærePåvirket(Ytelse vedtakHendelse) {
+        var fagsak = fagsakRepository.hentSakGittSaksnummer(new Saksnummer(vedtakHendelse.getSaksnummer())).orElseThrow();
+        Behandling vedtattBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+
+        AktørId pleietrengende = vedtattBehandling.getFagsak().getPleietrengendeAktørId();
+        List<Saksnummer> alleSaksnummer = sykdomVurderingRepository.hentAlleSaksnummer(pleietrengende);
+
+        var result = new ArrayList<SakMedPeriode>();
+        for (Saksnummer kandidatsaksnummer : alleSaksnummer) {
+            if (!kandidatsaksnummer.equals(fagsak.getSaksnummer())) {
+                var kandidatFagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
+                var sisteBehandlingPåKandidat = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(kandidatFagsak.getId()).orElseThrow();
+                var skalRevurderesPgaSykdom = perioderMedRevurderingSykdom(pleietrengende, kandidatsaksnummer, sisteBehandlingPåKandidat);
+                var referanse = BehandlingReferanse.fra(sisteBehandlingPåKandidat);
+                var skalRevurderesPgaEtablertTilsyn = perioderMedRevurderingPgaEtablertTilsyn(referanse);
+                var skalRevurderesPgaNattevåkOgBeredskap = perioderMedRevurderesPgaNattevåkOgBeredskap(referanse);
+                var skalRevurderesPgaEndretUttak = perioderMedRevurderingPgaUttak(sisteBehandlingPåKandidat, referanse);
+                if (!skalRevurderesPgaSykdom.isEmpty() || !skalRevurderesPgaEtablertTilsyn.isEmpty() || !skalRevurderesPgaNattevåkOgBeredskap.isEmpty() || !skalRevurderesPgaEndretUttak.isEmpty()) {
+                    var perioderMedEndring = new TreeSet<>(skalRevurderesPgaEtablertTilsyn);
+                    perioderMedEndring.addAll(skalRevurderesPgaNattevåkOgBeredskap);
+                    perioderMedEndring.addAll(skalRevurderesPgaSykdom);
+                    perioderMedEndring.addAll(skalRevurderesPgaEndretUttak);
+                    result.add(new SakMedPeriode(kandidatsaksnummer, perioderMedEndring));
+                    log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty());
+                }
+            }
+        }
+
+        return result;
+    }
+
     private boolean skalRevurderesPgaUttak(Behandling sisteBehandlingPåKandidat, BehandlingReferanse referanse) {
         if (!sisteBehandlingPåKandidat.getStatus().erFerdigbehandletStatus() && !samtidigUttakTjeneste.harKommetTilUttak(referanse)) {
             return false;
@@ -109,15 +146,42 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
         return samtidigUttakTjeneste.isEndringerMedUbesluttedeData(referanse);
     }
 
+    private NavigableSet<DatoIntervallEntitet> perioderMedRevurderingPgaUttak(Behandling sisteBehandlingPåKandidat, BehandlingReferanse referanse) {
+        if (!sisteBehandlingPåKandidat.getStatus().erFerdigbehandletStatus() && !samtidigUttakTjeneste.harKommetTilUttak(referanse)) {
+            return new TreeSet<>();
+        }
+        return samtidigUttakTjeneste.perioderMedEndringerMedUbesluttedeData(referanse);
+    }
+
     private boolean skalRevurderesPgaNattevåkOgBeredskap(BehandlingReferanse referanse) {
         return endringUnntakEtablertTilsynTjeneste.harEndringerSidenBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId());
+    }
+
+    private NavigableSet<DatoIntervallEntitet> perioderMedRevurderesPgaNattevåkOgBeredskap(BehandlingReferanse referanse) {
+        return new TreeSet<>(endringUnntakEtablertTilsynTjeneste.utledRelevanteEndringerSidenBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId()));
     }
 
     private boolean skalRevurderesPgaEtablertTilsyn(BehandlingReferanse referanse) {
         return erEndringPåEtablertTilsynTjeneste.erEndringerSidenBehandling(referanse);
     }
 
+    private NavigableSet<DatoIntervallEntitet> perioderMedRevurderingPgaEtablertTilsyn(BehandlingReferanse referanse) {
+        return erEndringPåEtablertTilsynTjeneste.perioderMedEndringerFraEksisterendeVersjon(referanse)
+            .compress()
+            .toSegments()
+            .stream()
+            .filter(it -> Objects.nonNull(it.getValue()))
+            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
     private boolean vurderBehovForRevurderingPgaSykdom(AktørId pleietrengende, Saksnummer kandidatsaksnummer, Behandling sisteBehandlingPåKandidat) {
+        var endringerISøktePerioder = perioderMedRevurderingSykdom(pleietrengende, kandidatsaksnummer, sisteBehandlingPåKandidat);
+
+        return !endringerISøktePerioder.isEmpty();
+    }
+
+    private NavigableSet<DatoIntervallEntitet> perioderMedRevurderingSykdom(AktørId pleietrengende, Saksnummer kandidatsaksnummer, Behandling sisteBehandlingPåKandidat) {
         SykdomGrunnlagBehandling kandidatSykdomBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(sisteBehandlingPåKandidat.getUuid())
             .orElseThrow();
         var behandling = behandlingRepository.hentBehandlingHvisFinnes(kandidatSykdomBehandling.getBehandlingUuid()).orElseThrow();
@@ -126,7 +190,12 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
         var utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, vurderingsperioder, manglendeOmsorgenForPerioder);
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagService.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlag()), utledetGrunnlag).getDiffPerioder();
 
-        return !endringerISøktePerioder.isEmpty();
+        return endringerISøktePerioder.compress()
+            .toSegments()
+            .stream()
+            .filter(it -> Objects.nonNull(it.getValue()))
+            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private List<Periode> utledVurderingsperiode(Behandling behandling) {

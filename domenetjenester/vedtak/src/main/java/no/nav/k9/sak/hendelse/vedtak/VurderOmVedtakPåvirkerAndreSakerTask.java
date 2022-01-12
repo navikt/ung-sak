@@ -1,5 +1,8 @@
 package no.nav.k9.sak.hendelse.vedtak;
 
+import java.util.NavigableSet;
+import java.util.stream.Collectors;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -18,8 +21,8 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 @ProsessTask(VurderOmVedtakPåvirkerAndreSakerTask.TASKNAME)
@@ -53,18 +56,23 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
         LOG_CONTEXT.add("ytelseType", fagsakYtelseType);
 
         var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste.finnTjeneste(fagsakYtelseType);
-        var kandidaterTilRevurdering = vurderOmVedtakPåvirkerSakerTjeneste.utledSakerSomErKanVærePåvirket(vedtakHendelse);
+        var kandidaterTilRevurdering = vurderOmVedtakPåvirkerSakerTjeneste.utledSakerMedPerioderSomErKanVærePåvirket(vedtakHendelse);
 
         log.info("Etter '{}' vedtak på saksnummer='{}', skal følgende saker '{}' som skal revurderes som følge av vedtak.", fagsakYtelseType, vedtakHendelse.getSaksnummer(), kandidaterTilRevurdering);
 
-        for (Saksnummer kandidatsaksnummer : kandidaterTilRevurdering) {
+        for (SakMedPeriode kandidatsaksnummer : kandidaterTilRevurdering) {
             ProsessTaskData tilRevurderingTaskData = new ProsessTaskData(OpprettRevurderingEllerOpprettDiffTask.TASKNAME);
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON.getKode());
-            var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
+            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODER, utledPerioder(kandidatsaksnummer.getPerioder()));
+            var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer.getSaksnummer(), false).orElseThrow();
             var tilRevurdering = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
             tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
 
             fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
         }
+    }
+
+    private String utledPerioder(NavigableSet<DatoIntervallEntitet> perioder) {
+        return perioder.stream().map(it -> it.getFomDato() + "/" + it.getTomDato()).collect(Collectors.joining("|"));
     }
 }
