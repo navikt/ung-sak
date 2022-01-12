@@ -7,6 +7,7 @@ import java.util.NavigableSet;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -34,10 +35,11 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
 
     @Inject
     public FrisinnVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("FRISINN") VilkårUtleder vilkårUtleder,
-                                                      UttakRepository uttakRepository) {
+                                                      UttakRepository uttakRepository,
+                                                      @KonfigVerdi(value = "FRISINN_NYTT_STP_TOGGLE", defaultVerdi = "false", required = false) boolean nyttStpToggle) {
         this.maksSøktePeriode = new MaksSøktePeriode(uttakRepository);
         this.vilkårUtleder = vilkårUtleder;
-        final var beregningPeriode = new BeregningPeriode(uttakRepository);
+        final var beregningPeriode = new BeregningPeriode(uttakRepository, nyttStpToggle);
         vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, beregningPeriode);
     }
 
