@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
@@ -27,20 +28,21 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.Beregningsgrunnla
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @BehandlingTypeRef
 @BehandlingStegRef(kode = "VURDER_REF_BERGRUNN")
 @ApplicationScoped
-class PSBVurderRefusjonLagFortsettRequest implements LagFortsettRequest {
+class PleiepengerVurderRefusjonLagFortsettRequest implements LagFortsettRequest {
 
-    private PSBYtelsesspesifiktGrunnlagMapper ytelsesspesifiktGrunnlagMapper;
+    private PleiepengerGrunnlagMapper ytelsesspesifiktGrunnlagMapper;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
 
-    public PSBVurderRefusjonLagFortsettRequest() {
+    public PleiepengerVurderRefusjonLagFortsettRequest() {
     }
 
     @Inject
-    public PSBVurderRefusjonLagFortsettRequest(@FagsakYtelseTypeRef("PSB") PSBYtelsesspesifiktGrunnlagMapper ytelsesspesifiktGrunnlagMapper,
-                                               BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
+    public PleiepengerVurderRefusjonLagFortsettRequest(@Any PleiepengerGrunnlagMapper ytelsesspesifiktGrunnlagMapper,
+                                                       BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
         this.ytelsesspesifiktGrunnlagMapper = ytelsesspesifiktGrunnlagMapper;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
     }

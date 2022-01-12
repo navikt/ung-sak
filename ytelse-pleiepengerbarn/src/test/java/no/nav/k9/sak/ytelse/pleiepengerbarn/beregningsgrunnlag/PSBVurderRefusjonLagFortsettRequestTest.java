@@ -29,7 +29,7 @@ class PSBVurderRefusjonLagFortsettRequestTest {
         var behandlingType = BehandlingType.FØRSTEGANGSSØKNAD;
         var behandlingStegType = BehandlingStegType.VURDER_REF_BERGRUNN;
         var lagFortsettRequest = LagFortsettRequest.finnTjeneste(tjenester, ytelseType, behandlingType, behandlingStegType);
-        assertThat(lagFortsettRequest.getClass().getSimpleName()).isEqualTo(getSimpleName(PSBVurderRefusjonLagFortsettRequest.class));
+        assertThat(lagFortsettRequest.getClass().getSimpleName()).isEqualTo(getSimpleName(PleiepengerVurderRefusjonLagFortsettRequest.class));
     }
 
     @Test
