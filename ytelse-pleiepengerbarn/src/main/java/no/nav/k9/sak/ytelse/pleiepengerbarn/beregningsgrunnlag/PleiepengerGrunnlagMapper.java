@@ -34,16 +34,16 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 @FagsakYtelseTypeRef("PSB")
 @FagsakYtelseTypeRef("PPN")
 @ApplicationScoped
-public class PSBYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<YtelsespesifiktGrunnlagDto> {
+public class PleiepengerGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<YtelsespesifiktGrunnlagDto> {
 
     private UttakTjeneste uttakRestKlient;
 
-    public PSBYtelsesspesifiktGrunnlagMapper() {
+    public PleiepengerGrunnlagMapper() {
         // for proxy
     }
 
     @Inject
-    public PSBYtelsesspesifiktGrunnlagMapper(UttakTjeneste uttakRestKlient) {
+    public PleiepengerGrunnlagMapper(UttakTjeneste uttakRestKlient) {
         this.uttakRestKlient = uttakRestKlient;
     }
 
