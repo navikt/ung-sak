@@ -130,12 +130,6 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private boolean harAvbruttAksjonspunktIDenneBehandlingen(Behandling behandling, AksjonspunktDefinisjon kontrollerLegeerklæring) {
-        var aksjonspunktFor = behandling.getAksjonspunktFor(kontrollerLegeerklæring.getKode());
-
-        return aksjonspunktFor.isPresent() && aksjonspunktFor.get().erAvbrutt();
-    }
-
     private TreeSet<DatoIntervallEntitet> kunPerioderMedOmsorgenFor(final LocalDateTimeline<Utfall> perioderUnder18årTidslinje, Utfall utfall) {
         return perioderUnder18årTidslinje.stream()
             .filter(s -> utfall == s.getValue())
