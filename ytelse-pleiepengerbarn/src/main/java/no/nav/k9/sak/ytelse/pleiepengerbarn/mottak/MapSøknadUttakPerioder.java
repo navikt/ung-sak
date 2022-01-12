@@ -13,6 +13,8 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.uttak.UtenlandsoppholdÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -24,9 +26,13 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.BeredskapPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.FeriePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.NattevåkPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.Tilsynsordning;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.TilsynsordningPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtenlandsoppholdPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
+import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.psb.v1.Beredskap;
 import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie;
@@ -215,6 +221,35 @@ public class MapSøknadUttakPerioder {
         return nattevåkperioder;
     }
 
+    List<UtenlandsoppholdPeriode> mapUtenlandsopphold(Utenlandsopphold utenlandsopphold) {
+        final List<UtenlandsoppholdPeriode> utenlandsoppholdPerioder = utenlandsopphold.getPerioder()
+            .entrySet()
+            .stream()
+            .map(entry ->
+                new UtenlandsoppholdPeriode(
+                    entry.getKey().getFraOgMed(),
+                    entry.getKey().getTilOgMed(),
+                    true,
+                    Landkoder.fraKode(entry.getValue().getLand().getLandkode()),
+                    UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
+                .collect(Collectors.toList());
+
+        if (utenlandsopphold.getPerioderSomSkalSlettes() != null) {
+            utenlandsoppholdPerioder.addAll(utenlandsopphold.getPerioderSomSkalSlettes()
+                .entrySet()
+                .stream()
+                .map(entry ->
+                    new UtenlandsoppholdPeriode(
+                        entry.getKey().getFraOgMed(),
+                        entry.getKey().getTilOgMed(),
+                        false,
+                        Landkoder.fraKode(entry.getValue().getLand().getLandkode()),
+                        UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
+                .collect(Collectors.toList()));
+        }
+        return utenlandsoppholdPerioder;
+    }
+
     Collection<UttakPeriode> mapUttak(Uttak uttak) {
         if (uttak == null || uttak.getPerioder() == null) {
             return List.of();
@@ -224,5 +259,7 @@ public class MapSøknadUttakPerioder {
             .stream()
             .map(it -> new UttakPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getKey().getFraOgMed(), it.getKey().getTilOgMed()), it.getValue().getTimerPleieAvBarnetPerDag())).collect(Collectors.toList());
     }
+
+
 
 }

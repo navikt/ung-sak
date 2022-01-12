@@ -113,9 +113,9 @@ class SøknadOversetter {
             mapper.mapUttak(ytelse.getUttak()),
             mapper.mapOppgittArbeidstid(ytelse.getArbeidstid()),
             mapper.mapOppgittTilsynsordning(ytelse.getTilsynsordning()),
+            mapper.mapUtenlandsopphold(ytelse.getUtenlandsopphold()),
             mapper.mapFerie(ytelse.getSøknadsperiodeList(), ytelse.getLovbestemtFerie()),
             mapper.mapBeredskap(ytelse.getBeredskap()),
             mapper.mapNattevåk(ytelse.getNattevåk()));
     }
-
 }

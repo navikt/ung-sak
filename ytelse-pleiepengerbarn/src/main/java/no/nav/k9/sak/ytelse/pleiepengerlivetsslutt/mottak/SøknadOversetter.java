@@ -47,6 +47,7 @@ class SøknadOversetter {
             List.of(),
             List.of(),
             List.of(),
+            List.of(),
             List.of());
 
         var søknadsperioder = arbeidPerioder.stream().map(it -> it.getPeriode()).map(di -> new Periode(di.getFomDato(), di.getTomDato())).collect(Collectors.toList());

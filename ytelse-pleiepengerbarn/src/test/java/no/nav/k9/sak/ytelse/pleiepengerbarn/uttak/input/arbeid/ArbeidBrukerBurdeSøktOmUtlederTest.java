@@ -67,6 +67,7 @@ class ArbeidBrukerBurdeSøktOmUtlederTest {
             List.of(),
             List.of(),
             List.of(),
+            List.of(),
             List.of()));
 
         var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, timeline, opprettVilkår(timeline), new OpptjeningResultatBuilder(null).build());
@@ -108,6 +109,7 @@ class ArbeidBrukerBurdeSøktOmUtlederTest {
         var perioderFraSøknader = Set.of(new PerioderFraSøknad(journalpostId,
             List.of(new UttakPeriode(periodeTilVurdering, Duration.ZERO)),
             List.of(new ArbeidPeriode(arbeidsperiode, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(1))),
+            List.of(),
             List.of(),
             List.of(),
             List.of(),
