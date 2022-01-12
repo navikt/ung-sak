@@ -1,5 +1,20 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
 
+import static no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper.mapTilAktør;
+import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.KravperioderPrArbeidsforhold;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PerioderForKrav;
@@ -16,21 +31,6 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper.mapTilAktør;
-import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 public class KravperioderMapper {
 
@@ -129,32 +129,24 @@ public class KravperioderMapper {
 
     private static LocalDate finnStartdatoRefusjon(Inntektsmelding im, LocalDate skjæringstidspunktBeregning,
                                                    ArbeidDto arbeidDto) {
-        LocalDate startRefusjon;
-        if (arbeidDto != null) {
-            LocalDate startDatoArbeid = arbeidDto.getYrkesaktiviteter().stream()
-                .filter(y -> y.getArbeidsgiver().getIdent().equals(im.getArbeidsgiver().getIdentifikator()) &&
-                    matcherReferanse(y.getAbakusReferanse(), im.getArbeidsforholdRef()))
-                .flatMap(y -> y.getAktivitetsAvtaler().stream())
-                .filter(a -> a.getStillingsprosent() == null)
-                .map(AktivitetsAvtaleDto::getPeriode)
-                .filter(a -> !a.getTom().isBefore(skjæringstidspunktBeregning))
-                .map(Periode::getFom)
-                .min(Comparator.naturalOrder())
-                .orElse(skjæringstidspunktBeregning);
-            if (startDatoArbeid.isAfter(skjæringstidspunktBeregning)) {
-                if (im.getStartDatoPermisjon().isEmpty()) {
-                    startRefusjon = startDatoArbeid;
-                } else {
-                    startRefusjon = startDatoArbeid.isAfter(im.getStartDatoPermisjon().get()) ?
-                        startDatoArbeid : im.getStartDatoPermisjon().get();
-                }
-            } else {
-                startRefusjon = im.getStartDatoPermisjon().orElse(skjæringstidspunktBeregning);
-            }
-        } else {
-            startRefusjon = skjæringstidspunktBeregning;
+        if (arbeidDto == null) {
+            throw new IllegalStateException("Krever arbeidDto for mapping av inntektsmelding");
         }
-        return startRefusjon;
+        LocalDate startDatoArbeid = finnStartdatoArbeid(im, skjæringstidspunktBeregning, arbeidDto);
+        return startDatoArbeid.isAfter(skjæringstidspunktBeregning) ? startDatoArbeid : skjæringstidspunktBeregning;
+    }
+
+    private static LocalDate finnStartdatoArbeid(Inntektsmelding im, LocalDate skjæringstidspunktBeregning, ArbeidDto arbeidDto) {
+        return arbeidDto.getYrkesaktiviteter().stream()
+            .filter(y -> y.getArbeidsgiver().getIdent().equals(im.getArbeidsgiver().getIdentifikator()) &&
+                matcherReferanse(y.getAbakusReferanse(), im.getArbeidsforholdRef()))
+            .flatMap(y -> y.getAktivitetsAvtaler().stream())
+            .filter(a -> a.getStillingsprosent() == null)
+            .map(AktivitetsAvtaleDto::getPeriode)
+            .filter(a -> !a.getTom().isBefore(skjæringstidspunktBeregning))
+            .map(Periode::getFom)
+            .min(Comparator.naturalOrder())
+            .orElse(skjæringstidspunktBeregning);
     }
 
     private static List<Refusjonsperiode> mapRefusjonsperioder(Inntektsmelding im, LocalDate startdatoRefusjon) {
@@ -191,5 +183,6 @@ public class KravperioderMapper {
             || (ref1 != null && ref2 != null && Objects.equals(ref1.getAbakusReferanse(), ref2.getReferanse()));
     }
 
-    public static record Kravnøkkel(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef referanse) { }
+    public static record Kravnøkkel(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef referanse) {
+    }
 }
