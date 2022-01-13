@@ -9,7 +9,7 @@ import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomResultatTypeConverter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity(name = "UnntakEtablertTilsynPeriode")

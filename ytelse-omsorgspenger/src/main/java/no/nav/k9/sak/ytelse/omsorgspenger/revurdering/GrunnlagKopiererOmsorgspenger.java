@@ -2,8 +2,8 @@ package no.nav.k9.sak.ytelse.omsorgspenger.revurdering;
 
 import java.util.EnumSet;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;

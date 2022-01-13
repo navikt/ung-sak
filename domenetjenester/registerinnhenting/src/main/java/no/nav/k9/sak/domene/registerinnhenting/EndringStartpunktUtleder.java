@@ -2,7 +2,7 @@ package no.nav.k9.sak.domene.registerinnhenting;
 
 import java.util.Optional;
 
-import javax.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Instance;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;

@@ -3,8 +3,8 @@ package no.nav.k9.sak.ytelse.beregning.adapter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatRegelmodell;

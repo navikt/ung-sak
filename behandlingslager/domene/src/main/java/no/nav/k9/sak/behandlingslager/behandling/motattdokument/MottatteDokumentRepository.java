@@ -8,11 +8,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.TypedQuery;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.TypedQuery;
 
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.kodeverk.dokument.Brevkode;

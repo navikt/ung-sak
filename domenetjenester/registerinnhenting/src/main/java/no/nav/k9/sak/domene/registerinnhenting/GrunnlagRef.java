@@ -12,11 +12,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.util.AnnotationLiteral;
-import javax.inject.Qualifier;
-import javax.persistence.Entity;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.util.AnnotationLiteral;
+import jakarta.inject.Qualifier;
+import jakarta.persistence.Entity;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;

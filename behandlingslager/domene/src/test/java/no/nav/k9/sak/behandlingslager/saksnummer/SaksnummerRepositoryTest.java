@@ -9,8 +9,8 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)

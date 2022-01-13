@@ -3,8 +3,8 @@ package no.nav.k9.sak.hendelse.brukerdialoginnsyn;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

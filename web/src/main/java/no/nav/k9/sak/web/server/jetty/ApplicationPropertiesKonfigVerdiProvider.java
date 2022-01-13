@@ -3,7 +3,7 @@ package no.nav.k9.sak.web.server.jetty;
 import java.io.IOException;
 import java.util.Properties;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.felles.konfigurasjon.konfig.PropertiesKonfigVerdiProvider;
 import no.nav.k9.felles.konfigurasjon.konfig.StandardPropertySource;

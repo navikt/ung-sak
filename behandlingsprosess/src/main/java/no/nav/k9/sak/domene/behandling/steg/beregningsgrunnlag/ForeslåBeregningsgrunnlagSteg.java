@@ -3,8 +3,8 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;
 
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;

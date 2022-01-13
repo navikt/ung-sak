@@ -3,12 +3,10 @@ package no.nav.k9.sak.hendelse.vedtak;
 import java.util.NavigableSet;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
@@ -44,9 +42,9 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
 
     @Inject
     public VurderOmVedtakPåvirkerAndreSakerTask(BehandlingRepository behandlingRepository,
-                                                FagsakRepository fagsakRepository,
-                                                FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                                @KonfigVerdi(value = "VEDTAK_PERSISTER_ENDRET_PERIODE", defaultVerdi = "false") Boolean persisterPerioderMedDiff) {
+            FagsakRepository fagsakRepository,
+            FagsakProsessTaskRepository fagsakProsessTaskRepository,
+            @KonfigVerdi(value = "VEDTAK_PERSISTER_ENDRET_PERIODE", defaultVerdi = "false") Boolean persisterPerioderMedDiff) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
@@ -60,19 +58,28 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
         LOG_CONTEXT.add("ytelseType", fagsakYtelseType);
 
         var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste.finnTjeneste(fagsakYtelseType);
-        var kandidaterTilRevurdering = vurderOmVedtakPåvirkerSakerTjeneste.utledSakerMedPerioderSomErKanVærePåvirket(vedtakHendelse);
+        var kandidaterTilRevurdering = vurderOmVedtakPåvirkerSakerTjeneste
+                .utledSakerMedPerioderSomErKanVærePåvirket(vedtakHendelse);
 
-        log.info("Etter '{}' vedtak på saksnummer='{}', skal følgende saker '{}' som skal revurderes som følge av vedtak.", fagsakYtelseType, vedtakHendelse.getSaksnummer(), kandidaterTilRevurdering);
+        log.info(
+                "Etter '{}' vedtak på saksnummer='{}', skal følgende saker '{}' som skal revurderes som følge av vedtak.",
+                fagsakYtelseType, vedtakHendelse.getSaksnummer(), kandidaterTilRevurdering);
 
         for (SakMedPeriode kandidatsaksnummer : kandidaterTilRevurdering) {
-            ProsessTaskData tilRevurderingTaskData = new ProsessTaskData(OpprettRevurderingEllerOpprettDiffTask.TASKNAME);
-            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON.getKode());
+            ProsessTaskData tilRevurderingTaskData = new ProsessTaskData(
+                    OpprettRevurderingEllerOpprettDiffTask.TASKNAME);
+            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK,
+                    BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON.getKode());
             if (persisterPerioderMedDiff) {
-                tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODER, utledPerioder(kandidatsaksnummer.getPerioder()));
+                tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODER,
+                        utledPerioder(kandidatsaksnummer.getPerioder()));
             }
-            var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer.getSaksnummer(), false).orElseThrow();
-            var tilRevurdering = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
-            tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
+            var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer.getSaksnummer(), false)
+                    .orElseThrow();
+            var tilRevurdering = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId())
+                    .orElseThrow();
+            tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(),
+                    tilRevurdering.getAktørId().getId());
 
             fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
         }

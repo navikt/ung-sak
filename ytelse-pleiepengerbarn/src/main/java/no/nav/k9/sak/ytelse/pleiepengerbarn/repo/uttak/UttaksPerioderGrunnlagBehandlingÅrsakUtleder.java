@@ -2,7 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;

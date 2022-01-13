@@ -6,8 +6,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.prosesstask.api.ProsessTaskData;

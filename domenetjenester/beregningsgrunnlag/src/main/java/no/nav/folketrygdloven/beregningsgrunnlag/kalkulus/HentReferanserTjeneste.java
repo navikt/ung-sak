@@ -12,8 +12,8 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.k9.kodeverk.vilkår.Utfall;

@@ -4,8 +4,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;

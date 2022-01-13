@@ -5,8 +5,8 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import no.nav.k9.oppdrag.kontrakt.BehandlingReferanse;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;

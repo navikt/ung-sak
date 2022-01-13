@@ -6,8 +6,8 @@ import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.kontrakt.tilsyn.aksjonspunkt.VurderingNattevåkDto;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderingNattevåkDto.class, adapter = AksjonspunktOppdaterer.class)

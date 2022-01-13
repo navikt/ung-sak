@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableSet;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.VilkårType;

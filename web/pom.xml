@@ -61,7 +61,7 @@
 
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
-            <artifactId>kontrakt</artifactId>
+            <artifactId>kontrakt-jakarta</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
@@ -70,7 +70,7 @@
 
         <dependency>
             <groupId>no.nav.foreldrepenger.abakus</groupId>
-            <artifactId>abakus-kontrakt</artifactId>
+            <artifactId>abakus-kontrakt-jakarta</artifactId>
         </dependency>
 
         <dependency>
@@ -151,8 +151,8 @@
             <artifactId>jersey-cdi1x-servlet</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-json-jackson</artifactId>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.ext</groupId>
@@ -197,7 +197,7 @@
             <artifactId>jetty-annotations</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>javax.annotation</groupId>
+                    <groupId>jakarta.annotation</groupId>
                     <artifactId>javax.annotation-api</artifactId>
                 </exclusion>
             </exclusions>
@@ -272,7 +272,7 @@
         </dependency>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-jaxrs2</artifactId>
+            <artifactId>swagger-jaxrs2-jakarta</artifactId>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>

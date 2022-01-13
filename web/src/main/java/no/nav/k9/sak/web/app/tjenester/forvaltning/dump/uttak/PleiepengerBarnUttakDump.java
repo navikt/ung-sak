@@ -11,8 +11,8 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;

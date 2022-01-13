@@ -4,9 +4,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 

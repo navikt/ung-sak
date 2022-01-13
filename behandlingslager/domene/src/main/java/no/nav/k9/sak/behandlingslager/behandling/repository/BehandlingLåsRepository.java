@@ -4,12 +4,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.persistence.CacheRetrieveMode;
-import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
-import javax.persistence.LockModeType;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.persistence.CacheRetrieveMode;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.LockModeType;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 

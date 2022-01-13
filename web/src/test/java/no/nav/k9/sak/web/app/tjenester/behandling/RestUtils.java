@@ -7,11 +7,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
 
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.web.app.ApplicationConfig;

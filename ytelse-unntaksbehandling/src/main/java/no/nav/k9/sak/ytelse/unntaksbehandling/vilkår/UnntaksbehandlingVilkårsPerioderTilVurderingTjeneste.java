@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;

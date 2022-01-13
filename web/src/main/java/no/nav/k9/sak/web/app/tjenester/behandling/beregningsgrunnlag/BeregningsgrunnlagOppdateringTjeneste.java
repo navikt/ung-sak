@@ -7,8 +7,8 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;

@@ -3,7 +3,7 @@ package no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Instance;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;

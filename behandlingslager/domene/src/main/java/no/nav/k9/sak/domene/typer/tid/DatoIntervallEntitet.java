@@ -6,8 +6,8 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
 import com.vladmihalcea.hibernate.type.range.Range;
 

@@ -10,7 +10,7 @@
         <version>${revision}${sha1}${changelist}</version>
     </parent>
 
-    <artifactId>kontrakt</artifactId>
+    <artifactId>kontrakt-jakarta</artifactId>
     <packaging>jar</packaging>
     <name>K9SAK :: Kontrakter</name>
     <description>Kontrakter for tjenester eksponert / topics publisert av K9SAK</description>
@@ -23,7 +23,7 @@
 
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
-            <artifactId>kodeverk</artifactId>
+            <artifactId>kodeverk-jakarta</artifactId>
         </dependency>
 
 

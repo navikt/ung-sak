@@ -10,7 +10,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
 

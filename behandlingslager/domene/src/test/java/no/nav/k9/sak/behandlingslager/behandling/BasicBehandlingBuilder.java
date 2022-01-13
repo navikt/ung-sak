@@ -1,6 +1,6 @@
 package no.nav.k9.sak.behandlingslager.behandling;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;

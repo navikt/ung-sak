@@ -152,7 +152,7 @@
 
             <dependency>
                 <groupId>no.nav.k9.oppdrag.kontrakt</groupId>
-                <artifactId>oppdrag-kontrakter</artifactId>
+                <artifactId>oppdrag-kontrakter-jakarta</artifactId>
                 <version>1.4.2</version>
             </dependency>
             <dependency>
@@ -162,27 +162,27 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
-                <artifactId>eksterne-kontrakter</artifactId>
+                <artifactId>formidling-kontrakt-jakarta</artifactId>
                 <version>0.0.19</version>
             </dependency>
             <dependency>
 			    <groupId>no.nav.foreldrepenger.kontrakter</groupId>
-			    <artifactId>fp-feed-vedtak-tjenestespesifikasjon</artifactId>
+			    <artifactId>fp-feed-vedtak-tjenestespesifikasjon-jakarta</artifactId>
                 <version>6.1.3</version>
 		    </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-                <artifactId>hendelse-historikk-innslag</artifactId>
+                <artifactId>hendelse-historikk-innslag-jakarta</artifactId>
                 <version>6.1.3</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
-                <artifactId>abakus-kontrakt</artifactId>
+                <artifactId>abakus-kontrakt-jakarta</artifactId>
                 <version>1.3.26</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
-                <artifactId>kalkulus-kontrakt</artifactId>
+                <artifactId>kalkulus-kontrakt-jakarta</artifactId>
                 <version>1.5.5</version>
             </dependency>
 
@@ -198,12 +198,12 @@
             </dependency>
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
-                <artifactId>swagger-jaxrs2</artifactId>
+                <artifactId>swagger-jaxrs2-jakarta</artifactId>
                 <version>${swagger.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
-                <artifactId>swagger-core</artifactId>
+                <artifactId>swagger-core-jakarta</artifactId>
                 <version>${swagger.version}</version>
             </dependency>
 
@@ -227,7 +227,7 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.sak</groupId>
-                <artifactId>kodeverk</artifactId>
+                <artifactId>kodeverk-jakarta</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -237,7 +237,7 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.sak</groupId>
-                <artifactId>kontrakt</artifactId>
+                <artifactId>kontrakt-jakarta</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -370,22 +370,22 @@
 
             <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>soknad-frisinn</artifactId>
+                <artifactId>soknad-frisinn-jakarta</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>soknad</artifactId>
+                <artifactId>soknad-jakarta</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>innsyn</artifactId>
+                <artifactId>innsyn-jakarta</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
            <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>inntektsmelding-v1</artifactId>
+                <artifactId>inntektsmelding-v1-jakarta</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
 
@@ -511,12 +511,12 @@
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
-                <version>2.4.0-b180830.0438</version>
+                <version>3.0.1</version>
             </dependency>
             <dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
-                <version>2.4.0-b180830.0359</version>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>3.0.1</version>
             </dependency>
 
             <!-- Java11 -->
