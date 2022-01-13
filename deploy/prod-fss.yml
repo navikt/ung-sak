@@ -242,4 +242,4 @@ spec:
 
     # FRISINN NYE REGLER 2022
     - name: FRISINN_NYTT_STP_TOGGLE
-        value: "false"
+      value: "false"
