@@ -15,12 +15,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.abakus.vedtak.ytelse.Ytelse;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -28,6 +31,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.hendelse.vedtak.SakMedPeriode;
 import no.nav.k9.sak.hendelse.vedtak.VurderOmVedtakPåvirkerSakerTjeneste;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -38,6 +42,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PSBVilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
@@ -54,6 +59,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
+    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
     VurderOmPSBVedtakPåvirkerAndreSakerTjeneste() {
     }
@@ -67,6 +73,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
                                                        SykdomGrunnlagService sykdomGrunnlagService,
                                                        ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
                                                        EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
+                                                       @FagsakYtelseTypeRef("PSB") PSBVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                        SamtidigUttakTjeneste samtidigUttakTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
@@ -77,6 +84,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
+        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
     @Override
@@ -125,11 +133,9 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
                 var skalRevurderesPgaEtablertTilsyn = perioderMedRevurderingPgaEtablertTilsyn(referanse);
                 var skalRevurderesPgaNattevåkOgBeredskap = perioderMedRevurderesPgaNattevåkOgBeredskap(referanse);
                 var skalRevurderesPgaEndretUttak = perioderMedRevurderingPgaUttak(sisteBehandlingPåKandidat, referanse);
+
                 if (!skalRevurderesPgaSykdom.isEmpty() || !skalRevurderesPgaEtablertTilsyn.isEmpty() || !skalRevurderesPgaNattevåkOgBeredskap.isEmpty() || !skalRevurderesPgaEndretUttak.isEmpty()) {
-                    var perioderMedEndring = new TreeSet<>(skalRevurderesPgaEtablertTilsyn);
-                    perioderMedEndring.addAll(skalRevurderesPgaNattevåkOgBeredskap);
-                    perioderMedEndring.addAll(skalRevurderesPgaSykdom);
-                    perioderMedEndring.addAll(skalRevurderesPgaEndretUttak);
+                    TreeSet<DatoIntervallEntitet> perioderMedEndring = utledPerioder(skalRevurderesPgaSykdom, skalRevurderesPgaEtablertTilsyn, skalRevurderesPgaNattevåkOgBeredskap, skalRevurderesPgaEndretUttak);
                     result.add(new SakMedPeriode(kandidatsaksnummer, perioderMedEndring));
                     log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty());
                 }
@@ -137,6 +143,51 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
         }
 
         return result;
+    }
+
+    private TreeSet<DatoIntervallEntitet> utledPerioder(NavigableSet<DatoIntervallEntitet> skalRevurderesPgaSykdom, NavigableSet<DatoIntervallEntitet> skalRevurderesPgaEtablertTilsyn, NavigableSet<DatoIntervallEntitet> skalRevurderesPgaNattevåkOgBeredskap, NavigableSet<DatoIntervallEntitet> skalRevurderesPgaEndretUttak) {
+        var perioderMedEndring = new TreeSet<>(skalRevurderesPgaEtablertTilsyn);
+        perioderMedEndring.addAll(skalRevurderesPgaNattevåkOgBeredskap);
+        perioderMedEndring.addAll(skalRevurderesPgaSykdom);
+        perioderMedEndring.addAll(skalRevurderesPgaEndretUttak);
+
+        var tidslinje = new LocalDateTimeline<Boolean>(List.of());
+
+        for (DatoIntervallEntitet periode : perioderMedEndring) {
+            tidslinje = tidslinje.combine(new LocalDateSegment<>(periode.toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        // tett hull
+        var kantIKantVurderer = vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer();
+        var segmenterSomMangler = utledHullSomMåTettes(tidslinje, kantIKantVurderer);
+        for (LocalDateSegment<Boolean> segment : segmenterSomMangler) {
+            tidslinje = tidslinje.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        return tidslinje.compress()
+            .toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private List<LocalDateSegment<Boolean>> utledHullSomMåTettes(LocalDateTimeline<Boolean> tidslinjen, KantIKantVurderer kantIKantVurderer) {
+        var segmenter = tidslinjen.compress().toSegments();
+
+        LocalDateSegment<Boolean> periode = null;
+        var resultat = new ArrayList<LocalDateSegment<Boolean>>();
+
+        for (LocalDateSegment<Boolean> segment : segmenter) {
+            if (periode == null) {
+                periode = segment;
+            } else if (kantIKantVurderer.erKantIKant(DatoIntervallEntitet.fra(segment.getLocalDateInterval()), DatoIntervallEntitet.fra(periode.getLocalDateInterval()))) {
+                resultat.add(new LocalDateSegment<>(periode.getFom(), segment.getTom(), periode.getValue()));
+            } else {
+                periode = segment;
+            }
+        }
+
+        return resultat;
     }
 
     private boolean skalRevurderesPgaUttak(Behandling sisteBehandlingPåKandidat, BehandlingReferanse referanse) {
@@ -214,7 +265,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
             .stream()
             .map(VilkårPeriode::getPeriode)
             .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
-            .collect(Collectors.toList()));
+            .toList());
 
         return vurderingsperioder;
     }
