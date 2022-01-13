@@ -36,13 +36,13 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
 
     @Inject
     public RapidsBehovKafkaProducer(
-        @KonfigVerdi(value = "kafka.behov.topic", defaultVerdi = "k9-rapid-v2", required = false) String topic,
+        @KonfigVerdi(value = "KAFKA_BEHOV_TOPIC", defaultVerdi = "k9-rapid-v2", required = false) String topic,
         @KonfigVerdi(value = "KAFKA_BROKERS", required = false) String aivenBootstrapServers,
         @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String aivenTruststorePath,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String aivenKeystorePath,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String aivenCredstorePassword,
         @KonfigVerdi(value = "KAFKA_OVERRIDE_KEYSTORE_PASSWORD", required = false) String overrideKeystorePassword,
-        @KonfigVerdi(value = "bootstrap.servers", required = false) String onpremBootstrapServers,
+        @KonfigVerdi(value = "BOOTSTRAP_SERVERS", required = false) String onpremBootstrapServers,
         @KonfigVerdi(value = "K9_RAPID_AIVEN", defaultVerdi = "false") boolean isAivenInUse,
         @KonfigVerdi(value = "systembruker.username", defaultVerdi = "vtp") String username,
         @KonfigVerdi(value = "systembruker.password", defaultVerdi = "vtp") String password) {
@@ -72,7 +72,9 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
             properties.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, aivenCredstorePassword);
             properties.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, aivenCredstorePassword);
         }
-        this.producer = createProducerWithSerializers(properties);
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        this.producer = new KafkaProducer<>(properties);
     }
 
     @Override
@@ -100,9 +102,4 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
         }
     }
 
-    private static Producer<String, String> createProducerWithSerializers(Properties properties) {
-        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        return new KafkaProducer<>(properties);
-    }
 }
