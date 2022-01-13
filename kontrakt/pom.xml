@@ -17,6 +17,7 @@
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
+        <legacy.artifactId>kontrakt</legacy.artifactId>
     </properties>
 
     <dependencies>
@@ -31,7 +32,9 @@
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
+            <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>jakarta.el</artifactId>

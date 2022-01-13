@@ -16,7 +16,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 
-import javassist.Modifier;
+import java.lang.reflect.Modifier;
 
 /** Konfig for å scanne JPA klasser. */
 public class TraverseJpaEntityGraphConfig extends TraverseGraphConfig {

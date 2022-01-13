@@ -33,14 +33,14 @@
 
         <argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN -Duser.timezone='Europe/Oslo'</argLine>
 
-        <revision>3.2.0</revision>
+        <revision>4.0.0</revision>
         <sha1></sha1>
         <changelist>-SNAPSHOT</changelist>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <junit.version>5.8.2</junit.version>
-        <felles.version>0.2.18</felles.version>
+        <felles.version>0.6.5</felles.version>
         <swagger.version>2.1.12</swagger.version>
         <k9format.version>5.7.4</k9format.version>
     </properties>
@@ -73,12 +73,6 @@
                 <version>4.0.2</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.ow2.asm</groupId>
-                <artifactId>asm</artifactId>
-                <version>9.2</version>
-            </dependency>
-
             <!-- Felles biblioteker - Importerte avhengigheter. -->
             <dependency>
                 <groupId>no.nav.fpsak.tidsserie</groupId>
@@ -89,14 +83,6 @@
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>7.0.2.Final</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.weld</groupId>
-                <artifactId>weld-core-bom</artifactId>
-                <version>3.1.8.Final</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
 
             <dependency>
@@ -145,7 +131,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>0.1.9</version>
+                <version>0.5.0</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -491,17 +477,16 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>4.2.0</version>
-            </dependency>
-            <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-api</artifactId>
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>4.2.0</version>
+            </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest</artifactId>
@@ -511,7 +496,7 @@
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
-                <version>3.0.1</version>
+                <version>3.0.2</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>
@@ -748,7 +733,7 @@
             </plugin>
 
             <plugin>
-				<!-- FOR Å LEGGE VED JAKARTA EE9 KOMPATIBLE ARTEFAKTER I TILLEGG -->
+				<!-- FOR Å LEGGE VED JAVAX 8 KOMPATIBLE ARTEFAKTER I TILLEGG -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
@@ -759,19 +744,19 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <target>
+			                <target>
                                 <property name="plugin_classpath" refid="maven.plugin.classpath" />
                                 <java classname="no.nav.k9.dev.jakarta.App">
                                     <arg value="${project.build.directory}/${project.build.finalName}.jar" />
-                                    <arg value="${project.build.directory}/${project.artifactId}-jakarta-${project.version}.jar" />
+                                    <arg value="${project.build.directory}/${legacy.artifactId}-${project.version}.jar" />
                                     <arg value="-q" />
                                     <arg value="-o" />
+                                    <arg value="--reverse" />
                                     <classpath>
                                         <pathelement path="${plugin_classpath}" />
                                     </classpath>
                                 </java>
                             </target>
-                            <skip>${maven.deploy.skip}</skip>
                         </configuration>
                     </execution>
                     <execution>
@@ -781,19 +766,19 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <target>
+			                <target>
                                 <property name="plugin_classpath" refid="maven.plugin.classpath" />
                                 <java classname="no.nav.k9.dev.jakarta.App">
                                     <arg value="${project.build.directory}/${project.build.finalName}-sources.jar" />
-                                    <arg value="${project.build.directory}/${project.artifactId}-jakarta-${project.version}-sources.jar" />
+                                    <arg value="${project.build.directory}/${legacy.artifactId}-${project.version}-sources.jar" />
                                     <arg value="-q" />
                                     <arg value="-o" />
+                                    <arg value="--reverse" />
                                     <classpath>
                                         <pathelement path="${plugin_classpath}" />
                                     </classpath>
                                 </java>
                             </target>
-                            <skip>${maven.deploy.skip}</skip>
                         </configuration>
                     </execution>
                 </executions>
@@ -819,14 +804,14 @@
         </plugins>
     </build>
 
-    <profiles>
+     <profiles>
 		<!-- FOR Å LEGGE VED JAKARTA EE9 KOMPATIBLE ARTEFAKTER I TILLEGG -->
 		<!-- (bruker ikke attach-jar da den ikke støtter alterntiv artefakt navn) -->
         <profile>
             <id>jar-module</id>
             <activation>
                 <file>
-                    <exists>./export-kontrakt</exists>
+                    <exists>src/main/java/</exists>
                 </file>
             </activation>
             <build>
@@ -839,11 +824,12 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <target>
-                                        <unzip src="${project.build.directory}/${project.artifactId}-jakarta-${project.version}.jar"
-                                            dest="${project.build.directory}/jakarta">
+                                        <unzip src="${project.build.directory}/${legacy.artifactId}-${project.version}.jar"
+                                            dest="${project.build.directory}/javax">
                                             <patternset>
                                                 <include name="META-INF/maven/**/pom.xml" />
                                             </patternset>
+                                            <mapper type="flatten"/>
                                         </unzip>
                                     </target>
                                 </configuration>
@@ -858,15 +844,15 @@
                                     <target>
                                         <!-- ompakker jar fil uten pom.xml -->
                                         <jar
-                                            destfile="${project.build.directory}/${project.artifactId}-jakarta-${project.version}-TOBEDEPLOYED.jar">
+                                            destfile="${project.build.directory}/${legacy.artifactId}-${project.version}-TOBEDEPLOYED.jar">
                                             <zipfileset
-                                                src="${project.build.directory}/${project.artifactId}-jakarta-${project.version}.jar"
+                                                src="${project.build.directory}/${legacy.artifactId}-${project.version}.jar"
                                                 excludes="META-INF/maven/**" />
                                         </jar>
                                         <jar
-                                            destfile="${project.build.directory}/${project.artifactId}-jakarta-${project.version}-sources-TOBEDEPLOYED.jar">
+                                            destfile="${project.build.directory}/${legacy.artifactId}-${project.version}-sources-TOBEDEPLOYED.jar">
                                             <zipfileset
-                                                src="${project.build.directory}/${project.artifactId}-jakarta-${project.version}-sources.jar"
+                                                src="${project.build.directory}/${legacy.artifactId}-${project.version}-sources.jar"
                                                 excludes="META-INF/maven/**" />
                                         </jar>
                                     </target>
@@ -888,9 +874,9 @@
                                     <goal>install-file</goal>
                                 </goals>
                                 <configuration>
-                                    <pomFile>${project.build.directory}/jakarta/META-INF/maven/${project.groupId}/${project.artifactId}/pom.xml</pomFile>
-                                    <file>${project.build.directory}/${project.artifactId}-jakarta-${project.version}-TOBEDEPLOYED.jar</file>
-                                    <sources>${project.build.directory}/${project.artifactId}-jakarta-${project.version}-sources-TOBEDEPLOYED.jar</sources>
+                                    <pomFile>${project.build.directory}/javax/pom.xml</pomFile>
+                                    <file>${project.build.directory}/${legacy.artifactId}-${project.version}-TOBEDEPLOYED.jar</file>
+                                    <sources>${project.build.directory}/${legacy.artifactId}-${project.version}-sources-TOBEDEPLOYED.jar</sources>
                                 </configuration>
                             </execution>
                         </executions>
@@ -907,10 +893,11 @@
                                 <configuration>
                                     <repositoryId>github</repositoryId>
                                     <!-- må matche unpacked pom.xml fra over (disse endrer ikke path ved transform p.t.) -->
-                                    <pomFile>${project.build.directory}/jakarta/META-INF/maven/${project.groupId}/${project.artifactId}/pom.xml</pomFile>
+                                    <pomFile>${project.build.directory}/javax/pom.xml</pomFile>
                                     <url>${project.distributionManagement.repository.url}</url>
-                                    <file>${project.build.directory}/${project.artifactId}-jakarta-${project.version}-TOBEDEPLOYED.jar</file>
-                                    <sources>${project.build.directory}/${project.artifactId}-jakarta-${project.version}-sources-TOBEDEPLOYED.jar</sources>
+                                    <file>${project.build.directory}/${legacy.artifactId}-${project.version}-TOBEDEPLOYED.jar</file>
+                                    <sources>${project.build.directory}/${legacy.artifactId}-${project.version}-sources-TOBEDEPLOYED.jar</sources>
+                                    <skip>${maven.deploy.skip}</skip>
                                 </configuration>
                             </execution>
                         </executions>
@@ -925,6 +912,11 @@
             <id>github</id>
             <name>GitHub Apache Maven Packages</name>
             <url>https://maven.pkg.github.com/navikt/k9-sak/</url>
+        </repository>
+        <repository>
+            <id>central</id>
+            <name>Maven Central</name>
+            <url>https://repo1.maven.org/maven2/</url>
         </repository>
 		<repository>
             <!-- bruker SNAPSHOT versjon av eclipse-transformer (0.3.0-SNAPSHOT) -->

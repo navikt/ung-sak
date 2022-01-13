@@ -17,6 +17,7 @@
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
+        <legacy.artifactId>kodeverk</legacy.artifactId>
     </properties>
 
     <dependencies>
@@ -24,8 +25,9 @@
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
+            <scope>provided</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
