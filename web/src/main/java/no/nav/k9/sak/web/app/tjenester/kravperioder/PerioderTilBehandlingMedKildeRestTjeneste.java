@@ -42,6 +42,7 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 @Produces(MediaType.APPLICATION_JSON)
 public class PerioderTilBehandlingMedKildeRestTjeneste {
 
+    public static final String BEHANDLING_PERIODER = "/behandling/perioder";
     private BehandlingRepository behandlingRepository;
     private SøknadsfristTjenesteProvider søknadsfristTjenesteProvider;
     private UtledStatusPåPerioderTjeneste statusPåPerioderTjeneste;
@@ -62,7 +63,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     }
 
     @GET
-    @Path("/behandling/perioder")
+    @Path(BEHANDLING_PERIODER)
     @Operation(description = "Hent perioder til behandling og kilden til disse",
         summary = ("Hent perioder til behandling og kilden til disse"),
         tags = "perioder",
