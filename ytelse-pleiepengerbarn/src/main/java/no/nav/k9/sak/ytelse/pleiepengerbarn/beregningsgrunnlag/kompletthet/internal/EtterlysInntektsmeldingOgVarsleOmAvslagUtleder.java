@@ -38,7 +38,7 @@ class EtterlysInntektsmeldingOgVarsleOmAvslagUtleder {
             }
             var fristTid = FristKalkulerer.regnUtFrist(AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING, eksisterendeFrist);
 
-            return KompletthetsAksjon.automatiskEtterlysning(AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING, fristTid, manglerSomIkkeHarBlittEtterlystEnda, DokumentMalType.ETTERLYS_INNTEKTSMELDING_PURRING);
+            return KompletthetsAksjon.automatiskEtterlysning(AksjonspunktDefinisjon.AUTO_VENT_ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING, fristTid, relevanteMangler, DokumentMalType.ETTERLYS_INNTEKTSMELDING_PURRING);
         } else if (harEksisterendeFristSomHarUtløpt(eksisterendeFrist) && erIkkeKomplett) {
             return KompletthetsAksjon.uavklart();
         }

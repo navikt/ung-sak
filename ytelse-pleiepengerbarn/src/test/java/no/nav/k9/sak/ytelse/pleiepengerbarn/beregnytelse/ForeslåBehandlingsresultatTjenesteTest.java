@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
-import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -92,6 +90,11 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         }
 
         @Override
+        public Set<VilkårType> definerendeVilkår() {
+            return Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+        }
+
+        @Override
         public int maksMellomliggendePeriodeAvstand() {
             return 0;
         }
@@ -103,7 +106,6 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     public void setup() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
 
-        when(medlemTjeneste.utledVilkårUtfall(any())).thenReturn(new Tuple<>(Utfall.OPPFYLT, Avslagsårsak.UDEFINERT));
         revurderingBehandlingsresultatutleder = Mockito.spy(new DefaultRevurderingBehandlingsresultatutleder());
         tjeneste = new UttakForeslåBehandlingsresultatTjeneste(repositoryProvider,
             vedtakVarselRepository,
@@ -230,6 +232,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
 
         var vilkårsresultatBuilder = Vilkårene.builder();
+        leggTilVilkårMedUtfall(Utfall.OPPFYLT, vilkårsresultatBuilder, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, null);
         if (utfall.equals(Utfall.OPPFYLT)) {
             leggTilVilkårMedUtfall(utfall, vilkårsresultatBuilder, VilkårType.OPPTJENINGSVILKÅRET, null);
             leggTilVilkårMedUtfall(utfall, vilkårsresultatBuilder, VilkårType.MEDLEMSKAPSVILKÅRET, null);

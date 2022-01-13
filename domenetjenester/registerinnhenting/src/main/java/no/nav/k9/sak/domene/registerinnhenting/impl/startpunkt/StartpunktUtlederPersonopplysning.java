@@ -4,30 +4,32 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningGrunnlagDiff;
-import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
+import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 
 @ApplicationScoped
 @GrunnlagRef("PersonInformasjon")
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @FagsakYtelseTypeRef("OMP")
 @FagsakYtelseTypeRef("FRISINN")
 class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
 
-    private PersonopplysningRepository personopplysningRepository;
-
     private final String source = this.getClass().getSimpleName();
+    private PersonopplysningRepository personopplysningRepository;
 
     StartpunktUtlederPersonopplysning() {
         // For CDI
@@ -40,8 +42,8 @@ class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
 
     @Override
     public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {
-        PersonopplysningGrunnlagEntitet grunnlag1 = personopplysningRepository.hentPersonopplysningerPåId((Long)grunnlagId1);
-        PersonopplysningGrunnlagEntitet grunnlag2 = personopplysningRepository.hentPersonopplysningerPåId((Long)grunnlagId2);
+        PersonopplysningGrunnlagEntitet grunnlag1 = personopplysningRepository.hentPersonopplysningerPåId((Long) grunnlagId1);
+        PersonopplysningGrunnlagEntitet grunnlag2 = personopplysningRepository.hentPersonopplysningerPåId((Long) grunnlagId2);
         return utled(ref, grunnlag1, grunnlag2);
     }
 
@@ -72,14 +74,14 @@ class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
         }
         if (poDiff.erBarnDødsdatoEndret()) {
             FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.BEREGNING, "barnets dødsdato", grunnlag1.getId(), grunnlag2.getId());
-            startpunkter.add(StartpunktType.BEREGNING);
+            startpunkter.add(StartpunktType.UTTAKSVILKÅR);
         }
 
         final LocalDate skjæringstidspunkt = ref.getUtledetSkjæringstidspunkt();
         if (personstatusUnntattDødEndret) {
             leggTilBasertPåSTP(grunnlag1.getId(), grunnlag2.getId(), startpunkter, poDiff.erPersonstatusEndretForSøkerFør(skjæringstidspunkt), "personstatus");
         }
-        if (poDiff.erAdresserEndretFør(null)) {
+        if (!Objects.equals(FagsakYtelseType.PSB,ref.getFagsakYtelseType()) && poDiff.erAdresserEndretFør(null)) {
             leggTilBasertPåSTP(grunnlag1.getId(), grunnlag2.getId(), startpunkter, poDiff.erSøkersAdresseEndretFør(skjæringstidspunkt), "adresse");
         }
 
@@ -87,7 +89,7 @@ class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
             FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP, "region", grunnlag1.getId(), grunnlag2.getId());
             startpunkter.add(StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP);
         }
-        if(poDiff.erRelasjonerEndret()) {
+        if (poDiff.erRelasjonerEndret()) {
             leggTilForRelasjoner(grunnlag1.getId(), grunnlag2.getId(), poDiff, startpunkter);
         }
         if (startpunkter.isEmpty()) {
@@ -102,9 +104,6 @@ class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
         if (endretFørStp) {
             FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP, loggMelding, g1Id, g2Id);
             startpunkter.add(StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP);
-        } else {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UTTAKSVILKÅR, loggMelding, g1Id, g2Id);
-            startpunkter.add(StartpunktType.UTTAKSVILKÅR);
         }
     }
 

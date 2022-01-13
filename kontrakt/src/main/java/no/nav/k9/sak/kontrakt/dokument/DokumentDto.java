@@ -22,6 +22,7 @@ public class DokumentDto {
     private String href;
     @JsonIgnore
     private String basePath;
+    private String brevkode;
 
     public DokumentDto(String basePath) {
         this.basePath = basePath + "&journalpostId=%s&dokumentId=%s";
@@ -63,6 +64,14 @@ public class DokumentDto {
     public void setDokumentId(String dokumentId) {
         this.dokumentId = dokumentId;
         genererLenke();
+    }
+
+    public void setBrevkode(String brevkode) {
+        this.brevkode = brevkode;
+    }
+
+    public String getBrevkode() {
+        return brevkode;
     }
 
     public String getGjelderFor() {

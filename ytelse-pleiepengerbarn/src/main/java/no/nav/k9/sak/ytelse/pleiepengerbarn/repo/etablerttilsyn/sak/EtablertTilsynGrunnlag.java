@@ -27,7 +27,6 @@ public class EtablertTilsynGrunnlag extends BaseEntitet {
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
     private Long behandlingId;
 
-
     @ManyToOne
     @Immutable
     @JoinColumn(name = "etablert_tilsyn_id", nullable = false, updatable = false, unique = true)

@@ -18,6 +18,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
@@ -66,9 +67,10 @@ class ArbeidBrukerBurdeSøktOmUtlederTest {
             List.of(),
             List.of(),
             List.of(),
+            List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, timeline, opprettVilkår(timeline), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, timeline, opprettVilkår(timeline), new OpptjeningResultatBuilder(null).build());
 
         var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         var brukerAktørId = AktørId.dummy();
@@ -110,9 +112,10 @@ class ArbeidBrukerBurdeSøktOmUtlederTest {
             List.of(),
             List.of(),
             List.of(),
+            List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, timeline, opprettVilkår(timeline), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, timeline, opprettVilkår(timeline), new OpptjeningResultatBuilder(null).build());
 
         var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         var brukerAktørId = AktørId.dummy();

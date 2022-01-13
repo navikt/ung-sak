@@ -47,6 +47,7 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     VM_1035("1035", "Ikke tilstrekkelig opptjening"),
 
     VM_1041("1041", "for lavt brutto beregningsgrunnlag"),
+    VM_1043("1043", "Manglende inntektsgrunnlag for periode"),
 
     VM_1051("1051", "Stebarnsadopsjon ikke flere dager igjen"),
 

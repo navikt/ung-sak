@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -19,6 +19,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -47,6 +48,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.SøktUttak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Vilkårsperiode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.YtelseType;
 
 @Dependent
 public class MapInputTilUttakTjeneste {
@@ -57,7 +59,7 @@ public class MapInputTilUttakTjeneste {
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
-            @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
+                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
     }
@@ -66,6 +68,7 @@ public class MapInputTilUttakTjeneste {
     public Uttaksgrunnlag hentUtOgMapRequest(BehandlingReferanse referanse) {
         return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, false));
     }
+
     public Uttaksgrunnlag hentUtUbesluttededataOgMapRequest(BehandlingReferanse referanse) {
         return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, true));
     }
@@ -75,13 +78,11 @@ public class MapInputTilUttakTjeneste {
 
         var behandling = input.getBehandling();
         var vurderteSøknadsperioder = input.getVurderteSøknadsperioder();
-        var uttaksPerioderGrunnlag = input.getUttaksGrunnlag();
         var personopplysningerAggregat = input.getPersonopplysningerAggregat();
 
         // Henter ut alt og lager tidlinje av denne for så å ta ut den delen som er relevant
         // NB! Kan gi issues ved lange fagsaker mtp ytelse
-        var perioderFraSøknader = uttaksPerioderGrunnlag.getOppgitteSøknadsperioder()
-            .getPerioderFraSøknadene();
+        var perioderFraSøknader = input.getPerioderFraSøknad();
         var kravDokumenter = vurderteSøknadsperioder.keySet();
 
         evaluerDokumenter(perioderFraSøknader, kravDokumenter);
@@ -123,7 +124,7 @@ public class MapInputTilUttakTjeneste {
 
         final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(input.getEtablertTilsynPerioder());
 
-        var innvilgedePerioderMedSykdom = finnInnvilgedePerioderSykdom(input.getVilkårene());
+        var innvilgedePerioderMedSykdom = finnInnvilgedePerioderSykdom(input.getVilkårene(), input.getDefinerendeVilkårtyper());
 
         var unntakEtablertTilsynForPleietrengende = input.getUnntakEtablertTilsynForPleietrengende().orElse(null);
         var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
@@ -132,6 +133,7 @@ public class MapInputTilUttakTjeneste {
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
 
         return new Uttaksgrunnlag(
+            mapTilYtelseType(behandling),
             barn,
             søker,
             behandling.getFagsak().getSaksnummer().getVerdi(),
@@ -149,17 +151,25 @@ public class MapInputTilUttakTjeneste {
         );
     }
 
-    private Set<DatoIntervallEntitet> finnInnvilgedePerioderSykdom(Vilkårene vilkårene) {
-        var s1 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR).orElseThrow()
-            .getPerioder()
-            .stream();
-        var s2 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR).orElseThrow()
-            .getPerioder()
-            .stream();
-        return Stream.concat(s1, s2)
-            .filter(it -> no.nav.k9.kodeverk.vilkår.Utfall.OPPFYLT.equals(it.getUtfall()))
-            .map(VilkårPeriode::getPeriode)
-            .collect(Collectors.toSet());
+    private YtelseType mapTilYtelseType(Behandling behandling) {
+        return switch (behandling.getFagsakYtelseType()) {
+            case PLEIEPENGER_SYKT_BARN -> YtelseType.PSB;
+            case PLEIEPENGER_NÆRSTÅENDE -> YtelseType.PLS;
+            default -> throw new IllegalStateException("Ikke støttet ytelse for uttak Pleiepenger: " + behandling.getFagsakYtelseType());
+        };
+    }
+
+    private Set<DatoIntervallEntitet> finnInnvilgedePerioderSykdom(Vilkårene vilkårene, Set<VilkårType> definerendeVilkårtyper) {
+        final var resultat = new TreeSet<DatoIntervallEntitet>();
+        for (VilkårType vilkårType : definerendeVilkårtyper) {
+            var innvilgedePerioder = vilkårene.getVilkår(vilkårType).orElseThrow().getPerioder()
+                .stream()
+                .filter(it -> no.nav.k9.kodeverk.vilkår.Utfall.OPPFYLT.equals(it.getUtfall()))
+                .map(VilkårPeriode::getPeriode)
+                .collect(Collectors.toSet());
+            resultat.addAll(innvilgedePerioder);
+        }
+        return resultat;
     }
 
     private RettVedDød utledRettVedDød(InputParametere input) {
@@ -201,14 +211,14 @@ public class MapInputTilUttakTjeneste {
             .stream()
             .filter(it -> erRelevantForBehandling(it, innvilgedePerioderMedSykdom))
             .forEach(periode -> {
-                var utfall = switch (periode.getResultat()) {
-                    case OPPFYLT -> Utfall.OPPFYLT;
-                    case IKKE_OPPFYLT -> Utfall.IKKE_OPPFYLT;
-                    case IKKE_VURDERT -> throw new IllegalStateException("Skal ikke komme perioder som ikke er vurdert til uttak.");
-                };
-                map.put(new LukketPeriode(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato()), utfall);
-            }
-        );
+                    var utfall = switch (periode.getResultat()) {
+                        case OPPFYLT -> Utfall.OPPFYLT;
+                        case IKKE_OPPFYLT -> Utfall.IKKE_OPPFYLT;
+                        case IKKE_VURDERT -> throw new IllegalStateException("Skal ikke komme perioder som ikke er vurdert til uttak.");
+                    };
+                    map.put(new LukketPeriode(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato()), utfall);
+                }
+            );
         return map;
     }
 
@@ -254,6 +264,7 @@ public class MapInputTilUttakTjeneste {
             case INGEN -> Pleiebehov.PROSENT_0;
             case KONTINUERLIG_TILSYN -> Pleiebehov.PROSENT_100;
             case UTVIDET_KONTINUERLIG_TILSYN, INNLEGGELSE -> Pleiebehov.PROSENT_200;
+            case LIVETS_SLUTT_TILSYN -> Pleiebehov.PROSENT_6000;
             default -> throw new IllegalStateException("Ukjent Pleiegrad: " + grad);
         };
     }
@@ -261,9 +272,6 @@ public class MapInputTilUttakTjeneste {
     private HashMap<String, List<Vilkårsperiode>> toInngangsvilkår(Vilkårene vilkårene) {
         final HashMap<String, List<Vilkårsperiode>> inngangsvilkår = new HashMap<>();
         vilkårene.getVilkårene().forEach(v -> {
-            if (v.getVilkårType() == VilkårType.BEREGNINGSGRUNNLAGVILKÅR) {
-                return;
-            }
             final List<Vilkårsperiode> vilkårsperioder = v.getPerioder()
                 .stream()
                 .map(vp -> new Vilkårsperiode(new LukketPeriode(vp.getFom(), vp.getTom()), mapUtfall(v.getVilkårType(), vp)))

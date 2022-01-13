@@ -34,9 +34,12 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet.VilkårUtfall;
+import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @Dependent
@@ -45,8 +48,10 @@ public class VilkårTjeneste {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(VilkårTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
+    private Instance<ForlengelseTjeneste> forlengelseTjenester;
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+    private FagsakRepository fagsakRepository;
 
     protected VilkårTjeneste() {
         // CDI Proxy
@@ -55,10 +60,13 @@ public class VilkårTjeneste {
     @Inject
     public VilkårTjeneste(BehandlingRepository behandlingRepository,
                           @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                          VilkårResultatRepository vilkårResultatRepository) {
+                          @Any Instance<ForlengelseTjeneste> forlengelseTjenester,
+                          VilkårResultatRepository vilkårResultatRepository, FagsakRepository fagsakRepository) {
         this.behandlingRepository = behandlingRepository;
+        this.forlengelseTjenester = forlengelseTjenester;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårsPerioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.fagsakRepository = fagsakRepository;
     }
 
     public Vilkårene hentVilkårResultat(Long behandlingId) {
@@ -158,8 +166,10 @@ public class VilkårTjeneste {
 
     public void settVilkårutfallTilIkkeVurdert(Long behandlingId, VilkårType vilkårType, NavigableSet<DatoIntervallEntitet> vilkårsPerioder) {
         if (vilkårsPerioder.isEmpty()) {
+            log.info("Ingen perioder å tilbakestille.");
             return;
         }
+        log.info("Setter {} til vurdering", vilkårsPerioder);
         Behandling behandling = hentBehandling(behandlingId);
         var vilkårsPerioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling);
         vilkårResultatRepository.tilbakestillPerioder(behandlingId, vilkårType, vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer(), vilkårsPerioder);
@@ -179,10 +189,18 @@ public class VilkårTjeneste {
         return behandlingRepository.hentBehandling(behandlingId);
     }
 
-    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType, boolean skalIgnorereAvslåttePerioder) {
+    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType,
+                                                                        boolean skalIgnorereAvslåttePerioder) {
+        return utledPerioderTilVurdering(ref, vilkårType, skalIgnorereAvslåttePerioder, false, false);
+    }
+
+    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType,
+                                                                        boolean skalIgnorereAvslåttePerioder,
+                                                                        boolean skalIgnorereAvslagPåKompletthet, boolean skalIgnorerePerioderFraInfotrygd) {
         Long behandlingId = ref.getBehandlingId();
         var behandling = hentBehandling(behandlingId);
         var perioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling);
+        var sakInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(ref.getFagsakId());
 
         var vilkår = hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(behandlingId, vilkårType));
@@ -196,12 +214,23 @@ public class VilkårTjeneste {
             var avslåttePerioder = vilkår.get()
                 .getPerioder()
                 .stream()
-                .filter(it -> Utfall.IKKE_OPPFYLT.equals(it.getUtfall()))
-                .map(VilkårPeriode::getPeriode)
-                .collect(Collectors.toList());
-            perioder.removeAll(avslåttePerioder);
+                .filter(it -> skalFiltreresBort(it, skalIgnorereAvslagPåKompletthet))
+                .map(VilkårPeriode::getPeriode).toList();
+            avslåttePerioder.forEach(perioder::remove);
+        }
+        if (vilkår.isPresent() && skalIgnorerePerioderFraInfotrygd) {
+            var periodeFraInfotrygd = vilkår.get()
+                .getPerioder()
+                .stream()
+                .filter(it -> sakInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).anyMatch(stp -> it.getSkjæringstidspunkt().equals(stp)))
+                .map(VilkårPeriode::getPeriode).toList();
+            periodeFraInfotrygd.forEach(perioder::remove);
         }
         return Collections.unmodifiableNavigableSet(perioder);
+    }
+
+    private boolean skalFiltreresBort(VilkårPeriode it, boolean skalIgnoreAvslagPåKompletthet) {
+        return Utfall.IKKE_OPPFYLT.equals(it.getUtfall()) && (skalIgnoreAvslagPåKompletthet || !Avslagsårsak.MANGLENDE_INNTEKTSGRUNNLAG.equals(it.getAvslagsårsak()));
     }
 
     public Optional<Vilkårene> hentHvisEksisterer(Long behandlingId) {

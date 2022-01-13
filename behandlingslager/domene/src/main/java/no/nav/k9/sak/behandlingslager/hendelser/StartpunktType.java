@@ -28,6 +28,7 @@ public enum StartpunktType implements Kodeverdi {
     OPPTJENING("OPPTJENING", "Opptjening", 20),
     BEREGNING("BEREGNING", "Beregning", 25),
     UTTAKSVILKÅR("UTTAKSVILKÅR", "Uttaksvilkår", 30),
+    UTTAKSVILKÅR_VURDERING("UTTAKSVILKÅR_VURDERING", "Uttaksvilkår", 35),
 
     UDEFINERT("-", "Ikke definert", 99),
     ;

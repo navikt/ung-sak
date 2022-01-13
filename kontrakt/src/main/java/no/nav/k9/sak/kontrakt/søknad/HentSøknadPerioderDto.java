@@ -30,7 +30,7 @@ public class HentSøknadPerioderDto {
     @Valid
     private PersonIdent brukerIdent;
 
-    @JsonProperty(value = "pleietrengende", required = true)
+    @JsonProperty(value = "pleietrengende")
     @Valid
     private PersonIdent pleietrengendeIdent;
 
@@ -41,7 +41,7 @@ public class HentSøknadPerioderDto {
 
     public HentSøknadPerioderDto(@Valid @NotNull FagsakYtelseType ytelseType,
                                  @Valid @NotNull PersonIdent brukerIdent,
-                                 @Valid @NotNull PersonIdent pleietrengendeIdent) {
+                                 @Valid PersonIdent pleietrengendeIdent) {
         this.ytelseType = ytelseType;
         this.brukerIdent = brukerIdent;
         this.pleietrengendeIdent = pleietrengendeIdent;

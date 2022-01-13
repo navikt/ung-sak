@@ -68,6 +68,15 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
         }
     }
 
+    @Override
+    protected void håndterForlengelse(BehandlingskontrollKontekst kontekst, Behandling behandling, DatoIntervallEntitet periode) {
+        var opptjeningResultat = opptjeningRepository.finnOpptjening(behandling.getOriginalBehandlingId().orElseThrow()).orElseThrow();
+
+        var opptjening = opptjeningResultat.finnOpptjening(periode.getFomDato()).orElseThrow();
+
+        opptjeningRepository.lagreOpptjeningResultat(behandling, periode.getFomDato(), opptjening.getOpptjentPeriode(), opptjening.getOpptjeningAktivitet());
+    }
+
     private void oppdaterAksjonspunktMedFristerFraRegel(RegelResultat regelResultat, OpptjeningsvilkårResultat opres) {
         if (opres.getFrist() != null) {
             var eksisterende = regelResultat.getAksjonspunktDefinisjoner().stream().filter(it -> it.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER))

@@ -85,6 +85,19 @@ public class VilkårPeriodeBuilder {
         return this;
     }
 
+    public VilkårPeriodeBuilder forlengelseAv(VilkårPeriode eksisteredeVurdering) {
+        this.entitet.setManueltVurdert(eksisteredeVurdering.getErManueltVurdert());
+        this.entitet.setAvslagsårsak(eksisteredeVurdering.getAvslagsårsak());
+        this.entitet.setMerknadParametere(eksisteredeVurdering.getMerknadParametere());
+        this.entitet.setRegelEvaluering(eksisteredeVurdering.getRegelEvaluering());
+        this.entitet.setRegelInput(eksisteredeVurdering.getRegelInput());
+        this.entitet.setUtfall(eksisteredeVurdering.getUtfall());
+        this.entitet.setOverstyrtUtfall(eksisteredeVurdering.getOverstyrtUtfall());
+        this.entitet.setBegrunnelse(eksisteredeVurdering.getBegrunnelse());
+        this.entitet.setUtfallMerknad(eksisteredeVurdering.getMerknad());
+        return this;
+    }
+
     public VilkårPeriode build() {
         if (bygget) {
             throw new IllegalStateException("Builderen har allerede blitt bygget.");

@@ -68,6 +68,10 @@ public class SykdomVurderingService {
         // XXX: Denne er kastet sammen og bør trolig skrives enklere
         final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
 
+        if (behandling.getStatus().erFerdigbehandletStatus()) {
+            return SykdomAksjonspunkt.bareFalse();
+        }
+
         final boolean harUklassifiserteDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
         final boolean manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring(pleietrengende);
         final boolean manglerDiagnosekode = sykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnosekoder().isEmpty();
@@ -130,7 +134,7 @@ public class SykdomVurderingService {
         final LocalDateTimeline<SykdomVurderingVersjon> vurderinger = hentVurderinger(sykdomVurderingType, behandling);
         final LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
 
-        final LocalDateTimeline<Boolean> perioderTilVurdering = utledPerioderTilVurderingUtenOmsorgenFor(behandling);
+        final LocalDateTimeline<Boolean> perioderTilVurdering = utledPerioderTilVurderingMedOmsorgenFor(behandling);
         final List<Periode> nyeSøknadsperioder = Collections.emptyList(); // TODO;nyeSøknadsperioder
         final List<Periode> alleSøknadsperioder = behandledeSøknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
         final LocalDateTimeline<Boolean> innleggelseUnder18årTidslinje = hentInnleggelseUnder18årTidslinje(behandling);
@@ -146,7 +150,8 @@ public class SykdomVurderingService {
         final List<Periode> resterendeValgfrieVurderingsperioder;
         if (sykdomVurderingType == SykdomVurderingType.TO_OMSORGSPERSONER) {
             // Kun vurder perioder for TO_OMSORGSPERSONER hvis det ligger en KTP-vurdering i bunn:
-            alleResterendeVurderingsperioder = alleResterendeVurderingsperioder.intersection(toLocalDateTimeline(hentKontinuerligTilsynOgPleiePerioder(behandling)));
+            final LocalDateTimeline<Boolean> ktpTidslinje = toLocalDateTimeline(hentKontinuerligTilsynOgPleiePerioder(behandling));
+            alleResterendeVurderingsperioder = alleResterendeVurderingsperioder.intersection(ktpTidslinje);
 
             final LocalDateTimeline<?> flereOmsorgspersoner = harAndreSakerEnn(behandling.getFagsak().getSaksnummer(), behandledeSøknadsperioder);
             final LocalDateTimeline<Boolean> resterendeVurderingsperioderTidslinje = alleResterendeVurderingsperioder.intersection(flereOmsorgspersoner);
@@ -154,11 +159,13 @@ public class SykdomVurderingService {
                 resterendeVurderingsperioderTidslinje
             );
             resterendeValgfrieVurderingsperioder = toPeriodeList(
-                kunPerioderSomIkkeFinnesI(alleResterendeVurderingsperioder, resterendeVurderingsperioderTidslinje)
+                kunPerioderSomIkkeFinnesI(kunPerioderSomIkkeFinnesI(behandledeSøknadsperioder.intersection(ktpTidslinje), resterendeVurderingsperioderTidslinje), vurderinger)
             );
         } else {
             resterendeVurderingsperioder = toPeriodeList(alleResterendeVurderingsperioder);
-            resterendeValgfrieVurderingsperioder = List.of();
+            resterendeValgfrieVurderingsperioder = toPeriodeList(
+                kunPerioderSomIkkeFinnesI(kunPerioderSomIkkeFinnesI(behandledeSøknadsperioder, alleResterendeVurderingsperioder), vurderinger)
+            );
         }
 
         return new SykdomVurderingerOgPerioder(
@@ -182,7 +189,7 @@ public class SykdomVurderingService {
         return pleietrengendePersonopplysning.getFødselsdato();
     }
 
-    private LocalDateTimeline<Boolean> utledPerioderTilVurderingUtenOmsorgenFor(Behandling behandling) {
+    private LocalDateTimeline<Boolean> utledPerioderTilVurderingMedOmsorgenFor(Behandling behandling) {
         final var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
         final var perioderTilVurderingUnder18 = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         final var perioderTilVurdering18 = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR);

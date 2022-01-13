@@ -37,7 +37,8 @@ public class SykdomAksjonspunkt {
             !manglerDiagnosekode &&
             !manglerGodkjentLegeerklæring &&
             !manglerVurderingAvKontinuerligTilsynOgPleie &&
-            !manglerVurderingAvToOmsorgspersoner;
+            !manglerVurderingAvToOmsorgspersoner &&
+            !nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
     }
 
     public boolean isHarUklassifiserteDokumenter() {
@@ -66,5 +67,16 @@ public class SykdomAksjonspunkt {
 
     public boolean isNyttDokumentHarIkkekontrollertEksisterendeVurderinger() {
         return nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
+    }
+
+    public static SykdomAksjonspunkt bareFalse() {
+        return new SykdomAksjonspunkt(
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false);
     }
 }

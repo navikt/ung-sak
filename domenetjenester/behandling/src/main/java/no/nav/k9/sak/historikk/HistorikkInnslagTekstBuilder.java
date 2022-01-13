@@ -301,7 +301,9 @@ public class HistorikkInnslagTekstBuilder {
         return this;
     }
 
-    public <K extends Kodeverdi> HistorikkInnslagTekstBuilder medEndretFelt(HistorikkEndretFeltType historikkEndretFeltType, String navnVerdi, K fraVerdi,
+    public <K extends Kodeverdi> HistorikkInnslagTekstBuilder medEndretFelt(HistorikkEndretFeltType historikkEndretFeltType,
+                                                                            String navnVerdi,
+                                                                            K fraVerdi,
                                                                             K tilVerdi) {
         if (Objects.equals(fraVerdi, tilVerdi)) {
             return this;
@@ -315,6 +317,13 @@ public class HistorikkInnslagTekstBuilder {
             .medSekvensNr(getNesteEndredeFeltSekvensNr())
             .build(historikkinnslagDelBuilder);
         return this;
+    }
+
+    public  HistorikkInnslagTekstBuilder medEndretFelt(HistorikkEndretFeltType historikkEndretFeltType,
+                                                                            String navnVerdi,
+                                                                            LocalDate fraVerdi,
+                                                                            LocalDate tilVerdi) {
+        return medEndretFelt(historikkEndretFeltType, navnVerdi, formatString(fraVerdi), formatString(tilVerdi));
     }
 
     public HistorikkInnslagTekstBuilder medEndretFelt(HistorikkEndretFeltType historikkEndretFeltType, Boolean fraVerdi, Boolean tilVerdi) {
@@ -547,8 +556,11 @@ public class HistorikkInnslagTekstBuilder {
         if (opt.isPresent()) {
             return Optional.empty();
         } else {
+            Set<String> eksisterendeKoder = del.getHistorikkinnslagFelt().stream()
+                .map(HistorikkinnslagFelt::getFeltType)
+                .map(HistorikkinnslagFeltType::getKode).collect(Collectors.toSet());
             List<String> feltKoder = fieldList.stream().map(HistorikkinnslagFeltType::getKode).collect(Collectors.toList());
-            return Optional.of(HistorikkInnsalgFeil.FACTORY.manglerMinstEtFeltForHistorikkinnslag(type, feltKoder));
+            return Optional.of(HistorikkInnsalgFeil.FACTORY.manglerMinstEtFeltForHistorikkinnslag(type, feltKoder, eksisterendeKoder));
         }
     }
 

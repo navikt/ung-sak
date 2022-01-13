@@ -85,16 +85,12 @@ spec:
       value: privat-k9-infotrygdFeedHendelse
     - name: KAFKA_FATTEVEDTAK_TOPIC
       value: privat-familie-vedtakFattet-v1
-    - name: KAFKA_HISTORIKKINNSLAG_TOPIC
-      value: privat-k9-historikkinnslag-p
-    - name: KAFKA_RISIKOKLASSIFISERING_TOPIC
-      value: privat-k9-risk-utfor-p
-    - name: KAFKA_KONTROLL_RESULTAT_TOPIC
-      value: privat-k9-kontroll-resultat-p
     - name: KAFKA_VEDTAKHENDELSE_TOPIC
       value: privat-k9-vedtakhendelse
     - name: KAFKA_STONADSTATISTIKK_TOPIC
       value: k9saksbehandling.aapen-k9-stonadstatistikk-v1
+    - name: KAFKA_BRUKERDIALOGINNSYN_TOPIC
+      value: dusseldorf.privat-k9-sak-innsyn-v1
 
     # Baseurl
     - name: SCHEMA_REGISTRY_URL
@@ -155,6 +151,8 @@ spec:
       value: http://k9-formidling.k9saksbehandling/k9/formidling
     - name: K9_PUNSJ_URL
       value: https://k9-punsj.nais.adeo.no/api
+    - name: INFOTRYGD_BS_BASE_URI
+      value: https://k9-infotrygd.intern.nav.no
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
@@ -187,6 +185,8 @@ spec:
       value: "3030"
 
     # Feature-flag
+    - name: VKY_VED_OVERLAPP_INFOTRYGD
+      value: "true"
     - name: OMP_IM_SJEKK_FORSTE_FRAVAERSDAG
       value: "false"
     - name: PSB_OPPG_OPPTJENING_PRIORITERING
@@ -205,14 +205,22 @@ spec:
       value: "true"
     - name: ENABLE_UTLEDET_ENDRINGSPERIODE
       value: "true"
-    - name: ARBEIDSTID_SJEKK_SNFL
+    - name: ENABLE_RELEVANT_SYKDOMSPERIODE
       value: "true"
-    - name: NY_SYKDOM_TOTRINN
+    - name: ENABLE_STONADSTATISTIKK
       value: "true"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
     - name: MAP_ALLE_KRAV
       value: "true"
+    - name: PSB_ENABLE_BEKREFT_UTTAK
+      value: "true"
+    - name: DISABLE_VURDER_TILBAKETREKK
+      value: "true"
+    - name: PSB_INFOTRYGD_MIGRERING
+      value: "false"
+    - name: FORLENGELSE_OPPTJENING_ENABLET
+      value: "false"
     - name: K9_RAPID_AIVEN
       value: "false"
 
@@ -226,3 +234,14 @@ spec:
 
     - name: PIP_USERS
       value: "srvPDP,srvk9-tilbake,srvsaf"
+
+
+    # Pleiepenger infotrygd migrering
+    - name: INFOTRYGD_MIGRERING_TILLATELSER
+      value: ""
+
+
+
+    # FRISINN NYE REGLER 2022
+    - name: FRISINN_NYTT_STP_TOGGLE
+        value: "false"

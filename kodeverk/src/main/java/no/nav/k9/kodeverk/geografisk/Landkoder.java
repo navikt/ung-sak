@@ -52,6 +52,37 @@ public class Landkoder implements Kodeverdi {
         this.kode = kode;
     }
 
+    private static Map<String, Landkoder> initKoder() {
+        var map = new LinkedHashMap<String, Landkoder>();
+        for (var c : Locale.getISOCountries()) {
+            Locale locale = new Locale("", c);
+            String iso3cc = locale.getISO3Country().toUpperCase();
+            Landkoder landkode = new Landkoder(iso3cc);
+            map.put(c, landkode);
+            map.put(iso3cc, landkode);
+        }
+        // udefinerte koder
+        List.of("-", "???")
+            .forEach(c -> map.put(c, new Landkoder(c)));
+
+        // ISO user defined codes (NAV spesifikke)
+        // @see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#User-assigned_code_elements
+        List.of(
+            "XXX", // STATSLØS
+            "XUK", // UKJENT
+            "XXK",  // KOSOVO
+            // Historiske land
+            "DDR" // Tyskland (Øst)
+        ).forEach(c -> map.put(c, new Landkoder(c)));
+
+        // ISO transitional codes.
+        // @see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Transitional_reservations
+        List.of("ANT", "BUR", "BYS", "CSK", "ROM", "SCG", "TMP", "YUG", "ZAR", "SUN")
+            .forEach(c -> map.put(c, new Landkoder(c)));
+
+        return Collections.unmodifiableMap(map);
+    }
+
     @Override
     public String getOffisiellKode() {
         return kode;
@@ -72,6 +103,14 @@ public class Landkoder implements Kodeverdi {
     @Override
     public String getKodeverk() {
         return KODEVERK;
+    }
+
+    public static boolean erNorge(String kode) {
+        return NOR.getKode().equals(kode);
+    }
+
+    public static Map<String, Landkoder> kodeMap() {
+        return Collections.unmodifiableMap(KODER);
     }
 
     @Override
@@ -105,44 +144,5 @@ public class Landkoder implements Kodeverdi {
     @Override
     public String toString() {
         return kode;
-    }
-
-    private static Map<String, Landkoder> initKoder() {
-        var map = new LinkedHashMap<String, Landkoder>();
-        for (var c : Locale.getISOCountries()) {
-            Locale locale = new Locale("", c);
-            String iso3cc = locale.getISO3Country().toUpperCase();
-            Landkoder landkode = new Landkoder(iso3cc);
-            map.put(c, landkode);
-            map.put(iso3cc, landkode);
-        }
-        // udefinerte koder
-        List.of("-", "???")
-            .forEach(c -> map.put(c, new Landkoder(c)));
-
-        // ISO user defined codes (NAV spesifikke)
-        // @see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#User-assigned_code_elements
-        List.of(
-            "XXX", // STATSLØS
-            "XUK", // UKJENT
-            "XXK",  // KOSOVO
-            // Historiske land
-            "DDR" // Tyskland (Øst)
-        ).forEach(c -> map.put(c, new Landkoder(c)));
-
-        // ISO transitional codes.
-        // @see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Transitional_reservations
-        List.of("ANT", "BUR", "BYS", "CSK", "ROM", "SCG", "TMP", "YUG", "ZAR", "SUN")
-            .forEach(c -> map.put(c, new Landkoder(c)));
-
-        return Collections.unmodifiableMap(map);
-    }
-
-    public static boolean erNorge(String kode) {
-        return NOR.getKode().equals(kode);
-    }
-
-    public static Map<String, Landkoder> kodeMap() {
-        return Collections.unmodifiableMap(KODER);
     }
 }

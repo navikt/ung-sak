@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -17,12 +18,14 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @ApplicationScoped
 public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandlingsresultatTjeneste {
 
@@ -67,6 +70,11 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
             return true;
         }
 
+        var harIngenPerioderForMedisinsk = harIngenPerioderForMedisinsk(vilkårene);
+        if (harIngenPerioderForMedisinsk) {
+            return true;
+        }
+
         final var maksPeriode = getMaksPeriode(ref.getBehandlingId());
         final var vilkårTidslinjer = vilkårene.getVilkårTidslinjer(maksPeriode);
 
@@ -74,8 +82,8 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
             .filter(e -> harAvslåtteVilkårsPerioder(e.getValue())
                 && harIngenOppfylteVilkårsPerioder(e.getValue())
             )
-            .map(e -> e.getKey())
-            .collect(Collectors.toList());
+            .map(Map.Entry::getKey)
+            .toList();
 
         if (avslåtteVilkår.isEmpty()) {
             return false;
@@ -90,5 +98,15 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
 
 
         return ingenAvSykdomsvilkåreneErOppfylt;
+    }
+
+    private boolean harIngenPerioderForMedisinsk(Vilkårene vilkårene) {
+        return vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()
+            .stream()
+            .allMatch(it -> harIngenPerioder(it, vilkårene));
+    }
+
+    private boolean harIngenPerioder(VilkårType vilkårType, Vilkårene vilkårene) {
+        return vilkårene.getVilkår(vilkårType).map(Vilkår::getPerioder).orElse(List.of()).isEmpty();
     }
 }

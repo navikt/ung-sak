@@ -121,6 +121,8 @@ public class AksjonspunktRestTjeneste {
         return getAksjonspunkter(behandling);
     }
 
+    /** @deprecated pt. ikke i bruk i K9 */
+    @Deprecated(forRemoval=true)
     @GET
     @Path(AKSJONSPUNKT_RISIKO_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -130,18 +132,11 @@ public class AksjonspunktRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getRisikoAksjonspunkt(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        AksjonspunktDto dto = AksjonspunktDtoMapper.lagAksjonspunktDto(behandling, Collections.emptyList())
-            .stream()
-            .filter(ap -> AksjonspunktDefinisjon.VURDER_FARESIGNALER.equals(ap.getDefinisjon()))
-            .findFirst()
-            .orElse(null);
-
         CacheControl cc = new CacheControl();
         cc.setNoCache(true);
         cc.setNoStore(true);
         cc.setMaxAge(0);
-        return Response.ok(dto).cacheControl(cc).build();
+        return Response.ok().cacheControl(cc).build();
     }
 
     @GET

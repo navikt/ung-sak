@@ -28,6 +28,7 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @BehandlingStegRef(kode = "BERYT")
 @BehandlingTypeRef
 @ApplicationScoped

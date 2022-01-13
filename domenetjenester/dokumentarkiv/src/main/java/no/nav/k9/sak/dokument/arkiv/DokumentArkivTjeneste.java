@@ -158,6 +158,7 @@ public class DokumentArkivTjeneste {
     private ArkivDokument.Builder opprettArkivDokument(DokumentInfo dokumentInfo) {
         ArkivDokument.Builder builder = ArkivDokument.Builder.ny()
             .medDokumentId(dokumentInfo.getDokumentInfoId())
+            .medBrevkode(dokumentInfo.getBrevkode())
             .medTittel(dokumentInfo.getTittel());
 
         dokumentInfo.getDokumentvarianter().stream()

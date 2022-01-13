@@ -7,17 +7,19 @@ import java.util.UUID;
 public class OppdaterBeregningsgrunnlagResultat {
 
     private LocalDate skjæringstidspunkt;
-    private UUID referanse;
-    private BeregningsgrunnlagEndring beregningsgrunnlagEndring;
-    private FaktaOmBeregningVurderinger faktaOmBeregningVurderinger;
-    private VarigEndretNæringVurdering varigEndretNæringVurdering;
+    private final UUID referanse;
+    private final BeregningsgrunnlagEndring beregningsgrunnlagEndring;
+    private final FaktaOmBeregningVurderinger faktaOmBeregningVurderinger;
+    private final VarigEndretNæringVurdering varigEndretNæringVurdering;
+    private final RefusjonoverstyringEndring refusjonoverstyringEndring;
 
     public OppdaterBeregningsgrunnlagResultat(BeregningsgrunnlagEndring beregningsgrunnlagEndring,
                                               FaktaOmBeregningVurderinger faktaOmBeregningVurderinger,
                                               VarigEndretNæringVurdering varigEndretNæringVurdering,
-                                              UUID referanse) {
+                                              RefusjonoverstyringEndring refusjonoverstyringEndring, UUID referanse) {
         this.beregningsgrunnlagEndring = beregningsgrunnlagEndring;
         this.faktaOmBeregningVurderinger = faktaOmBeregningVurderinger;
+        this.refusjonoverstyringEndring = refusjonoverstyringEndring;
         this.referanse = referanse;
         this.varigEndretNæringVurdering = varigEndretNæringVurdering;
     }
@@ -32,6 +34,10 @@ public class OppdaterBeregningsgrunnlagResultat {
 
     public Optional<VarigEndretNæringVurdering> getVarigEndretNæringVurdering() {
         return Optional.ofNullable(varigEndretNæringVurdering);
+    }
+
+    public Optional<RefusjonoverstyringEndring> getRefusjonoverstyringEndring() {
+        return Optional.of(refusjonoverstyringEndring);
     }
 
     public LocalDate getSkjæringstidspunkt() {

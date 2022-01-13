@@ -320,6 +320,164 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return Response.ok(resultatString).build();
     }
+    
+    @GET
+    @Path("/aapne-psb-med-soknad")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Henter åpne saker i PSB.", summary = ("Henter åpne saker i PSB."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response antallÅpnePsbMedSøknad() {
+        final Query q = entityManager.createNativeQuery("select\n"
+                + "    f.saksnummer, b.original_behandling_id IS NOT NULL AS revurdering, m.id IS NOT NULL AS med_soknad, COUNT(*) AS antall_soknader\n"
+                + "  from behandling b inner join fagsak f ON (\n"
+                + "    f.id = b.fagsak_id\n"
+                + "    and f.ytelse_type = 'PSB'\n"
+                + "  ) left outer join mottatt_dokument m ON (\n"
+                + "    m.behandling_id = b.id\n"
+                + "    and m.type = 'PLEIEPENGER_SOKNAD'\n"
+                + "    and m.status = 'GYLDIG'\n"
+                + "  ) \n"
+                + "  where b.behandling_status = 'UTRED'\n"
+                + "    AND b.original_behandling_id IS NOT NULL\n"
+                + "    AND m.id IS NOT NULL\n"
+                + "  group by saksnummer, b.original_behandling_id IS NOT NULL, m.id IS NOT NULL");
+
+        @SuppressWarnings("unchecked")
+        final List<Object[]> result = q.getResultList();
+        final String restApiPath = "/aapne-psb-med-soknad";
+        final String resultatString = result.stream()
+                .filter(a -> harLesetilgang(a[0].toString(), restApiPath))
+                .map(a -> a[0].toString() + ";" + a[1].toString() + ";" + a[2].toString() + ";" + a[3].toString())
+                .reduce((a, b) -> a + "\n" + b)
+                .orElse("");
+        return Response.ok(resultatString).build();
+    }
+    
+    @GET
+    @Path("/frisinn/uttrekk-antall")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Adhoc-uttrekk for Frisinn", summary = ("Adhoc-uttrekk for Frisinn."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response antallFrisinnsøknader() {
+
+        final Query q = entityManager.createNativeQuery("SELECT '2020' aar, (\n"
+                + "  SELECT COUNT(*)\n"
+                + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
+                + "    f.id = b.fagsak_id\n"
+                + "  )\n"
+                + "  WHERE f.ytelse_type = 'FRISINN'\n"
+                + "    AND b.opprettet_tid < '2021-02-01'\n"
+                + "    AND b.behandling_status IN ('AVSLU', 'FVED', 'IVED')\n"
+                + "    AND b.ansvarlig_saksbehandler is not null\n"
+                + "    AND NOT EXISTS (\n"
+                + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
+                + "    )\n"
+                + ") AS manuell, (\n"
+                + "  SELECT COUNT(*)\n"
+                + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
+                + "    f.id = b.fagsak_id\n"
+                + "  )\n"
+                + "  WHERE f.ytelse_type = 'FRISINN'\n"
+                + "    AND b.opprettet_tid < '2021-02-01'\n"
+                + "    AND b.behandling_status IN ('AVSLU', 'FVED', 'IVED')\n"
+                + "    AND b.ansvarlig_saksbehandler is null\n"
+                + "    AND NOT EXISTS (\n"
+                + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
+                + "    )\n"
+                + ") AS automatisk\n"
+                + "\n"
+                + "UNION\n"
+                + "\n"
+                + "SELECT '2021' aar, (\n"
+                + "  SELECT COUNT(*)\n"
+                + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
+                + "    f.id = b.fagsak_id\n"
+                + "  )\n"
+                + "  WHERE f.ytelse_type = 'FRISINN'\n"
+                + "    AND b.opprettet_tid >= '2021-02-01'\n"
+                + "    AND b.behandling_status IN ('AVSLU', 'FVED', 'IVED')\n"
+                + "    AND b.ansvarlig_saksbehandler is not null\n"
+                + "    AND NOT EXISTS (\n"
+                + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
+                + "    )\n"
+                + ") AS manuell, (\n"
+                + "  SELECT COUNT(*)\n"
+                + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
+                + "    f.id = b.fagsak_id\n"
+                + "  )\n"
+                + "  WHERE f.ytelse_type = 'FRISINN'\n"
+                + "    AND b.opprettet_tid >= '2021-02-01'\n"
+                + "    AND b.behandling_status IN ('AVSLU', 'FVED', 'IVED')\n"
+                + "    AND b.ansvarlig_saksbehandler is null\n"
+                + "    AND NOT EXISTS (\n"
+                + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
+                + "    )\n"
+                + ") AS automatisk\n"
+                + "\n"
+                + "UNION\n"
+                + "\n"
+                + "SELECT '2020-ubehandlet' aar, (\n"
+                + "  SELECT COUNT(*)\n"
+                + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
+                + "    f.id = b.fagsak_id\n"
+                + "  )\n"
+                + "  WHERE f.ytelse_type = 'FRISINN'\n"
+                + "    AND b.opprettet_tid < '2021-02-01'\n"
+                + "    AND b.behandling_status NOT IN ('AVSLU', 'FVED', 'IVED')\n"
+                + "    AND b.ansvarlig_saksbehandler is not null\n"
+                + "    AND NOT EXISTS (\n"
+                + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
+                + "    )\n"
+                + ") AS manuell, (\n"
+                + "  SELECT COUNT(*)\n"
+                + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
+                + "    f.id = b.fagsak_id\n"
+                + "  )\n"
+                + "  WHERE f.ytelse_type = 'FRISINN'\n"
+                + "    AND b.opprettet_tid < '2021-02-01'\n"
+                + "    AND b.behandling_status NOT IN ('AVSLU', 'FVED', 'IVED')\n"
+                + "    AND b.ansvarlig_saksbehandler is null\n"
+                + "    AND NOT EXISTS (\n"
+                + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
+                + "    )\n"
+                + ") AS automatisk\n"
+                + "\n"
+                + "UNION\n"
+                + "\n"
+                + "SELECT '2021-ubehandlet' aar, (\n"
+                + "  SELECT COUNT(*)\n"
+                + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
+                + "    f.id = b.fagsak_id\n"
+                + "  )\n"
+                + "  WHERE f.ytelse_type = 'FRISINN'\n"
+                + "    AND b.opprettet_tid >= '2021-02-01'\n"
+                + "    AND b.behandling_status NOT IN ('AVSLU', 'FVED', 'IVED')\n"
+                + "    AND b.ansvarlig_saksbehandler is not null\n"
+                + "    AND NOT EXISTS (\n"
+                + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
+                + "    )\n"
+                + ") AS manuell, (\n"
+                + "  SELECT COUNT(*)\n"
+                + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
+                + "    f.id = b.fagsak_id\n"
+                + "  )\n"
+                + "  WHERE f.ytelse_type = 'FRISINN'\n"
+                + "    AND b.opprettet_tid >= '2021-02-01'\n"
+                + "    AND b.behandling_status NOT IN ('AVSLU', 'FVED', 'IVED')\n"
+                + "    AND b.ansvarlig_saksbehandler is null\n"
+                + "    AND NOT EXISTS (\n"
+                + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
+                + "    )\n"
+                + ") AS automatisk");
+
+        @SuppressWarnings("unchecked")
+        final List<Object[]> result = q.getResultList();
+        final String resultatString = result.stream()
+                .map(a -> a[0].toString() + ";" + a[1].toString() + ";" + a[2].toString())
+                .reduce((a, b) -> a + "\n" + b)
+                .orElse("");
+        return Response.ok(resultatString).build();
+    }
 
     private final boolean harLesetilgang(String saksnummer, String restApiPath) {
         final AbacAttributtSamling attributter = AbacAttributtSamling.medJwtToken(tokenProvider.getToken().getToken());

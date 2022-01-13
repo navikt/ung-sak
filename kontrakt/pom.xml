@@ -15,6 +15,10 @@
     <name>K9SAK :: Kontrakter</name>
     <description>Kontrakter for tjenester eksponert / topics publisert av K9SAK</description>
 
+    <properties>
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
+
     <dependencies>
 
         <dependency>
@@ -50,15 +54,6 @@
 
     <build>
         <plugins>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <!-- denne modulen skal deployes til maven repo (eksponerte kontrakter) -->
-                    <skip>false</skip>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -71,7 +66,6 @@
                     <!-- ikke kompiler denne modulen med enable-preview. skaper trøbbel ved oppgradering av java versjoner der kontraker benyttes av andre -->
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 

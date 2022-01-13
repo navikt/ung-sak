@@ -6,10 +6,12 @@ import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -21,13 +23,12 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysning;
 import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
@@ -49,6 +50,7 @@ public class PSBKompletthetSjekkerTjeneste {
     private final BestiltEtterlysningRepository etterlysningRepository;
     private final PSBKompletthetsjekker kompletthetsjekker;
     private final KompletthetUtleder kompletthetUtleder = new KompletthetUtleder();
+    private final FagsakRepository fagsakRepository;
     private final EtterlysInntektsmeldingUtleder etterlysInntektsmeldingUtleder = new EtterlysInntektsmeldingUtleder();
     private final EtterlysInntektsmeldingOgVarsleOmAvslagUtleder etterlysInntektsmeldingOgVarsleOmAvslagUtleder = new EtterlysInntektsmeldingOgVarsleOmAvslagUtleder();
 
@@ -57,35 +59,39 @@ public class PSBKompletthetSjekkerTjeneste {
                                          BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                          BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                          BestiltEtterlysningRepository etterlysningRepository,
-                                         @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") PSBKompletthetsjekker kompletthetsjekker) {
+                                         @Any PSBKompletthetsjekker kompletthetsjekker,
+                                         FagsakRepository fagsakRepository) {
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.kompletthetsjekker = kompletthetsjekker;
+        this.fagsakRepository = fagsakRepository;
     }
 
 
     public KompletthetsAksjon utledTilstand(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, false, true);
         var kompletthetsVurderinger = kompletthetsjekker.utledAlleManglendeVedleggForPerioder(ref);
 
         var inputUtenVurderinger = new VurdererInput(perioderTilVurdering, kompletthetsVurderinger);
         var aksjon = kompletthetUtleder.utled(inputUtenVurderinger);
 
         var grunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(ref.getBehandlingId());
-        if (aksjon.kanFortsette()) {
-            deaktiverVurderingerSomIkkeErRelevantePgaNåKomplett(ref.getBehandlingId(), perioderTilVurdering, kompletthetsVurderinger, grunnlag);
 
+        grunnlag = justerTidligereVurderingerEtterOppdatertStatus(ref, perioderTilVurdering, kompletthetsVurderinger, grunnlag);
+
+        if (aksjon.kanFortsette()) {
             log.info("Behandlingen er komplett, kan fortsette.");
             return aksjon;
         }
+        settVilkårsPeriodeTilVurderingHvisTidligereVarAvslagOgTilVurderingNå(ref, perioderTilVurdering, grunnlag);
 
         var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
 
         avslåOgAvkortRelevanteKompletthetsvurderinger(kontekst, perioderTilVurdering, grunnlag);
 
-        var redusertPerioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
+        var redusertPerioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, true, true);
         var inputMedVurderinger = new VurdererInput(redusertPerioderTilVurdering, kompletthetsVurderinger, grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of()), Set.of(Vurdering.KAN_FORTSETTE));
         aksjon = kompletthetUtleder.utled(inputMedVurderinger);
 
@@ -127,7 +133,45 @@ public class PSBKompletthetSjekkerTjeneste {
         return KompletthetsAksjon.manuellAvklaring(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING);
     }
 
-    private void deaktiverVurderingerSomIkkeErRelevantePgaNåKomplett(Long behandlingId, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> kompletthetsVurderinger, Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlag) {
+    private Optional<BeregningsgrunnlagPerioderGrunnlag> justerTidligereVurderingerEtterOppdatertStatus(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> kompletthetsVurderinger, Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlag) {
+        deaktiverVurderingerSomIkkeErRelevantePgaNåKomplett(ref, perioderTilVurdering, kompletthetsVurderinger, grunnlag);
+        grunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+        settVilkårsPeriodeTilVurderingHvisTidligereVarAvslagOgTilVurderingNå(ref, perioderTilVurdering, grunnlag);
+        return grunnlag;
+    }
+
+    private void settVilkårsPeriodeTilVurderingHvisTidligereVarAvslagOgTilVurderingNå(BehandlingReferanse ref,
+                                                                                      NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
+                                                                                      Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlag) {
+        if (perioderTilVurdering.isEmpty()) {
+            return;
+        }
+        var aktuellePerioderTilVurdering = perioderTilVurdering;
+        if (grunnlag.isPresent()) {
+            var relevanteSkjæringstidspunkterMedAvlsag = grunnlag.get().getKompletthetPerioder()
+                .stream()
+                .filter(it -> Vurdering.MANGLENDE_GRUNNLAG.equals(it.getVurdering()))
+                .map(KompletthetPeriode::getSkjæringstidspunkt)
+                .filter(skjæringstidspunkt -> perioderTilVurdering.stream().anyMatch(at -> Objects.equals(at.getFomDato(), skjæringstidspunkt)))
+                .collect(Collectors.toSet());
+
+            aktuellePerioderTilVurdering = perioderTilVurdering.stream()
+                .filter(it -> relevanteSkjæringstidspunkterMedAvlsag.stream()
+                    .noneMatch(skjæringstidspunkt -> Objects.equals(it.getFomDato(), skjæringstidspunkt)))
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        }
+        if (aktuellePerioderTilVurdering.isEmpty()) {
+            return;
+        }
+        log.info("Finner aktuelle perioder {} for tilbakestilling hvis tidligere avslått pga manglende grunnlag.", aktuellePerioderTilVurdering);
+        beregningsgrunnlagVilkårTjeneste.settVilkårutfallTilIkkeVurdertHvisTidligereAvslagPåKompletthet(ref.getBehandlingId(), aktuellePerioderTilVurdering);
+    }
+
+    private void deaktiverVurderingerSomIkkeErRelevantePgaNåKomplett(BehandlingReferanse ref,
+                                                                     NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
+                                                                     Map<DatoIntervallEntitet, List<ManglendeVedlegg>> kompletthetsVurderinger,
+                                                                     Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlag) {
         if (grunnlag.isEmpty()) {
             return;
         }
@@ -147,7 +191,7 @@ public class PSBKompletthetSjekkerTjeneste {
             .collect(Collectors.toList());
 
         if (!kompletthetPerioder.isEmpty()) {
-            beregningPerioderGrunnlagRepository.deaktiverKompletthetsPerioder(behandlingId, kompletthetPerioder);
+            beregningPerioderGrunnlagRepository.deaktiverKompletthetsPerioder(ref.getBehandlingId(), kompletthetPerioder);
         }
     }
 
@@ -181,7 +225,7 @@ public class PSBKompletthetSjekkerTjeneste {
     private void avslå(KompletthetPeriode periode, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, BehandlingskontrollKontekst kontekst) {
         var relevantPeriode = perioderTilVurdering.stream()
             .filter(it -> it.inkluderer(periode.getSkjæringstidspunkt()))
-            .collect(Collectors.toList());
+            .toList();
 
         if (relevantPeriode.size() > 1) {
             throw new IllegalStateException("Fant flere vilkårsperioder(" + relevantPeriode.size() + ") relevant for " + periode);

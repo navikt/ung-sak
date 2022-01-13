@@ -48,13 +48,13 @@ public class ForeslåVedtakStegImpl implements ForeslåVedtakSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        
+
         final Optional<BehandleStegResultat> ytelsespesifikkForeslåVedtakResultat = hentAlternativForeslåVedtak(behandling)
             .map(afv -> afv.run(BehandlingReferanse.fra(behandling)));
         if (ytelsespesifikkForeslåVedtakResultat.isPresent()) {
             return ytelsespesifikkForeslåVedtakResultat.get();
         }
-        
+
         return foreslåVedtakTjeneste.foreslåVedtak(behandling, kontekst);
     }
 

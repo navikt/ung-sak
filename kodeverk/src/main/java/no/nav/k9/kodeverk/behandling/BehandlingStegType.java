@@ -32,6 +32,7 @@ public enum BehandlingStegType implements Kodeverdi {
     FASTSETT_OPPTJENINGSPERIODE("VURDER_OPPTJ_PERIODE", "Vurder Opptjening Periode", UTREDES),
     FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING("FASTSETT_STP_BER", "Fastsett skjæringstidspunkt beregning", UTREDES),
     FATTE_VEDTAK("FVEDSTEG", "Fatte Vedtak", BehandlingStatus.FATTER_VEDTAK),
+    VURDER_VILKAR_BERGRUNN("VURDER_VILKAR_BERGRUNN", "Vurder beregingsgrunnlagsvilkåret", UTREDES),
     VURDER_REF_BERGRUNN("VURDER_REF_BERGRUNN", "Vurder refusjon for beregningsgrunnlaget", UTREDES),
     FORDEL_BEREGNINGSGRUNNLAG("FORDEL_BERGRUNN", "Fordel beregningsgrunnlag", UTREDES),
     FORESLÅ_BEHANDLINGSRESULTAT("FORBRES", "Foreslå behandlingsresultat", UTREDES),
@@ -58,6 +59,8 @@ public enum BehandlingStegType implements Kodeverdi {
     START_STEG("START", "Start behandling prosess", UTREDES),
     VARSEL_REVURDERING("VRSLREV", "Varsel om revurdering", UTREDES),
     VULOMED("VULOMED", "Vurder løpende medlemskap", UTREDES),
+    /** @deprecated pt. ikke i bruk i K9 */
+    @Deprecated(forRemoval=true)
     VURDER_FARESIGNALER("VURDER_FARESIGNALER", "Vurder faresignaler", UTREDES),
     VURDER_INNSYN("VURDINNSYN", "Vurder innsynskrav", UTREDES),
     VURDER_KOMPLETTHET("VURDERKOMPLETT", "Vurder kompletthet", UTREDES),
@@ -73,9 +76,11 @@ public enum BehandlingStegType implements Kodeverdi {
     VURDER_TILBAKETREKK("VURDER_TILBAKETREKK", "Vurder tilbaketrekk", UTREDES),
     VURDER_UTLAND("VURDER_UTLAND", "Vurder utland (SED)", UTREDES),
     VURDER_UTTAK("VURDER_UTTAK", "Vurder uttaksvilkår", UTREDES),
+    VURDER_UTTAK_V2("VURDER_UTTAK_V2", "Vurder uttaksvilkår", UTREDES),
     BEKREFT_UTTAK("BEKREFT_UTTAK", "Bekreft uttak", UTREDES),
     MANUELL_VILKÅRSVURDERING("MANUELL_VILKÅRSVURDERING", "Manuell vilkårsvurdering", UTREDES),
     MANUELL_TILKJENNING_YTELSE("MANUELL_TILKJENNING_YTELSE", "Manuell tilkjenning av ytelse", UTREDES),
+    OVERGANG_FRA_INFOTRYGD("OVERGANG_FRA_INFOTRYGD", "Direkte overgang fra infotrygd", UTREDES),
     ;
 
     private static final Map<String, BehandlingStegType> KODER = new LinkedHashMap<>();

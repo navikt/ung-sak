@@ -22,10 +22,11 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
@@ -40,6 +41,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.medlem.impl.MedlemEndringssjekker;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @Dependent
@@ -48,7 +50,9 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
     private Instance<MedlemEndringssjekker> alleEndringssjekkere;
     private MedlemskapRepository medlemskapRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
+    private Instance<ForlengelseTjeneste> forlengelseTjenester;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+    private Boolean enableForlengelse;
     private BehandlingRepository behandlingRepository;
 
     @Inject
@@ -56,12 +60,16 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
                                                       MedlemskapRepository medlemskapRepository,
                                                       @Any Instance<MedlemEndringssjekker> alleEndringssjekkere,
                                                       PersonopplysningTjeneste personopplysningTjeneste,
-                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
+                                                      @Any Instance<ForlengelseTjeneste> forlengelseTjenester,
+                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
+                                                      @KonfigVerdi(value = "forlengelse.medlemskap.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
         this.behandlingRepository = behandlingRepository;
         this.alleEndringssjekkere = alleEndringssjekkere;
         this.medlemskapRepository = medlemskapRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
+        this.forlengelseTjenester = forlengelseTjenester;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
+        this.enableForlengelse = enableForlengelse;
     }
 
     UtledVurderingsdatoerForMedlemskapTjeneste() {
@@ -80,28 +88,63 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
      * @return datoer med diff i medlemskap
      */
     public Set<LocalDate> finnVurderingsdatoer(Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        return finnVurderingsdatoerMedForlengelse(behandlingId).getDatoerTilVurdering();
+    }
 
+    /**
+     * Utleder vurderingsdatoer for:
+     * - utledVurderingsdatoerForPersonopplysninger
+     * - utledVurderingsdatoerForBortfallAvInntekt
+     * - utledVurderingsdatoerForMedlemskap
+     * <p>
+     * Ser bare på datoer etter skjæringstidspunktet
+     *
+     * @param behandlingId id i databasen
+     * @return datoer med diff i medlemskap
+     */
+    public Vurderingsdatoer finnVurderingsdatoerMedForlengelse(Long behandlingId) {
+
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var endringssjekker = FagsakYtelseTypeRef.Lookup.find(alleEndringssjekkere, behandling.getFagsakYtelseType())
             .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + behandling.getFagsakYtelseType().getKode()));
-        var vilkårsPerioder = getPerioderTilVurderingTjeneste(behandling)
-            .utled(behandlingId, VilkårType.MEDLEMSKAPSVILKÅRET);
-        var tidligsteStp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo);
+        var ref = BehandlingReferanse.fra(behandling);
+        var perioderTilVurdering = utledPerioderTilVurdering(ref);
+
+        var tidligsteStp = perioderTilVurdering.getTidligsteDatoTilVurdering();
+
         if (tidligsteStp.isEmpty()) {
-            return Set.of();
+            return new Vurderingsdatoer();
         }
+
         Set<LocalDate> datoer = new HashSet<>();
 
-        for (DatoIntervallEntitet vilkårsPeriode : vilkårsPerioder) {
+        for (DatoIntervallEntitet vilkårsPeriode : perioderTilVurdering.getPerioderTilVurdering()) {
             datoer.add(vilkårsPeriode.getFomDato());
+            datoer.addAll(utledVurderingsdatoerForTPS(behandling, vilkårsPeriode).keySet());
+        }
+        for (DatoIntervallEntitet vilkårsPeriode : perioderTilVurdering.getForlengelseTilVurdering()) {
             datoer.addAll(utledVurderingsdatoerForTPS(behandling, vilkårsPeriode).keySet());
         }
         datoer.addAll(utledVurderingsdatoerForMedlemskap(behandlingId, endringssjekker).keySet());
 
         // ønsker bare å se på datoer etter skjæringstidspunktet
-        return datoer.stream()
+        return new Vurderingsdatoer(datoer.stream()
             .filter(entry -> entry.isAfter(tidligsteStp.get().minusDays(1)))
-            .sorted().collect(Collectors.toCollection(TreeSet::new));
+            .sorted().collect(Collectors.toCollection(TreeSet::new)), perioderTilVurdering.getForlengelseTilVurdering());
+    }
+
+    private PerioderTilVurdering utledPerioderTilVurdering(BehandlingReferanse referanse) {
+        var vilkårsPerioder = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType())
+            .utled(referanse.getBehandlingId(), VilkårType.MEDLEMSKAPSVILKÅRET);
+        NavigableSet<DatoIntervallEntitet> forlengelsePerioder;
+        if (enableForlengelse) {
+            var forlengelseTjeneste = ForlengelseTjeneste.finnTjeneste(forlengelseTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
+            forlengelsePerioder = forlengelseTjeneste.utledPerioderSomSkalBehandlesSomForlengelse(referanse, vilkårsPerioder, VilkårType.MEDLEMSKAPSVILKÅRET);
+        } else {
+            forlengelsePerioder = new TreeSet<>();
+        }
+
+        return new PerioderTilVurdering(vilkårsPerioder, forlengelsePerioder);
     }
 
     Map<LocalDate, Set<VurderingsÅrsak>> finnVurderingsdatoerMedÅrsak(Long behandlingId) {
@@ -110,14 +153,20 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
             .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + behandling.getFagsakYtelseType().getKode()));
         Map<LocalDate, Set<VurderingsÅrsak>> datoer = new HashMap<>();
 
-        var vilkårsPerioder = getPerioderTilVurderingTjeneste(behandling)
-            .utled(behandlingId, VilkårType.MEDLEMSKAPSVILKÅRET);
-        var tidligsteStp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo);
+        var ref = BehandlingReferanse.fra(behandling);
+        var perioderTilVurdering = utledPerioderTilVurdering(ref);
+
+        var tidligsteStp = perioderTilVurdering.getTidligsteDatoTilVurdering();
+
         if (tidligsteStp.isEmpty()) {
             return Map.of();
         }
-        for (DatoIntervallEntitet periode : vilkårsPerioder) {
+
+        for (DatoIntervallEntitet periode : perioderTilVurdering.getPerioderTilVurdering()) {
             mergeResultat(datoer, Map.of(periode.getFomDato(), Set.of(VurderingsÅrsak.SKJÆRINGSTIDSPUNKT)));
+            mergeResultat(datoer, utledVurderingsdatoerForTPS(behandling, periode));
+        }
+        for (DatoIntervallEntitet periode : perioderTilVurdering.getForlengelseTilVurdering()) {
             mergeResultat(datoer, utledVurderingsdatoerForTPS(behandling, periode));
         }
         mergeResultat(datoer, utledVurderingsdatoerForMedlemskap(behandlingId, endringssjekker));
@@ -301,11 +350,6 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
             riktigEntitetVerdi = sisteVersjon.getValue();
         }
         return riktigEntitetVerdi;
-    }
-
-    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
-        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType())
-            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
     }
 
 }

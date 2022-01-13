@@ -4,14 +4,18 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.io.ByteArrayInputStream;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -31,8 +35,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.exception.TekniskException;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -62,7 +69,6 @@ public class DokumentRestTjeneste {
 
     public static final String DOKUMENTER_PATH = "/dokument/hent-dokumentliste";
     public static final String DOKUMENT_PATH = "/dokument/hent-dokument";
-    public static final String DOKUMENTER_BEHANDLING_PATH = "/dokument/hent-dokument-behandling";
     public static final String SAKSNUMMER_PARAM = "saksnummer";
     public static final String JOURNALPOST_ID_PARAM = "journalpostId";
     public static final String DOKUMENT_ID_PARAM = "dokumentId";
@@ -73,6 +79,7 @@ public class DokumentRestTjeneste {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private VirksomhetTjeneste virksomhetTjeneste;
     private BehandlingRepository behandlingRepository;
+    private Boolean enablePsbHenleggelse;
 
     public DokumentRestTjeneste() {
         // For Rest-CDI
@@ -84,13 +91,15 @@ public class DokumentRestTjeneste {
                                 FagsakRepository fagsakRepository,
                                 MottatteDokumentRepository mottatteDokumentRepository,
                                 VirksomhetTjeneste virksomhetTjeneste,
-                                BehandlingRepository behandlingRepository) {
+                                BehandlingRepository behandlingRepository,
+                                @KonfigVerdi(value = "BEHANDLINGID_DOKUMENTLIST_ENABLET", defaultVerdi = "false") Boolean enablePsbHenleggelse) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.virksomhetTjeneste = virksomhetTjeneste;
         this.behandlingRepository = behandlingRepository;
+        this.enablePsbHenleggelse = enablePsbHenleggelse;
     }
 
     @GET
@@ -110,8 +119,7 @@ public class DokumentRestTjeneste {
 
             Fagsak fagsak = fagsakOpt.get();
 
-            Set<Long> åpneBehandlinger = behandlingRepository.hentBehandlingerSomIkkeErAvsluttetForFagsakId(fagsakId).stream().map(Behandling::getId)
-                .collect(Collectors.toSet());
+            var behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsakId);
 
             // Burde brukt map på dokumentid, men den lagres ikke i praksis.
             Map<JournalpostId, List<MottattDokument>> mottattedokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsakId).stream()
@@ -125,12 +133,66 @@ public class DokumentRestTjeneste {
             journalPostList.forEach(arkivJournalPost -> {
                 dokumentResultat.addAll(mapFraArkivJournalPost(saksnummer, arkivJournalPost, mottattedokumenter, inntektsmeldinger));
             });
-            dokumentResultat.sort(Comparator.comparing(DokumentDto::getTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())));
 
-            return dokumentResultat;
+            return dokumentResultat.stream()
+                .peek(it -> leggTilBehandling(it, behandlinger))
+                .sorted(Comparator.comparing(DokumentDto::getTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())))
+                .collect(Collectors.toList());
+
         } catch (ManglerTilgangException e) {
             throw DokumentRestTjenesteFeil.FACTORY.applikasjonHarIkkeTilgangTilHentJournalpostListeTjeneste(e).toException();
         }
+    }
+
+    private void leggTilBehandling(DokumentDto dto, List<Behandling> behandlinger) {
+        if (!enablePsbHenleggelse) {
+            return;
+        }
+        var behandlingTidslinje = opprettTidslinje(behandlinger);
+        var behandlingId = utledBehandling(dto, behandlingTidslinje);
+
+        if (behandlingId != null) {
+            var result = new ArrayList<Long>();
+            result.add(behandlingId);
+
+            dto.setBehandlinger(result);
+        }
+    }
+
+    Long utledBehandling(DokumentDto dto, NavigableSet<BehandlingPeriode> behandlingTidslinje) {
+        if (Objects.equals(dto.getKommunikasjonsretning(), Kommunikasjonsretning.UT)) {
+            // finn nærmeste TOM
+            return behandlingTidslinje.stream()
+                .min(Comparator.comparing(it -> distanseTilTom(dto.getTidspunkt(), it)))
+                .map(BehandlingPeriode::getBehandlingId)
+                .orElse(null);
+        }
+
+        return behandlingTidslinje.stream()
+            .filter(it -> it.getTom().isAfter(dto.getTidspunkt()))
+            .min(Comparator.comparing(it -> distanseTilTom(dto.getTidspunkt(), it)))
+            .map(BehandlingPeriode::getBehandlingId)
+            .orElse(null);
+    }
+
+    private Long distanseTilTom(LocalDateTime dato, BehandlingPeriode periode) {
+        return Math.abs(ChronoUnit.MILLIS.between(dato, periode.getTom()));
+    }
+
+    private NavigableSet<BehandlingPeriode> opprettTidslinje(List<Behandling> behandlinger) {
+        var tidslinje = new TreeSet<BehandlingPeriode>();
+
+        var sorted = new ArrayList<>(behandlinger);
+        sorted.sort(Comparator.comparing(Behandling::getAvsluttetDato, Comparator.nullsLast(Comparator.naturalOrder())));
+
+        LocalDateTime fom = Tid.TIDENES_BEGYNNELSE.atStartOfDay();
+        for (Behandling behandling : sorted) {
+            var tom = behandling.getAvsluttetDato() != null ? behandling.getAvsluttetDato() : Tid.TIDENES_ENDE.atStartOfDay();
+            tidslinje.add(new BehandlingPeriode(fom, tom, behandling.getId()));
+            fom = tom.plusNanos(1);
+        }
+
+        return tidslinje;
     }
 
     private Map<JournalpostId, List<Inntektsmelding>> finnInntektsmeldinger(Fagsak fagsak) {
@@ -184,6 +246,7 @@ public class DokumentRestTjeneste {
         dto.setJournalpostId(arkivJournalPost.getJournalpostId());
         dto.setDokumentId(arkivDokument.getDokumentId());
         dto.setTittel(arkivDokument.getTittel());
+        dto.setBrevkode(arkivDokument.getBrevkode());
         dto.setKommunikasjonsretning(arkivJournalPost.getKommunikasjonsretning());
         dto.setTidspunkt(arkivJournalPost.getTidspunkt());
 

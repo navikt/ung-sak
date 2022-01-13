@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -77,18 +78,33 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     @Override
     public OmsorgspengerGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         List<Aktivitet> aktiviteter = hentAktiviteter(ref);
-        if (aktiviteter == null || aktiviteter.isEmpty()) {
+        if (aktiviteter.isEmpty()) {
             return new OmsorgspengerGrunnlag(Collections.emptyList());
         }
 
-        var utbetalingsgradPrAktivitet = aktiviteter.stream()
+        // Kalkulus forventer å ikke få duplikate arbeidsforhold, så vi samler alle perioder pr arbeidsforhold/aktivitet
+        var gruppertPrAktivitet = aktiviteter.stream()
             .filter(e -> !e.getUttaksperioder().isEmpty())
-            .map(e -> mapTilUtbetalingsgrad(e.getArbeidsforhold(), e.getUttaksperioder().stream()
-                .filter(it -> vilkårsperiode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom())))
-                .collect(Collectors.toList())))
+            .collect(Collectors.groupingBy(a -> mapTilKalkulusArbeidsforhold(a.getArbeidsforhold())));
+
+
+        var utbetalingsgradPrAktivitet = gruppertPrAktivitet
+            .entrySet()
+            .stream()
+            .map(e -> {
+                var utbetalingsgraderForVilkårsperiode = filtrerForVilkårsperiode(vilkårsperiode, e.getValue().stream().flatMap(a -> a.getUttaksperioder().stream()));
+                return mapTilUtbetalingsgrad(utbetalingsgraderForVilkårsperiode, e.getKey());
+            })
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
         return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
+    }
+
+    @NotNull
+    private List<Uttaksperiode> filtrerForVilkårsperiode(DatoIntervallEntitet vilkårsperiode, Stream<Uttaksperiode> uttaksperiodeStream) {
+        return uttaksperiodeStream
+            .filter(it -> vilkårsperiode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom())))
+            .collect(Collectors.toList());
     }
 
     @NotNull
@@ -97,12 +113,8 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         return fullUttaksplan.getAktiviteter();
     }
 
-    private UtbetalingsgradPrAktivitetDto mapTilUtbetalingsgrad(Arbeidsforhold uttakArbeidsforhold, List<Uttaksperiode> perioder) {
-        var arbeidsforhold = mapTilKalkulusArbeidsforhold(uttakArbeidsforhold);
-        var utbetalingsgrad = perioder.stream()
-            .sorted(COMP_PERIODE) // stabil rekkefølge output
-            .map(p -> new PeriodeMedUtbetalingsgradDto(tilKalkulusPeriode(p.getPeriode()), mapUtbetalingsgrad(p)))
-            .collect(Collectors.toList());
+    private UtbetalingsgradPrAktivitetDto mapTilUtbetalingsgrad(List<Uttaksperiode> perioder, UtbetalingsgradArbeidsforholdDto arbeidsforhold) {
+        var utbetalingsgrad = mapUtbetalingsgradPerioder(perioder);
 
         if (perioder.size() != utbetalingsgrad.size()) {
             throw new IllegalArgumentException("Utvikler-feil: Skal ikke komme til kalkulus uten innvilgede perioder for " + arbeidsforhold + ", angitte uttaksperioder: " + perioder);
@@ -111,6 +123,14 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
             return null;
         }
         return new UtbetalingsgradPrAktivitetDto(arbeidsforhold, utbetalingsgrad);
+    }
+
+    @NotNull
+    private List<PeriodeMedUtbetalingsgradDto> mapUtbetalingsgradPerioder(List<Uttaksperiode> perioder) {
+        return perioder.stream()
+            .sorted(COMP_PERIODE) // stabil rekkefølge output
+            .map(p -> new PeriodeMedUtbetalingsgradDto(tilKalkulusPeriode(p.getPeriode()), mapUtbetalingsgrad(p)))
+            .collect(Collectors.toList());
     }
 
     @NotNull

@@ -79,12 +79,6 @@ spec:
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
       value: privat-k9-aksjonspunkthendelse
-    - name: KAFKA_HISTORIKKINNSLAG_TOPIC
-      value: privat-k9-historikkinnslag-q1
-    - name: KAFKA_RISIKOKLASSIFISERING_TOPIC
-      value: privat-k9-risk-utfor-q1
-    - name: KAFKA_KONTROLL_RESULTAT_TOPIC
-      value: privat-k9-kontroll-resultat-q1
     - name: KAFKA_DOKUMENTBESTILLING_TOPIC
       value: privat-k9-dokumenthendelse
     - name: KAFKA_INFOTRYGDFEED_TOPIC
@@ -95,6 +89,8 @@ spec:
       value: privat-k9-vedtakhendelse
     - name: KAFKA_STONADSTATISTIKK_TOPIC
       value: k9saksbehandling.aapen-k9-stonadstatistikk-v1
+    - name: KAFKA_BRUKERDIALOGINNSYN_TOPIC
+      value: dusseldorf.privat-k9-sak-innsyn-v1
 
     # Baseurl
     - name: SCHEMA_REGISTRY_URL
@@ -155,6 +151,8 @@ spec:
       value: http://k9-formidling.k9saksbehandling/k9/formidling
     - name : K9_PUNSJ_URL
       value: https://k9-punsj.dev.adeo.no/api
+    - name: INFOTRYGD_BS_BASE_URI
+      value: https://k9-infotrygd.dev.intern.nav.no
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
@@ -186,6 +184,8 @@ spec:
       value: "3030"
 
     # Feature-flag
+    - name: VKY_VED_OVERLAPP_INFOTRYGD
+      value: "true"
     - name: OMP_IM_SJEKK_FORSTE_FRAVAERSDAG
       value: "true"
     - name: PSB_OPPG_OPPTJENING_PRIORITERING
@@ -204,17 +204,31 @@ spec:
       value: "true"
     - name: ENABLE_UTLEDET_ENDRINGSPERIODE
       value: "true"
-    - name: ARBEIDSTID_SJEKK_SNFL
-      value: "true"
-    - name: NY_SYKDOM_TOTRINN
-      value: "true"
     - name: ENABLE_STONADSTATISTIKK
       value: "true"
     - name: ENABLE_RELEVANT_SYKDOMSPERIODE
       value: "true"
-    - name: KOMPLETTHET_NY_FLYT
-      value: "true"
     - name: MAP_ALLE_KRAV
+      value: "true"
+    - name: ENABLE_BRUKERDIALOGINNSYN
+      value: "true"
+    - name: PSB_ENABLE_BEKREFT_UTTAK
+      value: "true"
+    - name: DISABLE_VURDER_TILBAKETREKK
+      value: "true"
+    - name: PSB_INFOTRYGD_MIGRERING
+      value: "true"
+    - name: FORLENGELSE_OPPTJENING_ENABLET
+      value: "true"
+    - name: FORLENGELSE_MEDLEMSKAP_ENABLET
+      value: "true"
+    - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
+      value: "true"
+    - name: HENLEGGELSE_PSB_ENABLET
+      value: "true"
+    - name: BEHANDLINGID_DOKUMENTLIST_ENABLET
+      value: "true"
+    - name: PERIODER_KANT_I_KANT_VURDERER_ENABLET
       value: "true"
     - name: K9_RAPID_AIVEN
       value: "true"
@@ -229,3 +243,12 @@ spec:
 
     - name: PIP_USERS
       value: "srvPDP,srvk9-tilbake,srvsaf,Z993210,Z994080"
+
+    # Pleiepenger infotrygd migrering
+    - name: INFOTRYGD_MIGRERING_TILLATELSER
+      value: "Z990404,Z990422,Z994004"
+
+
+    # FRISINN NYE REGLER 2022
+    - name: FRISINN_NYTT_STP_TOGGLE
+        value: "true"

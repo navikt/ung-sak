@@ -60,7 +60,7 @@ updates:
     directory: "/"
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 15
     registries:
       - k9-felles
       - k9-prosesstask
@@ -77,5 +77,5 @@ updates:
     directory: "/"
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 15
     

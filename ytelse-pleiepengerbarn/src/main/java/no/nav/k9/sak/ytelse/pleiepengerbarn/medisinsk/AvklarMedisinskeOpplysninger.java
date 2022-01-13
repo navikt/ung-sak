@@ -2,12 +2,10 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.medisinsk;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -55,8 +53,6 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     private SykdomDokumentRepository sykdomDokumentRepository;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
 
-    private boolean enableNySykdomTotrinn;
-
     AvklarMedisinskeOpplysninger() {
         // for CDI proxy
     }
@@ -67,8 +63,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
                                         @FagsakYtelseTypeRef("PSB") PSBVilkårsPerioderTilVurderingTjeneste psbVilkårsPerioderTilVurderingTjeneste,
                                         BehandlingRepository behandlingRepository, VilkårResultatRepository vilkårResultatRepository,
                                         PleiebehovResultatRepository resultatRepository, SykdomDokumentRepository sykdomDokumentRepository,
-                                        SykdomGrunnlagRepository sykdomGrunnlagRepository,
-                                        @KonfigVerdi(value = "NY_SYKDOM_TOTRINN", defaultVerdi = "false") boolean enableNySykdomTotrinn) {
+                                        SykdomGrunnlagRepository sykdomGrunnlagRepository) {
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.sykdomVurderingService = sykdomVurderingService;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
@@ -78,7 +73,6 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         this.resultatRepository = resultatRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
-        this.enableNySykdomTotrinn = enableNySykdomTotrinn;
     }
 
 
@@ -87,22 +81,18 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         final Behandling behandling = behandlingRepository.hentBehandling(param.getRef().getBehandlingId());
 
         boolean skalHaToTrinn;
-        if (enableNySykdomTotrinn) {
-            final var perioder = psbVilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-            List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
-            SykdomGrunnlagSammenlikningsresultat sammenlikningsresultat = sykdomGrunnlagService.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder);
 
-            final boolean harTidligereHattRelevantGodkjentLegeerklæring = sykdomGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
-            final boolean harGodkjentLegeerklæring = !sykdomDokumentRepository.hentGodkjenteLegeerklæringer(behandling.getFagsak().getPleietrengendeAktørId()).isEmpty();
+        final var perioder = psbVilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
+        SykdomGrunnlagSammenlikningsresultat sammenlikningsresultat = sykdomGrunnlagService.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder);
 
-            final var harFåttFørsteLegeerklæring = !harTidligereHattRelevantGodkjentLegeerklæring && harGodkjentLegeerklæring;
-            final var harEndringer = !sammenlikningsresultat.getDiffPerioder().isEmpty();
+        final boolean harTidligereHattRelevantGodkjentLegeerklæring = sykdomGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
+        final boolean harGodkjentLegeerklæring = !sykdomDokumentRepository.hentGodkjenteLegeerklæringer(behandling.getFagsak().getPleietrengendeAktørId()).isEmpty();
 
-            skalHaToTrinn = harEndringer || harFåttFørsteLegeerklæring;
-        } else {
-            skalHaToTrinn = true;
-        }
+        final var harFåttFørsteLegeerklæring = !harTidligereHattRelevantGodkjentLegeerklæring && harGodkjentLegeerklæring;
+        final var harEndringer = !sammenlikningsresultat.getDiffPerioder().isEmpty();
 
+        skalHaToTrinn = harEndringer || harFåttFørsteLegeerklæring;
 
         if (dto.isIkkeVentPåGodkjentLegeerklæring()) {
             final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandling);
@@ -129,7 +119,8 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
          *
          * ...men dette har ikke blitt prioritert.
          */
-        kvitterUtAlleDokumenterSomLiggerPåPleietrengende(behandling);
+        // Saksbehandler må igjen kvittere ut dokumenter manuelt for å sikre at de har blitt vurdert:
+        //kvitterUtAlleDokumenterSomLiggerPåPleietrengende(behandling);
 
         lagHistorikkinnslag(param, "Sykdom manuelt behandlet.");
 

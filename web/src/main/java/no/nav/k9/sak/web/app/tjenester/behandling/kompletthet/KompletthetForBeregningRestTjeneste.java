@@ -112,7 +112,7 @@ public class KompletthetForBeregningRestTjeneste {
     }
 
     private Boolean utledVurdering(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
-        return perioderTilVurdering.stream().anyMatch(at -> it.getKey().equals(at));
+        return perioderTilVurdering.stream().anyMatch(at -> it.getKey().equals(at) && !it.getValue().isEmpty());
     }
 
     @GET
@@ -156,7 +156,7 @@ public class KompletthetForBeregningRestTjeneste {
             .stream()
             .map(im -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(im.getArbeidsgiver().getIdentifikator(),
                 im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), Status.MOTTATT, im.getJournalpostId()))
-            .collect(Collectors.toList()));
+            .toList());
 
         return resultat;
     }

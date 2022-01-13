@@ -13,7 +13,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderFaktaOmBeregningDtoer;
-import no.nav.k9.sak.web.app.tjenester.behandling.historikk.FaktaOmBeregningHistorikkTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning.FaktaOmBeregningHistorikkTjeneste;
 
 
 @ApplicationScoped

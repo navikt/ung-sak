@@ -24,6 +24,8 @@ public enum SkjermlenkeType implements Kodeverdi {
     FAKTA_FOR_OPPTJENING("FAKTA_FOR_OPPTJENING", "Opptjening"),
     FAKTA_OM_ARBEIDSFORHOLD("FAKTA_OM_ARBEIDSFORHOLD", "Arbeidsforhold"),
     FAKTA_OM_BEREGNING("FAKTA_OM_BEREGNING", "Beregning"),
+    INFOTRYGD_MIGRERING("INFOTRYGD_MIGRERING", "Infotrygdmigrering"),
+    OVERSTYR_INPUT_BEREGNING("OVERSTYR_INPUT_BEREGNING", "Overstyr input beregning"),
     FAKTA_OM_FORDELING("FAKTA_OM_FORDELING", "Fordeling"),
     FAKTA_OM_MEDLEMSKAP("FAKTA_OM_MEDLEMSKAP", "Medlemskap"),
     FAKTA_OM_MEDISINSK("FAKTA_OM_MEDISINSK", "Sykdom"),
@@ -50,6 +52,8 @@ public enum SkjermlenkeType implements Kodeverdi {
     UTLAND("UTLAND", "Endret utland"),
     UTTAK("UTTAK", "Uttak"),
     VEDTAK("VEDTAK", "Vedtak"),
+    /** @deprecated pt. ikke i bruk i K9 */
+    @Deprecated
     VURDER_FARESIGNALER("VURDER_FARESIGNALER", "Vurder faresignaler"),
     VURDER_NATTEVÅK("VURDER_NATTEVÅK", "Vurder nattevåk"),
     VURDER_BEREDSKAP("VURDER_BEREDSKAP", "Vurder beredskap"),

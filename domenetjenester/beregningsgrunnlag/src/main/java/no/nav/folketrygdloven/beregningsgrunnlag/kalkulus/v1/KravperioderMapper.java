@@ -7,10 +7,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
@@ -39,8 +41,8 @@ public class KravperioderMapper {
                                                          InntektArbeidYtelseGrunnlagDto grunnlagDto) {
         Collection<Inntektsmelding> inntektsmeldinger = imTjeneste.begrensSakInntektsmeldinger(referanse, sakInntektsmeldinger, vilkårsperiode);
 
-        Map<Kravnøkkel, Inntektsmelding> sisteIMPrArbeidsforhold = finnSisteInntektsmeldingMedRefusjonPrArbeidsforhold(vilkårsperiode, imTjeneste, inntektsmeldinger);
-        Map<Kravnøkkel, List<Inntektsmelding>> gruppertPrArbeidsforhold = finnInntektsmeldingMedRefusjonPrArbeidsforhold(inntektsmeldinger);
+        Map<Kravnøkkel, Inntektsmelding> sisteIMPrArbeidsforhold = finnSisteInntektsmeldingMedRefusjonPrArbeidsforhold(vilkårsperiode, imTjeneste, inntektsmeldinger, grunnlagDto.getArbeidDto());
+        Map<Kravnøkkel, List<Inntektsmelding>> gruppertPrArbeidsforhold = finnInntektsmeldingMedRefusjonPrArbeidsforhold(inntektsmeldinger, vilkårsperiode.getFomDato(), grunnlagDto.getArbeidDto());
 
         List<KravperioderPrArbeidsforhold> kravPrArbeidsforhold = gruppertPrArbeidsforhold
             .entrySet()
@@ -51,26 +53,28 @@ public class KravperioderMapper {
         return kravPrArbeidsforhold.isEmpty() ? null : kravPrArbeidsforhold;
     }
 
-    private static Map<Kravnøkkel, List<Inntektsmelding>> finnInntektsmeldingMedRefusjonPrArbeidsforhold(Collection<Inntektsmelding> inntektsmeldinger) {
-        List<Inntektsmelding> inntektsmeldingerMedRefusjonskrav = filtrerKunRefusjon(inntektsmeldinger);
+    private static Map<Kravnøkkel, List<Inntektsmelding>> finnInntektsmeldingMedRefusjonPrArbeidsforhold(Collection<Inntektsmelding> inntektsmeldinger, LocalDate skjæringstidspunkt, ArbeidDto arbeidDto) {
+        List<Inntektsmelding> inntektsmeldingerMedRefusjonskrav = filtrerKunRefusjon(inntektsmeldinger, skjæringstidspunkt, arbeidDto);
         return grupper(inntektsmeldingerMedRefusjonskrav);
     }
 
-    private static List<Inntektsmelding> filtrerKunRefusjon(Collection<Inntektsmelding> inntektsmeldinger) {
+    private static List<Inntektsmelding> filtrerKunRefusjon(Collection<Inntektsmelding> inntektsmeldinger, LocalDate skjæringstidspunkt, ArbeidDto arbeidDto) {
         return inntektsmeldinger.stream()
             .filter(im -> (im.getRefusjonBeløpPerMnd() != null && !im.getRefusjonBeløpPerMnd().erNullEllerNulltall()) ||
                 im.getEndringerRefusjon().stream().anyMatch(e -> !e.getRefusjonsbeløp().erNullEllerNulltall()))
+            .filter(im -> refusjonOpphørerFørStart(im, finnStartdatoRefusjon(im, skjæringstidspunkt, arbeidDto)) )
             .collect(Collectors.toList());
     }
 
-    private static Map<Kravnøkkel, Inntektsmelding> finnSisteInntektsmeldingMedRefusjonPrArbeidsforhold(DatoIntervallEntitet vilkårsperiode, InntektsmeldingerRelevantForBeregning imTjeneste, Collection<Inntektsmelding> inntektsmeldinger) {
+    private static Map<Kravnøkkel, Inntektsmelding> finnSisteInntektsmeldingMedRefusjonPrArbeidsforhold(DatoIntervallEntitet vilkårsperiode, InntektsmeldingerRelevantForBeregning imTjeneste, Collection<Inntektsmelding> inntektsmeldinger, ArbeidDto arbeidDto) {
         List<Inntektsmelding> sisteInntektsmeldinger = imTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldinger, vilkårsperiode);
-        return grupperEneste(filtrerKunRefusjon(sisteInntektsmeldinger));
+        return grupperEneste(filtrerKunRefusjon(sisteInntektsmeldinger, vilkårsperiode.getFomDato(), arbeidDto));
     }
 
     private static KravperioderPrArbeidsforhold mapTilKravPrArbeidsforhold(DatoIntervallEntitet vilkårsperiode,
                                                                            InntektArbeidYtelseGrunnlagDto grunnlagDto,
-                                                                           Map<Kravnøkkel, Inntektsmelding> sisteIMPrArbeidsforhold, Map.Entry<Kravnøkkel, List<Inntektsmelding>> e) {
+                                                                           Map<Kravnøkkel, Inntektsmelding> sisteIMPrArbeidsforhold,
+                                                                           Map.Entry<Kravnøkkel, List<Inntektsmelding>> e) {
         List<PerioderForKrav> alleTidligereKravPerioder = lagPerioderForAlle(vilkårsperiode, grunnlagDto, e.getValue());
         PerioderForKrav sistePerioder = lagPerioderForKrav(
             sisteIMPrArbeidsforhold.get(e.getKey()),
@@ -90,15 +94,25 @@ public class KravperioderMapper {
     }
 
     private static Map<Kravnøkkel, List<Inntektsmelding>> grupper(List<Inntektsmelding> inntektsmeldingerMedRefusjonskrav) {
-        return inntektsmeldingerMedRefusjonskrav.stream()
-            .collect(Collectors.groupingBy(im ->
-                new Kravnøkkel(im.getArbeidsgiver(), im.getArbeidsforholdRef())));
+        Map<Kravnøkkel, List<Inntektsmelding>> resultMap = inntektsmeldingerMedRefusjonskrav.stream()
+            .map(im -> new Kravnøkkel(im.getArbeidsgiver(), im.getArbeidsforholdRef()))
+            .distinct()
+            .collect(Collectors.toMap(n -> n, n -> new ArrayList<>()));
+        inntektsmeldingerMedRefusjonskrav.forEach(im -> {
+            var nøkler = finnKeysSomSkalHaInntektsmelding(resultMap, im);
+            nøkler.forEach(n -> resultMap.get(n).add(im));
+        });
+        return resultMap;
+    }
+
+    private static Set<Kravnøkkel> finnKeysSomSkalHaInntektsmelding(Map<Kravnøkkel, List<Inntektsmelding>> resultMap, Inntektsmelding im) {
+        return resultMap.keySet().stream().filter(n -> n.arbeidsgiver.equals(im.getArbeidsgiver()) && n.referanse.gjelderFor(im.getArbeidsforholdRef())).collect(Collectors.toSet());
     }
 
     private static Map<Kravnøkkel, Inntektsmelding> grupperEneste(List<Inntektsmelding> inntektsmeldingerMedRefusjonskrav) {
         return inntektsmeldingerMedRefusjonskrav.stream()
             .collect(Collectors.toMap(im ->
-                new Kravnøkkel(im.getArbeidsgiver(), im.getArbeidsforholdRef()),
+                    new Kravnøkkel(im.getArbeidsgiver(), im.getArbeidsforholdRef()),
                 im -> im));
     }
 
@@ -117,37 +131,32 @@ public class KravperioderMapper {
 
     private static LocalDate finnStartdatoRefusjon(Inntektsmelding im, LocalDate skjæringstidspunktBeregning,
                                                    ArbeidDto arbeidDto) {
-        LocalDate startRefusjon;
-        if (arbeidDto != null) {
-            LocalDate startDatoArbeid = arbeidDto.getYrkesaktiviteter().stream()
-                .filter(y -> y.getArbeidsgiver().getIdent().equals(im.getArbeidsgiver().getIdentifikator()) &&
-                    matcherReferanse(y.getAbakusReferanse(), im.getArbeidsforholdRef()))
-                .flatMap(y -> y.getAktivitetsAvtaler().stream())
-                .filter(a -> a.getStillingsprosent() == null)
-                .map(AktivitetsAvtaleDto::getPeriode)
-                .map(Periode::getFom)
-                .filter(fom -> fom.isAfter(skjæringstidspunktBeregning))
-                .min(Comparator.naturalOrder())
-                .orElse(skjæringstidspunktBeregning);
-            if (startDatoArbeid.isAfter(skjæringstidspunktBeregning)) {
-                if (im.getStartDatoPermisjon().isEmpty()) {
-                    startRefusjon = startDatoArbeid;
-                } else {
-                    startRefusjon = startDatoArbeid.isAfter(im.getStartDatoPermisjon().get()) ?
-                        startDatoArbeid : im.getStartDatoPermisjon().get();
-                }
-            } else {
-                startRefusjon = skjæringstidspunktBeregning;
-            }
-        } else {
-            startRefusjon = skjæringstidspunktBeregning;
+        if (arbeidDto == null) {
+            throw new IllegalStateException("Krever arbeidDto for mapping av inntektsmelding");
         }
-        return startRefusjon;
+        LocalDate startDatoArbeid = finnStartdatoArbeid(im, skjæringstidspunktBeregning, arbeidDto);
+        return startDatoArbeid.isAfter(skjæringstidspunktBeregning) ? startDatoArbeid : skjæringstidspunktBeregning;
+    }
+
+    private static LocalDate finnStartdatoArbeid(Inntektsmelding im, LocalDate skjæringstidspunktBeregning, ArbeidDto arbeidDto) {
+        return arbeidDto.getYrkesaktiviteter().stream()
+            .filter(y -> y.getArbeidsgiver().getIdent().equals(im.getArbeidsgiver().getIdentifikator()) &&
+                matcherReferanse(y.getAbakusReferanse(), im.getArbeidsforholdRef()))
+            .flatMap(y -> y.getAktivitetsAvtaler().stream())
+            .filter(a -> a.getStillingsprosent() == null)
+            .map(AktivitetsAvtaleDto::getPeriode)
+            .filter(a -> !a.getTom().isBefore(skjæringstidspunktBeregning))
+            .map(Periode::getFom)
+            .min(Comparator.naturalOrder())
+            .orElse(skjæringstidspunktBeregning);
     }
 
     private static List<Refusjonsperiode> mapRefusjonsperioder(Inntektsmelding im, LocalDate startdatoRefusjon) {
         ArrayList<LocalDateSegment<BigDecimal>> alleSegmenter = new ArrayList<>();
-        if (!(im.getRefusjonBeløpPerMnd() == null || im.getRefusjonBeløpPerMnd().getVerdi().compareTo(BigDecimal.ZERO) ==0)) {
+        if (refusjonOpphørerFørStart(im, startdatoRefusjon)) {
+            return Collections.emptyList();
+        }
+        if (!(im.getRefusjonBeløpPerMnd() == null || im.getRefusjonBeløpPerMnd().getVerdi().compareTo(BigDecimal.ZERO) == 0)) {
             alleSegmenter.add(new LocalDateSegment<>(startdatoRefusjon, TIDENES_ENDE, im.getRefusjonBeløpPerMnd().getVerdi()));
         }
 
@@ -171,11 +180,15 @@ public class KravperioderMapper {
 
     }
 
+    private static boolean refusjonOpphørerFørStart(Inntektsmelding im, LocalDate startdatoRefusjon) {
+        return im.getRefusjonOpphører() != null && im.getRefusjonOpphører().isBefore(startdatoRefusjon);
+    }
+
     private static boolean matcherReferanse(InternArbeidsforholdRefDto ref1, InternArbeidsforholdRef ref2) {
         return (ref1 == null && ref2 == null)
             || (ref1 != null && ref2 != null && Objects.equals(ref1.getAbakusReferanse(), ref2.getReferanse()));
     }
 
-    public static record Kravnøkkel (Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef referanse) { }
-
+    public static record Kravnøkkel(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef referanse) {
+    }
 }

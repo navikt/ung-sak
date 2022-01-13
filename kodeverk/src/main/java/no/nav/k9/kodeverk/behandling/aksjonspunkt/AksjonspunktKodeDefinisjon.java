@@ -77,6 +77,7 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE = "5039";
     public static final String VURDER_FAKTA_FOR_ATFL_SN_KODE = "5058";
+    public static final String VURDER_REFUSJON_BERGRUNN_KODE = "5059";
 
     public static final String FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE_KODE = "5042";
 
@@ -95,6 +96,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE = "5068";
     public static final String VURDER_TILBAKETREKK_KODE = "5090";
 
+    /** p.t. ikke i bruk i K9 */
+    @Deprecated
     public static final String VURDER_FARESIGNALER_KODE = "5095";
 
     public static final String AUTO_VENT_BRUKER_70_ÅR = "7035";
@@ -108,6 +111,11 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_RETT_ETTER_PLEIETRENGENDES_DØD = "9202";
     public static final String MANGLER_AKTIVITETER = "9203";
     public static final String VENT_ANNEN_PSB_SAK_KODE = "9290";
+    public static final String OVERSTYR_BEREGNING_INPUT = "9005";
+    public static final String AUTO_VENT_PÅ_KOMPLETT_SØKNAD_FOR_PERIODE = "9006";
+    public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE = "9007";
+    public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART = "9008";
+
 
     // OMS
     public static final String AVKLAR_OMSORGEN_FOR_KODE = "9002";

@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.foreslåvedtak;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -98,7 +99,7 @@ public class ForeslåVedtakTjenesteTest {
         kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
 
         when(oppgaveTjeneste.harÅpneOppgaverAvType(any(AktørId.class), any(), any())).thenReturn(false);
-        when(overlappendeYtelserTjeneste.finnOverlappendeYtelser(any())).thenReturn(Map.of());
+        when(overlappendeYtelserTjeneste.finnOverlappendeYtelser(any(), anySet())).thenReturn(Map.of());
 
         SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste = new SjekkMotAndreYtelserTjeneste(historikkRepository, oppgaveTjeneste, overlappendeYtelserTjeneste);
         tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, false, sjekkMotAndreYtelserTjeneste, foreslåVedtakManueltUtledere);

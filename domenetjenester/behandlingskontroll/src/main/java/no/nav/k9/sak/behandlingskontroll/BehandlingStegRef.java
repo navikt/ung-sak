@@ -49,6 +49,7 @@ public @interface BehandlingStegRef {
      */
     String kode();
 
+
     /**
      * AnnotationLiteral som kan brukes i CDI søk.
      * <p>

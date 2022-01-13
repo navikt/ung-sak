@@ -28,6 +28,10 @@ public class BehandlingVedtakEvent implements BehandlingEvent {
         return behandling.getId();
     }
 
+    public Behandling getBehandling() {
+        return behandling;
+    }
+
     public BehandlingVedtak getVedtak() {
         return vedtak;
     }

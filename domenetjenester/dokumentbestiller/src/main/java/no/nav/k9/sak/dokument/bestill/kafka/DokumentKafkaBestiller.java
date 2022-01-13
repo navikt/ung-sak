@@ -1,6 +1,7 @@
 package no.nav.k9.sak.dokument.bestill.kafka;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,12 +41,22 @@ public class DokumentKafkaBestiller {
     }
 
     public void bestillBrevFraKafka(BestillBrevDto bestillBrevDto, HistorikkAktør aktør) {
-        Behandling behandling = behandlingRepository.hentBehandling(bestillBrevDto.getBehandlingId());
-        DokumentMalType dokumentMalType = DokumentMalType.fraKode(bestillBrevDto.getBrevmalkode());
+        bestillBrevFraKafka(List.of(bestillBrevDto), aktør);
+    }
 
-        var payload = mapDokumentdataParametre(bestillBrevDto);
+    public void bestillBrevFraKafka(List<BestillBrevDto> bestillBrevDtoer, HistorikkAktør aktør) {
+        if (bestillBrevDtoer.isEmpty()) {
+            return;
+        }
+        var behandlingId = bestillBrevDtoer.stream().map(BestillBrevDto::getBehandlingId).findFirst().orElseThrow();
+        var brevmalKode = bestillBrevDtoer.stream().map(BestillBrevDto::getBrevmalkode).findFirst().orElseThrow();
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        DokumentMalType dokumentMalType = DokumentMalType.fraKode(brevmalKode);
+        for (BestillBrevDto bestillBrevDto : bestillBrevDtoer) {
+            var payload = mapDokumentdataParametre(bestillBrevDto);
 
-        opprettKafkaTask(behandling, dokumentMalType, bestillBrevDto.getOverstyrtMottaker(), tilJson(payload));
+            opprettKafkaTask(behandling, dokumentMalType, bestillBrevDto.getOverstyrtMottaker(), tilJson(payload));
+        }
         brevHistorikkinnslag.opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, dokumentMalType);
     }
 

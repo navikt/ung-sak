@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -102,15 +101,16 @@ public class VurderLøpendeMedlemskap {
     }
 
     private Map<LocalDate, MedlemskapsvilkårGrunnlag> lagGrunnlag(Long behandlingId) {
+        return lagGrunnlagMedForlengesesPerioder(behandlingId).getGrunnlagPerVurderingsdato();
+    }
+
+    private GrunnlagOgPerioder lagGrunnlagMedForlengesesPerioder(Long behandlingId) {
         Optional<MedlemskapAggregat> medlemskap = medlemskapRepository.hentMedlemskap(behandlingId);
         Optional<VurdertMedlemskapPeriodeEntitet> vurdertMedlemskapPeriode = medlemskap.flatMap(MedlemskapAggregat::getVurderingLøpendeMedlemskap);
-        List<LocalDate> vurderingsdatoerListe = utledVurderingsdatoerMedlemskap.finnVurderingsdatoer(behandlingId)
-            .stream()
-            .sorted(LocalDate::compareTo)
-            .collect(Collectors.toList());
+        var vurderingsdatoerMedForlengelse = utledVurderingsdatoerMedlemskap.finnVurderingsdatoerMedForlengelse(behandlingId);
 
-        if (vurderingsdatoerListe.isEmpty()) {
-            return Collections.emptyMap();
+        if (vurderingsdatoerMedForlengelse.getDatoerTilVurdering().isEmpty()) {
+            return new GrunnlagOgPerioder(Collections.emptyMap(), vurderingsdatoerMedForlengelse.getForlengelser());
         }
 
         Map<LocalDate, VurdertLøpendeMedlemskapEntitet> map = mapVurderingFraSaksbehandler(vurdertMedlemskapPeriode);
@@ -118,7 +118,7 @@ public class VurderLøpendeMedlemskap {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
         Map<LocalDate, MedlemskapsvilkårGrunnlag> resulatat = new TreeMap<>();
-        for (LocalDate vurderingsdato : vurderingsdatoerListe) {
+        for (LocalDate vurderingsdato : vurderingsdatoerMedForlengelse.getDatoerTilVurdering()) {
             Optional<VurdertLøpendeMedlemskapEntitet> vurdertOpt = Optional.ofNullable(map.get(vurderingsdato));
             PersonopplysningerAggregat aggregatOptional = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(ref.getBehandlingId(), ref.getAktørId(), vurderingsdato);
             MedlemskapsvilkårGrunnlag grunnlag = new MedlemskapsvilkårGrunnlag(
@@ -137,7 +137,7 @@ public class VurderLøpendeMedlemskap {
 
             resulatat.put(vurderingsdato, grunnlag);
         }
-        return resulatat;
+        return new GrunnlagOgPerioder(resulatat, vurderingsdatoerMedForlengelse.getForlengelser());
     }
 
     private Boolean utledBasertPåStatsborgerskap(PersonopplysningerAggregat aggregat) {
@@ -196,7 +196,9 @@ public class VurderLøpendeMedlemskap {
     }
 
     private boolean brukerNorskNordisk(PersonopplysningerAggregat aggregat) {
-        final Optional<StatsborgerskapEntitet> statsborgerskap = aggregat.getStatsborgerskapFor(aggregat.getSøker().getAktørId()).stream().findFirst();
+        final Optional<StatsborgerskapEntitet> statsborgerskap = aggregat.getStatsborgerskapFor(aggregat.getSøker().getAktørId())
+            .stream()
+            .findFirst();
         return Region.NORDEN.equals(statsborgerskap.map(StatsborgerskapEntitet::getRegion).orElse(null));
     }
 
@@ -258,5 +260,25 @@ public class VurderLøpendeMedlemskap {
         LocalDate tomDato = aktivitetsAvtale.getPeriode().getTomDato();
         return (aktivitetsAvtale.getErLøpende() && fomDato.isBefore(skjæringstidspunkt))
             || (fomDato.isBefore(skjæringstidspunkt) && tomDato.isAfter(skjæringstidspunkt));
+    }
+
+    public VurdertMedlemskapOgForlengelser vurderMedlemskapOgHåndterForlengelse(Long behandlingId) {
+        Map<LocalDate, VilkårData> resultat = new TreeMap<>();
+
+        var grunnlagOgPerioder = lagGrunnlagMedForlengesesPerioder(behandlingId);
+
+        for (Map.Entry<LocalDate, MedlemskapsvilkårGrunnlag> entry : grunnlagOgPerioder.getGrunnlagPerVurderingsdato().entrySet()) {
+            VilkårData data = evaluerGrunnlag(entry.getValue(), DatoIntervallEntitet.fraOgMed(entry.getKey()));
+            if (data.getUtfallType().equals(Utfall.OPPFYLT)) {
+                resultat.put(entry.getKey(), data);
+            } else if (data.getUtfallType().equals(Utfall.IKKE_OPPFYLT)) {
+                if (data.getVilkårUtfallMerknad() == null) {
+                    throw new IllegalStateException("Forventer at vilkår utfall merknad er satt når vilkåret blir satt til IKKE_OPPFYLT for grunnlag:" + entry.getValue().toString());
+                }
+                resultat.put(entry.getKey(), data);
+                break;
+            }
+        }
+        return new VurdertMedlemskapOgForlengelser(resultat, grunnlagOgPerioder.getForlengelsesPerioder());
     }
 }

@@ -16,11 +16,11 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepos
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
 
     private PersonopplysningRepository personopplysningRepository;
@@ -30,7 +30,6 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     private OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository;
-    private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
     private AvklartSøknadsfristRepository avklartSøknadsfristRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -47,7 +46,6 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
                                        SøknadsperiodeRepository søknadsperiodeRepository,
                                        UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                                        OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository,
-                                       UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
                                        RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
                                        InntektArbeidYtelseTjeneste iayTjeneste) {
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
@@ -57,7 +55,6 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
         this.omsorgenForGrunnlagRepository = omsorgenForGrunnlagRepository;
-        this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;

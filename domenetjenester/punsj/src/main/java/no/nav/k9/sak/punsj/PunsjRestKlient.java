@@ -8,15 +8,25 @@ import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +39,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIderDto;
 
 
@@ -70,16 +82,21 @@ public class PunsjRestKlient {
     }
 
 
-    public Optional<JournalpostIderDto> getUferdigJournalpostIderPåAktør(String aktørId) {
+    public Optional<JournalpostIderDto> getUferdigJournalpostIderPåAktør(String aktørId, String aktørIdBarn) {
         Objects.requireNonNull(aktørId);
-        URIBuilder builder = new URIBuilder(toUri(punsjEndpoint, "/journalpost/uferdig/"+aktørId));
+        URIBuilder builder = new URIBuilder(toUri(punsjEndpoint, "/journalpost/uferdig"));
 
         try {
-            HttpGet kall = new HttpGet(builder.build());
-            try (var httpResponse = restClient.execute(kall)) {
+            SøkDto søk = new SøkDto(aktørId, aktørIdBarn);
+            String json = JsonObjectMapper.getJson(søk);
+            HttpPost httpPost = new HttpPost(builder.build());
+            httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+            httpPost.setHeader(HttpHeaders.ACCEPT, "application/json");
+
+            try (var httpResponse = restClient.execute(httpPost)) {
                 int responseCode = httpResponse.getStatusLine().getStatusCode();
                 if (isOk(responseCode)) {
-                    ObjectReaderResponseHandler<Object> handler = new ObjectReaderResponseHandler<>(kall.getURI(), journalpostIderReader);
+                    ObjectReaderResponseHandler<Object> handler = new ObjectReaderResponseHandler<>(httpPost.getURI(), journalpostIderReader);
                     return Optional.of((JournalpostIderDto) handler.handleResponse(httpResponse));
                 } else {
                     log.info("Fikk ikke hentet informasjon fra k9-punsj - responseCode=" + responseCode);
@@ -88,7 +105,7 @@ public class PunsjRestKlient {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
         }
         return Optional.empty();
@@ -107,4 +124,44 @@ public class PunsjRestKlient {
             throw new IllegalArgumentException("Ugyldig uri: " + uri, e);
         }
     }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonFormat(shape = JsonFormat.Shape.OBJECT)
+    @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
+    @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_ARBEIDSFORHOLD_KODE)
+    static class SøkDto {
+        @JsonProperty(value = "aktorIdentDto", required = true)
+        @Valid
+        @NotNull
+        private String aktorIdentDto;
+
+        @JsonProperty(value = "aktorIdentBarnDto")
+        @Valid
+        private String aktorIdentBarnDto;
+
+        public SøkDto(String aktorIdentDto, String aktorIdentBarnDto) {
+            this.aktorIdentDto = aktorIdentDto;
+            this.aktorIdentBarnDto = aktorIdentBarnDto;
+        }
+
+        public SøkDto() {
+        }
+
+        public String getAktorIdentDto() {
+            return aktorIdentDto;
+        }
+
+        public void setAktorIdentDto(String aktorIdentDto) {
+            this.aktorIdentDto = aktorIdentDto;
+        }
+
+        public String getAktorIdentBarnDto() {
+            return aktorIdentBarnDto;
+        }
+
+        public void setAktorIdentBarnDto(String aktorIdentBarnDto) {
+            this.aktorIdentBarnDto = aktorIdentBarnDto;
+        }
+    }
+
 }

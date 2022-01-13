@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
@@ -23,6 +24,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
 public class InputParametere {
@@ -32,6 +34,7 @@ public class InputParametere {
     private Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> vurderteSøknadsperioder;
     private NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
     private Vilkårene vilkårene;
+    private Set<VilkårType> definerendeVilkårtyper;
     private UttaksPerioderGrunnlag uttaksGrunnlag;
     private List<EtablertPleieperiode> pleiebehov;
     private Set<Saksnummer> relaterteSaker;
@@ -42,7 +45,8 @@ public class InputParametere {
     private OpptjeningResultat opptjeningResultat;
     private RettPleiepengerVedDødGrunnlag rettPleiepengerVedDødGrunnlag;
     private InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag;
-    private Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende;
+    private UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende;
+    private Set<PerioderFraSøknad> perioderFraSøknad;
 
     public InputParametere() {
     }
@@ -92,6 +96,15 @@ public class InputParametere {
         return vilkårene;
     }
 
+    public InputParametere medDefinerendeVilkår(Set<VilkårType> definerendeVilkårtyper) {
+        this.definerendeVilkårtyper = Objects.requireNonNull(definerendeVilkårtyper);
+        return this;
+    }
+
+    public Set<VilkårType> getDefinerendeVilkårtyper() {
+        return definerendeVilkårtyper;
+    }
+
     public InputParametere medUttaksGrunnlag(UttaksPerioderGrunnlag uttaksPerioderGrunnlag) {
         this.uttaksGrunnlag = Objects.requireNonNull(uttaksPerioderGrunnlag);
         return this;
@@ -99,6 +112,15 @@ public class InputParametere {
 
     public UttaksPerioderGrunnlag getUttaksGrunnlag() {
         return uttaksGrunnlag;
+    }
+
+    public InputParametere medPerioderFraSøknad(Set<PerioderFraSøknad> perioderFraSøknad) {
+        this.perioderFraSøknad = Objects.requireNonNull(perioderFraSøknad);
+        return this;
+    }
+
+    public Set<PerioderFraSøknad> getPerioderFraSøknad() {
+        return perioderFraSøknad;
     }
 
     public InputParametere medPleiebehov(List<EtablertPleieperiode> pleiebehov) {
@@ -128,12 +150,12 @@ public class InputParametere {
         this.utvidetRevurderingPerioder = utvidetRevurderingPerioder;
         return this;
     }
-    
+
     public InputParametere medPerioderSomSkalTilbakestilles(NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles) {
         this.perioderSomSkalTilbakestilles = perioderSomSkalTilbakestilles;
         return this;
     }
-    
+
     public NavigableSet<DatoIntervallEntitet> getPerioderSomSkalTilbakestilles() {
         return perioderSomSkalTilbakestilles;
     }
@@ -182,12 +204,12 @@ public class InputParametere {
         return inntektArbeidYtelseGrunnlag;
     }
 
-    public InputParametere medUnntakEtablertTilsynForPleietrengende(Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende) {
+    public InputParametere medUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
         this.unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynForPleietrengende;
         return this;
     }
-    
+
     public Optional<UnntakEtablertTilsynForPleietrengende> getUnntakEtablertTilsynForPleietrengende() {
-        return unntakEtablertTilsynForPleietrengende;
+        return Optional.ofNullable(unntakEtablertTilsynForPleietrengende);
     }
 }

@@ -32,6 +32,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 @ApplicationScoped
 @GrunnlagRef("SykdomGrunnlag")
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
 
     private static final Logger log = LoggerFactory.getLogger(StartpunktUtlederPleiepengerSyktBarn.class);
@@ -72,7 +73,7 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
         StartpunktType tilsynStartpunkt = utledStartpunktForEtablertTilsyn(ref);
         result.add(tilsynStartpunkt);
         log.info("Kjører diff av etablertTilsyn, funnet følgende resultat = {}", tilsynStartpunkt);
-        
+
         StartpunktType uttakStartpunkt = utledStartpunktForUttak(ref);
         log.info("Kjører diff av uttak, funnet følgende resultat = {}", uttakStartpunkt);
         result.add(uttakStartpunkt);
@@ -80,12 +81,12 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
         StartpunktType nattevåkBeredskapStartpunkt = utledStartpunktForNattevåkOgBeredskap(ref);
         result.add(nattevåkBeredskapStartpunkt);
         log.info("Kjører diff av nattevåk & beredskap, funnet følgende resultat = {}", nattevåkBeredskapStartpunkt);
-        
+
         return result.stream()
             .min(Comparator.comparing(StartpunktType::getRangering))
             .orElse(StartpunktType.UDEFINERT);
     }
-    
+
     private StartpunktType utledStartpunktForNattevåkOgBeredskap(BehandlingReferanse ref) {
         return endringUnntakEtablertTilsynTjeneste.harEndringerSidenBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId()) ? StartpunktType.UTTAKSVILKÅR : StartpunktType.UDEFINERT;
     }
@@ -99,10 +100,10 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
             return StartpunktType.UDEFINERT;
         }
     }
-    
+
     private StartpunktType utledStartpunktForUttak(BehandlingReferanse ref) {
         if (samtidigUttakTjeneste.isSkalHaTilbakehopp(ref)) {
-            return StartpunktType.UTTAKSVILKÅR;
+            return StartpunktType.UTTAKSVILKÅR_VURDERING;
         } else {
             return StartpunktType.UDEFINERT;
         }

@@ -7,14 +7,14 @@ import java.util.concurrent.TimeUnit;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.exception.VLException;
+import no.nav.k9.felles.util.LRUCache;
 import no.nav.k9.kodeverk.organisasjon.Organisasjonstype;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.domene.arbeidsforhold.person.PersonIdentTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.felles.exception.VLException;
-import no.nav.k9.felles.util.LRUCache;
 
 @ApplicationScoped
 public class ArbeidsgiverTjeneste {
@@ -61,7 +61,7 @@ public class ArbeidsgiverTjeneste {
             if (personinfo.isPresent()) {
                 PersoninfoArbeidsgiver personinfoArbeidsgiver = personinfo.get();
                 String fødselsdato = personinfoArbeidsgiver.getFødselsdato().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-                ArbeidsgiverOpplysninger nyOpplysninger = new ArbeidsgiverOpplysninger(fødselsdato, personinfoArbeidsgiver.getNavn(), personinfoArbeidsgiver.getFødselsdato());
+                ArbeidsgiverOpplysninger nyOpplysninger = new ArbeidsgiverOpplysninger(fødselsdato, personinfoArbeidsgiver.getPersonIdent().getIdent(), personinfoArbeidsgiver.getNavn(), personinfoArbeidsgiver.getFødselsdato());
                 cache.put(arbeidsgiver.getIdentifikator(), nyOpplysninger);
                 return nyOpplysninger;
             } else {

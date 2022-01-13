@@ -2,14 +2,11 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @Dependent
@@ -21,19 +18,6 @@ public class SøknadsperiodeRepository {
     public SøknadsperiodeRepository(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
-    }
-
-    public Set<SøknadsPeriodeDokumenter> hentPerioderKnyttetTilJournalpost(Long behandlingId, Set<JournalpostId> journalpostIder) {
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-        if (eksisterendeGrunnlag.isEmpty()) {
-            return Set.of();
-        }
-        return eksisterendeGrunnlag.get().getOppgitteSøknadsperioder()
-            .getPerioder()
-            .stream()
-            .filter(it -> journalpostIder.contains(it.getJournalpostId()))
-            .map(it -> new SøknadsPeriodeDokumenter(it.getJournalpostId(), it.getPerioder()))
-            .collect(Collectors.toSet());
     }
 
     public Optional<SøknadsperiodeGrunnlag> hentGrunnlag(Long behandlingId) {

@@ -16,7 +16,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndringEllerNyoppstartetSNDtoer;
-import no.nav.k9.sak.web.app.tjenester.behandling.historikk.VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning.VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderVarigEndringEllerNyoppstartetSNDtoer.class, adapter = AksjonspunktOppdaterer.class)

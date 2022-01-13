@@ -41,10 +41,10 @@
             <artifactId>behandlingskontroll</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.foreldrepenger.kontrakter</groupId>
+            <groupId>no.nav.k9</groupId>
             <artifactId>inntektsmelding-v1</artifactId>
         </dependency>
-        
+
         <!-- JAXB for å parse Inntektsmelding -->
         <dependency>
             <groupId>javax.xml.bind</groupId>

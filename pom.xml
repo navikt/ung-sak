@@ -38,20 +38,12 @@
         <changelist>-SNAPSHOT</changelist>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <junit.version>5.8.1</junit.version>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <junit.version>5.8.2</junit.version>
         <felles.version>0.2.18</felles.version>
-        <swagger.version>2.1.11</swagger.version>
-        <fp-kontrakter.version>6.0.4</fp-kontrakter.version>
-        <k9format.version>5.5.13</k9format.version>
+        <swagger.version>2.1.12</swagger.version>
+        <k9format.version>5.7.4</k9format.version>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>github</id>
-            <name>GitHub Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/navikt/k9-sak/</url>
-        </repository>
-    </repositories>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
         har uheldige virkninger ved bruk av import og dependency (bruk composition
@@ -64,7 +56,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>2.13.0</version>
+                <version>2.13.1</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -72,7 +64,7 @@
             <dependency>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
-                <version>8.0.5</version>
+                <version>8.4.1</version>
             </dependency>
 
             <dependency>
@@ -86,6 +78,11 @@
                 <groupId>no.nav.fpsak.tidsserie</groupId>
                 <artifactId>fpsak-tidsserie</artifactId>
                 <version>2.5.7</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate.validator</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>6.2.1.Final</version>
             </dependency>
 
             <dependency>
@@ -140,23 +137,9 @@
             </dependency>
 
             <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter</groupId>
-                <artifactId>fp-kontrakter-root</artifactId>
-                <version>${fp-kontrakter.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-                <artifactId>fp-topics</artifactId>
-                <version>${fp-kontrakter.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-            <dependency>
                 <groupId>no.nav.k9.oppdrag.kontrakt</groupId>
                 <artifactId>oppdrag-kontrakter</artifactId>
-                <version>1.4</version>
+                <version>1.4.2</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.aarskvantum</groupId>
@@ -166,49 +149,33 @@
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>eksterne-kontrakter</artifactId>
-                <version>0.0.13</version>
+                <version>0.0.19</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-                <artifactId>fp-topics-manifest</artifactId>
-                <version>${fp-kontrakter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-                <artifactId>fp-topics-behandlingsprosess</artifactId>
-                <version>${fp-kontrakter.version}</version>
-            </dependency>
+			    <groupId>no.nav.foreldrepenger.kontrakter</groupId>
+			    <artifactId>fp-feed-vedtak-tjenestespesifikasjon</artifactId>
+                <version>6.1.3</version>
+		    </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
                 <artifactId>hendelse-historikk-innslag</artifactId>
-                <version>${fp-kontrakter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-                <artifactId>hendelser-kontroll-resultat</artifactId>
-                <version>${fp-kontrakter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter</groupId>
-                <artifactId>inntektsmelding-v1</artifactId>
-                <version>${fp-kontrakter.version}</version>
+                <version>6.1.3</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>1.3.14</version>
+                <version>1.3.26</version>
             </dependency>
-
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
-                <artifactId>kontrakt</artifactId>
-                <version>1.2.78</version>
+                <artifactId>kalkulus-kontrakt</artifactId>
+                <version>1.4.0</version>
             </dependency>
 
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
-                <version>5.0.0</version>
+                <version>5.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.threeten</groupId>
@@ -386,6 +353,28 @@
                 <artifactId>ytelse-omsorgspenger</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>soknad-frisinn</artifactId>
+                <version>${k9format.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>soknad</artifactId>
+                <version>${k9format.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>innsyn</artifactId>
+                <version>${k9format.version}</version>
+            </dependency>
+           <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>inntektsmelding-v1</artifactId>
+                <version>${k9format.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>no.nav.k9.sak.ytelse</groupId>
                 <artifactId>ytelse-pleiepengerbarn</artifactId>
@@ -396,29 +385,17 @@
                 <artifactId>ytelse-unntaksbehandling</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>no.nav.pleiepengerbarn.uttak</groupId>
+                <artifactId>kontrakter</artifactId>
+                <version>1.1.17</version>
+            </dependency>
 
             <dependency>
                 <groupId>no.nav.fpsak.nare</groupId>
                 <artifactId>fpsak-nare-core</artifactId>
                 <version>2.1.5</version>
             </dependency>
-
-            <dependency>
-                <groupId>no.nav.k9</groupId>
-                <artifactId>soknad-frisinn</artifactId>
-                <version>${k9format.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.pleiepengerbarn.uttak</groupId>
-                <artifactId>kontrakter</artifactId>
-                <version>1.1.14</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9</groupId>
-                <artifactId>soknad</artifactId>
-                <version>${k9format.version}</version>
-            </dependency>
-
 
             <!-- Prosjektets egne TEST AVHENGIGHETER -->
             <!-- NB: Definer scope der det brukes, ikke her. -->
@@ -431,11 +408,6 @@
             <dependency>
                 <groupId>no.nav.k9.sak</groupId>
                 <artifactId>dokumentbestiller</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9.sak</groupId>
-                <artifactId>risikoklassifisering</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -507,7 +479,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.1.0</version>
+                <version>4.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
@@ -602,11 +574,10 @@
                     <version>1.7.0</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>buildnumber-maven-plugin</artifactId>
-                    <version>1.4</version>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>3.0.0</version>
                 </plugin>
-
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
@@ -652,12 +623,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.0.0-M1</version>
+                    <version>3.0.0-M2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.2.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -713,13 +684,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>
@@ -768,8 +732,203 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+				<!-- FOR Å LEGGE VED JAKARTA EE9 KOMPATIBLE ARTEFAKTER I TILLEGG -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>transform-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <property name="plugin_classpath" refid="maven.plugin.classpath" />
+                                <java classname="no.nav.k9.dev.jakarta.App">
+                                    <arg value="${project.build.directory}/${project.build.finalName}.jar" />
+                                    <arg value="${project.build.directory}/${project.artifactId}-jakarta-${project.version}.jar" />
+                                    <arg value="-q" />
+                                    <arg value="-o" />
+                                    <classpath>
+                                        <pathelement path="${plugin_classpath}" />
+                                    </classpath>
+                                </java>
+                            </target>
+                            <skip>${maven.deploy.skip}</skip>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>transform-sources-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <property name="plugin_classpath" refid="maven.plugin.classpath" />
+                                <java classname="no.nav.k9.dev.jakarta.App">
+                                    <arg value="${project.build.directory}/${project.build.finalName}-sources.jar" />
+                                    <arg value="${project.build.directory}/${project.artifactId}-jakarta-${project.version}-sources.jar" />
+                                    <arg value="-q" />
+                                    <arg value="-o" />
+                                    <classpath>
+                                        <pathelement path="${plugin_classpath}" />
+                                    </classpath>
+                                </java>
+                            </target>
+                            <skip>${maven.deploy.skip}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>no.nav.k9.dev</groupId>
+                        <artifactId>dev-jakarta-transform</artifactId>
+                        <version>0.6.2</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>ant-contrib</groupId>
+                        <artifactId>ant-contrib</artifactId>
+                        <version>1.0b3</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>ant</groupId>
+                                <artifactId>ant</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+		<!-- FOR Å LEGGE VED JAKARTA EE9 KOMPATIBLE ARTEFAKTER I TILLEGG -->
+		<!-- (bruker ikke attach-jar da den ikke støtter alterntiv artefakt navn) -->
+        <profile>
+            <id>jar-module</id>
+            <activation>
+                <file>
+                    <exists>./export-kontrakt</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <configuration>
+                                    <target>
+                                        <unzip src="${project.build.directory}/${project.artifactId}-jakarta-${project.version}.jar"
+                                            dest="${project.build.directory}/jakarta">
+                                            <patternset>
+                                                <include name="META-INF/maven/**/pom.xml" />
+                                            </patternset>
+                                        </unzip>
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>antrun-delete-file</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <target>
+                                        <!-- ompakker jar fil uten pom.xml -->
+                                        <jar
+                                            destfile="${project.build.directory}/${project.artifactId}-jakarta-${project.version}-TOBEDEPLOYED.jar">
+                                            <zipfileset
+                                                src="${project.build.directory}/${project.artifactId}-jakarta-${project.version}.jar"
+                                                excludes="META-INF/maven/**" />
+                                        </jar>
+                                        <jar
+                                            destfile="${project.build.directory}/${project.artifactId}-jakarta-${project.version}-sources-TOBEDEPLOYED.jar">
+                                            <zipfileset
+                                                src="${project.build.directory}/${project.artifactId}-jakarta-${project.version}-sources.jar"
+                                                excludes="META-INF/maven/**" />
+                                        </jar>
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-install-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>install-file</goal>
+                                </goals>
+                                <configuration>
+                                    <pomFile>${project.build.directory}/jakarta/META-INF/maven/${project.groupId}/${project.artifactId}/pom.xml</pomFile>
+                                    <file>${project.build.directory}/${project.artifactId}-jakarta-${project.version}-TOBEDEPLOYED.jar</file>
+                                    <sources>${project.build.directory}/${project.artifactId}-jakarta-${project.version}-sources-TOBEDEPLOYED.jar</sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>deploy-file</goal>
+                                </goals>
+                                <configuration>
+                                    <repositoryId>github</repositoryId>
+                                    <!-- må matche unpacked pom.xml fra over (disse endrer ikke path ved transform p.t.) -->
+                                    <pomFile>${project.build.directory}/jakarta/META-INF/maven/${project.groupId}/${project.artifactId}/pom.xml</pomFile>
+                                    <url>${project.distributionManagement.repository.url}</url>
+                                    <file>${project.build.directory}/${project.artifactId}-jakarta-${project.version}-TOBEDEPLOYED.jar</file>
+                                    <sources>${project.build.directory}/${project.artifactId}-jakarta-${project.version}-sources-TOBEDEPLOYED.jar</sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <repositories>
+        <repository>
+            <id>github</id>
+            <name>GitHub Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/navikt/k9-sak/</url>
+        </repository>
+		<repository>
+            <!-- bruker SNAPSHOT versjon av eclipse-transformer (0.3.0-SNAPSHOT) -->
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+	<pluginRepositories>
+        <pluginRepository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/navikt/dev-jakarta-transform/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <scm>
         <connection>scm:git:https://github.com/navikt/k9-sak.git</connection>
         <developerConnection>scm:git:https://github.com/navikt/k9-sak.git</developerConnection>
@@ -784,4 +943,3 @@
         </repository>
     </distributionManagement>
 </project>
-

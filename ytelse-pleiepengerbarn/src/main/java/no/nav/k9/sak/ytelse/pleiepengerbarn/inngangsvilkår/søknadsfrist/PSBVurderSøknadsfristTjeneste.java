@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -25,22 +26,22 @@ import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.SøktPeriode;
-import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class PSBVurderSøknadsfristTjeneste implements SøknadsfristTjeneste {
 
-    private VurderSøknadsfristTjeneste<Søknadsperiode> vurderSøknadsfristTjeneste;
+    private PSBVurdererSøknadsfristTjeneste vurderSøknadsfristTjeneste;
 
     PSBVurderSøknadsfristTjeneste() {
         // CDI
     }
 
     @Inject
-    public PSBVurderSøknadsfristTjeneste(@FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> vurderSøknadsfristTjeneste) {
+    public PSBVurderSøknadsfristTjeneste(@Any PSBVurdererSøknadsfristTjeneste vurderSøknadsfristTjeneste) {
         this.vurderSøknadsfristTjeneste = vurderSøknadsfristTjeneste;
     }
 

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
@@ -49,7 +50,6 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -80,7 +80,7 @@ public class VurderLøpendeMedlemskapStegTest {
         personopplysningRepository = provider.getPersonopplysningRepository();
         fagsakRepository = provider.getFagsakRepository();
 
-        steg = new VurderMedlemskapSteg(vurdertLøpendeMedlemskapTjeneste, provider);
+        steg = new VurderMedlemskapSteg(vurdertLøpendeMedlemskapTjeneste, provider, null, false);
     }
 
     @Test

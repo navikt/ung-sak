@@ -27,6 +27,7 @@ public enum BeregningsgrunnlagTilstand implements Kodeverdi {
     KOFAKBER_UT("KOFAKBER_UT", "Kontroller fakta beregningsgrunnlag - Ut"),
     FORESLÅTT("FORESLÅTT", "Foreslått"),
     FORESLÅTT_UT("FORESLÅTT_UT", "Foreslått ut"),
+    VURDERT_VILKÅR("VURDERT_VILKÅR", "Vurder vilkår"),
     VURDERT_REFUSJON("VURDERT_REFUSJON", "Vurder refusjonskrav beregning"),
     VURDERT_REFUSJON_UT("VURDERT_REFUSJON_UT", "Vurder refusjonskrav beregning - Ut"),
     OPPDATERT_MED_REFUSJON_OG_GRADERING("OPPDATERT_MED_REFUSJON_OG_GRADERING", "Tilstand for splittet periode med refusjon og gradering"),
@@ -41,18 +42,19 @@ public enum BeregningsgrunnlagTilstand implements Kodeverdi {
 
     private static final List<BeregningsgrunnlagTilstand> tilstandRekkefølge = Collections.unmodifiableList(
         List.of(
-        OPPRETTET,
-        FASTSATT_BEREGNINGSAKTIVITETER,
-        OPPDATERT_MED_ANDELER,
-        KOFAKBER_UT,
-        FORESLÅTT,
-        FORESLÅTT_UT,
-        VURDERT_REFUSJON,
-        VURDERT_REFUSJON_UT,
-        OPPDATERT_MED_REFUSJON_OG_GRADERING,
-        FASTSATT_INN,
-        FASTSATT
-    ));
+            OPPRETTET,
+            FASTSATT_BEREGNINGSAKTIVITETER,
+            OPPDATERT_MED_ANDELER,
+            KOFAKBER_UT,
+            FORESLÅTT,
+            FORESLÅTT_UT,
+            VURDERT_VILKÅR,
+            VURDERT_REFUSJON,
+            VURDERT_REFUSJON_UT,
+            OPPDATERT_MED_REFUSJON_OG_GRADERING,
+            FASTSATT_INN,
+            FASTSATT
+        ));
 
     static {
         for (var v : values()) {

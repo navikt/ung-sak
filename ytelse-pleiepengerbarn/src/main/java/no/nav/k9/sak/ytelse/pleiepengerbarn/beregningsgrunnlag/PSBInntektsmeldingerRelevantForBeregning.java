@@ -23,6 +23,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBere
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class PSBInntektsmeldingerRelevantForBeregning implements InntektsmeldingerRelevantForBeregning {
 
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
@@ -43,12 +44,29 @@ public class PSBInntektsmeldingerRelevantForBeregning implements Inntektsmelding
 
     @Override
     public List<Inntektsmelding> utledInntektsmeldingerSomGjelderForPeriode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet relevantPeriode) {
+        var cutoffDato = utledCutOffDato(relevantPeriode);
         var sortedIms = sakInntektsmeldinger
             .stream()
+            .filter(it -> datoErFørEllerLik(cutoffDato, it))
             .sorted(Inntektsmelding.COMP_REKKEFØLGE)
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         return sorterOgPlukkUtPrioritert(relevantPeriode, sortedIms);
+    }
+
+    private boolean datoErFørEllerLik(LocalDate cutoffDato, Inntektsmelding it) {
+        return it.getStartDatoPermisjon().isPresent() &&
+            (it.getStartDatoPermisjon().get().isBefore(cutoffDato) || it.getStartDatoPermisjon().get().equals(cutoffDato));
+    }
+
+    private LocalDate utledCutOffDato(DatoIntervallEntitet relevantPeriode) {
+        var maksdatoPeriode = relevantPeriode.getTomDato();
+        var utledetCutOff = relevantPeriode.getFomDato().plusDays(29);
+
+        if (maksdatoPeriode.isBefore(utledetCutOff)) {
+            return utledetCutOff;
+        }
+        return maksdatoPeriode;
     }
 
     ArrayList<Inntektsmelding> sorterOgPlukkUtPrioritert(DatoIntervallEntitet relevantPeriode, Set<Inntektsmelding> sortedIms) {

@@ -18,10 +18,10 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårTypeKoder;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.Inngangsvilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
-import no.nav.k9.sak.inngangsvilkår.VilkårTypeRef;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 
 @ApplicationScoped

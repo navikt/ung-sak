@@ -85,6 +85,37 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
             utførtRegler(kontekst, behandling, regelResultat, intervall);
         }
 
+        //
+        if (inngangsvilkårFellesTjeneste.getEnableForlengelse() && behandling.getOriginalBehandlingId().isPresent()) {
+            var forlengelserTilVurdering = inngangsvilkårFellesTjeneste.utledForlengelserTilVurdering(ref.getBehandlingId(), vilkår);
+
+            if (!forlengelserTilVurdering.isEmpty()) {
+                var vilkårene = vilkårResultatRepository.hent(behandling.getId());
+                var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);
+                var vedtattUtfallPåVilkåret = vilkårResultatRepository.hentHvisEksisterer(behandling.getOriginalBehandlingId().orElseThrow())
+                    .orElseThrow()
+                    .getVilkår(vilkår)
+                    .orElseThrow();
+
+                var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkår);
+
+                for (DatoIntervallEntitet datoIntervallEntitet : forlengelserTilVurdering) {
+                    var eksisteredeVurdering = vedtattUtfallPåVilkåret.finnPeriodeForSkjæringstidspunkt(datoIntervallEntitet.getFomDato());
+
+                    var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(datoIntervallEntitet)
+                        .forlengelseAv(eksisteredeVurdering);
+
+                    vilkårBuilder.leggTil(vilkårPeriodeBuilder);
+
+                    håndterForlengelse(kontekst, behandling, datoIntervallEntitet); // kopi av resultat modeller
+                }
+                vilkårResultatBuilder.leggTil(vilkårBuilder);
+
+                vilkårResultatRepository.lagre(behandling.getId(), vilkårResultatBuilder.build());
+            }
+
+        }
+
         return new ArrayList<>(regelResultat.getAksjonspunktDefinisjoner());
     }
 
@@ -94,6 +125,11 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
 
     @SuppressWarnings("unused")
     protected void utførtRegler(BehandlingskontrollKontekst kontekst, Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
+        // template method
+    }
+
+    @SuppressWarnings("unused")
+    protected void håndterForlengelse(BehandlingskontrollKontekst kontekst, Behandling behandling, DatoIntervallEntitet periode) {
         // template method
     }
 

@@ -91,7 +91,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
                 var referanse = BehandlingReferanse.fra(sisteBehandlingPåKandidat);
                 boolean skalRevurderesPgaEtablertTilsyn = skalRevurderesPgaEtablertTilsyn(referanse);
                 boolean skalRevurderesPgaNattevåkOgBeredskap = skalRevurderesPgaNattevåkOgBeredskap(referanse);
-                boolean skalRevurderesPgaEndretUttak = samtidigUttakTjeneste.isEndringerMedUbesluttedeData(referanse);
+                boolean skalRevurderesPgaEndretUttak = skalRevurderesPgaUttak(sisteBehandlingPåKandidat, referanse);
                 if (skalRevurderesPgaSykdom || skalRevurderesPgaEtablertTilsyn || skalRevurderesPgaNattevåkOgBeredskap || skalRevurderesPgaEndretUttak) {
                     result.add(kandidatsaksnummer);
                     log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}", kandidatsaksnummer, skalRevurderesPgaSykdom, skalRevurderesPgaEtablertTilsyn, skalRevurderesPgaNattevåkOgBeredskap, skalRevurderesPgaEndretUttak);
@@ -100,6 +100,13 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
         }
 
         return result;
+    }
+
+    private boolean skalRevurderesPgaUttak(Behandling sisteBehandlingPåKandidat, BehandlingReferanse referanse) {
+        if (!sisteBehandlingPåKandidat.getStatus().erFerdigbehandletStatus() && !samtidigUttakTjeneste.harKommetTilUttak(referanse)) {
+            return false;
+        }
+        return samtidigUttakTjeneste.isEndringerMedUbesluttedeData(referanse);
     }
 
     private boolean skalRevurderesPgaNattevåkOgBeredskap(BehandlingReferanse referanse) {

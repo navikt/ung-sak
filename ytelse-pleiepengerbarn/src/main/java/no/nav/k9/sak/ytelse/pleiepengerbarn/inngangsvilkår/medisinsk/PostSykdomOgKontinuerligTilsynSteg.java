@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk;
 
+import java.util.ArrayList;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -12,19 +13,25 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedlemskap;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
@@ -37,7 +44,9 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap;
     private VilkårResultatRepository vilkårResultatRepository;
+    private BehandlingRepository behandlingRepository;
 
     PostSykdomOgKontinuerligTilsynSteg() {
         // CDI
@@ -46,10 +55,13 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     @Inject
     public PostSykdomOgKontinuerligTilsynSteg(BehandlingRepositoryProvider repositoryProvider,
                                               BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                              @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+                                              @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                              AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap) {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
+        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.aksjonspunktutlederForMedlemskap = aksjonspunktutlederForMedlemskap;
     }
 
     @Override
@@ -62,11 +74,26 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
         vilkårResultatRepository.lagre(behandlingId, oppdatertResultatBuilder.build());
 
+        reutledAksjonspunktForMedlemskap(kontekst);
         // Rydder bort grunnlag som ikke lenger er relevant siden perioden ikke skal vurderes
         // Disse blir da ikke lenger med til tilkjent ytelse, slik at det vedtaket blir inkosistent
         beregningPerioderGrunnlagRepository.ryddMotVilkår(behandlingId);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private void reutledAksjonspunktForMedlemskap(BehandlingskontrollKontekst kontekst) {
+        var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var ref = BehandlingReferanse.fra(behandling);
+
+        if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP)) {
+
+            var aksjonspunktResultats = aksjonspunktutlederForMedlemskap.utledAksjonspunkterFor(new AksjonspunktUtlederInput(ref));
+            if (aksjonspunktResultats.isEmpty()) {
+                behandling.getAksjonspunktFor(AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP).avbryt();
+                behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+            }
+        }
     }
 
     private NavigableSet<DatoIntervallEntitet> utledPerioderVurdert(Long behandlingId) {
@@ -92,7 +119,7 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
 
-        justerPeriodeForOpptjeningOgBeregning(avslåttePerioder, innvilgedePerioder, resultatBuilder);
+        justerPeriodeForAndreVilkår(avslåttePerioder, innvilgedePerioder, resultatBuilder);
 
         return resultatBuilder;
     }
@@ -125,7 +152,7 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             .collect(Collectors.toSet());
     }
 
-    private void justerPeriodeForOpptjeningOgBeregning(Set<VilkårPeriode> avslåttePerioder, Set<VilkårPeriode> innvilgedePerioder, VilkårResultatBuilder resultatBuilder) {
+    private void justerPeriodeForAndreVilkår(Set<VilkårPeriode> avslåttePerioder, Set<VilkårPeriode> innvilgedePerioder, VilkårResultatBuilder resultatBuilder) {
         for (VilkårType vilkårType : Set.of(VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.OPPTJENINGSVILKÅRET, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET)) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
             var perioderSomSkalTilbakestilles = avslåttePerioder.stream()
@@ -135,11 +162,46 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             if (!perioderSomSkalTilbakestilles.isEmpty()) {
                 vilkårBuilder = vilkårBuilder.tilbakestill(perioderSomSkalTilbakestilles);
             }
-            for (VilkårPeriode innvilgetPeriode : innvilgedePerioder) {
-                vilkårBuilder = vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(innvilgetPeriode.getPeriode())
-                    .medPeriode(innvilgetPeriode.getPeriode()));
+            var innvilgetTidslinje = utledTidslinje(innvilgedePerioder, resultatBuilder.getKantIKantVurderer());
+            for (DatoIntervallEntitet innvilgetPeriode : innvilgetTidslinje) {
+                vilkårBuilder = vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(innvilgetPeriode)
+                    .medPeriode(innvilgetPeriode));
             }
             resultatBuilder.leggTil(vilkårBuilder);
         }
     }
+
+    private NavigableSet<DatoIntervallEntitet> utledTidslinje(Set<VilkårPeriode> innvilgedePerioder, KantIKantVurderer kantIKantVurderer) {
+        DatoIntervallEntitet periode = null;
+        var vilkårPerioder = new ArrayList<DatoIntervallEntitet>();
+
+        for (VilkårPeriode vilkårPeriode : innvilgedePerioder) {
+            if (periode == null) {
+                periode = vilkårPeriode.getPeriode();
+            } else if (kantIKantVurderer.erKantIKant(vilkårPeriode.getPeriode(), periode)) {
+                periode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), vilkårPeriode.getTom());
+            } else {
+                vilkårPerioder.add(periode);
+                periode = vilkårPeriode.getPeriode();
+            }
+        }
+        if (periode != null) {
+            vilkårPerioder.add(periode);
+        }
+        return adjustAndCompress(vilkårPerioder);
+    }
+
+    private NavigableSet<DatoIntervallEntitet> adjustAndCompress(ArrayList<DatoIntervallEntitet> vilkårPerioder) {
+        var segmenter = vilkårPerioder.stream()
+            .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true))
+            .toList();
+
+        return new LocalDateTimeline<>(segmenter)
+            .compress()
+            .toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
 }

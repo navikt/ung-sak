@@ -10,30 +10,39 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.MapTilBrevkode;
 
 @Dependent
 public class SøknadsperiodeTjeneste {
 
+
     private BehandlingRepository behandlingRepository;
+    private FagsakRepository fagsakRepository;
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private Instance<MapTilBrevkode> brevkodeMappere;
 
 
     @Inject
-    public SøknadsperiodeTjeneste(BehandlingRepository behandlingRepository, SøknadsperiodeRepository søknadsperiodeRepository, MottatteDokumentRepository mottatteDokumentRepository) {
+    public SøknadsperiodeTjeneste(BehandlingRepository behandlingRepository, FagsakRepository fagsakRepository, SøknadsperiodeRepository søknadsperiodeRepository, MottatteDokumentRepository mottatteDokumentRepository, @Any Instance<MapTilBrevkode> brevkodeMappere) {
         this.behandlingRepository = behandlingRepository;
+        this.fagsakRepository = fagsakRepository;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.brevkodeMappere = brevkodeMappere;
     }
 
 
@@ -66,10 +75,10 @@ public class SøknadsperiodeTjeneste {
 
     public NavigableSet<DatoIntervallEntitet> utledVurderingsperioderFraSøknadsperioder(Long fagsakId, Set<Søknadsperioder> søknadsperioders) {
         return hentKravperioder(fagsakId, søknadsperioders)
-                .stream()
-                .filter(kp -> !kp.isHarTrukketKrav())
-                .map(Kravperiode::getPeriode)
-                .collect(Collectors.toCollection(TreeSet::new));
+            .stream()
+            .filter(kp -> !kp.isHarTrukketKrav())
+            .map(Kravperiode::getPeriode)
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     public List<Kravperiode> hentKravperioder(Long fagsakId, Long behandlingId) {
@@ -84,9 +93,12 @@ public class SøknadsperiodeTjeneste {
     }
 
     public List<Kravperiode> hentKravperioder(Long fagsakId, Collection<Søknadsperioder> søknadsperioders) {
+        var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
+        var brevkode = MapTilBrevkode.finnBrevkodeMapper(brevkodeMappere, fagsak.getYtelseType()).getBrevkode();
         final List<MottattDokument> mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(fagsakId)
                 .stream()
-                .filter(it -> Brevkode.PLEIEPENGER_BARN_SOKNAD.equals(it.getType()))
+                .filter(it -> brevkode.equals(it.getType()))
+                .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
                 .sorted(Comparator.comparing(MottattDokument::getInnsendingstidspunkt))
                 .toList();
 
@@ -128,4 +140,5 @@ public class SøknadsperiodeTjeneste {
             return harTrukketKrav;
         }
     }
+
 }
