@@ -111,7 +111,6 @@ public class HenleggBehandlingTjeneste {
         if (Objects.equals(BehandlingResultatType.HENLAGT_FEILOPPRETTET, årsakKode)) {
             var gyldigeDokumenterPåBehandling = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
                 .stream()
-                .filter(it -> Brevkode.SØKNAD_TYPER.contains(it.getType()))
                 .filter(it -> Objects.equals(it.getBehandlingId(), behandling.getId()))
                 .toList();
 
