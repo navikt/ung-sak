@@ -145,7 +145,7 @@ public class HenleggBehandlingTjeneste {
         Set<Brevkode> kravdokumentTyper = new HashSet<>(Brevkode.SØKNAD_TYPER);
 
         if (Objects.equals(behandling.getFagsakYtelseType(), FagsakYtelseType.OMP)) {
-            kravdokumentTyper.add(Brevkode.INNTEKTSMELDING);
+            kravdokumentTyper.addAll(List.of(Brevkode.INNTEKTSMELDING, Brevkode.FRAVÆRSKORRIGERING_IM_OMS));
         }
 
         List<MottattDokument> gyldigeDokumenterFagsak = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId());
