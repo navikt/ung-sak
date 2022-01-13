@@ -177,7 +177,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt</artifactId>
-                <version>1.4.0</version>
+                <version>1.5.3</version>
             </dependency>
 
             <dependency>
