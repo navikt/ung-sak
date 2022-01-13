@@ -86,6 +86,14 @@
             </dependency>
 
             <dependency>
+                <groupId>org.jboss.weld</groupId>
+                <artifactId>weld-core-bom</artifactId>
+                <version>3.1.8.Final</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
                 <groupId>no.nav.k9.felles</groupId>
                 <artifactId>k9-felles-root</artifactId>
