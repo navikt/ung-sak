@@ -6,7 +6,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -27,10 +30,22 @@ public class EtablertTilsynNattevåkOgBeredskapDto {
     @Valid
     private BeredskapDto beredskap;
 
-    public EtablertTilsynNattevåkOgBeredskapDto(List<EtablertTilsynPeriodeDto> etablertTilsynPerioder, NattevåkDto nattevåk, BeredskapDto beredskap) {
+    @JsonProperty(value = "opprettetAv")
+    @Size(max = 20)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String opprettetAv;
+
+    @JsonProperty(value = "opprettetTidspunkt")
+    @Valid
+    private LocalDateTime opprettetTidspunkt;
+
+    public EtablertTilsynNattevåkOgBeredskapDto(List<EtablertTilsynPeriodeDto> etablertTilsynPerioder, NattevåkDto nattevåk, BeredskapDto beredskap, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         this.etablertTilsynPerioder = etablertTilsynPerioder;
         this.nattevåk = nattevåk;
         this.beredskap = beredskap;
+        this.opprettetAv = opprettetAv;
+        this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
     public List<EtablertTilsynPeriodeDto> getEtablertTilsynPerioder() {
@@ -43,5 +58,13 @@ public class EtablertTilsynNattevåkOgBeredskapDto {
 
     public BeredskapDto getBeredskap() {
         return beredskap;
+    }
+
+    public String getOpprettetAv() {
+        return opprettetAv;
+    }
+
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
     }
 }
