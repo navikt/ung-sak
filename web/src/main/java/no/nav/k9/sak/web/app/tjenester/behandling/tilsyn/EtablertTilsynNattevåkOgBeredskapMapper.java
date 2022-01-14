@@ -43,9 +43,7 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
         return new EtablertTilsynNattevåkOgBeredskapDto(
             tilEtablertTilsyn(behandlingRef),
             tilNattevåk(nattevåk, behandlingRef.getAktørId()),
-            tilBeredskap(beredskap, behandlingRef.getAktørId()),
-            unntakEtablertTilsynForPleietrengende.get().getOpprettetAv(),
-            unntakEtablertTilsynForPleietrengende.get().getOpprettetTidspunkt());
+            tilBeredskap(beredskap, behandlingRef.getAktørId()));
     }
 
     private List<EtablertTilsynPeriodeDto> tilEtablertTilsyn(BehandlingReferanse behandlingRef) {

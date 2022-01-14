@@ -58,6 +58,8 @@ public class VurderingDto {
         this.begrunnelse = begrunnelse;
         this.resultat = resultat;
         this.kilde = kilde;
+        this.opprettetAv = opprettetAv;
+        this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
     public Long getId() {
