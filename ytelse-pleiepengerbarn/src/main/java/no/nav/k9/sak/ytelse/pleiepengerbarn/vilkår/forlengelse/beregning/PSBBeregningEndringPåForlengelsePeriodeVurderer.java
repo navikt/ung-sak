@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.EndringPåForlengelseInput;
@@ -43,6 +44,7 @@ public class PSBBeregningEndringPåForlengelsePeriodeVurderer implements Endring
     private MottatteDokumentRepository mottatteDokumentRepository;
     private InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning;
     private ProsessTriggereRepository prosessTriggereRepository;
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     PSBBeregningEndringPåForlengelsePeriodeVurderer() {
     }
@@ -51,11 +53,12 @@ public class PSBBeregningEndringPåForlengelsePeriodeVurderer implements Endring
     public PSBBeregningEndringPåForlengelsePeriodeVurderer(BehandlingRepository behandlingRepository,
                                                            MottatteDokumentRepository mottatteDokumentRepository,
                                                            ProsessTriggereRepository prosessTriggereRepository,
-                                                           @FagsakYtelseTypeRef("PSB") InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning) {
+                                                           @FagsakYtelseTypeRef("PSB") InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
     }
 
     @Override
@@ -68,8 +71,23 @@ public class PSBBeregningEndringPåForlengelsePeriodeVurderer implements Endring
             return true;
         }
 
+        if (harEndringIRegisterOpplysningerRelevantForPerioden(input, periode)) {
+            return true;
+        }
+
         return false;
     }
+
+    private boolean harEndringIRegisterOpplysningerRelevantForPerioden(EndringPåForlengelseInput input, DatoIntervallEntitet periode) {
+        var originalBehandling = behandlingRepository.hentBehandling(input.getBehandlingReferanse().getOriginalBehandlingId().orElseThrow());
+        var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(input.getBehandlingReferanse().getBehandlingId());
+        var originalIayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(originalBehandling.getId());
+        if (InntektArbeidYtelseEndringVurderer.harEndringRelevantForPerioden(input.getBehandlingReferanse().getAktørId(), iayGrunnlag, originalIayGrunnlag, periode)) {
+            return true;
+        }
+        return false;
+    }
+
 
     private boolean harEndringPåInntektsmeldingerTilBrukForPerioden(EndringPåForlengelseInput input, DatoIntervallEntitet periode) {
         var referanse = input.getBehandlingReferanse();
