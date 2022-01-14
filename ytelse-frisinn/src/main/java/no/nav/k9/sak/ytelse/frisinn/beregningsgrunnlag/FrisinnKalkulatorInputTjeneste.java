@@ -7,11 +7,13 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulatorInputTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
@@ -23,8 +25,10 @@ public class FrisinnKalkulatorInputTjeneste extends KalkulatorInputTjeneste {
     @Inject
     public FrisinnKalkulatorInputTjeneste(@Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                           @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregnings,
+                                          @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
+                                          VilkårResultatRepository vilkårResultatRepository,
                                           @KonfigVerdi(value = "FRISINN_NYTT_STP_TOGGLE", defaultVerdi = "false", required = false) boolean nyttStpToggle) {
-        super(opptjeningForBeregningTjeneste, inntektsmeldingerRelevantForBeregnings, false);
+        super(opptjeningForBeregningTjeneste, inntektsmeldingerRelevantForBeregnings, ytelseGrunnlagMapper, vilkårResultatRepository, false);
         this.nyttStpToggle = nyttStpToggle;
     }
 

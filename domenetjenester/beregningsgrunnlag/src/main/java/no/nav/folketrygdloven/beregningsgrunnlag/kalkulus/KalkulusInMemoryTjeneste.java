@@ -57,12 +57,7 @@ public class KalkulusInMemoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, List<StartBeregningInput> startBeregningInput) {
-        throw new IllegalStateException("Skal ALDRI bli implementert");
-    }
-
-    @Override
-    public SamletKalkulusResultat fortsettBeregning(BehandlingReferanse behandlingReferanse, Collection<BgRef> bgReferanser, BehandlingStegType stegType) {
+    public SamletKalkulusResultat beregn(BehandlingReferanse referanse, List<BeregnInput> beregningInput, BehandlingStegType stegType) {
         throw new IllegalStateException("Skal ALDRI bli implementert");
     }
 

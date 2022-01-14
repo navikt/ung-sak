@@ -26,17 +26,8 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public interface BeregningTjeneste {
 
     /**
-     * Starter en ny beregning eller starter en beregning på nytt fra starten av
-     * Steg 1. FASTSETT_STP_BER
-     *
-     * @param referanse {@link BehandlingReferanse}
-     * @param vilkårsperioder - alle perioder til vurdering
-     * @return SamletKalkulusResultat {@link KalkulusResultat}
-     */
-    SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, List<DatoIntervallEntitet> vilkårsperioder);
-
-    /**
      * Kjører en beregning videre fra gitt steg <br>
+     * Steg 1. FASTSETT_STP_BER (Fastsett skjæringstidspunkt for beregning)<br>
      * Steg 2. KOFAKBER (Kontroller fakta for beregning)<br>
      * Steg 3. FORS_BERGRUNN (Foreslå beregningsgrunnlag)<br>
      * Steg 4. VURDER_VILKAR_BERGRUNN (Vurder vilkår)<br>
@@ -44,12 +35,12 @@ public interface BeregningTjeneste {
      * Steg 6. FORDEL_BERGRUNN (Fordel beregningsgrunnlag)<br>
      * Steg 7. FAST_BERGRUNN (Fastsett beregningsgrunnlag)
      *
-     * @param ref {@link BehandlingReferanse}
+     * @param referanse {@link BehandlingReferanse}
      * @param vilkårsperioder Vilkårsperioder til vurdering
      * @param stegType {@link BehandlingStegType}
      * @return SamletKalkulusResultat {@link KalkulusResultat}
      */
-    SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> vilkårsperioder, BehandlingStegType stegType);
+    SamletKalkulusResultat beregn(BehandlingReferanse referanse, Collection<DatoIntervallEntitet> vilkårsperioder, BehandlingStegType stegType);
 
     /**
      * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt

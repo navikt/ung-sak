@@ -9,7 +9,7 @@ import java.util.UUID;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 
-public class StartBeregningInput {
+public class BeregnInput {
 
     private final UUID bgReferanse;
 
@@ -19,7 +19,7 @@ public class StartBeregningInput {
 
     private final InputOverstyringPeriode inputOverstyringPeriode;
 
-    public StartBeregningInput(UUID bgReferanse, DatoIntervallEntitet vilkårsperiode, List<UUID> originalReferanser, InputOverstyringPeriode inputOverstyringPeriode) {
+    public BeregnInput(UUID bgReferanse, DatoIntervallEntitet vilkårsperiode, List<UUID> originalReferanser, InputOverstyringPeriode inputOverstyringPeriode) {
         this.bgReferanse = bgReferanse;
         this.vilkårsperiode = vilkårsperiode;
         this.originalReferanser = originalReferanser;
