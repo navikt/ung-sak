@@ -221,6 +221,8 @@ spec:
       value: "false"
     - name: FORLENGELSE_OPPTJENING_ENABLET
       value: "false"
+    - name: K9_RAPID_AIVEN
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

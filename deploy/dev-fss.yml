@@ -230,6 +230,8 @@ spec:
       value: "true"
     - name: PERIODER_KANT_I_KANT_VURDERER_ENABLET
       value: "true"
+    - name: K9_RAPID_AIVEN
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
