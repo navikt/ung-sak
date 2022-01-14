@@ -28,7 +28,7 @@
     </modules>
 
     <properties>
-        <java.version>16</java.version>
+        <java.version>17</java.version>
         <kontrakt.java.version>16</kontrakt.java.version>
 
         <argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN -Duser.timezone='Europe/Oslo'</argLine>
@@ -73,6 +73,12 @@
                 <version>3.0.3</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>9.2</version>
+            </dependency>
+
             <!-- Felles biblioteker - Importerte avhengigheter. -->
             <dependency>
                 <groupId>no.nav.fpsak.tidsserie</groupId>
@@ -83,6 +89,14 @@
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>6.2.1.Final</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.weld</groupId>
+                <artifactId>weld-core-bom</artifactId>
+                <version>3.1.8.Final</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <dependency>
