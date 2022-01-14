@@ -37,12 +37,15 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
@@ -62,6 +65,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private SykdomDokumentRepository sykdomDokumentRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
 
     VurderILivetsSluttfaseSteg() {
@@ -73,34 +77,29 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
                                       PleiebehovResultatRepository resultatRepository,
                                       @FagsakYtelseTypeRef("PPN") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                       SykdomGrunnlagRepository sykdomGrunnlagRepository,
-                                      SykdomVurderingRepository sykdomVurderingRepository) {
+                                      SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingRepository sykdomVurderingRepository) {
         this.resultatRepository = resultatRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
+        this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandlingId = kontekst.getBehandlingId();
+        final Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        AktørId pleietrengendeAktørId = behandling.getFagsak().getPleietrengendeAktørId();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var perioder = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.I_LIVETS_SLUTTFASE);
 
-        final Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        final SykdomGrunnlagBehandling sykdomGrunnlagBehandling = opprettGrunnlag(perioder, behandling);
+        SykdomGrunnlagBehandling sykdomGrunnlagBehandling = opprettGrunnlag(perioder, behandling);
 
-        var gjeldendeSykdomVurdering = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.LIVETS_SLUTTFASE, behandling.getFagsak().getPleietrengendeAktørId());
-        var sykdomVurderingSegmenter = gjeldendeSykdomVurdering.toSegments();
-
-        var harVurdering = !sykdomVurderingSegmenter.isEmpty()
-            && sykdomVurderingSegmenter
-            .stream()
-            .allMatch(sykdomVurderingSegment -> sykdomVurderingSegment.getValue() != null
-                && Set.of(Resultat.OPPFYLT, Resultat.IKKE_OPPFYLT).contains(sykdomVurderingSegment.getValue().getResultat()));
-        if (!harVurdering || behandling.erManueltOpprettet()) {
+        boolean manglerVurdering = harUklassifiserteDokumenter(pleietrengendeAktørId) || manglerSykdomVurdering(pleietrengendeAktørId);
+        if (manglerVurdering || behandling.erManueltOpprettet()) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
@@ -109,6 +108,31 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         vilkårResultatRepository.lagre(behandlingId, builder.build());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private boolean harUklassifiserteDokumenter(AktørId pleietrengendeAktørId) {
+        return sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
+    }
+
+    private boolean harSykdomDokumenter(AktørId pleietrengendeAktørId) {
+        Set<SykdomDokumentType> aktuelleDokumenttyper = Set.of(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS, SykdomDokumentType.MEDISINSKE_OPPLYSNINGER);
+        return sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId).stream().anyMatch(d -> aktuelleDokumenttyper.contains(d.getType()));
+    }
+
+    private boolean manglerSykdomVurdering(AktørId pleietrengende) {
+        if (!harSykdomDokumenter(pleietrengende)){
+            //uten sykdomsdokumenter, kan ikke sykdomsvurdering utføres
+            return false;
+        }
+        var gjeldendeSykdomVurdering = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.LIVETS_SLUTTFASE, pleietrengende);
+        var sykdomVurderingSegmenter = gjeldendeSykdomVurdering.toSegments();
+        if (sykdomVurderingSegmenter.isEmpty()){
+            return true;
+        }
+        return sykdomVurderingSegmenter
+            .stream()
+            .anyMatch(sykdomVurderingSegment -> sykdomVurderingSegment.getValue() == null
+                || Resultat.IKKE_VURDERT == sykdomVurderingSegment.getValue().getResultat());
     }
 
     private SykdomGrunnlagBehandling opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, final Behandling behandling) {
