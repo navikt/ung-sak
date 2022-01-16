@@ -36,7 +36,8 @@
 		"ms-azuretools.vscode-docker",
 		"mtxr.sqltools",
 		"mtxr.sqltools-driver-pg",
-		"eamodio.gitlens"
+		"eamodio.gitlens",
+		"EditorConfig.EditorConfig"
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [
