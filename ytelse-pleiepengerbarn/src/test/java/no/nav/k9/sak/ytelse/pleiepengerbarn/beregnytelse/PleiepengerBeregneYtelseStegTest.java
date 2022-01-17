@@ -184,7 +184,7 @@ public class PleiepengerBeregneYtelseStegTest {
     private void byggUttakPlanResultat(Behandling behandling, LocalDate stp) {
         var periode = new LukketPeriode(stp, stp.plusDays(2));
         var uttaksplan = new Uttaksplan(Map.of(periode, new UttaksperiodeInfo(no.nav.pleiepengerbarn.uttak.kontrakter.Utfall.OPPFYLT,
-            BigDecimal.valueOf(100), List.of(), BigDecimal.valueOf(100), null, Set.of(), Map.of(), BigDecimal.valueOf(100), null, Set.of(), behandling.getUuid().toString(), AnnenPart.ALENE, null, null, null)), List.of());
+            BigDecimal.valueOf(100), List.of(), BigDecimal.valueOf(100), null, Set.of(), Map.of(), BigDecimal.valueOf(100), null, Set.of(), behandling.getUuid().toString(), AnnenPart.ALENE, null, null, null, false)), List.of());
 
         uttakTjeneste.lagreUttakResultatPerioder(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), uttaksplan);
     }

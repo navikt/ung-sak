@@ -38,17 +38,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.PerioderMedInakti
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.ferie.MapFerie;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.tilsyn.MapTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.uttak.MapUttak;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Barn;
-import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Pleiebehov;
-import no.nav.pleiepengerbarn.uttak.kontrakter.RettVedDød;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Søker;
-import no.nav.pleiepengerbarn.uttak.kontrakter.SøktUttak;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Vilkårsperiode;
-import no.nav.pleiepengerbarn.uttak.kontrakter.YtelseType;
+import no.nav.pleiepengerbarn.uttak.kontrakter.*;
 
 @Dependent
 public class MapInputTilUttakTjeneste {
@@ -131,6 +121,7 @@ public class MapInputTilUttakTjeneste {
         var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
         final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
+        var utenlandsoppholdperioder = new HashMap<LukketPeriode, UtenlandsoppholdInfo>(); /* TODO: fyll inn utenlandsoppholdperioder her */
 
         return new Uttaksgrunnlag(
             mapTilYtelseType(behandling),
@@ -147,7 +138,8 @@ public class MapInputTilUttakTjeneste {
             tilsynsperioder,
             beredskapsperioder,
             nattevåksperioder,
-            kravprioritet
+            kravprioritet,
+            utenlandsoppholdperioder
         );
     }
 
