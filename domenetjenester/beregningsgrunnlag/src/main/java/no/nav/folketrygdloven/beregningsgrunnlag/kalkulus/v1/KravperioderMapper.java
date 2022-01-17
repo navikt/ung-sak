@@ -62,7 +62,7 @@ public class KravperioderMapper {
         return inntektsmeldinger.stream()
             .filter(im -> (im.getRefusjonBeløpPerMnd() != null && !im.getRefusjonBeløpPerMnd().erNullEllerNulltall()) ||
                 im.getEndringerRefusjon().stream().anyMatch(e -> !e.getRefusjonsbeløp().erNullEllerNulltall()))
-            .filter(im -> refusjonOpphørerFørStart(im, finnStartdatoRefusjon(im, skjæringstidspunkt, arbeidDto)) )
+            .filter(im -> !refusjonOpphørerFørStart(im, finnStartdatoRefusjon(im, skjæringstidspunkt, arbeidDto)) )
             .collect(Collectors.toList());
     }
 
