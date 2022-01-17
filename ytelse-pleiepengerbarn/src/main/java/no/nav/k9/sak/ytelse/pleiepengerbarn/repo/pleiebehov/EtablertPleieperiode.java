@@ -5,6 +5,7 @@ import java.util.Objects;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,6 +19,7 @@ import javax.persistence.Version;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleiegradTypeConverter;
 
 @Entity(name = "Pleieperiode")
 @Table(name = "PB_PLEIEPERIODE")
@@ -34,7 +36,8 @@ public class EtablertPleieperiode extends BaseEntitet {
     })
     private DatoIntervallEntitet periode;
 
-    @Column(name = "grad", nullable = false)
+    @Column(name = "pleiegrad", nullable = false)
+    @Convert(converter = PleiegradTypeConverter.class)
     private Pleiegrad grad;
 
     @ManyToOne

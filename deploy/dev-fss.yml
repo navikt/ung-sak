@@ -232,6 +232,8 @@ spec:
       value: "true"
     - name: VEDTAK_PERSISTER_ENDRET_PERIODE
       value: "true"
+    - name: K9_RAPID_AIVEN
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
