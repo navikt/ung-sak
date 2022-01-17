@@ -134,8 +134,11 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
     }
 
     private Set<DatoIntervallEntitet> fallbackHåndtering(ProsessTaskData prosessTaskData) {
-        var fom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_FOM));
-        var tom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_TOM));
+        var fomString = prosessTaskData.getPropertyValue(PERIODE_FOM);
+        var tomString = prosessTaskData.getPropertyValue(PERIODE_TOM);
+
+        var fom = fomString != null ? LocalDate.parse(fomString) : null;
+        var tom = tomString != null ? LocalDate.parse(tomString) : null;
 
         if (fom == null && tom == null) {
             return null;
