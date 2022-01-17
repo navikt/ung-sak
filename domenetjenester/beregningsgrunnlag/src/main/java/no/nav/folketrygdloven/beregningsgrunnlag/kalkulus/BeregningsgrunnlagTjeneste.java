@@ -79,11 +79,14 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         if (bgReferanser.isEmpty()) {
             throw new IllegalArgumentException("Forventer minst en bgReferanse");
         }
+        // TODO: Skill ut oppretting og lagring av referanser i egen metode som kun kjøres ved start eller forlengelse
+        if (stegType.equals(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING)) {
+            // Lagrer alle referanser på nytt i første steg
+            lagreReferanser(referanse, bgReferanser);
+        }
         List<BeregnInput> beregningInput = lagBeregnInput(referanse, vilkårsperioder, bgReferanser);
         return finnTjeneste(referanse.getFagsakYtelseType()).beregn(referanse, beregningInput, stegType);
     }
-
-
 
 
     @Override
@@ -172,18 +175,29 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             .collect(Collectors.toList());
     }
 
-    private List<BeregnInput> lagBeregnInput(BehandlingReferanse referanse, Collection<DatoIntervallEntitet> vilkårsperioder, List<BgRef> bgReferanser) {
+    private List<BeregnInput> lagBeregnInput(BehandlingReferanse referanse,
+                                             Collection<DatoIntervallEntitet> vilkårsperioder,
+                                             List<BgRef> bgReferanser) {
         var originalReferanserMap = hentReferanserTjeneste.finnMapTilOriginaleReferanserUtenAvslag(referanse, vilkårsperioder, bgReferanser);
         var beregningInput = bgReferanser.stream().map(e -> {
             var bgRef = e.getRef();
             var stp = e.getStp();
             var vilkårsperiode = vilkårsperioder.stream().filter(p -> p.getFomDato().equals(stp)).findFirst().orElseThrow();
-            grunnlagRepository.lagre(referanse.getBehandlingId(), new BeregningsgrunnlagPeriode(bgRef, stp));
             Optional<InputOverstyringPeriode> inputOverstyring = finnInputOverstyring(referanse, stp);
             return new BeregnInput(bgRef, vilkårsperiode, originalReferanserMap.get(bgRef), inputOverstyring.orElse(null));
         }).collect(Collectors.toList());
         return beregningInput;
     }
+
+    private void lagreReferanser(BehandlingReferanse referanse,
+                                 List<BgRef> bgReferanser) {
+        bgReferanser.forEach(e -> {
+            var bgRef = e.getRef();
+            var stp = e.getStp();
+            grunnlagRepository.lagre(referanse.getBehandlingId(), new BeregningsgrunnlagPeriode(bgRef, stp));
+        });
+    }
+
 
     @Override
     public List<BeregningsgrunnlagDto> hentBeregningsgrunnlagDtoer(BehandlingReferanse ref) {
