@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.abakus.vedtak.ytelse.Ytelse;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -36,6 +37,7 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
+    private Boolean persisterPerioderMedDiff;
 
     VurderOmVedtakPåvirkerAndreSakerTask() {
     }
@@ -43,10 +45,12 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
     @Inject
     public VurderOmVedtakPåvirkerAndreSakerTask(BehandlingRepository behandlingRepository,
                                                 FagsakRepository fagsakRepository,
-                                                FagsakProsessTaskRepository fagsakProsessTaskRepository) {
+                                                FagsakProsessTaskRepository fagsakProsessTaskRepository,
+                                                @KonfigVerdi(value = "VEDTAK_PERSISTER_ENDRET_PERIODE", defaultVerdi = "false") Boolean persisterPerioderMedDiff) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
+        this.persisterPerioderMedDiff = persisterPerioderMedDiff;
     }
 
     @Override
@@ -63,7 +67,9 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
         for (SakMedPeriode kandidatsaksnummer : kandidaterTilRevurdering) {
             ProsessTaskData tilRevurderingTaskData = new ProsessTaskData(OpprettRevurderingEllerOpprettDiffTask.TASKNAME);
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON.getKode());
-            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODER, utledPerioder(kandidatsaksnummer.getPerioder()));
+            if (persisterPerioderMedDiff) {
+                tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODER, utledPerioder(kandidatsaksnummer.getPerioder()));
+            }
             var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer.getSaksnummer(), false).orElseThrow();
             var tilRevurdering = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
             tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
