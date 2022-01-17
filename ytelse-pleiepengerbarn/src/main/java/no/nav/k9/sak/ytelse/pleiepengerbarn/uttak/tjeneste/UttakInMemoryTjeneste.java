@@ -112,7 +112,8 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             AnnenPart.ALENE,
             null,
             null,
-            null);
+            null,
+            false);
     }
 
     private Map<String, Utfall> mapInngangsvilkår(Map<String, List<Vilkårsperiode>> inngangsvilkår) {
