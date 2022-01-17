@@ -1,6 +1,7 @@
 package no.nav.k9.sak.trigger;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,18 +30,18 @@ public class ProsessTriggereRepository {
         var prosessTriggere = hentEksisterendeGrunnlag(behandlingId);
         var result = new HashSet<>(triggere);
 
-        prosessTriggere.ifPresent(it -> {
-            result.addAll(it.getTriggere());
-            deaktiver(it);
-        });
+        prosessTriggere.ifPresent(it -> result.addAll(it.getTriggere()));
 
-        var oppdatert = new ProsessTriggere(behandlingId, new Triggere(result.stream()
-            .map(Trigger::new)
-            .collect(Collectors.toSet())));
+        if (!Objects.equals(result, prosessTriggere.map(ProsessTriggere::getTriggere).orElse(Set.of()))) {
+            prosessTriggere.ifPresent(this::deaktiver);
+            var oppdatert = new ProsessTriggere(behandlingId, new Triggere(result.stream()
+                .map(Trigger::new)
+                .collect(Collectors.toSet())));
 
-        entityManager.persist(oppdatert.getTriggereEntity());
-        entityManager.persist(oppdatert);
-        entityManager.flush();
+            entityManager.persist(oppdatert.getTriggereEntity());
+            entityManager.persist(oppdatert);
+            entityManager.flush();
+        }
     }
 
     public Optional<ProsessTriggere> hentGrunnlagBasertPåId(Long grunnlagId) {

@@ -20,4 +20,6 @@ public interface VurderOmVedtakPåvirkerSakerTjeneste {
     }
 
     List<Saksnummer> utledSakerSomErKanVærePåvirket(Ytelse vedtakHendelse);
+
+    List<SakMedPeriode> utledSakerMedPerioderSomErKanVærePåvirket(Ytelse vedtakHendelse);
 }
