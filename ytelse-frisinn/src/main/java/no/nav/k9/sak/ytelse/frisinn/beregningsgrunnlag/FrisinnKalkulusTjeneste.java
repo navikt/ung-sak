@@ -106,7 +106,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
         }
 
         if (!sendTilKalkulus.isEmpty()) {
-            var fraBeregningResponse = beregnKalkulus(ref, sendTilKalkulus, bgReferanser);
+            var fraBeregningResponse = beregnKalkulus(ref, sendTilKalkulus, bgReferanser, stegType);
             uuidKalkulusResulat.putAll(fraBeregningResponse.getResultater());
         }
 
@@ -114,13 +114,13 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
     }
 
-    private SamletKalkulusResultat beregnKalkulus(BehandlingReferanse ref, List<BeregnForRequest> sendTilKalkulus, Collection<BgRef> bgReferanser) {
+    private SamletKalkulusResultat beregnKalkulus(BehandlingReferanse ref, List<BeregnForRequest> sendTilKalkulus, Collection<BgRef> bgReferanser, BehandlingStegType stegType) {
         // samlet request til beregning
         var startBeregningRequest = new BeregnListeRequest(
             ref.getSaksnummer().getVerdi(),
             new AktørIdPersonident(ref.getAktørId().getId()),
             YtelseTyperKalkulusStøtterKontrakt.FRISINN,
-            StegType.FASTSETT_STP_BER,
+            new StegType(stegType.getKode()),
             sendTilKalkulus);
         List<TilstandResponse> tilstandResponse = getKalkulusRestTjeneste().beregn(startBeregningRequest).getTilstand();
         var fraBeregningResponse = mapFraTilstand(tilstandResponse, bgReferanser);
