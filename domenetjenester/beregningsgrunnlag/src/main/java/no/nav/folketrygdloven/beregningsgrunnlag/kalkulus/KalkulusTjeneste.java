@@ -50,6 +50,8 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
@@ -127,6 +129,24 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             .map(i -> new BgRef(i.getBgReferanse(), i.getSkjæringstidspunkt()))
             .toList();
         return mapFraTilstand(tilstandResponse.getTilstand(), bgReferanser);
+    }
+
+    @Override
+    public void kopier(BehandlingReferanse referanse,
+                       List<BeregnInput> beregningInput) {
+        if (beregningInput.isEmpty()) {
+            return;
+        }
+        var request = getKopierBeregningListeRequest(referanse, beregningInput);
+        restTjeneste.kopierBeregning(request);
+    }
+
+    private KopierBeregningListeRequest getKopierBeregningListeRequest(BehandlingReferanse referanse, List<BeregnInput> beregningInput) {
+        return new KopierBeregningListeRequest(referanse.getSaksnummer().getVerdi(),
+            YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
+        beregningInput.stream().map(i -> new KopierBeregningRequest(i.getBgReferanse(),
+            i.getOriginalReferanseMedSammeSkjæringstidspunkt().orElseThrow(() -> new IllegalStateException("Forventer å finne original referanse med samme skjæringstidspunkt ved kopiering"))
+        )).toList());
     }
 
     @Override

@@ -6,8 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -50,7 +51,7 @@ public class FordelBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
         var ref = BehandlingReferanse.fra(behandling);
 
         var callback = new HåndterResultat();
-        beregningStegTjeneste.fortsettBeregning(ref, FORDEL_BEREGNINGSGRUNNLAG, callback);
+        beregningStegTjeneste.fortsettBeregningInkludertForlengelser(ref, FORDEL_BEREGNINGSGRUNNLAG, callback);
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(callback.aksjonspunktResultater);
     }

@@ -8,15 +8,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilter;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @Dependent
 public class BeregningStegTjeneste {
@@ -25,18 +29,46 @@ public class BeregningStegTjeneste {
         void håndter(KalkulusResultat kalkulusResultat, DatoIntervallEntitet periode);
     }
 
-    private BeregningTjeneste kalkulusTjeneste;
-    private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
+    private final BeregningTjeneste kalkulusTjeneste;
+    private final BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
+    private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
+    private final boolean enableForlengelse;
 
     @Inject
-    public BeregningStegTjeneste(BeregningTjeneste kalkulusTjeneste, BeregningsgrunnlagVilkårTjeneste vilkårTjeneste) {
+    public BeregningStegTjeneste(BeregningTjeneste kalkulusTjeneste,
+                                 BeregningsgrunnlagVilkårTjeneste vilkårTjeneste,
+                                 VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
+                                 @KonfigVerdi(value = "forlengelse.beregning.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.vilkårTjeneste = vilkårTjeneste;
+        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
+        this.enableForlengelse = enableForlengelse;
+    }
+
+
+    public List<AksjonspunktResultat> fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType) {
+
+        var callback = new SamleAksjonspunktResultater();
+        fortsettBeregning(ref, stegType, callback);
+        return callback.aksjonspunktResultater;
+
+    }
+
+    public void fortsettBeregningInkludertForlengelser(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
+        fortsettBeregning(ref, stegType, resultatCallback, vilkårPeriodeFilterProvider.getFilter(ref));
     }
 
     public void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
+        if (enableForlengelse) {
+            periodeFilter.ignorerForlengelseperioder();
+        }
+        fortsettBeregning(ref, stegType, resultatCallback, periodeFilter);
+    }
 
-        var perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, true);
+    private void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback, VilkårPeriodeFilter periodeFilter) {
+        periodeFilter.ignorerAvslåttePerioder();
+        var perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, periodeFilter);
 
         if (perioderTilVurdering.isEmpty()) {
             return;
@@ -44,6 +76,7 @@ public class BeregningStegTjeneste {
 
         Map<LocalDate, DatoIntervallEntitet> stpTilPeriode = perioderTilVurdering
             .stream()
+            .map(PeriodeTilVurdering::getPeriode)
             .map(p -> new AbstractMap.SimpleEntry<>(p.getFomDato(), p))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
@@ -56,14 +89,6 @@ public class BeregningStegTjeneste {
             var periode = stpTilPeriode.get(stp);
             resultatCallback.håndter(delResultat, periode);
         }
-    }
-
-    public List<AksjonspunktResultat> fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType) {
-
-        var callback = new SamleAksjonspunktResultater();
-        fortsettBeregning(ref, stegType, callback);
-        return callback.aksjonspunktResultater;
-
     }
 
     static class SamleAksjonspunktResultater implements FortsettBeregningResultatCallback {
