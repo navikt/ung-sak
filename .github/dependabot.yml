@@ -4,7 +4,7 @@ registries:
     type: maven-repository
     url: https://maven.pkg.github.com/navikt/k9-sak
     username: x-access-token
-    password: ${{secrets.DEPENDABOT_ACCESS_TOKE
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}
   k9-felles:
     type: maven-repository
     url: https://maven.pkg.github.com/navikt/k9-felles
@@ -64,7 +64,7 @@ registries:
     type: maven-repository
     url: https://maven.pkg.github.com/navikt/dev-jakarta-transform
     username: x-access-token
-    password: ${{secrets.DEPENDABOT_ACCESS_TOKE
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}
 updates:
   - package-ecosystem: maven
     directory: "/"
