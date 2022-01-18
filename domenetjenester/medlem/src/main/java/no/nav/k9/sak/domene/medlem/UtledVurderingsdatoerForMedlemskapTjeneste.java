@@ -325,9 +325,9 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
     private LocalDateSegment<MedlemskapPerioderEntitet> slåSammenMedlemskapPerioder(LocalDateInterval di,
                                                                                     LocalDateSegment<MedlemskapPerioderEntitet> førsteVersjon,
                                                                                     LocalDateSegment<MedlemskapPerioderEntitet> sisteVersjon) {
-        if (førsteVersjon == null) {
+        if (førsteVersjon == null || førsteVersjon.getValue() == null) {
             return sisteVersjon;
-        } else if (sisteVersjon == null) {
+        } else if (sisteVersjon == null || sisteVersjon.getValue() == null) {
             return førsteVersjon;
         }
 
@@ -344,7 +344,7 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         MedlemskapPerioderEntitet riktigEntitetVerdi;
         LocalDate førsteBeslutningsdato = førsteVersjon.getValue().getBeslutningsdato();
         LocalDate sisteBeslutningsdato = sisteVersjon.getValue().getBeslutningsdato();
-        if (førsteBeslutningsdato != null && førsteBeslutningsdato.isAfter(sisteBeslutningsdato)) {
+        if (førsteBeslutningsdato != null && (sisteBeslutningsdato == null || førsteBeslutningsdato.isAfter(sisteBeslutningsdato))) {
             riktigEntitetVerdi = førsteVersjon.getValue();
         } else {
             riktigEntitetVerdi = sisteVersjon.getValue();
