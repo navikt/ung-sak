@@ -3,9 +3,9 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alenemidlertidig;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;

@@ -1,7 +1,7 @@
 package no.nav.k9.sak.domene.medlem;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.medlem.impl.AvklarFortsattMedlemskapAksjonspunkt;

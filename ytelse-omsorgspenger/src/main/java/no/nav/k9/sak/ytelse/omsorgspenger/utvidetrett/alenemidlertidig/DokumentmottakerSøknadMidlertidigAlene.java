@@ -3,8 +3,8 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alenemidlertidig;
 import java.util.Collection;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;

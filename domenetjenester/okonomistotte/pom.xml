@@ -19,7 +19,7 @@
 
 		<dependency>
 			<groupId>no.nav.k9.oppdrag.kontrakt</groupId>
-			<artifactId>oppdrag-kontrakter</artifactId>
+			<artifactId>oppdrag-kontrakter-jakarta</artifactId>
 		</dependency>
 
 		<dependency>

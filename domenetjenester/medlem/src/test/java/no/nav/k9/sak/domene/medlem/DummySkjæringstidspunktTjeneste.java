@@ -3,7 +3,7 @@ package no.nav.k9.sak.domene.medlem;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import javax.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.RequestScoped;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;

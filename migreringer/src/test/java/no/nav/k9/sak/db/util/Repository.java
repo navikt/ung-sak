@@ -2,8 +2,8 @@ package no.nav.k9.sak.db.util;
 import java.util.Collection;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaQuery;
 
 /**
  * Denne trengs ikke, unødvendig wrapper rundt EntityManager, som er lett

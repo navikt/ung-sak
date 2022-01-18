@@ -1,8 +1,8 @@
 package no.nav.k9.sak.behandlingskontroll.impl.observer;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;

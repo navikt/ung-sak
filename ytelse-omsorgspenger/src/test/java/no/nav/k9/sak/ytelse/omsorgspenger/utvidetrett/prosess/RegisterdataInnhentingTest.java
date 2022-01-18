@@ -2,7 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import javax.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.spi.CDI;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

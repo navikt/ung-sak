@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt;
 
-import static javax.validation.Validation.buildDefaultValidatorFactory;
+import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;

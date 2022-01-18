@@ -9,8 +9,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.inject.Alternative;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.Alternative;
 
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;

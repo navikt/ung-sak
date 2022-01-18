@@ -1,7 +1,7 @@
 package no.nav.k9.sak.behandlingslager.kodeverk;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 

@@ -3,10 +3,10 @@ package no.nav.k9.sak.behandlingslager.saksnummer;
 import java.math.BigInteger;
 import java.util.Objects;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 
 @Dependent
 public class SaksnummerRepository {
