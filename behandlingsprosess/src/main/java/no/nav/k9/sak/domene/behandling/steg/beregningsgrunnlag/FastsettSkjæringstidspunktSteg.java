@@ -9,14 +9,14 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -73,7 +73,7 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
 
-        kopierGrunnlagForForlengelseperioder(ref);
+        kopierGrunnlagForForlengelseperioder(ref, kontekst);
 
         var periodeFilter = periodeFilterProvider.getFilter(ref);
         periodeFilter.ignorerAvslåttePerioder();
@@ -97,12 +97,17 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         }
     }
 
-    private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref) {
-        if (enableForlengelse) {
+    private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
+        if (enableForlengelse && ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
             var periodeFilter = periodeFilterProvider.getFilter(ref);
             periodeFilter.ignorerAvslåttePerioder();
             var allePerioder = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, periodeFilter);
-            kalkulusTjeneste.kopier(ref, allePerioder);
+            var forlengelseperioder = allePerioder.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toSet());
+            if (!forlengelseperioder.isEmpty()) {
+                kalkulusTjeneste.kopier(ref, forlengelseperioder);
+                var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
+                beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraOriginalbehandling(kontekst, originalBehandlingId, forlengelseperioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toList()));
+            }
         }
     }
 

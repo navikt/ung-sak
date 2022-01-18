@@ -1,13 +1,13 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -49,6 +49,19 @@ public class BeregningsgrunnlagVilkårTjeneste {
     public void lagreVilkårresultat(BehandlingskontrollKontekst kontekst,
                                     DatoIntervallEntitet vilkårsPeriode, Avslagsårsak avslagsårsak) {
         vilkårTjeneste.lagreVilkårresultat(kontekst, vilkårType, vilkårsPeriode, avslagsårsak);
+    }
+
+    public void kopierVilkårresultatFraOriginalbehandling(BehandlingskontrollKontekst kontekst,
+                                                          Long originalBehandlingId,
+                                                          List<DatoIntervallEntitet> vilkårsPerioder) {
+        var originalVilkårResultat = vilkårTjeneste.hentVilkårResultat(originalBehandlingId).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+            .orElseThrow(() -> new IllegalStateException("Forventer vilkårsresultat for original behandling"));
+
+        vilkårsPerioder.forEach(vp -> {
+            var originalResultat = originalVilkårResultat.getPerioder().stream().filter(p -> p.getPeriode().getFomDato().equals(vp.getFomDato()))
+                .findFirst().orElseThrow(() -> new IllegalStateException("Forventer å finne originalt vilkårresultat for periode " + vp));
+            vilkårTjeneste.lagreVilkårresultat(kontekst, vilkårType, vp, originalResultat.getAvslagsårsak());
+        });
     }
 
     public void ryddVedtaksresultatOgVilkår(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet vilkårsPeriode) {
