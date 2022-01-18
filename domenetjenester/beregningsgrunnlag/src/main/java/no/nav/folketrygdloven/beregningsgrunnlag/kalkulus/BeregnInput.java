@@ -15,15 +15,25 @@ public class BeregnInput {
 
     private final DatoIntervallEntitet vilkårsperiode;
 
-    private final List<UUID> originalReferanser;
+    private List<UUID> originalReferanser;
 
-    private final InputOverstyringPeriode inputOverstyringPeriode;
+    private InputOverstyringPeriode inputOverstyringPeriode;
+
 
     public BeregnInput(UUID bgReferanse, DatoIntervallEntitet vilkårsperiode, List<UUID> originalReferanser, InputOverstyringPeriode inputOverstyringPeriode) {
         this.bgReferanse = bgReferanse;
         this.vilkårsperiode = vilkårsperiode;
         this.originalReferanser = originalReferanser;
         this.inputOverstyringPeriode = inputOverstyringPeriode;
+    }
+
+    private BeregnInput(UUID bgReferanse, DatoIntervallEntitet vilkårsperiode) {
+        this.bgReferanse = bgReferanse;
+        this.vilkårsperiode = vilkårsperiode;
+    }
+
+    public static BeregnInput forAksjonspunktOppdatering(UUID bgReferanse, DatoIntervallEntitet vilkårsperiode) {
+        return new BeregnInput(bgReferanse, vilkårsperiode);
     }
 
     public UUID getBgReferanse() {

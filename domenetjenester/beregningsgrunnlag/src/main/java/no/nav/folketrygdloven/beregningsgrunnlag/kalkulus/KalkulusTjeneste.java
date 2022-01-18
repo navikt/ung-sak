@@ -3,7 +3,6 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,13 +35,11 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrun
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.felles.v1.EksternArbeidsforholdRef;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
-import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdReferanseDto;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Vilkårsavslagsårsak;
 import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
-import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoForGUIRequest;
@@ -68,12 +65,9 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningVenteårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -94,10 +88,9 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
     private KalkulusRestKlient restTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
-    private KalkulatorInputTjeneste kalkulatorInputTjeneste;
-    private InntektArbeidYtelseTjeneste iayTjeneste;
+    protected InntektArbeidYtelseTjeneste iayTjeneste;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
-    private LagBeregnRequestTjeneste beregnRequestTjeneste;
+    protected LagBeregnRequestTjeneste beregnRequestTjeneste;
     private boolean togglePsbMigrering;
 
     public KalkulusTjeneste() {
@@ -106,7 +99,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     @Inject
     public KalkulusTjeneste(KalkulusRestKlient restTjeneste,
                             VilkårResultatRepository vilkårResultatRepository,
-                            @FagsakYtelseTypeRef("*") KalkulatorInputTjeneste kalkulatorInputTjeneste,
                             InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                             @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                             LagBeregnRequestTjeneste beregnRequestTjeneste,
@@ -114,7 +106,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     ) {
         this.restTjeneste = restTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.kalkulatorInputTjeneste = kalkulatorInputTjeneste;
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.beregnRequestTjeneste = beregnRequestTjeneste;
@@ -128,7 +119,9 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         if (beregningInput.isEmpty()) {
             return new SamletKalkulusResultat(Collections.emptyMap(), Collections.emptyMap());
         }
-        var request = getRequestForBeregning(referanse, beregningInput, stegType);
+        var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
+        var sakInntektsmeldinger = finnInntektsmeldingerForSak(referanse, beregningInput);
+        var request = beregnRequestTjeneste.lagMedInput(stegType, referanse, beregningInput, iayGrunnlag, sakInntektsmeldinger);
         TilstandListeResponse tilstandResponse = restTjeneste.beregn(request);
         var bgReferanser = beregningInput.stream()
             .map(i -> new BgRef(i.getBgReferanse(), i.getSkjæringstidspunkt()))
@@ -169,12 +162,11 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     private OppdateringListeRespons oppdaterMedOppdatertInput(List<HåndterBeregningRequest> requestListe,
                                                               Collection<BgRef> bgReferanser,
                                                               BehandlingReferanse referanse) {
-        Map<UUID, KalkulatorInputDto> input = lagInputMap(bgReferanser, referanse);
-        var request = new HåndterBeregningListeRequest(requestListe,
-            input,
-            YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
-            referanse.getSaksnummer().getVerdi(),
-            referanse.getBehandlingUuid());
+        var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
+        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
+        var vilkår = vilkårResultatRepository.hent(referanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
+        var bergnInputListe = bgReferanser.stream().map(r -> BeregnInput.forAksjonspunktOppdatering(r.getRef(), vilkår.finnPeriodeForSkjæringstidspunkt(r.getStp()).getPeriode())).toList();
+        var request = beregnRequestTjeneste.lagForAksjonspunktOppdateringMedInput(requestListe, referanse, bergnInputListe, iayGrunnlag, sakInntektsmeldinger);
         return restTjeneste.oppdaterBeregningListe(request);
     }
 
@@ -309,13 +301,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         }).collect(Collectors.toSet());
     }
 
-    private Map<UUID, KalkulatorInputDto> lagInputMap(Collection<BgRef> bgReferanser, BehandlingReferanse referanse) {
-        var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
-        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
-        Map<UUID, LocalDate> stpMap = bgReferanser.stream().collect(Collectors.toMap(BgRef::getRef, BgRef::getStp));
-        return kalkulatorInputTjeneste.byggInputPrReferanse(referanse, iayGrunnlag, sakInntektsmeldinger, stpMap);
-    }
-
     protected SamletKalkulusResultat mapFraTilstand(Collection<TilstandResponse> response, Collection<BgRef> bgReferanser) {
 
         Map<UUID, KalkulusResultat> resultater = new LinkedHashMap<>();
@@ -352,14 +337,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         var ytelseTypeKode = ytelseType.getKode();
         return FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ytelseTypeKode).orElseThrow(
             () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ytelseTypeKode));
-    }
-
-    protected BeregnListeRequest getRequestForBeregning(BehandlingReferanse referanse,
-                                                        List<BeregnInput> beregningInput,
-                                                        BehandlingStegType stegType) {
-        var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
-        var sakInntektsmeldinger = finnInntektsmeldingerForSak(referanse, beregningInput);
-        return beregnRequestTjeneste.lagMedInput(stegType, referanse, beregningInput, iayGrunnlag, sakInntektsmeldinger);
     }
 
     public Map<UUID, GrunnbeløpReguleringStatus> kontrollerBehovForGregulering(List<UUID> koblingerÅSpørreMot, Saksnummer saksnummer) {

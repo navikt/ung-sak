@@ -26,8 +26,17 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public interface BeregningTjeneste {
 
     /**
+     * Starter en ny beregning eller starter en beregning på nytt fra starten av
+     * Steg 1. FASTSETT_STP_BER
+     *
+     * @param referanse {@link BehandlingReferanse}
+     * @param vilkårsperioder - alle perioder til vurdering
+     * @return SamletKalkulusResultat {@link SamletKalkulusResultat}
+     */
+    SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, Collection<DatoIntervallEntitet> vilkårsperioder, BehandlingStegType stegType);
+
+    /**
      * Kjører en beregning videre fra gitt steg <br>
-     * Steg 1. FASTSETT_STP_BER (Fastsett skjæringstidspunkt for beregning)<br>
      * Steg 2. KOFAKBER (Kontroller fakta for beregning)<br>
      * Steg 3. FORS_BERGRUNN (Foreslå beregningsgrunnlag)<br>
      * Steg 4. VURDER_VILKAR_BERGRUNN (Vurder vilkår)<br>

@@ -55,13 +55,12 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
     @Inject
     public FrisinnKalkulusTjeneste(KalkulusRestKlient restTjeneste,
-                                   @FagsakYtelseTypeRef("FRISINN") KalkulatorInputTjeneste kalkulatorInputTjeneste,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    VilkårResultatRepository vilkårResultatRepository,
-                                   LagBeregnRequestTjeneste lagBeregnRequestTjeneste,
+                                   LagBeregnRequestTjeneste beregnRequestTjeneste,
                                    @FagsakYtelseTypeRef("FRISINN") Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper) {
-        super(restTjeneste, vilkårResultatRepository, kalkulatorInputTjeneste,
-            inntektArbeidYtelseTjeneste, ytelseGrunnlagMapper, lagBeregnRequestTjeneste, false);
+        super(restTjeneste, vilkårResultatRepository,
+            inntektArbeidYtelseTjeneste, ytelseGrunnlagMapper, beregnRequestTjeneste, false);
     }
 
     @Override
@@ -84,8 +83,8 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
                 uuidKalkulusResulat.put(bgReferanse, new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.INGEN_STØNADSDAGER_I_SØKNADSPERIODEN));
             } else {
                 // tar en og en
-                var startBeregningRequest = getRequestForBeregning(ref, beregnInput, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING);
-
+                var iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
+                var startBeregningRequest = beregnRequestTjeneste.lagMedInput(stegType, ref, beregnInput, iayGrunnlag, Collections.emptyList());
                 var inputPerRef = startBeregningRequest.getBeregnForListe();
                 if (inputPerRef.size() != 1) {
                     throw new IllegalStateException("forventet bare et resultat for startberegning, fikk: " + inputPerRef.size());

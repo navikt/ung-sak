@@ -1,12 +1,13 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
-import java.util.AbstractMap;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -63,37 +64,55 @@ public class KalkulatorInputTjeneste {
     public Map<UUID, KalkulatorInputDto> byggInputPrReferanse(BehandlingReferanse behandlingReferanse,
                                                               InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                               Collection<Inntektsmelding> sakInntektsmeldinger,
-                                                              Map<UUID, LocalDate> referanseTilStp) {
-        Vilkår vilkår = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
-
+                                                              List<BeregnInput> beregnInput) {
         var opptjeningsvilkår = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()).getVilkår(VilkårType.OPPTJENINGSVILKÅRET);
         var mapper = getYtelsesspesifikkMapper(behandlingReferanse.getFagsakYtelseType());
-        return referanseTilStp.entrySet()
-            .stream()
-            .sorted(Map.Entry.comparingByValue())
-            .map(i -> {
-                UUID bgReferanse = i.getKey();
-                var vilkårPeriode = vilkår.finnPeriodeForSkjæringstidspunkt(i.getValue());
-                VilkårUtfallMerknad vilkårsMerknad = null;
-                if (opptjeningsvilkår.isPresent()) {
-                    vilkårsMerknad = opptjeningsvilkår.get().finnPeriodeForSkjæringstidspunkt(vilkårPeriode.getSkjæringstidspunkt()).getMerknad();
-                }
-                var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårPeriode.getPeriode());
-                KalkulatorInputDto kalkulatorInputDto = byggDto(
-                    behandlingReferanse,
-                    bgReferanse,
-                    iayGrunnlag,
-                    sakInntektsmeldinger,
-                    ytelsesGrunnlag,
-                    vilkårPeriode.getPeriode(),
-                    vilkårsMerknad);
-                return new AbstractMap.SimpleEntry<>(bgReferanse,
-                    kalkulatorInputDto);
-            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        return beregnInput.stream()
+            .collect(Collectors.toMap(
+                BeregnInput::getBgReferanse,
+                mapInputDto(behandlingReferanse, iayGrunnlag, sakInntektsmeldinger, opptjeningsvilkår, mapper)));
     }
 
+    private Function<BeregnInput, KalkulatorInputDto> mapInputDto(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag iayGrunnlag, Collection<Inntektsmelding> sakInntektsmeldinger, Optional<Vilkår> opptjeningsvilkår, BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?> mapper) {
+        return input -> {
+            var vilkårsMerknad = finnVilkårmerknadForOpptjening(opptjeningsvilkår, input);
+            var vilkårsperiode = input.getVilkårsperiode();
+            var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårsperiode);
+            return byggDto(
+                behandlingReferanse,
+                iayGrunnlag,
+                sakInntektsmeldinger,
+                ytelsesGrunnlag,
+                vilkårsperiode,
+                vilkårsMerknad);
+        };
+    }
+
+    /** Finner vilkårmerknad for opptjeningsvilkåret
+     *  Brukes til å merke saker som skal beregnes som inaktiv § 8-47
+     *
+     * @param opptjeningsvilkår Opptjeningvilkår
+     * @param i input
+     * @return Vilkårutfallmerknad
+     */
+    private VilkårUtfallMerknad finnVilkårmerknadForOpptjening(Optional<Vilkår> opptjeningsvilkår, BeregnInput i) {
+        VilkårUtfallMerknad vilkårsMerknad = null;
+        if (opptjeningsvilkår.isPresent()) {
+            vilkårsMerknad = opptjeningsvilkår.get().finnPeriodeForSkjæringstidspunkt(i.getSkjæringstidspunkt()).getMerknad();
+        }
+        return vilkårsMerknad;
+    }
+
+    /** Mapper inputdto for beregning
+     * @param referanse Behandlingreferanse
+     * @param iayGrunnlag   IAY-grunnlag
+     * @param sakInntektsmeldinger  Inntektsmeldinger for saken
+     * @param ytelseGrunnlag Ytelsesspesifikt grunnlag
+     * @param vilkårsperiode Vilkårsperioden
+     * @param vilkårsMerknad Vilkårutfallmerknad fra opptjening (for inaktiv § 8-47)
+     * @return Input-dto
+     */
     public KalkulatorInputDto byggDto(BehandlingReferanse referanse,
-                                      UUID bgReferanse,
                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
                                       Collection<Inntektsmelding> sakInntektsmeldinger,
                                       YtelsespesifiktGrunnlagDto ytelseGrunnlag,
@@ -109,7 +128,7 @@ public class KalkulatorInputTjeneste {
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode);
 
         if (opptjeningAktiviteter.isEmpty()) {
-            throw new IllegalStateException("Forventer opptjening for vilkårsperiode: " + vilkårsperiode + ", bgReferanse=" + bgReferanse + ", iayGrunnlag.opptjening=" + oppgittOpptjening);
+            throw new IllegalStateException("Forventer opptjening for vilkårsperiode: " + vilkårsperiode + ", iayGrunnlag.opptjening=" + oppgittOpptjening);
         }
 
         var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter.get(), vilkårsMerknad);

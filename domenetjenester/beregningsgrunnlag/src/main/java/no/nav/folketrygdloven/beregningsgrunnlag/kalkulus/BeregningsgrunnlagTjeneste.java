@@ -66,8 +66,9 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         this.hentReferanserTjeneste = new HentReferanserTjeneste(grunnlagRepository, vilkårResultatRepository);
     }
 
+
     @Override
-    public SamletKalkulusResultat beregn(BehandlingReferanse referanse, Collection<DatoIntervallEntitet> vilkårsperioder, BehandlingStegType stegType) {
+    public SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, Collection<DatoIntervallEntitet> vilkårsperioder, BehandlingStegType stegType) {
         if (vilkårsperioder == null || vilkårsperioder.isEmpty()) {
             throw new IllegalArgumentException("Forventer minst en vilkårsperiode");
         }
@@ -79,11 +80,21 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         if (bgReferanser.isEmpty()) {
             throw new IllegalArgumentException("Forventer minst en bgReferanse");
         }
-        // TODO: Skill ut oppretting og lagring av referanser i egen metode som kun kjøres ved start eller forlengelse
-        if (stegType.equals(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING)) {
-            // Lagrer alle referanser på nytt i første steg
-            lagreReferanser(referanse, bgReferanser);
+        lagreReferanser(referanse, bgReferanser);
+        List<BeregnInput> beregningInput = lagBeregnInput(referanse, vilkårsperioder, bgReferanser);
+        return finnTjeneste(referanse.getFagsakYtelseType()).beregn(referanse, beregningInput, stegType);
+    }
+
+
+    @Override
+    public SamletKalkulusResultat beregn(BehandlingReferanse referanse, Collection<DatoIntervallEntitet> vilkårsperioder, BehandlingStegType stegType) {
+        if (vilkårsperioder == null || vilkårsperioder.isEmpty()) {
+            throw new IllegalArgumentException("Forventer minst en vilkårsperiode");
         }
+        var skjæringstidspunkter = vilkårsperioder.stream()
+            .map(DatoIntervallEntitet::getFomDato)
+            .collect(Collectors.toCollection(TreeSet::new));
+        var bgReferanser = hentReferanserTjeneste.finnBeregningsgrunnlagsReferanseFor(referanse.getBehandlingId(), skjæringstidspunkter, true, BehandlingType.REVURDERING.equals(referanse.getBehandlingType()));
         List<BeregnInput> beregningInput = lagBeregnInput(referanse, vilkårsperioder, bgReferanser);
         return finnTjeneste(referanse.getFagsakYtelseType()).beregn(referanse, beregningInput, stegType);
     }

@@ -29,6 +29,21 @@ import no.nav.k9.sak.typer.Saksnummer;
  */
 public interface KalkulusApiTjeneste {
 
+    /**
+     * Kjører en beregning fra gitt steg <br>
+     * Steg 1. FASTSETT_STP_NER (Fastsett skjæringstidspunkt beregning)<br>
+     * Steg 2. KOFAKBER (Kontroller fakta for beregning)<br>
+     * Steg 3. FORS_BERGRUNN (Foreslå beregningsgrunnlag)<br>
+     * Steg 4. VURDER_VILKAR_BERGRUNN (Vurder vilkår)<br>
+     * Steg 5. VURDER_REF_BERGRUNN (Vurder refusjon)<br>
+     * Steg 6. FORDEL_BERGRUNN (Fordel beregningsgrunnlag)<br>
+     * Steg 7. FAST_BERGRUNN (Fastsett beregningsgrunnlag)
+     *
+     * @param referanse behandlingreferanse
+     * @param beregningInput input vedrørende vilkårsperiode, referanse og koblinger mot andre original behandling
+     * @param stegType {@link BehandlingStegType}
+     * @return KalkulusResultat {@link KalkulusResultat}
+     */
     SamletKalkulusResultat beregn(BehandlingReferanse referanse,
                                   List<BeregnInput> beregningInput,
                                   BehandlingStegType stegType);
