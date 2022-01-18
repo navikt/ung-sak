@@ -4,8 +4,8 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FASTSETT_BEREGNIN
 
 import java.util.Collections;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.k9.sak.behandling.BehandlingReferanse;

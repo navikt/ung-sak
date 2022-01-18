@@ -25,13 +25,13 @@
         <!-- Domenetjenester avhengigheter -->
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
-            <artifactId>kontrakt-jakarta</artifactId>
+            <artifactId>kontrakt</artifactId>
         </dependency>
 
         <!-- kontrakter -->
         <dependency>
             <groupId>no.nav.folketrygdloven.kalkulus</groupId>
-            <artifactId>kalkulus-kontrakt-jakarta</artifactId>
+            <artifactId>kalkulus-kontrakt</artifactId>
         </dependency>
 
         <!-- Prosjekt avhengigheter -->
@@ -58,7 +58,7 @@
 
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-core-jakarta</artifactId>
+            <artifactId>swagger-core</artifactId>
             <scope>provided</scope>
         </dependency>
 

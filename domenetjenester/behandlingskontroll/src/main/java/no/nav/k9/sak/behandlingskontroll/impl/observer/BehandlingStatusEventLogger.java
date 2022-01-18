@@ -1,7 +1,7 @@
 package no.nav.k9.sak.behandlingskontroll.impl.observer;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

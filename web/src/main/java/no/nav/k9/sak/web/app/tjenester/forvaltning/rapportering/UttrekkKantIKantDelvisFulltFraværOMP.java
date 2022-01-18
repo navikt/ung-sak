@@ -3,10 +3,10 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering;
 import java.util.List;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Tuple;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.Tuple;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;

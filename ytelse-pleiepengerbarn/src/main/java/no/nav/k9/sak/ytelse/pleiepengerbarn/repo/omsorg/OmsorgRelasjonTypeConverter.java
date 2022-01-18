@@ -1,6 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg;
 
-import jakarta.persistence.AttributeConverter;
+import javax.persistence.AttributeConverter;
 
 import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 

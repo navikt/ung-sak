@@ -1,7 +1,7 @@
 package no.nav.k9.sak.perioder;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Instance;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Instance;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;

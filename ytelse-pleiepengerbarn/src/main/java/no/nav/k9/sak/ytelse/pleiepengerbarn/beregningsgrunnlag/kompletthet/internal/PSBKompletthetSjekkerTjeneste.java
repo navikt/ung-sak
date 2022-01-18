@@ -10,9 +10,9 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Any;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

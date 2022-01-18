@@ -1,7 +1,7 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;

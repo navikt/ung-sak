@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;

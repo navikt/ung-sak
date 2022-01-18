@@ -1,6 +1,6 @@
 package no.nav.k9.sak.web.app.oppgave;
 
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.ContextPathHolder;

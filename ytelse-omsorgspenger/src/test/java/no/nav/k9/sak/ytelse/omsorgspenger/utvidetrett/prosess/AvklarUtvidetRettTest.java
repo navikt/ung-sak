@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import jakarta.enterprise.inject.Any;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
+import javax.enterprise.inject.Any;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

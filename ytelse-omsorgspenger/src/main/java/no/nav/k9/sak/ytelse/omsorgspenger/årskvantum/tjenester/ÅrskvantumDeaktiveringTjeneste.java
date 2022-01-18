@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;

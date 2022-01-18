@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

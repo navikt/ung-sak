@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import jakarta.validation.ConstraintViolationException;
-import jakarta.ws.rs.ext.ExceptionMapper;
+import javax.validation.ConstraintViolationException;
+import javax.ws.rs.ext.ExceptionMapper;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;

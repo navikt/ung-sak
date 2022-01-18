@@ -1,10 +1,13 @@
 package no.nav.k9.sak.mottak.inntektsmelding.xml;
-
 import java.io.StringReader;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -15,20 +18,15 @@ import javax.xml.validation.SchemaFactory;
 
 import org.xml.sax.SAXException;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBElement;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Unmarshaller;
-
 public final class JaxbHelper {
     private static final Map<Class<?>, JAXBContext> CONTEXTS = new ConcurrentHashMap<>(); // NOSONAR
     private static final Map<String, Schema> SCHEMAS = new ConcurrentHashMap<>(); // NOSONAR
 
+
     private JaxbHelper() {
     }
 
-    public static <T> T unmarshalAndValidateXMLWithStAX(Class<T> clazz, String xml, String xsdLocation)
-            throws JAXBException, XMLStreamException, SAXException {
+    public static <T> T unmarshalAndValidateXMLWithStAX(Class<T> clazz, String xml, String xsdLocation) throws JAXBException, XMLStreamException, SAXException {
         if (!CONTEXTS.containsKey(clazz)) {
             CONTEXTS.put(clazz, JAXBContext.newInstance(clazz));
         }

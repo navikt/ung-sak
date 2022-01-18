@@ -2,8 +2,8 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død;
 
 import no.nav.k9.kodeverk.uttak.RettVedDødType;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 @Converter(autoApply = true)
 public class RettVedDødTypeConverter implements AttributeConverter<RettVedDødType, String> {

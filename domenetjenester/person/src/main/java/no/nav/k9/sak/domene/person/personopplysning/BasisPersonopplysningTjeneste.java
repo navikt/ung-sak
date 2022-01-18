@@ -1,7 +1,7 @@
 package no.nav.k9.sak.domene.person.personopplysning;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 

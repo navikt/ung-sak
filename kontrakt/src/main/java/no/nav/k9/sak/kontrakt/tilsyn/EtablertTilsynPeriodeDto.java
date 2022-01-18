@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.k9.sak.typer.Periode;
 
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import java.time.Duration;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

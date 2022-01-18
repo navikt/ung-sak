@@ -2,9 +2,9 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.kalkulus;
 
 import java.util.Optional;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Default;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;

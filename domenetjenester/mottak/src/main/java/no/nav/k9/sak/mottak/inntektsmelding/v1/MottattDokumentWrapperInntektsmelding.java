@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import jakarta.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBElement;
 
 import no.nav.inntektsmelding.xml.kodeliste._2019xxyy.BegrunnelseIngenEllerRedusertUtbetalingKodeliste;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;

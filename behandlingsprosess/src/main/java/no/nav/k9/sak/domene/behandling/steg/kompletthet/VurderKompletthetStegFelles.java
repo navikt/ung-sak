@@ -3,8 +3,8 @@ package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 import static java.util.Collections.singletonList;
 import static no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat.opprettForAksjonspunktMedFrist;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;

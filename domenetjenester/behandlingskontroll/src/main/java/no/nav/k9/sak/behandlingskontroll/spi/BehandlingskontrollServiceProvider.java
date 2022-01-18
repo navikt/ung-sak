@@ -3,9 +3,9 @@ package no.nav.k9.sak.behandlingskontroll.spi;
 import java.util.Objects;
 import java.util.UUID;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingskontrollEventPubliserer;

@@ -1,22 +1,30 @@
 package no.nav.k9.sak.web.server.jetty;
 
+import java.io.File;
 import java.io.IOException;
+import java.security.Security;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.security.auth.message.config.AuthConfigFactory;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+import org.apache.geronimo.components.jaspi.AuthConfigFactoryImpl;
+import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.jaas.JAASLoginService;
 import org.eclipse.jetty.plus.jndi.EnvEntry;
+import org.eclipse.jetty.plus.webapp.EnvConfiguration;
+import org.eclipse.jetty.plus.webapp.PlusConfiguration;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.DefaultIdentityService;
 import org.eclipse.jetty.security.SecurityHandler;
-import org.eclipse.jetty.security.jaspi.DefaultAuthConfigFactory;
 import org.eclipse.jetty.security.jaspi.JaspiAuthenticatorFactory;
-import org.eclipse.jetty.security.jaspi.provider.JaspiAuthConfigProvider;
+import org.eclipse.jetty.server.AbstractNetworkConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -27,18 +35,17 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceCollection;
+import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.MetaData;
+import org.eclipse.jetty.webapp.WebAppConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.webapp.WebInfConfiguration;
+import org.eclipse.jetty.webapp.WebXmlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import jakarta.security.auth.message.config.AuthConfigFactory;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.oidc.OidcApplication;
-import no.nav.k9.felles.sikkerhet.jaspic.OidcAuthModule;
 import no.nav.k9.sak.web.app.ApplicationConfig;
 import no.nav.k9.sak.web.server.jetty.db.DatabaseScript;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceRole;
@@ -48,20 +55,22 @@ import no.nav.k9.sak.web.server.jetty.db.EnvironmentClass;
 public class JettyServer {
 
     /**
-     * Legges først slik at alltid resetter context før prosesserer nye requests.
-     * Kjøres først så ikke risikerer andre har satt
-     * Request#setHandled(true).
+     * @see AbstractNetworkConnector#getHost()
+     * @see org.eclipse.jetty.server.ServerConnector#openAcceptChannel()
      */
-    static final class ResetLogContextHandler extends AbstractHandler {
-        @Override
-        public void handle(String target, Request baseRequest, HttpServletRequest request,
-                HttpServletResponse response) {
-            MDC.clear();
-        }
-    }
-
-    private static final Environment ENV = Environment.current();
-    private static final Logger log = LoggerFactory.getLogger(JettyServer.class);
+    protected static final String SERVER_HOST = "0.0.0.0";
+    /**
+     * nedstrippet sett med Jetty configurations for raskere startup.
+     */
+    protected static final Configuration[] CONFIGURATIONS = new Configuration[]{
+        new WebAppConfiguration(),
+        new WebInfConfiguration(),
+        new WebXmlConfiguration(),
+        new AnnotationConfiguration(),
+        new EnvConfiguration(),
+        new PlusConfiguration(),
+    };
+    static final Logger log = LoggerFactory.getLogger(JettyServer.class);
     private AppKonfigurasjon appKonfigurasjon;
 
     public JettyServer() {
@@ -90,7 +99,7 @@ public class JettyServer {
 
     private void start(AppKonfigurasjon appKonfigurasjon) throws Exception {
         Server server = new Server(appKonfigurasjon.getServerPort());
-        server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[] {}));
+        server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[]{}));
 
         var handlers = new HandlerList(new ResetLogContextHandler(), createContext(appKonfigurasjon));
         server.setHandler(handlers);
@@ -106,31 +115,28 @@ public class JettyServer {
 
     private void konfigurer() throws Exception { // NOSONAR
         konfigurerMiljø();
-        konfigurerSikkerhet();
+
+        File jaspiConf = new File(System.getProperty("conf", "./conf") + "/jaspi-conf.xml"); // NOSONAR
+        konfigurerSikkerhet(jaspiConf);
         konfigurerJndi();
     }
 
-    protected void konfigurerMiljø() {
-    }
+    protected void konfigurerMiljø() {}
 
     private void konfigurerJndi() throws Exception {
-        // må være << antall db connectdions. Summen av runner threads + kall fra ulike
-        // løsninger bør ikke overgå antall conns (vi isåfall kunne
+        // må være << antall db connectdions. Summen av runner threads + kall fra ulike løsninger bør ikke overgå antall conns (vi isåfall kunne
         // medføre connection timeouts)
         System.setProperty("task.manager.runner.threads", "7");
-        new EnvEntry("jdbc/defaultDS",
-                DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, getEnvironmentClass(), 15));
+        new EnvEntry("jdbc/defaultDS", DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, getEnvironmentClass(), 15));
     }
 
-    protected void konfigurerSikkerhet() {
-        var factory = new DefaultAuthConfigFactory();
+    protected void konfigurerSikkerhet(File jaspiConf) {
+        Security.setProperty(AuthConfigFactory.DEFAULT_FACTORY_SECURITY_PROPERTY, AuthConfigFactoryImpl.class.getCanonicalName());
 
-        factory.registerConfigProvider(new JaspiAuthConfigProvider(new OidcAuthModule()),
-                "HttpServlet",
-                "server " + appKonfigurasjon.getContextPath(),
-                "OIDC Authentication");
-
-        AuthConfigFactory.setFactory(factory);
+        if (!jaspiConf.exists()) {
+            throw new IllegalStateException("Missing required file: " + jaspiConf.getAbsolutePath());
+        }
+        System.setProperty("org.apache.geronimo.jaspic.configurationFile", jaspiConf.getAbsolutePath());
 
     }
 
@@ -139,12 +145,10 @@ public class JettyServer {
         String initSql = String.format("SET ROLE \"%s\"", DatasourceUtil.getDbRole("defaultDS", DatasourceRole.ADMIN));
         if (EnvironmentClass.LOCALHOST.equals(environmentClass)) {
             // TODO: Ønsker egentlig ikke dette, men har ikke satt opp skjema lokalt
-            // til å ha en admin bruker som gjør migrering og en annen som gjør CRUD
-            // operasjoner
+            // til å ha en admin bruker som gjør migrering og en annen som gjør CRUD operasjoner
             initSql = null;
         }
-        DataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, environmentClass,
-                1);
+        DataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, environmentClass, 1);
         try {
             DatabaseScript.migrate(migreringDs, initSql);
         } finally {
@@ -163,9 +167,9 @@ public class JettyServer {
     @SuppressWarnings("resource")
     protected List<Connector> createConnectors(AppKonfigurasjon appKonfigurasjon, Server server) {
         List<Connector> connectors = new ArrayList<>();
-        ServerConnector httpConnector = new ServerConnector(server,
-                new HttpConnectionFactory(createHttpConfiguration()));
+        ServerConnector httpConnector = new ServerConnector(server, new HttpConnectionFactory(createHttpConfiguration()));
         httpConnector.setPort(appKonfigurasjon.getServerPort());
+        httpConnector.setHost(SERVER_HOST);
         connectors.add(httpConnector);
 
         return connectors;
@@ -176,8 +180,7 @@ public class JettyServer {
         WebAppContext webAppContext = new WebAppContext();
         webAppContext.setParentLoaderPriority(true);
 
-        // må hoppe litt bukk for å hente web.xml fra classpath i stedet for fra
-        // filsystem.
+        // må hoppe litt bukk for å hente web.xml fra classpath i stedet for fra filsystem.
         String descriptor;
         try (var resource = Resource.newClassPathResource("/WEB-INF/web.xml")) {
             descriptor = resource.getURI().toURL().toExternalForm();
@@ -185,16 +188,15 @@ public class JettyServer {
         webAppContext.setDescriptor(descriptor);
         webAppContext.setBaseResource(createResourceCollection());
         webAppContext.setContextPath(appKonfigurasjon.getContextPath());
+        webAppContext.setConfigurations(CONFIGURATIONS);
 
         webAppContext.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false");
 
         /*
-         * lar jetty scanne flere jars for web resources (eks. WebFilter/WebListener
-         * annotations),
+         * lar jetty scanne flere jars for web resources (eks. WebFilter/WebListener annotations),
          * men bare de som matchr pattern for raskere oppstart
          */
-        webAppContext.setAttribute("org.eclipse.jetty.server.webapp.WebInfIncludeJarPattern",
-                "^.*jersey-.*.jar$|^.*felles-sikkerhet.*.jar$");
+        webAppContext.setAttribute("org.eclipse.jetty.server.webapp.WebInfIncludeJarPattern", "^.*jersey-.*.jar$|^.*-sikkerhet.*.jar$");
         webAppContext.setSecurityHandler(createSecurityHandler());
 
         updateMetaData(webAppContext.getMetaData());
@@ -231,9 +233,9 @@ public class JettyServer {
         List<Class<?>> appClasses = getWebInfClasses();
 
         List<Resource> resources = appClasses.stream()
-                .map(c -> Resource.newResource(c.getProtectionDomain().getCodeSource().getLocation()))
-                .distinct()
-                .collect(Collectors.toList());
+            .map(c -> Resource.newResource(c.getProtectionDomain().getCodeSource().getLocation()))
+            .distinct()
+            .collect(Collectors.toList());
 
         metaData.setWebInfClassesResources(resources);
     }
@@ -245,8 +247,19 @@ public class JettyServer {
     @SuppressWarnings("resource")
     protected ResourceCollection createResourceCollection() {
         return new ResourceCollection(
-                Resource.newClassPathResource("META-INF/resources/webjars/"),
-                Resource.newClassPathResource("/web"));
+            Resource.newClassPathResource("META-INF/resources/webjars/"),
+            Resource.newClassPathResource("/web"));
+    }
+
+    /**
+     * Legges først slik at alltid resetter context før prosesserer nye requests. Kjøres først så ikke risikerer andre har satt
+     * Request#setHandled(true).
+     */
+    static final class ResetLogContextHandler extends AbstractHandler {
+        @Override
+        public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) {
+            MDC.clear();
+        }
     }
 
 }

@@ -1,6 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.filter;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;

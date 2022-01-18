@@ -3,7 +3,7 @@ package no.nav.k9.sak.domene.iay.modell;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import jakarta.persistence.Embeddable;
+import javax.persistence.Embeddable;
 
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;

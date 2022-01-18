@@ -5,7 +5,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-import jakarta.enterprise.inject.Instance;
+import javax.enterprise.inject.Instance;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;

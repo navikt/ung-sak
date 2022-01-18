@@ -3,10 +3,10 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient;
 import java.util.Map;
 import java.util.Optional;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.validation.Validation;
+import javax.validation.Validator;
 
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.AleneOmsorg;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.KroniskSyktBarn;

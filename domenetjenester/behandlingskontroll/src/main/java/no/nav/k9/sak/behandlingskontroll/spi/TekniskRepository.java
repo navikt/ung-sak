@@ -1,6 +1,6 @@
 package no.nav.k9.sak.behandlingskontroll.spi;
 
-import jakarta.persistence.EntityManager;
+import javax.persistence.EntityManager;
 
 import no.nav.k9.felles.jpa.savepoint.RunWithSavepoint;
 import no.nav.k9.felles.jpa.savepoint.Work;

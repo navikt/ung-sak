@@ -1,9 +1,9 @@
 package no.nav.k9.sak.web.server.abac;
 
-import jakarta.annotation.Priority;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Alternative;
-import jakarta.interceptor.Interceptor;
+import javax.annotation.Priority;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Alternative;
+import javax.interceptor.Interceptor;
 
 import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.felles.log.sporingslogg.Sporingsdata;

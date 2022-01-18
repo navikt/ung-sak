@@ -1,6 +1,6 @@
 package no.nav.k9.sak.behandling.revurdering.ytelse;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 

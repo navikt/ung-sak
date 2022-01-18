@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import jakarta.enterprise.context.RequestScoped;
+import javax.enterprise.context.RequestScoped;
 
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 

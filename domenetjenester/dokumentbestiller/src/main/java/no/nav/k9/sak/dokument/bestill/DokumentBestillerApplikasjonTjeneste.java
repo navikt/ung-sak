@@ -4,8 +4,8 @@ import static no.nav.k9.sak.dokument.bestill.vedtak.VedtaksbrevUtleder.velgDokum
 
 import java.util.List;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;

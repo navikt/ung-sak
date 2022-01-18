@@ -1,6 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
-import jakarta.persistence.AttributeConverter;
+import javax.persistence.AttributeConverter;
 
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 

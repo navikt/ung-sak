@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.medlem;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class FrivilligEllerPliktigMedlemTjeneste {

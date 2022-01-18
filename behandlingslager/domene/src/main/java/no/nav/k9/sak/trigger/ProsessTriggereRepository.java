@@ -6,9 +6,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;

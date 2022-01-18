@@ -1,6 +1,6 @@
 package no.nav.k9.sak.historikk;
 
-import jakarta.persistence.EntityManager;
+import javax.persistence.EntityManager;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;

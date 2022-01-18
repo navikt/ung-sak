@@ -3,8 +3,8 @@ package no.nav.k9.sak.dokument.bestill.kafka;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;

@@ -11,8 +11,8 @@ import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.uttak.AvklarÅrskvantumDokDto;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarÅrskvantumDokDto.class, adapter = AksjonspunktOppdaterer.class)

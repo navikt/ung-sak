@@ -2,7 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 

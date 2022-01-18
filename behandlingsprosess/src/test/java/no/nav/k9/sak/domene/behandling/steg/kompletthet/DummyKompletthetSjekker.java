@@ -2,7 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;

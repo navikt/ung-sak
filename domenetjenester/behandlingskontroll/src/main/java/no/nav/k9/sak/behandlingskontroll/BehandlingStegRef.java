@@ -14,12 +14,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.Stereotype;
-import jakarta.enterprise.inject.spi.CDI;
-import jakarta.enterprise.util.AnnotationLiteral;
-import jakarta.inject.Qualifier;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Stereotype;
+import javax.enterprise.inject.spi.CDI;
+import javax.enterprise.util.AnnotationLiteral;
+import javax.inject.Qualifier;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -54,7 +54,7 @@ public @interface BehandlingStegRef {
      * AnnotationLiteral som kan brukes i CDI søk.
      * <p>
      * Eks. for bruk i:<br>
-     * {@link CDI#current#select(jakarta.enterprise.util.TypeLiteral, java.lang.annotation.Annotation...)}.
+     * {@link CDI#current#select(javax.enterprise.util.TypeLiteral, java.lang.annotation.Annotation...)}.
      */
     public static class BehandlingStegRefLiteral extends AnnotationLiteral<BehandlingStegRef> implements BehandlingStegRef {
 

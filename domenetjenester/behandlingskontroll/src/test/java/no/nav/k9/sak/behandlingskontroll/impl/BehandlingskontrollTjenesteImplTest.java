@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

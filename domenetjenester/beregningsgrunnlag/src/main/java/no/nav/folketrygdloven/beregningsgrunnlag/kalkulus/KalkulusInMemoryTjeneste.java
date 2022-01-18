@@ -14,8 +14,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.inject.Alternative;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.inject.Alternative;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;

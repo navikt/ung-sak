@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;

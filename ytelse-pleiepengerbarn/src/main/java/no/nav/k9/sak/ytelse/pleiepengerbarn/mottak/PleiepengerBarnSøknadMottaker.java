@@ -2,8 +2,8 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
 import java.time.LocalDate;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;

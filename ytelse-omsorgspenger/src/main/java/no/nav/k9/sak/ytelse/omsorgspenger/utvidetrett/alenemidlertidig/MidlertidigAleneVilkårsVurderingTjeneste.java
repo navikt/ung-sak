@@ -7,8 +7,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.vilkår.VilkårType;

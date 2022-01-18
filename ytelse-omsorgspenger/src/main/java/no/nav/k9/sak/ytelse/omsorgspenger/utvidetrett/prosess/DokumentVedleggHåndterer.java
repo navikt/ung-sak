@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import no.nav.k9.felles.integrasjon.saf.DokumentInfoResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.DokumentvariantResponseProjection;

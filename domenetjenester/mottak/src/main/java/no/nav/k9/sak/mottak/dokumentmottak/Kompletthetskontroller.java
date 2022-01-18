@@ -2,8 +2,8 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.util.Set;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;

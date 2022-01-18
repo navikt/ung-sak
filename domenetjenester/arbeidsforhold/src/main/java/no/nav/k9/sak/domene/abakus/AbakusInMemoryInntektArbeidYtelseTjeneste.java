@@ -17,8 +17,8 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.inject.Alternative;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.inject.Alternative;
 
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.felles.util.Tuple;

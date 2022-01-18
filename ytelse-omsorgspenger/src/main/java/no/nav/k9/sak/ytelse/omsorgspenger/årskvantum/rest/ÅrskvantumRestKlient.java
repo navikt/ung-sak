@@ -8,12 +8,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Default;
-import jakarta.inject.Inject;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.ws.rs.core.HttpHeaders;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.ws.rs.core.HttpHeaders;
 
 import no.nav.k9.aarskvantum.kontrakter.*;
 import no.nav.k9.sak.typer.PersonIdent;

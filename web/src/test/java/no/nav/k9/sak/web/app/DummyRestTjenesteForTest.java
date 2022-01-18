@@ -1,10 +1,10 @@
 package no.nav.k9.sak.web.app;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.OPTIONS;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Response;
+import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
 
 import io.swagger.v3.oas.annotations.Operation;
 

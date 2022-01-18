@@ -1,7 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

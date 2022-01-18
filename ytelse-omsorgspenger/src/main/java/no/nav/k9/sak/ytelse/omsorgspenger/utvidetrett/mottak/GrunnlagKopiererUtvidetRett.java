@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.mottak;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;

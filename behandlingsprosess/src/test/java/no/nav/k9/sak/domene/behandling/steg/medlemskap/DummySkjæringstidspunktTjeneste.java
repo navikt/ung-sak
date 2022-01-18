@@ -2,7 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.medlemskap;
 
 import java.time.LocalDate;
 import java.util.Optional;
-import jakarta.enterprise.context.RequestScoped;
+import javax.enterprise.context.RequestScoped;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;

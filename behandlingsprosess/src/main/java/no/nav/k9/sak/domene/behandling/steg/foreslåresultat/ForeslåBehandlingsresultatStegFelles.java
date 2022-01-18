@@ -6,8 +6,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;

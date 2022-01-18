@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.geografisk.Landkoder;

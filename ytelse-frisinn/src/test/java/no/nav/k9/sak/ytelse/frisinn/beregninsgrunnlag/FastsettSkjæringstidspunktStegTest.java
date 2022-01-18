@@ -2,9 +2,9 @@ package no.nav.k9.sak.ytelse.frisinn.beregninsgrunnlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

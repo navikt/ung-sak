@@ -1,6 +1,6 @@
 package no.nav.k9.sak.kontrakt.sykdom.dokument;
 
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;

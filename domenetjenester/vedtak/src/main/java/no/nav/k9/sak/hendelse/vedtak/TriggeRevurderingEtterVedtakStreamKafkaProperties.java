@@ -1,7 +1,7 @@
 package no.nav.k9.sak.hendelse.vedtak;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import org.apache.kafka.common.serialization.Serdes;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;

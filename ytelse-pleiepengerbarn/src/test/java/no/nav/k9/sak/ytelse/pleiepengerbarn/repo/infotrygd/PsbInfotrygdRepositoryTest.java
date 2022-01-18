@@ -2,7 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

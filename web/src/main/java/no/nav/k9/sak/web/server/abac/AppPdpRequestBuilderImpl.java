@@ -12,10 +12,10 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import jakarta.annotation.Priority;
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Alternative;
-import jakarta.inject.Inject;
+import javax.annotation.Priority;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Alternative;
+import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;

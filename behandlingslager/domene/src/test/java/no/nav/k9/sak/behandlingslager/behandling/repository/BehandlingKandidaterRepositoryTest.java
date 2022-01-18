@@ -2,8 +2,8 @@ package no.nav.k9.sak.behandlingslager.behandling.repository;
 
 import java.time.LocalDateTime;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.assertj.core.api.Assertions;
 

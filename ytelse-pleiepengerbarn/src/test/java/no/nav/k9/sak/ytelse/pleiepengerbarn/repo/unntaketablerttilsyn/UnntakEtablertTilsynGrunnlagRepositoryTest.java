@@ -8,7 +8,7 @@ import no.nav.k9.sak.typer.AktørId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
 

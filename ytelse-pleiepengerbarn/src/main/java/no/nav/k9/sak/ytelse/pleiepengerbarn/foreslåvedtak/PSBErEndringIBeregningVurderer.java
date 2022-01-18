@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;

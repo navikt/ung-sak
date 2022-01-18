@@ -17,8 +17,8 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;

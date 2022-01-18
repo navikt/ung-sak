@@ -4,8 +4,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
 

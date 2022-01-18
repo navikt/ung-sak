@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.Dependent;
+import javax.enterprise.context.Dependent;
 
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.søknad.JsonUtils;

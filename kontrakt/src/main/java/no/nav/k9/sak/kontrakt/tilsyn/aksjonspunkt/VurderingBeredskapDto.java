@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.*;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
+import javax.validation.Valid;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

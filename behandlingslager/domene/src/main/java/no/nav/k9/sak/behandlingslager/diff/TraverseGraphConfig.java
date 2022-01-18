@@ -24,7 +24,7 @@ import java.util.function.Function;
 
 import org.threeten.extra.Interval;
 
-import java.lang.reflect.Modifier;
+import javassist.Modifier;
 
 public class TraverseGraphConfig {
 

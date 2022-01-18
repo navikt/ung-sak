@@ -1,9 +1,9 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.dokument.Brevkode;
 

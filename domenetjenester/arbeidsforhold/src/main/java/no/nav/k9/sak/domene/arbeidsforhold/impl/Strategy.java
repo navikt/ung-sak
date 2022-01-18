@@ -7,7 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import jakarta.inject.Qualifier;
+import javax.inject.Qualifier;
 
 @Qualifier
 @Inherited

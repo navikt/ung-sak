@@ -3,9 +3,9 @@ package no.nav.k9.sak.kontrakt.sykdom.dokument;
 import java.util.Objects;
 import java.util.UUID;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotNull;
+import javax.validation.Valid;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;

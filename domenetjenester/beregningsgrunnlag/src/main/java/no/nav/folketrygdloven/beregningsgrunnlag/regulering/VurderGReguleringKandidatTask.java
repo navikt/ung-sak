@@ -2,8 +2,8 @@ package no.nav.folketrygdloven.beregningsgrunnlag.regulering;
 
 import java.time.LocalDate;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -5,8 +5,8 @@ import static no.nav.k9.sak.domene.vedtak.midlertidig.PublisereHistoriskeVedtakH
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;

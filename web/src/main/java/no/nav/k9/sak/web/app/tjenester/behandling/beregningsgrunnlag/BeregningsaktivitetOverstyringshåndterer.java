@@ -1,7 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;

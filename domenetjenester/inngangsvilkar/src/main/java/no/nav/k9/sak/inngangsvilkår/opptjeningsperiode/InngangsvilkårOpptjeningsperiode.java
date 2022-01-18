@@ -3,8 +3,8 @@ package no.nav.k9.sak.inngangsvilkår.opptjeningsperiode;
 import java.util.Collection;
 import java.util.NavigableMap;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.VilkårTypeKoder;
 import no.nav.k9.sak.behandling.BehandlingReferanse;

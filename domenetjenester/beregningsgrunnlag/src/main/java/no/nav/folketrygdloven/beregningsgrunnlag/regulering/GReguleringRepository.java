@@ -3,10 +3,10 @@ package no.nav.folketrygdloven.beregningsgrunnlag.regulering;
 import java.math.BigInteger;
 import java.util.Objects;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;

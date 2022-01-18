@@ -10,9 +10,9 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

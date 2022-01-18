@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.beregning.adapter;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagUtil;
 import no.nav.fpsak.tidsserie.LocalDateInterval;

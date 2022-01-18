@@ -13,8 +13,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -3,8 +3,8 @@ package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.vilkår;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;

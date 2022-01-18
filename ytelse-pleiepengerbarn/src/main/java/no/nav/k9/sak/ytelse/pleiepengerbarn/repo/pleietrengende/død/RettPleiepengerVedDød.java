@@ -3,7 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død;
 import no.nav.k9.kodeverk.uttak.RettVedDødType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity(name = "RettVedPleietrengendeDød")

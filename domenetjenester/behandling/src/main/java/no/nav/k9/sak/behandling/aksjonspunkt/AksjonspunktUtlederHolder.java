@@ -1,8 +1,8 @@
 package no.nav.k9.sak.behandling.aksjonspunkt;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.spi.CDI;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.CDI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

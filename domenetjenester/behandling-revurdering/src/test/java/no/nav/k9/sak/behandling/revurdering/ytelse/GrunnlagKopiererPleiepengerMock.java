@@ -1,7 +1,7 @@
 package no.nav.k9.sak.behandling.revurdering.ytelse;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.inject.Alternative;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.inject.Alternative;
 
 import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;

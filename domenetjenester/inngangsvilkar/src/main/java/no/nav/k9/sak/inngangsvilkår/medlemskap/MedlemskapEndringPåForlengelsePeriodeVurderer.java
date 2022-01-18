@@ -2,8 +2,8 @@ package no.nav.k9.sak.inngangsvilkår.medlemskap;
 
 import java.util.Set;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.vilkår.VilkårTypeKoder;

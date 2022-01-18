@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandling.BehandlingReferanse;

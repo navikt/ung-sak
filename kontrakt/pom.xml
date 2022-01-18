@@ -10,21 +10,20 @@
         <version>${revision}${sha1}${changelist}</version>
     </parent>
 
-    <artifactId>kontrakt-jakarta</artifactId>
+    <artifactId>kontrakt</artifactId>
     <packaging>jar</packaging>
     <name>K9SAK :: Kontrakter</name>
     <description>Kontrakter for tjenester eksponert / topics publisert av K9SAK</description>
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
-        <legacy.artifactId>kontrakt</legacy.artifactId>
     </properties>
 
     <dependencies>
 
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
-            <artifactId>kodeverk-jakarta</artifactId>
+            <artifactId>kodeverk</artifactId>
         </dependency>
 
 
@@ -32,9 +31,7 @@
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>jakarta.el</artifactId>

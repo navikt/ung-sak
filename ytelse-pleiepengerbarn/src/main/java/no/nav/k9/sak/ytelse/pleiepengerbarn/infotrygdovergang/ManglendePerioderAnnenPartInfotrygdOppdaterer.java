@@ -2,8 +2,8 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang;
 
 import java.util.Arrays;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.konfigurasjon.env.Environment;

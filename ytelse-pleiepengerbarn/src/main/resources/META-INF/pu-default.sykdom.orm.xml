@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
-        version="3.0">
+<entity-mappings xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm
+      http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd" version="2.1">
 
     <sequence-generator name="SEQ_SYKDOM_PERSON" allocation-size="5" sequence-name="SEQ_SYKDOM_PERSON" />
     <sequence-generator name="SEQ_SYKDOM_VURDERINGER" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERINGER" />
@@ -23,8 +22,8 @@
     <sequence-generator name="SEQ_SYKDOM_GRUNNLAG_INNLEGGELSE" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG_INNLEGGELSE" />
     <sequence-generator name="SEQ_SYKDOM_DIAGNOSEKODER" allocation-size="5" sequence-name="SEQ_SYKDOM_DIAGNOSEKODER" />
     <sequence-generator name="SEQ_SYKDOM_DIAGNOSEKODE" allocation-size="5" sequence-name="SEQ_SYKDOM_DIAGNOSEKODE" />
-    <sequence-generator name="SEQ_SYKDOM_GRUNNLAG_DIAGNOSEKODER" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG_DIAGNOSEKODER" />
-
+    <sequence-generator name="SEQ_SYKDOM_GRUNNLAG_DIAGNOSEKODER" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG_DIAGNOSEKODER" />   
+    
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderinger" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering" />

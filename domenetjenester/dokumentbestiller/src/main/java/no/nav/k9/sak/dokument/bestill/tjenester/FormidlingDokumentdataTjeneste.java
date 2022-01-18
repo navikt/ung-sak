@@ -1,8 +1,8 @@
 package no.nav.k9.sak.dokument.bestill.tjenester;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Default;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.bestill.klient.FormidlingDokumentdataKlient;

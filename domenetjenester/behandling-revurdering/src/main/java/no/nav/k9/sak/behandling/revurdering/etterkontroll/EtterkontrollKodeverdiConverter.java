@@ -1,7 +1,7 @@
 package no.nav.k9.sak.behandling.revurdering.etterkontroll;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 @Converter(autoApply = true)
 public class EtterkontrollKodeverdiConverter implements AttributeConverter<KontrollType, String> {

@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.ws.rs.core.Response;
+import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

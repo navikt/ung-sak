@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
+import javax.validation.Valid;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)

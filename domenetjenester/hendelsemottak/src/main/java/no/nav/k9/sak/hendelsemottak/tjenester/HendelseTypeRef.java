@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.util.AnnotationLiteral;
-import jakarta.inject.Qualifier;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.util.AnnotationLiteral;
+import javax.inject.Qualifier;
 
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 

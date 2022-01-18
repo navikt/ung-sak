@@ -2,7 +2,7 @@ package no.nav.k9.sak.domene.registerinnhenting;
 
 import java.util.Set;
 
-import jakarta.enterprise.inject.Instance;
+import javax.enterprise.inject.Instance;
 
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;

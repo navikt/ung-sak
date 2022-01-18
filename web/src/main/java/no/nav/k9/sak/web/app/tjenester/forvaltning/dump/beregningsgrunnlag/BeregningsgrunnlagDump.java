@@ -6,10 +6,10 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Tuple;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.Tuple;
 import java.util.List;
 
 @ApplicationScoped

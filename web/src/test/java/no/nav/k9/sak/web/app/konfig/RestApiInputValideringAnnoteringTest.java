@@ -8,8 +8,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.validation.Valid;
-import jakarta.ws.rs.core.Context;
+import javax.validation.Valid;
+import javax.ws.rs.core.Context;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

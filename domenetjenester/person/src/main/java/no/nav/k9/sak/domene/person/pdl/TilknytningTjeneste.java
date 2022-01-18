@@ -8,8 +8,8 @@ import static no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering.UGRAD
 
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;

@@ -14,8 +14,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.spi.CDI;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.CDI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

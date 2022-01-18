@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.medlem.impl;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.RegisterdataDiffsjekker;

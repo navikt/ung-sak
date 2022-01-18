@@ -5,8 +5,8 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.Optional;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;

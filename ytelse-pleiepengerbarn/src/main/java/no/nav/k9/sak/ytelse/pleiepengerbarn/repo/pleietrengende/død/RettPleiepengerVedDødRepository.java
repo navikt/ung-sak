@@ -2,10 +2,10 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død;
 
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.util.Objects;
 import java.util.Optional;
 

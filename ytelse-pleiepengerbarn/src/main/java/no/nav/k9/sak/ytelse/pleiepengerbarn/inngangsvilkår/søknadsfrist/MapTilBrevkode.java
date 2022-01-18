@@ -1,6 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist;
 
-import jakarta.enterprise.inject.Instance;
+import javax.enterprise.inject.Instance;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;

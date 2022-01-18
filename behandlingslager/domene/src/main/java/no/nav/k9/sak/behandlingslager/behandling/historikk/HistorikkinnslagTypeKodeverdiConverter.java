@@ -1,7 +1,7 @@
 package no.nav.k9.sak.behandlingslager.behandling.historikk;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 

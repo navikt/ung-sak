@@ -1,6 +1,6 @@
 package no.nav.k9.sak.web.app.oppgave;
 
-import jakarta.ws.rs.ApplicationPath;
+import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;
 

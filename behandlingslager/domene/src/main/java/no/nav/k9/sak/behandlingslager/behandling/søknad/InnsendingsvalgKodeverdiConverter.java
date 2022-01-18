@@ -1,7 +1,7 @@
 package no.nav.k9.sak.behandlingslager.behandling.søknad;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 @Converter(autoApply = true)
 public class InnsendingsvalgKodeverdiConverter implements AttributeConverter<Innsendingsvalg, String> {

@@ -1,7 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;

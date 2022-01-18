@@ -2,7 +2,7 @@ package no.nav.k9.sak.perioder;
 
 import java.util.NavigableSet;
 
-import jakarta.enterprise.inject.Instance;
+import javax.enterprise.inject.Instance;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;

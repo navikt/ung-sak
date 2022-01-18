@@ -1,6 +1,6 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 
-import jakarta.validation.constraints.NotNull;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;

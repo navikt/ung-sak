@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.inject.Alternative;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.inject.Alternative;
 
 import no.nav.k9.aarskvantum.kontrakter.*;
 import no.nav.k9.sak.kontrakt.uttak.Periode;

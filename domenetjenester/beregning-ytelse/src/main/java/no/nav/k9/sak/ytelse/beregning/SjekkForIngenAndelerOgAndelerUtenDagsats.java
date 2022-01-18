@@ -1,6 +1,6 @@
 package no.nav.k9.sak.ytelse.beregning;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 

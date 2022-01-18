@@ -9,8 +9,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Objects;
 
-import jakarta.enterprise.util.AnnotationLiteral;
-import jakarta.inject.Qualifier;
+import javax.enterprise.util.AnnotationLiteral;
+import javax.inject.Qualifier;
 
 /**
  * Marker type som implementerer interface {@link Dokumentmottaker}.

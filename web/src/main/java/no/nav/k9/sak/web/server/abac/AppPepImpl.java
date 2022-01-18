@@ -1,10 +1,10 @@
 package no.nav.k9.sak.web.server.abac;
 
-import jakarta.annotation.Priority;
-import jakarta.enterprise.inject.Alternative;
-import jakarta.enterprise.inject.Default;
-import jakarta.inject.Inject;
-import jakarta.interceptor.Interceptor;
+import javax.annotation.Priority;
+import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
+import javax.interceptor.Interceptor;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.AbacSporingslogg;

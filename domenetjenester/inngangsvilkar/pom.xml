@@ -57,7 +57,7 @@
         </dependency>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-core-jakarta</artifactId>
+            <artifactId>swagger-core</artifactId>
             <scope>provided</scope>
         </dependency>
 

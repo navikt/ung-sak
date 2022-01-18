@@ -3,8 +3,8 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.medisinsk;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;

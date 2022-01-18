@@ -2,7 +2,7 @@ package no.nav.k9.sak.kontrakt.ytelser;
 
 import java.time.LocalDate;
 
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;

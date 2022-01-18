@@ -3,10 +3,10 @@ package no.nav.k9.sak.web.server.batch;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 

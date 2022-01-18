@@ -6,10 +6,10 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.validation.Validation;
+import javax.validation.Validator;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

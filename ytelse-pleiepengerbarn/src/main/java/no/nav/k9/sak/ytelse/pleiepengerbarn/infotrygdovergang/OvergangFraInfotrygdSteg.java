@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;

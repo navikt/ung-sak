@@ -2,8 +2,8 @@ package no.nav.k9.sak.ytelse.beregning;
 
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 

@@ -3,10 +3,10 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak;
 import java.util.Objects;
 import java.util.Optional;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 

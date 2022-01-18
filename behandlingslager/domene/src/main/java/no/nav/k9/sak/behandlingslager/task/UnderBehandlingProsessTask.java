@@ -1,6 +1,6 @@
 package no.nav.k9.sak.behandlingslager.task;
 
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;

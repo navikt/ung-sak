@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.annotation.Priority;
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Alternative;
-import jakarta.interceptor.Interceptor;
+import javax.annotation.Priority;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Alternative;
+import javax.interceptor.Interceptor;
 
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
 import no.nav.k9.felles.sikkerhet.pdp.XacmlRequestBuilderTjeneste;
