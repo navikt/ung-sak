@@ -123,6 +123,7 @@ public class BehandlingskontrollEventObserver {
             .medBehandlingResultat(behandling.getBehandlingResultatType())
             .medAksjonspunktKoderMedStatusListe(aksjonspunktKoderMedStatusListe)
             .medAnsvarligSaksbehandlerForTotrinn(behandling.getAnsvarligSaksbehandler())
+            .medBehandlendeEnhet(behandling.getBehandlendeEnhet())
             .medFagsakPeriode(fagsak.getPeriode().tilPeriode())
             .medPleietrengendeAktørId(fagsak.getPleietrengendeAktørId())
             .medRelatertPartAktørId(fagsak.getRelatertPersonAktørId())
