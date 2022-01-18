@@ -229,6 +229,8 @@ spec:
       value: "true"
     - name: K9_RAPID_AIVEN
       value: "false"
+    - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
