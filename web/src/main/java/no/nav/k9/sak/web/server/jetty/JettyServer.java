@@ -127,7 +127,7 @@ public class JettyServer {
 
         factory.registerConfigProvider(new JaspiAuthConfigProvider(new OidcAuthModule()),
                 "HttpServlet",
-                "server /k9/sak",
+                "server " + appKonfigurasjon.getContextPath(),
                 "OIDC Authentication");
 
         AuthConfigFactory.setFactory(factory);
