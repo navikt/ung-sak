@@ -1,34 +1,43 @@
-name: Create or update Kafka topics
+name: Create or update kafka topic
 
 on:
-  push:
-    paths:
-      - 'deploy/topics.yml'
-      - 'deploy/topics-q.yml'
+  workflow_dispatch:
+    inputs:
+      topic:
+        type: choice
+        description: Choose topic to deploy
+        required: true
+        options:
+          - topic-aksjonspunkthendelse.yml
+          - topic-formidling-dd-feil.yml
+          - topic-infotrygdfeedhendelse.yml
+          - topic-stonadsstatistikk.yml
+          - topic-vedtakhendelse.yml
+      prod:
+        type: boolean
+        description: Deploy to prod
+        required: true
 
 jobs:
-  deploy-kafka-topics-dev:
-    name: Deploy to Aiven Dev
-    if: startsWith(github.ref, 'refs/heads/master')
+  deploy-kafka-topics:
+    name: Deploy ${{ github.event.inputs.topic }} to Aiven Dev
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: actions/checkout@v2
+
+      - name: Deploy to Dev
+        uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: dev-gcp
           VAR: kafka-pool=nav-dev
-          RESOURCE: deploy/topics-q.yml
+          RESOURCE: deploy/kafka/${{ github.event.inputs.topic }}
 
-  deploy-kafka-topics-prod:
-    name: Deploy to Aiven Prod
-    if: startsWith(github.ref, 'refs/heads/master')  # If the branch is master
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2.3.4
-      - uses: nais/deploy/actions/deploy@v1
+      - name: Deploy to Prod
+        if: ${{ github.event.inputs.prod == 'true' }}
+        uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: prod-gcp
           VAR: kafka-pool=nav-prod
-          RESOURCE: deploy/topics.yml
+          RESOURCE: deploy/kafka/${{ github.event.inputs.topic }}
