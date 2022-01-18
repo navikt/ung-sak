@@ -32,7 +32,8 @@ public class BeregningsgrunnlagOppdateringTjeneste {
         this.vilkårTjeneste = vilkårTjeneste;
     }
 
-    public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregning(Map<LocalDate, HåndterBeregningDto> stpTilDtoMap, BehandlingReferanse ref) {
+    public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregning(Map<LocalDate, HåndterBeregningDto> stpTilDtoMap,
+                                                                      BehandlingReferanse ref) {
         // Sjekker at vi ikke oppaterer grunnlag som ikke er til vurdering
         validerOppdatering(stpTilDtoMap, ref);
 

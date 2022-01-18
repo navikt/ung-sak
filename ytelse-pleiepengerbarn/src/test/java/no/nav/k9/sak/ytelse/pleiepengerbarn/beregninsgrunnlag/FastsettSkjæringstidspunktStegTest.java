@@ -18,7 +18,7 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-public class FastsettBeregningsaktiviteterStegTest {
+public class FastsettSkjæringstidspunktStegTest {
 
     @Inject
     private @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> instances;

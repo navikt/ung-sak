@@ -24,19 +24,19 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 import no.nav.folketrygdloven.kalkulus.mappers.JsonMapper;
+import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.FortsettBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListeForGUIRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.StartBeregningListeRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
+import no.nav.folketrygdloven.kalkulus.response.v1.KopiResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
-import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
@@ -59,6 +59,7 @@ public class KalkulusRestKlient {
     private final ObjectMapper kalkulusMapper = JsonMapper.getMapper();
     private final ObjectWriter kalkulusJsonWriter = kalkulusMapper.writerWithDefaultPrettyPrinter();
     private final ObjectReader tilstandReader = kalkulusMapper.readerFor(TilstandListeResponse.class);
+    private final ObjectReader kopierReader = kalkulusMapper.readerFor(new TypeReference<List<KopiResponse>>() {});
     private final ObjectReader oppdaterListeReader = kalkulusMapper.readerFor(OppdateringListeRespons.class);
     private final ObjectReader dtoListeReader = kalkulusMapper.readerFor(BeregningsgrunnlagListe.class);
     private final ObjectReader behovForGreguleringReader = kalkulusMapper.readerFor(GrunnbeløpReguleringRespons.class);
@@ -68,8 +69,8 @@ public class KalkulusRestKlient {
 
     private CloseableHttpClient restClient;
     private URI kalkulusEndpoint;
-    private URI startEndpoint;
-    private URI fortsettEndpoint;
+    private URI kopierEndpoint;
+    private URI beregnEndpoint;
     private URI oppdaterListeEndpoint;
     private URI beregningsgrunnlagListeDtoEndpoint;
 
@@ -101,8 +102,8 @@ public class KalkulusRestKlient {
 
     private KalkulusRestKlient(URI endpoint) {
         this.kalkulusEndpoint = endpoint;
-        this.startEndpoint = toUri("/api/kalkulus/v1/start/bolk");
-        this.fortsettEndpoint = toUri("/api/kalkulus/v1/fortsett/bolk");
+        this.beregnEndpoint = toUri("/api/kalkulus/v1/beregn/bolk");
+        this.kopierEndpoint = toUri("/api/kalkulus/v1/kopier/bolk");
         this.deaktiverBeregningsgrunnlag = toUri("/api/kalkulus/v1/deaktiver/bolk");
         this.oppdaterListeEndpoint = toUri("/api/kalkulus/v1/oppdaterListe");
         this.beregningsgrunnlagListeDtoEndpoint = toUri("/api/kalkulus/v1/beregningsgrunnlagListe");
@@ -112,23 +113,22 @@ public class KalkulusRestKlient {
         this.migrerAksjonspunkter = toUri("/api/kalkulus/v1/migrerAksjonspunkter");
     }
 
-    public List<TilstandResponse> startBeregning(StartBeregningListeRequest request) {
-        var endpoint = startEndpoint;
+
+    public TilstandListeResponse beregn(BeregnListeRequest request) {
+        var endpoint = beregnEndpoint;
 
         try {
-            String json = kalkulusJsonWriter.writeValueAsString(request);
-            TilstandListeResponse response = getResponse(endpoint, json, tilstandReader);
-            return response.getTilstand();
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), tilstandReader);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
 
-    public TilstandListeResponse fortsettBeregning(FortsettBeregningListeRequest request) {
-        var endpoint = fortsettEndpoint;
+    public List<KopiResponse> kopierBeregning(KopierBeregningListeRequest request) {
+        var endpoint = kopierEndpoint;
 
         try {
-            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), tilstandReader);
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), kopierReader);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
