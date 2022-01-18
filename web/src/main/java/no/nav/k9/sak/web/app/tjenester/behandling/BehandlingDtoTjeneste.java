@@ -379,6 +379,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(SykdomRestTjeneste.SYKDOM_AKSJONSPUNKT_PATH, "sykdom-aksjonspunkt", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_KTP_PATH, "sykdom-vurdering-oversikt-ktp", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_TOO_PATH, "sykdom-vurdering-oversikt-too", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_SLU_PATH, "sykdom-vurdering-oversikt-slu", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-direkte", uuidQueryParams));
                 dto.leggTil(post(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-opprettelse", new SykdomVurderingOpprettelseDto(behandling.getUuid().toString())));
                 dto.leggTil(post(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-endring", new SykdomVurderingEndringDto(behandling.getUuid().toString())));

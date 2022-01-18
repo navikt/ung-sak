@@ -47,7 +47,6 @@ import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingEndringResultatDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingIdDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingOpprettelseDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingOversikt;
-import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingMapper.Sporingsinformasjon;
@@ -79,8 +78,10 @@ public class SykdomVurderingRestTjeneste {
     public static final String VURDERING_VERSJON_PATH = BASE_PATH + VURDERING_VERSJON;
     private static final String VURDERING_OVERSIKT_KTP = "/oversikt/KONTINUERLIG_TILSYN_OG_PLEIE";
     private static final String VURDERING_OVERSIKT_TOO = "/oversikt/TO_OMSORGSPERSONER";
+    private static final String VURDERING_OVERSIKT_SLU = "/oversikt/I_LIVETS_SLUTT";
     public static final String VURDERING_OVERSIKT_KTP_PATH = BASE_PATH + VURDERING_OVERSIKT_KTP;
     public static final String VURDERING_OVERSIKT_TOO_PATH = BASE_PATH + VURDERING_OVERSIKT_TOO;
+    public static final String VURDERING_OVERSIKT_SLU_PATH = BASE_PATH + VURDERING_OVERSIKT_SLU;
 
     private BehandlingRepository behandlingRepository;
     private SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper = new SykdomVurderingOversiktMapper();
@@ -156,6 +157,31 @@ public class SykdomVurderingRestTjeneste {
     }
 
     @GET
+    @Path(VURDERING_OVERSIKT_SLU)
+    @Operation(description = "En oversikt over sykdomsvurderinger for i livets sluttfase",
+        summary = "En oversikt over sykdomsvurderinger for i livets sluttfase",
+        tags = "sykdom",
+        responses = {
+            @ApiResponse(responseCode = "200",
+                description = "",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = SykdomVurderingOversikt.class)))
+        })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public SykdomVurderingOversikt hentSykdomsoversiktForILivetsSluttase(
+        @NotNull @QueryParam(BehandlingUuidDto.NAME)
+        @Parameter(description = BehandlingUuidDto.DESC)
+        @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            BehandlingUuidDto behandlingUuid) {
+
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
+        final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForILivetsSluttfase(behandling);
+        final LocalDate pleietrengendesFødselsdato = sykdomVurderingService.finnPleietrengendesFødselsdato(behandling);
+
+        return sykdomVurderingOversiktMapper.map(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato);
+    }
+
+    @GET
     @Operation(description = "Henter informasjon om én gitt vurdering.",
         summary = "En gitt vurdering angitt med ID.",
         tags = "sykdom",
@@ -195,12 +221,13 @@ public class SykdomVurderingRestTjeneste {
         }
 
         // TODO: Bedre løsning:
-        final SykdomVurderingerOgPerioder sykdomUtlededePerioder;
-        if (versjoner.get(0).getSykdomVurdering().getType() == SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE) {
-            sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
-        } else {
-            sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForToOmsorgspersoner(behandling);
-        }
+        var sykdomVurderingType = versjoner.get(0).getSykdomVurdering().getType();
+        final SykdomVurderingerOgPerioder sykdomUtlededePerioder = switch (sykdomVurderingType) {
+            case KONTINUERLIG_TILSYN_OG_PLEIE -> sykdomVurderingService.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
+            case TO_OMSORGSPERSONER -> sykdomVurderingService.hentVurderingerForToOmsorgspersoner(behandling);
+            case LIVETS_SLUTTFASE -> sykdomVurderingService.hentVurderingerForILivetsSluttfase(behandling);
+            default -> throw new IllegalArgumentException("Sykdomvurderingstype ikke støttet for " + sykdomVurderingType);
+        };
 
         return sykdomVurderingMapper.map(behandling.getFagsak().getAktørId(), behandling.getUuid(), versjoner, alleDokumenter, sykdomUtlededePerioder);
     }

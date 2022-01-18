@@ -110,6 +110,10 @@ public class SykdomVurderingService {
         return utledPerioder(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);
     }
 
+    public SykdomVurderingerOgPerioder hentVurderingerForILivetsSluttfase(Behandling behandling) {
+        return utledPerioder(SykdomVurderingType.LIVETS_SLUTTFASE, behandling);
+    }
+
     private LocalDateTimeline<Boolean> hentInnleggelseUnder18årTidslinje(Behandling behandling) {
         final var innleggelser = hentInnleggelser(behandling);
 
