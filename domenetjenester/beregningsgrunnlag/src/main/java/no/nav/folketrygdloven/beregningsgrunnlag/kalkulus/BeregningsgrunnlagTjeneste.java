@@ -94,7 +94,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         var skjæringstidspunkter = vilkårsperioder.stream()
             .map(DatoIntervallEntitet::getFomDato)
             .collect(Collectors.toCollection(TreeSet::new));
-        var bgReferanser = hentReferanserTjeneste.finnBeregningsgrunnlagsReferanseFor(referanse.getBehandlingId(), skjæringstidspunkter, true, BehandlingType.REVURDERING.equals(referanse.getBehandlingType()));
+        var bgReferanser = hentReferanserTjeneste.finnBeregningsgrunnlagsReferanseFor(referanse.getBehandlingId(), skjæringstidspunkter, true, false);
         List<BeregnInput> beregningInput = lagBeregnInput(referanse, vilkårsperioder, bgReferanser);
         return finnTjeneste(referanse.getFagsakYtelseType()).beregn(referanse, beregningInput, stegType);
     }
