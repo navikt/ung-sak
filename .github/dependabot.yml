@@ -1,5 +1,10 @@
 version: 2
 registries:
+  k9-sak:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/k9-sak
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKE
   k9-felles:
     type: maven-repository
     url: https://maven.pkg.github.com/navikt/k9-felles
@@ -55,6 +60,11 @@ registries:
     url: https://maven.pkg.github.com/navikt/fp-tidsserie
     username: x-access-token
     password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}} 
+  dev-jakarta-transform:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/dev-jakarta-transform
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKE
 updates:
   - package-ecosystem: maven
     directory: "/"
@@ -62,6 +72,7 @@ updates:
       interval: daily
     open-pull-requests-limit: 15
     registries:
+      - k9-sak
       - k9-felles
       - k9-prosesstask
       - k9-format
@@ -73,6 +84,7 @@ updates:
       - ft-kalkulus
       - fp-nare
       - fp-tidsserie
+      - dev-jakarta-transform
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
