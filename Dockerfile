@@ -13,7 +13,6 @@ COPY build/init-app.sh /init-scripts/init-app.sh
 
 # Config
 COPY web/target/classes/logback.xml /app/conf/
-COPY web/target/classes/jetty/jaspi-conf.xml /app/conf/
 
 # Avhengigheter
 COPY web/target/lib/*.jar /app/lib/
