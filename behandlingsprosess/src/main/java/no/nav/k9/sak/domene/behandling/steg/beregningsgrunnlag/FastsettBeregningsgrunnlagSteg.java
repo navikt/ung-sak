@@ -4,7 +4,6 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FASTSETT_BEREGNIN
 
 import java.util.Collections;
 
-;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
