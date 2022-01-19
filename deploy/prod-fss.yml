@@ -221,6 +221,8 @@ spec:
       value: "false"
     - name: FORLENGELSE_OPPTJENING_ENABLET
       value: "false"
+    - name: FORLENGELSE_BEREGNING_ENABLET
+      value: "false"
     - name: BEHANDLINGID_DOKUMENTLIST_ENABLET
       value: "true"
     - name: PERIODER_KANT_I_KANT_VURDERER_ENABLET
