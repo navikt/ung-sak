@@ -1,6 +1,6 @@
 package no.nav.k9.sak.økonomi.tilbakekreving.modell;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;

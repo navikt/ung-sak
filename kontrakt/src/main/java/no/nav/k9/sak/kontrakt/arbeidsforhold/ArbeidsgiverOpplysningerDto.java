@@ -2,8 +2,8 @@ package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
 import java.time.LocalDate;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;

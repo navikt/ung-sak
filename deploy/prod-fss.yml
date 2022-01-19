@@ -221,6 +221,16 @@ spec:
       value: "false"
     - name: FORLENGELSE_OPPTJENING_ENABLET
       value: "false"
+    - name: BEHANDLINGID_DOKUMENTLIST_ENABLET
+      value: "true"
+    - name: PERIODER_KANT_I_KANT_VURDERER_ENABLET
+      value: "true"
+    - name: VEDTAK_PERSISTER_ENDRET_PERIODE
+      value: "true"
+    - name: K9_RAPID_AIVEN
+      value: "false"
+    - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

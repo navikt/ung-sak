@@ -54,7 +54,7 @@
         <!-- eksterne avhengigheter -->
         <dependency>
             <groupId>no.nav.k9</groupId>
-            <artifactId>soknad</artifactId>
+            <artifactId>soknad-jakarta</artifactId>
         </dependency>
 
         <!-- Test avhengigheter -->

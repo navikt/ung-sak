@@ -4,7 +4,7 @@ package no.nav.k9.sak.perioder;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;

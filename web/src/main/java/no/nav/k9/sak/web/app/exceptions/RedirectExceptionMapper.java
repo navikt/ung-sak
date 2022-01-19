@@ -2,8 +2,8 @@ package no.nav.k9.sak.web.app.exceptions;
 
 import java.net.URI;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
 
 import org.owasp.encoder.Encode;
 

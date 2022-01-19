@@ -2,9 +2,9 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste;
 
 import java.util.UUID;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Default;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Default;
+import jakarta.inject.Inject;
 
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 import no.nav.pleiepengerbarn.uttak.kontrakter.EndrePerioderGrunnlag;

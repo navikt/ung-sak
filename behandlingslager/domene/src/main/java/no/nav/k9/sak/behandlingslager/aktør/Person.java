@@ -1,6 +1,6 @@
 package no.nav.k9.sak.behandlingslager.aktør;
 
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.MappedSuperclass;
 
 import no.nav.k9.sak.typer.AktørId;
 

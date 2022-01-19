@@ -46,12 +46,12 @@
         <!-- eksterne avhengigheter -->
         <dependency>
             <groupId>no.nav.k9</groupId>
-            <artifactId>soknad</artifactId>
+            <artifactId>soknad-jakarta</artifactId>
         </dependency>
 
         <dependency>
             <groupId>no.nav.k9.aarskvantum</groupId>
-            <artifactId>kontrakter</artifactId>
+            <artifactId>k9-aarskvantum-kontrakt</artifactId>
         </dependency>
 
         <dependency>

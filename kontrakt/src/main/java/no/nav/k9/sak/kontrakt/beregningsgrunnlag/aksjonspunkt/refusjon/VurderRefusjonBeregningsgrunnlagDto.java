@@ -2,8 +2,8 @@ package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.refusjon;
 
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

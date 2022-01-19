@@ -1,9 +1,9 @@
 package no.nav.k9.sak.behandlingslager.fagsak;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryFeil;
 

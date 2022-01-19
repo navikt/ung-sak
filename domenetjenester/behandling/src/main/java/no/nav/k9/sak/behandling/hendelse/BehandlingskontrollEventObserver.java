@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,6 +123,7 @@ public class BehandlingskontrollEventObserver {
             .medBehandlingResultat(behandling.getBehandlingResultatType())
             .medAksjonspunktKoderMedStatusListe(aksjonspunktKoderMedStatusListe)
             .medAnsvarligSaksbehandlerForTotrinn(behandling.getAnsvarligSaksbehandler())
+            .medBehandlendeEnhet(behandling.getBehandlendeEnhet())
             .medFagsakPeriode(fagsak.getPeriode().tilPeriode())
             .medPleietrengendeAktørId(fagsak.getPleietrengendeAktørId())
             .medRelatertPartAktørId(fagsak.getRelatertPersonAktørId())

@@ -1,6 +1,6 @@
 package no.nav.k9.sak.kontrakt.dokument;
 
-import javax.validation.constraints.Digits;
+import jakarta.validation.constraints.Digits;
 
 import no.nav.k9.abac.AbacAttributt;
 

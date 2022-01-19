@@ -7,18 +7,18 @@ import java.util.Collection;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,6 +42,7 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 @Produces(MediaType.APPLICATION_JSON)
 public class PerioderTilBehandlingMedKildeRestTjeneste {
 
+    public static final String BEHANDLING_PERIODER = "/behandling/perioder";
     private BehandlingRepository behandlingRepository;
     private SøknadsfristTjenesteProvider søknadsfristTjenesteProvider;
     private UtledStatusPåPerioderTjeneste statusPåPerioderTjeneste;
@@ -62,7 +63,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     }
 
     @GET
-    @Path("/behandling/perioder")
+    @Path(BEHANDLING_PERIODER)
     @Operation(description = "Hent perioder til behandling og kilden til disse",
         summary = ("Hent perioder til behandling og kilden til disse"),
         tags = "perioder",

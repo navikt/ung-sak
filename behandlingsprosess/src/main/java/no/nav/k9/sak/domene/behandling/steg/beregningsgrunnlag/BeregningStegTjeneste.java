@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
@@ -47,7 +47,7 @@ public class BeregningStegTjeneste {
             .map(p -> new AbstractMap.SimpleEntry<>(p.getFomDato(), p))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
-        var kalkulusResultat = kalkulusTjeneste.fortsettBeregning(ref, perioderTilVurdering, stegType);
+        var kalkulusResultat = kalkulusTjeneste.beregn(ref, perioderTilVurdering, stegType);
 
         for (var resultat : kalkulusResultat.getResultater().entrySet()) {
             var eksternReferanse = resultat.getKey();

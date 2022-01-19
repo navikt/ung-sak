@@ -7,7 +7,7 @@ import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.YTELSE;
 import java.util.Map;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;

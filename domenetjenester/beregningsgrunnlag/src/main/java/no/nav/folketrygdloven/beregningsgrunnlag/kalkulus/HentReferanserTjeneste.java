@@ -12,8 +12,8 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -86,7 +86,7 @@ class HentReferanserTjeneste {
      * @return Map fra referanse i denne behandlingen til liste av referanser i original behandling
      */
     Map<UUID, List<UUID>> finnMapTilOriginaleReferanserUtenAvslag(BehandlingReferanse ref,
-                                                                    List<DatoIntervallEntitet> vilkårsperioder,
+                                                                    Collection<DatoIntervallEntitet> vilkårsperioder,
                                                                     List<BgRef> bgReferanser) {
 
         return ref.getOriginalBehandlingId()
@@ -98,7 +98,7 @@ class HentReferanserTjeneste {
             .orElse(Collections.emptyMap());
     }
 
-    private Map<UUID, List<UUID>> finnOrginalReferanserForAllePerioder(List<DatoIntervallEntitet> vilkårsperioder,
+    private Map<UUID, List<UUID>> finnOrginalReferanserForAllePerioder(Collection<DatoIntervallEntitet> vilkårsperioder,
                                                                          List<BgRef> bgReferanser,
                                                                          Optional<BeregningsgrunnlagPerioderGrunnlag> originaltGrunnlag,
                                                                          Optional<Vilkårene> originalVilkår) {

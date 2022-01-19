@@ -62,7 +62,7 @@ public class KravperioderMapper {
         return inntektsmeldinger.stream()
             .filter(im -> (im.getRefusjonBeløpPerMnd() != null && !im.getRefusjonBeløpPerMnd().erNullEllerNulltall()) ||
                 im.getEndringerRefusjon().stream().anyMatch(e -> !e.getRefusjonsbeløp().erNullEllerNulltall()))
-            .filter(im -> refusjonOpphørerFørStart(im, finnStartdatoRefusjon(im, skjæringstidspunkt, arbeidDto)) )
+            .filter(im -> !refusjonOpphørerFørStart(im, finnStartdatoRefusjon(im, skjæringstidspunkt, arbeidDto)) )
             .collect(Collectors.toList());
     }
 
@@ -185,8 +185,7 @@ public class KravperioderMapper {
     }
 
     private static boolean matcherReferanse(InternArbeidsforholdRefDto ref1, InternArbeidsforholdRef ref2) {
-        return (ref1 == null && ref2 == null)
-            || (ref1 != null && ref2 != null && Objects.equals(ref1.getAbakusReferanse(), ref2.getReferanse()));
+        return InternArbeidsforholdRef.ref(ref1 == null ? null : ref1.getAbakusReferanse()).gjelderFor(ref2);
     }
 
     public static record Kravnøkkel(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef referanse) {

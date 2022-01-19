@@ -1,4 +1,4 @@
-FROM navikt/java:16-appdynamics
+FROM navikt/java:17-appdynamics
 ENV APPD_ENABLED=true
 
 LABEL org.opencontainers.image.source=https://github.com/navikt/k9-sak
@@ -13,7 +13,6 @@ COPY build/init-app.sh /init-scripts/init-app.sh
 
 # Config
 COPY web/target/classes/logback.xml /app/conf/
-COPY web/target/classes/jetty/jaspi-conf.xml /app/conf/
 
 # Avhengigheter
 COPY web/target/lib/*.jar /app/lib/

@@ -17,6 +17,8 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.k9.sak.web.app.JettyTestApplication;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceRole;
@@ -25,13 +27,7 @@ import no.nav.k9.sak.web.server.jetty.db.EnvironmentClass;
 
 public class JettyDevServer extends JettyServer {
 
-    /**
-     * @see https://docs.oracle.com/en/java/javase/11/security/java-secure-socket-extension-jsse-reference-guide.html
-     */
-    private static final String TRUSTSTORE_PASSW_PROP = "javax.net.ssl.trustStorePassword";
-    private static final String TRUSTSTORE_PATH_PROP = "javax.net.ssl.trustStore";
-    private static final String KEYSTORE_PASSW_PROP = "no.nav.modig.security.appcert.password";
-    private static final String KEYSTORE_PATH_PROP = "no.nav.modig.security.appcert.keystore";
+    private static final Logger log = LoggerFactory.getLogger(JettyDevServer.class);
 
     public JettyDevServer() {
         super(new JettyDevKonfigurasjon());
@@ -42,29 +38,31 @@ public class JettyDevServer extends JettyServer {
         devServer.bootStrap();
     }
 
-    private static String initCryptoStoreConfig(String storeName, String storeProperty, String storePasswordProperty, String defaultPassword) {
+    private static String initCryptoStoreConfig(String storeName, String storeProperty, String storePasswordProperty,
+            String defaultPassword) {
         String defaultLocation = getProperty("user.home", ".") + "/.modig/" + storeName + ".jks";
 
         String storePath = getProperty(storeProperty, defaultLocation);
         File storeFile = new File(storePath);
         if (!storeFile.exists()) {
             throw new IllegalStateException("Finner ikke " + storeName + " i " + storePath
-                + "\n\tKonfigurer enten som System property \'" + storeProperty + "\' eller environment variabel \'"
-                + storeProperty.toUpperCase().replace('.', '_') + "\'");
+                    + "\n\tKonfigurer enten som System property \'" + storeProperty + "\' eller environment variabel \'"
+                    + storeProperty.toUpperCase().replace('.', '_') + "\'");
         }
         String password = getProperty(storePasswordProperty, defaultPassword);
         if (password == null) {
-            throw new IllegalStateException("Passord for å aksessere store " + storeName + " i " + storePath + " er null");
+            throw new IllegalStateException(
+                    "Passord for å aksessere store " + storeName + " i " + storePath + " er null");
         }
 
         System.setProperty(storeProperty, storeFile.getAbsolutePath());
         System.setProperty(storePasswordProperty, password);
-        
+
         // Aiven:
         System.setProperty("KAFKA_TRUSTSTORE_PATH", storeFile.getAbsolutePath());
         System.setProperty("KAFKA_KEYSTORE_PATH", storeFile.getAbsolutePath());
         System.setProperty("KAFKA_CREDSTORE_PASSWORD", password);
-        
+
         return storePath;
     }
 
@@ -83,7 +81,8 @@ public class JettyDevServer extends JettyServer {
             super.migrerDatabaser();
         } catch (IllegalStateException e) {
             log.info("Migreringer feilet, cleaner og prøver på nytt for lokal db.");
-            DataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, getEnvironmentClass(), 1);
+            DataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN,
+                    getEnvironmentClass(), 1);
             try {
                 DevDatabaseScript.clean(migreringDs);
             } finally {
@@ -114,18 +113,17 @@ public class JettyDevServer extends JettyServer {
     }
 
     @Override
-    protected void konfigurerSikkerhet(File jaspiConf) {
-        // overstyrer angitt dir for lokal testing
-        File alternativeJaspiConf = new File("src/main/resources/jetty/jaspi-conf.xml");
-        super.konfigurerSikkerhet(alternativeJaspiConf);
+    protected void konfigurerSikkerhet() {
+        super.konfigurerSikkerhet();
+
+        /**
+         * @see https://docs.oracle.com/en/java/javase/11/security/java-secure-socket-extension-jsse-reference-guide.html
+         */
 
         // truststore avgjør hva vi stoler på av sertifikater når vi gjør utadgående TLS kall
-        initCryptoStoreConfig("truststore", TRUSTSTORE_PATH_PROP, TRUSTSTORE_PASSW_PROP, "changeit");
-
-        // keystore genererer sertifikat og TLS for innkommende kall. Bruker standard prop hvis definert, ellers faller tilbake på modig props
-        var keystoreProp = System.getProperty("javax.net.ssl.keyStore") != null ? "javax.net.ssl.keyStore" : KEYSTORE_PATH_PROP;
-        var keystorePasswProp = System.getProperty("javax.net.ssl.keyStorePassword") != null ? "javax.net.ssl.keyStorePassword" : KEYSTORE_PASSW_PROP;
-        initCryptoStoreConfig("keystore", keystoreProp, keystorePasswProp, "devillokeystore1234");
+        initCryptoStoreConfig("truststore", "javax.net.ssl.trustStore", "javax.net.ssl.trustStorePassword", "changeit");
+        initCryptoStoreConfig("keystore", "javax.net.ssl.keyStore", "javax.net.ssl.keyStorePassword",
+                "devillokeystore1234");
     }
 
     @SuppressWarnings("resource")
@@ -134,16 +132,16 @@ public class JettyDevServer extends JettyServer {
         List<Connector> connectors = super.createConnectors(appKonfigurasjon, server);
 
         var sslContextFactory = new SslContextFactory.Server();
-        sslContextFactory.setKeyStorePath(System.getProperty(KEYSTORE_PATH_PROP));
-        sslContextFactory.setKeyStorePassword(System.getProperty(KEYSTORE_PASSW_PROP));
-        sslContextFactory.setKeyManagerPassword(System.getProperty(KEYSTORE_PASSW_PROP));
+        sslContextFactory.setKeyStorePath(System.getProperty("javax.net.ssl.keyStore"));
+        sslContextFactory.setKeyStorePassword(System.getProperty("javax.net.ssl.keyStorePassword"));
+        sslContextFactory.setKeyManagerPassword(System.getProperty("javax.net.ssl.keyStorePassword"));
 
         HttpConfiguration https = createHttpConfiguration();
         https.addCustomizer(new SecureRequestCustomizer());
 
         ServerConnector sslConnector = new ServerConnector(server,
-            new SslConnectionFactory(sslContextFactory, "http/1.1"),
-            new HttpConnectionFactory(https));
+                new SslConnectionFactory(sslContextFactory, "http/1.1"),
+                new HttpConnectionFactory(https));
         sslConnector.setPort(appKonfigurasjon.getSslPort());
         connectors.add(sslConnector);
 

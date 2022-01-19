@@ -17,7 +17,7 @@
 
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
-			<artifactId>kontrakt</artifactId>
+			<artifactId>kontrakt-jakarta</artifactId>
 		</dependency>
 
 		<dependency>
@@ -47,7 +47,7 @@
 
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
-			<artifactId>swagger-core</artifactId>
+			<artifactId>swagger-core-jakarta</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
