@@ -38,3 +38,4 @@ dep.txt
 APP_LOG_HOME_IS_UNDEFINED
 .factorypath
 .DS_Store
+.vscode

@@ -6,13 +6,18 @@ import java.util.stream.Stream;
 
 import jakarta.ws.rs.ApplicationPath;
 
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 
+import io.swagger.v3.core.jackson.ModelResolver;
+import io.swagger.v3.core.jackson.TypeNameResolver;
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import io.swagger.v3.oas.integration.OpenApiConfigurationException;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
+import io.swagger.v3.oas.integration.api.OpenApiContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
@@ -27,29 +32,36 @@ public class ApplicationConfig extends ResourceConfig {
 
     public static final String API_URI = "/api";
 
+    private final OpenApiContext openApiContext;
+    private final OpenAPI openApi;
+
     public ApplicationConfig() {
 
         OpenAPI oas = new OpenAPI();
         Info info = new Info()
-            .title("K9 saksbehandling - Saksbehandling av kapittel 9 i folketrygden")
-            .version("1.0")
-            .description("REST grensesnitt for Vedtaksløsningen.");
+                .title("K9 saksbehandling - Saksbehandling av kapittel 9 i folketrygden")
+                .version("1.0")
+                .description("REST grensesnitt for Vedtaksløsningen.");
 
         oas.info(info)
-            .addServersItem(new Server()
-                .url("/k9/sak"));
+                .addServersItem(new Server()
+                        .url("/k9/sak"));
+
+        TypeNameResolver.std.setUseFqn(true);
+        ModelResolver.enumsAsRef = true;
+
         SwaggerConfiguration oasConfig = new SwaggerConfiguration()
-            .openAPI(oas)
-            .prettyPrint(true)
-            .scannerClass("io.swagger.v3.jaxrs2.integration.JaxrsAnnotationScanner")
-            .resourcePackages(Stream.of("no.nav.k9.", "no.nav.k9.sak", "no.nav.k9")
-                .collect(Collectors.toSet()));
+                .openAPI(oas)
+                .prettyPrint(true)
+                .scannerClass("io.swagger.v3.jaxrs2.integration.JaxrsAnnotationScanner")
+                .resourcePackages(Stream.of("no.nav.k9.", "no.nav.k9.sak", "no.nav.k9")
+                        .collect(Collectors.toSet()));
 
         try {
-            new JaxrsOpenApiContextBuilder<>()
-                .openApiConfiguration(oasConfig)
-                .buildContext(true)
-                .read();
+            this.openApiContext = new JaxrsOpenApiContextBuilder<>()
+                    .openApiConfiguration(oasConfig)
+                    .buildContext(true);
+            this.openApi = this.openApiContext.read();
         } catch (OpenApiConfigurationException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -70,4 +82,8 @@ public class ApplicationConfig extends ResourceConfig {
         property(org.glassfish.jersey.server.ServerProperties.PROCESSING_RESPONSE_ERRORS_ENABLED, true);
     }
 
+    String getOpenApiSpec() throws Exception {
+        return this.openApiContext.getOutputYamlMapper().writer(new DefaultPrettyPrinter())
+                .writeValueAsString(this.openApi);
+    }
 }
