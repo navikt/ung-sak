@@ -169,7 +169,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt-jakarta</artifactId>
-                <version>1.5.5</version>
+                <version>1.5.6</version>
             </dependency>
 
             <dependency>
