@@ -4,8 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -16,13 +17,13 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.AvklarMedisinskeOpplysningerDto;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
@@ -35,7 +36,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PSBVilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomGrunnlagSammenlikningsresultat;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
@@ -46,7 +46,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
     private SykdomVurderingService sykdomVurderingService;
     private SykdomGrunnlagService sykdomGrunnlagService;
-    private PSBVilkårsPerioderTilVurderingTjeneste psbVilkårsPerioderTilVurderingTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private PleiebehovResultatRepository resultatRepository;
@@ -60,14 +60,14 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     @Inject
     public AvklarMedisinskeOpplysninger(HistorikkTjenesteAdapter historikkTjenesteAdapter, SykdomVurderingService sykdomVurderingService,
                                         SykdomGrunnlagService sykdomGrunnlagService,
-                                        @FagsakYtelseTypeRef("PSB") PSBVilkårsPerioderTilVurderingTjeneste psbVilkårsPerioderTilVurderingTjeneste,
+                                        @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                         BehandlingRepository behandlingRepository, VilkårResultatRepository vilkårResultatRepository,
                                         PleiebehovResultatRepository resultatRepository, SykdomDokumentRepository sykdomDokumentRepository,
                                         SykdomGrunnlagRepository sykdomGrunnlagRepository) {
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.sykdomVurderingService = sykdomVurderingService;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
-        this.psbVilkårsPerioderTilVurderingTjeneste = psbVilkårsPerioderTilVurderingTjeneste;
+        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.resultatRepository = resultatRepository;
@@ -79,10 +79,11 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     @Override
     public OppdateringResultat oppdater(AvklarMedisinskeOpplysningerDto dto, AksjonspunktOppdaterParameter param) {
         final Behandling behandling = behandlingRepository.hentBehandling(param.getRef().getBehandlingId());
+        VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = perioderTilVurderingTjeneste(behandling);
 
         boolean skalHaToTrinn;
 
-        final var perioder = psbVilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        final var perioder = vilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
         SykdomGrunnlagSammenlikningsresultat sammenlikningsresultat = sykdomGrunnlagService.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder);
 
@@ -105,8 +106,11 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
 
             lagHistorikkinnslag(param, "Sykdom manuelt behandlet: Mangler godkjent legeerklæring.");
 
-            oppdaterMedIkkeOppfylt(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, param, behandling);
-            oppdaterMedIkkeOppfylt(VilkårType.MEDISINSKEVILKÅR_18_ÅR, param, behandling);
+            for (VilkårType vilkårType : vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()) {
+                Avslagsårsak avslagsårsak = utledAvslagsårsak(vilkårType);
+                oppdaterMedIkkeOppfylt(vilkårType, avslagsårsak, param, behandling);
+            }
+
             return OppdateringResultat.utenTransisjon().medTotrinn().build();
         }
 
@@ -131,6 +135,15 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         return resultat;
     }
 
+    private Avslagsårsak utledAvslagsårsak(VilkårType vilkårType) {
+        return switch (vilkårType) {
+            case MEDISINSKEVILKÅR_UNDER_18_ÅR,
+                MEDISINSKEVILKÅR_18_ÅR -> Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN;
+            case I_LIVETS_SLUTTFASE -> Avslagsårsak.MANGLENDE_DOKUMENTASJON;
+            default -> throw new IllegalArgumentException("Ikke-støttet VilkårType " + vilkårType);
+        };
+    }
+
     private void kvitterUtAlleDokumenterSomLiggerPåPleietrengende(final Behandling behandling) {
         final LocalDateTime nå = LocalDateTime.now();
         final List<SykdomDokument> dokumenter = sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(behandling.getFagsak().getPleietrengendeAktørId());
@@ -139,7 +152,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         }
     }
 
-    private void oppdaterMedIkkeOppfylt(VilkårType vilkårType, AksjonspunktOppdaterParameter param, final Behandling behandling) {
+    private void oppdaterMedIkkeOppfylt(VilkårType vilkårType, Avslagsårsak avslagsårsak, AksjonspunktOppdaterParameter param, final Behandling behandling) {
         var vilkårene = vilkårResultatRepository.hent(behandling.getId());
         var timeline = vilkårene.getVilkårTimeline(vilkårType);
         if (!timeline.isEmpty()) {
@@ -147,7 +160,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
             var vilkårBuilder = builder.hentBuilderFor(vilkårType);
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(timeline.getMinLocalDate(), timeline.getMaxLocalDate())
                 .medUtfallManuell(Utfall.IKKE_OPPFYLT)
-                .medAvslagsårsak(Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN));
+                .medAvslagsårsak(avslagsårsak));
             builder.leggTil(vilkårBuilder);
 
             final var nåværendeResultat = resultatRepository.hentHvisEksisterer(behandling.getId());
@@ -162,5 +175,9 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
             .medSkjermlenke(SkjermlenkeType.PUNKT_FOR_MEDISINSK)
             .medBegrunnelse(begrunnelse);
         historikkTjenesteAdapter.opprettHistorikkInnslag(param.getBehandlingId(), HistorikkinnslagType.FAKTA_ENDRET);
+    }
+
+    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste(Behandling behandling) {
+        return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
     }
 }
