@@ -6,8 +6,8 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;

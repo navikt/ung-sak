@@ -9,8 +9,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
@@ -34,22 +34,22 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 @BehandlingStegRef(kode = "FASTSETT_STP_BER")
 @BehandlingTypeRef
 @ApplicationScoped
-public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg {
+public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
 
     private BeregningTjeneste kalkulusTjeneste;
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
 
-    protected FastsettBeregningsaktiviteterSteg() {
+    protected FastsettSkjæringstidspunktSteg() {
         // for CDI proxy
     }
 
     @Inject
-    public FastsettBeregningsaktiviteterSteg(BeregningTjeneste kalkulusTjeneste,
-                                             SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                             BehandlingRepository behandlingRepository,
-                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
+    public FastsettSkjæringstidspunktSteg(BeregningTjeneste kalkulusTjeneste,
+                                          SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                                          BehandlingRepository behandlingRepository,
+                                          BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.behandlingRepository = behandlingRepository;
@@ -88,7 +88,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     }
 
     private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, List<DatoIntervallEntitet> vilkårsperioder) {
-        var resultat = kalkulusTjeneste.startBeregning(ref, vilkårsperioder);
+        var resultat = kalkulusTjeneste.startBeregning(ref, vilkårsperioder, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING);
         var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
         for (var entry : resultat.getResultater().entrySet()) {
             var kalkulusResultat = entry.getValue();

@@ -8,8 +8,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.k9.kodeverk.vilkår.VilkårType;

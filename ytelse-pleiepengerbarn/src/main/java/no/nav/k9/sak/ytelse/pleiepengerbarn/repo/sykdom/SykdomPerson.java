@@ -2,7 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 import no.nav.k9.sak.typer.AktørId;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity(name = "SykdomPerson")
 @Table(name = "SYKDOM_PERSON")

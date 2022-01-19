@@ -1,6 +1,6 @@
 package no.nav.k9.sak.kontrakt.søknad;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;

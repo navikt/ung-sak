@@ -185,7 +185,7 @@ public class KravperioderMapper {
     }
 
     private static boolean matcherReferanse(InternArbeidsforholdRefDto ref1, InternArbeidsforholdRef ref2) {
-        return InternArbeidsforholdRef.ref(ref1.getAbakusReferanse()).gjelderFor(ref2);
+        return InternArbeidsforholdRef.ref(ref1 == null ? null : ref1.getAbakusReferanse()).gjelderFor(ref2);
     }
 
     public static record Kravnøkkel(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef referanse) {

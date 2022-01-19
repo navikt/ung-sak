@@ -3,8 +3,8 @@ package no.nav.k9.sak.domene.behandling.steg.foreslåresultat;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;

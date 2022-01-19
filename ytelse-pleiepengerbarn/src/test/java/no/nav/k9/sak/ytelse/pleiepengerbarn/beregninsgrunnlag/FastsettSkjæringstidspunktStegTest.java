@@ -2,9 +2,9 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregninsgrunnlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +18,7 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-public class FastsettBeregningsaktiviteterStegTest {
+public class FastsettSkjæringstidspunktStegTest {
 
     @Inject
     private @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> instances;

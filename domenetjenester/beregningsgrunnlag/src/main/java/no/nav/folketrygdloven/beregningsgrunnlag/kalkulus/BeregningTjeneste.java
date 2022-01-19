@@ -31,9 +31,9 @@ public interface BeregningTjeneste {
      *
      * @param referanse {@link BehandlingReferanse}
      * @param vilkårsperioder - alle perioder til vurdering
-     * @return SamletKalkulusResultat {@link KalkulusResultat}
+     * @return SamletKalkulusResultat {@link SamletKalkulusResultat}
      */
-    SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, List<DatoIntervallEntitet> vilkårsperioder);
+    SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, Collection<DatoIntervallEntitet> vilkårsperioder, BehandlingStegType stegType);
 
     /**
      * Kjører en beregning videre fra gitt steg <br>
@@ -44,12 +44,12 @@ public interface BeregningTjeneste {
      * Steg 6. FORDEL_BERGRUNN (Fordel beregningsgrunnlag)<br>
      * Steg 7. FAST_BERGRUNN (Fastsett beregningsgrunnlag)
      *
-     * @param ref {@link BehandlingReferanse}
+     * @param referanse {@link BehandlingReferanse}
      * @param vilkårsperioder Vilkårsperioder til vurdering
      * @param stegType {@link BehandlingStegType}
      * @return SamletKalkulusResultat {@link KalkulusResultat}
      */
-    SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> vilkårsperioder, BehandlingStegType stegType);
+    SamletKalkulusResultat beregn(BehandlingReferanse referanse, Collection<DatoIntervallEntitet> vilkårsperioder, BehandlingStegType stegType);
 
     /**
      * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt

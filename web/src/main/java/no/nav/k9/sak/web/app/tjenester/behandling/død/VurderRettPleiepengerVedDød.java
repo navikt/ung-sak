@@ -8,8 +8,8 @@ import no.nav.k9.sak.kontrakt.død.VurderingRettPleiepengerVedDødDto;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDød;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderingRettPleiepengerVedDødDto.class, adapter = AksjonspunktOppdaterer.class)

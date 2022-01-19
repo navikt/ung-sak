@@ -7,8 +7,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;

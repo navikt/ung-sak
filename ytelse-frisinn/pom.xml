@@ -47,7 +47,7 @@
 		<!-- eksterne avhengigheter -->
 		<dependency>
 			<groupId>no.nav.k9</groupId>
-			<artifactId>soknad-frisinn</artifactId>
+			<artifactId>soknad-frisinn-jakarta</artifactId>
 		</dependency>
 
 		<!-- Test avhengigheter -->

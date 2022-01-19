@@ -3,9 +3,9 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 

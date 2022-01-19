@@ -6,8 +6,8 @@ import no.nav.k9.sak.kontrakt.tilsyn.aksjonspunkt.VurderingDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.*;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
 

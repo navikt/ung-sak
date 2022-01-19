@@ -3,8 +3,8 @@ package no.nav.k9.sak.økonomi.tilbakekreving.klient;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;

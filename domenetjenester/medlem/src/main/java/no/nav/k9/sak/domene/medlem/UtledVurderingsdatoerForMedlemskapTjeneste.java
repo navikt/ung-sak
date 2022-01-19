@@ -14,10 +14,10 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -325,9 +325,9 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
     private LocalDateSegment<MedlemskapPerioderEntitet> slåSammenMedlemskapPerioder(LocalDateInterval di,
                                                                                     LocalDateSegment<MedlemskapPerioderEntitet> førsteVersjon,
                                                                                     LocalDateSegment<MedlemskapPerioderEntitet> sisteVersjon) {
-        if (førsteVersjon == null) {
+        if (førsteVersjon == null || førsteVersjon.getValue() == null) {
             return sisteVersjon;
-        } else if (sisteVersjon == null) {
+        } else if (sisteVersjon == null || sisteVersjon.getValue() == null) {
             return førsteVersjon;
         }
 
@@ -344,7 +344,7 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         MedlemskapPerioderEntitet riktigEntitetVerdi;
         LocalDate førsteBeslutningsdato = førsteVersjon.getValue().getBeslutningsdato();
         LocalDate sisteBeslutningsdato = sisteVersjon.getValue().getBeslutningsdato();
-        if (førsteBeslutningsdato != null && førsteBeslutningsdato.isAfter(sisteBeslutningsdato)) {
+        if (førsteBeslutningsdato != null && (sisteBeslutningsdato == null || førsteBeslutningsdato.isAfter(sisteBeslutningsdato))) {
             riktigEntitetVerdi = førsteVersjon.getValue();
         } else {
             riktigEntitetVerdi = sisteVersjon.getValue();

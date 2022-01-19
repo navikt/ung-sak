@@ -3,49 +3,48 @@
 {
 	"name": "Java",
 	"dockerComposeFile": "docker-compose.yml",
- 	"service": "app",
-  	"workspaceFolder": "/k9-sak",
-
+	"service": "app",
+	"workspaceFolder": "/k9-sak",
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
 		"java.home": "/docker-java-home",
 		"maven.settingsFile": "/workspace/.github/.m2/settings.xml",
 		"sqltools.connections": [
 			{
-			  "name": "Container database",
-			  "driver": "PostgreSQL",
-			  "previewLimit": 50,
-			  "server": "localhost",
-			  "port": 5432,
-			  "database": "k9sak_unit",
-			  "username": "k9sak_unit",
-			  "password": "k9sak_unit"
+				"name": "Container database",
+				"driver": "PostgreSQL",
+				"previewLimit": 50,
+				"server": "localhost",
+				"port": 5432,
+				"database": "k9sak_unit",
+				"username": "k9sak_unit",
+				"password": "k9sak_unit"
 			}
-		  ],
-		  "files.eol": "\n",
-		  "files.insertFinalNewline": true,
-		  "files.trimFinalNewlines": true,
-		  "files.trimTrailingWhitespace": true,
-		  "editor.formatOnSave": true,
-		  "editor.codeActionsOnSave": {
+		],
+		"files.eol": "\n",
+		"files.insertFinalNewline": true,
+		"files.trimFinalNewlines": true,
+		"files.trimTrailingWhitespace": true,
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
 			"source.organizeImports": true
-		  }
+		}
 	},
-
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"vscjava.vscode-java-pack",
 		"ms-azuretools.vscode-docker",
 		"mtxr.sqltools",
 		"mtxr.sqltools-driver-pg",
-		"eamodio.gitlens"
-	  ],
-
+		"eamodio.gitlens",
+		"EditorConfig.EditorConfig"
+	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [3000, 5432],
-
+	"forwardPorts": [
+		3000,
+		5432
+	],
 	"postAttachCommand": "sh .devcontainer/postAttachCommand.sh",
-
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode"
 }
