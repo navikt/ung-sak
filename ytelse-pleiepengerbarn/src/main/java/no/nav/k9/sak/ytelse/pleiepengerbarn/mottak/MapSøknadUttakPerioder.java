@@ -244,7 +244,7 @@ public class MapSøknadUttakPerioder {
                         entry.getKey().getTilOgMed(),
                         false,
                         Landkoder.fraKode(entry.getValue().getLand().getLandkode()),
-                        UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
+                        entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.ÅTTE_UKERS_REGEL : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
                 .collect(Collectors.toList()));
         }
         return utenlandsoppholdPerioder;
