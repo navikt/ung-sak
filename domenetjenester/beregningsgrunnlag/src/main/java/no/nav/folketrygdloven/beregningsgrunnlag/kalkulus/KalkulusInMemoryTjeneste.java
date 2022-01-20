@@ -62,6 +62,11 @@ public class KalkulusInMemoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
+    public void kopier(BehandlingReferanse referanse, List<BeregnInput> beregningInput) {
+        throw new IllegalStateException("Skal ALDRI bli implementert");
+    }
+
+    @Override
     public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(BehandlingReferanse behandlingReferanse, Collection<BgRef> referanser, Map<UUID, HåndterBeregningDto> håndterMap) {
         return List.of();
     }

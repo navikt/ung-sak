@@ -11,11 +11,12 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -29,6 +30,8 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @FagsakYtelseTypeRef
 @BehandlingStegRef(kode = "FASTSETT_STP_BER")
@@ -40,6 +43,8 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
+    private VilkårPeriodeFilterProvider periodeFilterProvider;
+    private boolean enableForlengelse;
 
     protected FastsettSkjæringstidspunktSteg() {
         // for CDI proxy
@@ -49,12 +54,16 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
     public FastsettSkjæringstidspunktSteg(BeregningTjeneste kalkulusTjeneste,
                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                           BehandlingRepository behandlingRepository,
-                                          BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
+                                          BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
+                                          VilkårPeriodeFilterProvider periodeFilterProvider,
+                                          @KonfigVerdi(value = "forlengelse.beregning.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
+        this.periodeFilterProvider = periodeFilterProvider;
+        this.enableForlengelse = enableForlengelse;
     }
 
     @Override
@@ -64,12 +73,19 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
 
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
+        kopierGrunnlagForForlengelseperioder(ref, kontekst);
 
-        var perioderTilBeregning = new ArrayList<DatoIntervallEntitet>();
-        for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            if (periodeErUtenforFagsaksIntervall(periode, behandling.getFagsak().getPeriode())) {
-                avslåVilkår(kontekst, Avslagsårsak.INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN, periode);
+        var periodeFilter = periodeFilterProvider.getFilter(ref);
+        periodeFilter.ignorerAvslåttePerioder();
+        if (enableForlengelse) {
+            periodeFilter.ignorerForlengelseperioder();
+        }
+        var perioderTilBeregning = new ArrayList<PeriodeTilVurdering>();
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, periodeFilter);
+
+        for (var periode : perioderTilVurdering) {
+            if (periodeErUtenforFagsaksIntervall(periode.getPeriode(), behandling.getFagsak().getPeriode())) {
+                avslåVilkår(kontekst, Avslagsårsak.INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN, periode.getPeriode());
             } else {
                 perioderTilBeregning.add(periode);
             }
@@ -83,11 +99,25 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         }
     }
 
+    private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
+        if (enableForlengelse && ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
+            var periodeFilter = periodeFilterProvider.getFilter(ref);
+            periodeFilter.ignorerAvslåttePerioder();
+            var allePerioder = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, periodeFilter);
+            var forlengelseperioder = allePerioder.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toSet());
+            if (!forlengelseperioder.isEmpty()) {
+                kalkulusTjeneste.kopier(ref, forlengelseperioder);
+                var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
+                beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatVedForlengelse(kontekst, originalBehandlingId, forlengelseperioder);
+            }
+        }
+    }
+
     private boolean periodeErUtenforFagsaksIntervall(DatoIntervallEntitet vilkårPeriode, DatoIntervallEntitet fagsakPeriode) {
         return !vilkårPeriode.overlapper(fagsakPeriode);
     }
 
-    private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, List<DatoIntervallEntitet> vilkårsperioder) {
+    private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, List<PeriodeTilVurdering> vilkårsperioder) {
         var resultat = kalkulusTjeneste.startBeregning(ref, vilkårsperioder, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING);
         var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
         for (var entry : resultat.getResultater().entrySet()) {
@@ -108,10 +138,10 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         return kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList());
     }
 
-    private void avslå(BehandlingskontrollKontekst kontekst, List<DatoIntervallEntitet> vilkårsperioder, SamletKalkulusResultat resultat, KalkulusResultat kalkulusResultat,
+    private void avslå(BehandlingskontrollKontekst kontekst, List<PeriodeTilVurdering> vilkårsperioder, SamletKalkulusResultat resultat, KalkulusResultat kalkulusResultat,
                        UUID bgReferanse) {
         var stp = resultat.getStp(bgReferanse);
-        var vilkårsperiode = vilkårsperioder.stream().filter(p -> Objects.equals(stp, p.getFomDato())).findFirst()
+        var vilkårsperiode = vilkårsperioder.stream().map(PeriodeTilVurdering::getPeriode).filter(p -> Objects.equals(stp, p.getFomDato())).findFirst()
             .orElseThrow(() -> new IllegalStateException("Finner ikke vilkårsperiode for stp [" + stp + "] for bgReferanse [" + bgReferanse + "]"));
         beregningsgrunnlagVilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, vilkårsperiode, Objects.requireNonNull(kalkulusResultat.getAvslagsårsak(), "mangler avslagsårsak: " + kalkulusResultat));
     }

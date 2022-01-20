@@ -11,7 +11,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Grunnbeløp;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
@@ -47,6 +46,15 @@ public interface KalkulusApiTjeneste {
     SamletKalkulusResultat beregn(BehandlingReferanse referanse,
                                   List<BeregnInput> beregningInput,
                                   BehandlingStegType stegType);
+
+    /** Lager en kopi av grunnlaget lagret i Steg 4: VURDER_VILKAR_BERGRUNN (Vurder vilkår)
+     *
+     * @param referanse BehandlingReferanse
+     * @param beregningInput Input med informasjon om referanser og original referanser
+     */
+    void kopier(BehandlingReferanse referanse,
+                List<BeregnInput> beregningInput);
+
 
     /**
      * @param behandlingReferanse Behandlingreferanse

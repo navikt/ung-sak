@@ -90,7 +90,7 @@ public class PleiepengerBeregneYtelseStegTest {
         beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         bgGrunnlagRepository = new BeregningPerioderGrunnlagRepository(entityManager, repositoryProvider.getVilkårResultatRepository());
-        beregningTjeneste = new BeregningsgrunnlagTjeneste(new UnitTestLookupInstanceImpl<>(kalkulusTjeneste), repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository);
+        beregningTjeneste = new BeregningsgrunnlagTjeneste(new UnitTestLookupInstanceImpl<>(kalkulusTjeneste), repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository, true);
         beregningsresultat = BeregningsresultatEntitet.builder()
             .medRegelInput("regelInput")
             .medRegelSporing("regelSporing")
