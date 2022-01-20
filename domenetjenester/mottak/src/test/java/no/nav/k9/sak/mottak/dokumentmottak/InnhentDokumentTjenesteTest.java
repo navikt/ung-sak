@@ -2,6 +2,7 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 
 import static java.time.LocalDate.now;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,6 +29,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -102,6 +104,7 @@ public class InnhentDokumentTjenesteTest {
 
         OrganisasjonsEnhet enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class))).thenReturn(enhet);
+        when(behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(any(Behandling.class), anyBoolean())).thenReturn(new ProsessTaskGruppe());
 
         when(dokumentmottaker.getBehandlingÅrsakType(Brevkode.INNTEKTSMELDING)).thenReturn(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
     }
@@ -126,7 +129,7 @@ public class InnhentDokumentTjenesteTest {
         innhentDokumentTjeneste.mottaDokument(revurderingBehandling.getFagsak(), List.of(mottattDokument));
 
         // Assert
-        verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(revurderingBehandling, false);
+        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(revurderingBehandling, false);
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), revurderingBehandling);
     }
 
@@ -153,7 +156,7 @@ public class InnhentDokumentTjenesteTest {
         innhentDokumentTjeneste.mottaDokument(revurderingBehandling.getFagsak(), List.of(mottattDokument));
 
         // Assert - sjekk flyt
-        verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(revurderingBehandling, false);
+        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(revurderingBehandling, false);
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), revurderingBehandling);
     }
 
@@ -172,7 +175,7 @@ public class InnhentDokumentTjenesteTest {
         innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
 
         // Assert - sjekk flyt
-        verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
+        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, false);
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), behandling);
     }
 
@@ -191,7 +194,7 @@ public class InnhentDokumentTjenesteTest {
         innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
 
         // Assert - sjekk flyt
-        verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
+        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, false);
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), behandling);
     }
 
