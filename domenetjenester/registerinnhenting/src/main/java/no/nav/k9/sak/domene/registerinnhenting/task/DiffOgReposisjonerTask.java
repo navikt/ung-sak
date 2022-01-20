@@ -19,7 +19,7 @@ import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 public class DiffOgReposisjonerTask extends UnderBehandlingProsessTask {
 
     public static final String TASKTYPE = "grunnlag.diffOgReposisjoner";
-    public static final String UTLED_ÅRSAKER = "skalUtledeÅrsaker";
+    public static final String UTLED_ÅRSAKER = "skalUtledeArsaker";
 
     private RegisterdataEndringshåndterer endringshåndterer;
 
