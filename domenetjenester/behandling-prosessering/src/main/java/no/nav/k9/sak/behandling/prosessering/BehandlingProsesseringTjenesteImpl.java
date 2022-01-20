@@ -162,10 +162,10 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         gruppe.addNesteSekvensiell(registerdataOppdatererTask);
         if (innhentRegisterdataFørst) {
             log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandling.getId());
-            leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe);
+            leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, true);
         } else {
             log.info("Sjekker om det har tilkommet nye søknader/inntektsmeldinger og annet for behandling: {}", behandling.getId());
-            leggTilTaskForDiffOgReposisjoner(behandling, gruppe);
+            leggTilTaskForDiffOgReposisjoner(behandling, gruppe, true);
         }
         ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
         fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
@@ -215,7 +215,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
         Long fagsakId = behandling.getFagsakId();
         Long behandlingId = behandling.getId();
-        ProsessTaskGruppe gruppe = opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId);
+        ProsessTaskGruppe gruppe = opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, true);
         if (gruppe == null) {
             return;
         }
@@ -223,7 +223,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     @Override
-    public ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId) {
+    public ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker) {
         Long fagsakId = behandling.getFagsakId();
         Long behandlingId = behandling.getId();
 
@@ -246,10 +246,10 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
         if (skalHenteInnRegisterData(behandling)) {
             log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandlingId);
-            leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe);
+            leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, skalUtledeÅrsaker);
         } else {
             log.info("Sjekker om det har tilkommet nye inntektsmeldinger for behandling: {}", behandlingId);
-            leggTilTaskForDiffOgReposisjoner(behandling, gruppe);
+            leggTilTaskForDiffOgReposisjoner(behandling, gruppe, skalUtledeÅrsaker);
         }
 
         var fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
@@ -264,13 +264,14 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         return gruppe;
     }
 
-    private void leggTilTasksForInnhentRegisterdataPåNytt(Behandling behandling, ProsessTaskGruppe gruppe) {
+    private void leggTilTasksForInnhentRegisterdataPåNytt(Behandling behandling, ProsessTaskGruppe gruppe, boolean skalUtledeÅrsaker) {
         leggTilInnhentRegisterdataTasks(behandling, gruppe);
-        leggTilTaskForDiffOgReposisjoner(behandling, gruppe);
+        leggTilTaskForDiffOgReposisjoner(behandling, gruppe, skalUtledeÅrsaker);
     }
 
-    private void leggTilTaskForDiffOgReposisjoner(Behandling behandling, ProsessTaskGruppe gruppe) {
+    private void leggTilTaskForDiffOgReposisjoner(Behandling behandling, ProsessTaskGruppe gruppe, boolean skalUtledeÅrsaker) {
         var diffOgReposisjoner = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
+        diffOgReposisjoner.setProperty(DiffOgReposisjonerTask.UTLED_ÅRSAKER, "" + skalUtledeÅrsaker);
         diffOgReposisjoner.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         try {
             var snapshotFørInnhenting = endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandling.getId());

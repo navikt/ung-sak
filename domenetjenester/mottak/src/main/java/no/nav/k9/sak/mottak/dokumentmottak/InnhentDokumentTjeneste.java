@@ -80,7 +80,7 @@ public class InnhentDokumentTjeneste {
         } else if (prosessenStårStillePåAksjonspunktForSøknadsfrist(resultat.behandling)) {
             taskGruppe.addNesteSekvensiell(restartBehandling(resultat.behandling, behandlingÅrsak));
         } else {
-            taskGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(resultat.behandling, false);
+            taskGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(resultat.behandling, false, false);
         }
         lagreDokumenter(brevkodeMap, resultat.behandling);
 

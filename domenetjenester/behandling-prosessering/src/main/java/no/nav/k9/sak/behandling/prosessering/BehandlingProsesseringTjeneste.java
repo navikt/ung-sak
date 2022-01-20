@@ -55,7 +55,7 @@ public interface BehandlingProsesseringTjeneste {
     // NB oppdaterer registerdata Lagrer tasks
     void opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId);
 
-    ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId);
+    ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker);
 
     void opprettTasksForInitiellRegisterInnhenting(Behandling behandling);
 

@@ -104,7 +104,7 @@ public class InnhentDokumentTjenesteTest {
 
         OrganisasjonsEnhet enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class))).thenReturn(enhet);
-        when(behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(any(Behandling.class), anyBoolean())).thenReturn(new ProsessTaskGruppe());
+        when(behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(any(Behandling.class), anyBoolean(), anyBoolean())).thenReturn(new ProsessTaskGruppe());
 
         when(dokumentmottaker.getBehandlingÅrsakType(Brevkode.INNTEKTSMELDING)).thenReturn(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
     }
@@ -129,7 +129,7 @@ public class InnhentDokumentTjenesteTest {
         innhentDokumentTjeneste.mottaDokument(revurderingBehandling.getFagsak(), List.of(mottattDokument));
 
         // Assert
-        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(revurderingBehandling, false);
+        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(revurderingBehandling, false, false);
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), revurderingBehandling);
     }
 
@@ -156,7 +156,7 @@ public class InnhentDokumentTjenesteTest {
         innhentDokumentTjeneste.mottaDokument(revurderingBehandling.getFagsak(), List.of(mottattDokument));
 
         // Assert - sjekk flyt
-        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(revurderingBehandling, false);
+        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(revurderingBehandling, false, false);
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), revurderingBehandling);
     }
 
@@ -175,7 +175,7 @@ public class InnhentDokumentTjenesteTest {
         innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
 
         // Assert - sjekk flyt
-        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, false);
+        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, false, false);
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), behandling);
     }
 
@@ -194,7 +194,7 @@ public class InnhentDokumentTjenesteTest {
         innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
 
         // Assert - sjekk flyt
-        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, false);
+        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, false, false);
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), behandling);
     }
 
