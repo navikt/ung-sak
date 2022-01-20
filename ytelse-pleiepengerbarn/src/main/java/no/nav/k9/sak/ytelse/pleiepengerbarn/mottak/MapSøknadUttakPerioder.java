@@ -26,12 +26,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.BeredskapPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.FeriePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.NattevåkPeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.Tilsynsordning;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.TilsynsordningPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtenlandsoppholdPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
-import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.psb.v1.Beredskap;
@@ -244,7 +242,7 @@ public class MapSøknadUttakPerioder {
                         entry.getKey().getTilOgMed(),
                         false,
                         Landkoder.fraKode(entry.getValue().getLand().getLandkode()),
-                        entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.ÅTTE_UKERS_REGEL : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
+                        entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.INGEN : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
                 .collect(Collectors.toList()));
         }
         return utenlandsoppholdPerioder;
