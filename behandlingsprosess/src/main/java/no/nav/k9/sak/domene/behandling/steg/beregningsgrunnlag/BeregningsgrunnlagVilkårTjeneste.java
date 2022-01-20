@@ -1,8 +1,8 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
-import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -12,6 +12,8 @@ import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
@@ -23,14 +25,17 @@ public class BeregningsgrunnlagVilkårTjeneste {
 
     private final VilkårType vilkårType = VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
     private VilkårTjeneste vilkårTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     protected BeregningsgrunnlagVilkårTjeneste() {
         // CDI Proxy
     }
 
     @Inject
-    public BeregningsgrunnlagVilkårTjeneste(VilkårTjeneste vilkårTjeneste) {
+    public BeregningsgrunnlagVilkårTjeneste(VilkårTjeneste vilkårTjeneste,
+                                            VilkårResultatRepository vilkårResultatRepository) {
         this.vilkårTjeneste = vilkårTjeneste;
+        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     public void lagreAvslåttVilkårresultat(BehandlingskontrollKontekst kontekst,
@@ -51,17 +56,30 @@ public class BeregningsgrunnlagVilkårTjeneste {
         vilkårTjeneste.lagreVilkårresultat(kontekst, vilkårType, vilkårsPeriode, avslagsårsak);
     }
 
-    public void kopierVilkårresultatFraOriginalbehandling(BehandlingskontrollKontekst kontekst,
-                                                          Long originalBehandlingId,
-                                                          List<DatoIntervallEntitet> vilkårsPerioder) {
-        var originalVilkårResultat = vilkårTjeneste.hentVilkårResultat(originalBehandlingId).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
-            .orElseThrow(() -> new IllegalStateException("Forventer vilkårsresultat for original behandling"));
+    public void kopierVilkårresultatVedForlengelse(BehandlingskontrollKontekst kontekst,
+                                                   Long originalBehandlingId,
+                                                   Set<PeriodeTilVurdering> forlengelseperioder) {
+        if (forlengelseperioder.stream().anyMatch(p -> !p.erForlengelse())) {
+            throw new IllegalStateException("Kan kun kopiere resultat ved forlengelse");
+        }
+        var originalVilkårResultat = vilkårTjeneste.hentVilkårResultat(kontekst.getBehandlingId());
+        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(originalVilkårResultat);
+        var vedtattUtfallPåVilkåret = vilkårTjeneste.hentHvisEksisterer(originalBehandlingId)
+            .orElseThrow()
+            .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+            .orElseThrow();
 
-        vilkårsPerioder.forEach(vp -> {
-            var originalResultat = originalVilkårResultat.getPerioder().stream().filter(p -> p.getPeriode().getFomDato().equals(vp.getFomDato()))
-                .findFirst().orElseThrow(() -> new IllegalStateException("Forventer å finne originalt vilkårresultat for periode " + vp));
-            vilkårTjeneste.lagreVilkårresultat(kontekst, vilkårType, vp, originalResultat.getAvslagsårsak());
-        });
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        for (var periode : forlengelseperioder) {
+            var eksisteredeVurdering = vedtattUtfallPåVilkåret.finnPeriodeForSkjæringstidspunkt(periode.getPeriode().getFomDato());
+            var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getPeriode())
+                .forlengelseAv(eksisteredeVurdering);
+            vilkårBuilder.leggTil(vilkårPeriodeBuilder);
+        }
+
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårResultatBuilder.build());
+
     }
 
     public void ryddVedtaksresultatOgVilkår(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet vilkårsPeriode) {

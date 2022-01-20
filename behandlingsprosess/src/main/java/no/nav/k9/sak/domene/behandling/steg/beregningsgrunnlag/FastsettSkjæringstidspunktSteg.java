@@ -108,7 +108,7 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
             if (!forlengelseperioder.isEmpty()) {
                 kalkulusTjeneste.kopier(ref, forlengelseperioder);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
-                beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraOriginalbehandling(kontekst, originalBehandlingId, forlengelseperioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toList()));
+                beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatVedForlengelse(kontekst, originalBehandlingId, forlengelseperioder);
             }
         }
     }
