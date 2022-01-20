@@ -8,14 +8,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -216,6 +215,18 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
         Long fagsakId = behandling.getFagsakId();
         Long behandlingId = behandling.getId();
+        ProsessTaskGruppe gruppe = opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId);
+        if (gruppe == null) {
+            return;
+        }
+        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, gruppe);
+    }
+
+    @Override
+    public ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId) {
+        Long fagsakId = behandling.getFagsakId();
+        Long behandlingId = behandling.getId();
+
         if (behandling.erSaksbehandlingAvsluttet()) {
             throw new IllegalStateException("Utvikler-feil: kan ikke gjenoppta behandling når saksbehandling er avsluttet: behandlingId=" + behandlingId + ", status=" + behandling.getStatus());
         }
@@ -227,7 +238,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         var eksisterendeGjenopptaTask = getEksisterendeTaskAvType(fagsakId, behandlingId, gjenopptaTaskType);
         if (eksisterendeGjenopptaTask.isPresent()) {
             log.warn("Har eksisterende task [{}], oppretter ikke nye for fagsakId={}, behandlingId={}: {}", gjenopptaTaskType, fagsakId, behandlingId, eksisterendeGjenopptaTask.get());
-            return;
+            return null;
         }
 
         gjenopptaBehandlingTask.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
@@ -250,8 +261,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         } else {
             gruppe.setCallIdFraEksisterende();
         }
-        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, gruppe);
-
+        return gruppe;
     }
 
     private void leggTilTasksForInnhentRegisterdataPåNytt(Behandling behandling, ProsessTaskGruppe gruppe) {

@@ -16,6 +16,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -73,17 +74,21 @@ public class InnhentDokumentTjeneste {
 
         var resultat = finnEllerOpprettBehandling(fagsak, behandlingÅrsak);
 
-        ProsessTaskData startTask;
+        ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
         if (resultat.nyopprettet) {
-            startTask = asynkStartBehandling(resultat.behandling);
-            taskRepository.lagre(startTask);
+            taskGruppe.addNesteSekvensiell(asynkStartBehandling(resultat.behandling));
         } else if (prosessenStårStillePåAksjonspunktForSøknadsfrist(resultat.behandling)) {
-            startTask = restartBehandling(resultat.behandling, behandlingÅrsak);
-            taskRepository.lagre(startTask);
+            taskGruppe.addNesteSekvensiell(restartBehandling(resultat.behandling, behandlingÅrsak));
         } else {
-            behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(resultat.behandling, false);
+            taskGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(resultat.behandling, false);
         }
         lagreDokumenter(brevkodeMap, resultat.behandling);
+
+        if (taskGruppe == null) {
+            throw new IllegalStateException("Det er planlagt kjøringer som ikke har garantert rekkefølge. Sjekk oversikt over ventende tasker for eventuelt avbryte disse.");
+        }
+        // Lagrer tasks til slutt for å sikre at disse blir kjørt etter at dokumentasjon er lagret
+        taskRepository.lagre(taskGruppe);
     }
 
     private ProsessTaskData restartBehandling(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
