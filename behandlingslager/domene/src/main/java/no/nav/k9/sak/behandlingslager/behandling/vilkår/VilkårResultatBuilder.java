@@ -84,6 +84,8 @@ public class VilkårResultatBuilder {
     public VilkårResultatBuilder leggTil(VilkårBuilder vilkårBuilder, boolean ignoreFullstendigTidslinje) {
         if (!ignoreFullstendigTidslinje && fullstendigTidslinje != null) {
             vilkårBuilder.medFullstendigTidslinje(fullstendigTidslinje);
+        } else if (ignoreFullstendigTidslinje) {
+            vilkårBuilder.medFullstendigTidslinje(null);
         }
         kladd.leggTilVilkår(vilkårBuilder.build());
         return this;
