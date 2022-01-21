@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.tilsyn;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -40,12 +42,24 @@ public class VurderingDto {
     @Valid
     private Kilde kilde;
 
-    public VurderingDto(Long id, Periode periode, String begrunnelse, Resultat resultat, Kilde kilde) {
+    @JsonProperty(value = "opprettetAv")
+    @Size(max = 20)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String opprettetAv;
+
+    @JsonProperty(value = "opprettetTidspunkt")
+    @Valid
+    private LocalDateTime opprettetTidspunkt;
+
+    public VurderingDto(Long id, Periode periode, String begrunnelse, Resultat resultat, Kilde kilde, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         this.id = id;
         this.periode = periode;
         this.begrunnelse = begrunnelse;
         this.resultat = resultat;
         this.kilde = kilde;
+        this.opprettetAv = opprettetAv;
+        this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
     public Long getId() {
@@ -66,5 +80,13 @@ public class VurderingDto {
 
     public Kilde getKilde() {
         return kilde;
+    }
+
+    public String getOpprettetAv() {
+        return opprettetAv;
+    }
+
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
     }
 }
