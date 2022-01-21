@@ -31,8 +31,8 @@ public class VilkårPeriodeFilterProvider {
         this.forlengelseTjenester = forlengelseTjenester;
     }
 
-    public VilkårPeriodeFilter getFilter(BehandlingReferanse referanse) {
-        return new VilkårPeriodeFilter(referanse, fagsakRepository, vilkårResultatRepository, getForlengelsetjeneste(referanse.getFagsakYtelseType(), referanse.getBehandlingType()));
+    public VilkårPeriodeFilter getFilter(BehandlingReferanse referanse, boolean skalMarkereForlengelser) {
+        return new VilkårPeriodeFilter(skalMarkereForlengelser, referanse, fagsakRepository, vilkårResultatRepository, getForlengelsetjeneste(referanse.getFagsakYtelseType(), referanse.getBehandlingType()));
     };
 
     private ForlengelseTjeneste getForlengelsetjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {

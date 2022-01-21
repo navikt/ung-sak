@@ -201,7 +201,7 @@ public class VilkårTjeneste {
                                                                         boolean skalIgnorereAvslåttePerioder,
                                                                         boolean skalIgnorereAvslagPåKompletthet,
                                                                         boolean skalIgnorerePerioderFraInfotrygd) {
-        var vilkårPeriodeFilter = new VilkårPeriodeFilter(ref, fagsakRepository, vilkårResultatRepository, getForlengelsetjeneste(ref.getFagsakYtelseType(), ref.getBehandlingType()));
+        var vilkårPeriodeFilter = new VilkårPeriodeFilter(false, ref, fagsakRepository, vilkårResultatRepository, getForlengelsetjeneste(ref.getFagsakYtelseType(), ref.getBehandlingType()));
         if (skalIgnorereAvslåttePerioder) {
             vilkårPeriodeFilter.ignorerAvslåttePerioder();
         }

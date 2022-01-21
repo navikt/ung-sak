@@ -75,7 +75,7 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
 
         kopierGrunnlagForForlengelseperioder(ref, kontekst);
 
-        var periodeFilter = periodeFilterProvider.getFilter(ref);
+        var periodeFilter = periodeFilterProvider.getFilter(ref, enableForlengelse);
         periodeFilter.ignorerAvslåttePerioder();
         if (enableForlengelse) {
             periodeFilter.ignorerForlengelseperioder();
@@ -101,7 +101,7 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
 
     private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
         if (enableForlengelse && ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
-            var periodeFilter = periodeFilterProvider.getFilter(ref);
+            var periodeFilter = periodeFilterProvider.getFilter(ref, enableForlengelse);
             periodeFilter.ignorerAvslåttePerioder();
             var allePerioder = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, periodeFilter);
             var forlengelseperioder = allePerioder.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toSet());
