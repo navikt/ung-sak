@@ -21,6 +21,7 @@ import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 
 public class VilkårPeriodeFilter {
 
+    private final boolean skalMarkereForlengelser;
     private final BehandlingReferanse behandlingReferanse;
     private final FagsakRepository fagsakRepository;
     private final VilkårResultatRepository vilkårResultatRepository;
@@ -31,9 +32,10 @@ public class VilkårPeriodeFilter {
     private boolean skalIgnorereForlengelser;
 
 
-    VilkårPeriodeFilter(BehandlingReferanse behandlingReferanse, FagsakRepository fagsakRepository,
+    VilkårPeriodeFilter(boolean skalMarkereForlengelser, BehandlingReferanse behandlingReferanse, FagsakRepository fagsakRepository,
                         VilkårResultatRepository vilkårResultatRepository,
                         ForlengelseTjeneste forlengelseTjeneste) {
+        this.skalMarkereForlengelser = skalMarkereForlengelser;
         this.behandlingReferanse = behandlingReferanse;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -66,12 +68,12 @@ public class VilkårPeriodeFilter {
                 .map(VilkårPeriode::getPeriode).toList();
             periodeFraInfotrygd.forEach(p -> filterPerioder.removeIf(fp -> fp.getPeriode().equals(p)));
         }
-        var forlengelser = forlengelseTjeneste.utledPerioderSomSkalBehandlesSomForlengelse(behandlingReferanse, filterPerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new)), vilkårType);
         if (skalIgnorereForlengelser) {
+            var forlengelser = forlengelseTjeneste.utledPerioderSomSkalBehandlesSomForlengelse(behandlingReferanse, filterPerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new)), vilkårType);
             forlengelser.forEach(p -> filterPerioder.removeIf(fp -> fp.getPeriode().equals(p)));
-        } else {
+        } else if (skalMarkereForlengelser) {
+            var forlengelser = forlengelseTjeneste.utledPerioderSomSkalBehandlesSomForlengelse(behandlingReferanse, filterPerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new)), vilkårType);
             forlengelser.forEach(p -> filterPerioder.forEach(fp -> fp.setErForlengelse(fp.getPeriode().equals(p))));
-
         }
         return Collections.unmodifiableNavigableSet(filterPerioder);
     }

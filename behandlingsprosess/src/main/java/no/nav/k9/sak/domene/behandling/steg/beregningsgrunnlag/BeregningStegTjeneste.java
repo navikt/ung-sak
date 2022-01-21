@@ -54,11 +54,11 @@ public class BeregningStegTjeneste {
     }
 
     public void fortsettBeregningInkludertForlengelser(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
-        fortsettBeregning(ref, stegType, resultatCallback, vilkårPeriodeFilterProvider.getFilter(ref));
+        fortsettBeregning(ref, stegType, resultatCallback, vilkårPeriodeFilterProvider.getFilter(ref, enableForlengelse));
     }
 
     public void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
-        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref, enableForlengelse);
         if (enableForlengelse) {
             periodeFilter.ignorerForlengelseperioder();
         }
