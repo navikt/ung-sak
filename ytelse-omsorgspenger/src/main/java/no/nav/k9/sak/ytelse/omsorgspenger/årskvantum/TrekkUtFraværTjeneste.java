@@ -8,12 +8,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -126,7 +125,7 @@ public class TrekkUtFraværTjeneste {
         søkteFraværsperioder.putAll(fraværFraSøknaderPåFagsak(behandling));
 
         var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), søkteFraværsperioder);
-        log.info("Fant {} inntektsmeldinger og {} søknader knyttet til fagsaken:", countIm(vurdertePerioder), countSøknad(vurdertePerioder));
+        log.info("Fant {} inntektsmeldinger med fraværsperioder og {} søknader knyttet til fagsaken", countIm(vurdertePerioder), countSøknad(vurdertePerioder));
 
         return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
     }
@@ -139,7 +138,7 @@ public class TrekkUtFraværTjeneste {
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
 
-        log.info("Fant inntektsmeldinger knyttet til fagsaken: {}", inntektsmeldingerJournalposter);
+        log.info("Fant {} inntektsmeldinger knyttet til behandlingen", inntektsmeldingerJournalposter);
 
         return hentFraværFraInntektsmeldinger(behandling.getFagsak(), inntektsmeldingerJournalposter);
     }
@@ -152,7 +151,7 @@ public class TrekkUtFraværTjeneste {
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
 
-        log.info("Fant inntektsmeldinger knyttet til fagsaken: {}", inntektsmeldingerJournalposter);
+        log.info("Fant {} inntektsmeldinger knyttet til fagsaken", inntektsmeldingerJournalposter);
 
         return hentFraværFraInntektsmeldinger(fagsak, inntektsmeldingerJournalposter);
     }
