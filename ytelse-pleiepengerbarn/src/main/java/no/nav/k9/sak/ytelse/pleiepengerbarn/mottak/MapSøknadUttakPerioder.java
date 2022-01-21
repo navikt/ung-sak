@@ -229,7 +229,7 @@ public class MapSøknadUttakPerioder {
                     entry.getKey().getTilOgMed(),
                     true,
                     Landkoder.fraKode(entry.getValue().getLand().getLandkode()),
-                    UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
+                    entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.INGEN : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
                 .collect(Collectors.toList());
 
         if (utenlandsopphold.getPerioderSomSkalSlettes() != null) {
