@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -81,7 +80,6 @@ public class PSBBeregningEndringPåForlengelsePeriodeVurderer implements Endring
         var mottatteInntektsmeldinger = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(referanse.getFagsakId())
             .stream()
             .filter(it -> Objects.equals(Brevkode.INNTEKTSMELDING, it.getType()))
-            .filter(it -> it.getMottattTidspunkt().isBefore(originalBehandling.getAvsluttetDato()))
             .toList();
 
         var inntektsmeldingerForrigeVedtak = inntektsmeldinger.stream()
@@ -116,8 +114,8 @@ public class PSBBeregningEndringPåForlengelsePeriodeVurderer implements Endring
         return mottatteInntektsmeldinger.stream()
             .filter(it -> Objects.equals(it.getJournalpostId(), inntektsmelding.getJournalpostId()))
             .findAny()
-            .orElseThrow()
-            .getMottattTidspunkt();
+            .map(MottattDokument::getMottattTidspunkt)
+            .orElse(LocalDateTime.now());
     }
 
     private boolean harMarkertPeriodeForReberegning(EndringPåForlengelseInput input, DatoIntervallEntitet periode) {
