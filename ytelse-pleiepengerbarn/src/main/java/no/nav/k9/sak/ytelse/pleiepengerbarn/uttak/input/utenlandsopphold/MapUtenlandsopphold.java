@@ -30,13 +30,15 @@ public class MapUtenlandsopphold {
             if (dokumenter.size() == 1) {
                 var perioderFraSøknad = dokumenter.iterator().next();
                 for (UtenlandsoppholdPeriode utenlandsoppholdPeriode : perioderFraSøknad.getUtenlandsopphold()) {
+                    var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(
+                        utenlandsoppholdPeriode.getPeriode().getFomDato(),
+                        utenlandsoppholdPeriode.getPeriode().getTomDato(),
+                        new UtenlandsoppholdInfo(map(utenlandsoppholdPeriode.getÅrsak()), utenlandsoppholdPeriode.getLand().getKode())
+                    )));
                     if (utenlandsoppholdPeriode.isAktiv()) {
-                        var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(
-                            utenlandsoppholdPeriode.getPeriode().getFomDato(),
-                            utenlandsoppholdPeriode.getPeriode().getTomDato(),
-                            new UtenlandsoppholdInfo(map(utenlandsoppholdPeriode.getÅrsak()), utenlandsoppholdPeriode.getLand().getKode())
-                        )));
                         resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                    } else {
+                        resultatTimeline = resultatTimeline.disjoint(timeline);
                     }
                 }
             } else {
