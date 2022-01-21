@@ -12,7 +12,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -221,10 +220,25 @@ public class PleiepengerVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
         var periodeMedÅrsaks = new TreeSet<PeriodeMedÅrsak>();
         if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
-            periodeMedÅrsaks.addAll(utledUtvidetPeriode(referanse)
+            periodeMedÅrsaks.addAll(utledUtvidetPeriodeForSykdom(referanse)
+                .toSegments()
                 .stream()
-                .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON))
+                .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+                .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON))
                 .collect(Collectors.toSet()));
+            periodeMedÅrsaks.addAll(etablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse)
+                .toSegments()
+                .stream()
+                .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+                .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON))
+                .collect(Collectors.toSet()));
+            periodeMedÅrsaks.addAll(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId())
+                .toSegments()
+                .stream()
+                .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+                .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON))
+                .collect(Collectors.toSet()));
+            // TODO: Vurder om uttak skal være med inn her
         }
         periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggereMedÅrsak(referanse));
         periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse)
