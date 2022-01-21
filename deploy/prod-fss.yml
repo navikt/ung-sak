@@ -71,11 +71,6 @@ spec:
     - name: APPDYNAMICS_AGENT_ACCOUNT_NAME
       value: PROD
 
-    - name: OPENIDCONNECT_ISSOHOST
-      value: https://isso.adeo.no:443/isso/oauth2
-    - name: OPENIDCONNECT_USERNAME
-      value: k9-sak-p
-
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
       value: privat-k9-aksjonspunkthendelse
@@ -169,12 +164,15 @@ spec:
       value: http://saf.teamdokumenthandtering
 
     # Sikkerhet:
-    - name: OIDC_STS_ISSUER_URL
-      value: https://security-token-service.nais.adeo.no
-    - name: OIDC_STS_JWKS_URL
-      value: https://security-token-service.nais.adeo.no/rest/v1/sts/jwks
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts.adeo.no/SecurityTokenServiceProvider/
+    - name: OIDC_STS_HOST_URL
+      value: https://security-token-service.nais.adeo.no
+    - name: OIDC_OPENAM_HOST_URL
+      value: https://isso.adeo.no:443/isso/oauth2
+    - name: OIDC_OPENAM_CLIENT_ID
+      value: k9-sak-p
+
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
 
@@ -241,12 +239,9 @@ spec:
     - name: PIP_USERS
       value: "srvPDP,srvk9-tilbake,srvsaf"
 
-
     # Pleiepenger infotrygd migrering
     - name: INFOTRYGD_MIGRERING_TILLATELSER
       value: ""
-
-
 
     # FRISINN NYE REGLER 2022
     - name: FRISINN_NYTT_STP_TOGGLE

@@ -71,11 +71,6 @@ spec:
     - name: APPDYNAMICS_AGENT_ACCOUNT_NAME
       value: NON-PROD
 
-    - name: OPENIDCONNECT_ISSOHOST
-      value: https://isso-q.adeo.no:443/isso/oauth2
-    - name: OPENIDCONNECT_USERNAME
-      value: k9-sak-q1
-
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
       value: privat-k9-aksjonspunkthendelse
@@ -169,10 +164,13 @@ spec:
       value: http://saf-q1.teamdokumenthandtering
 
     # Sikkerhet:
-    - name: OIDC_STS_ISSUER_URL
+    - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
-    - name: OIDC_STS_JWKS_URL
-      value: https://security-token-service.nais.preprod.local/rest/v1/sts/jwks
+    - name: OIDC_OPENAM_HOST_URL
+      value: https://isso-q.adeo.no:443/isso/oauth2
+    - name: OIDC_OPENAM_CLIENT_ID
+      value: k9-sak-q1
+
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
     - name: ABAC_ATTRIBUTT_DRIFT
