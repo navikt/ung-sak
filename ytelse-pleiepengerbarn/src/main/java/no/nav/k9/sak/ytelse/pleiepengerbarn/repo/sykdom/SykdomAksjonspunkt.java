@@ -7,6 +7,7 @@ public class SykdomAksjonspunkt {
     private final boolean manglerGodkjentLegeerklæring;
     private final boolean manglerVurderingAvKontinuerligTilsynOgPleie;
     private final boolean manglerVurderingAvToOmsorgspersoner;
+    private final boolean manglerVurderingAvILivetsSluttfase;
     private final boolean harDataSomIkkeHarBlittTattMedIBehandling;
     private final boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
 
@@ -16,13 +17,14 @@ public class SykdomAksjonspunkt {
                               boolean manglerGodkjentLegeerklæring,
                               boolean manglerVurderingAvKontinuerligTilsynOgPleie,
                               boolean manglerVurderingAvToOmsorgspersoner,
-                              boolean harDataSomIkkeHarBlittTattMedIBehandling,
+                              boolean manglerVurderingAvILivetsSluttfase, boolean harDataSomIkkeHarBlittTattMedIBehandling,
                               boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger) {
         this.harUklassifiserteDokumenter = harUklassifiserteDokumenter;
         this.manglerDiagnosekode = manglerDiagnosekode;
         this.manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring;
         this.manglerVurderingAvKontinuerligTilsynOgPleie = manglerVurderingAvKontinuerligTilsynOgPleie;
         this.manglerVurderingAvToOmsorgspersoner = manglerVurderingAvToOmsorgspersoner;
+        this.manglerVurderingAvILivetsSluttfase = manglerVurderingAvILivetsSluttfase;
         this.harDataSomIkkeHarBlittTattMedIBehandling = harDataSomIkkeHarBlittTattMedIBehandling;
         this.nyttDokumentHarIkkekontrollertEksisterendeVurderinger = nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
     }
@@ -57,6 +59,10 @@ public class SykdomAksjonspunkt {
         return manglerVurderingAvKontinuerligTilsynOgPleie;
     }
 
+    public boolean isManglerVurderingAvILivetsSluttfase() {
+        return manglerVurderingAvILivetsSluttfase;
+    }
+
     public boolean isManglerVurderingAvToOmsorgspersoner() {
         return manglerVurderingAvToOmsorgspersoner;
     }
@@ -71,6 +77,7 @@ public class SykdomAksjonspunkt {
 
     public static SykdomAksjonspunkt bareFalse() {
         return new SykdomAksjonspunkt(
+            false,
             false,
             false,
             false,
