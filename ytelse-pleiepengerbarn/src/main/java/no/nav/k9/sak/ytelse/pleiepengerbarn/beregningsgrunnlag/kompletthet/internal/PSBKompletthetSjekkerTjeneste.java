@@ -1,22 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal;
 
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
@@ -38,6 +24,12 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.KompletthetsAksjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.TidligereEtterlysning;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.PSBKompletthetsjekker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Dependent
 public class PSBKompletthetSjekkerTjeneste {
@@ -231,6 +223,8 @@ public class PSBKompletthetSjekkerTjeneste {
             throw new IllegalStateException("Fant flere vilkårsperioder(" + relevantPeriode.size() + ") relevant for " + periode);
         } else if (!relevantPeriode.isEmpty()) {
             beregningsgrunnlagVilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, relevantPeriode.get(0), periode.getBegrunnelse(), Avslagsårsak.MANGLENDE_INNTEKTSGRUNNLAG);
+        } else {
+            log.info("Forsøker å avslå periode({}) hvor vilkårsperioden ikke eksisterer / er til vurdering. perioder={}", periode.getSkjæringstidspunkt(), perioderTilVurdering);
         }
     }
 }
