@@ -77,6 +77,7 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
 
         var periodeFilter = periodeFilterProvider.getFilter(ref, enableForlengelse);
         periodeFilter.ignorerAvslåttePerioder();
+        periodeFilter.ignorerAvslagPåKompletthet();
         if (enableForlengelse) {
             periodeFilter.ignorerForlengelseperioder();
         }

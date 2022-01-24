@@ -67,6 +67,7 @@ public class BeregningStegTjeneste {
 
     private void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback, VilkårPeriodeFilter periodeFilter) {
         periodeFilter.ignorerAvslåttePerioder();
+        periodeFilter.ignorerAvslagPåKompletthet();
         var perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, periodeFilter);
 
         if (perioderTilVurdering.isEmpty()) {
