@@ -222,6 +222,7 @@ public class PSBKompletthetSjekkerTjeneste {
         if (relevantPeriode.size() > 1) {
             throw new IllegalStateException("Fant flere vilkårsperioder(" + relevantPeriode.size() + ") relevant for " + periode);
         } else if (!relevantPeriode.isEmpty()) {
+            log.info("Avslår periode({}) pga manglende grunnlag", relevantPeriode.get(0));
             beregningsgrunnlagVilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, relevantPeriode.get(0), periode.getBegrunnelse(), Avslagsårsak.MANGLENDE_INNTEKTSGRUNNLAG);
         } else {
             log.info("Forsøker å avslå periode({}) hvor vilkårsperioden ikke eksisterer / er til vurdering. perioder={}", periode.getSkjæringstidspunkt(), perioderTilVurdering);
