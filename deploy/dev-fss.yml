@@ -217,7 +217,7 @@ spec:
     - name: FORLENGELSE_MEDLEMSKAP_ENABLET
       value: "true"
     - name: FORLENGELSE_BEREGNING_ENABLET
-      value: "false"
+      value: "true"
     - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
       value: "true"
     - name: HENLEGGELSE_PSB_ENABLET
