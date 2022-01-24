@@ -6,13 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.hendelse.EventHendelse;
@@ -25,6 +24,7 @@ import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktTilstandDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingProsessHendelse;
 
 @ApplicationScoped
@@ -128,6 +128,12 @@ public class BehandlingskontrollEventObserver {
             .medPleietrengendeAktørId(fagsak.getPleietrengendeAktørId())
             .medRelatertPartAktørId(fagsak.getRelatertPersonAktørId())
             .medAnsvarligBeslutterForTotrinn(behandling.getAnsvarligBeslutter())
+            .medAksjonspunktTilstander(behandling.getAksjonspunkter().stream().map(it ->
+                new AksjonspunktTilstandDto(
+                    it.getAksjonspunktDefinisjon().getKode(),
+                    it.getStatus().getKode(),
+                    it.getVenteårsak().getKode())
+            ).toList())
             .build();
     }
 }
