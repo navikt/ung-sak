@@ -1,7 +1,7 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: k9-infotrygdFeedHendelse
+  name: infotrygdFeedHendelse
   namespace: k9saksbehandling
   labels:
     team: k9saksbehandling

@@ -10,7 +10,7 @@ spec:
   config:
     cleanupPolicy: delete  # delete, compact
     minimumInSyncReplicas: 1
-    partitions: 1
+    partitions: 3
     replication: 3  # see min/max requirements
     retentionBytes: -1  # -1 means unlimited
     retentionHours: 2160 # 90 dager
