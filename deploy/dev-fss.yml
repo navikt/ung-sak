@@ -230,6 +230,8 @@ spec:
       value: "true"
     - name: K9_RAPID_AIVEN
       value: "true"
+    - name: UTENLANDSPERIODER_MAPPING_ENABLET
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

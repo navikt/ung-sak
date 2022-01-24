@@ -37,6 +37,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.MapArbeid;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.PerioderMedInaktivitetUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.ferie.MapFerie;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.tilsyn.MapTilsyn;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.utenlandsopphold.MapUtenlandsopphold;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.uttak.MapUttak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.*;
 
@@ -45,13 +46,16 @@ public class MapInputTilUttakTjeneste {
 
     private HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private String unntak;
+    private Boolean utenlandsperioderMappingEnablet;
 
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
-                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
+                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
+                                    @KonfigVerdi(value = "UTENLANDSPERIODER_MAPPING_ENABLET", defaultVerdi = "false") Boolean utenlandsperioderMappingEnablet) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
+        this.utenlandsperioderMappingEnablet = utenlandsperioderMappingEnablet;
     }
 
 
@@ -121,7 +125,13 @@ public class MapInputTilUttakTjeneste {
         var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
         final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
-        var utenlandsoppholdperioder = new HashMap<LukketPeriode, UtenlandsoppholdInfo>(); /* TODO: fyll inn utenlandsoppholdperioder her */
+        Map<LukketPeriode, UtenlandsoppholdInfo> utenlandsoppholdperioder;
+        if (utenlandsperioderMappingEnablet) {
+            utenlandsoppholdperioder = new MapUtenlandsopphold().map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
+        } else {
+            utenlandsoppholdperioder = Map.of();
+        }
+
 
         return new Uttaksgrunnlag(
             mapTilYtelseType(behandling),
