@@ -1,24 +1,9 @@
 package no.nav.k9.sak.domene.registerinnhenting;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
@@ -53,14 +38,17 @@ import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.registerinnhenting.impl.SaksopplysningerFeil;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.AlleRelasjonFilter;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.IngenRelasjonFilter;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.OmsorgspengerRelasjonsFilter;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.PleietrengendeRelasjonsFilter;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.YtelsesspesifikkRelasjonsFilter;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.*;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.AktørId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class RegisterdataInnhenter {
@@ -177,7 +165,6 @@ public class RegisterdataInnhenter {
             if (personinfo != null) {
                 log.info("Fant personinfo for angitt pleietrengende fra fagsak");
                 if (harAktør(informasjonBuilder, personinfo)) {
-                    log.info("har allerede mappet pleietrengende");
                     return;
                 }
                 mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
