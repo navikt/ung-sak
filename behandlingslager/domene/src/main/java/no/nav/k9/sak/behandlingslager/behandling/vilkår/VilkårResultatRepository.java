@@ -1,20 +1,9 @@
 package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 
-import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NavigableSet;
-import java.util.Objects;
-import java.util.Optional;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -25,6 +14,11 @@ import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Periode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.Date;
+import java.util.*;
 
 @Dependent
 public class VilkårResultatRepository {
@@ -82,9 +76,7 @@ public class VilkårResultatRepository {
         var differ = vilkårsDiffer();
 
         if (differ.areDifferent(gammeltResultat, nyttResultat)) {
-            if (vilkårsResultat.isPresent()) {
-                deaktiverVilkårsResultat(vilkårsResultat.get());
-            }
+            vilkårsResultat.ifPresent(this::deaktiverVilkårsResultat);
 
             var nyttVilkårsResultat = new VilkårsResultat(behandlingId, nyttResultat);
             entityManager.persist(nyttResultat);
