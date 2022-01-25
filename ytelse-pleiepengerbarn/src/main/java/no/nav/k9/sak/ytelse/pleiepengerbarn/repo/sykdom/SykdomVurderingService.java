@@ -76,7 +76,6 @@ public class SykdomVurderingService {
 
         final boolean harUklassifiserteDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
         final boolean manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring(pleietrengende);
-        final boolean manglerDiagnosekode = sykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnosekoder().isEmpty();
 
         final boolean eksisterendeVurderinger = !sykdomVurderingRepository.hentSisteVurderingerFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, pleietrengende).isEmpty();
         boolean dokumenterUtenUtkvittering = !sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(pleietrengende).isEmpty();
@@ -84,17 +83,20 @@ public class SykdomVurderingService {
 
         final boolean harDataSomIkkeHarBlittTattMedIBehandling = sykdomGrunnlagService.harDataSomIkkeHarBlittTattMedIBehandling(behandling);
 
+        boolean manglerDiagnosekode;
         boolean manglerVurderingAvKontinuerligTilsynOgPleie;
         boolean manglerVurderingAvToOmsorgspersoner;
         boolean manglerVurderingAvILivetsSluttfase;
 
         switch (behandling.getFagsakYtelseType()) {
             case PLEIEPENGER_SYKT_BARN -> {
+                manglerDiagnosekode = sykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnosekoder().isEmpty();
                 manglerVurderingAvKontinuerligTilsynOgPleie = !hentVurderingerForKontinuerligTilsynOgPleie(behandling).getResterendeVurderingsperioder().isEmpty();
                 manglerVurderingAvToOmsorgspersoner = !hentVurderingerForToOmsorgspersoner(behandling).getResterendeVurderingsperioder().isEmpty();
                 manglerVurderingAvILivetsSluttfase = false;
             }
             case PLEIEPENGER_NÆRSTÅENDE -> {
+                manglerDiagnosekode = false;
                 manglerVurderingAvToOmsorgspersoner = false;
                 manglerVurderingAvKontinuerligTilsynOgPleie = false;
                 manglerVurderingAvILivetsSluttfase = !hentVurderingerForILivetsSluttfase(behandling).getResterendeVurderingsperioder().isEmpty();
