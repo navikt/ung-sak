@@ -12,7 +12,6 @@ on:
           - topic-infotrygdfeedhendelse.yml
           - topic-stonadsstatistikk.yml
           - topic-vedtakhendelse.yml
-          - topic-dokumenthendelse.yml
       prod:
         type: boolean
         description: Deploy to prod
