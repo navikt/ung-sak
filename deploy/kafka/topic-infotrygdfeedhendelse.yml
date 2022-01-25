@@ -1,7 +1,7 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: infotrygdFeedHendelse
+  name: infotrygdfeedhendelse
   namespace: k9saksbehandling
   labels:
     team: k9saksbehandling
@@ -13,7 +13,7 @@ spec:
     partitions: 1
     replication: 3  # see min/max requirements
     retentionBytes: -1  # -1 means unlimited
-    retentionHours: 2160 # 90 dager
+    retentionHours: 720 # 30 dager
   acl:
     - team: k9saksbehandling
       application: k9-sak

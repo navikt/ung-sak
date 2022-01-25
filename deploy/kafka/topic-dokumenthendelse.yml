@@ -19,10 +19,13 @@ spec:
       application: k9-sak
       access: write
     - team: k9saksbehandling
-      application: k9-formidling
+      application: k9-formidling-dokumentdata
       access: write
     - team: k9saksbehandling
       application: k9-punsj
+      access: write
+    - team: k9saksbehandling
+      application: k9-klage
       access: write
     - team: omsorgspenger
       application: omsorgspenger-rammemeldinger
