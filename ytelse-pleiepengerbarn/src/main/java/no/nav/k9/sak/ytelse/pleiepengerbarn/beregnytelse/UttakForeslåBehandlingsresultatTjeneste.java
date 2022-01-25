@@ -74,8 +74,8 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
             return true;
         }
         Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
-        var harIngenPerioderForMedisinsk = harIngenPerioderForMedisinsk(behandling, vilkårene);
-        if (harIngenPerioderForMedisinsk) {
+        var harIngenPerioderForSykdomsvilkår = harIngenPerioderForSykdomsvilkår(behandling, vilkårene);
+        if (harIngenPerioderForSykdomsvilkår) {
             return true;
         }
 
@@ -93,7 +93,7 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
             return false;
         }
 
-        Set<VilkårType> sykdomVilkårTyper = finnVilkårsperioderTilVurderingTjeneste(behandling).definerendeVilkår();
+        Set<VilkårType> sykdomVilkårTyper = sykdomVilkårTyper(behandling);
         boolean harAvslagForVilkårSomIkkeErSykdomsvilkår = avslåtteVilkår.stream().anyMatch(v -> !sykdomVilkårTyper.contains(v));
         if (harAvslagForVilkårSomIkkeErSykdomsvilkår) {
             return true;
@@ -103,9 +103,8 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
             .allMatch(vilkårtype -> harIngenOppfylteVilkårsPerioder(vilkårTidslinjer.get(vilkårtype)));
     }
 
-    private boolean harIngenPerioderForMedisinsk(Behandling behandling, Vilkårene vilkårene) {
-        VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = finnVilkårsperioderTilVurderingTjeneste(behandling);
-        return vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()
+    private boolean harIngenPerioderForSykdomsvilkår(Behandling behandling, Vilkårene vilkårene) {
+        return sykdomVilkårTyper(behandling)
             .stream()
             .allMatch(it -> harIngenPerioder(it, vilkårene));
     }
@@ -114,7 +113,11 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
         return vilkårene.getVilkår(vilkårType).map(Vilkår::getPerioder).orElse(List.of()).isEmpty();
     }
 
-    protected VilkårsPerioderTilVurderingTjeneste finnVilkårsperioderTilVurderingTjeneste(Behandling behandling) {
+    private Set<VilkårType> sykdomVilkårTyper(Behandling behandling) {
+        return finnVilkårsperioderTilVurderingTjeneste(behandling).definerendeVilkår();
+    }
+
+    private VilkårsPerioderTilVurderingTjeneste finnVilkårsperioderTilVurderingTjeneste(Behandling behandling) {
         return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
     }
 }

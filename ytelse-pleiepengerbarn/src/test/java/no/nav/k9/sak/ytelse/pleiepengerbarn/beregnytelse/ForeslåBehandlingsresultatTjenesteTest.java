@@ -47,6 +47,7 @@ import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakInMemoryTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
@@ -105,16 +106,11 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         revurderingBehandlingsresultatutleder = Mockito.spy(new DefaultRevurderingBehandlingsresultatutleder());
 
-        tjeneste = new UttakForeslåBehandlingsresultatTjeneste(repositoryProvider,
+        tjeneste = new UttakForeslåBehandlingsresultatTjeneste(
+            repositoryProvider,
             vedtakVarselRepository,
-            null,
-            revurderingBehandlingsresultatutleder) {
-
-            @Override
-            protected VilkårsPerioderTilVurderingTjeneste finnVilkårsperioderTilVurderingTjeneste(Behandling behandling) {
-                return vilkårsPerioderTilVurderingTjeneste;
-            }
-        };
+            new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
+            revurderingBehandlingsresultatutleder);
     }
 
     public void setEntityManager(EntityManager entityManager) {
