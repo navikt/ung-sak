@@ -82,16 +82,25 @@ public class SykdomVurderingService {
         boolean dokumenterUtenUtkvittering = !sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(pleietrengende).isEmpty();
         final boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger = dokumenterUtenUtkvittering && eksisterendeVurderinger;
 
-        final var ktp = hentVurderingerForKontinuerligTilsynOgPleie(behandling);
-        final boolean manglerVurderingAvKontinuerligTilsynOgPleie = !ktp.getResterendeVurderingsperioder().isEmpty();
-
-        final var too = hentVurderingerForToOmsorgspersoner(behandling);
-        final boolean manglerVurderingAvToOmsorgspersoner = !too.getResterendeVurderingsperioder().isEmpty();
-
-        final var slu = hentVurderingerForILivetsSluttfase(behandling);
-        final boolean manglerVurderingAvILivetsSluttfase = !slu.getResterendeVurderingsperioder().isEmpty();
-
         final boolean harDataSomIkkeHarBlittTattMedIBehandling = sykdomGrunnlagService.harDataSomIkkeHarBlittTattMedIBehandling(behandling);
+
+        boolean manglerVurderingAvKontinuerligTilsynOgPleie;
+        boolean manglerVurderingAvToOmsorgspersoner;
+        boolean manglerVurderingAvILivetsSluttfase;
+
+        switch (behandling.getFagsakYtelseType()) {
+            case PLEIEPENGER_SYKT_BARN -> {
+                manglerVurderingAvKontinuerligTilsynOgPleie = !hentVurderingerForKontinuerligTilsynOgPleie(behandling).getResterendeVurderingsperioder().isEmpty();
+                manglerVurderingAvToOmsorgspersoner = !hentVurderingerForToOmsorgspersoner(behandling).getResterendeVurderingsperioder().isEmpty();
+                manglerVurderingAvILivetsSluttfase = false;
+            }
+            case PLEIEPENGER_NÆRSTÅENDE -> {
+                manglerVurderingAvToOmsorgspersoner = false;
+                manglerVurderingAvKontinuerligTilsynOgPleie = false;
+                manglerVurderingAvILivetsSluttfase = !hentVurderingerForILivetsSluttfase(behandling).getResterendeVurderingsperioder().isEmpty();
+            }
+            default -> throw new IllegalArgumentException("Ikke-støttet ytelstype: " + behandling.getFagsakYtelseType());
+        }
 
         return new SykdomAksjonspunkt(
             harUklassifiserteDokumenter,

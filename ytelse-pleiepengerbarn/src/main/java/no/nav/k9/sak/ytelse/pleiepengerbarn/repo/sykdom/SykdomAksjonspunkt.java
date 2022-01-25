@@ -17,7 +17,8 @@ public class SykdomAksjonspunkt {
                               boolean manglerGodkjentLegeerklæring,
                               boolean manglerVurderingAvKontinuerligTilsynOgPleie,
                               boolean manglerVurderingAvToOmsorgspersoner,
-                              boolean manglerVurderingAvILivetsSluttfase, boolean harDataSomIkkeHarBlittTattMedIBehandling,
+                              boolean manglerVurderingAvILivetsSluttfase,
+                              boolean harDataSomIkkeHarBlittTattMedIBehandling,
                               boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger) {
         this.harUklassifiserteDokumenter = harUklassifiserteDokumenter;
         this.manglerDiagnosekode = manglerDiagnosekode;
@@ -40,6 +41,7 @@ public class SykdomAksjonspunkt {
             !manglerGodkjentLegeerklæring &&
             !manglerVurderingAvKontinuerligTilsynOgPleie &&
             !manglerVurderingAvToOmsorgspersoner &&
+            !manglerVurderingAvILivetsSluttfase &&
             !nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
     }
 
