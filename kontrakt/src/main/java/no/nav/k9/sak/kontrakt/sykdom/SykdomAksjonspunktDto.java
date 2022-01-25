@@ -1,11 +1,11 @@
 package no.nav.k9.sak.kontrakt.sykdom;
 
-import jakarta.validation.Valid;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.validation.Valid;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -36,6 +36,10 @@ public class SykdomAksjonspunktDto {
     @Valid
     private final boolean manglerVurderingAvToOmsorgspersoner;
 
+    @JsonProperty(value = "manglerVurderingAvILivetsSluttfase")
+    @Valid
+    private final boolean manglerVurderingAvILivetsSluttfase;
+
     @JsonProperty(value = "harDataSomIkkeHarBlittTattMedIBehandling")
     @Valid
     private final boolean harDataSomIkkeHarBlittTattMedIBehandling;
@@ -51,6 +55,7 @@ public class SykdomAksjonspunktDto {
                                  boolean manglerGodkjentLegeerklæring,
                                  boolean manglerVurderingAvKontinuerligTilsynOgPleie,
                                  boolean manglerVurderingAvToOmsorgspersoner,
+                                 boolean manglerVurderingAvILivetsSluttfase,
                                  boolean harDataSomIkkeHarBlittTattMedIBehandling,
                                  boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger) {
         this.kanLøseAksjonspunkt = kanLøseAksjonspunkt;
@@ -59,10 +64,10 @@ public class SykdomAksjonspunktDto {
         this.manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring;
         this.manglerVurderingAvKontinuerligTilsynOgPleie = manglerVurderingAvKontinuerligTilsynOgPleie;
         this.manglerVurderingAvToOmsorgspersoner = manglerVurderingAvToOmsorgspersoner;
+        this.manglerVurderingAvILivetsSluttfase = manglerVurderingAvILivetsSluttfase;
         this.harDataSomIkkeHarBlittTattMedIBehandling = harDataSomIkkeHarBlittTattMedIBehandling;
         this.nyttDokumentHarIkkekontrollertEksisterendeVurderinger = nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
     }
-
 
     public boolean isKanLøseAksjonspunkt() {
         return kanLøseAksjonspunkt;
@@ -86,6 +91,10 @@ public class SykdomAksjonspunktDto {
 
     public boolean isManglerVurderingAvToOmsorgspersoner() {
         return manglerVurderingAvToOmsorgspersoner;
+    }
+
+    public boolean isManglerVurderingAvILivetsSluttfase() {
+        return manglerVurderingAvILivetsSluttfase;
     }
 
     public boolean isHarDataSomIkkeHarBlittTattMedIBehandling() {
