@@ -30,11 +30,15 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
         @KonfigVerdi(value = "KAFKA_OMS_RAPID_TOPIC", defaultVerdi = "omsorgspenger.k9-rapid-v2") String topic,
         @KonfigVerdi(value = "KAFKA_BROKERS") String bootstrapServers,
         @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH") String truststorePath,
-        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD") String truststorePassword,
+        @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PASSWORD", required = false) String truststorePassword,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH") String keystorePath,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD") String credstorePassword) {
 
         Map<String, String> optionalProperties = Collections.emptyMap();
+
+        if(truststorePassword == null) {
+            truststorePassword = credstorePassword;
+        }
         this.clientId = clientId();
         this.topic = topic;
         this.producer = new KafkaProducerAiven(topic, bootstrapServers, truststorePath, truststorePassword, keystorePath, credstorePassword, clientId, optionalProperties);
