@@ -2,7 +2,6 @@ package no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -32,9 +31,8 @@ public class ForeslåVedtakAksjonspunktOppdaterer implements AksjonspunktOppdate
 
     @Override
     public OppdateringResultat oppdater(ForeslaVedtakAksjonspunktDto dto, AksjonspunktOppdaterParameter param) {
-        String begrunnelse = dto.getBegrunnelse();
         Behandling behandling = param.getBehandling();
-        vedtaksbrevHåndterer.oppdaterBegrunnelse(behandling, begrunnelse);
+        vedtaksbrevHåndterer.oppdaterBegrunnelse(behandling);
 
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         if (behandling.getFagsakYtelseType().equals(FagsakYtelseType.PSB)) {
@@ -43,9 +41,9 @@ public class ForeslåVedtakAksjonspunktOppdaterer implements AksjonspunktOppdate
             }
         }
 
-        vedtaksbrevHåndterer.oppdaterVedtaksbrev(dto, param, builder);
+        vedtaksbrevHåndterer.håndterTotrinnOgHistorikkinnslag(dto, param, builder);
 
-        vedtaksbrevHåndterer.oppdaterVedtaksvarsel(dto, param.getBehandlingId());
+        vedtaksbrevHåndterer.oppdaterVedtaksvarsel(dto, param.getBehandlingId(), param.getRef().getFagsakYtelseType());
 
         return builder.build();
     }

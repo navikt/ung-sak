@@ -8,6 +8,11 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -21,30 +26,20 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.k9.kodeverk.dokument.DokumentMalType;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.dokument.bestill.DokumentBehandlingTjeneste;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.vedtak.VedtakVarselDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Path("")
 @ApplicationScoped
@@ -57,7 +52,6 @@ public class BrevRestTjeneste {
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
-    private DokumentBehandlingTjeneste dokumentBehandlingTjeneste;
     private VedtakVarselRepository vedtakVarselRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
 
@@ -70,14 +64,12 @@ public class BrevRestTjeneste {
                             BehandlingVedtakRepository behandlingVedtakRepository,
                             VilkårResultatRepository vilkårResultatRepository,
                             BehandlingRepository behandlingRepository,
-                            DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
-                            DokumentBehandlingTjeneste dokumentBehandlingTjeneste) {
+                            DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
         this.vedtakVarselRepository = vedtakVarselRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
-        this.dokumentBehandlingTjeneste = dokumentBehandlingTjeneste;
     }
 
     @POST
@@ -90,28 +82,6 @@ public class BrevRestTjeneste {
         // FIXME: bør støttes behandlingUuid i formidling
         LOGGER.info("Brev med brevmalkode={} bestilt på behandlingId={}", bestillBrevDto.getBrevmalkode(), bestillBrevDto.getBehandlingId());
         dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.SAKSBEHANDLER);
-        oppdaterBehandlingBasertPåManueltBrev(DokumentMalType.fraKode(bestillBrevDto.getBrevmalkode()), bestillBrevDto.getBehandlingId());
-    }
-
-    private void oppdaterBehandlingBasertPåManueltBrev(DokumentMalType brevmalkode, Long behandlingId) {
-        if (DokumentMalType.REVURDERING_DOK.equals(brevmalkode)) {
-            settBehandlingPåVent(Venteårsak.AVV_RESPONS_REVURDERING, behandlingId);
-            registrerVarselOmRevurdering(behandlingId);
-        } else if (DokumentMalType.FORLENGET_DOK.equals(brevmalkode)) {
-            dokumentBehandlingTjeneste.utvidBehandlingsfristManuelt(behandlingId);
-        } else if (DokumentMalType.FORLENGET_MEDL_DOK.equals(brevmalkode)) {
-            dokumentBehandlingTjeneste.utvidBehandlingsfristManueltMedlemskap(behandlingId);
-        }
-    }
-
-    private void registrerVarselOmRevurdering(Long behandlingId) {
-        var varsel = vedtakVarselRepository.hentHvisEksisterer(behandlingId).orElse(new VedtakVarsel());
-        varsel.setHarSendtVarselOmRevurdering(true);
-        vedtakVarselRepository.lagre(behandlingId, varsel);
-    }
-
-    private void settBehandlingPåVent(Venteårsak avvResponsRevurdering, Long behandlingId) {
-        dokumentBehandlingTjeneste.settBehandlingPåVent(behandlingId, avvResponsRevurdering, null);
     }
 
     /** @deprecated brukes bare av FRISINN (per 2021-03-22). */
