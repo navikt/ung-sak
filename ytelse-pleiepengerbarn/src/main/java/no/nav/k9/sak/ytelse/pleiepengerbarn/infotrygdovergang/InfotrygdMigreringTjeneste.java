@@ -15,14 +15,16 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import org.jetbrains.annotations.NotNull;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -54,6 +56,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang.infotrygd.Infotryg
 @ApplicationScoped
 public class InfotrygdMigreringTjeneste {
 
+    private static final Logger log = LoggerFactory.getLogger(InfotrygdMigreringTjeneste.class);
 
     public static final String GAMMEL_ORDNING_KODE = "PB";
     public static final int ÅR_2022 = 2022;
@@ -84,10 +87,11 @@ public class InfotrygdMigreringTjeneste {
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
         var psbInfotrygdFilter = finnPSBInfotryd(ref.getBehandlingId(), ref.getAktørId());
-        List<YtelseAnvist> anvistePeriodeSomManglerSøknad = finnAnvistePerioderFraInfotrygdUtenSøknad(perioderTilVurdering, psbInfotrygdFilter, ref.getBehandlingId());
+        var perioderSomManglerSøknad = finnPerioderFraInfotrygdUtenSøknad(perioderTilVurdering, psbInfotrygdFilter, ref.getBehandlingId());
 
         var aksjonspunkter = new ArrayList<AksjonspunktResultat>();
-        if (!anvistePeriodeSomManglerSøknad.isEmpty()) {
+        if (!perioderSomManglerSøknad.isEmpty()) {
+            log.info("Fant perioder i infotrygd som mangler søknad: " + perioderSomManglerSøknad);
             aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE));
         }
 
@@ -269,17 +273,36 @@ public class InfotrygdMigreringTjeneste {
                 y.getKilde().equals(Fagsystem.INFOTRYGD));
     }
 
-    private List<YtelseAnvist> finnAnvistePerioderFraInfotrygdUtenSøknad(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, YtelseFilter psbInfotrygdFilter, Long behandlingId) {
+    private List<DatoIntervallEntitet> finnPerioderFraInfotrygdUtenSøknad(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, YtelseFilter psbInfotrygdFilter, Long behandlingId) {
         var fullstendigePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandlingId);
         if (!harPerioderTilVurderingIEllerEtterÅr(perioderTilVurdering, ÅR_2022)) {
             return Collections.emptyList();
         }
-        var anvistePerioderUtenSøknad = psbInfotrygdFilter.getFiltrertYtelser().stream()
+        var ytelseTidslinje = new LocalDateTimeline<>(psbInfotrygdFilter.getFiltrertYtelser().stream()
             .flatMap(y -> y.getYtelseAnvist().stream())
-            .filter(ya -> harAnvisningIEllerEtterÅr(ya, ÅR_2022))
-            .filter(ya -> !dekkesAvSøknad(fullstendigePerioder, ya, ÅR_2022))
-            .collect(Collectors.toList());
-        return anvistePerioderUtenSøknad;
+            .map(ya -> new LocalDateSegment<>(ya.getAnvistFOM(), ya.getAnvistTOM(), true))
+            .collect(Collectors.toList()), StandardCombinators::coalesceLeftHandSide);
+        var søknadTidslinje = new LocalDateTimeline<>(fullstendigePerioder.stream()
+            .map(this::utvidetOverHelgSegment)
+            .collect(Collectors.toList()), StandardCombinators::coalesceLeftHandSide);
+        var tidslinje2022 = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(
+            LocalDate.of(2022, 1, 1),
+            LocalDate.of(2022, 12, 31), true)));
+
+        var ytelseIkkeSøktForTidslinje = ytelseTidslinje.intersection(tidslinje2022)
+            .disjoint(søknadTidslinje);
+
+        return ytelseIkkeSøktForTidslinje.toSegments()
+            .stream().map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
+            .toList();
+    }
+
+    private LocalDateSegment<Boolean> utvidetOverHelgSegment(DatoIntervallEntitet s) {
+        var tomUkedag = s.getTomDato().getDayOfWeek();
+        var fomUkedag = s.getFomDato().getDayOfWeek();
+        var tom = tomUkedag.equals(DayOfWeek.FRIDAY) || tomUkedag.equals(DayOfWeek.SATURDAY) ? s.getTomDato().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)) : s.getTomDato();
+        var fom = fomUkedag.equals(DayOfWeek.MONDAY) ? s.getFomDato().with(TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY)) : s.getFomDato();
+        return new LocalDateSegment<>(fom, tom, true);
     }
 
     private boolean harPerioderTilVurderingIEllerEtterÅr(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, int år) {

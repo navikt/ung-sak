@@ -206,6 +206,22 @@ class InfotrygdMigreringTjenesteTest {
     }
 
     @Test
+    void skal_ikke_returnere_aksjonspunkt_når_periode_i_forrige_år_som_ikke_er_søkt_for() {
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(3), STP.minusMonths(1).plusDays(10)));
+        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
+            .thenReturn(new TreeSet<>((Set.of(
+                DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2022, 1, 3), STP.minusMonths(1).plusDays(10)),
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
+            ))));
+        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
+
+        var aksjonspunkter = tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling, STP));
+
+        assertThat(aksjonspunkter.size()).isEqualTo(0);
+    }
+
+
+    @Test
     void skal_returnere_aksjonspunkt_når_annen_part_har_overlappende_periode_i_infotrygd() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)));
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
