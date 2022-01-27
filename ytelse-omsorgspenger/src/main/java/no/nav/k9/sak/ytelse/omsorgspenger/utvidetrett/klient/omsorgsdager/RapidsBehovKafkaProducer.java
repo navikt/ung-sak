@@ -12,6 +12,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -36,12 +37,17 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
 
         Map<String, String> optionalProperties = Collections.emptyMap();
 
-        if(truststorePassword == null) {
-            truststorePassword = credstorePassword;
-        }
         this.clientId = clientId();
         this.topic = topic;
-        this.producer = new KafkaProducerAiven(topic, bootstrapServers, truststorePath, truststorePassword, keystorePath, credstorePassword, clientId, optionalProperties);
+        this.producer = new KafkaProducerAiven(
+            topic,
+            bootstrapServers,
+            truststorePath,
+            Objects.requireNonNullElse(truststorePassword, credstorePassword),
+            keystorePath,
+            credstorePassword,
+            clientId(),
+            optionalProperties);
     }
 
     @Override
