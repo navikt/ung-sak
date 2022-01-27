@@ -232,6 +232,8 @@ spec:
       value: "true"
     - name: UTENLANDSPERIODER_MAPPING_ENABLET
       value: "true"
+    - name: PSB_UTVIDE_VED_DODSFALL
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

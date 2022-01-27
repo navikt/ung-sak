@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.hibernate.annotations.BatchSize;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -19,9 +22,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.BatchSize;
-
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -40,7 +40,7 @@ public class Vilkår extends BaseEntitet implements IndexKey {
     @Column(name = "vilkar_type", nullable = false, updatable = false)
     private VilkårType vilkårType;
 
-    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true)
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     @JoinColumn(name = "vilkar_id", nullable = false)
     @OrderBy(value = "periode.fomDato asc nulls first")
     @BatchSize(size = 20)
@@ -52,7 +52,7 @@ public class Vilkår extends BaseEntitet implements IndexKey {
 
     /**
      * Merk - denne er kun for builder - bygger en ugyldig Vilkår (uten vilkårtype).
-     * 
+     *
      * @deprecated bør ikke brukes av builder og gjøres private
      */
     @Deprecated
@@ -71,7 +71,7 @@ public class Vilkår extends BaseEntitet implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { getVilkårType() };
+        Object[] keyParts = {getVilkårType()};
         return IndexKeyComposer.createKey(keyParts);
     }
 
@@ -97,8 +97,16 @@ public class Vilkår extends BaseEntitet implements IndexKey {
     }
 
     public VilkårPeriode finnPeriodeForSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
-        return this.perioder.stream().filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt)).findFirst()
+        return this.perioder.stream()
+            .filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt))
+            .findFirst()
             .orElseThrow(() -> new IllegalStateException("Fant ikke vilkårsperiode for skjæringstidspunkt " + skjæringstidspunkt));
+    }
+
+    public Optional<VilkårPeriode> finnPeriodeSomInneholderDato(LocalDate dato) {
+        return this.perioder.stream()
+            .filter(it -> it.getPeriode().inkluderer(dato))
+            .findFirst();
     }
 
     @Override
