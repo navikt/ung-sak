@@ -13,13 +13,12 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -46,9 +45,9 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
-import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakInMemoryTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
@@ -77,7 +76,6 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     private RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder;
     private ForeslåBehandlingsresultatTjeneste tjeneste;
 
-    private MedlemTjeneste medlemTjeneste = mock(MedlemTjeneste.class);
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = new VilkårsPerioderTilVurderingTjeneste() {
         @Override
         public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
@@ -102,14 +100,16 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     private VedtakVarselRepository vedtakVarselRepository = mock(VedtakVarselRepository.class);
     private EntityManager entityManager;
 
+
     @BeforeEach
     public void setup() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-
         revurderingBehandlingsresultatutleder = Mockito.spy(new DefaultRevurderingBehandlingsresultatutleder());
-        tjeneste = new UttakForeslåBehandlingsresultatTjeneste(repositoryProvider,
+
+        tjeneste = new UttakForeslåBehandlingsresultatTjeneste(
+            repositoryProvider,
             vedtakVarselRepository,
-            vilkårsPerioderTilVurderingTjeneste,
+            new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
             revurderingBehandlingsresultatutleder);
     }
 
