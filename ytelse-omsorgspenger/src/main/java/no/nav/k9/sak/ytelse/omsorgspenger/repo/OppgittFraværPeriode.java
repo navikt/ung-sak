@@ -35,6 +35,7 @@ import no.nav.k9.sak.domene.uttak.repo.SøknadÅrsakKodeConverter;
 import no.nav.k9.sak.domene.uttak.repo.UttakArbeidTypeKodeConverter;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 
@@ -94,6 +95,11 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, Søk
     @Column(name = "fravaer_per_dag", nullable = true)
     private Duration fraværPerDag;
 
+    @Embedded
+    @ChangeTracked
+    @AttributeOverrides(@AttributeOverride(name = "verdi", column = @Column(name = "refusjonsbeloep")))
+    private Beløp refusjonsbeløp;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -108,19 +114,20 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, Søk
         this.fraværPerDag = fraværPerDag;
     }
 
-    public OppgittFraværPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag, FraværÅrsak fraværÅrsak, SøknadÅrsak søknadÅrsak) {
+    public OppgittFraværPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag, Beløp refusjonsbeløp, FraværÅrsak fraværÅrsak, SøknadÅrsak søknadÅrsak) {
         this.journalpostId = journalpostId;
         this.arbeidsgiver = arbeidsgiver;
         this.arbeidsforholdRef = arbeidsforholdRef;
         this.fraværPerDag = fraværPerDag;
         this.aktivitet = Objects.requireNonNull(aktivitetType, "aktivitetType");
         this.søknadÅrsak = søknadÅrsak;
+        this.refusjonsbeløp = refusjonsbeløp;
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
         this.fraværÅrsak = fraværÅrsak;
     }
 
     public OppgittFraværPeriode(LocalDate fom, LocalDate tom, OppgittFraværPeriode fra) {
-        this(fra.getJournalpostId(), fom, tom, fra.getAktivitetType(), fra.getArbeidsgiver(), fra.getArbeidsforholdRef(), fra.getFraværPerDag(), fra.getFraværÅrsak(), fra.getSøknadÅrsak());
+        this(fra.getJournalpostId(), fom, tom, fra.getAktivitetType(), fra.getArbeidsgiver(), fra.getArbeidsforholdRef(), fra.getFraværPerDag(), fra.getRefusjonsbeløp(), fra.getFraværÅrsak(), fra.getSøknadÅrsak());
     }
 
     public OppgittFraværPeriode(OppgittFraværPeriode periode) {
@@ -130,6 +137,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, Søk
         this.fraværPerDag = periode.fraværPerDag;
         this.aktivitet = Objects.requireNonNull(periode.aktivitet, "aktivitetType");
         this.periode = periode.periode;
+        this.refusjonsbeløp = periode.refusjonsbeløp;
         this.fraværÅrsak = periode.fraværÅrsak;
         this.søknadÅrsak = periode.søknadÅrsak;
     }
@@ -182,6 +190,10 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, Søk
 
     public SøknadÅrsak getSøknadÅrsak() {
         return søknadÅrsak;
+    }
+
+    public Beløp getRefusjonsbeløp() {
+        return refusjonsbeløp;
     }
 
     @SuppressWarnings("unchecked")

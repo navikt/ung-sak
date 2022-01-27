@@ -10,12 +10,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.SøknadÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
@@ -24,6 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -110,7 +110,7 @@ class SøknadOppgittFraværMapper {
                 Arbeidsgiver arbeidsgiver = byggArbeidsgiver(sn.getOrganisasjonsnummer(), søker.getPersonIdent());
                 InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her
                 return new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE,
-                    arbeidsgiver, arbeidsforholdRef, varighet, fraværÅrsak, SøknadÅrsak.UDEFINERT);
+                    arbeidsgiver, arbeidsforholdRef, varighet, null, fraværÅrsak, SøknadÅrsak.UDEFINERT);
             })
             .collect(Collectors.toSet());
     }
@@ -123,11 +123,12 @@ class SøknadOppgittFraværMapper {
         LocalDate fom = fp.getPeriode().getFraOgMed();
         LocalDate tom = fp.getPeriode().getTilOgMed();
         Duration varighet = fp.getDuration();
+        Beløp refusjonsbeløp = null;
 
         SøknadÅrsak søknadsÅrsak = fp.getSøknadÅrsak() != null ? SøknadÅrsak.fraKode(fp.getSøknadÅrsak().getKode()) : SøknadÅrsak.UDEFINERT;
         Objects.requireNonNull(søknadsÅrsak, "fant ingen søknadÅrsak kode for:" + fp.getSøknadÅrsak());
 
-        return new OppgittFraværPeriode(jpId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet, fraværÅrsak, søknadsÅrsak);
+        return new OppgittFraværPeriode(jpId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet, refusjonsbeløp, fraværÅrsak, søknadsÅrsak);
     }
 
     private InternArbeidsforholdRef mapEksternArbeidsforholdId(String arbeidsforholdId, Behandling behandling) {
@@ -154,8 +155,9 @@ class SøknadOppgittFraværMapper {
         if (frilanser != null) {
             Arbeidsgiver arbeidsgiver = null;
             InternArbeidsforholdRef arbeidsforholdRef = null;
+            Beløp refusjonsbeløp = null;
             OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.FRILANSER,
-                arbeidsgiver, arbeidsforholdRef, varighet, fraværÅrsak, SøknadÅrsak.UDEFINERT);
+                arbeidsgiver, arbeidsforholdRef, varighet, refusjonsbeløp, fraværÅrsak, SøknadÅrsak.UDEFINERT);
 
             return Set.of(oppgittFraværPeriode);
         }

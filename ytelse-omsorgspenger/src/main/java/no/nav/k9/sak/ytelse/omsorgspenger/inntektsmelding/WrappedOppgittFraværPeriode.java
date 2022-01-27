@@ -12,12 +12,14 @@ public class WrappedOppgittFraværPeriode {
     private LocalDateTime innsendingstidspunkt;
     private KravDokumentType kravDokumentType;
     private Utfall søknadsfristUtfall;
+    private boolean konfliktImSøknad;
 
-    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, LocalDateTime innsendingstidspunkt, KravDokumentType kravDokumentType, Utfall søknadsfristUtfall) {
+    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, LocalDateTime innsendingstidspunkt, KravDokumentType kravDokumentType, Utfall søknadsfristUtfall, boolean konfliktImSøknad) {
         this.periode = periode;
         this.innsendingstidspunkt = innsendingstidspunkt;
         this.kravDokumentType = kravDokumentType;
         this.søknadsfristUtfall = søknadsfristUtfall;
+        this.konfliktImSøknad = konfliktImSøknad;
     }
 
     public OppgittFraværPeriode getPeriode() {
@@ -36,6 +38,10 @@ public class WrappedOppgittFraværPeriode {
         return innsendingstidspunkt;
     }
 
+    public boolean getKonfliktImSøknad() {
+        return konfliktImSøknad;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -44,7 +50,8 @@ public class WrappedOppgittFraværPeriode {
         return periodeEquals(that)
             && Objects.equals(innsendingstidspunkt, that.innsendingstidspunkt)
             && Objects.equals(kravDokumentType, that.kravDokumentType)
-            && Objects.equals(søknadsfristUtfall, that.søknadsfristUtfall);
+            && Objects.equals(søknadsfristUtfall, that.søknadsfristUtfall)
+            && Objects.equals(konfliktImSøknad, that.konfliktImSøknad);
     }
 
     private boolean periodeEquals(WrappedOppgittFraværPeriode that) {
@@ -56,7 +63,7 @@ public class WrappedOppgittFraværPeriode {
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode.hashCode(), innsendingstidspunkt, søknadsfristUtfall);
+        return Objects.hash(periode.hashCode(), innsendingstidspunkt, søknadsfristUtfall, konfliktImSøknad);
     }
 
     @Override
@@ -66,6 +73,7 @@ public class WrappedOppgittFraværPeriode {
             ", kravDokumentType=" + kravDokumentType +
             ", innsendingstidspunkt=" + innsendingstidspunkt +
             ", søknadsfristUtfall=" + søknadsfristUtfall +
+            ", konfliktImSøknad=" + konfliktImSøknad +
             '>';
     }
 }

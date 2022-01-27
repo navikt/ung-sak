@@ -47,7 +47,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
         LocalDate startDato = LocalDate.now().withYear(2020).withMonth(1).withDayOfMonth(1);
         var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
         var virksomhet = Arbeidsgiver.virksomhet("000000000");
-        var oppgittFraværPeriode = new OppgittFraværPeriode(jpId, startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7), FraværÅrsak.UDEFINERT, SøknadÅrsak.UDEFINERT);
+        var oppgittFraværPeriode = new OppgittFraværPeriode(jpId, startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7), null, FraværÅrsak.UDEFINERT, SøknadÅrsak.UDEFINERT);
         var map = Map.of(søknad,
             List.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, oppgittFraværPeriode)));
 
@@ -73,7 +73,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
         var virksomhet = Arbeidsgiver.virksomhet("000000000");
         var map = Map.of(søknad,
             List.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef,
-                new OppgittFraværPeriode(journalpostId, startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7), FraværÅrsak.UDEFINERT, SøknadÅrsak.UDEFINERT))));
+                new OppgittFraværPeriode(journalpostId, startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7), null, FraværÅrsak.UDEFINERT, SøknadÅrsak.UDEFINERT))));
 
         var søknadSetMap = tjeneste.vurderSøknadsfrist(1L, map);
 
@@ -96,7 +96,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
         var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
         var virksomhet = Arbeidsgiver.virksomhet("000000000");
         var jpDummy = new JournalpostId(123L);
-        var oppgittFraværPeriode = new OppgittFraværPeriode(jpDummy, startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7), FraværÅrsak.UDEFINERT, SøknadÅrsak.UDEFINERT);
+        var oppgittFraværPeriode = new OppgittFraværPeriode(jpDummy, startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7), null, FraværÅrsak.UDEFINERT, SøknadÅrsak.UDEFINERT);
         var søktePerioder = List.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, oppgittFraværPeriode));
         var map = Map.of(søknad, søktePerioder);
 

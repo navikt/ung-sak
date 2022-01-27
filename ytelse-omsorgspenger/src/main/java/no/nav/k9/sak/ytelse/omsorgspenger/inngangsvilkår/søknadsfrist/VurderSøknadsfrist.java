@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -154,7 +153,7 @@ class VurderSøknadsfrist {
         var raw = value.getRaw();
         var fraværPeriode = new OppgittFraværPeriode(raw.getJournalpostId(), segment.getFom(), segment.getTom(),
             raw.getAktivitetType(), raw.getArbeidsgiver(), raw.getArbeidsforholdRef(), raw.getFraværPerDag(),
-            raw.getFraværÅrsak(), raw.getSøknadÅrsak());
+            raw.getRefusjonsbeløp(), raw.getFraværÅrsak(), raw.getSøknadÅrsak());
 
         return new VurdertSøktPeriode<>(periode, value.getType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), value.getUtfall(), fraværPeriode);
     }

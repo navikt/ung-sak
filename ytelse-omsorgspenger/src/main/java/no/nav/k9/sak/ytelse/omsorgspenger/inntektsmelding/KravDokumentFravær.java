@@ -9,17 +9,17 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.kodeverk.uttak.FraværÅrsak;
-import no.nav.k9.kodeverk.uttak.SøknadÅrsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
+import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 public class KravDokumentFravær {
@@ -30,9 +30,11 @@ public class KravDokumentFravær {
         Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
         for (var dok : sorterteKravdokumenter) {
             for (var vurdertPeriode : fraværFraKravdokumenter.get(dok)) {
+                if (erImUtenRefusjonskravEllerTrektPeriode(dok.getType(), vurdertPeriode)) {
+                    continue;
+                }
                 var aktivitetIdent = lagAktivitetIdentifikator(vurdertPeriode);
-
-                var fraværsperiodeNy = new WrappedOppgittFraværPeriode(vurdertPeriode.getRaw(), dok.getInnsendingsTidspunkt(), dok.getType(), utledUtfall(vurdertPeriode));
+                var fraværsperiodeNy = new WrappedOppgittFraværPeriode(vurdertPeriode.getRaw(), dok.getInnsendingsTidspunkt(), dok.getType(), utledUtfall(vurdertPeriode), false);
                 var fraværsperioderSammenslåtte = mapByAktivitet.getOrDefault(aktivitetIdent, new ArrayList<>());
 
                 var tidslinjeNy = mapTilTimeline(List.of(fraværsperiodeNy));
@@ -74,6 +76,13 @@ public class KravDokumentFravær {
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+    private boolean erImUtenRefusjonskravEllerTrektPeriode(KravDokumentType type, VurdertSøktPeriode<OppgittFraværPeriode> vurdertPeriode) {
+        var erInntektsmelding = type == KravDokumentType.INNTEKTSMELDING;
+        var erRefusjon = vurdertPeriode.getRaw().getRefusjonsbeløp() != null && vurdertPeriode.getRaw().getRefusjonsbeløp().compareTo(Beløp.ZERO) < 0;
+        var erTrektPeriode = vurdertPeriode.getRaw().getFraværPerDag() != null && vurdertPeriode.getRaw().getFraværPerDag().isZero();
+        return erInntektsmelding && !erRefusjon && !erTrektPeriode;
+    }
+
     private LocalDateSegment<WrappedOppgittFraværPeriode> mergePeriode(LocalDateInterval di,
                                                                        LocalDateSegment<WrappedOppgittFraværPeriode> førsteVersjon,
                                                                        LocalDateSegment<WrappedOppgittFraværPeriode> sisteVersjon) {
@@ -82,23 +91,32 @@ public class KravDokumentFravær {
         } else if (sisteVersjon == null && førsteVersjon != null) {
             return førsteVersjon;
         }
-        var første = førsteVersjon.getValue();
-        var siste = sisteVersjon.getValue();
+        var førstePeriode = førsteVersjon.getValue().getPeriode();
+        var sistePeriode = sisteVersjon.getValue().getPeriode();
 
-        FraværÅrsak fraværÅrsak;
-        SøknadÅrsak søknadÅrsak;
-        if (første.getKravDokumentType() != siste.getKravDokumentType() && første.getKravDokumentType() == KravDokumentType.SØKNAD) {
-            // Kravdokument av type INNTEKTSMELDING har ikke FraværÅrsak, må hentes fra SØKNAD dersom oppgitt av søker
-            fraværÅrsak = første.getPeriode().getFraværÅrsak();
-            søknadÅrsak = første.getPeriode().getSøknadÅrsak();
-        } else {
-            // Bruker ellers siste versjon, da kravdokument med fraværesperioder kommer inn i sortert rekkefølge
-            fraværÅrsak = siste.getPeriode().getFraværÅrsak();
-            søknadÅrsak = siste.getPeriode().getSøknadÅrsak();
+        var fraværÅrsak = sistePeriode.getFraværÅrsak() != null ? sistePeriode.getFraværÅrsak() : førstePeriode.getFraværÅrsak();
+        var søknadÅrsak = sistePeriode.getSøknadÅrsak() != null ? sistePeriode.getSøknadÅrsak() : førstePeriode.getSøknadÅrsak();
+
+        var konfliktImSøknad = false;
+        if (førsteVersjon.getValue().getKravDokumentType() != sisteVersjon.getValue().getKravDokumentType()) {
+            var im = førsteVersjon.getValue().getKravDokumentType() == KravDokumentType.INNTEKTSMELDING ? førstePeriode : sistePeriode;
+            var søknad = førsteVersjon.getValue().getKravDokumentType() == KravDokumentType.SØKNAD ? førstePeriode : sistePeriode;
+            assert im != søknad : "IM og søknad må være fra forskjellige perioder";
+
+            var erForskjellFravær = Objects.equals(im.getFraværPerDag(), søknad.getFraværPerDag());
+            var erTrekkAvKrav = im.getFraværPerDag() != null && im.getFraværPerDag().isZero();
+            if (erForskjellFravær && !erTrekkAvKrav) {
+                konfliktImSøknad = true;
+            }
+
+            var erRefusjon = im.getRefusjonsbeløp() != null && im.getRefusjonsbeløp().compareTo(Beløp.ZERO) < 0;
+            if (erRefusjon) {
+                konfliktImSøknad = true;
+            }
         }
 
         // Siste segment for alt annet brukes alltid siste segment
-        var gjeldendeFp = siste.getPeriode();
+        var gjeldendeFp = sistePeriode;
         var wrapped = new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(gjeldendeFp.getJournalpostId(),
             di.getTomDato(),
             di.getTomDato(),
@@ -106,11 +124,14 @@ public class KravDokumentFravær {
             gjeldendeFp.getArbeidsgiver(),
             gjeldendeFp.getArbeidsforholdRef(),
             gjeldendeFp.getFraværPerDag(),
+            gjeldendeFp.getRefusjonsbeløp(),
             fraværÅrsak,
             søknadÅrsak),
-            siste.getInnsendingstidspunkt(),
-            siste.getKravDokumentType(),
-            siste.getSøknadsfristUtfall());
+            sisteVersjon.getValue().getInnsendingstidspunkt(),
+            sisteVersjon.getValue().getKravDokumentType(),
+            sisteVersjon.getValue().getSøknadsfristUtfall(),
+            // TODO: Ta i bruk konfliktImSøknad i Uttak
+            konfliktImSøknad);
 
         return new LocalDateSegment<>(di, wrapped);
     }
@@ -154,10 +175,11 @@ public class KravDokumentFravær {
 
     private WrappedOppgittFraværPeriode opprettHoldKonsistens(LocalDateSegment<WrappedOppgittFraværPeriode> segment) {
         var value = segment.getValue().getPeriode();
-        return new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(value.getJournalpostId(), segment.getFom(), segment.getTom(), value.getAktivitetType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), value.getFraværPerDag(), value.getFraværÅrsak(), value.getSøknadÅrsak()),
+        return new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(value.getJournalpostId(), segment.getFom(), segment.getTom(), value.getAktivitetType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), value.getFraværPerDag(), value.getRefusjonsbeløp(), value.getFraværÅrsak(), value.getSøknadÅrsak()),
             segment.getValue().getInnsendingstidspunkt(),
             segment.getValue().getKravDokumentType(),
-            segment.getValue().getSøknadsfristUtfall());
+            segment.getValue().getSøknadsfristUtfall(),
+            segment.getValue().getKonfliktImSøknad());
     }
 
 

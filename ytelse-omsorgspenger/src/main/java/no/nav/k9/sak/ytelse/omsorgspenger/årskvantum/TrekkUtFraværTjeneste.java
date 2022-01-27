@@ -184,7 +184,6 @@ public class TrekkUtFraværTjeneste {
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         sjekkOmInntektsmeldingerMatcher(inntektsmeldingerJournalposter, inntektsmeldinger);
-        inntektsmeldinger = fjernInntektsmeldingerUtenRefusjonskrav(inntektsmeldinger);
         return inntektsmeldingMapper.mapTilSøktePerioder(inntektsmeldinger);
     }
 
@@ -209,14 +208,6 @@ public class TrekkUtFraværTjeneste {
                     + " som er knyttet til behandlingen, men finner ikke disse i abakus (har følgende i abakus: "
                     + abakusJournalposter + ", mangler " + journalposterSomMangler + ")");
         }
-    }
-
-    // Skal ikke opprette kravperioder for inntektsmeldinger uten refusjonskrav
-    private LinkedHashSet<Inntektsmelding> fjernInntektsmeldingerUtenRefusjonskrav(LinkedHashSet<Inntektsmelding> inntektsmeldinger) {
-        return inntektsmeldinger
-            .stream()
-            .filter(im -> im.harRefusjonskrav())
-            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     // Slår sammen overlappende perioder fra kravdokumenter (IM-er, søknader)

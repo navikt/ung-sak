@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
-
 import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.SøknadÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
@@ -30,7 +29,7 @@ public class InntektsmeldingSøktePerioderMapper {
         result.put(new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING),
             it.getOppgittFravær()
                 .stream()
-                .map(pa -> new OppgittFraværPeriode(it.getJournalpostId(), pa.getFom(), pa.getTom(), UttakArbeidType.ARBEIDSTAKER, it.getArbeidsgiver(), it.getArbeidsforholdRef(), pa.getVarighetPerDag(), FraværÅrsak.UDEFINERT, SøknadÅrsak.UDEFINERT))
+                .map(pa -> new OppgittFraværPeriode(it.getJournalpostId(), pa.getFom(), pa.getTom(), UttakArbeidType.ARBEIDSTAKER, it.getArbeidsgiver(), it.getArbeidsforholdRef(), pa.getVarighetPerDag(), it.getRefusjonBeløpPerMnd(), FraværÅrsak.UDEFINERT, SøknadÅrsak.UDEFINERT))
                 .map(op -> new SøktPeriode<>(op.getPeriode(), op.getAktivitetType(), op.getArbeidsgiver(), op.getArbeidsforholdRef(), op))
                 .collect(Collectors.toList()));
     }
