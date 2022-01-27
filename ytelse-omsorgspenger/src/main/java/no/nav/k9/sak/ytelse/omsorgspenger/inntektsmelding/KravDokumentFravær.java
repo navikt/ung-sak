@@ -78,7 +78,7 @@ public class KravDokumentFravær {
 
     private boolean erImUtenRefusjonskravEllerTrektPeriode(KravDokumentType type, VurdertSøktPeriode<OppgittFraværPeriode> vurdertPeriode) {
         var erInntektsmelding = type == KravDokumentType.INNTEKTSMELDING;
-        var erRefusjon = vurdertPeriode.getRaw().getRefusjonsbeløp() != null && vurdertPeriode.getRaw().getRefusjonsbeløp().compareTo(Beløp.ZERO) < 0;
+        var erRefusjon = vurdertPeriode.getRaw().getRefusjonsbeløp() != null && vurdertPeriode.getRaw().getRefusjonsbeløp().compareTo(Beløp.ZERO) > 0;
         var erTrektPeriode = vurdertPeriode.getRaw().getFraværPerDag() != null && vurdertPeriode.getRaw().getFraværPerDag().isZero();
         return erInntektsmelding && !erRefusjon && !erTrektPeriode;
     }
@@ -109,7 +109,7 @@ public class KravDokumentFravær {
                 konfliktImSøknad = true;
             }
 
-            var erRefusjon = im.getRefusjonsbeløp() != null && im.getRefusjonsbeløp().compareTo(Beløp.ZERO) < 0;
+            var erRefusjon = im.getRefusjonsbeløp() != null && im.getRefusjonsbeløp().compareTo(Beløp.ZERO) > 0;
             if (erRefusjon) {
                 konfliktImSøknad = true;
             }

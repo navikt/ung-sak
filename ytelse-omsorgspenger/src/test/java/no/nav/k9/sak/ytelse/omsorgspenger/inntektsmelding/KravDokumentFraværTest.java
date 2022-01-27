@@ -24,6 +24,7 @@ import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -313,7 +314,7 @@ public class KravDokumentFraværTest {
     }
 
     private static VurdertSøktPeriode<OppgittFraværPeriode> lagSøktPeriode(JournalpostId journalpost, LocalDate fom, LocalDate tom, Duration fraværPerDag, UttakArbeidType uttakArbeidType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
-        OppgittFraværPeriode op1 = new OppgittFraværPeriode(journalpost, fom, tom, uttakArbeidType, arbeidsgiver, arbeidsforholdRef, fraværPerDag, null, FraværÅrsak.UDEFINERT, SøknadÅrsak.UDEFINERT);
+        OppgittFraværPeriode op1 = new OppgittFraværPeriode(journalpost, fom, tom, uttakArbeidType, arbeidsgiver, arbeidsforholdRef, fraværPerDag, new Beløp(100), FraværÅrsak.UDEFINERT, SøknadÅrsak.UDEFINERT);
         DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
         return new VurdertSøktPeriode<>(periode, uttakArbeidType, arbeidsgiver, arbeidsforholdRef, Utfall.OPPFYLT, op1);
     }
