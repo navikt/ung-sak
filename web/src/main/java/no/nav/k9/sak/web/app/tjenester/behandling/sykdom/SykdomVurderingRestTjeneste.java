@@ -131,7 +131,7 @@ public class SykdomVurderingRestTjeneste {
         SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
         final LocalDate pleietrengendesFødselsdato = sykdomVurderingService.finnPleietrengendesFødselsdato(behandling);
 
-        return sykdomVurderingOversiktMapper.map(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato);
+        return sykdomVurderingOversiktMapper.mapPSB(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato);
     }
 
     @GET
@@ -157,7 +157,7 @@ public class SykdomVurderingRestTjeneste {
         final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForToOmsorgspersoner(behandling);
         final LocalDate pleietrengendesFødselsdato = sykdomVurderingService.finnPleietrengendesFødselsdato(behandling);
 
-        return sykdomVurderingOversiktMapper.map(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato);
+        return sykdomVurderingOversiktMapper.mapPSB(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato);
     }
 
     @GET
@@ -181,9 +181,8 @@ public class SykdomVurderingRestTjeneste {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         validerYtelsetype(behandling, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE);
         final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForILivetsSluttfase(behandling);
-        final LocalDate pleietrengendesFødselsdato = sykdomVurderingService.finnPleietrengendesFødselsdato(behandling);
 
-        return sykdomVurderingOversiktMapper.map(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato);
+        return sykdomVurderingOversiktMapper.mapPPN(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder);
     }
 
     @GET
