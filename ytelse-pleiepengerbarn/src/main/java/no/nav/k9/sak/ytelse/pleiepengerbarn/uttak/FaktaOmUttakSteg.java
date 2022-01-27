@@ -99,7 +99,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         }
 
         if (aksjonspunkter.isEmpty()) {
-            if (utvidVedDødsfall) { // TODO: toggle
+            if (utvidVedDødsfall) {
                 håndterePleietrengendeDødsfallTjeneste.utvidPerioderVedDødsfall(referanse);
             }
             return BehandleStegResultat.utførtUtenAksjonspunkter();
