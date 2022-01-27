@@ -33,6 +33,7 @@ import no.nav.folketrygdloven.kalkulus.iay.inntekt.v1.RefusjonDto;
 import no.nav.folketrygdloven.kalkulus.iay.inntekt.v1.UtbetalingDto;
 import no.nav.folketrygdloven.kalkulus.iay.inntekt.v1.UtbetalingsPostDto;
 import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
+import no.nav.folketrygdloven.kalkulus.iay.ytelse.v1.AnvistAndel;
 import no.nav.folketrygdloven.kalkulus.iay.ytelse.v1.YtelseAnvistDto;
 import no.nav.folketrygdloven.kalkulus.iay.ytelse.v1.YtelseDto;
 import no.nav.folketrygdloven.kalkulus.iay.ytelse.v1.YtelseFordelingDto;
@@ -84,6 +85,7 @@ import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
+import no.nav.k9.sak.domene.iay.modell.YtelseAnvistAndel;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.YtelseStørrelse;
@@ -244,13 +246,32 @@ public class TilKalkulusMapper {
         return ytelseAnvist.stream().map(ya -> {
             BeløpDto beløpDto = mapBeløp(ya.getBeløp());
             BeløpDto dagsatsDto = mapBeløp(ya.getDagsats());
-            BigDecimal bigDecimal = ya.getUtbetalingsgradProsent().isPresent() ? ya.getUtbetalingsgradProsent().get().getVerdi() : null;
+            BigDecimal utbetalingsgrad = ya.getUtbetalingsgradProsent().isPresent() ? ya.getUtbetalingsgradProsent().get().getVerdi() : null;
             return new YtelseAnvistDto(new Periode(
                 ya.getAnvistFOM(), ya.getAnvistTOM()),
                 beløpDto,
                 dagsatsDto,
-                bigDecimal);
+                utbetalingsgrad,
+                mapAndeler(ya.getYtelseAnvistAndeler()));
         }).collect(Collectors.toSet());
+    }
+
+    private static List<AnvistAndel> mapAndeler(Set<YtelseAnvistAndel> ytelseAnvistAndeler) {
+        return ytelseAnvistAndeler == null ? null : ytelseAnvistAndeler.stream()
+            .map(TilKalkulusMapper::mapAndel)
+            .toList();
+    }
+
+    private static AnvistAndel mapAndel(YtelseAnvistAndel a) {
+        return new AnvistAndel(
+            a.getArbeidsgiver().map(TilKalkulusMapper::mapTilAktør).orElse(null),
+            a.getArbeidsforholdRef().getReferanse() == null ? null : new InternArbeidsforholdRefDto(a.getArbeidsforholdRef().getReferanse()),
+            a.getDagsats() == null ? null : new BeløpDto(a.getDagsats().getVerdi()),
+            a.getUtbetalingsgradProsent() == null ? null : a.getUtbetalingsgradProsent().getVerdi(),
+            a.getRefusjonsgradProsent() == null ? null : a.getRefusjonsgradProsent().getVerdi(),
+            a.getInntektskategori() == null ?
+                no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori.UDEFINERT : no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori.fraKode(a.getInntektskategori().getKode())
+        );
     }
 
     public static InntekterDto mapInntektDto(List<Inntekt> alleInntektBeregningsgrunnlag) {
