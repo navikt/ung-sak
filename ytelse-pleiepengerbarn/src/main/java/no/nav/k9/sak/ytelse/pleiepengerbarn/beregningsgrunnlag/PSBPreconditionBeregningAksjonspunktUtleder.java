@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
@@ -146,15 +145,19 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
 
 
     private boolean harNæringIInfotrygd(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, YtelseFilter psbInfotrygdFilter, LocalDate stp) {
+        var overlappendePerioder = finnOverlappendePerioder(perioderTilVurdering, psbInfotrygdFilter, stp);
+        return !overlappendePerioder.isEmpty() && overlappendePerioder.stream().allMatch(this::harKategoriMedNæring);
+    }
+
+    private List<Ytelse> finnOverlappendePerioder(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, YtelseFilter psbInfotrygdFilter, LocalDate stp) {
         return psbInfotrygdFilter.getFiltrertYtelser()
             .stream().filter(y -> harOverlappendePeriode(perioderTilVurdering, stp, y))
-            .allMatch(this::harKategoriMedNæring);
+            .toList();
     }
 
     private boolean harFrilansIInfotrygd(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, YtelseFilter psbInfotrygdFilter, LocalDate stp) {
-        return psbInfotrygdFilter.getFiltrertYtelser()
-            .stream().filter(y -> harOverlappendePeriode(perioderTilVurdering, stp, y))
-            .allMatch(this::harKategoriMedFrilans);
+        var overlappendePerioder = finnOverlappendePerioder(perioderTilVurdering, psbInfotrygdFilter, stp);
+        return !overlappendePerioder.isEmpty() && overlappendePerioder.stream().allMatch(this::harKategoriMedFrilans);
     }
 
     private boolean harOverlappendePeriode(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LocalDate stp, Ytelse y) {
