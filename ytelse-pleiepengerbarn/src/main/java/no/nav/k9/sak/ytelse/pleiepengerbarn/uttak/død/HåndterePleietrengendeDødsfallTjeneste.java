@@ -6,6 +6,7 @@ import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPe
 import java.time.LocalDate;
 import java.util.NavigableSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -46,7 +47,10 @@ public class HåndterePleietrengendeDødsfallTjeneste {
     }
 
     @Inject
-    public HåndterePleietrengendeDødsfallTjeneste(RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository, PersonopplysningTjeneste personopplysningTjeneste, VilkårResultatRepository vilkårResultatRepository, @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef PSBVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
+    public HåndterePleietrengendeDødsfallTjeneste(RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
+                                                  PersonopplysningTjeneste personopplysningTjeneste,
+                                                  VilkårResultatRepository vilkårResultatRepository,
+                                                  @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef PSBVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
 
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
@@ -83,10 +87,8 @@ public class HåndterePleietrengendeDødsfallTjeneste {
         int antallUker = utledAntallUker(rettVedDød);
         var sisteDagPgaDødsfall = dødsdato.plusDays(1).plusWeeks(antallUker);
 
-
-        var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
-
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato, sisteDagPgaDødsfall);
+        var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
 
         forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato());
 
@@ -94,7 +96,37 @@ public class HåndterePleietrengendeDødsfallTjeneste {
         forlengeVilkårMedPeriode(vilkår, resultatBuilder, vilkårene, periode);
         forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), resultatBuilder.build());
+    }
 
+    public Optional<DatoIntervallEntitet> utledUtvidetPeriodeForDødsfall(BehandlingReferanse referanse) {
+        if (!Objects.equals(FagsakYtelseType.PSB, referanse.getFagsakYtelseType())) {
+            return Optional.empty();
+        }
+
+        var rettVedDødGrunnlagOpt = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
+        if (rettVedDødGrunnlagOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var rettVedDød = rettVedDødGrunnlagOpt.orElseThrow().getRettVedPleietrengendeDød().getRettVedDødType();
+
+        var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
+        var pleietrengendePersonopplysninger = personopplysningerAggregat.getPersonopplysning(referanse.getPleietrengendeAktørId());
+
+        var dødsdato = pleietrengendePersonopplysninger.getDødsdato();
+        if (dødsdato == null) {
+            return Optional.empty();
+        }
+        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
+
+        if (harIkkeGodkjentSykdomPåDødsdatoen(dødsdato, vilkårene)) {
+            return Optional.empty();
+        }
+
+        int antallUker = utledAntallUker(rettVedDød);
+        var sisteDagPgaDødsfall = dødsdato.plusDays(1).plusWeeks(antallUker);
+
+        return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato, sisteDagPgaDødsfall));
     }
 
     private void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate fødselsdato) {
