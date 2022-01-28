@@ -299,6 +299,8 @@ public enum FagsakYtelseType implements Kodeverdi {
         PLEIEPENGER_SYKT_BARN, Set.of(
             SYKEPENGER,
             FORELDREPENGER),
+        PLEIEPENGER_NÆRSTÅENDE, Set.of(
+            SYKEPENGER),
         OMSORGSPENGER, Set.of(
             SYKEPENGER,
             FORELDREPENGER)
