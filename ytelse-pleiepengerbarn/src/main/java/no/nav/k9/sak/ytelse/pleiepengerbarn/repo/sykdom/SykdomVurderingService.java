@@ -211,9 +211,6 @@ public class SykdomVurderingService {
         final LocalDateTimeline<Boolean> innleggelseUnder18årTidslinje = hentInnleggelseUnder18årTidslinje(behandling);
 
         LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(behandling, perioderTilVurdering, vurderinger);
-        if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
-            alleResterendeVurderingsperioder = LocalDateTimeline.EMPTY_TIMELINE;
-        }
 
         alleResterendeVurderingsperioder = kunPerioderSomIkkeFinnesI(alleResterendeVurderingsperioder, innleggelseUnder18årTidslinje);
 
