@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.uttak;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
@@ -88,7 +89,7 @@ public class PleiepengerUttakRestTjeneste {
     @Operation(description = "Henter ut arbeidstid som bruker skulle oppgitt", tags = "behandling - pleiepenger/uttak", responses = {
         @ApiResponse(responseCode = "200", description = "Henter ut arbeidstid som bruker skulle oppgitt", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ManglendeArbeidstidDto.class)))
     })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public ManglendeArbeidstidDto getArbeidstidSomMangler(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
