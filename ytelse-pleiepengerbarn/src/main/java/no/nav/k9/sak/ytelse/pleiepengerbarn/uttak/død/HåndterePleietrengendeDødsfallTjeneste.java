@@ -92,7 +92,7 @@ public class HåndterePleietrengendeDødsfallTjeneste {
         }
 
         int antallUker = utledAntallUker(rettVedDød);
-        var sisteDagPgaDødsfall = dødsdato.plusDays(1).plusWeeks(antallUker);
+        var sisteDagPgaDødsfall = dødsdato.plusWeeks(antallUker);
 
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato, sisteDagPgaDødsfall);
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
@@ -134,7 +134,7 @@ public class HåndterePleietrengendeDødsfallTjeneste {
         }
 
         int antallUker = utledAntallUker(rettVedDød);
-        var sisteDagPgaDødsfall = dødsdato.plusDays(1).plusWeeks(antallUker);
+        var sisteDagPgaDødsfall = dødsdato.plusWeeks(antallUker);
 
         return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato, sisteDagPgaDødsfall));
     }
