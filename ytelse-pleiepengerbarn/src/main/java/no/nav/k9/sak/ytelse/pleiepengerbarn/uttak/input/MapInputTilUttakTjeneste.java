@@ -268,9 +268,7 @@ public class MapInputTilUttakTjeneste {
 
     private Map<LukketPeriode, Pleiebehov> toPleiebehov(List<EtablertPleieperiode> pleiebehov) {
         final Map<LukketPeriode, Pleiebehov> tilsynsbehov = new HashMap<>();
-        pleiebehov.forEach(p -> {
-            tilsynsbehov.put(toLukketPeriode(p.getPeriode()), mapToPleiebehov(p.getGrad()));
-        });
+        pleiebehov.forEach(p -> tilsynsbehov.put(toLukketPeriode(p.getPeriode()), mapToPleiebehov(p.getGrad())));
         return tilsynsbehov;
     }
 
