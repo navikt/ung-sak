@@ -12,6 +12,7 @@ import java.util.TreeSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.RettVedDødType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -41,6 +42,7 @@ public class HåndterePleietrengendeDødsfallTjeneste {
     private PersonopplysningTjeneste personopplysningTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private PSBVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
+    private Boolean utvidVedDødsfall;
 
     HåndterePleietrengendeDødsfallTjeneste() {
         // CDI
@@ -50,15 +52,20 @@ public class HåndterePleietrengendeDødsfallTjeneste {
     public HåndterePleietrengendeDødsfallTjeneste(RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
                                                   PersonopplysningTjeneste personopplysningTjeneste,
                                                   VilkårResultatRepository vilkårResultatRepository,
-                                                  @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef PSBVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
+                                                  @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef PSBVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                                  @KonfigVerdi(value = "PSB_UTVIDE_VED_DODSFALL", defaultVerdi = "false") Boolean utvidVedDødsfall) {
 
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+        this.utvidVedDødsfall = utvidVedDødsfall;
     }
 
     public void utvidPerioderVedDødsfall(BehandlingReferanse referanse) {
+        if (!utvidVedDødsfall) {
+            return;
+        }
         if (!Objects.equals(FagsakYtelseType.PSB, referanse.getFagsakYtelseType())) {
             return;
         }
@@ -92,13 +99,16 @@ public class HåndterePleietrengendeDødsfallTjeneste {
 
         forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato());
 
-        var vilkår = Set.of(VilkårType.OPPTJENINGSVILKÅRET, VilkårType.OMSORGEN_FOR, VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET, VilkårType.ALDERSVILKÅR);
+        var vilkår = Set.of(VilkårType.OPPTJENINGSVILKÅRET, VilkårType.OMSORGEN_FOR, VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET, VilkårType.ALDERSVILKÅR, VilkårType.SØKNADSFRIST);
         forlengeVilkårMedPeriode(vilkår, resultatBuilder, vilkårene, periode);
         forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), resultatBuilder.build());
     }
 
     public Optional<DatoIntervallEntitet> utledUtvidetPeriodeForDødsfall(BehandlingReferanse referanse) {
+        if (!utvidVedDødsfall) {
+            return Optional.empty();
+        }
         if (!Objects.equals(FagsakYtelseType.PSB, referanse.getFagsakYtelseType())) {
             return Optional.empty();
         }

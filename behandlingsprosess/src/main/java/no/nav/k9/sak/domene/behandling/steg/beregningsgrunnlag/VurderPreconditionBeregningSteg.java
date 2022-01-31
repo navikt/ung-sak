@@ -9,7 +9,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -46,6 +45,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
     private Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere;
+    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
 
 
     protected VurderPreconditionBeregningSteg() {
@@ -58,18 +58,23 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                            @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                            @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
-                                           @Any Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere) {
+                                           @Any Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere,
+                                           BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.aksjonspunktUtledere = aksjonspunktUtledere;
+        this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+
+        ryddVedtaksresultatForPerioderTilVurdering(kontekst, behandling);
+
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         var vilkåret = vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET)
             .orElseThrow();
@@ -91,6 +96,12 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         }
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(finnAksjonspunkter(behandling));
+    }
+
+    private void ryddVedtaksresultatForPerioderTilVurdering(BehandlingskontrollKontekst kontekst, Behandling behandling) {
+        var tjeneste = getPerioderTilVurderingTjeneste(behandling);
+        var perioderTilVurdering = tjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, perioderTilVurdering);
     }
 
 
