@@ -163,14 +163,14 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     }
 
     @Test
-    void skal_returnere_ventepunkt_når_periode_etter_migrering_som_ikke_er_søkt_for() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusMonths(1), STP.plusMonths(1).plusDays(10)), Arbeidskategori.ARBEIDSTAKER);
+    void skal_ikke_returnere_ventepunkt_når_ingen_perioder_overlapper_med_infotrygd() {
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusDays(20), STP.minusDays(10)), Arbeidskategori.ARBEIDSTAKER);
         fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
         assertThat(aksjonspunkter.size()).isEqualTo(1);
-        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_PÅ_KOMPLETT_SØKNAD_VED_OVERGANG_FRA_INFOTRYGD);
+        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT);
     }
 
     @Test

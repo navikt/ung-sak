@@ -47,6 +47,7 @@ public class InputParametere {
     private InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag;
     private UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende;
     private Set<PerioderFraSøknad> perioderFraSøknad;
+    private DatoIntervallEntitet utvidetPeriodeSomFølgeAvDødsfall;
 
     public InputParametere() {
     }
@@ -211,5 +212,15 @@ public class InputParametere {
 
     public Optional<UnntakEtablertTilsynForPleietrengende> getUnntakEtablertTilsynForPleietrengende() {
         return Optional.ofNullable(unntakEtablertTilsynForPleietrengende);
+    }
+
+
+    public Optional<DatoIntervallEntitet> getUtvidetPeriodeSomFølgeAvDødsfall() {
+        return Optional.ofNullable(utvidetPeriodeSomFølgeAvDødsfall);
+    }
+
+    public InputParametere medAutomatiskUtvidelseVedDødsfall(DatoIntervallEntitet utvidetPeriodeSomFølgeAvDødsfall) {
+        this.utvidetPeriodeSomFølgeAvDødsfall = utvidetPeriodeSomFølgeAvDødsfall;
+        return this;
     }
 }

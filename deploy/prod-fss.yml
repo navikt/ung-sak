@@ -216,9 +216,9 @@ spec:
     - name: DISABLE_VURDER_TILBAKETREKK
       value: "true"
     - name: PSB_INFOTRYGD_MIGRERING
-      value: "false"
+      value: "true"
     - name: FORLENGELSE_OPPTJENING_ENABLET
-      value: "false"
+      value: "true"
     - name: FORLENGELSE_BEREGNING_ENABLET
       value: "false"
     - name: BEHANDLINGID_DOKUMENTLIST_ENABLET

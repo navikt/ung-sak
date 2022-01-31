@@ -10,7 +10,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
@@ -42,6 +41,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeDødsfallTjeneste;
 
 @Dependent
 public class HentDataTilUttakTjeneste {
@@ -62,6 +62,7 @@ public class HentDataTilUttakTjeneste {
     private EtablertTilsynTjeneste etablertTilsynTjeneste;
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
+    private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
 
     @Inject
     public HentDataTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
@@ -79,7 +80,8 @@ public class HentDataTilUttakTjeneste {
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                     @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                    SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
+                                    SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+                                    HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
@@ -96,6 +98,7 @@ public class HentDataTilUttakTjeneste {
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.opptjeningRepository = opptjeningRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
+        this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
     }
 
     public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
@@ -159,6 +162,7 @@ public class HentDataTilUttakTjeneste {
             .medIAYGrunnlag(inntektArbeidYtelseGrunnlag)
             .medOpptjeningsresultat(opptjeningsresultat.orElse(null))
             .medRettPleiepengerVedDødGrunnlag(rettVedDød.orElse(null))
+            .medAutomatiskUtvidelseVedDødsfall(håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse).orElse(null))
             .medUnntakEtablertTilsynForPleietrengende(unntakEtablertTilsynForPleietrengende.orElse(null));
 
         return input;

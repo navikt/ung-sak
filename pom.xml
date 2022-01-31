@@ -40,7 +40,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <junit.version>5.8.2</junit.version>
-        <felles.version>0.7.1</felles.version>
+        <felles.version>0.7.3</felles.version>
         <swagger.version>2.1.12</swagger.version>
         <k9format.version>5.7.5</k9format.version>
     </properties>
@@ -64,7 +64,7 @@
             <dependency>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
-                <version>8.4.2</version>
+                <version>8.4.3</version>
             </dependency>
 
             <dependency>
@@ -149,7 +149,7 @@
             <dependency>
                 <groupId>no.nav.k9.aarskvantum</groupId>
                 <artifactId>k9-aarskvantum-kontrakt</artifactId>
-                <version>2.1.6</version>
+                <version>2.1.8</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
@@ -174,7 +174,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt-jakarta</artifactId>
-                <version>1.5.7</version>
+                <version>1.5.9</version>
             </dependency>
 
             <dependency>
@@ -483,7 +483,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.2.0</version>
+                <version>4.3.1</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
