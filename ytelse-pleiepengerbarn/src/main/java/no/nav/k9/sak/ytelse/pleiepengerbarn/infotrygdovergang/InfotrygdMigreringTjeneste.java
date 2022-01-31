@@ -146,11 +146,11 @@ public class InfotrygdMigreringTjeneste {
             .collect(Collectors.toList());
     }
 
-    private LocalDateTimeline<Boolean> lagTidslinje(Stream<DatoIntervallEntitet> annenPartSøktePerioderStream) {
-        var annenPartSøktePerioderSegments = annenPartSøktePerioderStream
+    private LocalDateTimeline<Boolean> lagTidslinje(Stream<DatoIntervallEntitet> periodeStream) {
+        var annenPartSøktePerioderSegments = periodeStream
             .map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), true))
             .collect(Collectors.toList());
-        return new LocalDateTimeline<>(annenPartSøktePerioderSegments);
+        return new LocalDateTimeline<>(annenPartSøktePerioderSegments, StandardCombinators::coalesceLeftHandSide);
     }
 
     private boolean harBerørtSakPåGammelOrdning(Map<AktørId, List<IntervallMedBehandlingstema>> grunnlagsperioderPrAktør) {
