@@ -168,7 +168,7 @@ public class SykdomVurderingService {
         LocalDateTimeline<Boolean> tidslinjeKreverVurdering = new LocalDateTimeline<>(perioderKreverVurdering.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true)).toList());
 
         LocalDateTimeline<Boolean> innleggelserTidslinje = hentAlleInnleggelserTidslinje(behandling);
-        LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(tidslinjeKreverVurdering, vurderinger);
+        LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(behandling, tidslinjeKreverVurdering, vurderinger);
         if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
             alleResterendeVurderingsperioder = LocalDateTimeline.EMPTY_TIMELINE;
         }
