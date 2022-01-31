@@ -104,7 +104,7 @@ public class MapInputTilUttakTjeneste {
 
         var tidslinjeTilVurdering = new LocalDateTimeline<>(mapPerioderTilVurdering(input));
 
-        final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
+        final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering, input.getUtvidetPeriodeSomFølgeAvDødsfall());
 
         var inaktivitetUtlederInput = new InaktivitetUtlederInput(behandling.getAktørId(), tidslinjeTilVurdering, input.getInntektArbeidYtelseGrunnlag());
         var inaktivTidslinje = new PerioderMedInaktivitetUtleder().utled(inaktivitetUtlederInput);
