@@ -89,7 +89,7 @@ public class PleiepengerUttakRestTjeneste {
     @Operation(description = "Henter ut arbeidstid som bruker skulle oppgitt", tags = "behandling - pleiepenger/uttak", responses = {
         @ApiResponse(responseCode = "200", description = "Henter ut arbeidstid som bruker skulle oppgitt", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ManglendeArbeidstidDto.class)))
     })
-    @BeskyttetRessurs(action = READ, resource = DRIFT)
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public ManglendeArbeidstidDto getArbeidstidSomMangler(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
@@ -107,7 +107,7 @@ public class PleiepengerUttakRestTjeneste {
     @Operation(description = "Henter ut uttaksgrunnlag for behandling", tags = "behandling - pleiepenger/uttak", responses = {
         @ApiResponse(responseCode = "200", description = "Uttaksgrunnlag", content = @Content(mediaType = MediaType.APPLICATION_JSON))
     })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response debugInput(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
