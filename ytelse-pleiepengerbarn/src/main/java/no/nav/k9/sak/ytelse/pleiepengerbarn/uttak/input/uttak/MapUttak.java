@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.uttak;
 
+import java.time.Duration;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +42,7 @@ public class MapUttak {
 
         if (utvidetPeriodeSomFølgeAvDødsfall.isPresent()) {
             var intervallEntitet = utvidetPeriodeSomFølgeAvDødsfall.get();
-            var dødsperiode = List.of(new LocalDateSegment<>(intervallEntitet.toLocalDateInterval(), new WrappedUttak(new UttakPeriode(intervallEntitet, null))));
+            var dødsperiode = List.of(new LocalDateSegment<>(intervallEntitet.toLocalDateInterval(), new WrappedUttak(new UttakPeriode(intervallEntitet, Duration.ofHours(7).plusMinutes(30)))));
             var timeline = new LocalDateTimeline<>(dødsperiode);
             resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
