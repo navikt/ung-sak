@@ -26,7 +26,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -84,21 +83,21 @@ public class OverstyrInputBeregningTjeneste {
         }).collect(Collectors.toList());
     }
 
-    private boolean harNæring(YtelseGrunnlag ytelseGrunnlag) {
-        return ytelseGrunnlag.getArbeidskategori().stream().anyMatch(ak -> ak.equals(Arbeidskategori.SELVSTENDIG_NÆRINGSDRIVENDE)
+    private boolean harNæring(Optional<YtelseGrunnlag> ytelseGrunnlag) {
+        return ytelseGrunnlag.map(yg -> yg.getArbeidskategori().stream().anyMatch(ak -> ak.equals(Arbeidskategori.SELVSTENDIG_NÆRINGSDRIVENDE)
             || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_FISKER)
             || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER)
-            || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE));
+            || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE))).orElse(false);
     }
 
 
-    private boolean harFrilans(YtelseGrunnlag ytelseGrunnlag) {
-        return ytelseGrunnlag.getArbeidskategori().stream().anyMatch(ak -> ak.equals(Arbeidskategori.FRILANSER)
-            || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER));
+    private boolean harFrilans(Optional<YtelseGrunnlag> ytelseGrunnlag) {
+        return ytelseGrunnlag.map(yg -> yg.getArbeidskategori().stream().anyMatch(ak -> ak.equals(Arbeidskategori.FRILANSER)
+            || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER))).orElse(false);
     }
 
 
-    private YtelseGrunnlag finnYtelseGrunnlagForMigrering(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
+    private Optional<YtelseGrunnlag> finnYtelseGrunnlagForMigrering(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
         var ytelseGrunnlagListe = new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandling.getAktørId()))
             .filter(y -> y.getYtelseType().equals(FagsakYtelseType.PSB) && y.getKilde().equals(Fagsystem.INFOTRYGD))
             .filter(y -> y.getYtelseAnvist().stream().anyMatch(ya -> {
@@ -108,10 +107,12 @@ public class OverstyrInputBeregningTjeneste {
             })).getFiltrertYtelser().stream()
             .flatMap(y -> y.getYtelseGrunnlag().stream())
             .collect(Collectors.toList());
-        if (ytelseGrunnlagListe.size() != 1) {
+        if (ytelseGrunnlagListe.size() > 1) {
             throw new IllegalStateException("Fant mer enn ett ytelsegrunnlag fra infotrygd for PSB. Fant " + ytelseGrunnlagListe.size());
+        } else if (ytelseGrunnlagListe.size() == 1) {
+            return Optional.of(ytelseGrunnlagListe.get(0));
         }
-        return ytelseGrunnlagListe.get(0);
+        return Optional.empty();
     }
 
     private Optional<InputOverstyringPeriode> finnEksisterendeOverstyring(Behandling behandling, LocalDate migrertStp) {

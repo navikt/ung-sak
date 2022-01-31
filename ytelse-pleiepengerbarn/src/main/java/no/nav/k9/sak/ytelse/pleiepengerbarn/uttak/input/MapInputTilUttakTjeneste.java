@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -39,7 +38,18 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.ferie.MapFerie;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.tilsyn.MapTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.utenlandsopphold.MapUtenlandsopphold;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.uttak.MapUttak;
-import no.nav.pleiepengerbarn.uttak.kontrakter.*;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Barn;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Pleiebehov;
+import no.nav.pleiepengerbarn.uttak.kontrakter.RettVedDød;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Søker;
+import no.nav.pleiepengerbarn.uttak.kontrakter.SøktUttak;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UtenlandsoppholdInfo;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Vilkårsperiode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.YtelseType;
 
 @Dependent
 public class MapInputTilUttakTjeneste {
@@ -47,15 +57,18 @@ public class MapInputTilUttakTjeneste {
     private HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private String unntak;
     private Boolean utenlandsperioderMappingEnablet;
+    private Boolean utvidVedDødsfall;
 
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
                                     @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
-                                    @KonfigVerdi(value = "UTENLANDSPERIODER_MAPPING_ENABLET", defaultVerdi = "false") Boolean utenlandsperioderMappingEnablet) {
+                                    @KonfigVerdi(value = "UTENLANDSPERIODER_MAPPING_ENABLET", defaultVerdi = "false") Boolean utenlandsperioderMappingEnablet,
+                                    @KonfigVerdi(value = "PSB_UTVIDE_VED_DODSFALL", defaultVerdi = "false") Boolean utvidVedDødsfall) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
         this.utenlandsperioderMappingEnablet = utenlandsperioderMappingEnablet;
+        this.utvidVedDødsfall = utvidVedDødsfall;
     }
 
 
@@ -107,6 +120,10 @@ public class MapInputTilUttakTjeneste {
             .medInntektArbeidYtelseGrunnlag(input.getInntektArbeidYtelseGrunnlag())
             .medBruker(behandling.getAktørId())
             .medSakerSomMåSpesialHåndteres(MapUnntakFraAktivitetGenerering.mapUnntak(unntak));
+
+        if (utvidVedDødsfall) {
+            input.getUtvidetPeriodeSomFølgeAvDødsfall().ifPresent(arbeidstidInput::medAutomatiskUtvidelseVedDødsfall);
+        }
 
         final List<Arbeid> arbeid = new MapArbeid().map(arbeidstidInput);
 

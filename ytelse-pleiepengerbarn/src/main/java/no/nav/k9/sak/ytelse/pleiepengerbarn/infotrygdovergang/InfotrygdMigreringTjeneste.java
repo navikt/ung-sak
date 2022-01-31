@@ -309,14 +309,4 @@ public class InfotrygdMigreringTjeneste {
         return perioderTilVurdering.stream().anyMatch(p -> p.getFomDato().getYear() <= år && p.getTomDato().getYear() >= år);
     }
 
-    private boolean dekkesAvSøknad(NavigableSet<DatoIntervallEntitet> fullstendigePerioder, YtelseAnvist ya, int år) {
-        var førsteMandagIÅret = LocalDate.of(år, 1, 1).with(TemporalAdjusters.dayOfWeekInMonth(1, DayOfWeek.MONDAY));
-        var anvistFom = ya.getAnvistFOM().isBefore(førsteMandagIÅret) ? førsteMandagIÅret : ya.getAnvistFOM();
-        return fullstendigePerioder.stream().anyMatch(p -> p.getFomDato().equals(anvistFom) && !p.getTomDato().isBefore(ya.getAnvistTOM()));
-    }
-
-    private boolean harAnvisningIEllerEtterÅr(YtelseAnvist ya, int år) {
-        return ya.getAnvistTOM().getYear() >= år && ya.getAnvistFOM().getYear() <= år;
-    }
-
 }

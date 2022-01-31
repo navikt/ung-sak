@@ -19,20 +19,20 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
 public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjon {
-    
+
     public static final int ALDER_FOR_STRENGERE_PSB_VURDERING = 18;
 
-    private static final int MAKSÅR = 200;
+    public static final int MAKSÅR = 200;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
     private BehandlingRepository behandlingRepository;
     private PersoninfoAdapter personinfoAdapter;
-    
+
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private boolean brukRelevantPeriode;
     private int fomAlder;
     private int toAlder;
 
-    
+
     private PleietrengendeAlderPeriode(BasisPersonopplysningTjeneste personopplysningTjeneste,
             BehandlingRepository behandlingRepository,
             PersoninfoAdapter personinfoAdapter,
@@ -48,28 +48,32 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
         this.fomAlder = fomAlder;
         this.toAlder = toAlder;
     }
-    
+
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
         final Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        
+
         /*
          * Denne sjekken kan fjernes når det ikke lenger finnes noen åpne
          * behandlinger opprettet før angitt tidspunkt.
          */
         final boolean opprettetEtterNyHåndtering = behandling.getOpprettetTidspunkt().isAfter(LocalDateTime.of(2021, 11, 30, 21, 15, 0));
-        
+
         final NavigableSet<DatoIntervallEntitet> perioder;
         if (brukRelevantPeriode && opprettetEtterNyHåndtering) {
             perioder = søknadsperiodeTjeneste.utledPeriode(behandlingId);
         } else {
             perioder = søknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId);
         }
-        
+
         final var fødselsdato = finnPleietrengendesFødselsdato(behandling);
+        return utledPeriodeIHenhold(perioder, fødselsdato, fomAlder, toAlder);
+    }
+
+    public static NavigableSet<DatoIntervallEntitet> utledPeriodeIHenhold(NavigableSet<DatoIntervallEntitet> perioder, LocalDate fødselsdato, int fomAlder, int toAlder) {
         final var periodeSomKanUtledes = new LocalDateInterval(fødselsdato.plusYears(fomAlder), fødselsdato.plusYears(toAlder).minusDays(1));
-        
+
         final var tidslinje = SykdomUtils.toLocalDateTimeline(perioder);
         final var resultat = tidslinje.intersection(periodeSomKanUtledes);
         return tilNavigableSet(resultat);
@@ -81,30 +85,30 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
             behandling.getFagsak().getAktørId(),
             behandling.getFagsak().getPeriode().getFomDato()
         );
-        
+
         if (personopplysningerAggregat.isEmpty()) {
             /*
              * Registerdatainnhenting har ikke blitt utført. Data må derfor hentes direkte fra PDL.
              */
             return fallbackDirekteoppslagFødselsdato(behandling.getFagsak().getPleietrengendeAktørId());
         }
-        
+
         var pleietrengendePersonopplysning = personopplysningerAggregat.get().getPersonopplysning(behandling.getFagsak().getPleietrengendeAktørId());
         return pleietrengendePersonopplysning.getFødselsdato();
     }
-    
+
     private LocalDate fallbackDirekteoppslagFødselsdato(AktørId pleietrengende) {
         final var personinfo = personinfoAdapter.hentPersoninfo(pleietrengende);
         return personinfo.getFødselsdato();
     }
-    
-    private TreeSet<DatoIntervallEntitet> tilNavigableSet(LocalDateTimeline<Boolean> resultat) {
+
+    private static TreeSet<DatoIntervallEntitet> tilNavigableSet(LocalDateTimeline<Boolean> resultat) {
         return resultat
           .stream()
           .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
           .collect(Collectors.toCollection(TreeSet::new));
     }
-    
+
     public static final PleietrengendeAlderPeriode under18(
             BasisPersonopplysningTjeneste personopplysningTjeneste,
             BehandlingRepository behandlingRepository,
@@ -113,7 +117,7 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
             boolean brukRelevantPeriode) {
         return new PleietrengendeAlderPeriode(personopplysningTjeneste, behandlingRepository, personinfoAdapter, søknadsperiodeTjeneste, brukRelevantPeriode, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
     }
-    
+
     public static final PleietrengendeAlderPeriode overEllerLik18(
             BasisPersonopplysningTjeneste personopplysningTjeneste,
             BehandlingRepository behandlingRepository,

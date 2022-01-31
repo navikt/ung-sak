@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår;
+package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.alder;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,16 +15,16 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-public class VurderAldersvilkåretTest {
+public class VurderAldersVilkårTjenesteTest {
 
-    private VurderAldersvilkåretSteg steg = new VurderAldersvilkåretSteg();
+    private final VurderAldersVilkårTjeneste tjeneste = new VurderAldersVilkårTjeneste();
 
     @Test
     void skal_vurdere_aldersvilkåret() {
         var fødselsdato = LocalDate.now().minusYears(70).plusDays(7);
         var vilkårBuilder = new VilkårBuilder(VilkårType.ALDERSVILKÅR);
 
-        steg.vurderPerioder(vilkårBuilder, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato.plusYears(70).minusDays(7), fødselsdato.plusYears(70).plusDays(7)))), fødselsdato, null);
+        tjeneste.vurderPerioder(vilkårBuilder, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato.plusYears(70).minusDays(7), fødselsdato.plusYears(70).plusDays(7)))), fødselsdato, null);
 
         var vilkår = vilkårBuilder.build();
 
@@ -40,7 +40,7 @@ public class VurderAldersvilkåretTest {
         var fødselsdato = LocalDate.now().minusYears(70).plusDays(7);
         var vilkårBuilder = new VilkårBuilder(VilkårType.ALDERSVILKÅR);
 
-        steg.vurderPerioder(vilkårBuilder, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato.plusYears(70).minusDays(7), fødselsdato.plusYears(70).plusDays(7)))), fødselsdato, fødselsdato.plusYears(70).minusDays(1));
+        tjeneste.vurderPerioder(vilkårBuilder, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato.plusYears(70).minusDays(7), fødselsdato.plusYears(70).plusDays(7)))), fødselsdato, fødselsdato.plusYears(70).minusDays(1));
 
         var vilkår = vilkårBuilder.build();
 

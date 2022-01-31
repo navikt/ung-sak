@@ -4,14 +4,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.typer.Periode;
 
@@ -32,7 +31,7 @@ public class SykdomVurderingOversikt {
     @Size(max = 1000)
     @Valid
     private List<Periode> resterendeVurderingsperioder = new ArrayList<>();
-    
+
     @JsonProperty(value = "resterendeValgfrieVurderingsperioder")
     @Size(max = 1000)
     @Valid
@@ -51,14 +50,14 @@ public class SykdomVurderingOversikt {
     @Valid
     private List<Periode> perioderSomKanVurderes = new ArrayList<>();
 
-    @JsonProperty(value = "pleietrengendesFødselsdato", required = true)
+    @JsonProperty(value = "pleietrengendesFødselsdato")
     @Valid
     private LocalDate pleietrengendesFødselsdato;
-    
+
     @JsonProperty(value = "harPerioderDerPleietrengendeErOver18år")
     @Valid
-    private boolean harPerioderDerPleietrengendeErOver18år;
-    
+    private Boolean harPerioderDerPleietrengendeErOver18år;
+
     /*
     // Om den siste versjonen har blitt besluttet iverksatt eller ikke.
     @JsonProperty(value = "besluttetIverksatt")
@@ -83,7 +82,7 @@ public class SykdomVurderingOversikt {
             List<Periode> søknadsperioderTilBehandling,
             List<Periode> perioderSomKanVurderes,
             LocalDate pleietrengendesFødselsdato,
-            boolean harPerioderDerPleietrengendeErOver18år,
+            Boolean harPerioderDerPleietrengendeErOver18år,
             List<ResourceLink> links) {
         this.vurderingselementer = vurderingselementer;
         this.resterendeVurderingsperioder = resterendeVurderingsperioder;
@@ -107,7 +106,7 @@ public class SykdomVurderingOversikt {
     public List<Periode> getResterendeVurderingsperioder() {
         return resterendeVurderingsperioder;
     }
-    
+
     public List<Periode> getResterendeValgfrieVurderingsperioder() {
         return resterendeValgfrieVurderingsperioder;
     }
@@ -119,12 +118,12 @@ public class SykdomVurderingOversikt {
     public List<Periode> getPerioderSomKanVurderes() {
         return perioderSomKanVurderes;
     }
-    
+
     public LocalDate getPleietrengendesFødselsdato() {
         return pleietrengendesFødselsdato;
     }
 
-    public boolean isHarPerioderDerPleietrengendeErOver18år() {
+    public Boolean isHarPerioderDerPleietrengendeErOver18år() {
         return harPerioderDerPleietrengendeErOver18år;
     }
 }

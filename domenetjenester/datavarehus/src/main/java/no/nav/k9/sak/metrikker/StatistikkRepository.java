@@ -15,19 +15,22 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.hibernate.query.NativeQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
-
-import org.hibernate.query.NativeQuery;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import no.nav.k9.felles.integrasjon.sensu.SensuEvent;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -39,12 +42,13 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.felles.integrasjon.sensu.SensuEvent;
 import no.nav.k9.prosesstask.api.ProsessTaskFeil;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 
 @Dependent
 public class StatistikkRepository {
+
+    private static final Logger log = LoggerFactory.getLogger(StatistikkRepository.class);
 
     private static final String UDEFINERT = "-";
 
@@ -89,17 +93,27 @@ public class StatistikkRepository {
         LocalDate dag = LocalDate.now();
 
         List<SensuEvent> metrikker = new ArrayList<>();
-        metrikker.addAll(fagsakStatusStatistikk());
-        metrikker.addAll(behandlingStatusStatistikk());
-        metrikker.addAll(behandlingResultatStatistikk());
-        metrikker.addAll(prosessTaskStatistikk());
-        metrikker.addAll(mottattDokumentStatistikk());
-        metrikker.addAll(aksjonspunktStatistikk());
-        metrikker.addAll(aksjonspunktStatistikkDaglig(dag));
-        metrikker.addAll(avslagStatistikk());
-        metrikker.addAll(avslagStatistikkDaglig(dag));
-        metrikker.addAll(prosessTaskFeilStatistikk());
+        metrikker.addAll(timeCall(this::fagsakStatusStatistikk, "fagsakStatusStatistikk"));
+        metrikker.addAll(timeCall(this::behandlingStatusStatistikk, "behandlingStatusStatistikk"));
+        metrikker.addAll(timeCall(this::behandlingResultatStatistikk, "behandlingResultatStatistikk"));
+        metrikker.addAll(timeCall(this::prosessTaskStatistikk, "prosessTaskStatistikk"));
+        metrikker.addAll(timeCall(this::mottattDokumentStatistikk, "mottattDokumentStatistikk"));
+        metrikker.addAll(timeCall(this::aksjonspunktStatistikk, "aksjonspunktStatistikk"));
+        metrikker.addAll(timeCall(() -> aksjonspunktStatistikkDaglig(dag), "aksjonspunktStatistikkDaglig"));
+        metrikker.addAll(timeCall(this::avslagStatistikk, "avslagStatistikk"));
+        metrikker.addAll(timeCall(() -> avslagStatistikkDaglig(dag), "avslagStatistikkDaglig"));
+        metrikker.addAll(timeCall(this::prosessTaskFeilStatistikk, "prosessTaskFeilStatistikk"));
         return metrikker;
+    }
+
+    private Collection<SensuEvent> timeCall(Supplier<Collection<SensuEvent>> collectionSupplier, String function) {
+        var start = System.currentTimeMillis();
+        var sensuEvents = collectionSupplier.get();
+        var slutt = System.currentTimeMillis();
+
+        log.info("{} benyttet {} ms", function, (slutt-start));
+
+        return sensuEvents;
     }
 
     @SuppressWarnings("unchecked")
