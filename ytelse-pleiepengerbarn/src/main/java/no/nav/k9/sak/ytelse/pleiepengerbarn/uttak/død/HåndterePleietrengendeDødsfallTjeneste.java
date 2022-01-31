@@ -92,7 +92,7 @@ public class HåndterePleietrengendeDødsfallTjeneste {
 
         forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato());
 
-        var vilkår = Set.of(VilkårType.OPPTJENINGSVILKÅRET, VilkårType.OMSORGEN_FOR, VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET, VilkårType.ALDERSVILKÅR);
+        var vilkår = Set.of(VilkårType.OPPTJENINGSVILKÅRET, VilkårType.OMSORGEN_FOR, VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET, VilkårType.ALDERSVILKÅR, VilkårType.SØKNADSFRIST);
         forlengeVilkårMedPeriode(vilkår, resultatBuilder, vilkårene, periode);
         forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), resultatBuilder.build());
