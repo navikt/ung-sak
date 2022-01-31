@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -324,7 +325,7 @@ public class MapArbeid {
 
             var harKravFørDødsfallOgDetteErSiste = fiktivtKravPgaDødsfall.getHarKravdokumentInnsendtFørDødsfall() && Objects.equals(at.getJournalpostId(), fiktivtKravPgaDødsfall.getSisteKravFørDødsfall());
             if (dødsdatoIPerioden && !fiktivtKravPgaDødsfall.getHarHåndtertDødsfall() && (harKravFørDødsfallOgDetteErSiste || !fiktivtKravPgaDødsfall.getHarKravdokumentInnsendtFørDødsfall())) {
-                håndterDødsfall(arbeidsforhold, input, midlertidigInaktivPeriode, periode);
+                håndterDødsfall(arbeidsforhold, input, midlertidigInaktivPeriode, periode, fiktivtKravPgaDødsfall);
                 fiktivtKravPgaDødsfall.markerHåndtert();
             }
         } else {
@@ -332,7 +333,7 @@ public class MapArbeid {
         }
     }
 
-    private void håndterDødsfall(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, ArbeidstidMappingInput input, Set<DatoIntervallEntitet> midlertidigInaktivPeriode, DatoIntervallEntitet periode) {
+    private void håndterDødsfall(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, ArbeidstidMappingInput input, Set<DatoIntervallEntitet> midlertidigInaktivPeriode, DatoIntervallEntitet periode, FiktivtKravPgaDødsfall fiktivtKravPgaDødsfall) {
         var dødstidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(input.getUtvidetPeriodeSomFølgeAvDødsfall().toLocalDateInterval(), null)));
 
         var relevantArbeidPåDødsdato = arbeidsforhold.entrySet()
@@ -341,17 +342,28 @@ public class MapArbeid {
             .filter(it -> it.getValue().intersects(dødstidslinje))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        relevantArbeidPåDødsdato.entrySet().forEach(entry -> leggTilFultFraværFra(arbeidsforhold, entry, input, midlertidigInaktivPeriode, periode));
+        relevantArbeidPåDødsdato.entrySet().forEach(entry -> leggTilFraværForDødsfall(arbeidsforhold, entry, input, midlertidigInaktivPeriode, periode, fiktivtKravPgaDødsfall));
     }
 
-    private void leggTilFultFraværFra(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, Map.Entry<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> entry, ArbeidstidMappingInput input, Set<DatoIntervallEntitet> midlertidigInaktivPeriode, DatoIntervallEntitet periode) {
+    private void leggTilFraværForDødsfall(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, Map.Entry<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> entry, ArbeidstidMappingInput input, Set<DatoIntervallEntitet> midlertidigInaktivPeriode, DatoIntervallEntitet periode, FiktivtKravPgaDødsfall fiktivtKravPgaDødsfall) {
         var dødsperiode = input.getUtvidetPeriodeSomFølgeAvDødsfall();
         var intersection = entry.getValue().intersection(dødsperiode.toLocalDateInterval());
-        var p = intersection.toSegments().iterator().next().getValue().getPeriode();
-        var key = new AktivitetIdentifikator(p.getAktivitetType(), p.getArbeidsgiver(), InternArbeidsforholdRef.nullRef());
+        var manglendePerioderIDødsPerioden = new LocalDateTimeline<WrappedArbeid>(List.of(new LocalDateSegment<>(dødsperiode.toLocalDateInterval(), null))).disjoint(intersection);
+        var key = utledKey(intersection);
         var perioder = arbeidsforhold.getOrDefault(key, new LocalDateTimeline<>(List.of()));
-        var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(dødsperiode.toLocalDateInterval(), new WrappedArbeid(p, Duration.ZERO))));
-        perioder = perioder.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
+        for (LocalDateSegment<WrappedArbeid> segment : intersection.toSegments()) {
+            var value = segment.getValue();
+            var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), new WrappedArbeid(value.getPeriode(), fiktivtKravPgaDødsfall.getHarKravdokumentInnsendtFørDødsfall() ? Duration.ZERO : value.getPeriode().getFaktiskArbeidTimerPerDag()))));
+            perioder = perioder.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        for (LocalDateSegment<WrappedArbeid> segment : manglendePerioderIDødsPerioden.toSegments()) {
+            var value = finnVerdiForutFor(perioder, segment.getLocalDateInterval());
+            var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), new WrappedArbeid(value.getPeriode(), Duration.ZERO))));
+            perioder = perioder.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
 
         if (!midlertidigInaktivPeriode.isEmpty()) {
             // Passe på at periodene ikke overlapper med innaktive perioder
@@ -362,6 +374,16 @@ public class MapArbeid {
         }
         perioder = justerPeriodenIHenholdTilStartenPåArbeidsforholdet(input, key, perioder);
         arbeidsforhold.put(key, perioder.intersection(periode.toLocalDateInterval()));
+    }
+
+    private WrappedArbeid finnVerdiForutFor(LocalDateTimeline<WrappedArbeid> perioder, LocalDateInterval interval) {
+        var dato = interval.getFomDato().minusDays(1);
+        return perioder.intersection(new LocalDateInterval(dato, dato)).toSegments().iterator().next().getValue();
+    }
+
+    private AktivitetIdentifikator utledKey(LocalDateTimeline<WrappedArbeid> intersection) {
+        var p = intersection.toSegments().iterator().next().getValue().getPeriode();
+        return new AktivitetIdentifikator(p.getAktivitetType(), p.getArbeidsgiver(), InternArbeidsforholdRef.nullRef());
     }
 
     private boolean erAvRelevantType(Map.Entry<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> it) {
