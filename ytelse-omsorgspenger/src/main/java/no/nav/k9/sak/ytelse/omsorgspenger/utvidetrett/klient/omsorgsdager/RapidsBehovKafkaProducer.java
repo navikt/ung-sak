@@ -38,6 +38,14 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
         Map<String, String> optionalProperties = Collections.emptyMap();
         this.clientId = clientId();
         this.topic = topic;
+
+        /*
+        KAFKA_TRUSTSTORE_PASSWORD er satt til required false ettersom truststore och credstore password er like for aiven.
+        Men i andre cases, f.eks. k9-verdikjede kan de vare ulike.
+
+        https://doc.nais.io/persistence/kafka/application/ - This feature applies only to Aiven hosted Kafka.
+        KAFKA_CREDSTORE_PASSWORD = Password needed to use the keystore and truststore
+         */
         this.producer = new KafkaProducerAiven(
             topic,
             bootstrapServers,
