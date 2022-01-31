@@ -14,12 +14,12 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -42,6 +42,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.PerioderMedSykdomInnvilgetUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeDødsfallTjeneste;
 
 @Dependent
@@ -64,6 +65,7 @@ public class HentDataTilUttakTjeneste {
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
+    private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
 
     @Inject
     public HentDataTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
@@ -82,7 +84,7 @@ public class HentDataTilUttakTjeneste {
                                     @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                     SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-                                    HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste) {
+                                    HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste, PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
@@ -100,6 +102,7 @@ public class HentDataTilUttakTjeneste {
         this.opptjeningRepository = opptjeningRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
+        this.perioderMedSykdomInnvilgetUtleder = perioderMedSykdomInnvilgetUtleder;
     }
 
     public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
@@ -179,13 +182,20 @@ public class HentDataTilUttakTjeneste {
             søknadsperioder = SykdomUtils.toLocalDateTimeline(datoer);
             if (utvidetPeriodeSomFølgeAvDødsfall.isPresent()) {
                 søknadsperioder = søknadsperioder.combine(new LocalDateSegment<>(utvidetPeriodeSomFølgeAvDødsfall.get().toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                final LocalDateTimeline<Boolean> trukkedeKrav = hentTrukkedeKravTidslinje(referanse, behandling);
+                søknadsperioder = SykdomUtils.kunPerioderSomIkkeFinnesI(søknadsperioder, trukkedeKrav);
             }
         } else {
-            søknadsperioder = SykdomUtils.toLocalDateTimeline(finnSykdomsperioder(referanse));
+            var innvilgeteVilkårPerioder = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse);
+
+            søknadsperioder = new LocalDateTimeline<>(innvilgeteVilkårPerioder.stream()
+                .map(VilkårPeriode::getPeriode)
+                .map(DatoIntervallEntitet::toLocalDateInterval)
+                .map(it -> new LocalDateSegment<>(it, true))
+                .collect(Collectors.toList()));
         }
 
-        final LocalDateTimeline<Boolean> trukkedeKrav = hentTrukkedeKravTidslinje(referanse, behandling);
-        return SykdomUtils.kunPerioderSomIkkeFinnesI(søknadsperioder, trukkedeKrav).stream()
+        return søknadsperioder.stream()
             .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
             .collect(Collectors.toCollection(TreeSet::new));
     }
@@ -227,17 +237,6 @@ public class HentDataTilUttakTjeneste {
             .stream()
             .map(s -> new EtablertTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue().getVarighet(), s.getValue().getJournalpostId()))
             .collect(Collectors.toList());
-    }
-
-    private NavigableSet<DatoIntervallEntitet> finnSykdomsperioder(BehandlingReferanse referanse) {
-        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = perioderTilVurderingTjeneste(referanse);
-        var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
-        final var resultat = new TreeSet<DatoIntervallEntitet>();
-        for (VilkårType vilkårType : definerendeVilkår) {
-            final var periode = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), vilkårType);
-            resultat.addAll(periode);
-        }
-        return resultat;
     }
 
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste(BehandlingReferanse behandlingReferanse) {
