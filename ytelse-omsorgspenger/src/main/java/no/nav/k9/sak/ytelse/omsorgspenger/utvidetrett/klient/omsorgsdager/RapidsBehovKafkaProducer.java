@@ -13,6 +13,7 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -31,7 +32,7 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
         @KonfigVerdi(value = "KAFKA_OMS_RAPID_TOPIC", defaultVerdi = "omsorgspenger.k9-rapid-v2") String topic,
         @KonfigVerdi(value = "KAFKA_BROKERS") String bootstrapServers,
         @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH") String truststorePath,
-        @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PASSWORD", required = false) String truststorePassword,
+        @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PASSWORD", required = false) Optional<String> truststorePassword,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH") String keystorePath,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD") String credstorePassword) {
 
@@ -39,18 +40,11 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
         this.clientId = clientId();
         this.topic = topic;
 
-        /*
-        KAFKA_TRUSTSTORE_PASSWORD er satt til required false ettersom truststore och credstore password er like for aiven.
-        Men i andre cases, f.eks. k9-verdikjede kan de vare ulike.
-
-        https://doc.nais.io/persistence/kafka/application/ - This feature applies only to Aiven hosted Kafka.
-        KAFKA_CREDSTORE_PASSWORD = Password needed to use the keystore and truststore
-         */
         this.producer = new KafkaProducerAiven(
             topic,
             bootstrapServers,
             truststorePath,
-            Objects.requireNonNullElse(truststorePassword, credstorePassword),
+            truststorePassword,
             keystorePath,
             credstorePassword,
             clientId(),
