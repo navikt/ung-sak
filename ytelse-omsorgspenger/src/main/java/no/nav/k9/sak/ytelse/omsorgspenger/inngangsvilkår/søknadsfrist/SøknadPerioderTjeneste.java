@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -61,7 +60,7 @@ public class SøknadPerioderTjeneste {
                     .orElse(Set.of());
                 søktePerioderMedKravDokument.put(kravDokument, mapFraværPerioder(fraværPerioderFraSøknad, dok));
             } else if (BREVKODER_IM_KORRIGERING.contains(dok.getType())) {
-                var kravDokument = new KravDokument(dok.getJournalpostId(), dok.getMottattTidspunkt(), KravDokumentType.INNTEKTSMELDING);
+                var kravDokument = new KravDokument(dok.getJournalpostId(), dok.getMottattTidspunkt(), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV);
                 var fraværskorrigeringerFraIm = grunnlagRepository.hentOppgittFraværFraFraværskorrigeringerHvisEksisterer(dok.getBehandlingId())
                     .map(OppgittFravær::getPerioder)
                     .orElse(Set.of());

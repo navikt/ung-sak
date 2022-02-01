@@ -304,7 +304,7 @@ public class KravDokumentFraværTest {
         var fraværPerDag = im.getOppgittFravær().get(0).getVarighetPerDag();
         var jpId = im.getJournalpostId();
 
-        return Map.entry(new KravDokument(jpId, im.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING),
+        return Map.entry(new KravDokument(jpId, im.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV),
             List.of(lagSøktPeriode(jpId, fom, tom, fraværPerDag, UttakArbeidType.ARBEIDSTAKER, im.getArbeidsgiver(), im.getArbeidsforholdRef())));
     }
 
