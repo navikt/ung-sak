@@ -351,22 +351,23 @@ public class MapArbeid {
     }
 
     private void leggTilFraværForDødsfall(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, Map.Entry<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> entry, ArbeidstidMappingInput input, Set<DatoIntervallEntitet> midlertidigInaktivPeriode, DatoIntervallEntitet periode, FiktivtKravPgaDødsfall fiktivtKravPgaDødsfall) {
-        var dødsperiode = input.getUtvidetPeriodeSomFølgeAvDødsfall();
+        var dødsperiode = input.getUtvidetPeriodeSomFølgeAvDødsfall(); // Dødsdato + justert periode
+        var periodeSomSkalJusteresSomFølgeAvDødsfall = DatoIntervallEntitet.fraOgMedTilOgMed(dødsperiode.getFomDato().plusDays(1), dødsperiode.getTomDato()); // justert periode
         var intersection = entry.getValue().intersection(periodeMedDødsfall(input).toLocalDateInterval());
-        var manglendePerioderIDødsPerioden = new LocalDateTimeline<WrappedArbeid>(List.of(new LocalDateSegment<>(dødsperiode.toLocalDateInterval(), null))).disjoint(intersection);
+        var manglendePerioderIDødsPerioden = new LocalDateTimeline<WrappedArbeid>(List.of(new LocalDateSegment<>(periodeSomSkalJusteresSomFølgeAvDødsfall.toLocalDateInterval(), null))).disjoint(intersection);
         var key = utledKey(intersection);
         var perioder = arbeidsforhold.getOrDefault(key, new LocalDateTimeline<>(List.of()));
 
         for (LocalDateSegment<WrappedArbeid> segment : intersection.toSegments()) {
             var value = segment.getValue();
             var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), new WrappedArbeid(value.getPeriode(), fiktivtKravPgaDødsfall.getHarKravdokumentInnsendtFørDødsfall() ? Duration.ZERO : value.getPeriode().getFaktiskArbeidTimerPerDag()))));
-            perioder = perioder.combine(timeline.intersection(dødsperiode.toLocalDateInterval()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            perioder = perioder.combine(timeline.intersection(periodeSomSkalJusteresSomFølgeAvDødsfall.toLocalDateInterval()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
         for (LocalDateSegment<WrappedArbeid> segment : manglendePerioderIDødsPerioden.toSegments()) {
             var value = finnVerdiForutFor(perioder, segment.getLocalDateInterval());
             var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), new WrappedArbeid(value.getPeriode(), Duration.ZERO))));
-            perioder = perioder.combine(timeline.intersection(dødsperiode.toLocalDateInterval()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            perioder = perioder.combine(timeline.intersection(periodeSomSkalJusteresSomFølgeAvDødsfall.toLocalDateInterval()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
         if (!midlertidigInaktivPeriode.isEmpty()) {
