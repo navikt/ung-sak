@@ -105,6 +105,10 @@ public class InfotrygdMigreringTjeneste {
             throw new IllegalStateException("Fant berørt sak på gammel ordning");
         }
 
+        if (!grunnlagsperioderPrAktør.isEmpty()) {
+            log.info("Fant berørte perioder i infotrygd: " + grunnlagsperioderPrAktør.values());
+        }
+
         var ikkeSøktMedOverlappMap = grunnlagsperioderPrAktør.entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey,
