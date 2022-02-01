@@ -107,6 +107,9 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     
     private boolean harOmsorgenForISistePeriode(Vilkårene vilkårene) {
         final Vilkår vilkår = vilkårene.getVilkår(VILKÅRET).get();
+        if (vilkår.getPerioder().isEmpty()) {
+            return false;
+        }
         final VilkårPeriode vilkårPeriode = vilkår.getPerioder().get(vilkår.getPerioder().size() - 1);
         return (vilkårPeriode.getUtfall() == Utfall.OPPFYLT);
     }
