@@ -43,7 +43,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
     @Test
     void skal_godkjenne_9_måneder_søknadsfrist_for_covid19_utvidet_frist() {
         var jpId = new JournalpostId(123L);
-        KravDokument søknad = new KravDokument(jpId, LocalDateTime.now().withYear(2021).withMonth(1).withDayOfMonth(1), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV);
+        KravDokument søknad = new KravDokument(jpId, LocalDateTime.now().withYear(2021).withMonth(1).withDayOfMonth(1), KravDokumentType.INNTEKTSMELDING);
         LocalDate startDato = LocalDate.now().withYear(2020).withMonth(1).withDayOfMonth(1);
         var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
         var virksomhet = Arbeidsgiver.virksomhet("000000000");
@@ -67,7 +67,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
     @Test
     void skal_vurdere_søknadsfrist() {
         var journalpostId = new JournalpostId(123L);
-        KravDokument søknad = new KravDokument(journalpostId, LocalDateTime.now().withYear(2022).withMonth(1).withDayOfMonth(1), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV);
+        KravDokument søknad = new KravDokument(journalpostId, LocalDateTime.now().withYear(2022).withMonth(1).withDayOfMonth(1), KravDokumentType.INNTEKTSMELDING);
         LocalDate startDato = LocalDate.now().withYear(2021).withMonth(1).withDayOfMonth(1);
         var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
         var virksomhet = Arbeidsgiver.virksomhet("000000000");
@@ -91,7 +91,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
 
     @Test
     void skal_ta_hensyn_til_tidligere_godkjent() {
-        KravDokument søknad = new KravDokument(new JournalpostId(123L), LocalDateTime.now().withYear(2021).withMonth(1).withDayOfMonth(1), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV);
+        KravDokument søknad = new KravDokument(new JournalpostId(123L), LocalDateTime.now().withYear(2021).withMonth(1).withDayOfMonth(1), KravDokumentType.INNTEKTSMELDING);
         LocalDate startDato = LocalDate.now().withYear(2020).withMonth(1).withDayOfMonth(1);
         var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
         var virksomhet = Arbeidsgiver.virksomhet("000000000");
@@ -113,7 +113,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
         assertThat(next.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(startDato.withMonth(4).withDayOfMonth(1), startDato.plusMonths(12)));
         assertThat(next.getUtfall()).isEqualTo(Utfall.OPPFYLT);
 
-        KravDokument søknad2 = new KravDokument(new JournalpostId(124L), LocalDateTime.now().withYear(2022).withMonth(1).withDayOfMonth(1), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV);
+        KravDokument søknad2 = new KravDokument(new JournalpostId(124L), LocalDateTime.now().withYear(2022).withMonth(1).withDayOfMonth(1), KravDokumentType.INNTEKTSMELDING);
 
         var søktePerioder2 = List.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato.plusMonths(6), startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, oppgittFraværPeriode));
 

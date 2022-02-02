@@ -82,7 +82,7 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
 
         var inntektsmeldinger = inntektsmeldingerPerioderTjeneste.hentUtInntektsmeldingerKnyttetTilBehandling(referanse);
         var kravDokumenter = inntektsmeldinger.stream()
-            .map(it -> new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV))
+            .map(it -> new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING))
             .collect(Collectors.toCollection(HashSet::new));
 
         var søktePerioderFraSøknad = søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåBehandling(referanse);

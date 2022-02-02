@@ -216,7 +216,7 @@ public class TrekkUtFraværTjeneste {
     }
 
     private long countIm(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder) {
-        return vurdertePerioder.keySet().stream().filter(type -> List.of(KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV, KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV).contains(type.getType())).count();
+        return vurdertePerioder.keySet().stream().filter(type -> List.of(KravDokumentType.INNTEKTSMELDING, KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV).contains(type.getType())).count();
     }
 
     private long countSøknad(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder) {

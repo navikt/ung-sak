@@ -121,10 +121,10 @@ public class KravDokumentFravær {
         WrappedOppgittFraværPeriode im;
         WrappedOppgittFraværPeriode søknad;
         if (førsteVersjon.getValue().getKravDokumentType() != sisteVersjon.getValue().getKravDokumentType()) {
-            if (førsteVersjon.getValue().getKravDokumentType() == KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV && sisteVersjon.getValue().getKravDokumentType() == KravDokumentType.SØKNAD) {
+            if (førsteVersjon.getValue().getKravDokumentType() == KravDokumentType.INNTEKTSMELDING && sisteVersjon.getValue().getKravDokumentType() == KravDokumentType.SØKNAD) {
                 im = førsteVersjon.getValue();
                 søknad = sisteVersjon.getValue();
-            } else if (sisteVersjon.getValue().getKravDokumentType() == KravDokumentType.SØKNAD && førsteVersjon.getValue().getKravDokumentType() == KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV) {
+            } else if (sisteVersjon.getValue().getKravDokumentType() == KravDokumentType.SØKNAD && førsteVersjon.getValue().getKravDokumentType() == KravDokumentType.INNTEKTSMELDING) {
                 søknad = førsteVersjon.getValue();
                 im = sisteVersjon.getValue();
             } else {
@@ -137,7 +137,7 @@ public class KravDokumentFravær {
                 return true;
             }
 
-            if (im.getKravDokumentType() == KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV) {
+            if (im.getKravDokumentType() == KravDokumentType.INNTEKTSMELDING) {
                 return true;
             }
         }

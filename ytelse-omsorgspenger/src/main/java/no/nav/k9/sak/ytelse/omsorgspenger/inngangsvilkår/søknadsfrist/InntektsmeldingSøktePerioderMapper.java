@@ -39,7 +39,7 @@ public class InntektsmeldingSøktePerioderMapper {
         var erRefusjon = im.getRefusjonBeløpPerMnd() != null && im.getRefusjonBeløpPerMnd().compareTo(Beløp.ZERO) > 0;
 
         if (erRefusjon) {
-            return KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV;
+            return KravDokumentType.INNTEKTSMELDING;
         }
         else {
             return KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV;

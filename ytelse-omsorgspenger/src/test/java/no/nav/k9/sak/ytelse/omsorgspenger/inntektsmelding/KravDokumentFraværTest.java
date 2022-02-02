@@ -324,7 +324,7 @@ public class KravDokumentFraværTest {
         var fraværPerDag = im.getOppgittFravær().get(0).getVarighetPerDag();
         var jpId = im.getJournalpostId();
         var kravDokumentType = im.getRefusjonBeløpPerMnd().getVerdi().compareTo(BigDecimal.ZERO) > 0
-            ? KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV
+            ? KravDokumentType.INNTEKTSMELDING
             : KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV;
 
         return Map.entry(new KravDokument(jpId, im.getInnsendingstidspunkt(), kravDokumentType),

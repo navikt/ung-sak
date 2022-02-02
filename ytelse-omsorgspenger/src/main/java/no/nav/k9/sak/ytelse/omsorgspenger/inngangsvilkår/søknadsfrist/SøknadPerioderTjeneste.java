@@ -60,7 +60,7 @@ public class SøknadPerioderTjeneste {
                     .orElse(Set.of());
                 søktePerioderMedKravDokument.put(kravDokument, mapFraværPerioder(fraværPerioderFraSøknad, dok));
             } else if (BREVKODER_IM_KORRIGERING.contains(dok.getType())) {
-                var kravDokument = new KravDokument(dok.getJournalpostId(), dok.getMottattTidspunkt(), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV);
+                var kravDokument = new KravDokument(dok.getJournalpostId(), dok.getMottattTidspunkt(), KravDokumentType.INNTEKTSMELDING);
                 var fraværskorrigeringerFraIm = grunnlagRepository.hentOppgittFraværFraFraværskorrigeringerHvisEksisterer(dok.getBehandlingId())
                     .map(OppgittFravær::getPerioder)
                     .orElse(Set.of());
