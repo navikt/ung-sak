@@ -294,6 +294,26 @@ public class KravDokumentFraværTest {
         assertThat(fp1.getPeriode().getTom()).isEqualTo(LocalDate.now());
     }
 
+    @Test
+    public void skal_filtrere_inntektsmelding_uten_refusjonskrav() {
+        var im = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
+            .medArbeidsforholdId(EksternArbeidsforholdRef.nullRef())
+            .medJournalpostId("1")
+            .medInnsendingstidspunkt(LocalDateTime.now().minusDays(10))
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("AR123")
+            .medOppgittFravær(List.of(new PeriodeAndel(LocalDate.now().minusDays(30), LocalDate.now().minusDays(25))))
+            .medRefusjon(BigDecimal.ZERO) // Gir KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV
+            .build();
+        var input = Map.ofEntries(mapTilKravdok(im));
+
+        List<WrappedOppgittFraværPeriode> oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(input);
+
+        assertThat(oppgittFraværPeriode).hasSize(0);
+    }
+
 
     private static Map.Entry<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> mapTilKravdok(Inntektsmelding im) {
         if (im.getOppgittFravær().size() != 1) {
@@ -303,8 +323,11 @@ public class KravDokumentFraværTest {
         var tom = im.getOppgittFravær().get(0).getTom();
         var fraværPerDag = im.getOppgittFravær().get(0).getVarighetPerDag();
         var jpId = im.getJournalpostId();
+        var kravDokumentType = im.getRefusjonBeløpPerMnd().getVerdi().compareTo(BigDecimal.ZERO) > 0
+            ? KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV
+            : KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV;
 
-        return Map.entry(new KravDokument(jpId, im.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING),
+        return Map.entry(new KravDokument(jpId, im.getInnsendingstidspunkt(), kravDokumentType),
             List.of(lagSøktPeriode(jpId, fom, tom, fraværPerDag, UttakArbeidType.ARBEIDSTAKER, im.getArbeidsgiver(), im.getArbeidsforholdRef())));
     }
 

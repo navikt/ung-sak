@@ -33,7 +33,7 @@ public class OMPSøknadsfristTjenesteTest {
         var søktPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now());
         var vurdertPeriode = new VurdertSøktPeriode<OppgittFraværPeriode>(søktPeriode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), Utfall.OPPFYLT, null);
         Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder = Map.of(
-            new KravDokument(new JournalpostId(123L), LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING),
+            new KravDokument(new JournalpostId(123L), LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV),
             List.of(vurdertPeriode));
 
         VilkårResultatBuilder resultatBuilder = tjeneste.mapVurderingerTilVilkårsresultat(Vilkårene.builder(), Map.of(), vurdertePerioder, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(12), LocalDate.now().plusMonths(12)));
@@ -53,9 +53,9 @@ public class OMPSøknadsfristTjenesteTest {
         var vurdertPeriode = new VurdertSøktPeriode<OppgittFraværPeriode>(søktPeriode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), Utfall.OPPFYLT, null);
         var vurdertPeriode1 = new VurdertSøktPeriode<OppgittFraværPeriode>(søktPeriode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000001"), InternArbeidsforholdRef.nullRef(), Utfall.IKKE_VURDERT, null);
         Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder = Map.of(
-            new KravDokument(new JournalpostId(123L), LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING),
+            new KravDokument(new JournalpostId(123L), LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV),
             List.of(vurdertPeriode),
-            new KravDokument(new JournalpostId(124L), LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING),
+            new KravDokument(new JournalpostId(124L), LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV),
             List.of(vurdertPeriode1));
 
         VilkårResultatBuilder resultatBuilder = tjeneste.mapVurderingerTilVilkårsresultat(Vilkårene.builder(), Map.of(), vurdertePerioder, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(12), LocalDate.now().plusMonths(12)));
@@ -75,9 +75,9 @@ public class OMPSøknadsfristTjenesteTest {
         var vurdertPeriode = new VurdertSøktPeriode<OppgittFraværPeriode>(søktPeriode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), Utfall.OPPFYLT, null);
         var vurdertPeriode1 = new VurdertSøktPeriode<OppgittFraværPeriode>(søktPeriode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000001"), InternArbeidsforholdRef.nullRef(), Utfall.IKKE_OPPFYLT, null);
         Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder = Map.of(
-            new KravDokument(new JournalpostId(123L), LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING),
+            new KravDokument(new JournalpostId(123L), LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV),
             List.of(vurdertPeriode),
-            new KravDokument(new JournalpostId(124L), LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING),
+            new KravDokument(new JournalpostId(124L), LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV),
             List.of(vurdertPeriode1));
 
         VilkårResultatBuilder resultatBuilder = tjeneste.mapVurderingerTilVilkårsresultat(Vilkårene.builder(), Map.of(), vurdertePerioder, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(12), LocalDate.now().plusMonths(12)));

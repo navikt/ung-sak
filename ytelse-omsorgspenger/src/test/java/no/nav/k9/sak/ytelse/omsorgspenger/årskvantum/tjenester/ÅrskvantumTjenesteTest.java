@@ -83,6 +83,6 @@ public class ÅrskvantumTjenesteTest {
     }
 
     private List<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> mapTilWrappedPeriode(List<OppgittFraværPeriode> perioder) {
-        return perioder.stream().map(it -> new no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode(it, LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING, Utfall.OPPFYLT)).collect(Collectors.toList());
+        return perioder.stream().map(it -> new no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode(it, LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV, Utfall.OPPFYLT)).collect(Collectors.toList());
     }
 }

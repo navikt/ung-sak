@@ -9,13 +9,12 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.kodeverk.uttak.FraværÅrsak;
-import no.nav.k9.kodeverk.uttak.SøknadÅrsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
@@ -30,6 +29,9 @@ public class KravDokumentFravær {
         Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
         for (var dok : sorterteKravdokumenter) {
             for (var vurdertPeriode : fraværFraKravdokumenter.get(dok)) {
+                if (erImUtenRefusjonskravOgUtenTrektPeriode(dok.getType(), vurdertPeriode)) {
+                    continue;
+                }
                 var aktivitetIdent = lagAktivitetIdentifikator(vurdertPeriode);
 
                 var fraværsperiodeNy = new WrappedOppgittFraværPeriode(vurdertPeriode.getRaw(), dok.getInnsendingsTidspunkt(), dok.getType(), utledUtfall(vurdertPeriode));
@@ -74,6 +76,11 @@ public class KravDokumentFravær {
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+    private boolean erImUtenRefusjonskravOgUtenTrektPeriode(KravDokumentType type, VurdertSøktPeriode<OppgittFraværPeriode> vurdertPeriode) {
+        var erTrektPeriode = vurdertPeriode.getRaw().getFraværPerDag() != null && vurdertPeriode.getRaw().getFraværPerDag().isZero();
+        return type == KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV && !erTrektPeriode;
+    }
+
     private LocalDateSegment<WrappedOppgittFraværPeriode> mergePeriode(LocalDateInterval di,
                                                                        LocalDateSegment<WrappedOppgittFraværPeriode> førsteVersjon,
                                                                        LocalDateSegment<WrappedOppgittFraværPeriode> sisteVersjon) {
@@ -82,23 +89,17 @@ public class KravDokumentFravær {
         } else if (sisteVersjon == null && førsteVersjon != null) {
             return førsteVersjon;
         }
-        var første = førsteVersjon.getValue();
-        var siste = sisteVersjon.getValue();
+        var førstePeriode = førsteVersjon.getValue().getPeriode();
+        var sistePeriode = sisteVersjon.getValue().getPeriode();
 
-        FraværÅrsak fraværÅrsak;
-        SøknadÅrsak søknadÅrsak;
-        if (første.getKravDokumentType() != siste.getKravDokumentType() && første.getKravDokumentType() == KravDokumentType.SØKNAD) {
-            // Kravdokument av type INNTEKTSMELDING har ikke FraværÅrsak, må hentes fra SØKNAD dersom oppgitt av søker
-            fraværÅrsak = første.getPeriode().getFraværÅrsak();
-            søknadÅrsak = første.getPeriode().getSøknadÅrsak();
-        } else {
-            // Bruker ellers siste versjon, da kravdokument med fraværesperioder kommer inn i sortert rekkefølge
-            fraværÅrsak = siste.getPeriode().getFraværÅrsak();
-            søknadÅrsak = siste.getPeriode().getSøknadÅrsak();
-        }
+        var fraværÅrsak = sistePeriode.getFraværÅrsak() != null ? sistePeriode.getFraværÅrsak() : førstePeriode.getFraværÅrsak();
+        var søknadÅrsak = sistePeriode.getSøknadÅrsak() != null ? sistePeriode.getSøknadÅrsak() : førstePeriode.getSøknadÅrsak();
+
+        // TODO: Ta i bruk konfliktImSøknad i Uttak
+        boolean konfliktImSøknad = erKonfliktMellomImOgSøknad(førsteVersjon, sisteVersjon);
 
         // Siste segment for alt annet brukes alltid siste segment
-        var gjeldendeFp = siste.getPeriode();
+        var gjeldendeFp = sisteVersjon.getValue().getPeriode();
         var wrapped = new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(gjeldendeFp.getJournalpostId(),
             di.getTomDato(),
             di.getTomDato(),
@@ -108,11 +109,39 @@ public class KravDokumentFravær {
             gjeldendeFp.getFraværPerDag(),
             fraværÅrsak,
             søknadÅrsak),
-            siste.getInnsendingstidspunkt(),
-            siste.getKravDokumentType(),
-            siste.getSøknadsfristUtfall());
+            sisteVersjon.getValue().getInnsendingstidspunkt(),
+            sisteVersjon.getValue().getKravDokumentType(),
+            sisteVersjon.getValue().getSøknadsfristUtfall());
 
         return new LocalDateSegment<>(di, wrapped);
+    }
+
+    private boolean erKonfliktMellomImOgSøknad(LocalDateSegment<WrappedOppgittFraværPeriode> førsteVersjon, LocalDateSegment<WrappedOppgittFraværPeriode> sisteVersjon) {
+
+        WrappedOppgittFraværPeriode im;
+        WrappedOppgittFraværPeriode søknad;
+        if (førsteVersjon.getValue().getKravDokumentType() != sisteVersjon.getValue().getKravDokumentType()) {
+            if (førsteVersjon.getValue().getKravDokumentType() == KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV && sisteVersjon.getValue().getKravDokumentType() == KravDokumentType.SØKNAD) {
+                im = førsteVersjon.getValue();
+                søknad = sisteVersjon.getValue();
+            } else if (sisteVersjon.getValue().getKravDokumentType() == KravDokumentType.SØKNAD && førsteVersjon.getValue().getKravDokumentType() == KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV) {
+                søknad = førsteVersjon.getValue();
+                im = sisteVersjon.getValue();
+            } else {
+                return false;
+            }
+
+            var erForskjellFravær = Objects.equals(im.getPeriode().getFraværPerDag(), søknad.getPeriode().getFraværPerDag());
+            var erTrekkAvKrav = im.getPeriode().getFraværPerDag() != null && im.getPeriode().getFraværPerDag().isZero();
+            if (erForskjellFravær && !erTrekkAvKrav) {
+                return true;
+            }
+
+            if (im.getKravDokumentType() == KravDokumentType.INNTEKTSMELDING_MED_REFUSJONSKRAV) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
