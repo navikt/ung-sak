@@ -132,7 +132,8 @@ public class BehandlingskontrollEventObserver {
                 new AksjonspunktTilstandDto(
                     it.getAksjonspunktDefinisjon().getKode(),
                     it.getStatus().getKode(),
-                    it.getVenteårsak().getKode())
+                    it.getVenteårsak().getKode(),
+                    it.getFristTid())
             ).toList())
             .build();
     }

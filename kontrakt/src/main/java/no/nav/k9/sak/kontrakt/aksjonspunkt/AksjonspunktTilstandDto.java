@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.aksjonspunkt;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -15,7 +17,7 @@ import jakarta.validation.constraints.NotNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public record AksjonspunktTilstandDto(String aksjonspunktKode, String status, String venteårsak) {
+public record AksjonspunktTilstandDto(String aksjonspunktKode, String status, String venteårsak, LocalDateTime fristTid) {
     @JsonCreator
     public AksjonspunktTilstandDto(
         @JsonProperty(value = "kode", required = true)
@@ -25,22 +27,26 @@ public record AksjonspunktTilstandDto(String aksjonspunktKode, String status, St
         @NotNull
             String status,
         @JsonProperty(value = "venteårsak")
-            String venteårsak) {
+            String venteårsak,
+        @JsonProperty(value = "fristTid")
+        LocalDateTime fristTid) {
         this.aksjonspunktKode = aksjonspunktKode;
         this.status = status;
         this.venteårsak = venteårsak;
+        this.fristTid = fristTid;
     }
 
     public AksjonspunktTilstandDto(AksjonspunktTilstandDto kopierFra) {
-        this(kopierFra.aksjonspunktKode, kopierFra.status, kopierFra.venteårsak);
+        this(kopierFra.aksjonspunktKode, kopierFra.status, kopierFra.venteårsak, kopierFra.fristTid);
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<"
-            + "kode=" + aksjonspunktKode
-            + ", status=" + status
-            + (venteårsak == null ? "" : ", venteårsak=" + venteårsak)
-            + ">";
+        return "AksjonspunktTilstandDto{" +
+            "aksjonspunktKode='" + aksjonspunktKode + '\'' +
+            ", status='" + status + '\'' +
+            ", venteårsak='" + venteårsak + '\'' +
+            ", fristTid=" + fristTid +
+            '}';
     }
 }
