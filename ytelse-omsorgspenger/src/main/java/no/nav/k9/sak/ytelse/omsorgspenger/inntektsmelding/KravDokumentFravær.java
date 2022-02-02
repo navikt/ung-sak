@@ -29,7 +29,7 @@ public class KravDokumentFravær {
         Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
         for (var dok : sorterteKravdokumenter) {
             for (var vurdertPeriode : fraværFraKravdokumenter.get(dok)) {
-                if (erImUtenRefusjonskravEllerTrektPeriode(dok.getType(), vurdertPeriode)) {
+                if (erImUtenRefusjonskravOgUtenTrektPeriode(dok.getType(), vurdertPeriode)) {
                     continue;
                 }
                 var aktivitetIdent = lagAktivitetIdentifikator(vurdertPeriode);
@@ -76,7 +76,7 @@ public class KravDokumentFravær {
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private boolean erImUtenRefusjonskravEllerTrektPeriode(KravDokumentType type, VurdertSøktPeriode<OppgittFraværPeriode> vurdertPeriode) {
+    private boolean erImUtenRefusjonskravOgUtenTrektPeriode(KravDokumentType type, VurdertSøktPeriode<OppgittFraværPeriode> vurdertPeriode) {
         var erTrektPeriode = vurdertPeriode.getRaw().getFraværPerDag() != null && vurdertPeriode.getRaw().getFraværPerDag().isZero();
         return type == KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV && !erTrektPeriode;
     }
