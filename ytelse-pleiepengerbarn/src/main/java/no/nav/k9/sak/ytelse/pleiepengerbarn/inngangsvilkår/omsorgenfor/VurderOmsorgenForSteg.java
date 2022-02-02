@@ -5,12 +5,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -101,19 +100,19 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         if (haddeOmsorgenForISistePeriode != harOmsorgenForISistePeriode) {
             brukerdialoginnsynService.publiserOmsorgenForHendelse(behandling, harOmsorgenForISistePeriode);
         }
-        
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
-    
+
     private boolean harOmsorgenForISistePeriode(Vilkårene vilkårene) {
-        final Vilkår vilkår = vilkårene.getVilkår(VILKÅRET).get();
+        final Vilkår vilkår = vilkårene.getVilkår(VILKÅRET).orElseThrow();
         if (vilkår.getPerioder().isEmpty()) {
             return false;
         }
         final VilkårPeriode vilkårPeriode = vilkår.getPerioder().get(vilkår.getPerioder().size() - 1);
         return (vilkårPeriode.getUtfall() == Utfall.OPPFYLT);
     }
-    
+
 
     private boolean harIkkeLengerAksjonspunkt(Behandling behandling, LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje) {
         return !harAksjonspunkt(samletOmsorgenForTidslinje, behandling.erManueltOpprettet());
