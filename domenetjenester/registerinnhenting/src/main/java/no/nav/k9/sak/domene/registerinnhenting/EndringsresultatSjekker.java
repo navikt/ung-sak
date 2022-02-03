@@ -125,7 +125,7 @@ public class EndringsresultatSjekker {
 
         // Del 1: Finn diff mellom grunnlagets id før og etter oppdatering
         EndringsresultatSnapshot idSnapshotNå = opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId);
-        EndringsresultatDiff idDiff = idSnapshotNå.minus(snapshotFør);
+        EndringsresultatDiff idDiff = snapshotFør.minus(idSnapshotNå);
 
         // Del 2: Transformer diff på grunnlagets id til diff på grunnlagets sporede endringer (@ChangeTracked)
         EndringsresultatDiff sporedeEndringerDiff = EndringsresultatDiff.opprettForSporingsendringer();
@@ -181,10 +181,6 @@ public class EndringsresultatSjekker {
         return snapshot;
     }
 
-    public EndringsresultatDiff finnIdEndringerPåBehandling(Behandling behandling, EndringsresultatSnapshot idSnapshotFør) {
-        EndringsresultatSnapshot idSnapshotNå = opprettEndringsresultatIdPåBehandlingSnapshot(behandling);
-        return idSnapshotNå.minus(idSnapshotFør);
-    }
 
     private EndringsresultatSnapshot lagVilkårResultatIdSnapshotAvTidsstempel(Behandling behandling) {
         return vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
