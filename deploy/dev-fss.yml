@@ -167,7 +167,7 @@ spec:
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
     - name: OIDC_OPENAM_HOST_URL
-      value: https://isso-q.adeo.no:443/isso/oauth2
+      value: https://isso-q.adeo.no/isso/oauth2
     - name: OIDC_OPENAM_CLIENT_ID
       value: k9-sak-q1
 
