@@ -45,7 +45,7 @@
         <k9format.version>5.7.6</k9format.version>
         <jackson.version>2.13.1</jackson.version>
         <asm.version>9.2</asm.version>
-        <kotlin-stdlib-version>1.6.10</kotlin-stdlib-version>
+        <kotlin-stdlib.version>1.6.10</kotlin-stdlib.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -516,25 +516,25 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-stdlib</artifactId>
-                <version>${kotling-stdlib.version}</version>
+                <version>${kotlin-stdlib.version}</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-stdlib-common</artifactId>
-                <version>${kotling-stdlib.version}</version>
+                <version>${kotlin-stdlib.version}</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-reflect</artifactId>
-                <version>${kotling-stdlib.version}</version>
+                <version>${kotlin-stdlib.version}</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-stdlib-jdk8</artifactId>
-                <version>${kotling-stdlib.version}</version>
+                <version>${kotlin-stdlib.version}</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
