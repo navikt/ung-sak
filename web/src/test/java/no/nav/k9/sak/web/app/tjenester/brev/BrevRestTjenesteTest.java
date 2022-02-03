@@ -12,11 +12,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.ws.rs.core.Response;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import jakarta.ws.rs.core.Response;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -24,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposito
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.dokument.bestill.DokumentBehandlingTjeneste;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
@@ -34,7 +32,6 @@ public class BrevRestTjenesteTest {
 
     private BrevRestTjeneste brevRestTjeneste;
     private final DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjenesteMock = mock(DokumentBestillerApplikasjonTjeneste.class);
-    private final DokumentBehandlingTjeneste dokumentBehandlingTjenesteMock = mock(DokumentBehandlingTjeneste.class);
     private final BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
     private final VilkårResultatRepository vilkårResultatRepository = mock(VilkårResultatRepository.class);
     private final VedtakVarselRepository vedtakVarselRepository = mock(VedtakVarselRepository.class);
@@ -44,7 +41,7 @@ public class BrevRestTjenesteTest {
     public void setUp() {
         when(behandlingRepository.hentBehandling(anyLong())).thenReturn(mock(Behandling.class));
 
-        brevRestTjeneste = new BrevRestTjeneste(vedtakVarselRepository, behandlingVedtakRepository, vilkårResultatRepository, behandlingRepository, dokumentBestillerApplikasjonTjenesteMock, dokumentBehandlingTjenesteMock);
+        brevRestTjeneste = new BrevRestTjeneste(vedtakVarselRepository, behandlingVedtakRepository, vilkårResultatRepository, behandlingRepository, dokumentBestillerApplikasjonTjenesteMock);
     }
 
     @Test

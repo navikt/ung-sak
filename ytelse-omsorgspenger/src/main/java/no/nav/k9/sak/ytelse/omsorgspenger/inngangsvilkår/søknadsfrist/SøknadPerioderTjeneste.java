@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;

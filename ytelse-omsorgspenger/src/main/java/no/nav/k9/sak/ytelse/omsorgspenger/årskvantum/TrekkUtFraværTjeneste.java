@@ -184,7 +184,6 @@ public class TrekkUtFraværTjeneste {
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         sjekkOmInntektsmeldingerMatcher(inntektsmeldingerJournalposter, inntektsmeldinger);
-        inntektsmeldinger = fjernInntektsmeldingerUtenRefusjonskrav(inntektsmeldinger);
         return inntektsmeldingMapper.mapTilSøktePerioder(inntektsmeldinger);
     }
 
@@ -211,21 +210,13 @@ public class TrekkUtFraværTjeneste {
         }
     }
 
-    // Skal ikke opprette kravperioder for inntektsmeldinger uten refusjonskrav
-    private LinkedHashSet<Inntektsmelding> fjernInntektsmeldingerUtenRefusjonskrav(LinkedHashSet<Inntektsmelding> inntektsmeldinger) {
-        return inntektsmeldinger
-            .stream()
-            .filter(im -> im.harRefusjonskrav())
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
     // Slår sammen overlappende perioder fra kravdokumenter (IM-er, søknader)
     public List<WrappedOppgittFraværPeriode> trekkUtFravær(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværPerKravdokument) {
         return new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(fraværPerKravdokument);
     }
 
     private long countIm(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder) {
-        return vurdertePerioder.keySet().stream().filter(type -> KravDokumentType.INNTEKTSMELDING.equals(type.getType())).count();
+        return vurdertePerioder.keySet().stream().filter(type -> List.of(KravDokumentType.INNTEKTSMELDING, KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV).contains(type.getType())).count();
     }
 
     private long countSøknad(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder) {

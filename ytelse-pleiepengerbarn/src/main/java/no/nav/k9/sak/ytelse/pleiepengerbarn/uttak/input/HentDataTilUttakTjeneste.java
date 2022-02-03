@@ -12,6 +12,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -111,7 +112,8 @@ public class HentDataTilUttakTjeneste {
 
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = perioderTilVurderingTjeneste(referanse);
         final NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(referanse.getBehandlingId());
-        final NavigableSet<DatoIntervallEntitet> perioderTilVurdering = hentPerioderTilVurdering(referanse, skalMappeHeleTidslinjen, behandling);
+        var utvidetPeriodeSomFølgeAvDødsfall = håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse);
+        final NavigableSet<DatoIntervallEntitet> perioderTilVurdering = hentPerioderTilVurdering(referanse, skalMappeHeleTidslinjen, behandling, utvidetPeriodeSomFølgeAvDødsfall);
 
         var utvidetRevurderingPerioder = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(referanse);
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
@@ -145,6 +147,7 @@ public class HentDataTilUttakTjeneste {
             .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
         var perioderFraSøknad = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(referanse);
 
+
         var input = new InputParametere()
             .medBehandling(behandling)
             .medVilkårene(vilkårene)
@@ -162,16 +165,21 @@ public class HentDataTilUttakTjeneste {
             .medIAYGrunnlag(inntektArbeidYtelseGrunnlag)
             .medOpptjeningsresultat(opptjeningsresultat.orElse(null))
             .medRettPleiepengerVedDødGrunnlag(rettVedDød.orElse(null))
-            .medAutomatiskUtvidelseVedDødsfall(håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse).orElse(null))
+            .medAutomatiskUtvidelseVedDødsfall(utvidetPeriodeSomFølgeAvDødsfall.orElse(null))
             .medUnntakEtablertTilsynForPleietrengende(unntakEtablertTilsynForPleietrengende.orElse(null));
 
         return input;
     }
 
-    private NavigableSet<DatoIntervallEntitet> hentPerioderTilVurdering(BehandlingReferanse referanse, boolean skalMappeHeleTidslinjen, Behandling behandling) {
+    private NavigableSet<DatoIntervallEntitet> hentPerioderTilVurdering(BehandlingReferanse referanse, boolean skalMappeHeleTidslinjen, Behandling behandling, Optional<DatoIntervallEntitet> utvidetPeriodeSomFølgeAvDødsfall) {
         LocalDateTimeline<Boolean> søknadsperioder;
         if (skalMappeHeleTidslinjen) {
-            søknadsperioder = SykdomUtils.toLocalDateTimeline(søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId()));
+            var datoer = søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId());
+
+            søknadsperioder = SykdomUtils.toLocalDateTimeline(datoer);
+            if (utvidetPeriodeSomFølgeAvDødsfall.isPresent()) {
+                søknadsperioder = søknadsperioder.combine(new LocalDateSegment<>(utvidetPeriodeSomFølgeAvDødsfall.get().toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
         } else {
             søknadsperioder = SykdomUtils.toLocalDateTimeline(finnSykdomsperioder(referanse));
         }
@@ -232,7 +240,7 @@ public class HentDataTilUttakTjeneste {
         return resultat;
     }
 
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste(BehandlingReferanse behandlingReferanse){
+    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste(BehandlingReferanse behandlingReferanse) {
         return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandlingReferanse.getFagsakYtelseType(), behandlingReferanse.getBehandlingType());
     }
 }

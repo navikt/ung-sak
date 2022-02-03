@@ -4,8 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import jakarta.inject.Inject;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import jakarta.inject.Inject;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -25,10 +25,8 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.dokument.bestill.DokumentBehandlingTjeneste;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -47,9 +45,6 @@ public class SendVedtaksbrevTest {
 
     @Mock
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
-
-    @Mock
-    private DokumentBehandlingTjeneste dokumentBehandlingTjeneste;
 
     private SendVedtaksbrev sendVedtaksbrev;
     private Behandling behandling;

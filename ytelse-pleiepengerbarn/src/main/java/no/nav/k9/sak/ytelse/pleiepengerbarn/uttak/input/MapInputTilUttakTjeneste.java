@@ -14,6 +14,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -25,7 +26,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynPeriode;
@@ -104,7 +104,7 @@ public class MapInputTilUttakTjeneste {
 
         var tidslinjeTilVurdering = new LocalDateTimeline<>(mapPerioderTilVurdering(input));
 
-        final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
+        final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering, input.getUtvidetPeriodeSomFølgeAvDødsfall());
 
         var inaktivitetUtlederInput = new InaktivitetUtlederInput(behandling.getAktørId(), tidslinjeTilVurdering, input.getInntektArbeidYtelseGrunnlag());
         var inaktivTidslinje = new PerioderMedInaktivitetUtleder().utled(inaktivitetUtlederInput);
@@ -127,7 +127,7 @@ public class MapInputTilUttakTjeneste {
 
         final List<Arbeid> arbeid = new MapArbeid().map(arbeidstidInput);
 
-        final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehov());
+        final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input);
 
         final List<LukketPeriode> lovbestemtFerie = new MapFerie().map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
 
@@ -266,11 +266,22 @@ public class MapInputTilUttakTjeneste {
         return new ArrayList<>(timeline.compress().toSegments());
     }
 
-    private Map<LukketPeriode, Pleiebehov> toPleiebehov(List<EtablertPleieperiode> pleiebehov) {
+    private Map<LukketPeriode, Pleiebehov> toPleiebehov(InputParametere inputParametere) {
+        var pleiebehov = inputParametere.getPleiebehov();
+        var timeline = new LocalDateTimeline<>(pleiebehov.stream()
+            .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), mapToPleiebehov(it.getGrad())))
+            .toList());
+
+        if (inputParametere.getUtvidetPeriodeSomFølgeAvDødsfall().isPresent()) {
+            var manglendePerioderIDødsPerioden = new LocalDateTimeline<Pleiebehov>(List.of(new LocalDateSegment<>(inputParametere.getUtvidetPeriodeSomFølgeAvDødsfall().get().toLocalDateInterval(), null))).disjoint(timeline);
+            for (LocalDateSegment<Pleiebehov> segment : manglendePerioderIDødsPerioden) {
+                var manglendeSegment = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), Pleiebehov.PROSENT_100)));
+                timeline = timeline.combine(manglendeSegment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
+        }
+
         final Map<LukketPeriode, Pleiebehov> tilsynsbehov = new HashMap<>();
-        pleiebehov.forEach(p -> {
-            tilsynsbehov.put(toLukketPeriode(p.getPeriode()), mapToPleiebehov(p.getGrad()));
-        });
+        timeline.toSegments().forEach(p -> tilsynsbehov.put(toLukketPeriode(DatoIntervallEntitet.fra(p.getLocalDateInterval())), p.getValue()));
         return tilsynsbehov;
     }
 

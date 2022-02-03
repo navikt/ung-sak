@@ -44,7 +44,6 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
-import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.vedtak.ekstern.OverlappendeYtelserTjeneste;
@@ -105,6 +104,10 @@ public class InfotrygdMigreringTjeneste {
             throw new IllegalStateException("Fant berørt sak på gammel ordning");
         }
 
+        if (!grunnlagsperioderPrAktør.isEmpty()) {
+            log.info("Fant berørte perioder i infotrygd: " + grunnlagsperioderPrAktør.values());
+        }
+
         var ikkeSøktMedOverlappMap = grunnlagsperioderPrAktør.entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey,
@@ -146,11 +149,11 @@ public class InfotrygdMigreringTjeneste {
             .collect(Collectors.toList());
     }
 
-    private LocalDateTimeline<Boolean> lagTidslinje(Stream<DatoIntervallEntitet> annenPartSøktePerioderStream) {
-        var annenPartSøktePerioderSegments = annenPartSøktePerioderStream
+    private LocalDateTimeline<Boolean> lagTidslinje(Stream<DatoIntervallEntitet> periodeStream) {
+        var annenPartSøktePerioderSegments = periodeStream
             .map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), true))
             .collect(Collectors.toList());
-        return new LocalDateTimeline<>(annenPartSøktePerioderSegments);
+        return new LocalDateTimeline<>(annenPartSøktePerioderSegments, StandardCombinators::coalesceLeftHandSide);
     }
 
     private boolean harBerørtSakPåGammelOrdning(Map<AktørId, List<IntervallMedBehandlingstema>> grunnlagsperioderPrAktør) {

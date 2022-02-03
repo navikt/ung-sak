@@ -173,7 +173,7 @@ spec:
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.adeo.no
     - name: OIDC_OPENAM_HOST_URL
-      value: https://isso.adeo.no:443/isso/oauth2
+      value: https://isso.adeo.no/isso/oauth2
     - name: OIDC_OPENAM_CLIENT_ID
       value: k9-sak-p
 

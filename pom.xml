@@ -40,9 +40,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <junit.version>5.8.2</junit.version>
-        <felles.version>0.7.4</felles.version>
+        <felles.version>0.7.9</felles.version>
         <swagger.version>2.1.12</swagger.version>
-        <k9format.version>5.7.5</k9format.version>
+        <k9format.version>5.7.6</k9format.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -513,7 +513,7 @@
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.3.1</version>
+                <version>42.3.2</version>
             </dependency>
             <dependency>
                 <groupId>no.nav</groupId>
