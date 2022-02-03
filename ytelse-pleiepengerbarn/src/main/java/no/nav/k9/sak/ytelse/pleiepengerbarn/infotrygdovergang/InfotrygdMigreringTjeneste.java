@@ -100,7 +100,7 @@ public class InfotrygdMigreringTjeneste {
             LocalDate.now().minusYears(1),
             Set.of("PN", GAMMEL_ORDNING_KODE));
 
-        if (harBerørtSakPåGammelOrdning(grunnlagsperioderPrAktør)) {
+        if (harBerørtSakPåGammelOrdning(grunnlagsperioderPrAktør, perioderTilVurdering)) {
             throw new IllegalStateException("Fant berørt sak på gammel ordning");
         }
 
@@ -149,6 +149,7 @@ public class InfotrygdMigreringTjeneste {
             .collect(Collectors.toList());
     }
 
+
     private LocalDateTimeline<Boolean> lagTidslinje(Stream<DatoIntervallEntitet> periodeStream) {
         var annenPartSøktePerioderSegments = periodeStream
             .map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), true))
@@ -156,9 +157,11 @@ public class InfotrygdMigreringTjeneste {
         return new LocalDateTimeline<>(annenPartSøktePerioderSegments, StandardCombinators::coalesceLeftHandSide);
     }
 
-    private boolean harBerørtSakPåGammelOrdning(Map<AktørId, List<IntervallMedBehandlingstema>> grunnlagsperioderPrAktør) {
+    private boolean harBerørtSakPåGammelOrdning(Map<AktørId, List<IntervallMedBehandlingstema>> grunnlagsperioderPrAktør, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         return grunnlagsperioderPrAktør.values().stream()
-            .flatMap(Collection::stream).anyMatch(p -> p.behandlingstema().equals(GAMMEL_ORDNING_KODE));
+            .flatMap(Collection::stream)
+            .filter(intervallMedTema -> perioderTilVurdering.stream().anyMatch(p -> p.overlapper(intervallMedTema.intervall())))
+            .anyMatch(p -> p.behandlingstema().equals(GAMMEL_ORDNING_KODE));
     }
 
     public void finnOgOpprettMigrertePerioder(Long behandlingId, AktørId aktørId, Long fagsakId) {
