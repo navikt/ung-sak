@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.omsorgsdager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.kafka.KafkaProducerAiven;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,11 +33,12 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
         @KonfigVerdi(value = "KAFKA_OMS_RAPID_TOPIC", defaultVerdi = "omsorgspenger.k9-rapid-v2") String topic,
         @KonfigVerdi(value = "KAFKA_BROKERS") String bootstrapServers,
         @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH") String truststorePath,
-        @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PASSWORD", required = false) Optional<String> truststorePassword,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH") String keystorePath,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD") String credstorePassword) {
 
         Map<String, String> optionalProperties = Collections.emptyMap();
+        Optional<String> truststorePassword = Optional.ofNullable(System.getenv("KAFKA_TRUSTSTORE_PASSWORD")); // VTP-fiks
+
         this.clientId = clientId();
         this.topic = topic;
 
