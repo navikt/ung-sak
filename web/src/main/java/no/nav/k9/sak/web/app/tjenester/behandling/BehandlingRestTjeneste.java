@@ -12,8 +12,17 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -31,13 +40,6 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.headers.Header;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
@@ -52,10 +54,13 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ProsessTaskGruppeIdDto;
@@ -70,6 +75,8 @@ import no.nav.k9.sak.kontrakt.behandling.NyBehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.ReåpneBehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
+import no.nav.k9.sak.kontrakt.infotrygd.DirekteOvergangDto;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
@@ -89,6 +96,7 @@ public class BehandlingRestTjeneste {
     public static final String FAGSAK_BEHANDLING_PATH = "/fagsak/behandling";
     public static final String REVURDERING_ORGINAL_PATH = "/behandling/revurdering-original";
     public static final String STATUS_PATH = "/behandling/status";
+    public static final String DIREKTE_OVERGANG_PATH = "/behandling/direkte-overgang";
     static public final String BYTT_ENHET_PATH = "/behandlinger/bytt-enhet";
     static public final String GJENOPPTA_PATH = "/behandlinger/gjenoppta";
     static public final String HENLEGG_PATH = "/behandlinger/henlegg";
@@ -104,6 +112,8 @@ public class BehandlingRestTjeneste {
     private HenleggBehandlingTjeneste henleggBehandlingTjeneste;
     private BehandlingDtoTjeneste behandlingDtoTjeneste;
     private SjekkProsessering sjekkProsessering;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+
 
     BehandlingRestTjeneste() {
         // for proxy
@@ -116,7 +126,8 @@ public class BehandlingRestTjeneste {
                                   FagsakTjeneste fagsakTjeneste,
                                   HenleggBehandlingTjeneste henleggBehandlingTjeneste,
                                   BehandlingDtoTjeneste behandlingDtoTjeneste,
-                                  SjekkProsessering sjekkProsessering) {
+                                  SjekkProsessering sjekkProsessering,
+                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
@@ -124,6 +135,7 @@ public class BehandlingRestTjeneste {
         this.henleggBehandlingTjeneste = henleggBehandlingTjeneste;
         this.behandlingDtoTjeneste = behandlingDtoTjeneste;
         this.sjekkProsessering = sjekkProsessering;
+        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
 
     @POST
@@ -467,6 +479,28 @@ public class BehandlingRestTjeneste {
         return behandlingDtoTjeneste.lovligeOperasjoner(behandling);
     }
 
+    @GET
+    @Path(DIREKTE_OVERGANG_PATH)
+    @Operation(description = "Hent direkte overgang for behandling gitt id", summary = ("Returnerer direkte overgang for behandling"), tags = "behandlinger", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer skjæringstidspunkter for direkte overgang", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DirekteOvergangDto.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response hentDirekteOvergangForBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
+        var infotrygdMigreringer = fagsakTjeneste.finnSakInfotrygdmigreringForFagsak(behandling.getFagsak());
+
+        var perioderTilVurdering = getPerioderTilVurderingTjeneste(behandling).utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var migreringerTilVurdering = infotrygdMigreringer.stream().filter(m -> perioderTilVurdering.stream().anyMatch(p -> p.inkluderer(m.getSkjæringstidspunkt())))
+            .toList();
+        if (migreringerTilVurdering.isEmpty()) {
+            return Response.noContent().build();
+        }
+        var dto = new DirekteOvergangDto(migreringerTilVurdering.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).collect(Collectors.toList()));
+        ResponseBuilder responseBuilder = Response.ok().entity(dto);
+        return responseBuilder.build();
+    }
+
     private interface BehandlingRestTjenesteFeil extends DeklarerteFeil {
         BehandlingRestTjenesteFeil FACTORY = FeilFactory.create(BehandlingRestTjenesteFeil.class); // NOSONAR
 
@@ -487,4 +521,10 @@ public class BehandlingRestTjeneste {
             return AbacDataAttributter.opprett();
         }
     }
+
+    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
+        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType())
+            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
+    }
+
 }
