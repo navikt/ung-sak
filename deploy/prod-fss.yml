@@ -243,7 +243,7 @@ spec:
 
     # Pleiepenger infotrygd migrering
     - name: INFOTRYGD_MIGRERING_TILLATELSER
-      value: ""
+      value: "K137924,N106674,H137477,N130802,N140249,A100265,D101758,E151154,A147438"
 
     # FRISINN NYE REGLER 2022
     - name: FRISINN_NYTT_STP_TOGGLE

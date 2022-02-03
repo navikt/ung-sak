@@ -20,7 +20,7 @@ public class MedlemEndringIdentifiserer {
 
     public boolean erEndretFørSkjæringstidspunkt(MedlemskapAggregat grunnlag1, MedlemskapAggregat grunnlag2, LocalDate skjæringstidspunkt) {
         RegisterdataDiffsjekker differ = new RegisterdataDiffsjekker(true);
-        final Map<Node, Pair> nodeEndringer = differ.finnForskjellerPå(grunnlag1.getRegistrertMedlemskapPerioder(), grunnlag2.getRegistrertMedlemskapPerioder());
+        final Map<Node, Pair> nodeEndringer = differ.finnForskjellerPå(grunnlag1 != null ? grunnlag1.getRegistrertMedlemskapPerioder() : null, grunnlag2 != null ? grunnlag2.getRegistrertMedlemskapPerioder() : null);
 
         return nodeEndringer.keySet()
             .stream()
