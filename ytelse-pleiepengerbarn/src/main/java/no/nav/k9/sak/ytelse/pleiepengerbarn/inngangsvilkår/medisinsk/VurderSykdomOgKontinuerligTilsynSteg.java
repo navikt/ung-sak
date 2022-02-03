@@ -57,6 +57,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
 @BehandlingStegRef(kode = "VURDER_MEDISINSK")
 @BehandlingTypeRef
@@ -72,6 +73,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private VilkårResultatRepository vilkårResultatRepository;
     private SykdomVurderingService sykdomVurderingService;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     VurderSykdomOgKontinuerligTilsynSteg() {
         // CDI
@@ -82,7 +84,8 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                                                 PleiebehovResultatRepository resultatRepository,
                                                 @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                 SykdomVurderingService sykdomVurderingService,
-                                                SykdomGrunnlagRepository sykdomGrunnlagRepository) {
+                                                SykdomGrunnlagRepository sykdomGrunnlagRepository,
+                                                SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
@@ -90,6 +93,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.sykdomVurderingService = sykdomVurderingService;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
 
     private static final <T> NavigableSet<T> union(NavigableSet<T> s1, NavigableSet<T> s2) {
@@ -100,6 +104,10 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+        if (søknadsperiodeTjeneste.utledFullstendigPeriode(kontekst.getBehandlingId()).isEmpty() ) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
+
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
 
         final var perioderUnder18årTidslinje = medOmsorgenFor(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR), vilkårene);
