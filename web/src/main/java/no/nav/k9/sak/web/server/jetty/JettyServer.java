@@ -94,7 +94,7 @@ public class JettyServer {
 
         var handlers = new HandlerList(new ResetLogContextHandler(), createContext(appKonfigurasjon));
         server.setHandler(handlers);
-        server.addEventListener(new JettyServicerLifeCyleListener());
+        server.addEventListener(new JettyServerLifeCyleListener());
         server.start();
         server.join();
     }

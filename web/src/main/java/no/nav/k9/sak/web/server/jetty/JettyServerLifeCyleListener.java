@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.inject.spi.CDI;
 import no.nav.k9.prosesstask.impl.TaskManager;
 
-public class JettyServicerLifeCyleListener implements LifeCycle.Listener {
+public class JettyServerLifeCyleListener implements LifeCycle.Listener {
 
-    private static final Logger log = LoggerFactory.getLogger(JettyServicerLifeCyleListener.class);
+    private static final Logger log = LoggerFactory.getLogger(JettyServerLifeCyleListener.class);
 
     @Override
     public void lifeCycleStarted(LifeCycle event) {
