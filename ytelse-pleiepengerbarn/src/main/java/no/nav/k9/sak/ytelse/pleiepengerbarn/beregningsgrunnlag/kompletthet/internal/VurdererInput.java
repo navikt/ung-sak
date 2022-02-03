@@ -14,22 +14,27 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 class VurdererInput {
 
     private NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
+    private NavigableSet<DatoIntervallEntitet> perioderTilVurderingMedSøknadsfristOppfylt;
     private Map<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggPerPeriode;
     private List<KompletthetPeriode> kompletthetPerioder;
     private Set<Vurdering> vurderingDetSkalTasHensynTil;
 
     VurdererInput(NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
-                         Map<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggPerPeriode,
-                         List<KompletthetPeriode> kompletthetPerioder,
-                         Set<Vurdering> vurderingDetSkalTasHensynTil) {
+                  NavigableSet<DatoIntervallEntitet> perioderTilVurderingMedSøknadsfristOppfylt,
+                  Map<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggPerPeriode,
+                  List<KompletthetPeriode> kompletthetPerioder,
+                  Set<Vurdering> vurderingDetSkalTasHensynTil) {
         this.perioderTilVurdering = Objects.requireNonNull(perioderTilVurdering);
+        this.perioderTilVurderingMedSøknadsfristOppfylt = perioderTilVurderingMedSøknadsfristOppfylt;
         this.manglendeVedleggPerPeriode = Objects.requireNonNull(manglendeVedleggPerPeriode);
         this.kompletthetPerioder = kompletthetPerioder != null ? kompletthetPerioder : List.of();
         this.vurderingDetSkalTasHensynTil = vurderingDetSkalTasHensynTil != null ? vurderingDetSkalTasHensynTil : Set.of();
     }
 
-    VurdererInput(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> kompletthetsVurderinger) {
-        this(perioderTilVurdering, kompletthetsVurderinger, null, null);
+    VurdererInput(NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
+                  NavigableSet<DatoIntervallEntitet> perioderTilVurderingMedSøknadsfristOppfylt,
+                  Map<DatoIntervallEntitet, List<ManglendeVedlegg>> kompletthetsVurderinger) {
+        this(perioderTilVurdering, perioderTilVurderingMedSøknadsfristOppfylt, kompletthetsVurderinger, null, null);
     }
 
     NavigableSet<DatoIntervallEntitet> getPerioderTilVurdering() {
@@ -38,6 +43,10 @@ class VurdererInput {
 
     Map<DatoIntervallEntitet, List<ManglendeVedlegg>> getManglendeVedleggPerPeriode() {
         return manglendeVedleggPerPeriode;
+    }
+
+    NavigableSet<DatoIntervallEntitet> getPerioderTilVurderingMedSøknadsfristOppfylt() {
+        return perioderTilVurderingMedSøknadsfristOppfylt;
     }
 
     List<KompletthetPeriode> getKompletthetsPerioder() {
