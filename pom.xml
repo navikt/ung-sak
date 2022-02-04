@@ -134,7 +134,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>0.5.0</version>
+                <version>0.7.1</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -443,6 +443,13 @@
                 <groupId>com.papertrailapp</groupId>
                 <artifactId>logback-syslog4j</artifactId>
                 <version>1.0.0</version>
+                <exclusions>
+                    <exclusion>
+                        <!-- ekskluderer denne fordi snyk rapporterer falsk positiv, vi bruker nyere logcack-classic -->
+                        <groupId>ch.qos.logback</groupId>
+                        <artifactId>logback-classic</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- Transitive avhengighet resolution for å sikre bestemt versjon -->
@@ -559,14 +566,6 @@
                 <groupId>org.wildfly.common</groupId>
                 <artifactId>wildfly-common</artifactId>
                 <version>1.5.2.Final</version>
-            </dependency>
-            <dependency>
-                <!-- lagt her for å sikre dependencyConvergence -->
-                <groupId>com.fasterxml.jackson.jaxrs</groupId>
-                <artifactId>jackson-jaxrs-json-provider</artifactId>
-                <!-- TODO få denne på {jackson.version} -->
-                <!-- men bare 2.12* som har dependency med jakarta-classifier -->
-                <version>2.12.3</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
