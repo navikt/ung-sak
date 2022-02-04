@@ -27,6 +27,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
@@ -70,6 +71,7 @@ public class KompletthetForBeregningRestTjeneste {
     private VilkårResultatRepository vilkårResultatRepository;
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private boolean skipKompletthetVedAvslagSøknadsfrist;
 
     public KompletthetForBeregningRestTjeneste() {
         // for resteasy
@@ -79,11 +81,13 @@ public class KompletthetForBeregningRestTjeneste {
     public KompletthetForBeregningRestTjeneste(BehandlingRepository behandlingRepository,
                                                VilkårResultatRepository vilkårResultatRepository,
                                                KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
-                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                               @KonfigVerdi(value = "KOMPLETTHET_SKIP_VED_AVSLAG_SOKNADSFRIST", defaultVerdi = "false", required = false) boolean skipKompletthetVedAvslagSøknadsfrist) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.skipKompletthetVedAvslagSøknadsfrist = skipKompletthetVedAvslagSøknadsfrist;
     }
 
     @GET
@@ -99,15 +103,7 @@ public class KompletthetForBeregningRestTjeneste {
         var kompletthetPerioder = kompletthetForBeregningTjeneste.hentKompletthetsVurderinger(ref);
         var tjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
         var perioderTilVurdering = tjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        var innvilgetSøknadsfrist = vilkårResultatRepository.hent(ref.getBehandlingId())
-            .getVilkår(VilkårType.SØKNADSFRIST)
-            .orElseThrow()
-            .getPerioder()
-            .stream()
-            .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
-            .filter(it -> Objects.equals(it.getGjeldendeUtfall(), Utfall.OPPFYLT))
-            .map(VilkårPeriode::getPeriode)
-            .collect(Collectors.toCollection(TreeSet::new));
+        var innvilgetSøknadsfrist = utledPerioderMedInnvilgetPåSøknadsfrist(ref, perioderTilVurdering);
 
         var status = manglendeVedleggForPeriode.entrySet()
             .stream()
@@ -117,7 +113,22 @@ public class KompletthetForBeregningRestTjeneste {
         return new KompletthetsVurderingDto(status);
     }
 
-    private KompletthetsTilstandPåPeriodeDto mapV1Periode(BehandlingReferanse ref, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, List<KompletthetPeriode> kompletthetPerioder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, TreeSet<DatoIntervallEntitet> innvilgetSøknadsfrist, Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it) {
+    private NavigableSet<DatoIntervallEntitet> utledPerioderMedInnvilgetPåSøknadsfrist(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+        if (!skipKompletthetVedAvslagSøknadsfrist) {
+            return perioderTilVurdering;
+        }
+        return vilkårResultatRepository.hent(ref.getBehandlingId())
+            .getVilkår(VilkårType.SØKNADSFRIST)
+            .orElseThrow()
+            .getPerioder()
+            .stream()
+            .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
+            .filter(it -> Objects.equals(it.getGjeldendeUtfall(), Utfall.OPPFYLT))
+            .map(VilkårPeriode::getPeriode)
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private KompletthetsTilstandPåPeriodeDto mapV1Periode(BehandlingReferanse ref, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, List<KompletthetPeriode> kompletthetPerioder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, NavigableSet<DatoIntervallEntitet> innvilgetSøknadsfrist, Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it) {
         var kompletthetsvurdering = finnRelevantVurderingForPeriode(it.getKey(), kompletthetPerioder);
         return new KompletthetsTilstandPåPeriodeDto(new Periode(it.getKey().getFomDato(), it.getKey().getTomDato()),
             mapStatusPåInntektsmeldinger(it, unikeInntektsmeldingerForFagsak, ref, kompletthetsvurdering),
@@ -126,7 +137,7 @@ public class KompletthetForBeregningRestTjeneste {
             kompletthetsvurdering.map(KompletthetPeriode::getBegrunnelse).orElse(null));
     }
 
-    private Boolean utledVurdering(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, TreeSet<DatoIntervallEntitet> innvilgetSøknadsfrist) {
+    private Boolean utledVurdering(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, NavigableSet<DatoIntervallEntitet> innvilgetSøknadsfrist) {
         return perioderTilVurdering.stream().anyMatch(at -> it.getKey().equals(at) && !it.getValue().isEmpty()) && innvilgetSøknadsfrist.stream().anyMatch(at -> at.overlapper(it.getKey()));
     }
 
@@ -143,15 +154,7 @@ public class KompletthetForBeregningRestTjeneste {
         var kompletthetPerioder = kompletthetForBeregningTjeneste.hentKompletthetsVurderinger(ref);
         var tjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
         var perioderTilVurdering = tjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        var innvilgetSøknadsfrist = vilkårResultatRepository.hent(ref.getBehandlingId())
-            .getVilkår(VilkårType.SØKNADSFRIST)
-            .orElseThrow()
-            .getPerioder()
-            .stream()
-            .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
-            .filter(it -> Objects.equals(it.getGjeldendeUtfall(), Utfall.OPPFYLT))
-            .map(VilkårPeriode::getPeriode)
-            .collect(Collectors.toCollection(TreeSet::new));
+        var innvilgetSøknadsfrist = utledPerioderMedInnvilgetPåSøknadsfrist(ref, perioderTilVurdering);
 
         var status = manglendeVedleggForPeriode.entrySet()
             .stream()
@@ -161,7 +164,7 @@ public class KompletthetForBeregningRestTjeneste {
         return new KompletthetsVurderingV2Dto(status);
     }
 
-    private KompletthetsTilstandPåPeriodeV2Dto mapPeriode(BehandlingReferanse ref, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, List<KompletthetPeriode> kompletthetPerioder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, TreeSet<DatoIntervallEntitet> innvilgetSøknadsfrist) {
+    private KompletthetsTilstandPåPeriodeV2Dto mapPeriode(BehandlingReferanse ref, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, List<KompletthetPeriode> kompletthetPerioder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, NavigableSet<DatoIntervallEntitet> innvilgetSøknadsfrist) {
         var kompletthetsvurdering = finnRelevantVurderingForPeriode(it.getKey(), kompletthetPerioder);
         return new KompletthetsTilstandPåPeriodeV2Dto(new Periode(it.getKey().getFomDato(), it.getKey().getTomDato()),
             mapStatusPåInntektsmeldingerV2(it, unikeInntektsmeldingerForFagsak, ref, kompletthetsvurdering),

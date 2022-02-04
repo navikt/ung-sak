@@ -227,6 +227,8 @@ spec:
       value: "false"
     - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
       value: "true"
+    - name: KOMPLETTHET_SKIP_VED_AVSLAG_SOKNADSFRIST
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
@@ -55,6 +56,7 @@ public class PSBKompletthetSjekkerTjeneste {
     private final KompletthetUtleder kompletthetUtleder = new KompletthetUtleder();
     private final EtterlysInntektsmeldingUtleder etterlysInntektsmeldingUtleder = new EtterlysInntektsmeldingUtleder();
     private final EtterlysInntektsmeldingOgVarsleOmAvslagUtleder etterlysInntektsmeldingOgVarsleOmAvslagUtleder = new EtterlysInntektsmeldingOgVarsleOmAvslagUtleder();
+    private boolean skipKompletthetVedAvslagSøknadsfrist;
 
     @Inject
     public PSBKompletthetSjekkerTjeneste(BehandlingRepository behandlingRepository,
@@ -62,28 +64,22 @@ public class PSBKompletthetSjekkerTjeneste {
                                          BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                          BestiltEtterlysningRepository etterlysningRepository,
                                          @Any PSBKompletthetsjekker kompletthetsjekker,
-                                         VilkårResultatRepository vilkårResultatRepository) {
+                                         VilkårResultatRepository vilkårResultatRepository,
+                                         @KonfigVerdi(value = "KOMPLETTHET_SKIP_VED_AVSLAG_SOKNADSFRIST", defaultVerdi = "false", required = false) boolean skipKompletthetVedAvslagSøknadsfrist) {
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.kompletthetsjekker = kompletthetsjekker;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.skipKompletthetVedAvslagSøknadsfrist = skipKompletthetVedAvslagSøknadsfrist;
     }
 
 
     public KompletthetsAksjon utledTilstand(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, false, true);
         var kompletthetsVurderinger = kompletthetsjekker.utledAlleManglendeVedleggForPerioder(ref);
-        var innvilgetSøknadsfrist = vilkårResultatRepository.hent(ref.getBehandlingId())
-            .getVilkår(VilkårType.SØKNADSFRIST)
-            .orElseThrow()
-            .getPerioder()
-            .stream()
-            .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
-            .filter(it -> Objects.equals(it.getGjeldendeUtfall(), Utfall.OPPFYLT))
-            .map(VilkårPeriode::getPeriode)
-            .collect(Collectors.toCollection(TreeSet::new));
+        var innvilgetSøknadsfrist = utledPerioderMedSøknadsfristInnvilget(ref, perioderTilVurdering);
 
         var inputUtenVurderinger = new VurdererInput(perioderTilVurdering, innvilgetSøknadsfrist, kompletthetsVurderinger);
         var aksjon = kompletthetUtleder.utled(inputUtenVurderinger);
@@ -142,6 +138,21 @@ public class PSBKompletthetSjekkerTjeneste {
         // Manuell avklaring
         log.info("Behandlingen er IKKE komplett, ber om manuell avklaring og avklaring om mulige avslag.");
         return KompletthetsAksjon.manuellAvklaring(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING);
+    }
+
+    private NavigableSet<DatoIntervallEntitet> utledPerioderMedSøknadsfristInnvilget(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+        if (!skipKompletthetVedAvslagSøknadsfrist) {
+            return perioderTilVurdering;
+        }
+        return vilkårResultatRepository.hent(ref.getBehandlingId())
+            .getVilkår(VilkårType.SØKNADSFRIST)
+            .orElseThrow()
+            .getPerioder()
+            .stream()
+            .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
+            .filter(it -> Objects.equals(it.getGjeldendeUtfall(), Utfall.OPPFYLT))
+            .map(VilkårPeriode::getPeriode)
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private Optional<BeregningsgrunnlagPerioderGrunnlag> justerTidligereVurderingerEtterOppdatertStatus(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> kompletthetsVurderinger, Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlag) {
