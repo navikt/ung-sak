@@ -240,6 +240,8 @@ spec:
       value: "true"
     - name: PSB_UTVIDE_VED_DODSFALL
       value: "true"
+    - name: KOMPLETTHET_SKIP_VED_AVSLAG_SOKNADSFRIST
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

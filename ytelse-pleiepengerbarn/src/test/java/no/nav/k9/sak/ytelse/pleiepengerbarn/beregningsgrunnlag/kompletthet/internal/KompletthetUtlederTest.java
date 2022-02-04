@@ -27,7 +27,7 @@ class KompletthetUtlederTest {
         Map<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggPerPeriode = Map.of();
         var vurderingDetSkalTasHensynTil = Set.of(Vurdering.KAN_FORTSETTE);
 
-        var input = new VurdererInput(perioderTilVurdering, manglendeVedleggPerPeriode, null, vurderingDetSkalTasHensynTil);
+        var input = new VurdererInput(perioderTilVurdering, perioderTilVurdering, manglendeVedleggPerPeriode, null, vurderingDetSkalTasHensynTil);
 
         var aksjon = utleder.utled(input);
 
@@ -42,12 +42,27 @@ class KompletthetUtlederTest {
         Map<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggPerPeriode = Map.of(periode, List.of(new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, Arbeidsgiver.virksomhet("000000000"))));
         var vurderingDetSkalTasHensynTil = Set.of(Vurdering.KAN_FORTSETTE);
 
-        var input = new VurdererInput(perioderTilVurdering, manglendeVedleggPerPeriode, null, vurderingDetSkalTasHensynTil);
+        var input = new VurdererInput(perioderTilVurdering, perioderTilVurdering, manglendeVedleggPerPeriode, null, vurderingDetSkalTasHensynTil);
 
         var aksjon = utleder.utled(input);
 
         assertThat(aksjon).isNotNull();
         assertThat(aksjon.kanFortsette()).isFalse();
         assertThat(aksjon.erUavklart()).isTrue();
+    }
+
+    @Test
+    void skal_ikke_gi_uavklart_hvis_ikke_komplett_men_avslått_på_søknadsfirst() {
+        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(1), LocalDate.now());
+        var perioderTilVurdering = new TreeSet<>(Set.of(periode));
+        Map<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggPerPeriode = Map.of(periode, List.of(new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, Arbeidsgiver.virksomhet("000000000"))));
+        var vurderingDetSkalTasHensynTil = Set.of(Vurdering.KAN_FORTSETTE);
+
+        var input = new VurdererInput(perioderTilVurdering, new TreeSet<>(), manglendeVedleggPerPeriode, null, vurderingDetSkalTasHensynTil);
+
+        var aksjon = utleder.utled(input);
+
+        assertThat(aksjon).isNotNull();
+        assertThat(aksjon.kanFortsette()).isTrue();
     }
 }

@@ -1,20 +1,37 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal;
 
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysning;
 import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
@@ -24,12 +41,6 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.KompletthetsAksjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.TidligereEtterlysning;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.PSBKompletthetsjekker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Dependent
 public class PSBKompletthetSjekkerTjeneste {
@@ -41,10 +52,11 @@ public class PSBKompletthetSjekkerTjeneste {
     private final BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private final BestiltEtterlysningRepository etterlysningRepository;
     private final PSBKompletthetsjekker kompletthetsjekker;
+    private final VilkårResultatRepository vilkårResultatRepository;
     private final KompletthetUtleder kompletthetUtleder = new KompletthetUtleder();
-    private final FagsakRepository fagsakRepository;
     private final EtterlysInntektsmeldingUtleder etterlysInntektsmeldingUtleder = new EtterlysInntektsmeldingUtleder();
     private final EtterlysInntektsmeldingOgVarsleOmAvslagUtleder etterlysInntektsmeldingOgVarsleOmAvslagUtleder = new EtterlysInntektsmeldingOgVarsleOmAvslagUtleder();
+    private boolean skipKompletthetVedAvslagSøknadsfrist;
 
     @Inject
     public PSBKompletthetSjekkerTjeneste(BehandlingRepository behandlingRepository,
@@ -52,21 +64,24 @@ public class PSBKompletthetSjekkerTjeneste {
                                          BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                          BestiltEtterlysningRepository etterlysningRepository,
                                          @Any PSBKompletthetsjekker kompletthetsjekker,
-                                         FagsakRepository fagsakRepository) {
+                                         VilkårResultatRepository vilkårResultatRepository,
+                                         @KonfigVerdi(value = "KOMPLETTHET_SKIP_VED_AVSLAG_SOKNADSFRIST", defaultVerdi = "false", required = false) boolean skipKompletthetVedAvslagSøknadsfrist) {
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.kompletthetsjekker = kompletthetsjekker;
-        this.fagsakRepository = fagsakRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
+        this.skipKompletthetVedAvslagSøknadsfrist = skipKompletthetVedAvslagSøknadsfrist;
     }
 
 
     public KompletthetsAksjon utledTilstand(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, false, true);
         var kompletthetsVurderinger = kompletthetsjekker.utledAlleManglendeVedleggForPerioder(ref);
+        var innvilgetSøknadsfrist = utledPerioderMedSøknadsfristInnvilget(ref, perioderTilVurdering);
 
-        var inputUtenVurderinger = new VurdererInput(perioderTilVurdering, kompletthetsVurderinger);
+        var inputUtenVurderinger = new VurdererInput(perioderTilVurdering, innvilgetSøknadsfrist, kompletthetsVurderinger);
         var aksjon = kompletthetUtleder.utled(inputUtenVurderinger);
 
         var grunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(ref.getBehandlingId());
@@ -84,7 +99,7 @@ public class PSBKompletthetSjekkerTjeneste {
         avslåOgAvkortRelevanteKompletthetsvurderinger(kontekst, perioderTilVurdering, grunnlag);
 
         var redusertPerioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, true, true);
-        var inputMedVurderinger = new VurdererInput(redusertPerioderTilVurdering, kompletthetsVurderinger, grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of()), Set.of(Vurdering.KAN_FORTSETTE));
+        var inputMedVurderinger = new VurdererInput(redusertPerioderTilVurdering, innvilgetSøknadsfrist, kompletthetsVurderinger, grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of()), Set.of(Vurdering.KAN_FORTSETTE));
         aksjon = kompletthetUtleder.utled(inputMedVurderinger);
 
         if (aksjon.kanFortsette()) {
@@ -123,6 +138,21 @@ public class PSBKompletthetSjekkerTjeneste {
         // Manuell avklaring
         log.info("Behandlingen er IKKE komplett, ber om manuell avklaring og avklaring om mulige avslag.");
         return KompletthetsAksjon.manuellAvklaring(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING);
+    }
+
+    private NavigableSet<DatoIntervallEntitet> utledPerioderMedSøknadsfristInnvilget(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+        if (!skipKompletthetVedAvslagSøknadsfrist) {
+            return perioderTilVurdering;
+        }
+        return vilkårResultatRepository.hent(ref.getBehandlingId())
+            .getVilkår(VilkårType.SØKNADSFRIST)
+            .orElseThrow()
+            .getPerioder()
+            .stream()
+            .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
+            .filter(it -> Objects.equals(it.getGjeldendeUtfall(), Utfall.OPPFYLT))
+            .map(VilkårPeriode::getPeriode)
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private Optional<BeregningsgrunnlagPerioderGrunnlag> justerTidligereVurderingerEtterOppdatertStatus(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> kompletthetsVurderinger, Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlag) {
