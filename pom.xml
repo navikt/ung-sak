@@ -564,14 +564,9 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>
                 <artifactId>jackson-jaxrs-json-provider</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <!-- lagt her for å sikre dependencyConvergence -->
-                <groupId>com.fasterxml.jackson.jaxrs</groupId>
-                <artifactId>jackson-jaxrs-json-provider</artifactId>
-                <classifier>jakarta</classifier>
-                <version>${jackson.version}</version>
+                <!-- TODO få denne på {jackson.version} -->
+                <!-- men bare 2.12* som har dependency med jakarta-classifier -->
+                <version>2.12.3</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
