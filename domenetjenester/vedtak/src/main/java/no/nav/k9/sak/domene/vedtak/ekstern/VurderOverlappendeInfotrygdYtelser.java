@@ -76,7 +76,7 @@ public class VurderOverlappendeInfotrygdYtelser {
             var overlappendeTilkjentYtelse = tilkjentYtelseTimeline.intersection(ytelseperioderTimeline);
 
             var overlappendePerioderBeskrivelse = overlappendeTilkjentYtelse.toSegments().stream()
-                .map(segment -> "" + segment.getValue().getPeriode() + ", utbetalingsgrad=" + segment.getValue().getLavestUtbetalingsgrad().orElse(BigDecimal.ZERO))
+                .map(segment -> "" + segment.getValue().getPeriode() + " og utbetalingsgrad:" + segment.getValue().getLavestUtbetalingsgrad().orElse(BigDecimal.ZERO))
                 .collect(Collectors.joining(", "));
             var beskrivelse = "K9-ytelse '" + behandling.getFagsakYtelseType().getNavn() + "' er innvilget for saksnummer " + ref.getSaksnummer() +  " med overlappende perioder: " + overlappendePerioderBeskrivelse;
 
