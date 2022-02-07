@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.vedtak.ekstern;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -49,7 +50,8 @@ public class VurderOverlappendeInfotrygdYtelser {
 
     @Inject
     public VurderOverlappendeInfotrygdYtelser(OverlappendeYtelserTjeneste overlappendeYtelserTjeneste,
-                                              OppgaveTjeneste oppgaveTjeneste, BeregningsresultatRepository beregningsresultatRepository) {
+                                              OppgaveTjeneste oppgaveTjeneste,
+                                              BeregningsresultatRepository beregningsresultatRepository) {
         this.overlappendeYtelserTjeneste = overlappendeYtelserTjeneste;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.beregningsresultatRepository = beregningsresultatRepository;
@@ -74,9 +76,9 @@ public class VurderOverlappendeInfotrygdYtelser {
             var overlappendeTilkjentYtelse = tilkjentYtelseTimeline.intersection(ytelseperioderTimeline);
 
             var overlappendePerioderBeskrivelse = overlappendeTilkjentYtelse.toSegments().stream()
-                .map(segment -> "periode=" + segment.getValue().getPeriode() + ", utbetalingsgrad=" + segment.getValue().getLavestUtbetalingsgrad())
-                .collect(Collectors.joining(","));
-            var beskrivelse = "K9-ytelse '" + behandling.getFagsakYtelseType().getNavn() + "' er innvilget for saksnummer " + ref.getSaksnummer() +  "med overlappende perioder: " + overlappendePerioderBeskrivelse;
+                .map(segment -> "" + segment.getValue().getPeriode() + ", utbetalingsgrad=" + segment.getValue().getLavestUtbetalingsgrad().orElse(BigDecimal.ZERO))
+                .collect(Collectors.joining(", "));
+            var beskrivelse = "K9-ytelse '" + behandling.getFagsakYtelseType().getNavn() + "' er innvilget for saksnummer " + ref.getSaksnummer() +  " med overlappende perioder: " + overlappendePerioderBeskrivelse;
 
             var oppgaveId = switch (entry.getKey().getYtelseType()) {
                 case SYKEPENGER -> oppgaveTjeneste.opprettVkyOppgaveOverlappendeYtelse(ref, beskrivelse, SP_OPPG_TEMA, BEH_TYPE_SAMHANDLING, SP_ANSV_ENHET_ID);
