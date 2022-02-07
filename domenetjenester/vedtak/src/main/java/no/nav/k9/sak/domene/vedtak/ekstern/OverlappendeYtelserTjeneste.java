@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.vedtak.ekstern;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Optional;
@@ -11,13 +10,15 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
@@ -26,6 +27,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
@@ -33,6 +35,7 @@ public class OverlappendeYtelserTjeneste {
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private BeregningsresultatRepository beregningsresultatRepository;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
     OverlappendeYtelserTjeneste() {
         // CDI
@@ -40,29 +43,28 @@ public class OverlappendeYtelserTjeneste {
 
     @Inject
     public OverlappendeYtelserTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                       BeregningsresultatRepository beregningsresultatRepository) {
+                                       BeregningsresultatRepository beregningsresultatRepository,
+                                       @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.beregningsresultatRepository = beregningsresultatRepository;
+        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
     public Map<Ytelse, NavigableSet<LocalDateInterval>> finnOverlappendeYtelser(BehandlingReferanse ref, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
-        var tilkjentYtelsePerioder = hentTilkjentYtelsePerioder(ref);
-        if (tilkjentYtelsePerioder.isEmpty()) {
+        var perioderTilVurderingTidslinje = hentBeregningsgrunnlagPerioderTilVurderingTidslinje(ref);
+        var tilkjentYtelseTidslinje = hentTilkjentYtelseTidslinje(ref);
+        tilkjentYtelseTidslinje = tilkjentYtelseTidslinje.intersection(perioderTilVurderingTidslinje);
+        if (tilkjentYtelseTidslinje.isEmpty()) {
             return Map.of();
         }
+
         var aktørYtelse = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId())
             .getAktørYtelseFraRegister(ref.getAktørId());
         if (aktørYtelse.isEmpty()) {
             return Map.of();
         }
 
-        var tilkjentYtelseTimeline = new LocalDateTimeline<Boolean>(List.of());
-        for (LocalDateSegment<Boolean> periode : tilkjentYtelsePerioder) {
-            tilkjentYtelseTimeline = tilkjentYtelseTimeline.combine(new LocalDateTimeline<>(List.of(periode)), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
-        tilkjentYtelseTimeline = tilkjentYtelseTimeline.compress();
-
-        return doFinnOverlappendeYtelser(ref.getSaksnummer(), tilkjentYtelseTimeline, new YtelseFilter(aktørYtelse.get()).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType())));
+        return doFinnOverlappendeYtelser(ref.getSaksnummer(), tilkjentYtelseTidslinje, new YtelseFilter(aktørYtelse.get()).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType())));
     }
 
     public static Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(Saksnummer saksnummer, LocalDateTimeline<Boolean> tilkjentYtelseTimeline, YtelseFilter ytelseFilter) {
@@ -107,9 +109,16 @@ public class OverlappendeYtelserTjeneste {
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
+    private LocalDateTimeline<Boolean> hentBeregningsgrunnlagPerioderTilVurderingTidslinje(BehandlingReferanse ref) {
+        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var periodeSegmenter = perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).toList();
 
-    private Set<LocalDateSegment<Boolean>> hentTilkjentYtelsePerioder(BehandlingReferanse ref) {
-        return beregningsresultatRepository.hentBeregningsresultatAggregat(ref.getBehandlingId())
+        return new LocalDateTimeline<>(periodeSegmenter);
+    }
+
+    private LocalDateTimeline<Boolean> hentTilkjentYtelseTidslinje(BehandlingReferanse ref) {
+        var tilkjentYtelsePerioder = beregningsresultatRepository.hentBeregningsresultatAggregat(ref.getBehandlingId())
             .map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat)
             .map(BeregningsresultatEntitet::getBeregningsresultatPerioder)
             .filter(perioder -> !perioder.isEmpty())
@@ -117,5 +126,6 @@ public class OverlappendeYtelserTjeneste {
                 .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true))
                 .collect(Collectors.toSet()))
             .orElse(Set.of());
+        return new LocalDateTimeline<>(tilkjentYtelsePerioder);
     }
 }
