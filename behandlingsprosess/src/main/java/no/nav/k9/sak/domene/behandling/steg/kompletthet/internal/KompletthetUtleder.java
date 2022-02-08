@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal;
+package no.nav.k9.sak.domene.behandling.steg.kompletthet.internal;
 
 import java.util.List;
 import java.util.Map;
@@ -7,10 +7,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
+import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetsAksjon;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.KompletthetsAksjon;
 
 class KompletthetUtleder {
 

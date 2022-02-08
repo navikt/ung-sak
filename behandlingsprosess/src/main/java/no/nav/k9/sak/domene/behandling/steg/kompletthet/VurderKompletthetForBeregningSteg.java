@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet;
+package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -31,10 +31,10 @@ import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysnin
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagSteg;
+import no.nav.k9.sak.domene.behandling.steg.kompletthet.internal.KompletthetBeregningTjeneste;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal.PSBKompletthetSjekkerTjeneste;
 
 @FagsakYtelseTypeRef("PSB")
 @FagsakYtelseTypeRef("PPN")
@@ -45,7 +45,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.inter
 public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
-    private PSBKompletthetSjekkerTjeneste kompletthetSjekkerTjeneste;
+    private KompletthetBeregningTjeneste kompletthetBeregningTjeneste;
     private BestiltEtterlysningRepository bestiltEtterlysningRepository;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
     private Boolean kompletthetBeregningOMP;
@@ -56,13 +56,13 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
 
     @Inject
     public VurderKompletthetForBeregningSteg(BehandlingRepository behandlingRepository,
-                                             PSBKompletthetSjekkerTjeneste kompletthetSjekkerTjeneste,
+                                             KompletthetBeregningTjeneste kompletthetBeregningTjeneste,
                                              BestiltEtterlysningRepository bestiltEtterlysningRepository,
                                              DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
                                              @KonfigVerdi(value = "KOMPLETTHET_BEREGNING_OMP", defaultVerdi = "true") Boolean kompletthetBeregningOMP) {
 
         this.behandlingRepository = behandlingRepository;
-        this.kompletthetSjekkerTjeneste = kompletthetSjekkerTjeneste;
+        this.kompletthetBeregningTjeneste = kompletthetBeregningTjeneste;
         this.bestiltEtterlysningRepository = bestiltEtterlysningRepository;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
         this.kompletthetBeregningOMP = kompletthetBeregningOMP;
@@ -81,7 +81,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     }
 
     private BehandleStegResultat nyKompletthetFlyt(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        var kompletthetsAksjon = kompletthetSjekkerTjeneste.utledTilstand(ref, kontekst);
+        var kompletthetsAksjon = kompletthetBeregningTjeneste.utledTilstand(ref, kontekst);
 
         if (kompletthetsAksjon.kanFortsette()) {
             avbrytAksjonspunktHvisTilstede(kontekst);

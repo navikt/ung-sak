@@ -72,6 +72,7 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
             .collect(Collectors.toList());
     }
 
+    @Override
     public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggForPerioder(BehandlingReferanse ref) {
         return kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref);
     }

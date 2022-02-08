@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal;
+package no.nav.k9.sak.domene.behandling.steg.kompletthet.internal;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
+import no.nav.k9.sak.domene.behandling.steg.kompletthet.PeriodeMedMangler;
+import no.nav.k9.sak.domene.behandling.steg.kompletthet.TidligereEtterlysning;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.PeriodeMedMangler;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.TidligereEtterlysning;
 
 class EtterlysningInput {
 
