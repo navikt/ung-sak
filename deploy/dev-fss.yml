@@ -242,6 +242,8 @@ spec:
       value: "true"
     - name: KOMPLETTHET_SKIP_VED_AVSLAG_SOKNADSFRIST
       value: "true"
+    - name: KOMPLETTHET_BEREGNING_OMP
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
