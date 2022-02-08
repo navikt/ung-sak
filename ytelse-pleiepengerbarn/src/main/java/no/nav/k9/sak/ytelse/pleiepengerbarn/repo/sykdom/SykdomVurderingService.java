@@ -172,7 +172,7 @@ public class SykdomVurderingService {
         LocalDateTimeline<Boolean> tidslinjeKreverVurdering = new LocalDateTimeline<>(perioderKreverVurdering.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true)).toList());
 
         LocalDateTimeline<Boolean> innleggelserTidslinje = hentAlleInnleggelserTidslinje(behandling);
-        LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(tidslinjeKreverVurdering, vurderinger);
+        LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(behandling, tidslinjeKreverVurdering, vurderinger);
         if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
             alleResterendeVurderingsperioder = LocalDateTimeline.EMPTY_TIMELINE;
         }
@@ -214,10 +214,7 @@ public class SykdomVurderingService {
         final List<Periode> alleSøknadsperioder = behandledeSøknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
         final LocalDateTimeline<Boolean> innleggelseUnder18årTidslinje = hentInnleggelseUnder18årTidslinje(behandling);
 
-        LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(perioderTilVurdering, vurderinger);
-        if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
-            alleResterendeVurderingsperioder = LocalDateTimeline.EMPTY_TIMELINE;
-        }
+        LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(behandling, perioderTilVurdering, vurderinger);
 
         alleResterendeVurderingsperioder = kunPerioderSomIkkeFinnesI(alleResterendeVurderingsperioder, innleggelseUnder18årTidslinje);
 
@@ -237,6 +234,7 @@ public class SykdomVurderingService {
                 kunPerioderSomIkkeFinnesI(kunPerioderSomIkkeFinnesI(behandledeSøknadsperioder.intersection(ktpTidslinje), resterendeVurderingsperioderTidslinje), vurderinger)
             );
         } else {
+            alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(behandling, toLocalDateTimeline(alleSøknadsperioder), vurderinger);
             resterendeVurderingsperioder = toPeriodeList(alleResterendeVurderingsperioder);
             resterendeValgfrieVurderingsperioder = toPeriodeList(
                 kunPerioderSomIkkeFinnesI(kunPerioderSomIkkeFinnesI(behandledeSøknadsperioder, alleResterendeVurderingsperioder), vurderinger)
@@ -312,7 +310,10 @@ public class SykdomVurderingService {
             .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
     }
 
-    private LocalDateTimeline<Boolean> finnResterendeVurderingsperioder(LocalDateTimeline<Boolean> vurderingsperioder, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje) {
+    private LocalDateTimeline<Boolean> finnResterendeVurderingsperioder(Behandling behandling, LocalDateTimeline<Boolean> vurderingsperioder, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje) {
+        if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
+            return LocalDateTimeline.EMPTY_TIMELINE;
+        }
         return kunPerioderSomIkkeFinnesI(vurderingsperioder, vurderingerTidslinje);
     }
 
