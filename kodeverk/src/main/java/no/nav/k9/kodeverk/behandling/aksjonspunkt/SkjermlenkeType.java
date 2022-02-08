@@ -36,7 +36,7 @@ public enum SkjermlenkeType implements Kodeverdi {
     FAKTA_OM_INNTEKTSMELDING("FAKTA_OM_INNTEKTSMELDING", "Inntektsmelding"),
     FAKTA_OM_SIMULERING("FAKTA_OM_SIMULERING", "Simulering"),
     FAKTA_OM_UTTAK("FAKTA_OM_UTTAK", "Uttak"),
-    FAKTA_OM_VERGE("FAKTA_OM_VERGE", "Verge/fullmektig"),
+    FAKTA_OM_VERGE("FAKTA_OM_VERGE", "Verge/fullmektig/søker under 18 år"),
     KONTROLL_AV_SAKSOPPLYSNINGER("KONTROLL_AV_SAKSOPPLYSNINGER", "Kontroll av saksopplysninger"),
     OPPLYSNINGSPLIKT("OPPLYSNINGSPLIKT", "Opplysningsplikt"),
     PUNKT_FOR_MEDLEMSKAP("PUNKT_FOR_MEDLEMSKAP", "Medlemskap"),
