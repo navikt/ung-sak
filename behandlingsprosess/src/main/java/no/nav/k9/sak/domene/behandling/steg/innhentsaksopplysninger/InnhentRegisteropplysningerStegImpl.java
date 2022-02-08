@@ -65,6 +65,9 @@ public class InnhentRegisteropplysningerStegImpl implements InnhentRegisteropply
             .collect(Collectors.toSet());
 
         var forventedeTasks = behandlingProsesseringTjeneste.utledRegisterinnhentingTaskTyper(behandling);
+        if (forventedeTasks.isEmpty()) {
+            return false;
+        }
 
         return planlagteTasker.containsAll(forventedeTasks);
     }
