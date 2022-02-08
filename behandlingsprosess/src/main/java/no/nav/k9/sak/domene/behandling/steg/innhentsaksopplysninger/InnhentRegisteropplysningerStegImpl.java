@@ -64,6 +64,10 @@ public class InnhentRegisteropplysningerStegImpl implements InnhentRegisteropply
             .map(ProsessTaskData::getTaskType)
             .collect(Collectors.toSet());
 
+        if (planlagteTasker.isEmpty()) {
+            return false;
+        }
+
         var forventedeTasks = behandlingProsesseringTjeneste.utledRegisterinnhentingTaskTyper(behandling);
         if (forventedeTasks.isEmpty()) {
             return false;
