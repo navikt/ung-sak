@@ -3,6 +3,7 @@ package no.nav.k9.sak.behandling.prosessering;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -307,27 +308,11 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
     private void leggTilInnhentRegisterdataTasks(Behandling behandling, ProsessTaskGruppe gruppe) {
 
-        var tasks = new ArrayList<ProsessTaskData>();
+        var taskTyper = utledRegisterinnhentingTaskTyper(behandling);
 
-        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, PersonInformasjonEntitet.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
-            var innhentPersonopplysniger = new ProsessTaskData(InnhentPersonopplysningerTask.TASKTYPE);
-            innhentPersonopplysniger.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-            tasks.add(innhentPersonopplysniger);
-        });
-
-        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, MedlemskapAggregat.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
-            var innhentMedlemskapOpplysniger = new ProsessTaskData(InnhentMedlemskapOpplysningerTask.TASKTYPE);
-            innhentMedlemskapOpplysniger.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-            tasks.add(innhentMedlemskapOpplysniger);
-        });
-
-        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, InntektArbeidYtelseGrunnlag.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
-            if (skalInnhenteAbakus(behandling)) {
-                var abakusRegisterInnheting = new ProsessTaskData(InnhentIAYIAbakusTask.TASKTYPE);
-                abakusRegisterInnheting.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-                tasks.add(abakusRegisterInnheting);
-            }
-        });
+        var tasks = taskTyper.stream()
+            .map(it -> mapTilTask(it, behandling))
+            .collect(Collectors.toList());
 
         if (tasks.isEmpty()) {
             throw new UnsupportedOperationException("Utvikler-feil: Håpet på å hente inn noe registerdata for ytelseType=" + behandling.getFagsakYtelseType());
@@ -339,6 +324,30 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         ProsessTaskData oppdaterInnhentTidspunkt = new ProsessTaskData(SettRegisterdataInnhentetTidspunktTask.TASKTYPE);
         oppdaterInnhentTidspunkt.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(oppdaterInnhentTidspunkt);
+    }
+
+    private ProsessTaskData mapTilTask(String taskType, Behandling behandling) {
+        var task = new ProsessTaskData(taskType);
+        task.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+        return task;
+    }
+
+    @Override
+    public List<String> utledRegisterinnhentingTaskTyper(Behandling behandling) {
+        var tasks = new ArrayList<String>();
+
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, PersonInformasjonEntitet.class, behandling.getFagsakYtelseType())
+            .ifPresent(u -> tasks.add(InnhentPersonopplysningerTask.TASKTYPE));
+
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, MedlemskapAggregat.class, behandling.getFagsakYtelseType())
+            .ifPresent(u -> tasks.add(InnhentMedlemskapOpplysningerTask.TASKTYPE));
+
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, InntektArbeidYtelseGrunnlag.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
+            if (skalInnhenteAbakus(behandling)) {
+                tasks.add(InnhentIAYIAbakusTask.TASKTYPE);
+            }
+        });
+        return tasks;
     }
 
     private boolean skalInnhenteAbakus(Behandling behandling) {
