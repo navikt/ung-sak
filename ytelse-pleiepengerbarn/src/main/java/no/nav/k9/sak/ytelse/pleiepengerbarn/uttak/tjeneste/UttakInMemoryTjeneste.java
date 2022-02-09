@@ -75,7 +75,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             uttakPerioder.put(periode.getPeriode(), mapTilUttaksperiodeInfo(periode, input));
         }
 
-        var plan = new Uttaksplan(uttakPerioder, List.of());
+        var plan = new Uttaksplan(uttakPerioder, List.of(), null);
 
         lagreUttakResultatPerioder(saksnummer, behandlingUuid, plan);
 
