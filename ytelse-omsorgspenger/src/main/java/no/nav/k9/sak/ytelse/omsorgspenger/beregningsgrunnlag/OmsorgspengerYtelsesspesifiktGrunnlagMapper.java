@@ -18,6 +18,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtel
 import no.nav.folketrygdloven.kalkulus.beregning.v1.AktivitetDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.OmsorgspengerGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedUtbetalingsgradDto;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.SøknadsperioderPrAktivitetDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradPrAktivitetDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
@@ -30,9 +31,16 @@ import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist.SøknadPerioderTjeneste;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.KravDokumentFravær;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @FagsakYtelseTypeRef("OMP")
@@ -42,14 +50,23 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     private static final Comparator<Uttaksperiode> COMP_PERIODE = comparing(uttaksperiode -> uttaksperiode.getPeriode().getFom());
 
     private ÅrskvantumTjeneste årskvantumTjeneste;
+    private SøknadPerioderTjeneste søknadPerioderTjeneste;
+    private VurderSøknadsfristTjeneste<OppgittFraværPeriode> søknadsfristTjeneste;
+    private boolean sendSøknadsperioderTilKalkulus;
 
     protected OmsorgspengerYtelsesspesifiktGrunnlagMapper() {
         // for proxy
     }
 
     @Inject
-    public OmsorgspengerYtelsesspesifiktGrunnlagMapper(ÅrskvantumTjeneste årskvantumTjeneste) {
+    public OmsorgspengerYtelsesspesifiktGrunnlagMapper(ÅrskvantumTjeneste årskvantumTjeneste,
+                                                       SøknadPerioderTjeneste søknadPerioderTjeneste,
+                                                       @FagsakYtelseTypeRef("OMP") VurderSøknadsfristTjeneste<OppgittFraværPeriode> søknadsfristTjeneste,
+                                                       @KonfigVerdi(value = "OMP_SOKNADSPERIODER_KALKULUS", defaultVerdi = "true", required = false) boolean sendSøknadsperioderTilKalkulus) {
         this.årskvantumTjeneste = årskvantumTjeneste;
+        this.søknadPerioderTjeneste = søknadPerioderTjeneste;
+        this.søknadsfristTjeneste = søknadsfristTjeneste;
+        this.sendSøknadsperioderTilKalkulus = sendSøknadsperioderTilKalkulus;
     }
 
     private static InternArbeidsforholdRefDto mapArbeidsforholdId(String arbeidsforholdId) {
@@ -78,7 +95,8 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     public OmsorgspengerGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         List<Aktivitet> aktiviteter = hentAktiviteter(ref);
         if (aktiviteter.isEmpty()) {
-            return new OmsorgspengerGrunnlag(Collections.emptyList());
+            List<SøknadsperioderPrAktivitetDto> søknadsperioder = sendSøknadsperioderTilKalkulus ? Collections.emptyList() : null;
+            return new OmsorgspengerGrunnlag(Collections.emptyList(), søknadsperioder);
         }
 
         // Kalkulus forventer å ikke få duplikate arbeidsforhold, så vi samler alle perioder pr arbeidsforhold/aktivitet
@@ -95,8 +113,49 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
                 return mapTilUtbetalingsgrad(utbetalingsgraderForVilkårsperiode, e.getKey());
             })
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-        return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
+            .toList();
+
+        List<SøknadsperioderPrAktivitetDto> søkadsperioder;
+        if (sendSøknadsperioderTilKalkulus) {
+            søkadsperioder = hentSøknadsperioder(ref);
+        } else {
+            søkadsperioder = null;
+        }
+        return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet, søkadsperioder);
+    }
+
+    private List<SøknadsperioderPrAktivitetDto> hentSøknadsperioder(BehandlingReferanse ref) {
+        var søkteFraværsperioder = søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåFagsak(ref);
+        var søkteFraværsperioderSøknadsfristbehandlet = søknadsfristTjeneste.vurderSøknadsfrist(ref.getBehandlingId(), søkteFraværsperioder);
+        var søkteFraværesperioderUtenOverlapp = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(søkteFraværsperioderSøknadsfristbehandlet);
+
+        return søkteFraværesperioderUtenOverlapp.stream()
+            //.filter(wofp -> wofp.getSøknadsfristUtfall() == no.nav.k9.kodeverk.vilkår.Utfall.OPPFYLT)
+            .collect(Collectors.groupingBy(this::mapAktivitet, Collectors.mapping(this::mapPeriode, Collectors.toList())))
+            .entrySet().stream()
+            .map(e -> new SøknadsperioderPrAktivitetDto(e.getKey(), e.getValue()))
+            .toList();
+    }
+
+    private Periode mapPeriode(WrappedOppgittFraværPeriode wrappedPeriode) {
+        OppgittFraværPeriode periode = wrappedPeriode.getPeriode();
+        return new Periode(periode.getFom(), periode.getTom());
+    }
+
+    private AktivitetDto mapAktivitet(WrappedOppgittFraværPeriode wrappedPeriode) {
+        OppgittFraværPeriode periode = wrappedPeriode.getPeriode();
+        if (periode.getArbeidsforholdRef().getReferanse() != null) {
+            throw new IllegalArgumentException("Forventer ikke arbeidsforhold her, skal kun få søknadsperioder her p.t. ikke mulig å opplyse arbeidsforhold i søknad.");
+        }
+        Aktør arbeidsgiver = mapTilAktør(periode.getArbeidsgiver());
+        return new AktivitetDto(arbeidsgiver, null, new UttakArbeidType(periode.getAktivitetType().getKode()));
+    }
+
+    public static Aktør mapTilAktør(Arbeidsgiver arbeidsgiver) {
+        if (arbeidsgiver == null) {
+            return null;
+        }
+        return arbeidsgiver.getErVirksomhet() ? new Organisasjon(arbeidsgiver.getOrgnr()) : new AktørIdPersonident(arbeidsgiver.getAktørId().getId());
     }
 
     @NotNull
