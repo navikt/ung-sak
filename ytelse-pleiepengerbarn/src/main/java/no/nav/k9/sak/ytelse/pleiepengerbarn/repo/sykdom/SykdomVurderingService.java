@@ -235,6 +235,7 @@ public class SykdomVurderingService {
             );
         } else {
             alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(behandling, toLocalDateTimeline(alleSøknadsperioder), vurderinger);
+            alleResterendeVurderingsperioder = kunPerioderSomIkkeFinnesI(alleResterendeVurderingsperioder, innleggelseUnder18årTidslinje);
             resterendeVurderingsperioder = toPeriodeList(alleResterendeVurderingsperioder);
             resterendeValgfrieVurderingsperioder = toPeriodeList(
                 kunPerioderSomIkkeFinnesI(kunPerioderSomIkkeFinnesI(behandledeSøknadsperioder, alleResterendeVurderingsperioder), vurderinger)
