@@ -230,7 +230,7 @@ spec:
     - name: VEDTAK_PERSISTER_ENDRET_PERIODE
       value: "true"
     - name: K9_RAPID_AIVEN
-      value: "false"
+      value: "true"
     - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
       value: "true"
     - name: KOMPLETTHET_SKIP_VED_AVSLAG_SOKNADSFRIST
