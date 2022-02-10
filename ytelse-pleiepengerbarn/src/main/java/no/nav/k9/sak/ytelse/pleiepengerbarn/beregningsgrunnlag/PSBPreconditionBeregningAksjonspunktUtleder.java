@@ -125,8 +125,8 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
     }
 
     private boolean harFrilansIInfotrygdOgManglerSøknad(NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
-                                                       List<SakInfotrygdMigrering> eksisterendeMigreringTilVurdering,
-                                                       YtelseFilter psbInfotrygdFilter, Long behandlingId) {
+                                                        List<SakInfotrygdMigrering> eksisterendeMigreringTilVurdering,
+                                                        YtelseFilter psbInfotrygdFilter, Long behandlingId) {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
         return eksisterendeMigreringTilVurdering.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt)
             .anyMatch(stp -> harFrilansIInfotrygd(perioderTilVurdering, psbInfotrygdFilter, stp) &&
@@ -214,14 +214,12 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
     }
 
 
-
     private YtelseFilter finnPSBInfotryd(AksjonspunktUtlederInput param) {
         InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId());
         Optional<AktørYtelse> aktørYtelse = iayGrunnlag.getAktørYtelseFraRegister(param.getAktørId());
         YtelseFilter ytelseFilter = lagInfotrygdPSBFilter(aktørYtelse);
         return ytelseFilter;
     }
-
 
 
     private List<SakInfotrygdMigrering> finnEksisterendeMigreringTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer) {
@@ -231,7 +229,12 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         var antallPerioderMedOverlapp = perioderTilVurdering.stream().filter(periode -> migreringTilVurdering.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt)
             .anyMatch(periode::inkluderer)).count();
         if (migreringTilVurdering.size() > antallPerioderMedOverlapp) {
-            throw new IllegalStateException("Forventer maksimalt en migrering til vurdering per periode");
+            throw new IllegalStateException(
+                String.format("Forventer maksimalt en migrering til vurdering per periode. " +
+                        "Migrerte skjæringstidspunkt : %s, " +
+                        "Perioder til vurdering: %s",
+                    eksisterendeInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).collect(Collectors.toSet()),
+                    perioderTilVurdering));
         }
         return migreringTilVurdering;
     }
