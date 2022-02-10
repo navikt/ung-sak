@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 
+import java.time.Duration;
 import java.util.Objects;
 
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
@@ -10,6 +11,10 @@ class WrappedArbeid {
 
     public WrappedArbeid(ArbeidPeriode periode) {
         this.periode = periode;
+    }
+
+    public WrappedArbeid(ArbeidPeriode periode, Duration faktisArbedstid) {
+        this(new ArbeidPeriode(periode.getPeriode(), periode.getAktivitetType(), periode.getArbeidsgiver(), periode.getArbeidsforholdRef(), periode.getJobberNormaltTimerPerDag(), faktisArbedstid));
     }
 
     public ArbeidPeriode getPeriode() {

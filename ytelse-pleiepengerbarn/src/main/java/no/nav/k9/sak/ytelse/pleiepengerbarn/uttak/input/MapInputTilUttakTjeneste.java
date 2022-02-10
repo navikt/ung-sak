@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -26,7 +26,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynPeriode;
@@ -39,7 +38,18 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.ferie.MapFerie;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.tilsyn.MapTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.utenlandsopphold.MapUtenlandsopphold;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.uttak.MapUttak;
-import no.nav.pleiepengerbarn.uttak.kontrakter.*;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Barn;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Pleiebehov;
+import no.nav.pleiepengerbarn.uttak.kontrakter.RettVedDød;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Søker;
+import no.nav.pleiepengerbarn.uttak.kontrakter.SøktUttak;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UtenlandsoppholdInfo;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Vilkårsperiode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.YtelseType;
 
 @Dependent
 public class MapInputTilUttakTjeneste {
@@ -47,15 +57,18 @@ public class MapInputTilUttakTjeneste {
     private HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private String unntak;
     private Boolean utenlandsperioderMappingEnablet;
+    private Boolean utvidVedDødsfall;
 
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
                                     @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
-                                    @KonfigVerdi(value = "UTENLANDSPERIODER_MAPPING_ENABLET", defaultVerdi = "false") Boolean utenlandsperioderMappingEnablet) {
+                                    @KonfigVerdi(value = "UTENLANDSPERIODER_MAPPING_ENABLET", defaultVerdi = "false") Boolean utenlandsperioderMappingEnablet,
+                                    @KonfigVerdi(value = "PSB_UTVIDE_VED_DODSFALL", defaultVerdi = "false") Boolean utvidVedDødsfall) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
         this.utenlandsperioderMappingEnablet = utenlandsperioderMappingEnablet;
+        this.utvidVedDødsfall = utvidVedDødsfall;
     }
 
 
@@ -91,7 +104,7 @@ public class MapInputTilUttakTjeneste {
 
         var tidslinjeTilVurdering = new LocalDateTimeline<>(mapPerioderTilVurdering(input));
 
-        final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
+        final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering, input.getUtvidetPeriodeSomFølgeAvDødsfall());
 
         var inaktivitetUtlederInput = new InaktivitetUtlederInput(behandling.getAktørId(), tidslinjeTilVurdering, input.getInntektArbeidYtelseGrunnlag());
         var inaktivTidslinje = new PerioderMedInaktivitetUtleder().utled(inaktivitetUtlederInput);
@@ -108,9 +121,13 @@ public class MapInputTilUttakTjeneste {
             .medBruker(behandling.getAktørId())
             .medSakerSomMåSpesialHåndteres(MapUnntakFraAktivitetGenerering.mapUnntak(unntak));
 
+        if (utvidVedDødsfall) {
+            input.getUtvidetPeriodeSomFølgeAvDødsfall().ifPresent(arbeidstidInput::medAutomatiskUtvidelseVedDødsfall);
+        }
+
         final List<Arbeid> arbeid = new MapArbeid().map(arbeidstidInput);
 
-        final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehov());
+        final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input);
 
         final List<LukketPeriode> lovbestemtFerie = new MapFerie().map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
 
@@ -249,11 +266,22 @@ public class MapInputTilUttakTjeneste {
         return new ArrayList<>(timeline.compress().toSegments());
     }
 
-    private Map<LukketPeriode, Pleiebehov> toPleiebehov(List<EtablertPleieperiode> pleiebehov) {
+    private Map<LukketPeriode, Pleiebehov> toPleiebehov(InputParametere inputParametere) {
+        var pleiebehov = inputParametere.getPleiebehov();
+        var timeline = new LocalDateTimeline<>(pleiebehov.stream()
+            .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), mapToPleiebehov(it.getGrad())))
+            .toList());
+
+        if (inputParametere.getUtvidetPeriodeSomFølgeAvDødsfall().isPresent()) {
+            var manglendePerioderIDødsPerioden = new LocalDateTimeline<Pleiebehov>(List.of(new LocalDateSegment<>(inputParametere.getUtvidetPeriodeSomFølgeAvDødsfall().get().toLocalDateInterval(), null))).disjoint(timeline);
+            for (LocalDateSegment<Pleiebehov> segment : manglendePerioderIDødsPerioden) {
+                var manglendeSegment = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), Pleiebehov.PROSENT_100)));
+                timeline = timeline.combine(manglendeSegment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
+        }
+
         final Map<LukketPeriode, Pleiebehov> tilsynsbehov = new HashMap<>();
-        pleiebehov.forEach(p -> {
-            tilsynsbehov.put(toLukketPeriode(p.getPeriode()), mapToPleiebehov(p.getGrad()));
-        });
+        timeline.toSegments().forEach(p -> tilsynsbehov.put(toLukketPeriode(DatoIntervallEntitet.fra(p.getLocalDateInterval())), p.getValue()));
         return tilsynsbehov;
     }
 

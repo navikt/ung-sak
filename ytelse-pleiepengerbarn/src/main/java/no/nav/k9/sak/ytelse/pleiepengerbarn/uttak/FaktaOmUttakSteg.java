@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,6 +17,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
@@ -82,12 +84,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         if (unntakEtablertTilsynForPleietrengende.isPresent()) {
             unntakEtablertTilsynGrunnlagRepository.lagreGrunnlag(behandlingId, unntakEtablertTilsynForPleietrengende.get());
 
-            if (søktOmNattevåk(unntakEtablertTilsynForPleietrengende.get()) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
-                aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_NATTEVÅK);
-            }
-            if (søktOmBeredskap(unntakEtablertTilsynForPleietrengende.get()) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
-                aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_BEREDSKAP);
-            }
+            aksjonspunkter.addAll(vurderAksjonspunktForNattevåkOgBeredskap(behandling, unntakEtablertTilsynForPleietrengende.get(), innvilgedePerioderTilVurdering));
         }
         if (rettEtterPleietrengendesDødMåAvklares(behandlingId) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
             aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD);
@@ -107,6 +104,40 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
     }
 
+    private List<AksjonspunktDefinisjon> vurderAksjonspunktForNattevåkOgBeredskap(Behandling behandling, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Set<VilkårPeriode> innvilgedePerioderTilVurdering) {
+        var aksjonspunkter = new ArrayList<AksjonspunktDefinisjon>();
+        if (søktOmNattevåk(unntakEtablertTilsynForPleietrengende) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
+            if (harNattevåkPerioderSomIkkeErVurdert(unntakEtablertTilsynForPleietrengende)) {
+                aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_NATTEVÅK);
+            } else if (behandling.erManueltOpprettet() && behandling.getAksjonspunktFor(AksjonspunktDefinisjon.VURDER_NATTEVÅK.getKode()).isEmpty()) {
+                aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_NATTEVÅK);
+            }
+        }
+        if (søktOmBeredskap(unntakEtablertTilsynForPleietrengende) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
+            if (harBeredskapPerioderSomIkkeErVurdert(unntakEtablertTilsynForPleietrengende)) {
+                aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_BEREDSKAP);
+            } else if (behandling.erManueltOpprettet() && behandling.getAksjonspunktFor(AksjonspunktDefinisjon.VURDER_BEREDSKAP.getKode()).isEmpty()) {
+                aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_BEREDSKAP);
+            }
+        }
+        return aksjonspunkter;
+    }
+
+    private boolean harBeredskapPerioderSomIkkeErVurdert(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
+        final var beredskap = unntakEtablertTilsynForPleietrengende.getBeredskap();
+        if (beredskap != null) {
+            return beredskap.getPerioder().stream().anyMatch(periode -> periode.getResultat().equals(Resultat.IKKE_VURDERT));
+        }
+        return false;
+    }
+
+    private boolean harNattevåkPerioderSomIkkeErVurdert(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
+        final var nattevåk = unntakEtablertTilsynForPleietrengende.getNattevåk();
+        if (nattevåk != null) {
+            return nattevåk.getPerioder().stream().anyMatch(periode -> periode.getResultat().equals(Resultat.IKKE_VURDERT));
+        }
+        return false;
+    }
 
     private boolean harNoenGodkjentPerioderMedSykdom(Set<VilkårPeriode> innvilgetePerioder) {
         return !innvilgetePerioder.isEmpty();
@@ -115,7 +146,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     private boolean søktOmNattevåk(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
         final var nattevåk = unntakEtablertTilsynForPleietrengende.getNattevåk();
         if (nattevåk != null) {
-            return nattevåk.getPerioder().stream().anyMatch(periode -> periode.getResultat().equals(Resultat.IKKE_VURDERT));
+            return !nattevåk.getPerioder().isEmpty();
         }
         return false;
     }
@@ -123,7 +154,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     private boolean søktOmBeredskap(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
         final var beredskap = unntakEtablertTilsynForPleietrengende.getBeredskap();
         if (beredskap != null) {
-            return beredskap.getPerioder().stream().anyMatch(periode -> periode.getResultat().equals(Resultat.IKKE_VURDERT));
+            return !beredskap.getPerioder().isEmpty();
         }
         return false;
     }

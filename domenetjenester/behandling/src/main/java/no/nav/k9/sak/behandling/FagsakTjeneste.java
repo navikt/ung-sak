@@ -14,6 +14,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -82,5 +83,10 @@ public class FagsakTjeneste {
 
         return false;
     }
+
+    public List<SakInfotrygdMigrering> finnSakInfotrygdmigreringForFagsak(Fagsak fagsak) {
+        return fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+    }
+
 
 }

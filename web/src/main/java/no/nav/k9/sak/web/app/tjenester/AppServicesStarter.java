@@ -4,7 +4,6 @@ import jakarta.inject.Inject;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
-
 import no.nav.k9.felles.integrasjon.sensu.SensuKlient;
 import no.nav.k9.prosesstask.impl.BatchTaskScheduler;
 import no.nav.k9.prosesstask.impl.TaskManager;
@@ -30,7 +29,7 @@ public class AppServicesStarter implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         sensuKlient.start();
-        taskManager.start();
+        //taskManager.start();
         batchTaskScheduler.start();
     }
 

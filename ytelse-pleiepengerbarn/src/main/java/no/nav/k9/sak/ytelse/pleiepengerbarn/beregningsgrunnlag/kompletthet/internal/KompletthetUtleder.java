@@ -45,11 +45,12 @@ class KompletthetUtleder {
 
     Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledRelevanteVurderinger(VurdererInput input) {
         var perioderTilVurdering = input.getPerioderTilVurdering();
+        var perioderTilVurderingMedSøknadsfristOppfylt = input.getPerioderTilVurderingMedSøknadsfristOppfylt();
 
         var kompletthetsVurderinger = input.getManglendeVedleggPerPeriode();
         return kompletthetsVurderinger.entrySet()
             .stream()
-            .filter(it -> perioderTilVurdering.contains(it.getKey()))
+            .filter(it -> perioderTilVurdering.contains(it.getKey()) && perioderTilVurderingMedSøknadsfristOppfylt.stream().anyMatch(at -> at.overlapper(it.getKey())))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

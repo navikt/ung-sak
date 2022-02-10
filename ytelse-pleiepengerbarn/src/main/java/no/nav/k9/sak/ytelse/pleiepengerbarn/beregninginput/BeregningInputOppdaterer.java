@@ -161,10 +161,6 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
         return a.getArbeidsgiverOrgnr() == null ? null : a.getArbeidsgiverOrgnr().getId();
     }
 
-    private DatoIntervallEntitet mapPeriode(Periode periode) {
-        return periode.getTom() == null ? DatoIntervallEntitet.fraOgMed(periode.getFom()) : DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
-    }
-
     private Beløp mapBeløp(Integer beløp) {
         return beløp != null ? new Beløp(beløp) : null;
     }

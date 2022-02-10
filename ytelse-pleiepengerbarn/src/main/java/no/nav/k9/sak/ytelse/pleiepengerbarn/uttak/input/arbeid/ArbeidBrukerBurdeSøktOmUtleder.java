@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -41,6 +40,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjene
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.PerioderMedSykdomInnvilgetUtleder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeDødsfallTjeneste;
 
 @ApplicationScoped
 public class ArbeidBrukerBurdeSøktOmUtleder {
@@ -48,6 +48,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
+    private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
     private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
     private OpptjeningRepository opptjeningRepository;
@@ -63,7 +64,8 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
                                           PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
                                           PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
                                           OpptjeningRepository opptjeningRepository,
-                                          VilkårResultatRepository vilkårResultatRepository) {
+                                          VilkårResultatRepository vilkårResultatRepository,
+                                          HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
@@ -71,6 +73,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         this.opptjeningRepository = opptjeningRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
+        this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
     }
 
     public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledMangler(BehandlingReferanse referanse) {
@@ -89,6 +92,8 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             .medTidslinjeTilVurdering(tidslinjeTilVurdering)
             .medOpptjeningsResultat(opptjeningResultat.orElse(null))
             .medVilkår(vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow());
+        håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse).ifPresent(input::medAutomatiskUtvidelseVedDødsfall);
+
         var innvilgeteVilkårPerioder = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse);
 
         var innvilgedeSegmenter = innvilgeteVilkårPerioder.stream()

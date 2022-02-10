@@ -6,9 +6,6 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.UUID;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -31,6 +28,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
@@ -105,13 +104,6 @@ public class UttakRestKlient {
         }
     }
 
-    /**
-     * Benytt simuleringV2
-     *
-     * @param request
-     * @return
-     */
-    @Deprecated(forRemoval = true)
     public Simulering simulerUttaksplan(Uttaksgrunnlag request) {
         URIBuilder builder = new URIBuilder(endpointSimuleringUttaksplan);
         try {

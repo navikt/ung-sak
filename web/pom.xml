@@ -15,7 +15,7 @@
 
     <properties>
         <simple.client.version>0.14.1</simple.client.version>
-        <swagger-ui.version>4.2.1</swagger-ui.version>
+        <swagger-ui.version>4.5.0</swagger-ui.version>
     </properties>
 
 
@@ -24,7 +24,7 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-bom</artifactId>
-                <version>11.0.7</version>
+                <version>11.0.8</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
