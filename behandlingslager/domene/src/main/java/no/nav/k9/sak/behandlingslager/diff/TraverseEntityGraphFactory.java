@@ -2,6 +2,8 @@ package no.nav.k9.sak.behandlingslager.diff;
 
 import java.util.function.Function;
 
+import com.vladmihalcea.hibernate.type.range.Range;
+
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
@@ -21,21 +23,21 @@ import no.nav.k9.sak.typer.Stillingsprosent;
 public final class TraverseEntityGraphFactory {
     private TraverseEntityGraphFactory() {
     }
-    
+
     public static TraverseGraph build(boolean medChangedTrackedOnly, Class<?>... leafClasses) {
         return build(medChangedTrackedOnly, TraverseGraphConfig.NO_FILTER, leafClasses);
     }
 
     public static TraverseGraph build(boolean medChangedTrackedOnly, Function<Object, Boolean> inclusionFilter, Class<?>... leafClasses) {
-        
+
         /* default oppsett for behandlingslager. */
-        
+
         var config = new TraverseJpaEntityGraphConfig();
         config.setIgnoreNulls(true);
         config.setOnlyCheckTrackedFields(medChangedTrackedOnly);
         config.addRootClasses(Behandling.class, SøknadEntitet.class);
         config.setInclusionFilter(inclusionFilter);
-        
+
         config.addLeafClasses(Beløp.class);
         config.addLeafClasses(AktørId.class);
         config.addLeafClasses(Saksnummer.class);
@@ -46,7 +48,8 @@ public final class TraverseEntityGraphFactory {
         config.addLeafClasses(InternArbeidsforholdRef.class);
         config.addLeafClasses(Stillingsprosent.class);
         config.addLeafClasses(Arbeidsgiver.class);
-        
+        config.addLeafClasses(Range.class);
+
         config.addLeafClasses(DatoIntervallEntitet.class, ÅpenDatoIntervallEntitet.class);
         config.addLeafClasses(Kodeverdi.class);
 
