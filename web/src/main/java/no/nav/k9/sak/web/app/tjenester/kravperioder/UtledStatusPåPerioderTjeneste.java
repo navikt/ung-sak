@@ -30,10 +30,7 @@ import no.nav.k9.sak.typer.Periode;
 
 public class UtledStatusPåPerioderTjeneste {
 
-    private final Boolean kantIKantVurdererEnablet;
-
-    public UtledStatusPåPerioderTjeneste(Boolean kantIKantVurdererEnablet) {
-        this.kantIKantVurdererEnablet = kantIKantVurdererEnablet;
+    public UtledStatusPåPerioderTjeneste() {
     }
 
     public StatusForPerioderPåBehandling utled(Behandling behandling,
@@ -96,11 +93,9 @@ public class UtledStatusPåPerioderTjeneste {
         for (LocalDateTimeline<ÅrsakerTilVurdering> linje : relevanteTidslinjer) {
             tidslinjen = tidslinjen.combine(linje, mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-        if (kantIKantVurdererEnablet) {
-            var segmenterSomMangler = utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
-            for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenterSomMangler) {
-                tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-            }
+        var segmenterSomMangler = utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
+        for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenterSomMangler) {
+            tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
         return tidslinjen;
     }
@@ -186,11 +181,9 @@ public class UtledStatusPåPerioderTjeneste {
             tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        if (kantIKantVurdererEnablet) {
-            var segmenterSomMangler = utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
-            for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenterSomMangler) {
-                tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-            }
+        var segmenterSomMangler = utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
+        for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenterSomMangler) {
+            tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
         return tidslinjen.compress()

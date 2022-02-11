@@ -212,13 +212,9 @@ spec:
       value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
       value: "true"
-    - name: PSB_ENABLE_BEKREFT_UTTAK
-      value: "true"
     - name: DISABLE_VURDER_TILBAKETREKK
       value: "true"
     - name: PSB_INFOTRYGD_MIGRERING
-      value: "true"
-    - name: FORLENGELSE_OPPTJENING_ENABLET
       value: "true"
     - name: FORLENGELSE_MEDLEMSKAP_ENABLET
       value: "true"
@@ -227,12 +223,6 @@ spec:
     - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
       value: "true"
     - name: HENLEGGELSE_PSB_ENABLET
-      value: "true"
-    - name: BEHANDLINGID_DOKUMENTLIST_ENABLET
-      value: "true"
-    - name: PERIODER_KANT_I_KANT_VURDERER_ENABLET
-      value: "true"
-    - name: VEDTAK_PERSISTER_ENDRET_PERIODE
       value: "true"
     - name: K9_RAPID_AIVEN
       value: "true"
