@@ -295,6 +295,14 @@ public class FagsakRepository {
         return query.getResultList();
     }
 
+    public List<SakInfotrygdMigrering> hentAlleSakInfotrygdMigreringer(Long fagsakId) {
+        TypedQuery<SakInfotrygdMigrering> query = entityManager.createQuery("from SakInfotrygdMigrering " +
+            "where fagsak_id=:fagsakId " +
+            "order by skjaeringstidspunkt asc", SakInfotrygdMigrering.class);
+        query.setParameter("fagsakId", fagsakId); // NOSONAR
+        return query.getResultList();
+    }
+
     private Optional<SakInfotrygdMigrering> hentSakInfotrygdMigrering(Long fagsakId, LocalDate stp) {
         TypedQuery<SakInfotrygdMigrering> query = entityManager.createQuery("from SakInfotrygdMigrering " +
             "where fagsak_id=:fagsakId " +
