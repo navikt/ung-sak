@@ -157,7 +157,7 @@ public class TrekkUtFraværTjeneste {
     }
 
     private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> fraværFraSøknaderPåFagsak(Behandling behandling) {
-        return søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåFagsak(BehandlingReferanse.fra(behandling));
+        return søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåFagsak(behandling.getFagsakId());
     }
 
     private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> fraværFraSøknaderPåBehandling(Behandling behandling) {
