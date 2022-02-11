@@ -152,6 +152,9 @@ public class DokumentRestTjeneste {
     }
 
     Long utledBehandling(DokumentDto dto, NavigableSet<BehandlingPeriode> behandlingTidslinje) {
+        if (dto.getTidspunkt() == null) {
+            return null;
+        }
         if (Objects.equals(dto.getKommunikasjonsretning(), Kommunikasjonsretning.UT)) {
             // finn nærmeste TOM
             return behandlingTidslinje.stream()
@@ -161,7 +164,7 @@ public class DokumentRestTjeneste {
         }
 
         return behandlingTidslinje.stream()
-            .filter(it -> it.getTom() != null && it.getTom().isAfter(dto.getTidspunkt()))
+            .filter(it -> it.getTom().isAfter(dto.getTidspunkt()))
             .min(Comparator.comparing(it -> distanseTilTom(dto.getTidspunkt(), it)))
             .map(BehandlingPeriode::getBehandlingId)
             .orElse(null);
