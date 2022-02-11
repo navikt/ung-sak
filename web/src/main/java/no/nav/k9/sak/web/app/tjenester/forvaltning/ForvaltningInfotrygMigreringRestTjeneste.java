@@ -3,9 +3,11 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning;
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,7 +18,6 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -46,7 +47,8 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
     @Path("/skjæringstidspunkter")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent skjæringstidspunkter for infotrygdmigrering for saker", tags = "infotrygdmigrering", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer alle skjæringstidspunkt som har blitt lagret på sak", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MigrertSkjæringstidspunktDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer alle skjæringstidspunkt som har blitt lagret på sak",
+            content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = List.class), schema = @Schema(implementation = MigrertSkjæringstidspunktDto.class)), mediaType = MediaType.APPLICATION_JSON))
     })
     @BeskyttetRessurs(action = READ, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
