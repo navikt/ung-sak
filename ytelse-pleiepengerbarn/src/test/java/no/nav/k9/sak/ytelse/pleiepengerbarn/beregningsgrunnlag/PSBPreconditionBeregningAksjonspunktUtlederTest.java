@@ -13,13 +13,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -36,7 +35,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -110,7 +108,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     @Test
     void skal_returnere_aksjonspunkt_eksisterende_migrering() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP), Arbeidskategori.ARBEIDSTAKER);
-        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(behandling.getFagsakId(), STP));
+        fagsakRepository.opprettInfotrygdmigrering(behandling.getFagsakId(), STP);
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
@@ -129,10 +127,9 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         lagInfotrygdPsbYtelsePerioder(List.of(
             DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
             DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30))
-            ), Arbeidskategori.ARBEIDSTAKER);
+        ), Arbeidskategori.ARBEIDSTAKER);
 
-        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
-        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.plusDays(20)));
+        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.plusDays(20));
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
@@ -147,7 +144,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
             .thenReturn(new TreeSet<>((Set.of(
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusDays(10), STP.minusDays(3)),
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
-        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP.minusDays(10)));
+        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.minusDays(10));
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
@@ -165,7 +162,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     @Test
     void skal_ikke_returnere_ventepunkt_når_ingen_perioder_overlapper_med_infotrygd() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusDays(20), STP.minusDays(10)), Arbeidskategori.ARBEIDSTAKER);
-        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
+        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
@@ -180,7 +177,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.PLEIEPENGER_AV_DAGPENGER, new Periode(STP, STP.plusDays(10)),
                     null, null, null)))));
-        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
+        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
@@ -194,7 +191,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.NÆRING, new Periode(STP, STP.plusDays(10)),
                     null, null, null)))));
-        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
+        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
@@ -211,7 +208,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
                     null, null, null)))));
         when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any(LocalDate.class)))
             .thenReturn(Optional.of(byggOppgittOpptjeningMedNæring()));
-        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
+        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
@@ -227,7 +224,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.FRILANS, new Periode(STP, STP.plusDays(10)),
                     null, null, null)))));
-        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
+        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
@@ -245,7 +242,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
                     null, null, null)))));
         when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any(LocalDate.class)))
             .thenReturn(Optional.of(byggOppgittOpptjeningMedFrilans()));
-        fagsakRepository.lagreOgFlush(new SakInfotrygdMigrering(fagsak.getId(), STP));
+        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
@@ -265,10 +262,9 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         return OppgittOpptjeningBuilder.ny().leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
             .medFrilansOppdrag(List.of(OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder.ny()
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(10), STP.plusMonths(1)))
-                    .medOppdragsgiver("999999999")
-                    .medInntekt(BigDecimal.TEN).build())).build()).build();
+                .medOppdragsgiver("999999999")
+                .medInntekt(BigDecimal.TEN).build())).build()).build();
     }
-
 
 
     private void lagInfotrygdPsbYtelse(DatoIntervallEntitet periode, Arbeidskategori arbeidskategori) {
