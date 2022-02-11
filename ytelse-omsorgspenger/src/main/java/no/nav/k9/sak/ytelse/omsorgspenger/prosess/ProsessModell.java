@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.prosess;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -45,6 +44,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_UTTAK)
             .medSteg(BehandlingStegType.BEKREFT_UTTAK)
             .medSteg(BehandlingStegType.PRECONDITION_BEREGNING)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING)
             .medSteg(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_BEREGNING)
             .medSteg(BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG)
@@ -89,6 +89,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_UTTAK)
             .medSteg(BehandlingStegType.BEKREFT_UTTAK)
             .medSteg(BehandlingStegType.PRECONDITION_BEREGNING)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING)
             .medSteg(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_BEREGNING)
             .medSteg(BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG)

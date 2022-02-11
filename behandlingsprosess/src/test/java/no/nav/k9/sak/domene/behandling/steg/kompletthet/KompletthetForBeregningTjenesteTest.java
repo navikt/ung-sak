@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
+package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet;
+package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 
 import java.util.List;
 import java.util.Objects;

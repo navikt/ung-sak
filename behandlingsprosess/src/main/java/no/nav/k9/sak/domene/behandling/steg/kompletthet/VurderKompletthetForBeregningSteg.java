@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet;
+package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -9,11 +9,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
-
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
 import no.nav.k9.formidling.kontrakt.kodeverk.Mottaker;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
@@ -31,22 +31,24 @@ import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysnin
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagSteg;
+import no.nav.k9.sak.domene.behandling.steg.kompletthet.internal.KompletthetBeregningTjeneste;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.kompletthet.internal.PSBKompletthetSjekkerTjeneste;
 
 @FagsakYtelseTypeRef("PSB")
 @FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef("OMP")
 @BehandlingStegRef(kode = "KOMPLETT_FOR_BEREGNING")
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
-    private PSBKompletthetSjekkerTjeneste kompletthetSjekkerTjeneste;
+    private KompletthetBeregningTjeneste kompletthetBeregningTjeneste;
     private BestiltEtterlysningRepository bestiltEtterlysningRepository;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
+    private Boolean kompletthetBeregningOMP;
 
     protected VurderKompletthetForBeregningSteg() {
         // for CDI proxy
@@ -54,14 +56,16 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
 
     @Inject
     public VurderKompletthetForBeregningSteg(BehandlingRepository behandlingRepository,
-                                             PSBKompletthetSjekkerTjeneste kompletthetSjekkerTjeneste,
+                                             KompletthetBeregningTjeneste kompletthetBeregningTjeneste,
                                              BestiltEtterlysningRepository bestiltEtterlysningRepository,
-                                             DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
+                                             DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
+                                             @KonfigVerdi(value = "KOMPLETTHET_BEREGNING_OMP", defaultVerdi = "true") Boolean kompletthetBeregningOMP) {
 
         this.behandlingRepository = behandlingRepository;
-        this.kompletthetSjekkerTjeneste = kompletthetSjekkerTjeneste;
+        this.kompletthetBeregningTjeneste = kompletthetBeregningTjeneste;
         this.bestiltEtterlysningRepository = bestiltEtterlysningRepository;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
+        this.kompletthetBeregningOMP = kompletthetBeregningOMP;
     }
 
     @Override
@@ -69,12 +73,15 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var ref = BehandlingReferanse.fra(behandling);
+        if (ref.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER && !kompletthetBeregningOMP) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
 
         return nyKompletthetFlyt(ref, kontekst);
     }
 
     private BehandleStegResultat nyKompletthetFlyt(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        var kompletthetsAksjon = kompletthetSjekkerTjeneste.utledTilstand(ref, kontekst);
+        var kompletthetsAksjon = kompletthetBeregningTjeneste.utledTilstand(ref, kontekst);
 
         if (kompletthetsAksjon.kanFortsette()) {
             avbrytAksjonspunktHvisTilstede(kontekst);

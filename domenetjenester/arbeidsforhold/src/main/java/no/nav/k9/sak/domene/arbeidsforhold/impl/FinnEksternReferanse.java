@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
+package no.nav.k9.sak.domene.arbeidsforhold.impl;
 
 import java.util.function.BiFunction;
 
@@ -8,12 +8,12 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
-class FinnEksternReferanse implements BiFunction<Arbeidsgiver, InternArbeidsforholdRef, EksternArbeidsforholdRef> {
+public class FinnEksternReferanse implements BiFunction<Arbeidsgiver, InternArbeidsforholdRef, EksternArbeidsforholdRef> {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ArbeidsforholdInformasjon arbInfo;
     private Long behandlingId;
 
-    FinnEksternReferanse(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, Long behandlingId) {
+    public FinnEksternReferanse(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, Long behandlingId) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.behandlingId = behandlingId;
     }
