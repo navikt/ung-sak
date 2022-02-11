@@ -161,7 +161,7 @@ public class DokumentRestTjeneste {
         }
 
         return behandlingTidslinje.stream()
-            .filter(it -> it.getTom().isAfter(dto.getTidspunkt()))
+            .filter(it -> it.getTom() != null && it.getTom().isAfter(dto.getTidspunkt()))
             .min(Comparator.comparing(it -> distanseTilTom(dto.getTidspunkt(), it)))
             .map(BehandlingPeriode::getBehandlingId)
             .orElse(null);
