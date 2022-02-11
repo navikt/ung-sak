@@ -6,10 +6,14 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -40,8 +44,10 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
 
     @GET
     @Path("/skjæringstidspunkter")
-    @Produces(MediaType.TEXT_PLAIN)
-    @Operation(description = "Hent skjæringstidspunkter for infotrygdmigrering for saker", tags = "infotrygdmigrering")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Hent skjæringstidspunkter for infotrygdmigrering for saker", tags = "infotrygdmigrering", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer alle skjæringstidspunkt som har blitt lagret på sak", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MigrertSkjæringstidspunktDto.class)))
+    })
     @BeskyttetRessurs(action = READ, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getSkjæringstidspunkter(@QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) SaksnummerDto saksnummerDto) { // NOSONAR
