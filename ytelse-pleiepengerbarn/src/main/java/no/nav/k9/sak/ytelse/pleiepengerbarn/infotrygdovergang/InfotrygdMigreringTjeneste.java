@@ -191,8 +191,9 @@ public class InfotrygdMigreringTjeneste {
             .filter(stp -> perioderTilVurdering.stream().map(DatoIntervallEntitet::getFomDato).anyMatch(stp::equals))
             .collect(Collectors.toUnmodifiableSet());
 
+        NavigableSet<DatoIntervallEntitet> allePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandlingId);
         var migreringerSomSkalDeaktiveres = eksisterendeMigreringTilVurdering.stream()
-            .filter(m -> perioderTilVurdering.stream().map(DatoIntervallEntitet::getFomDato).noneMatch(fom -> m.getSkjæringstidspunkt().equals(fom)))
+            .filter(m -> allePerioder.stream().map(DatoIntervallEntitet::getFomDato).noneMatch(fom -> m.getSkjæringstidspunkt().equals(fom)))
             .collect(Collectors.toUnmodifiableSet());
         migreringerSomSkalDeaktiveres.forEach(m -> deaktiver(m, behandlingId));
 
