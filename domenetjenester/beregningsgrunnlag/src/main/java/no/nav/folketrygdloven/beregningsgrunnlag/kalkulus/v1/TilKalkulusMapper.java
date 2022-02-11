@@ -49,6 +49,10 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.OpptjeningAktivitetType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.PermisjonsbeskrivelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.RelatertYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.TemaUnderkategori;
+import no.nav.folketrygdloven.kalkulus.kodeverk.UtbetaltNæringsYtelseType;
+import no.nav.folketrygdloven.kalkulus.kodeverk.UtbetaltPensjonTrygdType;
+import no.nav.folketrygdloven.kalkulus.kodeverk.UtbetaltYtelseFraOffentligeType;
+import no.nav.folketrygdloven.kalkulus.kodeverk.UtbetaltYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.VirksomhetType;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.MidlertidigInaktivType;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittArbeidsforholdDto;
@@ -58,6 +62,10 @@ import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningAktiviteterDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningPeriodeDto;
+import no.nav.k9.kodeverk.arbeidsforhold.NæringsinntektType;
+import no.nav.k9.kodeverk.arbeidsforhold.OffentligYtelseType;
+import no.nav.k9.kodeverk.arbeidsforhold.PensjonTrygdType;
+import no.nav.k9.kodeverk.arbeidsforhold.YtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
@@ -263,11 +271,27 @@ public class TilKalkulusMapper {
     }
 
     private static UtbetalingsPostDto mapTilDto(Inntektspost inntektspost) {
-        return new UtbetalingsPostDto(
+        var utbetalingsPostDto = new UtbetalingsPostDto(
             mapPeriode(inntektspost.getPeriode()),
             InntektspostType.fraKode(inntektspost.getInntektspostType().getKode()),
             inntektspost.getBeløp().getVerdi());
+        if (inntektspost.getYtelseType() != null) {
+            var ytelseType = inntektspost.getYtelseType();
+            utbetalingsPostDto.medUtbetaltYtelseType(mapUtbetaltYtelseTypeTilGrunnlag(ytelseType));
+        }
+        return utbetalingsPostDto;
     }
+
+    static UtbetaltYtelseType mapUtbetaltYtelseTypeTilGrunnlag(YtelseType type) {
+        String kode = type.getKode();
+        return switch (type.getKodeverk()) {
+            case OffentligYtelseType.KODEVERK -> new UtbetaltYtelseFraOffentligeType(kode);
+            case NæringsinntektType.KODEVERK -> new UtbetaltNæringsYtelseType(kode);
+            case PensjonTrygdType.KODEVERK -> new UtbetaltPensjonTrygdType(kode);
+            default -> throw new IllegalArgumentException("Ukjent UtbetaltYtelseType: " + type);
+        };
+    }
+
 
     public static ArbeidDto mapArbeidDto(Collection<Yrkesaktivitet> yrkesaktiviteterForBeregning) {
         List<YrkesaktivitetDto> yrkesaktivitetDtoer = yrkesaktiviteterForBeregning.stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList());
