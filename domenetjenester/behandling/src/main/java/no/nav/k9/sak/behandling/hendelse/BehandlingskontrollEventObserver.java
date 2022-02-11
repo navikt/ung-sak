@@ -131,8 +131,8 @@ public class BehandlingskontrollEventObserver {
             .medAksjonspunktTilstander(behandling.getAksjonspunkter().stream().map(it ->
                 new AksjonspunktTilstandDto(
                     it.getAksjonspunktDefinisjon().getKode(),
-                    it.getStatus().getKode(),
-                    it.getVenteårsak().getKode(),
+                    it.getStatus(),
+                    it.getVenteårsak(),
                     it.getFristTid())
             ).toList())
             .build();

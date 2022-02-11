@@ -10,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotNull;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 
 /**
  * Informasjon om aksjonspunktstilstanden i behandlingen.
@@ -17,17 +19,17 @@ import jakarta.validation.constraints.NotNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public record AksjonspunktTilstandDto(String aksjonspunktKode, String status, String venteårsak, LocalDateTime fristTid) {
+public record AksjonspunktTilstandDto(@NotNull String aksjonspunktKode, @NotNull AksjonspunktStatus status, Venteårsak venteårsak, LocalDateTime fristTid) {
     @JsonCreator
     public AksjonspunktTilstandDto(
-        @JsonProperty(value = "kode", required = true)
+        @JsonProperty(value = "aksjonspunktKode", required = true)
         @NotNull
             String aksjonspunktKode,
         @JsonProperty(value = "status", required = true)
         @NotNull
-            String status,
+            AksjonspunktStatus status,
         @JsonProperty(value = "venteårsak")
-            String venteårsak,
+            Venteårsak venteårsak,
         @JsonProperty(value = "fristTid")
         LocalDateTime fristTid) {
         this.aksjonspunktKode = aksjonspunktKode;
