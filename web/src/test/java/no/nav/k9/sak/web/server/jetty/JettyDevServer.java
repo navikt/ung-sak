@@ -157,10 +157,10 @@ public class JettyDevServer extends JettyServer {
     }
 
     @Override
-    protected List<Class<?>> getWebInfClasses() {
-        List<Class<?>> webInfClasses = new ArrayList<>(super.getWebInfClasses());
-        webInfClasses.add(JettyTestApplication.class);
-        return webInfClasses;
+    protected Class<?>[] getJaxRsApplicationClasses() {
+        final List<Class<?>> classes = new ArrayList<>(List.of(super.getJaxRsApplicationClasses()));
+        classes.add(JettyTestApplication.class);
+        return classes.toArray(new Class<?>[0]);
     }
 
 }

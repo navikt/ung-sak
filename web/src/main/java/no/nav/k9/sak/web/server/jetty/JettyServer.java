@@ -3,9 +3,7 @@ package no.nav.k9.sak.web.server.jetty;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -25,10 +23,11 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.servlet.ServletContainerInitializerHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceCollection;
-import org.eclipse.jetty.webapp.MetaData;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -37,9 +36,7 @@ import jakarta.security.auth.message.config.AuthConfigFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.k9.felles.oidc.OidcApplication;
 import no.nav.k9.felles.sikkerhet.jaspic.OidcAuthModule;
-import no.nav.k9.sak.web.app.ApplicationConfig;
 import no.nav.k9.sak.web.server.jetty.db.DatabaseScript;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceRole;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceUtil;
@@ -183,10 +180,23 @@ public class JettyServer {
         webAppContext.setAttribute("org.eclipse.jetty.server.webapp.WebInfIncludeJarPattern",
             "^.*jersey-.*.jar$|^.*felles-sikkerhet.*.jar$");
         webAppContext.setSecurityHandler(createSecurityHandler());
-
-        updateMetaData(webAppContext.getMetaData());
+        
+        final ServletContainerInitializerHolder jerseyHolder = webAppContext.addServletContainerInitializer(new JerseyServletContainerInitializer());
+        jerseyHolder.addStartupClasses(getJaxRsApplicationClasses());
+        
         webAppContext.setThrowUnavailableOnStartupException(true);
+        
         return webAppContext;
+    }
+    
+    protected Class<?>[] getJaxRsApplicationClasses() {       
+        return new Class<?>[] {
+            no.nav.k9.felles.oidc.OidcApplication.class,
+            no.nav.k9.sak.web.app.ApplicationConfig.class,
+            no.nav.k9.sak.web.server.InternalApplicationConfig.class,
+            no.nav.k9.sak.web.app.oppgave.OppgaveRedirectApplication.class,
+            no.nav.k9.sak.web.app.FrontendApiConfig.class
+        };
     }
 
     protected HttpConfiguration createHttpConfiguration() {
@@ -211,22 +221,6 @@ public class JettyServer {
         securityHandler.setLoginService(loginService);
 
         return securityHandler;
-    }
-
-    private void updateMetaData(MetaData metaData) {
-        // Find path to class-files while starting jetty from development environment.
-        List<Class<?>> appClasses = getWebInfClasses();
-
-        List<Resource> resources = appClasses.stream()
-            .map(c -> Resource.newResource(c.getProtectionDomain().getCodeSource().getLocation()))
-            .distinct()
-            .collect(Collectors.toList());
-
-        metaData.setWebInfClassesResources(resources);
-    }
-
-    protected List<Class<?>> getWebInfClasses() {
-        return Arrays.asList(ApplicationConfig.class, OidcApplication.class);
     }
 
     @SuppressWarnings("resource")
