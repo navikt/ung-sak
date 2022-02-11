@@ -7,6 +7,11 @@ import java.util.Collection;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -19,13 +24,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -54,11 +52,10 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     @Inject
     public PerioderTilBehandlingMedKildeRestTjeneste(BehandlingRepository behandlingRepository,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                                     SøknadsfristTjenesteProvider søknadsfristTjenesteProvider,
-                                                     @KonfigVerdi(value = "PERIODER_KANT_I_KANT_VURDERER_ENABLET", defaultVerdi = "false") Boolean kantIKantVurdererEnablet) {
+                                                     SøknadsfristTjenesteProvider søknadsfristTjenesteProvider) {
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
-        this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(kantIKantVurdererEnablet);
+        this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste();
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
