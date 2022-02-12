@@ -63,9 +63,15 @@ public class KravDokumentFravær {
 
     private List<WrappedOppgittFraværPeriode> slåSammenTidslinjer(LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNy,
                                                                   LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeSammenslått) {
+        return slåSammenTidslinjer(tidslinjeNy, tidslinjeSammenslått, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+    }
+
+    private List<WrappedOppgittFraværPeriode> slåSammenTidslinjer(LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNy,
+                                                                  LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeSammenslått,
+                                                                  LocalDateTimeline.JoinStyle joinStyle) {
 
 
-        tidslinjeSammenslått = tidslinjeSammenslått.combine(tidslinjeNy, this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        tidslinjeSammenslått = tidslinjeSammenslått.combine(tidslinjeNy, this::mergePeriode, joinStyle);
 
         var oppdatertAktivitetListe = tidslinjeSammenslått.compress()
             .toSegments()
@@ -87,16 +93,31 @@ public class KravDokumentFravær {
 
         for (Map.Entry<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> entryIm : fraværsperioderIm.entrySet()) {
             var aktivitetIdent = entryIm.getKey();
+            var tidslinjeSøknad = finnSøknadTidslinje(fraværsperioderSøknad, aktivitetIdent);
             for (var fraværPeriodeIm : entryIm.getValue()) {
                 var fraværsperioder = fraværsperioderSammenslått.getOrDefault(aktivitetIdent, new ArrayList<>());
+                var tidslinjeRenIm = mapTilTimeline(List.of(fraværPeriodeIm));
 
-                var tidslinjeIm = mapTilTimeline(List.of(fraværPeriodeIm));
+                //merger inn fraværsårsak og søknadsårsker fra eventuell søknad for samme arbeidsgiver
+                var fraværPerioderImMedSøknadsårsaker = slåSammenTidslinjer(tidslinjeRenIm, tidslinjeSøknad, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+                var tidslinjeImMedSøknadsårsaker = mapTilTimeline(fraværPerioderImMedSøknadsårsaker);
+
+                ryddOppIBerørteArbeidsforhold(fraværsperioderSammenslått, aktivitetIdent, tidslinjeImMedSøknadsårsaker);
+
                 var tidslinjeSammenslått = mapTilTimeline(fraværsperioder);
-
-                fraværsperioderSammenslått.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeIm, tidslinjeSammenslått));
+                fraværsperioderSammenslått.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeImMedSøknadsårsaker, tidslinjeSammenslått));
             }
         }
         return fraværsperioderSammenslått;
+    }
+
+    private LocalDateTimeline<WrappedOppgittFraværPeriode> finnSøknadTidslinje(Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> fraværsperioderSøknad, AktivitetIdentifikator aktivitetIdent) {
+        return fraværsperioderSøknad.entrySet().stream()
+            .filter(e -> e.getKey().gjelderSamme(aktivitetIdent)) //kan få maksimalt én match siden søknad ikke oppgir arbeidsforholdId
+            .map(Map.Entry::getValue)
+            .map(this::mapTilTimeline)
+            .findAny()
+            .orElse((LocalDateTimeline<WrappedOppgittFraværPeriode>) LocalDateTimeline.EMPTY_TIMELINE);
     }
 
     private List<KravDokument> sorterDokumenter(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
