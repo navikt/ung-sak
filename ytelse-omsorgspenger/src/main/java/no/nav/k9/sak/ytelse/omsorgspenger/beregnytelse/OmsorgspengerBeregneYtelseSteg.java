@@ -37,7 +37,6 @@ import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
-import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
@@ -101,17 +100,15 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         // Kalle regeltjeneste
         var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttaksresultat);
 
-        // Verifiser beregningsresultat
-        BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
-        omsorgspengerYtelseVerifiserer.verifiser(behandling, beregningsresultat);
-
-        if (harUtbetalingTilBruker(beregningsresultat, vurdertePerioder)) {
-            log.info("Har utbetaling til bruker: {}", beregningsresultat);
-        }
-
         // Beregn feriepenger
         var feriepengerTjeneste = FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, ref.getFagsakYtelseType()).orElseThrow();
         feriepengerTjeneste.beregnFeriepenger(beregningsresultat);
+
+        // Verifiser beregningsresultat
+        omsorgspengerYtelseVerifiserer.verifiser(behandling, beregningsresultat);
+        if (harUtbetalingTilBruker(beregningsresultat, vurdertePerioder)) {
+            log.info("Har utbetaling til bruker: {}", beregningsresultat);
+        }
 
         // Lagre beregningsresultat
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
