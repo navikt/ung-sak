@@ -99,7 +99,7 @@ public class KravDokumentFravær {
                 var tidslinjeRenIm = mapTilTimeline(List.of(fraværPeriodeIm));
 
                 //merger inn fraværsårsak og søknadsårsker fra eventuell søknad for samme arbeidsgiver
-                var fraværPerioderImMedSøknadsårsaker = slåSammenTidslinjer(tidslinjeRenIm, tidslinjeSøknad, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+                var fraværPerioderImMedSøknadsårsaker = slåSammenTidslinjer(tidslinjeRenIm, tidslinjeSøknad, LocalDateTimeline.JoinStyle.RIGHT_JOIN);
                 var tidslinjeImMedSøknadsårsaker = mapTilTimeline(fraværPerioderImMedSøknadsårsaker);
 
                 ryddOppIBerørteArbeidsforhold(fraværsperioderSammenslått, aktivitetIdent, tidslinjeImMedSøknadsårsaker);
