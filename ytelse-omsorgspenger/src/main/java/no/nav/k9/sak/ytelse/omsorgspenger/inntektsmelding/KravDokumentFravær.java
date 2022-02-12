@@ -55,22 +55,20 @@ public class KravDokumentFravær {
 
                 ryddOppIBerørteArbeidsforhold(mapByAktivitet, aktivitetIdent, tidslinjeNy);
 
-                mapByAktivitet.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeNy, tidslinjeSammenslått));
+                mapByAktivitet.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeSammenslått, tidslinjeNy));
             }
         }
         return mapByAktivitet;
     }
 
-    private List<WrappedOppgittFraværPeriode> slåSammenTidslinjer(LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNy,
-                                                                  LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeSammenslått) {
+    private List<WrappedOppgittFraværPeriode> slåSammenTidslinjer(LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeSammenslått,
+                                                                  LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNy) {
         return slåSammenTidslinjer(tidslinjeNy, tidslinjeSammenslått, LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }
 
-    private List<WrappedOppgittFraværPeriode> slåSammenTidslinjer(LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNy,
-                                                                  LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeSammenslått,
+    private List<WrappedOppgittFraværPeriode> slåSammenTidslinjer(LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeSammenslått,
+                                                                  LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNy,
                                                                   LocalDateTimeline.JoinStyle joinStyle) {
-
-
         tidslinjeSammenslått = tidslinjeSammenslått.combine(tidslinjeNy, this::mergePeriode, joinStyle);
 
         var oppdatertAktivitetListe = tidslinjeSammenslått.compress()
@@ -105,7 +103,7 @@ public class KravDokumentFravær {
                 ryddOppIBerørteArbeidsforhold(fraværsperioderSammenslått, aktivitetIdent, tidslinjeImMedSøknadsårsaker);
 
                 var tidslinjeSammenslått = mapTilTimeline(fraværsperioder);
-                fraværsperioderSammenslått.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeImMedSøknadsårsaker, tidslinjeSammenslått));
+                fraværsperioderSammenslått.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeSammenslått, tidslinjeImMedSøknadsårsaker));
             }
         }
         return fraværsperioderSammenslått;
