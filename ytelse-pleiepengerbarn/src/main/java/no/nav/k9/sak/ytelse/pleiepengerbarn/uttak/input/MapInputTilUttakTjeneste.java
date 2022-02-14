@@ -144,7 +144,7 @@ public class MapInputTilUttakTjeneste {
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
         Map<LukketPeriode, UtenlandsoppholdInfo> utenlandsoppholdperioder;
         if (utenlandsperioderMappingEnablet) {
-            utenlandsoppholdperioder = new MapUtenlandsopphold().map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
+            utenlandsoppholdperioder = MapUtenlandsopphold.map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
         } else {
             utenlandsoppholdperioder = Map.of();
         }

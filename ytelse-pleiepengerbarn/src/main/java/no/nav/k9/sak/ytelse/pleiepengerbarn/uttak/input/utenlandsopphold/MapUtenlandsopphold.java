@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class MapUtenlandsopphold {
 
-    public Map<LukketPeriode, UtenlandsoppholdInfo> map(Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> kravDokumenter,
+    public static Map<LukketPeriode, UtenlandsoppholdInfo> map(Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> kravDokumenter,
                                                         Set<PerioderFraSøknad> perioderFraSøknader,
                                                         LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
 
@@ -54,7 +54,7 @@ public class MapUtenlandsopphold {
         return utenlandsperioder;
     }
 
-    private UtenlandsoppholdÅrsak map(no.nav.k9.kodeverk.uttak.UtenlandsoppholdÅrsak utenlandsoppholdÅrsak) {
+    private static UtenlandsoppholdÅrsak map(no.nav.k9.kodeverk.uttak.UtenlandsoppholdÅrsak utenlandsoppholdÅrsak) {
         return switch(utenlandsoppholdÅrsak) {
             case BARNET_INNLAGT_I_HELSEINSTITUSJON_FOR_NORSK_OFFENTLIG_REGNING -> UtenlandsoppholdÅrsak.BARNET_INNLAGT_I_HELSEINSTITUSJON_FOR_NORSK_OFFENTLIG_REGNING;
             case BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD -> UtenlandsoppholdÅrsak.BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD;
