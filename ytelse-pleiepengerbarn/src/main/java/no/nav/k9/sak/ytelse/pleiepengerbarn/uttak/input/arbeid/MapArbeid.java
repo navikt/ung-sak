@@ -323,7 +323,7 @@ public class MapArbeid {
                 .flatMap(Collection::stream)
                 .forEach(p -> mapArbeidsopplysningerFraDokument(periode, arbeidsforhold, midlertidigInaktivPeriode, p, input));
 
-            var dødsdatoIPerioden = input.getUtvidetPeriodeSomFølgeAvDødsfall() != null && periode.overlapper(periodeMedDødsfall(input));
+            var dødsdatoIPerioden = input.getUtvidetPeriodeSomFølgeAvDødsfall() != null && periodeOverlapperMedDødsdato(periode, input);
             var harKravFørDødsfallOgDetteErSiste = fiktivtKravPgaDødsfall.getHarKravdokumentInnsendtFørDødsfall() && Objects.equals(at.getJournalpostId(), fiktivtKravPgaDødsfall.getSisteKravFørDødsfall());
             if (dødsdatoIPerioden && !fiktivtKravPgaDødsfall.getHarHåndtertDødsfall() && (harKravFørDødsfallOgDetteErSiste || !fiktivtKravPgaDødsfall.getHarKravdokumentInnsendtFørDødsfall())) {
                 håndterDødsfall(arbeidsforhold, input, midlertidigInaktivPeriode, periode, fiktivtKravPgaDødsfall);
@@ -332,6 +332,11 @@ public class MapArbeid {
         } else {
             throw new IllegalStateException("Fant " + dokumenter.size() + " for dokumentet : " + at);
         }
+    }
+
+    private boolean periodeOverlapperMedDødsdato(DatoIntervallEntitet periode, ArbeidstidMappingInput input) {
+        var dødsdato = DatoIntervallEntitet.fraOgMedTilOgMed(input.getUtvidetPeriodeSomFølgeAvDødsfall().getFomDato().minusDays(1), input.getUtvidetPeriodeSomFølgeAvDødsfall().getFomDato());
+        return periode.overlapper(dødsdato);
     }
 
     private DatoIntervallEntitet periodeMedDødsfall(ArbeidstidMappingInput input) {
