@@ -23,12 +23,15 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.uttak.FastsattUttakDto;
 import no.nav.k9.sak.kontrakt.uttak.UtenlandsoppholdDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.utenlandsopphold.MapUtenlandsopphold;
@@ -45,13 +48,22 @@ public class UtenlandsoppholdRestTjeneste {
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     private BehandlingRepository behandlingRepository;
 
+    private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
+    private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
+
     public UtenlandsoppholdRestTjeneste() {
     }
 
     @Inject
-    public UtenlandsoppholdRestTjeneste(UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository, BehandlingRepository behandlingRepository) {
+    public UtenlandsoppholdRestTjeneste(
+            UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
+            BehandlingRepository behandlingRepository,
+            PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
+            PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste) {
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
         this.behandlingRepository = behandlingRepository;
+        this.søknadsfristTjeneste = søknadsfristTjeneste;
+        this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
     }
 
     @GET
@@ -73,8 +85,10 @@ public class UtenlandsoppholdRestTjeneste {
             BehandlingUuidDto behandlingIdDto) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
         Optional<UttaksPerioderGrunnlag> uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(behandling.getId());
-
-        MapUtenlandsopphold.map()
+        var behandlingReferanse = BehandlingReferanse.fra(behandling);
+        var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(behandlingReferanse);
+        var perioderFraSøknad = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(behandlingReferanse);
+        MapUtenlandsopphold.map(vurderteSøknadsperioder, perioderFraSøknad);
 
         uttaksPerioderGrunnlag.get().getOppgitteSøknadsperioder()
             .getPerioderFraSøknadene()
