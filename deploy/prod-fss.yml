@@ -166,16 +166,10 @@ spec:
     # Sikkerhet:
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts.adeo.no/SecurityTokenServiceProvider/
-    - name: OIDC_STS_ISSUER_URL
+    - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.adeo.no
-    - name: OIDC_STS_JWKS_URL
-      value: https://security-token-service.nais.adeo.no/rest/v1/sts/jwks
-    - name: OPENIDCONNECT_ISSOHOST
-      value: https://isso.adeo.no:443/isso/oauth2
-    - name: OPENIDCONNECT_ISSOISSUER
-      value: https://isso.adeo.no:443/isso/oauth2
-    - name: OPENIDCONNECT_ISSOJWKS
-      value: https://isso.adeo.no:443/isso/oauth2/connect/jwk_uri
+    - name: OIDC_OPENAM_HOST_URL
+      value: https://isso.adeo.no/isso/oauth2
     - name: OIDC_OPENAM_CLIENT_ID
       value: k9-sak-p
 
