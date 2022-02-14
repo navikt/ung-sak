@@ -4,18 +4,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.uttak.SøknadÅrsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.perioder.KravDokumentType;
-import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
@@ -26,11 +28,12 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 @Dependent
 public class OmsorgspengerYtelseVerifiserer {
 
+    private static final Logger logger = LoggerFactory.getLogger(OmsorgspengerYtelseVerifiserer.class);
+
     private TrekkUtFraværTjeneste trekkUtFraværTjeneste;
 
     @Inject
-    public OmsorgspengerYtelseVerifiserer(@FagsakYtelseTypeRef("OMP") VurderSøknadsfristTjeneste<OppgittFraværPeriode> søknadsfristTjeneste,
-                                          TrekkUtFraværTjeneste trekkUtFraværTjeneste) {
+    public OmsorgspengerYtelseVerifiserer(TrekkUtFraværTjeneste trekkUtFraværTjeneste) {
         this.trekkUtFraværTjeneste = trekkUtFraværTjeneste;
     }
 
@@ -40,41 +43,54 @@ public class OmsorgspengerYtelseVerifiserer {
     }
 
     private void verifiserUtbetalingKunHvorKrav(Behandling behandling, BeregningsresultatEntitet beregningsresultat) {
-        //TODO hente krav mer direkte for IM/Søknad for å også kunne oppdage feil i trekkUtFraværTjeneste?
-        List<WrappedOppgittFraværPeriode> alleKravstilteFravær = trekkUtFraværTjeneste.fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(behandling);
-
-        verifiserUtbetalingSøkerKunVedSøknad(beregningsresultat, alleKravstilteFravær);
-        verifiserRefusjonKunVedRefusjonskrav(beregningsresultat, alleKravstilteFravær);
+        var alleKrav = trekkUtFraværTjeneste.fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(behandling);
+        verifiserRefusjonKunVedRefusjonskrav(alleKrav, beregningsresultat);
+        verifiserUtbetalingSøkerKunVedSøknad(alleKrav, beregningsresultat);
     }
 
-    private void verifiserUtbetalingSøkerKunVedSøknad(BeregningsresultatEntitet beregningsresultat, List<WrappedOppgittFraværPeriode> alleKravstilteFravær) {
-        LocalDateTimeline<Set<Arbeidsgiver>> søknadTidslinje = kravTidslinjer(alleKravstilteFravær, KravDokumentType.SØKNAD);
-        LocalDateTimeline<Set<Arbeidsgiver>> utbetalingTilSøkerTidslinje = tidslinjeUtbetaling(beregningsresultat, true);
-        LocalDateTimeline<Set<Arbeidsgiver>> utbetalingUtenSøknad = utbetalingTilSøkerTidslinje.combine(søknadTidslinje, TidsserieUtil::minus, LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .filterValue(v -> !v.isEmpty())
-            .compress();
-        if (!utbetalingUtenSøknad.isEmpty()) {
-            List<Periode> perioder = utbetalingUtenSøknad.stream().map(segment -> new Periode(segment.getFom(), segment.getTom())).toList();
-            throw new IllegalArgumentException("Feil i løsningen. Har tilkjent utbetaling til bruker uten søknad. Gjelder en eller flere aktiviteter eller arbeidsgivere for periodene " + perioder);
-        }
-    }
-
-    private void verifiserRefusjonKunVedRefusjonskrav(BeregningsresultatEntitet beregningsresultat, List<WrappedOppgittFraværPeriode> alleKravstilteFravær) {
-        LocalDateTimeline<Set<Arbeidsgiver>> imKravTidslinje = kravTidslinjer(alleKravstilteFravær, KravDokumentType.INNTEKTSMELDING);
+    private void verifiserRefusjonKunVedRefusjonskrav(List<WrappedOppgittFraværPeriode> alleKrav, BeregningsresultatEntitet beregningsresultat) {
+        LocalDateTimeline<Set<Arbeidsgiver>> imKravTidslinje = kravImTidslinje(alleKrav);
         LocalDateTimeline<Set<Arbeidsgiver>> utbetalingRefusjonTidslinje = tidslinjeUtbetaling(beregningsresultat, false);
         LocalDateTimeline<Set<Arbeidsgiver>> refusjonUtenRefusjonskrav = utbetalingRefusjonTidslinje.combine(imKravTidslinje, TidsserieUtil::minus, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .filterValue(v -> !v.isEmpty())
             .compress();
         if (!refusjonUtenRefusjonskrav.isEmpty()) {
             List<Periode> perioder = refusjonUtenRefusjonskrav.stream().map(segment -> new Periode(segment.getFom(), segment.getTom())).toList();
-            throw new IllegalArgumentException("Feil i løsningen. Har tilkjent refusjon uten refusjonskrav. Gjelder en eller flere arbeidsgivere for periodene " + perioder);
+            if (perioder.get(0).getFom().getYear() >= 2022) {
+                throw new IllegalArgumentException("Feil i løsningen. Har tilkjent refusjon uten refusjonskrav. Gjelder en eller flere arbeidsgivere for periodene " + perioder);
+            } else {
+                logger.warn("Har tilkjent refusjon uten refusjonskrav. Gjelder en eller flere arbeidsgivere for periodene {}", perioder);
+            }
         }
     }
 
-    private LocalDateTimeline<Set<Arbeidsgiver>> kravTidslinjer(List<WrappedOppgittFraværPeriode> alleKravperioder, KravDokumentType kravtype) {
+    private void verifiserUtbetalingSøkerKunVedSøknad(List<WrappedOppgittFraværPeriode> alleKrav, BeregningsresultatEntitet beregningsresultat) {
+        LocalDateTimeline<Set<Arbeidsgiver>> søknadTidslinje = søknadTidslinje(alleKrav);
+        LocalDateTimeline<Set<Arbeidsgiver>> utbetalingTilSøkerTidslinje = tidslinjeUtbetaling(beregningsresultat, true);
+        LocalDateTimeline<Set<Arbeidsgiver>> utbetalingUtenSøknad = utbetalingTilSøkerTidslinje.combine(søknadTidslinje, TidsserieUtil::minus, LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .filterValue(v -> !v.isEmpty())
+            .compress();
+        if (!utbetalingUtenSøknad.isEmpty()) {
+            List<Periode> perioder = utbetalingUtenSøknad.stream().map(segment -> new Periode(segment.getFom(), segment.getTom())).toList();
+            if (perioder.get(0).getFom().getYear() >= 2022) {
+                throw new IllegalArgumentException("Feil i løsningen. Har tilkjent utbetaling til bruker uten søknad. Gjelder en eller flere aktiviteter eller arbeidsgivere for periodene " + perioder);
+            } else {
+                logger.warn("Har tilkjent utbetaling til bruker uten søknad. Gjelder en eller flere aktiviteter eller arbeidsgivere for periodene {}", perioder);
+            }
+        }
+    }
+
+    private LocalDateTimeline<Set<Arbeidsgiver>> søknadTidslinje(List<WrappedOppgittFraværPeriode> alleKravperioder) {
         return new LocalDateTimeline<>(alleKravperioder.stream()
             .filter(kp -> kp.getSøknadsfristUtfall() == Utfall.OPPFYLT)
-            .filter(kp -> kp.getKravDokumentType() == kravtype)
+            .filter(kp -> kp.getKravDokumentType() == KravDokumentType.SØKNAD || kp.getPeriode().getSøknadÅrsak() != SøknadÅrsak.UDEFINERT) //HAXX når IM prioriteres over søknad, blir likevel SøknadÅrsak fra søknad satt
+            .map(this::mapPeriode).toList(), TidsserieUtil::union);
+    }
+
+    private LocalDateTimeline<Set<Arbeidsgiver>> kravImTidslinje(List<WrappedOppgittFraværPeriode> alleKravperioder) {
+        return new LocalDateTimeline<>(alleKravperioder.stream()
+            .filter(kp -> kp.getSøknadsfristUtfall() == Utfall.OPPFYLT)
+            .filter(kp -> kp.getKravDokumentType() == KravDokumentType.INNTEKTSMELDING)
             .map(this::mapPeriode).toList(), TidsserieUtil::union);
     }
 
