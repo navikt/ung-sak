@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -42,7 +40,7 @@ public class OmsorgspengerYtelseVerifiserer {
     }
 
     private void verifiserUtbetalingKunHvorKrav(Behandling behandling, BeregningsresultatEntitet beregningsresultat) {
-        //TODO hente separat for IM/Søknad for å unngå at perioder utvides?
+        //TODO hente krav mer direkte for IM/Søknad for å også kunne oppdage feil i trekkUtFraværTjeneste?
         List<WrappedOppgittFraværPeriode> alleKravstilteFravær = trekkUtFraværTjeneste.fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(behandling);
 
         verifiserUtbetalingSøkerKunVedSøknad(beregningsresultat, alleKravstilteFravær);
@@ -57,19 +55,19 @@ public class OmsorgspengerYtelseVerifiserer {
             .compress();
         if (!utbetalingUtenSøknad.isEmpty()) {
             List<Periode> perioder = utbetalingUtenSøknad.stream().map(segment -> new Periode(segment.getFom(), segment.getTom())).toList();
-            throw new IllegalArgumentException("Feil i løsningen. Har utbetaling til bruker uten søknad. Gjelder en eller flere aktiviteter for periodene " + perioder);
+            throw new IllegalArgumentException("Feil i løsningen. Har tilkjent utbetaling til bruker uten søknad. Gjelder en eller flere aktiviteter eller arbeidsgivere for periodene " + perioder);
         }
     }
 
     private void verifiserRefusjonKunVedRefusjonskrav(BeregningsresultatEntitet beregningsresultat, List<WrappedOppgittFraværPeriode> alleKravstilteFravær) {
         LocalDateTimeline<Set<Arbeidsgiver>> imKravTidslinje = kravTidslinjer(alleKravstilteFravær, KravDokumentType.INNTEKTSMELDING);
-        LocalDateTimeline<Set<Arbeidsgiver>> utbetalingRefusjonTidslinje = tidslinjeUtbetaling(beregningsresultat, true);
+        LocalDateTimeline<Set<Arbeidsgiver>> utbetalingRefusjonTidslinje = tidslinjeUtbetaling(beregningsresultat, false);
         LocalDateTimeline<Set<Arbeidsgiver>> refusjonUtenRefusjonskrav = utbetalingRefusjonTidslinje.combine(imKravTidslinje, TidsserieUtil::minus, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .filterValue(v -> !v.isEmpty())
             .compress();
         if (!refusjonUtenRefusjonskrav.isEmpty()) {
             List<Periode> perioder = refusjonUtenRefusjonskrav.stream().map(segment -> new Periode(segment.getFom(), segment.getTom())).toList();
-            throw new IllegalArgumentException("Feil i løsningen. Har refusjon uten refusjonskrav. Gjelder en eller flere arbeidsgivere for periodene " + perioder);
+            throw new IllegalArgumentException("Feil i løsningen. Har tilkjent refusjon uten refusjonskrav. Gjelder en eller flere arbeidsgivere for periodene " + perioder);
         }
     }
 
@@ -80,7 +78,6 @@ public class OmsorgspengerYtelseVerifiserer {
             .map(this::mapPeriode).toList(), TidsserieUtil::union);
     }
 
-    @NotNull
     private LocalDateTimeline<Set<Arbeidsgiver>> tidslinjeUtbetaling(BeregningsresultatEntitet beregningsresultat, boolean tilBruker) {
         return new LocalDateTimeline<>(beregningsresultat.getBeregningsresultatPerioder().stream().map(p -> mapPeriode(p, tilBruker)).toList(), TidsserieUtil::union);
     }
@@ -92,7 +89,6 @@ public class OmsorgspengerYtelseVerifiserer {
             .collect(Collectors.toSet());
         return new LocalDateSegment<>(brPeriode.getPeriode().getFomDato(), brPeriode.getPeriode().getTomDato(), tilBrukerMedAndelPrArbeidsgiver);
     }
-
 
     private Arbeidsgiver mapArbeidsgiver(BeregningsresultatAndel a) {
         return a.getArbeidsgiver().orElse(null);
