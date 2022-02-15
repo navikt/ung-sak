@@ -48,7 +48,7 @@ public class OmsorgspengerYtelseVerifiserer {
         LocalDateTimeline<Set<Arbeidsgiver>> utbetalingRefusjonTidslinje = tidslinjeUtbetaling(beregningsresultat, false);
         LocalDateTimeline<Set<Arbeidsgiver>> utbetalingUtenKrav = finnUtbetalingUtenKrav(imKravTidslinje, utbetalingRefusjonTidslinje);
 
-        if (utbetalingUtenKrav.isEmpty()) {
+        if (!utbetalingUtenKrav.isEmpty()) {
             var perioder = utbetalingUtenKrav.stream().map(LocalDateSegment::getLocalDateInterval).toList();
             if (utbetalingUtenKrav.getMinLocalDate().getYear() >= 2022) {
                 throw new IllegalArgumentException("Feil i løsningen. Har tilkjent refusjon uten refusjonskrav. Gjelder en eller flere arbeidsgivere for periodene " + perioder);
