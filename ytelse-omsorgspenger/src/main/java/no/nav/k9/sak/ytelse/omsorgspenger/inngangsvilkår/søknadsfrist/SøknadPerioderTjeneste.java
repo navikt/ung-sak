@@ -37,8 +37,8 @@ public class SøknadPerioderTjeneste {
         this.grunnlagRepository = grunnlagRepository;
     }
 
-    public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentSøktePerioderMedKravdokumentPåFagsak(BehandlingReferanse ref) {
-        var mottatteDokumenter = hentMottatteDokument(ref.getFagsakId());
+    public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentSøktePerioderMedKravdokumentPåFagsak(Long fagsakId) {
+        var mottatteDokumenter = hentMottatteDokument(fagsakId);
         return tilSøktePerioderMedKravdokument(mottatteDokumenter);
     }
 
