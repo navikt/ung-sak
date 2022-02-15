@@ -131,7 +131,7 @@ spec:
     - name: OPPGAVE_RS_URI
       value: https://oppgave.nais.adeo.no/api/v1/oppgaver
     - name: MEDL2_RS_URL
-      value: https://app.adeo.no/medl2/api/v1/medlemskapsunntak
+      value: https://medlemskap-medl-api.intern.nav.no/api/v1/medlemskapsunntak
     - name: PDL_BASE_URL
       value: http://pdl-api.default/graphql
     - name: ORGANISASJON_RS_URL
