@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 import static no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetIdentifikator.lagAktivitetIdentifikator;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -11,10 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.perioder.KravDokument;
@@ -71,13 +74,10 @@ public class KravDokumentFravær {
 
         tidslinjeSammenslått = tidslinjeSammenslått.combine(tidslinjeNy, this::oppdaterPeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        var oppdatertAktivitetListe = tidslinjeSammenslått.compress()
-            .toSegments()
+        return compress(tidslinjeSammenslått)
             .stream()
-            .map(this::opprettHoldKonsistens)
-            .collect(Collectors.toList());
-
-        return oppdatertAktivitetListe;
+            .map(LocalDateSegment::getValue)
+            .toList();
     }
 
     private Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> slåSammenSøknadOgInntektsmelding(
@@ -106,14 +106,7 @@ public class KravDokumentFravær {
 
     private LocalDateTimeline<WrappedOppgittFraværPeriode> leggPåSøknadsårsakerFraSøknad(LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeIm, LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeSøknad) {
         var tidslinjeImMedSøknadÅrsaker = tidslinjeIm.combine(tidslinjeSøknad, this::oppdaterPeriode, LocalDateTimeline.JoinStyle.LEFT_JOIN);
-
-        var fraværPerioderImMedSøknadsårsaker = tidslinjeImMedSøknadÅrsaker.compress()
-            .toSegments()
-            .stream()
-            .map(this::opprettHoldKonsistens)
-            .collect(Collectors.toList());
-
-        return mapTilTimeline(fraværPerioderImMedSøknadsårsaker);
+        return compress(tidslinjeImMedSøknadÅrsaker);
     }
 
     private LocalDateTimeline<WrappedOppgittFraværPeriode> finnSøknadTidslinje(Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> fraværsperioderSøknad, AktivitetIdentifikator aktivitetIdent) {
@@ -217,14 +210,11 @@ public class KravDokumentFravær {
         for (Map.Entry<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> entry : entriesBerørteArbeidsforhold) {
             var tidslinjeBerørt = mapTilTimeline(entry.getValue());
 
-            tidslinjeBerørt = tidslinjeBerørt.disjoint(tidslinjeNye);
-            var oppdatertListe = tidslinjeBerørt.compress()
-                .toSegments()
+            tidslinjeBerørt = tidslinjeBerørt.disjoint(tidslinjeNye, KravDokumentFravær::leftOnly);
+            var oppdatertListe = compress(tidslinjeBerørt)
                 .stream()
-                .filter(it -> it.getValue() != null)
-                .filter(it -> it.getValue().getPeriode() != null)
-                .map(this::opprettHoldKonsistens)
-                .collect(Collectors.toList());
+                .map(LocalDateSegment::getValue)
+                .toList();
 
             mapByAktivitet.put(entry.getKey(), oppdatertListe);
         }
@@ -236,14 +226,32 @@ public class KravDokumentFravær {
             .collect(Collectors.toList()));
     }
 
-    private WrappedOppgittFraværPeriode opprettHoldKonsistens(LocalDateSegment<WrappedOppgittFraværPeriode> segment) {
-        var value = segment.getValue().getPeriode();
-        return new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(value.getJournalpostId(), segment.getFom(), segment.getTom(), value.getAktivitetType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), value.getFraværPerDag(), value.getFraværÅrsak(), value.getSøknadÅrsak()),
-            segment.getValue().getInnsendingstidspunkt(),
-            segment.getValue().getKravDokumentType(),
-            segment.getValue().getSøknadsfristUtfall());
+    public static LocalDateSegment<WrappedOppgittFraværPeriode> leftOnly(LocalDateInterval dateInterval, LocalDateSegment<WrappedOppgittFraværPeriode> lhs, LocalDateSegment<WrappedOppgittFraværPeriode> rhs) {
+        return new LocalDateSegment<>(dateInterval, kloneVerdierNyPeriode(lhs.getValue(), dateInterval.getFomDato(), dateInterval.getTomDato()));
     }
 
+    public static LocalDateTimeline<WrappedOppgittFraværPeriode> compress(LocalDateTimeline<WrappedOppgittFraværPeriode> timeline) {
+        BiPredicate<WrappedOppgittFraværPeriode, WrappedOppgittFraværPeriode> equalsChecker = (WrappedOppgittFraværPeriode v1, WrappedOppgittFraværPeriode v2) -> {
+            return Objects.equals(v1.getKravDokumentType(), v2.getKravDokumentType())
+                && Objects.equals(v1.getInnsendingstidspunkt(), v2.getInnsendingstidspunkt())
+                && Objects.equals(v1.getSøknadsfristUtfall(), v2.getSøknadsfristUtfall())
+                && Objects.equals(v1.getPeriode().getJournalpostId(), v2.getPeriode().getJournalpostId())
+                && Objects.equals(v1.getPeriode().getPayload(), v2.getPeriode().getPayload()); // merk bruker payload her og ikke kun OppgittFraværPeriode
+        };
+        LocalDateSegmentCombinator<WrappedOppgittFraværPeriode, WrappedOppgittFraværPeriode, WrappedOppgittFraværPeriode> nySegment = (i, v1, v2) -> {
+            if (Objects.equals(v1, v2)) {
+                return v1;
+            } else {
+                return new LocalDateSegment<>(i, kloneVerdierNyPeriode(v1.getValue(), i.getFomDato(), i.getTomDato()));
+            }
+        };
+        return timeline.compress(equalsChecker, nySegment);
+    }
+
+    private static WrappedOppgittFraværPeriode kloneVerdierNyPeriode(WrappedOppgittFraværPeriode wfp, LocalDate fom, LocalDate tom) {
+        OppgittFraværPeriode fp = new OppgittFraværPeriode(fom, tom, wfp.getPeriode());
+        return new WrappedOppgittFraværPeriode(fp, wfp.getInnsendingstidspunkt(), wfp.getKravDokumentType(), wfp.getSøknadsfristUtfall());
+    }
 
     private void validerOverlapp(Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> mapByAktivitet) {
         // LocalDateTimeline kaster exception dersom overlapp i perioder
