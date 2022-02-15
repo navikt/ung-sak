@@ -1,6 +1,10 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.utenlandsopphold;
 
-import no.nav.fpsak.tidsserie.LocalDateSegment;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
@@ -12,9 +16,6 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UtenlandsoppholdInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UtenlandsoppholdÅrsak;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 public class MapUtenlandsopphold {
 
     public static Map<LukketPeriode, UtenlandsoppholdInfo> map(Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> kravDokumenter,
@@ -22,10 +23,8 @@ public class MapUtenlandsopphold {
                                                         LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
 
         LocalDateTimeline<UtledetUtenlandsopphold> utenlandsoppholdTidslinje = UtenlandsoppholdTidslinjeTjeneste.byggTidslinje(kravDokumenter, perioderFraSøknader);
-        LocalDateTimeline<UtenlandsoppholdInfo> resultatTimeline = new LocalDateTimeline<UtenlandsoppholdInfo>(utenlandsoppholdTidslinje.stream()
-            .map(s -> new LocalDateSegment(s.getLocalDateInterval(), new UtenlandsoppholdInfo(
-                    mapÅrsak(s.getValue().getÅrsak()), s.getValue().getLandkode().getKode())))
-                    .collect(Collectors.toList()));
+        LocalDateTimeline<UtenlandsoppholdInfo> resultatTimeline = utenlandsoppholdTidslinje.mapValue(v -> new UtenlandsoppholdInfo(mapÅrsak(v.getÅrsak()), v.getLandkode().getKode()));
+
         var utenlandsperioder = new HashMap<LukketPeriode, UtenlandsoppholdInfo>();
         resultatTimeline.compress()
             .intersection(tidslinjeTilVurdering)
