@@ -43,8 +43,10 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtenlandsoppholdTidslinjeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.delt.UtledetUtenlandsopphold;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.utenlandsopphold.MapUtenlandsopphold;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.HentPerioderTilVurderingTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
@@ -112,18 +114,9 @@ public class UtenlandsoppholdRestTjeneste {
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(behandlingReferanse);
         var perioderFraSøknad = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(behandlingReferanse);
 
-        NavigableSet<DatoIntervallEntitet> perioderTilVurderingTidslinje = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(behandling);
-
-        LocalDateTimeline<Boolean> tidslinjeTilVurdering =
-            new LocalDateTimeline<>(perioderTilVurderingTidslinje
-                .stream()
-                .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
-                .collect(Collectors.toList()))
-                .compress();
-
-        Map<LukketPeriode, UtenlandsoppholdInfo> utenlandsopphold = MapUtenlandsopphold.map(vurderteSøknadsperioder, perioderFraSøknad, tidslinjeTilVurdering);
-
-        utenlandsopphold.entrySet().stream().map(e -> e.)
+        LocalDateTimeline<UtledetUtenlandsopphold> localDateSegments = UtenlandsoppholdTidslinjeTjeneste.byggTidslinje(vurderteSøknadsperioder, perioderFraSøknad);
+        // TODO - Implementer objekt som skal vises....
+        return null;
     }
 
 }

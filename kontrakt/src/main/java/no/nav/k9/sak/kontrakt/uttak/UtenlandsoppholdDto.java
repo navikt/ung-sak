@@ -10,17 +10,20 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY, isGetterVisibility = JsonAutoDetect.Visibility.NONE)
 public class UtenlandsoppholdDto {
-    private List<UtenlandsoppholdPeriodeDto> perioder;
+    // TODO: Lag class
+    // private List<UtenlandsoppholdPeriodeDto> perioder;
 
     public UtenlandsoppholdDto() {
 
     }
 
-    public leggTil(UtenlandsoppholdPeriodeDto periode) {
-        perioder.add(periode);
-    }
+    // TODO
+    //public leggTil(UtenlandsoppholdPeriodeDto periode) {
+        //perioder.add(periode);
+    //}
 }
 
-class UtenlandsoppholdPeriodeDto {
-    private
-}
+// TODO:
+// class UtenlandsoppholdPeriodeDto {
+    //private
+// }
