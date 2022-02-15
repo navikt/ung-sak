@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -54,7 +55,7 @@ public class UtenlandsoppholdRestTjeneste {
     @Inject
     public UtenlandsoppholdRestTjeneste(
             BehandlingRepository behandlingRepository,
-            PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
+            @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
             PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
@@ -70,7 +71,7 @@ public class UtenlandsoppholdRestTjeneste {
                 responseCode = "200",
                 description = "Returnerer søkers oppgitte utenlandsopphold, tom liste hvis det ikke finnes noe",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = FastsattUttakDto.class)))
+                    schema = @Schema(implementation = UtenlandsoppholdDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public UtenlandsoppholdDto getUtenlandsopphold(
