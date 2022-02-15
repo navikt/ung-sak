@@ -146,8 +146,6 @@ public class KravDokumentFravær {
 
     private LocalDateSegment<WrappedOppgittFraværPeriode> mergeImMedSøknad(LocalDateInterval di, WrappedOppgittFraværPeriode im, WrappedOppgittFraværPeriode søknad) {
         var gjeldende = søknadHarKravOgImHarTrektKrav(im, søknad) ? søknad : im;
-        // TODO: Ta i bruk konfliktImSøknad i Uttak
-        boolean konfliktImSøknad = erAvvikMellomImOgSøknad(im, søknad);
 
         var wrapped = new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(gjeldende.getPeriode().getJournalpostId(),
             di.getFomDato(),
@@ -169,12 +167,6 @@ public class KravDokumentFravær {
         var harSøknadKrav = søknad.getPeriode().getFraværPerDag() == null || !søknad.getPeriode().getFraværPerDag().isZero();
         var erImTrekkAvKrav = im.getPeriode().getFraværPerDag() != null && im.getPeriode().getFraværPerDag().isZero();
         return harSøknadKrav && erImTrekkAvKrav;
-    }
-
-    private boolean erAvvikMellomImOgSøknad(WrappedOppgittFraværPeriode im, WrappedOppgittFraværPeriode søknad) {
-        var erForskjellFravær = Objects.equals(im.getPeriode().getFraværPerDag(), søknad.getPeriode().getFraværPerDag());
-        var erImTrekkAvKrav = im.getPeriode().getFraværPerDag() != null && im.getPeriode().getFraværPerDag().isZero();
-        return erForskjellFravær && !erImTrekkAvKrav;
     }
 
     /**
