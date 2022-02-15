@@ -228,6 +228,9 @@ spec:
       value: "true"
     - name: KOMPLETTHET_BEREGNING_OMP
       value: "true"
+    - name: OMP_VERIFISERING_TILKJENT_YTELSE
+      value: "true"
+
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

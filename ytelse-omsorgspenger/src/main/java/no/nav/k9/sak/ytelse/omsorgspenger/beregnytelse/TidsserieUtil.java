@@ -36,8 +36,10 @@ public class TidsserieUtil {
             resultat = lv;
         } else {
             resultat = new HashSet<>(lv);
-            resultat.removeAll(rv);
-
+            for (T t : rv) {
+                //HashSet støtter null, men ikke i removeAll
+                resultat.remove(t);
+            }
         }
         return new LocalDateSegment<>(dateInterval, resultat);
     }

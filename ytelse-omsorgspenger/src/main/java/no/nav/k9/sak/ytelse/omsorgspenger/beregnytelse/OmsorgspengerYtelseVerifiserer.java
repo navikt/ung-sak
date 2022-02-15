@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
@@ -26,15 +28,20 @@ public class OmsorgspengerYtelseVerifiserer {
     private static final Logger logger = LoggerFactory.getLogger(OmsorgspengerYtelseVerifiserer.class);
 
     private TrekkUtFraværTjeneste trekkUtFraværTjeneste;
+    private Boolean skruPåNyVerifisering;
 
     @Inject
-    public OmsorgspengerYtelseVerifiserer(TrekkUtFraværTjeneste trekkUtFraværTjeneste) {
+    public OmsorgspengerYtelseVerifiserer(TrekkUtFraværTjeneste trekkUtFraværTjeneste,
+                                          @KonfigVerdi(value = "OMP_VERIFISERING_TILKJENT_YTELSE", defaultVerdi = "true") Boolean skruPåNyVerifisering) {
         this.trekkUtFraværTjeneste = trekkUtFraværTjeneste;
+        this.skruPåNyVerifisering = skruPåNyVerifisering;
     }
 
     public void verifiser(Behandling behandling, BeregningsresultatEntitet beregningsresultat) {
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
-        verifiserUtbetalingKunHvorKrav(behandling, beregningsresultat);
+        if (skruPåNyVerifisering) {
+            verifiserUtbetalingKunHvorKrav(behandling, beregningsresultat);
+        }
     }
 
     private void verifiserUtbetalingKunHvorKrav(Behandling behandling, BeregningsresultatEntitet beregningsresultat) {
@@ -104,7 +111,9 @@ public class OmsorgspengerYtelseVerifiserer {
 
 
     private LocalDateSegment<Set<Arbeidsgiver>> mapPeriode(OppgittFraværPeriode periode) {
-        return new LocalDateSegment<>(periode.getFom(), periode.getTom(), Set.of(mapArbeidsgiver(periode)));
+        Set<Arbeidsgiver> arbeidsgivere = new HashSet<>();
+        arbeidsgivere.add(mapArbeidsgiver(periode));
+        return new LocalDateSegment<>(periode.getFom(), periode.getTom(), arbeidsgivere);
     }
 
     private Arbeidsgiver mapArbeidsgiver(OppgittFraværPeriode periode) {
