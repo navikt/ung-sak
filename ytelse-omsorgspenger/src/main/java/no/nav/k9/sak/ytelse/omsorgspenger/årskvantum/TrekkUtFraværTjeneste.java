@@ -92,7 +92,7 @@ public class TrekkUtFraværTjeneste {
             fravær.size(),
             fravær.stream()
                 .map(OppgittFraværPeriode::getPeriode)
-                .collect(Collectors.toList()));
+                .toList());
         if (fravær.isEmpty()) {
             throw new IllegalStateException("Utvikler feil, forventer fraværsperioder til behandlingen");
         }
@@ -107,16 +107,24 @@ public class TrekkUtFraværTjeneste {
         var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), søkteFraværsperioder);
         log.info("Fant {} inntektsmeldinger og {} søknader knyttet til behandlingen:", countIm(vurdertePerioder), countSøknad(vurdertePerioder));
 
-        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
+        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).toList();
     }
 
     public List<OppgittFraværPeriode> fraværFraInntektsmeldingerPåFagsak(Behandling behandling) {
         var fraværPåFagsak = søktFraværFraImPåFagsak(behandling.getFagsak());
 
         var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), fraværPåFagsak);
-        log.info("Fant {} inntektsmeldinger knyttet med fræværsperioder for behandlingen:", countIm(vurdertePerioder));
+        log.info("Fant {} inntektsmeldinger knyttet med fræværsperioder for fagsaken:", countIm(vurdertePerioder));
 
-        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
+        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).toList();
+    }
+
+    public List<OppgittFraværPeriode> fraværsperioderFraSøknaderPåFagsak(Behandling behandling) {
+        var søkteFraværsperioder = fraværFraSøknaderPåFagsak(behandling);
+        var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), søkteFraværsperioder);
+        log.info("Fant {} søknader knyttet til fagsaken:", countSøknad(vurdertePerioder));
+
+        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).toList();
     }
 
     public List<OppgittFraværPeriode> alleFraværsperioderPåFagsak(Behandling behandling) {
@@ -127,7 +135,7 @@ public class TrekkUtFraværTjeneste {
         var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), søkteFraværsperioder);
         log.info("Fant {} inntektsmeldinger med fraværsperioder og {} søknader knyttet til fagsaken", countIm(vurdertePerioder), countSøknad(vurdertePerioder));
 
-        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
+        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).toList();
     }
 
     private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søktFraværFraImPåBehandling(Behandling behandling) {

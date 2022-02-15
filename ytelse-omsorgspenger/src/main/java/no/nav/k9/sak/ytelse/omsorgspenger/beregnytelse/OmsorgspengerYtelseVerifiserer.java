@@ -11,17 +11,13 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.kodeverk.uttak.SøknadÅrsak;
-import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
-import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 
@@ -43,13 +39,13 @@ public class OmsorgspengerYtelseVerifiserer {
     }
 
     private void verifiserUtbetalingKunHvorKrav(Behandling behandling, BeregningsresultatEntitet beregningsresultat) {
-        var alleKrav = trekkUtFraværTjeneste.fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(behandling);
-        verifiserRefusjonKunVedRefusjonskrav(alleKrav, beregningsresultat);
-        verifiserUtbetalingSøkerKunVedSøknad(alleKrav, beregningsresultat);
+        verifiserRefusjonKunVedRefusjonskrav(behandling, beregningsresultat);
+        verifiserUtbetalingSøkerKunVedSøknad(behandling, beregningsresultat);
     }
 
-    private void verifiserRefusjonKunVedRefusjonskrav(List<WrappedOppgittFraværPeriode> alleKrav, BeregningsresultatEntitet beregningsresultat) {
-        LocalDateTimeline<Set<Arbeidsgiver>> imKravTidslinje = kravImTidslinje(alleKrav);
+    private void verifiserRefusjonKunVedRefusjonskrav(Behandling behandling, BeregningsresultatEntitet beregningsresultat) {
+        List<OppgittFraværPeriode> fraværsperioder = trekkUtFraværTjeneste.fraværFraInntektsmeldingerPåFagsak(behandling);
+        LocalDateTimeline<Set<Arbeidsgiver>> imKravTidslinje = kravTidslinje(fraværsperioder);
         LocalDateTimeline<Set<Arbeidsgiver>> utbetalingRefusjonTidslinje = tidslinjeUtbetaling(beregningsresultat, false);
         LocalDateTimeline<Set<Arbeidsgiver>> refusjonUtenRefusjonskrav = utbetalingRefusjonTidslinje.combine(imKravTidslinje, TidsserieUtil::minus, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .filterValue(v -> !v.isEmpty())
@@ -64,8 +60,9 @@ public class OmsorgspengerYtelseVerifiserer {
         }
     }
 
-    private void verifiserUtbetalingSøkerKunVedSøknad(List<WrappedOppgittFraværPeriode> alleKrav, BeregningsresultatEntitet beregningsresultat) {
-        LocalDateTimeline<Set<Arbeidsgiver>> søknadTidslinje = søknadTidslinje(alleKrav);
+    private void verifiserUtbetalingSøkerKunVedSøknad(Behandling behandling, BeregningsresultatEntitet beregningsresultat) {
+        List<OppgittFraværPeriode> fraværsperioder = trekkUtFraværTjeneste.fraværsperioderFraSøknaderPåFagsak(behandling);
+        LocalDateTimeline<Set<Arbeidsgiver>> søknadTidslinje = kravTidslinje(fraværsperioder);
         LocalDateTimeline<Set<Arbeidsgiver>> utbetalingTilSøkerTidslinje = tidslinjeUtbetaling(beregningsresultat, true);
         LocalDateTimeline<Set<Arbeidsgiver>> utbetalingUtenSøknad = utbetalingTilSøkerTidslinje.combine(søknadTidslinje, TidsserieUtil::minus, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .filterValue(v -> !v.isEmpty())
@@ -80,17 +77,8 @@ public class OmsorgspengerYtelseVerifiserer {
         }
     }
 
-    private LocalDateTimeline<Set<Arbeidsgiver>> søknadTidslinje(List<WrappedOppgittFraværPeriode> alleKravperioder) {
+    private LocalDateTimeline<Set<Arbeidsgiver>> kravTidslinje(List<OppgittFraværPeriode> alleKravperioder) {
         return new LocalDateTimeline<>(alleKravperioder.stream()
-            .filter(kp -> kp.getSøknadsfristUtfall() == Utfall.OPPFYLT)
-            .filter(kp -> kp.getKravDokumentType() == KravDokumentType.SØKNAD || kp.getPeriode().getSøknadÅrsak() != SøknadÅrsak.UDEFINERT) //HAXX når IM prioriteres over søknad, blir likevel SøknadÅrsak fra søknad satt
-            .map(this::mapPeriode).toList(), TidsserieUtil::union);
-    }
-
-    private LocalDateTimeline<Set<Arbeidsgiver>> kravImTidslinje(List<WrappedOppgittFraværPeriode> alleKravperioder) {
-        return new LocalDateTimeline<>(alleKravperioder.stream()
-            .filter(kp -> kp.getSøknadsfristUtfall() == Utfall.OPPFYLT)
-            .filter(kp -> kp.getKravDokumentType() == KravDokumentType.INNTEKTSMELDING)
             .map(this::mapPeriode).toList(), TidsserieUtil::union);
     }
 
@@ -111,13 +99,11 @@ public class OmsorgspengerYtelseVerifiserer {
     }
 
 
-    private LocalDateSegment<Set<Arbeidsgiver>> mapPeriode(WrappedOppgittFraværPeriode wrappedPeriode) {
-        OppgittFraværPeriode periode = wrappedPeriode.getPeriode();
-        return new LocalDateSegment<>(periode.getFom(), periode.getTom(), Set.of(mapArbeidsgiver(wrappedPeriode)));
+    private LocalDateSegment<Set<Arbeidsgiver>> mapPeriode(OppgittFraværPeriode periode) {
+        return new LocalDateSegment<>(periode.getFom(), periode.getTom(), Set.of(mapArbeidsgiver(periode)));
     }
 
-    private Arbeidsgiver mapArbeidsgiver(WrappedOppgittFraværPeriode wrappedPeriode) {
-        OppgittFraværPeriode periode = wrappedPeriode.getPeriode();
+    private Arbeidsgiver mapArbeidsgiver(OppgittFraværPeriode periode) {
         if (periode.getArbeidsforholdRef().getReferanse() != null) {
             throw new IllegalArgumentException("Forventer ikke arbeidsforhold her, skal kun få søknadsperioder her p.t. ikke mulig å opplyse arbeidsforhold i søknad.");
         }
