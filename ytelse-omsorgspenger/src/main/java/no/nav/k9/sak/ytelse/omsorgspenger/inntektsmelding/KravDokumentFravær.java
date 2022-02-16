@@ -1,15 +1,12 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 
-import static no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetIdentifikator.lagAktivitetIdentifikator;
-
 import java.time.Duration;
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,98 +26,75 @@ public class KravDokumentFravær {
 
     public List<WrappedOppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
 
-        Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> fraværsperioderSøknad = utledFraværsperioder(fraværFraKravdokumenter, SØKNAD_TYPER);
-        Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> fraværsperioderIm = utledFraværsperioder(fraværFraKravdokumenter, IM_TYPER);
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSøknad = utledFraværsperioder(fraværFraKravdokumenter, SØKNAD_TYPER);
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderIm = utledFraværsperioder(fraværFraKravdokumenter, IM_TYPER);
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSammenslått = slåSammenSøknadOgInntektsmelding(fraværsperioderSøknad, fraværsperioderIm);
 
-        Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> fraværsperioderSammenslått = slåSammenSøknadOgInntektsmelding(fraværsperioderSøknad, fraværsperioderIm);
-
-        validerOverlapp(fraværsperioderSammenslått);
-        return fraværsperioderSammenslått.values().stream().flatMap(Collection::stream).toList();
+        return fraværsperioderSammenslått.values().stream()
+            .map(KravDokumentFravær::compress)
+            .flatMap(LocalDateTimeline::stream)
+            .map(LocalDateSegment::getValue)
+            .toList();
     }
 
-    private Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> utledFraværsperioder(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter, Set<KravDokumentType> kravdokumentTyper) {
-        Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
+    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> utledFraværsperioder(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter, Set<KravDokumentType> kravdokumentTyper) {
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
 
         fraværFraKravdokumenter.entrySet().stream()
             .filter(e -> kravdokumentTyper.contains(e.getKey().getType()))
             .sorted(Comparator.comparing(e -> e.getKey().getInnsendingsTidspunkt()))
-            .forEachOrdered(e -> {
-                KravDokument dok = e.getKey();
-                for (VurdertSøktPeriode<OppgittFraværPeriode> vurdertPeriode : e.getValue()) {
-                    if (erImUtenRefusjonskravOgUtenTrektPeriode(dok.getType(), vurdertPeriode)) {
-                        continue;
-                    }
-                    var aktivitetIdent = lagAktivitetIdentifikator(vurdertPeriode);
+            .forEachOrdered(dokumentEntry -> {
+                KravDokument dok = dokumentEntry.getKey();
+                var fraværPerioder = dokumentEntry.getValue();
+                var aktivitetIdent = unikAktivitetIdentifikator(fraværPerioder);
 
-                    var fraværsperiodeNy = new WrappedOppgittFraværPeriode(vurdertPeriode.getRaw(), dok.getInnsendingsTidspunkt(), dok.getType(), utledUtfall(vurdertPeriode));
-                    var fraværsperioderSammenslåtte = mapByAktivitet.getOrDefault(aktivitetIdent, new ArrayList<>());
+                var wrappedFaværPerioder = fraværPerioder.stream()
+                    .filter(vurdertPeriode -> !erImUtenRefusjonskravOgUtenTrektPeriode(dok.getType(), vurdertPeriode))
+                    .map(v -> new WrappedOppgittFraværPeriode(v.getRaw(), dok.getInnsendingsTidspunkt(), dok.getType(), utledUtfall(v)))
+                    .toList();
 
-                    var tidslinjeNy = mapTilTimeline(List.of(fraværsperiodeNy));
-                    var tidslinjeSammenslått = mapTilTimeline(fraværsperioderSammenslåtte);
+                var tidslinjeNy = mapTilTimeline(wrappedFaværPerioder);
+                var tidslinjeSammenslått = mapByAktivitet.getOrDefault(aktivitetIdent, (LocalDateTimeline<WrappedOppgittFraværPeriode>) LocalDateTimeline.EMPTY_TIMELINE);
 
-                    ryddOppIBerørteArbeidsforhold(mapByAktivitet, aktivitetIdent, tidslinjeNy);
-
-                    mapByAktivitet.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeNy, tidslinjeSammenslått));
-                }
+                ryddOppIBerørteArbeidsforhold(mapByAktivitet, aktivitetIdent, tidslinjeNy);
+                mapByAktivitet.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeSammenslått, tidslinjeNy));
             });
 
         return mapByAktivitet;
     }
 
-    private List<WrappedOppgittFraværPeriode> slåSammenTidslinjer(LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNy, LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeSammenslått) {
-
-        tidslinjeSammenslått = tidslinjeSammenslått.combine(tidslinjeNy, this::oppdaterPeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-
-        var oppdatertAktivitetListe = tidslinjeSammenslått.compress()
-            .toSegments()
-            .stream()
-            .map(this::opprettHoldKonsistens)
-            .collect(Collectors.toList());
-
-        return oppdatertAktivitetListe;
-    }
-
-    private Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> slåSammenSøknadOgInntektsmelding(
-        Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> fraværsperioderSøknad,
-        Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> fraværsperioderIm) {
+    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> slåSammenSøknadOgInntektsmelding(
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSøknad,
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderIm) {
 
         // Begynner med fraværsperioder fra søknad som seed, før merge med fraværsperioder fra inntektsmelding
-        Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> fraværsperioderSammenslått = new LinkedHashMap<>(fraværsperioderSøknad);
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSammenslått = new LinkedHashMap<>(fraværsperioderSøknad);
 
-        for (Map.Entry<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> entryIm : fraværsperioderIm.entrySet()) {
-            var aktivitetIdent = entryIm.getKey();
+        fraværsperioderIm.forEach((aktivitetIdent, tidslinjeIm) -> {
             var tidslinjeSøknad = finnSøknadTidslinje(fraværsperioderSøknad, aktivitetIdent);
-            for (var fraværPeriodeIm : entryIm.getValue()) {
-                var fraværsperioder = fraværsperioderSammenslått.getOrDefault(aktivitetIdent, new ArrayList<>());
-                var tidslinjeIm = mapTilTimeline(List.of(fraværPeriodeIm));
-                tidslinjeIm = leggPåSøknadsårsakerFraSøknad(tidslinjeIm, tidslinjeSøknad);
+            var tidslinjeSammenslått = fraværsperioderSammenslått.getOrDefault(aktivitetIdent, (LocalDateTimeline<WrappedOppgittFraværPeriode>) LocalDateTimeline.EMPTY_TIMELINE);
 
-                ryddOppIBerørteArbeidsforhold(fraværsperioderSammenslått, aktivitetIdent, tidslinjeIm);
+            tidslinjeIm = leggPåSøknadsårsakerFraSøknad(tidslinjeIm, tidslinjeSøknad);
 
-                var tidslinjeSammenslått = mapTilTimeline(fraværsperioder);
-                fraværsperioderSammenslått.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeIm, tidslinjeSammenslått));
-            }
-        }
+            ryddOppIBerørteArbeidsforhold(fraværsperioderSammenslått, aktivitetIdent, tidslinjeIm);
+
+            fraværsperioderSammenslått.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeSammenslått, tidslinjeIm));
+        });
         return fraværsperioderSammenslått;
     }
 
-    private LocalDateTimeline<WrappedOppgittFraværPeriode> leggPåSøknadsårsakerFraSøknad(LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeIm, LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeSøknad) {
-        var tidslinjeImMedSøknadÅrsaker = tidslinjeIm.combine(tidslinjeSøknad, this::oppdaterPeriode, LocalDateTimeline.JoinStyle.LEFT_JOIN);
-
-        var fraværPerioderImMedSøknadsårsaker = tidslinjeImMedSøknadÅrsaker.compress()
-            .toSegments()
-            .stream()
-            .map(this::opprettHoldKonsistens)
-            .collect(Collectors.toList());
-
-        return mapTilTimeline(fraværPerioderImMedSøknadsårsaker);
+    private LocalDateTimeline<WrappedOppgittFraværPeriode> slåSammenTidslinjer(LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeSammenslått, LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNy) {
+        return tidslinjeSammenslått.combine(tidslinjeNy, this::oppdaterPeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }
 
-    private LocalDateTimeline<WrappedOppgittFraværPeriode> finnSøknadTidslinje(Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> fraværsperioderSøknad, AktivitetIdentifikator aktivitetIdent) {
+    private LocalDateTimeline<WrappedOppgittFraværPeriode> leggPåSøknadsårsakerFraSøknad(LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeIm, LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeSøknad) {
+        return tidslinjeIm.combine(tidslinjeSøknad, this::oppdaterPeriode, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+    }
+
+    private LocalDateTimeline<WrappedOppgittFraværPeriode> finnSøknadTidslinje(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSøknad, AktivitetIdentifikator aktivitetIdent) {
         return fraværsperioderSøknad.entrySet().stream()
             .filter(e -> e.getKey().gjelderSamme(aktivitetIdent)) //kan få maksimalt én match siden søknad ikke oppgir arbeidsforholdId
             .map(Map.Entry::getValue)
-            .map(this::mapTilTimeline)
             .findAny()
             .orElse((LocalDateTimeline<WrappedOppgittFraværPeriode>) LocalDateTimeline.EMPTY_TIMELINE);
     }
@@ -134,9 +108,9 @@ public class KravDokumentFravær {
                                                                           LocalDateSegment<WrappedOppgittFraværPeriode> førsteVersjon,
                                                                           LocalDateSegment<WrappedOppgittFraværPeriode> sisteVersjon) {
         if (førsteVersjon == null && sisteVersjon != null) {
-            return sisteVersjon;
+            return nyPeriode(di, sisteVersjon);
         } else if (sisteVersjon == null && førsteVersjon != null) {
-            return førsteVersjon;
+            return nyPeriode(di, førsteVersjon);
         }
         var førsteWrapped = førsteVersjon.getValue();
         var sisteWrapped = sisteVersjon.getValue();
@@ -145,32 +119,12 @@ public class KravDokumentFravær {
         } else if (SØKNAD_TYPER.contains(førsteWrapped.getKravDokumentType()) && IM_TYPER.contains(sisteWrapped.getKravDokumentType())) {
             return mergeImMedSøknad(di, sisteWrapped, førsteWrapped);
         } else {
-            return oppdaterPeriode(di, sisteWrapped);
+            return nyPeriode(di, sisteVersjon);
         }
-    }
-
-
-    private LocalDateSegment<WrappedOppgittFraværPeriode> oppdaterPeriode(LocalDateInterval di, WrappedOppgittFraværPeriode fraværPeriode) {
-        var wrapped = new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(fraværPeriode.getPeriode().getJournalpostId(),
-            di.getTomDato(),
-            di.getTomDato(),
-            fraværPeriode.getPeriode().getAktivitetType(),
-            fraværPeriode.getPeriode().getArbeidsgiver(),
-            fraværPeriode.getPeriode().getArbeidsforholdRef(),
-            fraværPeriode.getPeriode().getFraværPerDag(),
-            fraværPeriode.getPeriode().getFraværÅrsak(),
-            fraværPeriode.getPeriode().getSøknadÅrsak()),
-            fraværPeriode.getInnsendingstidspunkt(),
-            fraværPeriode.getKravDokumentType(),
-            fraværPeriode.getSøknadsfristUtfall());
-
-        return new LocalDateSegment<>(di, wrapped);
     }
 
     private LocalDateSegment<WrappedOppgittFraværPeriode> mergeImMedSøknad(LocalDateInterval di, WrappedOppgittFraværPeriode im, WrappedOppgittFraværPeriode søknad) {
         var gjeldende = søknadHarKravOgImHarTrektKrav(im, søknad) ? søknad : im;
-        // TODO: Ta i bruk konfliktImSøknad i Uttak
-        boolean konfliktImSøknad = erAvvikMellomImOgSøknad(im, søknad);
 
         var wrapped = new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(gjeldende.getPeriode().getJournalpostId(),
             di.getFomDato(),
@@ -194,63 +148,45 @@ public class KravDokumentFravær {
         return harSøknadKrav && erImTrekkAvKrav;
     }
 
-    private boolean erAvvikMellomImOgSøknad(WrappedOppgittFraværPeriode im, WrappedOppgittFraværPeriode søknad) {
-        var erForskjellFravær = Objects.equals(im.getPeriode().getFraværPerDag(), søknad.getPeriode().getFraværPerDag());
-        var erImTrekkAvKrav = im.getPeriode().getFraværPerDag() != null && im.getPeriode().getFraværPerDag().isZero();
-        return erForskjellFravær && !erImTrekkAvKrav;
-    }
-
     /**
      * Rydd opp i arbeidsforhold for samme arbeidsgiver, men annet arbeidsforhold
      */
-    private void ryddOppIBerørteArbeidsforhold(
-        Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> mapByAktivitet,
-        AktivitetIdentifikator aktivitetIdent,
-        LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNye) {
+    private void ryddOppIBerørteArbeidsforhold(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> mapByAktivitet,
+                                               AktivitetIdentifikator aktivitetIdent,
+                                               LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNy) {
 
-        var entriesBerørteArbeidsforhold = mapByAktivitet.entrySet()
-            .stream()
-            // Samme arbeidsgiver, men annet arbeidsforhold
-            .filter(it -> !it.getKey().equals(aktivitetIdent) && it.getKey().gjelderSamme(aktivitetIdent))
-            .collect(Collectors.toList());
-
-        for (Map.Entry<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> entry : entriesBerørteArbeidsforhold) {
-            var tidslinjeBerørt = mapTilTimeline(entry.getValue());
-
-            tidslinjeBerørt = tidslinjeBerørt.disjoint(tidslinjeNye);
-            var oppdatertListe = tidslinjeBerørt.compress()
-                .toSegments()
-                .stream()
-                .filter(it -> it.getValue() != null)
-                .filter(it -> it.getValue().getPeriode() != null)
-                .map(this::opprettHoldKonsistens)
-                .collect(Collectors.toList());
-
-            mapByAktivitet.put(entry.getKey(), oppdatertListe);
+        for (AktivitetIdentifikator key : List.copyOf(mapByAktivitet.keySet())) {
+            if (!key.equals(aktivitetIdent) && key.gjelderSamme(aktivitetIdent)) {
+                var tidslinjeBerørt = mapByAktivitet.get(key);
+                tidslinjeBerørt = tidslinjeBerørt.disjoint(tidslinjeNy, KravDokumentFravær::leftOnly);
+                mapByAktivitet.put(key, tidslinjeBerørt);
+            }
         }
     }
 
-    private LocalDateTimeline<WrappedOppgittFraværPeriode> mapTilTimeline(List<WrappedOppgittFraværPeriode> aktiviteter) {
+    private LocalDateTimeline<WrappedOppgittFraværPeriode> mapTilTimeline(Collection<WrappedOppgittFraværPeriode> aktiviteter) {
         return new LocalDateTimeline<>(aktiviteter.stream()
-            .map(it -> new LocalDateSegment<>(it.getPeriode().getFom(), it.getPeriode().getTom(), it))
-            .collect(Collectors.toList()));
+            .map(a -> new LocalDateSegment<>(a.getPeriode().getFom(), a.getPeriode().getTom(), a))
+            .toList());
     }
 
-    private WrappedOppgittFraværPeriode opprettHoldKonsistens(LocalDateSegment<WrappedOppgittFraværPeriode> segment) {
-        var value = segment.getValue().getPeriode();
-        return new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(value.getJournalpostId(), segment.getFom(), segment.getTom(), value.getAktivitetType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), value.getFraværPerDag(), value.getFraværÅrsak(), value.getSøknadÅrsak()),
-            segment.getValue().getInnsendingstidspunkt(),
-            segment.getValue().getKravDokumentType(),
-            segment.getValue().getSøknadsfristUtfall());
+    private static LocalDateSegment<WrappedOppgittFraværPeriode> nyPeriode(LocalDateInterval nyPeriode, LocalDateSegment<WrappedOppgittFraværPeriode> gjeldende) {
+        return new LocalDateSegment<>(nyPeriode, kloneVerdierNyPeriode(gjeldende.getValue(), nyPeriode.getFomDato(), nyPeriode.getTomDato()));
     }
 
+    public static LocalDateSegment<WrappedOppgittFraværPeriode> leftOnly(LocalDateInterval dateInterval, LocalDateSegment<WrappedOppgittFraværPeriode> lhs, LocalDateSegment<WrappedOppgittFraværPeriode> rhs) {
+        return new LocalDateSegment<>(dateInterval, kloneVerdierNyPeriode(lhs.getValue(), dateInterval.getFomDato(), dateInterval.getTomDato()));
+    }
 
-    private void validerOverlapp(Map<AktivitetIdentifikator, List<WrappedOppgittFraværPeriode>> mapByAktivitet) {
-        // LocalDateTimeline kaster exception dersom overlapp i perioder
-        mapByAktivitet.forEach((key, value) -> {
-            var segments = value.stream().map(ofp -> new LocalDateSegment<>(ofp.getPeriode().getFom(), ofp.getPeriode().getTom(), ofp)).collect(Collectors.toList());
-            new LocalDateTimeline<>(segments);
-        });
+    public static LocalDateTimeline<WrappedOppgittFraværPeriode> compress(LocalDateTimeline<WrappedOppgittFraværPeriode> timeline) {
+        return timeline.compress(
+            WrappedOppgittFraværPeriode::equalsIgnorerPeriode,
+            (intervall, v1, v2) -> new LocalDateSegment<>(intervall, kloneVerdierNyPeriode(v1.getValue(), intervall.getFomDato(), intervall.getTomDato())));
+    }
+
+    private static WrappedOppgittFraværPeriode kloneVerdierNyPeriode(WrappedOppgittFraværPeriode wfp, LocalDate fom, LocalDate tom) {
+        OppgittFraværPeriode fp = new OppgittFraværPeriode(fom, tom, wfp.getPeriode());
+        return new WrappedOppgittFraværPeriode(fp, wfp.getInnsendingstidspunkt(), wfp.getKravDokumentType(), wfp.getSøknadsfristUtfall());
     }
 
     private Utfall utledUtfall(VurdertSøktPeriode<OppgittFraværPeriode> pa) {
@@ -258,5 +194,13 @@ public class KravDokumentFravær {
             return Utfall.OPPFYLT;
         }
         return pa.getUtfall();
+    }
+
+    private AktivitetIdentifikator unikAktivitetIdentifikator(Collection<VurdertSøktPeriode<OppgittFraværPeriode>> søktePerioder) {
+        Set<AktivitetIdentifikator> resultat = søktePerioder.stream().map(AktivitetIdentifikator::lagAktivitetIdentifikator).collect(Collectors.toSet());
+        if (resultat.size() == 1) {
+            return resultat.iterator().next();
+        }
+        throw new IllegalArgumentException("Forventer nøyaktig 1 aktivitet identifikator pr kravdokument, men fikk " + resultat.size());
     }
 }

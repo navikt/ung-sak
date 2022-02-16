@@ -41,22 +41,26 @@ public class WrappedOppgittFraværPeriode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WrappedOppgittFraværPeriode that = (WrappedOppgittFraværPeriode) o;
-        return periodeEquals(that)
+        return Objects.equals(periode, that.periode)
             && Objects.equals(innsendingstidspunkt, that.innsendingstidspunkt)
             && Objects.equals(kravDokumentType, that.kravDokumentType)
             && Objects.equals(søknadsfristUtfall, that.søknadsfristUtfall);
     }
 
-    private boolean periodeEquals(WrappedOppgittFraværPeriode that) {
-        if (this.periode != null && that.periode != null) {
-            return this.periode.equals(that.periode);
-        } else
-            return this.periode == null && that.periode == null;
+    public boolean equalsIgnorerPeriode(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WrappedOppgittFraværPeriode that = (WrappedOppgittFraværPeriode) o;
+        return Objects.equals(innsendingstidspunkt, that.innsendingstidspunkt)
+            && Objects.equals(kravDokumentType, that.kravDokumentType)
+            && Objects.equals(søknadsfristUtfall, that.søknadsfristUtfall)
+            && Objects.equals(periode.getJournalpostId(), that.periode.getJournalpostId())
+            && Objects.equals(periode.getPayload(), that.periode.getPayload());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode.hashCode(), innsendingstidspunkt, søknadsfristUtfall);
+        return Objects.hash(periode, innsendingstidspunkt, søknadsfristUtfall);
     }
 
     @Override
