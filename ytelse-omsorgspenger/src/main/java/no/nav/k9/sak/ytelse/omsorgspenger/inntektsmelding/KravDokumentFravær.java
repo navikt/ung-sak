@@ -173,7 +173,7 @@ public class KravDokumentFravær {
         boolean konfliktImSøknad = erAvvikMellomImOgSøknad(im, søknad);
 
         var wrapped = new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(gjeldende.getPeriode().getJournalpostId(),
-            di.getTomDato(),
+            di.getFomDato(),
             di.getTomDato(),
             gjeldende.getPeriode().getAktivitetType(),
             gjeldende.getPeriode().getArbeidsgiver(),
