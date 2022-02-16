@@ -64,7 +64,7 @@ jobs:
       - name: Build artifacts & deploy
         shell: bash
         run: |
-          mvn verify -e --batch-mode --settings ./.github/.m2/settings.xml -DtrimStackTrace=false --file pom.xml -Dfile.encoding=UTF-8
+          mvn verify -e --batch-mode --settings ./.github/.m2/settings.xml -DtrimStackTrace=false --file pom.xml -Dfile.encoding=UTF-8 -Penforcer
           echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
         env:
           GH_ACCESS_TOKEN: ${{ secrets.READER_TOKEN }}
