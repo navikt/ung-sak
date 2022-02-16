@@ -117,7 +117,7 @@ spec:
     - name: INFOTRYGD_HENDELSER_API_URL
       value: http://infotrygd-hendelser.default/infotrygd/hendelser
     - name: FPABAKUS_URL
-      value: http://fpabakus.default/fpabakus
+      value: http://fpabakus.teamforeldrepenger/fpabakus
     - name: FTKALKULUS_URL
       value: http://ftkalkulus.k9saksbehandling/ftkalkulus
     - name: ABAKUS_CALLBACK_URL
