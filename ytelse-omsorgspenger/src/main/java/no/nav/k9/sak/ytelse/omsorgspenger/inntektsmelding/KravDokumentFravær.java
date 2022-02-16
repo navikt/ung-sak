@@ -7,9 +7,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -49,12 +47,15 @@ public class KravDokumentFravær {
                 KravDokument dok = dokumentEntry.getKey();
                 var fraværPerioder = dokumentEntry.getValue();
                 var aktivitetIdent = unikAktivitetIdentifikator(fraværPerioder);
+
                 var wrappedFaværPerioder = fraværPerioder.stream()
                     .filter(vurdertPeriode -> !erImUtenRefusjonskravOgUtenTrektPeriode(dok.getType(), vurdertPeriode))
                     .map(v -> new WrappedOppgittFraværPeriode(v.getRaw(), dok.getInnsendingsTidspunkt(), dok.getType(), utledUtfall(v)))
                     .toList();
+
                 var tidslinjeNy = mapTilTimeline(wrappedFaværPerioder);
                 var tidslinjeSammenslått = mapByAktivitet.getOrDefault(aktivitetIdent, (LocalDateTimeline<WrappedOppgittFraværPeriode>) LocalDateTimeline.EMPTY_TIMELINE);
+
                 ryddOppIBerørteArbeidsforhold(mapByAktivitet, aktivitetIdent, tidslinjeNy);
                 mapByAktivitet.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeSammenslått, tidslinjeNy));
             });
@@ -69,15 +70,16 @@ public class KravDokumentFravær {
         // Begynner med fraværsperioder fra søknad som seed, før merge med fraværsperioder fra inntektsmelding
         Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSammenslått = new LinkedHashMap<>(fraværsperioderSøknad);
 
-        for (Map.Entry<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> entryIm : fraværsperioderIm.entrySet()) {
-            var aktivitetIdent = entryIm.getKey();
-            var tidslinjeIm = entryIm.getValue();
+        fraværsperioderIm.forEach((aktivitetIdent, tidslinjeIm) -> {
             var tidslinjeSøknad = finnSøknadTidslinje(fraværsperioderSøknad, aktivitetIdent);
             var tidslinjeSammenslått = fraværsperioderSammenslått.getOrDefault(aktivitetIdent, (LocalDateTimeline<WrappedOppgittFraværPeriode>) LocalDateTimeline.EMPTY_TIMELINE);
+
             tidslinjeIm = leggPåSøknadsårsakerFraSøknad(tidslinjeIm, tidslinjeSøknad);
+
             ryddOppIBerørteArbeidsforhold(fraværsperioderSammenslått, aktivitetIdent, tidslinjeIm);
+
             fraværsperioderSammenslått.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeSammenslått, tidslinjeIm));
-        }
+        });
         return fraværsperioderSammenslått;
     }
 
@@ -177,14 +179,9 @@ public class KravDokumentFravær {
     }
 
     public static LocalDateTimeline<WrappedOppgittFraværPeriode> compress(LocalDateTimeline<WrappedOppgittFraværPeriode> timeline) {
-        BiPredicate<WrappedOppgittFraværPeriode, WrappedOppgittFraværPeriode> equalsChecker = (WrappedOppgittFraværPeriode v1, WrappedOppgittFraværPeriode v2) -> {
-            return Objects.equals(v1.getKravDokumentType(), v2.getKravDokumentType())
-                && Objects.equals(v1.getInnsendingstidspunkt(), v2.getInnsendingstidspunkt())
-                && Objects.equals(v1.getSøknadsfristUtfall(), v2.getSøknadsfristUtfall())
-                && Objects.equals(v1.getPeriode().getJournalpostId(), v2.getPeriode().getJournalpostId())
-                && Objects.equals(v1.getPeriode().getPayload(), v2.getPeriode().getPayload()); // merk bruker payload her og ikke OppgittFraværPeriode, da den har equals på fom/tom
-        };
-        return timeline.compress(equalsChecker, (intervall, v1, v2) -> new LocalDateSegment<>(intervall, kloneVerdierNyPeriode(v1.getValue(), intervall.getFomDato(), intervall.getTomDato())));
+        return timeline.compress(
+            WrappedOppgittFraværPeriode::equalsIgnorerPeriode,
+            (intervall, v1, v2) -> new LocalDateSegment<>(intervall, kloneVerdierNyPeriode(v1.getValue(), intervall.getFomDato(), intervall.getTomDato())));
     }
 
     private static WrappedOppgittFraværPeriode kloneVerdierNyPeriode(WrappedOppgittFraværPeriode wfp, LocalDate fom, LocalDate tom) {
