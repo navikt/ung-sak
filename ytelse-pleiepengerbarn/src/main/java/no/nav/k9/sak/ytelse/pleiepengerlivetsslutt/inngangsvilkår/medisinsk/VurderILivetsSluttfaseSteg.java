@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
@@ -99,7 +98,8 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         SykdomGrunnlagBehandling sykdomGrunnlagBehandling = opprettGrunnlag(perioder, behandling);
 
         boolean manglerVurdering = harUklassifiserteDokumenter(pleietrengendeAktørId) || manglerSykdomVurdering(pleietrengendeAktørId);
-        if (manglerVurdering || behandling.erManueltOpprettet()) {
+        final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && sykdomGrunnlagBehandling.isFørsteGrunnlagPåBehandling();
+        if (manglerVurdering || førsteGangManuellRevurdering ) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
