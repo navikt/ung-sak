@@ -294,7 +294,7 @@ class InfotrygdMigreringTjenesteTest {
     }
 
     @Test
-    void skal_fjerne_migrering_dersom_ny_periode_i_forkant_uten_overlapp() {
+    void skal_ikke_fjerne_migrering_dersom_ny_periode_i_forkant_uten_overlapp() {
         lagInfotrygdPsbYtelsePerioder(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP)));
 
         tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
@@ -313,7 +313,8 @@ class InfotrygdMigreringTjenesteTest {
         tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
 
         sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isEqualTo(0);
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
+        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP.minusDays(3));
     }
 
     @Test
