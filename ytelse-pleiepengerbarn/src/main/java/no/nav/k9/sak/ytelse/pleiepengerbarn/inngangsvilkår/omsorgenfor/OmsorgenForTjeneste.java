@@ -5,17 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
+import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
@@ -36,6 +37,9 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmod
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.RelasjonsRolle;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
 
 @ApplicationScoped
 public class OmsorgenForTjeneste {
@@ -44,6 +48,7 @@ public class OmsorgenForTjeneste {
     private OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository;
     private BehandlingRepository behandlingRepository;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
+    private SøknadsperiodeRepository søknadsperiodeRepository;
     private KantIKantVurderer kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
     OmsorgenForTjeneste() {
@@ -51,11 +56,12 @@ public class OmsorgenForTjeneste {
     }
 
     @Inject
-    OmsorgenForTjeneste(OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository, BehandlingRepository behandlingRepository, BasisPersonopplysningTjeneste personopplysningTjeneste) {
+    OmsorgenForTjeneste(OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository, BehandlingRepository behandlingRepository, BasisPersonopplysningTjeneste personopplysningTjeneste, SøknadsperiodeRepository søknadsperiodeRepository) {
         this.utfallOversetter = new VilkårUtfallOversetter();
         this.omsorgenForGrunnlagRepository = omsorgenForGrunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
+        this.søknadsperiodeRepository = søknadsperiodeRepository;
     }
 
     public List<VilkårData> vurderPerioder(BehandlingskontrollKontekst kontekst, LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje) {
@@ -70,8 +76,12 @@ public class OmsorgenForTjeneste {
     }
 
     LocalDateTimeline<OmsorgenForVilkårGrunnlag> mapGrunnlag(BehandlingskontrollKontekst kontekst, NavigableSet<DatoIntervallEntitet> perioder) {
-        final OmsorgenForVilkårGrunnlag systemgrunnlag = oversettSystemdataTilRegelModellOmsorgen(kontekst.getBehandlingId(), kontekst.getAktørId(), perioder);
-        final var vurdertOmsorgenForTidslinje = oversettTilRegelModellOmsorgenForVurderinger(kontekst);
+        return mapGrunnlag(kontekst.getBehandlingId(), kontekst.getAktørId(), perioder);
+    }
+
+    public LocalDateTimeline<OmsorgenForVilkårGrunnlag> mapGrunnlag(long behandlingId, AktørId aktørId, NavigableSet<DatoIntervallEntitet> perioder) {
+        final OmsorgenForVilkårGrunnlag systemgrunnlag = oversettSystemdataTilRegelModellOmsorgen(behandlingId, aktørId, perioder);
+        final var vurdertOmsorgenForTidslinje = oversettTilRegelModellOmsorgenForVurderinger(behandlingId);
         final var samletOmsorgenForTidslinje = slåSammenGrunnlagFraSystemOgVurdering(perioder, systemgrunnlag, vurdertOmsorgenForTidslinje);
         return samletOmsorgenForTidslinje;
     }
@@ -94,8 +104,8 @@ public class OmsorgenForTjeneste {
         }, JoinStyle.RIGHT_JOIN);
     }
 
-    private LocalDateTimeline<OmsorgenForVilkårGrunnlag> oversettTilRegelModellOmsorgenForVurderinger(BehandlingskontrollKontekst kontekst) {
-        final Optional<OmsorgenForGrunnlag> omsorgenForGrunnlag = omsorgenForGrunnlagRepository.hentHvisEksisterer(kontekst.getBehandlingId());
+    private LocalDateTimeline<OmsorgenForVilkårGrunnlag> oversettTilRegelModellOmsorgenForVurderinger(long behandlingId) {
+        final Optional<OmsorgenForGrunnlag> omsorgenForGrunnlag = omsorgenForGrunnlagRepository.hentHvisEksisterer(behandlingId);
         final var vurdertOmsorgenForTidslinje = new LocalDateTimeline<OmsorgenForVilkårGrunnlag>(
                     omsorgenForGrunnlag.map(og -> og.getOmsorgenFor().getPerioder()).orElse(List.of())
                     .stream()
@@ -154,6 +164,75 @@ public class OmsorgenForTjeneste {
             return new Relasjon(relasjonen.getAktørId().getId(), relasjonen.getTilAktørId().getId(), RelasjonsRolle.find(relasjonen.getRelasjonsrolle().getKode()), relasjonen.getHarSammeBosted());
         } else {
             return null;
+        }
+    }
+    
+    public Systemdata hentSystemdata(Long behandlingId, AktørId aktørId, AktørId optPleietrengendeAktørId) {
+        final Optional<SøknadsperiodeGrunnlag> søknadsgrunnlag = søknadsperiodeRepository.hentGrunnlag(behandlingId);
+        var pleietrengende = Optional.ofNullable(optPleietrengendeAktørId);
+        if (søknadsgrunnlag.isEmpty()
+                || søknadsgrunnlag.get().getOppgitteSøknadsperioder() == null
+                || søknadsgrunnlag.get().getOppgitteSøknadsperioder().getPerioder() == null
+                || pleietrengende.isEmpty()) {
+            return new Systemdata(false, false);
+        }
+        var søknadsperioder = søknadsgrunnlag.get().getOppgitteSøknadsperioder();
+        var periode = mapTilPeriode(søknadsperioder.getPerioder());
+
+        var optAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, periode);
+        if (optAggregat.isEmpty()) {
+            return new Systemdata(false, false);
+        }
+        var aggregat = optAggregat.get();
+        var pleietrengendeAktørId = pleietrengende.get();
+        var relasjon = aggregat.getSøkersRelasjoner().stream().filter(it -> it.getTilAktørId().equals(pleietrengendeAktørId)).collect(Collectors.toList());
+
+        var registrertForeldrerelasjon = relasjon.stream().anyMatch(it -> RelasjonsRolleType.BARN.equals(it.getRelasjonsrolle()));
+        var registrertSammeBosted = aggregat.harSøkerSammeAdresseSom(pleietrengendeAktørId, RelasjonsRolleType.BARN);
+
+        return new Systemdata(registrertForeldrerelasjon, registrertSammeBosted);
+
+    }
+    
+    private DatoIntervallEntitet mapTilPeriode(Set<Søknadsperioder> søknadsperioder) {
+        final List<DatoIntervallEntitet> perioder = søknadsperioder.stream()
+                .map(p -> p.getPerioder())
+                .flatMap(Set::stream)
+                .map(s -> s.getPeriode())
+                .collect(Collectors.toList());
+
+        final var fom = perioder
+                .stream()
+                .map(DatoIntervallEntitet::getFomDato)
+                .min(LocalDate::compareTo)
+                .orElseThrow();
+
+        final var tom = perioder
+                .stream()
+                .map(DatoIntervallEntitet::getTomDato)
+                .max(LocalDate::compareTo)
+                .orElseThrow();
+
+        return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+    }
+    
+    public static class Systemdata {
+        private final boolean registrertForeldrerelasjon;
+        private final boolean registrertSammeBosted;
+
+
+        public Systemdata(boolean registrertForeldrerelasjon, boolean registrertSammeBosted) {
+            this.registrertForeldrerelasjon = registrertForeldrerelasjon;
+            this.registrertSammeBosted = registrertSammeBosted;
+        }
+
+
+        public boolean isRegistrertForeldrerelasjon() {
+            return registrertForeldrerelasjon;
+        }
+
+        public boolean isRegistrertSammeBosted() {
+            return registrertSammeBosted;
         }
     }
 }
