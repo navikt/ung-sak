@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.omsorg;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
