@@ -20,6 +20,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -35,10 +36,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjene
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtenlandsoppholdTidslinjeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.delt.UtledetUtenlandsopphold;
 
-@ApplicationScoped
-@Transactional
-@Path("")
 @Produces(MediaType.APPLICATION_JSON)
+@ApplicationScoped
+@Path("")
+@Transactional
 public class UtenlandsoppholdRestTjeneste {
     static final String BASE_PATH = "/behandling/uttak";
 
@@ -86,16 +87,15 @@ public class UtenlandsoppholdRestTjeneste {
 
         LocalDateTimeline<UtledetUtenlandsopphold> utenlandsoppholdTidslinje = UtenlandsoppholdTidslinjeTjeneste.byggTidslinje(vurderteSøknadsperioder, perioderFraSøknad);
         UtenlandsoppholdDto dto = new UtenlandsoppholdDto();
-        utenlandsoppholdTidslinje
-            .stream()
-            .map(s -> {
-                dto.leggTil(
-                    s.getFom(),
-                    s.getTom(),
-                    s.getValue().getLandkode().getNavn(),
-                    s.getValue().getÅrsak().getNavn());
-                return null;
-            });
+
+        for (LocalDateSegment<UtledetUtenlandsopphold> s : utenlandsoppholdTidslinje.toSegments()) {
+            dto.leggTil(
+                s.getFom(),
+                s.getTom(),
+                s.getValue().getLandkode(),
+                s.getValue().getÅrsak());
+        }
+
         return dto;
     }
 

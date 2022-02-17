@@ -14,13 +14,13 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 public enum UtenlandsoppholdÅrsak implements Kodeverdi {
     BARNET_INNLAGT_I_HELSEINSTITUSJON_FOR_NORSK_OFFENTLIG_REGNING(
         "BARNET_INNLAGT_I_HELSEINSTITUSJON_FOR_NORSK_OFFENTLIG_REGNING",
-        "Barnet innlagt i helseinstitusjon for norsk offentlig regning"),
+        "Barn er innlagt i helseinstitusjon for norsk offentlig regning (mottar pleiepenger som i Norge, telles ikke i 8 uker)"),
     BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD(
         "BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD",
-        "Barnet innlagt i helseinstitusjon dekket etter avtale med et annet land om trygd"),
+        "Barn er innlagt i helseinstitusjon dekket etter avtale med annet land om trygd (mottar pleiepenger som i Norge, telles ikke i 8 uker)"),
     INGEN(
         "INGEN",
-        "Ingen");
+        "Ingen av årsakene over (kan motta pleiepenger i 8 uker)");
 
     private final String kode;
     private final String navn;
