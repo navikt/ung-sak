@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -50,7 +49,7 @@ class SøknadOversetter {
             List.of(),
             List.of());
 
-        var søknadsperioder = arbeidPerioder.stream().map(it -> it.getPeriode()).map(di -> new Periode(di.getFomDato(), di.getTomDato())).collect(Collectors.toList());
+        var søknadsperioder = arbeidPerioder.stream().map(ArbeidPeriode::getPeriode).map(di -> new Periode(di.getFomDato(), di.getTomDato())).collect(Collectors.toList());
         var maksSøknadsperiode = finnMaksperiode(søknadsperioder);
 
         søknadPersisterer.lagreSøknadEntitet(søknad, journalpostId, behandlingId, maksSøknadsperiode, mottattDato);

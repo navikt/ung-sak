@@ -41,10 +41,6 @@
             <artifactId>k9-felles-feil</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-            <artifactId>hendelse-historikk-innslag-jakarta</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-streams</artifactId>
         </dependency>

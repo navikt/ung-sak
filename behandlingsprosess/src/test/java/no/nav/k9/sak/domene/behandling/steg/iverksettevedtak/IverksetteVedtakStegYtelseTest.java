@@ -1,18 +1,11 @@
 package no.nav.k9.sak.domene.behandling.steg.iverksettevedtak;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
-
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -47,7 +43,6 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.db.util.Repository;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettImpl;
-import no.nav.k9.sak.domene.vedtak.IdentifiserOverlappendeInfotrygdYtelseTjeneste;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
@@ -64,21 +59,18 @@ public class IverksetteVedtakStegYtelseTest {
     private EntityManager entityManager;
 
     private BehandlingRepositoryProvider repositoryProvider;
-    private BehandlingRepository behandlingRepository ;
+    private BehandlingRepository behandlingRepository;
 
     private Behandling behandling;
 
     private Instance<OpprettProsessTaskIverksett> opprettProsessTaskIverksett;
 
-    private Repository repository ;
-    private BehandlingVedtakRepository behandlingVedtakRepository ;
-    private HistorikkRepository historikkRepository ;
+    private Repository repository;
+    private BehandlingVedtakRepository behandlingVedtakRepository;
+    private HistorikkRepository historikkRepository;
 
     @Mock
     private VurderBehandlingerUnderIverksettelse vurderBehandlingerUnderIverksettelse;
-
-    @Mock
-    private IdentifiserOverlappendeInfotrygdYtelseTjeneste iverksettingSkalIkkeStoppesAvOverlappendeYtelse;
 
     @Mock
     private FagsakProsessTaskRepository prosessTaskRepository;
@@ -88,7 +80,7 @@ public class IverksetteVedtakStegYtelseTest {
 
     @Mock
     private InfotrygdFeedService infotrygdFeedService;
-    
+
     @Mock
     private StønadstatistikkService stønadstatistikkService;
 
@@ -99,7 +91,7 @@ public class IverksetteVedtakStegYtelseTest {
 
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         behandlingRepository = repositoryProvider.getBehandlingRepository();
-        repository =  new Repository(entityManager);
+        repository = new Repository(entityManager);
         behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         historikkRepository = repositoryProvider.getHistorikkRepository();
 
@@ -107,7 +99,6 @@ public class IverksetteVedtakStegYtelseTest {
         opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService));
         iverksetteVedtakSteg = new IverksetteVedtakSteg(repositoryProvider,
             opprettProsessTaskIverksett,
-            iverksettingSkalIkkeStoppesAvOverlappendeYtelse,
             vurderBehandlingerUnderIverksettelse);
         behandling = opprettBehandling();
     }
@@ -117,7 +108,6 @@ public class IverksetteVedtakStegYtelseTest {
         // Arrange
         opprettBehandlingVedtak(VedtakResultatType.INNVILGET, IverksettingStatus.IKKE_IVERKSATT);
         when(vurderBehandlingerUnderIverksettelse.vurder(eq(behandling))).thenReturn(true);
-        when(iverksettingSkalIkkeStoppesAvOverlappendeYtelse.vurder(eq(behandling), any())).thenReturn(Optional.empty());
 
         // Act
         BehandleStegResultat resultat = utførSteg(behandling);
@@ -139,7 +129,6 @@ public class IverksetteVedtakStegYtelseTest {
         opprettBehandlingVedtak(VedtakResultatType.INNVILGET, IverksettingStatus.IKKE_IVERKSATT);
         when(vurderBehandlingerUnderIverksettelse.vurder(eq(behandling))).thenReturn(false);
         BehandlingOverlappInfotrygd behandlingOverlappInfotrygd = mock(BehandlingOverlappInfotrygd.class);
-        when(iverksettingSkalIkkeStoppesAvOverlappendeYtelse.vurder(eq(behandling), any())).thenReturn(Optional.of(behandlingOverlappInfotrygd));
 
         // Act
         BehandleStegResultat resultat = utførSteg(behandling);
@@ -147,7 +136,6 @@ public class IverksetteVedtakStegYtelseTest {
         // Assert
         assertThat(resultat.getTransisjon()).isEqualTo(FellesTransisjoner.SETT_PÅ_VENT);
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
-        verify(iverksettingSkalIkkeStoppesAvOverlappendeYtelse).vurderOgLagreEventueltOverlapp(any(), any());
     }
 
     @Test
@@ -155,7 +143,6 @@ public class IverksetteVedtakStegYtelseTest {
         // Arrange
         opprettBehandlingVedtak(VedtakResultatType.INNVILGET, IverksettingStatus.IKKE_IVERKSATT);
         when(vurderBehandlingerUnderIverksettelse.vurder(eq(behandling))).thenReturn(false);
-        when(iverksettingSkalIkkeStoppesAvOverlappendeYtelse.vurder(eq(behandling), any())).thenReturn(Optional.empty());
 
         // Act
         BehandleStegResultat resultat = utførSteg(behandling);
@@ -163,7 +150,6 @@ public class IverksetteVedtakStegYtelseTest {
         // Assert
         assertThat(resultat.getTransisjon()).isEqualTo(FellesTransisjoner.SETT_PÅ_VENT);
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
-        verify(iverksettingSkalIkkeStoppesAvOverlappendeYtelse).vurderOgLagreEventueltOverlapp(any(), any());
     }
 
     private BehandleStegResultat utførSteg(Behandling behandling) {
