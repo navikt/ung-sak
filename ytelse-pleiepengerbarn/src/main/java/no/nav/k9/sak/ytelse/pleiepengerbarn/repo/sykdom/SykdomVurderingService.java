@@ -40,7 +40,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 public class SykdomVurderingService {
 
     //TODO PPN bruke konstanter fra Tid-klassen istedet?
-    public static final Periode PERIODE_SYKDOMSVURDERING_PPN = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2099, 12, 31));
+    public static final LocalDate SLUTT_SYKDOMSVURDERING_PPN =  LocalDate.of(2099, 12, 31);
 
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
@@ -168,7 +168,7 @@ public class SykdomVurderingService {
         LocalDateTimeline<SykdomVurderingVersjon> vurderinger = hentVurderinger(SykdomVurderingType.LIVETS_SLUTTFASE, behandling);
         LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
 
-        List<Periode> perioderKreverVurdering = behandledeSøknadsperioder.isEmpty() ? List.of() : List.of(PERIODE_SYKDOMSVURDERING_PPN);
+        List<Periode> perioderKreverVurdering = behandledeSøknadsperioder.isEmpty() ? List.of() : List.of(new Periode(behandledeSøknadsperioder.getMinLocalDate(), SLUTT_SYKDOMSVURDERING_PPN));
         LocalDateTimeline<Boolean> tidslinjeKreverVurdering = new LocalDateTimeline<>(perioderKreverVurdering.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true)).toList());
 
         LocalDateTimeline<Boolean> innleggelserTidslinje = hentAlleInnleggelserTidslinje(behandling);
@@ -201,7 +201,7 @@ public class SykdomVurderingService {
 
         return søknadsperioderTidslinje.isEmpty()
             ? søknadsperioderTidslinje
-            : new LocalDateTimeline<>(PERIODE_SYKDOMSVURDERING_PPN.getFom(), PERIODE_SYKDOMSVURDERING_PPN.getTom(), saksnumre);
+            : new LocalDateTimeline<>(søknadsperioderTidslinje.getMinLocalDate(), SLUTT_SYKDOMSVURDERING_PPN, saksnumre);
     }
 
     @SuppressWarnings("unchecked")
