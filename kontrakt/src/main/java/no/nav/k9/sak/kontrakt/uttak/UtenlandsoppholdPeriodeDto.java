@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.uttak;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.uttak.UtenlandsoppholdÅrsak;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -25,6 +27,10 @@ public class UtenlandsoppholdPeriodeDto {
     @Valid
     private Landkoder landkode;
 
+    @JsonProperty(value = "region")
+    @Valid
+    private Region region;
+
     @JsonProperty(value = "årsak")
     @Valid
     private UtenlandsoppholdÅrsak årsak;
@@ -37,6 +43,7 @@ public class UtenlandsoppholdPeriodeDto {
         this.periode = new Periode(fom, tom);
         this.landkode = landkode;
         this.årsak = årsak;
+        this.region = Region.finnHøyestRangertRegion(List.of(landkode.getKode()));
     }
 
     public Periode getPeriode() {
@@ -45,6 +52,10 @@ public class UtenlandsoppholdPeriodeDto {
 
     public Landkoder getLandkode() {
         return landkode;
+    }
+
+    public Region getRegion() {
+        return region;
     }
 
     public UtenlandsoppholdÅrsak getÅrsak() {

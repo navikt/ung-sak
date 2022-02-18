@@ -6,6 +6,8 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
@@ -56,6 +58,7 @@ public enum UtenlandsoppholdÅrsak implements Kodeverdi {
     }
 
     @Override
+    @JsonValue
     public String getKode() {
         return kode;
     }
