@@ -1,9 +1,6 @@
 package no.nav.k9.sak.kontrakt.uttak;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -18,23 +15,39 @@ import no.nav.k9.kodeverk.uttak.UtenlandsoppholdÅrsak;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY, isGetterVisibility = JsonAutoDetect.Visibility.NONE)
-public class UtenlandsoppholdDto {
-    @JsonProperty(value = "perioder")
+public class UtenlandsoppholdPeriodeDto {
+    @JsonProperty(value = "periode")
     @Valid
     @Size
-    private List<UtenlandsoppholdPeriodeDto> perioder = new ArrayList<>();
+    private Periode periode;
 
-    public UtenlandsoppholdDto() {
+    @JsonProperty(value = "landkode")
+    @Valid
+    private Landkoder landkode;
+
+    @JsonProperty(value = "årsak")
+    @Valid
+    private UtenlandsoppholdÅrsak årsak;
+
+    public UtenlandsoppholdPeriodeDto() {
 
     }
 
-    public void leggTil(LocalDate fom, LocalDate tom, Landkoder landkode, UtenlandsoppholdÅrsak årsak) {
-        perioder.add(new UtenlandsoppholdPeriodeDto(fom, tom, landkode, årsak));
+    public UtenlandsoppholdPeriodeDto(LocalDate fom, LocalDate tom, Landkoder landkode, UtenlandsoppholdÅrsak årsak) {
+        this.periode = new Periode(fom, tom);
+        this.landkode = landkode;
+        this.årsak = årsak;
     }
 
-    public List<UtenlandsoppholdPeriodeDto> getPerioder() {
-        return Collections.unmodifiableList(perioder);
+    public Periode getPeriode() {
+        return periode;
+    }
+
+    public Landkoder getLandkode() {
+        return landkode;
+    }
+
+    public UtenlandsoppholdÅrsak getÅrsak() {
+        return årsak;
     }
 }
-
-
