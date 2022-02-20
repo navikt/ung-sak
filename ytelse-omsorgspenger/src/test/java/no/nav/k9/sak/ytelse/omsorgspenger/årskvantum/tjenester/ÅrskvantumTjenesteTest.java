@@ -20,6 +20,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.SamtidigKravStatus;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
@@ -83,6 +84,6 @@ public class ÅrskvantumTjenesteTest {
     }
 
     private List<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> mapTilWrappedPeriode(List<OppgittFraværPeriode> perioder) {
-        return perioder.stream().map(it -> new no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode(it, LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING, Utfall.OPPFYLT)).collect(Collectors.toList());
+        return perioder.stream().map(it -> new no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode(it, LocalDateTime.now(), KravDokumentType.INNTEKTSMELDING, Utfall.OPPFYLT, SamtidigKravStatus.refusjonskravFinnes())).collect(Collectors.toList());
     }
 }

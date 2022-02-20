@@ -12,12 +12,14 @@ public class WrappedOppgittFraværPeriode {
     private LocalDateTime innsendingstidspunkt;
     private KravDokumentType kravDokumentType;
     private Utfall søknadsfristUtfall;
+    private SamtidigKravStatus samtidigeKrav;
 
-    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, LocalDateTime innsendingstidspunkt, KravDokumentType kravDokumentType, Utfall søknadsfristUtfall) {
+    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, LocalDateTime innsendingstidspunkt, KravDokumentType kravDokumentType, Utfall søknadsfristUtfall, SamtidigKravStatus samtidigeKrav) {
         this.periode = periode;
         this.innsendingstidspunkt = innsendingstidspunkt;
         this.kravDokumentType = kravDokumentType;
         this.søknadsfristUtfall = søknadsfristUtfall;
+        this.samtidigeKrav = samtidigeKrav;
     }
 
     public OppgittFraværPeriode getPeriode() {
@@ -36,6 +38,10 @@ public class WrappedOppgittFraværPeriode {
         return innsendingstidspunkt;
     }
 
+    public SamtidigKravStatus getSamtidigeKrav() {
+        return samtidigeKrav;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -44,7 +50,8 @@ public class WrappedOppgittFraværPeriode {
         return Objects.equals(periode, that.periode)
             && Objects.equals(innsendingstidspunkt, that.innsendingstidspunkt)
             && Objects.equals(kravDokumentType, that.kravDokumentType)
-            && Objects.equals(søknadsfristUtfall, that.søknadsfristUtfall);
+            && Objects.equals(søknadsfristUtfall, that.søknadsfristUtfall)
+            && Objects.equals(samtidigeKrav, that.samtidigeKrav);
     }
 
     public boolean equalsIgnorerPeriode(Object o) {
@@ -54,13 +61,14 @@ public class WrappedOppgittFraværPeriode {
         return Objects.equals(innsendingstidspunkt, that.innsendingstidspunkt)
             && Objects.equals(kravDokumentType, that.kravDokumentType)
             && Objects.equals(søknadsfristUtfall, that.søknadsfristUtfall)
+            && Objects.equals(samtidigeKrav, that.samtidigeKrav)
             && Objects.equals(periode.getJournalpostId(), that.periode.getJournalpostId())
             && Objects.equals(periode.getPayload(), that.periode.getPayload());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, innsendingstidspunkt, søknadsfristUtfall);
+        return Objects.hash(periode, innsendingstidspunkt, søknadsfristUtfall, søknadsfristUtfall);
     }
 
     @Override
@@ -70,6 +78,7 @@ public class WrappedOppgittFraværPeriode {
             ", kravDokumentType=" + kravDokumentType +
             ", innsendingstidspunkt=" + innsendingstidspunkt +
             ", søknadsfristUtfall=" + søknadsfristUtfall +
+            ", samtidigeKrav=" + samtidigeKrav +
             '>';
     }
 }
