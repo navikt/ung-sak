@@ -36,6 +36,10 @@ public class SamtidigKravStatus {
         return new SamtidigKravStatus(KravStatus.FINNES_IKKE, KravStatus.FINNES, KravStatus.FINNES_IKKE);
     }
 
+    public static SamtidigKravStatus søknadTrekt() {
+        return new SamtidigKravStatus(KravStatus.FINNES_IKKE, KravStatus.TREKT, KravStatus.FINNES_IKKE);
+    }
+
     public static SamtidigKravStatus støttendeInntektsmeldingFinnes() {
         return new SamtidigKravStatus(KravStatus.FINNES_IKKE, KravStatus.FINNES_IKKE, KravStatus.FINNES);
     }

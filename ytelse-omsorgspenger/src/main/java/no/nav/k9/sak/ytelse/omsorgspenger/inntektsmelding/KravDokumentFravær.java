@@ -129,10 +129,12 @@ public class KravDokumentFravær {
 
     private SamtidigKravStatus initiellKravtype(KravDokumentType type, Duration fraværPerDag) {
         return switch (type) {
-            case SØKNAD -> SamtidigKravStatus.søknadFinnes();
-            case INNTEKTSMELDING -> fraværPerDag == null || !fraværPerDag.isZero()
-                ? SamtidigKravStatus.refusjonskravFinnes()
-                : SamtidigKravStatus.refusjonskravTrekt();
+            case SØKNAD -> harTrektKrav(fraværPerDag)
+                ? SamtidigKravStatus.søknadTrekt()
+                : SamtidigKravStatus.søknadFinnes();
+            case INNTEKTSMELDING -> harTrektKrav(fraværPerDag)
+                ? SamtidigKravStatus.refusjonskravTrekt()
+                : SamtidigKravStatus.refusjonskravFinnes();
             case INNTEKTSMELDING_UTEN_REFUSJONSKRAV -> SamtidigKravStatus.støttendeInntektsmeldingFinnes();
         };
     }
@@ -242,7 +244,11 @@ public class KravDokumentFravær {
     }
 
     private boolean harTrektKrav(WrappedOppgittFraværPeriode im) {
-        return im.getPeriode().getFraværPerDag() != null && im.getPeriode().getFraværPerDag().isZero();
+        return harTrektKrav(im.getPeriode().getFraværPerDag());
+    }
+
+    private boolean harTrektKrav(Duration fraværPrDag) {
+        return fraværPrDag != null && fraværPrDag.isZero();
     }
 
     /**
