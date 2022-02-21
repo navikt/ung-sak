@@ -55,7 +55,7 @@ class SøknadOversetter {
         søknadPersisterer.lagreSøknadEntitet(søknad, journalpostId, behandlingId, maksSøknadsperiode, mottattDato);
         søknadPersisterer.lagreMedlemskapinfo(ytelse.getBosteder(), behandlingId, mottattDato);
         søknadPersisterer.lagrePleietrengende(fagsakId, ytelse.getPleietrengende().getPersonIdent());
-        søknadPersisterer.lagreSøknadsperioder(søknadsperioder, List.of(), journalpostId, behandlingId);
+        søknadPersisterer.lagreSøknadsperioder(søknadsperioder, ytelse.getTrekkKravPerioder(), journalpostId, behandlingId);
         søknadPersisterer.lagreUttak(perioderFraSøknad, behandlingId);
         søknadPersisterer.oppdaterFagsakperiode(maksSøknadsperiode, fagsakId);
     }
