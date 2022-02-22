@@ -141,7 +141,7 @@ class InfotrygdMigreringTjenesteTest {
     }
 
     @Test
-    void skal_opprette_med_overlapp_for_periode_som_ikke_vurderes() {
+    void skal_rydde_infotrygdmigrering_for_periode_som_ikke_vurderes() {
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
@@ -153,8 +153,7 @@ class InfotrygdMigreringTjenesteTest {
         tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
 
         var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
-        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP.minusDays(10));
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(0);
     }
 
     @Test

@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,7 +117,6 @@ public class InfotrygdMigreringTjeneste {
         return aksjonspunkter;
     }
 
-    @NotNull
     private List<DatoIntervallEntitet> getInfotrygdPerioder(Map.Entry<AktørId, List<IntervallMedBehandlingstema>> e) {
         return e.getValue().stream().map(IntervallMedBehandlingstema::intervall).collect(Collectors.toList());
     }
@@ -195,14 +193,14 @@ public class InfotrygdMigreringTjeneste {
 
         utledetInfotrygdmigreringTilVurdering.forEach(localDate -> opprettMigrering(fagsakId, localDate, perioderTilVurdering));
 
-
-        var eksisterendeMigreringTilVurdering = finnEksisterendeMigreringTilVurdering(perioderTilVurdering, eksisterendeInfotrygdMigreringer);
-        deaktiverSkjæringstidspunkterSomErFlyttet(behandlingId, eksisterendeMigreringTilVurdering, utledetInfotrygdmigreringTilVurdering);
+        deaktiverSkjæringstidspunkterSomErFlyttet(behandlingId, eksisterendeInfotrygdMigreringer, utledetInfotrygdmigreringTilVurdering);
     }
 
-    private void deaktiverSkjæringstidspunkterSomErFlyttet(Long behandlingId, List<SakInfotrygdMigrering> eksisterendeMigreringTilVurdering, HashSet<LocalDate> utledetInfotrygdmigreringTilVurdering) {
+    private void deaktiverSkjæringstidspunkterSomErFlyttet(Long behandlingId,
+                                                           List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer,
+                                                           HashSet<LocalDate> utledetInfotrygdmigreringTilVurdering) {
         NavigableSet<DatoIntervallEntitet> allePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandlingId);
-        var migreringerSomSkalDeaktiveres = eksisterendeMigreringTilVurdering.stream()
+        var migreringerSomSkalDeaktiveres = eksisterendeInfotrygdMigreringer.stream()
             .filter(m -> allePerioder.stream().map(DatoIntervallEntitet::getFomDato).noneMatch(fom -> m.getSkjæringstidspunkt().equals(fom)))
             .collect(Collectors.toUnmodifiableSet());
         migreringerSomSkalDeaktiveres.forEach(m -> deaktiver(m, behandlingId, utledetInfotrygdmigreringTilVurdering));
@@ -218,7 +216,7 @@ public class InfotrygdMigreringTjeneste {
         if (overlappendePeriode.isPresent()) {
             var harUtledetNyttVedStart = utledetInfotrygdmigreringTilVurdering.stream().anyMatch(nye -> overlappendePeriode.get().getFomDato().equals(nye));
             if (!harUtledetNyttVedStart) {
-                throw new IllegalStateException("Skal ikke deaktivere skjæringstidspunkt for migrering uten å opprette nytt ved start av periode");
+                log.warn("Daktiverer infotrydmigrering uten å ha opprettet ny i ved start av periode");
             }
         }
         fagsakRepository.deaktiverInfotrygdmigrering(m.getFagsakId(), m.getSkjæringstidspunkt());
@@ -265,18 +263,6 @@ public class InfotrygdMigreringTjeneste {
             .map(DatoIntervallEntitet::getFomDato).filter(d -> alleAnvistePerioder.stream()
                 .anyMatch(p -> p.inkluderer(d))).collect(Collectors.toSet());
 
-    }
-
-    private List<SakInfotrygdMigrering> finnEksisterendeMigreringTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer) {
-        var migreringTilVurdering = eksisterendeInfotrygdMigreringer.stream()
-            .filter(sim -> perioderTilVurdering.stream().anyMatch(periode -> periode.inkluderer(sim.getSkjæringstidspunkt())))
-            .collect(Collectors.toList());
-        var antallPerioderMedOverlapp = perioderTilVurdering.stream().filter(periode -> migreringTilVurdering.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt)
-            .anyMatch(periode::inkluderer)).count();
-        if (migreringTilVurdering.size() > antallPerioderMedOverlapp) {
-            throw new IllegalStateException("Forventer maksimalt en migrering til vurdering per periode");
-        }
-        return migreringTilVurdering;
     }
 
     private Set<DatoIntervallEntitet> finnKantIKantPeriode(YtelseFilter ytelseFilter, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {

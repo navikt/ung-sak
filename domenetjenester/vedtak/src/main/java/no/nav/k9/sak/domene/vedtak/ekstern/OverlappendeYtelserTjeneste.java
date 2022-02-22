@@ -1,11 +1,11 @@
 package no.nav.k9.sak.domene.vedtak.ekstern;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -67,8 +67,8 @@ public class OverlappendeYtelserTjeneste {
         return doFinnOverlappendeYtelser(ref.getSaksnummer(), tilkjentYtelseTidslinje, new YtelseFilter(aktørYtelse.get()).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType())));
     }
 
-    public static Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(Saksnummer saksnummer, LocalDateTimeline<Boolean> tilkjentYtelseTimeline, YtelseFilter ytelseFilter) {
-        Map<Ytelse, NavigableSet<LocalDateInterval>> overlapp = new TreeMap<>();
+    private Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(Saksnummer saksnummer, LocalDateTimeline<Boolean> tilkjentYtelseTimeline, YtelseFilter ytelseFilter) {
+        Map<Ytelse, NavigableSet<LocalDateInterval>> overlappendeYtelser = new HashMap<>();
         if (!tilkjentYtelseTimeline.isEmpty()) {
 
             for (var yt : ytelseFilter.getFiltrertYtelser()) {
@@ -89,19 +89,21 @@ public class OverlappendeYtelserTjeneste {
                             .collect(Collectors.toCollection(LinkedHashSet::new));
 
                         var anvistTimeline = new LocalDateTimeline<>(anvistSegmenter, StandardCombinators::alwaysTrueForMatch);
-                        var intersection = anvistTimeline.intersection(tilkjentYtelseTimeline);
-                        if (!intersection.isEmpty()) {
-                            overlapp.put(yt, intersection.getDatoIntervaller());
+                        var ovelappendeTidslinje = anvistTimeline.intersection(tilkjentYtelseTimeline);
+                        if (!ovelappendeTidslinje.isEmpty()) {
+                            var ovelappendeDatoIntervaller = new TreeSet<>(overlappendeYtelser.getOrDefault(yt, new TreeSet<>()));
+                            ovelappendeDatoIntervaller.addAll(ovelappendeTidslinje.getLocalDateIntervals());
+                            overlappendeYtelser.put(yt, ovelappendeDatoIntervaller);
                         }
                     }
                 }
             }
         }
-        return overlapp;
+        return overlappendeYtelser;
     }
 
     private static NavigableSet<LocalDateInterval> innvilgelseOverlapperMedAnnenYtelse(LocalDateTimeline<Boolean> vilkårPeriode, DatoIntervallEntitet ytp) {
-        return vilkårPeriode.getDatoIntervaller()
+        return vilkårPeriode.getLocalDateIntervals()
             .stream()
             .map(it -> it.overlap(new LocalDateInterval(ytp.getFomDato(), ytp.getTomDato())))
             .filter(Optional::isPresent)
