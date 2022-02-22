@@ -85,7 +85,7 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public void leggTilSkjærinstidspunkt(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MigrerFraInfotrygdDto migrerFraInfotrygdDto) { // NOSONAR
-        var fagsak = fagsakRepository.hentSakGittSaksnummer(migrerFraInfotrygdDto.getSaksnummer().getVerdi()).orElseThrow();
+        var fagsak = fagsakRepository.hentSakGittSaksnummer(migrerFraInfotrygdDto.getSaksnummer()).orElseThrow();
 
         var behandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId()).orElseThrow();
 
