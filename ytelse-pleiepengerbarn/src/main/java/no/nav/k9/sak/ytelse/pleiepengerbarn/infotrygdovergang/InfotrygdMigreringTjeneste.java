@@ -193,15 +193,15 @@ public class InfotrygdMigreringTjeneste {
 
         utledetInfotrygdmigreringTilVurdering.forEach(localDate -> opprettMigrering(fagsakId, localDate, perioderTilVurdering));
 
-        deaktiverSkjæringstidspunkterSomErFlyttet(behandlingId, eksisterendeInfotrygdMigreringer, utledetInfotrygdmigreringTilVurdering);
+        deaktiverSkjæringstidspunkterSomErFlyttet(behandlingId, eksisterendeInfotrygdMigreringer, perioderTilVurdering, utledetInfotrygdmigreringTilVurdering);
     }
 
     private void deaktiverSkjæringstidspunkterSomErFlyttet(Long behandlingId,
                                                            List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer,
+                                                           NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
                                                            HashSet<LocalDate> utledetInfotrygdmigreringTilVurdering) {
-        NavigableSet<DatoIntervallEntitet> allePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandlingId);
         var migreringerSomSkalDeaktiveres = eksisterendeInfotrygdMigreringer.stream()
-            .filter(m -> allePerioder.stream().map(DatoIntervallEntitet::getFomDato).noneMatch(fom -> m.getSkjæringstidspunkt().equals(fom)))
+            .filter(m -> perioderTilVurdering.stream().anyMatch(periode -> periode.inkluderer(m.getSkjæringstidspunkt()) && !m.getSkjæringstidspunkt().equals(periode.getFomDato())))
             .collect(Collectors.toUnmodifiableSet());
         migreringerSomSkalDeaktiveres.forEach(m -> deaktiver(m, behandlingId, utledetInfotrygdmigreringTilVurdering));
     }
@@ -216,9 +216,10 @@ public class InfotrygdMigreringTjeneste {
         if (overlappendePeriode.isPresent()) {
             var harUtledetNyttVedStart = utledetInfotrygdmigreringTilVurdering.stream().anyMatch(nye -> overlappendePeriode.get().getFomDato().equals(nye));
             if (!harUtledetNyttVedStart) {
-                log.warn("Daktiverer infotrydmigrering uten å ha opprettet ny i ved start av periode");
+                throw new IllegalStateException("Skal ikke deaktivere skjæringstidspunkt for migrering uten å opprette nytt ved start av periode");
             }
         }
+        log.info("Deaktiverer skjæringstidspunkt " + m.getSkjæringstidspunkt() + " for fagsak " + m.getFagsakId());
         fagsakRepository.deaktiverInfotrygdmigrering(m.getFagsakId(), m.getSkjæringstidspunkt());
     }
 

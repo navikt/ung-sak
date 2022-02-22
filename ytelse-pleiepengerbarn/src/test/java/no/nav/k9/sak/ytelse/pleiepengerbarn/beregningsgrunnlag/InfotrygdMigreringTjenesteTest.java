@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -153,8 +152,44 @@ class InfotrygdMigreringTjenesteTest {
         tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
 
         var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isEqualTo(0);
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
+        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP.minusDays(10));
     }
+
+    @Test
+    void skal_rydde_infotrygdmigrering_for_periode_som_vurderes() {
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.plusDays(10)));
+        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.plusDays(2));
+
+        tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
+
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
+        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP);
+    }
+
+    @Test
+    void skal_rydde_infotrygdmigrering_for_to_perioder_som_vurderes() {
+        when(perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
+            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusMonths(1).plusDays(10))))));
+        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
+            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusMonths(1).plusDays(10))))));
+        lagInfotrygdPsbYtelsePerioder(List.of(
+            DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
+            DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusMonths(1).plusDays(10))));
+        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.plusDays(2));
+
+        tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
+
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(2);
+        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP.minusMonths(1));
+        assertThat(sakInfotrygdMigrering.get(1).getSkjæringstidspunkt()).isEqualTo(STP);
+
+    }
+
 
     @Test
     void skal_feile_ved_trukket_søknad() {
@@ -363,25 +398,24 @@ class InfotrygdMigreringTjenesteTest {
     private void lagInfotrygdPsbYtelsePerioder(List<DatoIntervallEntitet> perioder) {
         var iayBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         var aktørYtelseBuilder = InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder.oppdatere(Optional.empty());
-        var ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty());
 
-        var fom = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(Comparator.naturalOrder()).orElseThrow();
-        var tom = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(Comparator.naturalOrder()).orElseThrow();
 
-        ytelseBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
-            .medYtelseGrunnlag(ytelseBuilder.getGrunnlagBuilder().medArbeidskategori(Arbeidskategori.ARBEIDSTAKER).build())
-            .medKilde(Fagsystem.INFOTRYGD)
-            .medYtelseType(FagsakYtelseType.PSB);
-
-        perioder.stream().map(periode -> ytelseBuilder.getAnvistBuilder().medAnvistPeriode(periode)
+        perioder.forEach(periode -> {
+            var ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty());
+            ytelseBuilder.medPeriode(periode)
+                .medYtelseGrunnlag(ytelseBuilder.getGrunnlagBuilder().medArbeidskategori(Arbeidskategori.ARBEIDSTAKER).build())
+                .medKilde(Fagsystem.INFOTRYGD)
+                .medYtelseType(FagsakYtelseType.PSB);
+            var ytelseAnvist = ytelseBuilder.getAnvistBuilder().medAnvistPeriode(periode)
                 .medBeløp(BigDecimal.TEN)
                 .medDagsats(BigDecimal.TEN)
                 .medUtbetalingsgradProsent(BigDecimal.valueOf(100))
-                .build())
-            .forEach(ytelseBuilder::medYtelseAnvist);
+                .build();
+            ytelseBuilder.medYtelseAnvist(ytelseAnvist);
+            aktørYtelseBuilder.leggTilYtelse(ytelseBuilder);
+        });
 
-        aktørYtelseBuilder.leggTilYtelse(ytelseBuilder)
-            .medAktørId(fagsak.getAktørId());
+        aktørYtelseBuilder.medAktørId(fagsak.getAktørId());
         iayBuilder.leggTilAktørYtelse(aktørYtelseBuilder);
         iayTjeneste.lagreIayAggregat(behandling.getId(), iayBuilder);
     }
