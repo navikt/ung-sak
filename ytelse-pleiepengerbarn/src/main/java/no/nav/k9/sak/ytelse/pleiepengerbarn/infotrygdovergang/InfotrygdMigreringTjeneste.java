@@ -190,35 +190,19 @@ public class InfotrygdMigreringTjeneste {
         var utledetInfotrygdmigreringTilVurdering = new HashSet<LocalDate>();
         utledetInfotrygdmigreringTilVurdering.addAll(datoerForOverlapp);
         utledetInfotrygdmigreringTilVurdering.addAll(skjæringstidspunkterTilVurdering);
-
         utledetInfotrygdmigreringTilVurdering.forEach(localDate -> opprettMigrering(fagsakId, localDate, perioderTilVurdering));
-
-        deaktiverSkjæringstidspunkterSomErFlyttet(behandlingId, eksisterendeInfotrygdMigreringer, perioderTilVurdering, utledetInfotrygdmigreringTilVurdering);
+        deaktiverSkjæringstidspunkterSomErFlyttet(eksisterendeInfotrygdMigreringer, perioderTilVurdering);
     }
 
-    private void deaktiverSkjæringstidspunkterSomErFlyttet(Long behandlingId,
-                                                           List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer,
-                                                           NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
-                                                           HashSet<LocalDate> utledetInfotrygdmigreringTilVurdering) {
+    private void deaktiverSkjæringstidspunkterSomErFlyttet(List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer,
+                                                           NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         var migreringerSomSkalDeaktiveres = eksisterendeInfotrygdMigreringer.stream()
             .filter(m -> perioderTilVurdering.stream().anyMatch(periode -> periode.inkluderer(m.getSkjæringstidspunkt()) && !m.getSkjæringstidspunkt().equals(periode.getFomDato())))
             .collect(Collectors.toUnmodifiableSet());
-        migreringerSomSkalDeaktiveres.forEach(m -> deaktiver(m, behandlingId, utledetInfotrygdmigreringTilVurdering));
+        migreringerSomSkalDeaktiveres.forEach(this::deaktiver);
     }
 
-    private void deaktiver(SakInfotrygdMigrering m, Long behandlingId, HashSet<LocalDate> utledetInfotrygdmigreringTilVurdering) {
-        var allePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandlingId);
-        if (allePerioder.stream().map(DatoIntervallEntitet::getFomDato).anyMatch(fom -> m.getSkjæringstidspunkt().equals(fom))) {
-            throw new IllegalStateException("Skal ikke deaktivere migrering for eksisterende skjærinstidspunkt");
-        }
-        var overlappendePeriode = allePerioder.stream()
-            .filter(p -> p.inkluderer(m.getSkjæringstidspunkt())).findFirst();
-        if (overlappendePeriode.isPresent()) {
-            var harUtledetNyttVedStart = utledetInfotrygdmigreringTilVurdering.stream().anyMatch(nye -> overlappendePeriode.get().getFomDato().equals(nye));
-            if (!harUtledetNyttVedStart) {
-                throw new IllegalStateException("Skal ikke deaktivere skjæringstidspunkt for migrering uten å opprette nytt ved start av periode");
-            }
-        }
+    private void deaktiver(SakInfotrygdMigrering m) {
         log.info("Deaktiverer skjæringstidspunkt " + m.getSkjæringstidspunkt() + " for fagsak " + m.getFagsakId());
         fagsakRepository.deaktiverInfotrygdmigrering(m.getFagsakId(), m.getSkjæringstidspunkt());
     }
