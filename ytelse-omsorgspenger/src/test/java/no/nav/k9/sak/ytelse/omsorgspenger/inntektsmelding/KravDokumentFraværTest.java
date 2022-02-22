@@ -466,7 +466,7 @@ class KravDokumentFraværTest {
         assertThat(fp1.getPeriode().getTom()).isEqualTo(LocalDate.now());
         assertThat(fp1.getPeriode().getArbeidsgiver()).isEqualTo(Arbeidsgiver.virksomhet("000000000"));
         assertThat(fp1.getPeriode().getArbeidsforholdRef()).isEqualTo(InternArbeidsforholdRef.nullRef());
-        assertThat(fp1.getSamtidigeKrav()).isEqualTo(SamtidigKravStatus.søknadFinnes().oppdaterRefusjonskravTrekt());
+        assertThat(fp1.getSamtidigeKrav()).isEqualTo(SamtidigKravStatus.søknadFinnes().oppdaterInntektsmeldingTrekt());
     }
 
     @Test
@@ -551,7 +551,7 @@ class KravDokumentFraværTest {
         assertThat(fp1.getPeriode().getTom()).isEqualTo(LocalDate.now());
         assertThat(fp1.getPeriode().getArbeidsgiver()).isEqualTo(Arbeidsgiver.virksomhet("000000000"));
         assertThat(fp1.getPeriode().getArbeidsforholdRef()).isEqualTo(InternArbeidsforholdRef.nullRef()); //bare IM som har arbeidsforhold, og kravet fra IM er trekt
-        assertThat(fp1.getSamtidigeKrav()).isEqualTo(SamtidigKravStatus.søknadFinnes().oppdaterRefusjonskravTrekt());
+        assertThat(fp1.getSamtidigeKrav()).isEqualTo(SamtidigKravStatus.søknadFinnes().oppdaterInntektsmeldingTrekt());
     }
 
     @Test

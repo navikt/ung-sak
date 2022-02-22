@@ -26,32 +26,24 @@ public class KravDokumentFravær {
     private static final Set<KravDokumentType> SØKNAD_TYPER = Set.of(KravDokumentType.SØKNAD);
     private static final Set<KravDokumentType> IM_TYPER = Set.of(KravDokumentType.INNTEKTSMELDING, KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV);
 
+    private static final BiPredicate<KravDokumentType, VurdertSøktPeriode<OppgittFraværPeriode>> KUN_FRAVÆR_PERIODE_MED_REFUSJONSKRAV_ELLER_TREKK_AV_DAGER = (dokumentType, vurdertPeriode) -> dokumentType == KravDokumentType.INNTEKTSMELDING || harTrektKrav(vurdertPeriode.getRaw().getFraværPerDag());
+    private static final BiPredicate<KravDokumentType, VurdertSøktPeriode<OppgittFraværPeriode>> KUN_FRAVÆR_PERIODE_UTEN_REFUSJONSKRAV_ELLER_TREKK_AV_DAGER = (dokumentType, vurdertPeriode) -> dokumentType == KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV || harTrektKrav(vurdertPeriode.getRaw().getFraværPerDag());
+    private static final BiPredicate<KravDokumentType, VurdertSøktPeriode<OppgittFraværPeriode>> IKKE_FILTRER = (dokumentType, vurdertPeriode) -> true;
+
     public List<WrappedOppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
 
-        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSøknad = utledKravFraSøknad(fraværFraKravdokumenter);
-        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderRefusjonskrav = utledRefusjonskrav(fraværFraKravdokumenter);
-        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> støttendeIM = utledStøttendeIM(fraværFraKravdokumenter);
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSøknad = utledFraværsperioder(fraværFraKravdokumenter, SØKNAD_TYPER, IKKE_FILTRER);
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderImMedRefusjonskrav = utledFraværsperioder(fraværFraKravdokumenter, IM_TYPER, KUN_FRAVÆR_PERIODE_MED_REFUSJONSKRAV_ELLER_TREKK_AV_DAGER);
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderImUtenRefusjonskrav = utledFraværsperioder(fraværFraKravdokumenter, IM_TYPER, KUN_FRAVÆR_PERIODE_UTEN_REFUSJONSKRAV_ELLER_TREKK_AV_DAGER);
 
-        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSøknadStøtteIM = slåSammenSøknaderOgStøttendeIm(fraværsperioderSøknad, støttendeIM);
-        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSammenslått = slåSammenSøknadOgInntektsmelding(fraværsperioderSøknadStøtteIM, fraværsperioderRefusjonskrav);
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> søknadOgImUtenRefusjonskravSammenslått = slåSammenSøknadOgImUtenRefusjonskrav(fraværsperioderSøknad, fraværsperioderImUtenRefusjonskrav);
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> søknadOgAlleImSammenslått = slåSammenSøknadOgImMedRefusjonskrav(søknadOgImUtenRefusjonskravSammenslått, fraværsperioderImMedRefusjonskrav);
 
-        return fraværsperioderSammenslått.values().stream()
+        return søknadOgAlleImSammenslått.values().stream()
             .map(KravDokumentFravær::compress)
             .flatMap(LocalDateTimeline::stream)
             .map(LocalDateSegment::getValue)
             .toList();
-    }
-
-    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> utledRefusjonskrav(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
-        return utledFraværsperioder(fraværFraKravdokumenter, IM_TYPER, ignorerFraværPerioderUtenRefusjon);
-    }
-
-    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> utledKravFraSøknad(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
-        return utledFraværsperioder(fraværFraKravdokumenter, SØKNAD_TYPER, ikkeFiltrer);
-    }
-
-    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> utledStøttendeIM(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
-        return utledFraværsperioder(fraværFraKravdokumenter, Set.of(KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV), ikkeFiltrer);
     }
 
     private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> utledFraværsperioder(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter, Set<KravDokumentType> kravdokumentTyper, BiPredicate<KravDokumentType, VurdertSøktPeriode<OppgittFraværPeriode>> periodefilter) {
@@ -80,52 +72,52 @@ public class KravDokumentFravær {
         return mapByAktivitet;
     }
 
-    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> slåSammenSøknadOgInntektsmelding(
+    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> slåSammenSøknadOgImMedRefusjonskrav(
         Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSøknad,
-        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderIm) {
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderImMedRefusjonskrav) {
 
         // begynner med fraværsperioder fra søknad som seed
         var fraværsperioderSammenslått = new LinkedHashMap<>(fraværsperioderSøknad);
 
         // merge med fraværsperioder fra inntektsmelding
-        fraværsperioderIm.forEach((aktivitetIdent, tidslinjeIm) -> {
+        fraværsperioderImMedRefusjonskrav.forEach((aktivitetIdent, tidslinjeIm) -> {
             var tidslinjeSøknad = finnSøknadTidslinje(fraværsperioderSøknad, aktivitetIdent);
-            var tidlinjeImBeriket = berikMedSøknad(tidslinjeIm, tidslinjeSøknad);
+            var tidslinjeSøknadOgRefusjonskrav = slåSammenSøknadOgRefusjonskrav(tidslinjeIm, tidslinjeSøknad);
 
             ryddOppIBerørteArbeidsforhold(fraværsperioderSammenslått, aktivitetIdent, tidslinjeIm);
 
-            var tidslinjeSammenslått = fraværsperioderSammenslått.getOrDefault(aktivitetIdent, (LocalDateTimeline<WrappedOppgittFraværPeriode>) LocalDateTimeline.EMPTY_TIMELINE);
-
-            var tidslinjeRefusjon = tidlinjeImBeriket.filterValue(v -> v.getKravDokumentType() != KravDokumentType.SØKNAD);
-            fraværsperioderSammenslått.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeSammenslått, tidslinjeRefusjon));
+            var tidslinjeRefusjon = tidslinjeSøknadOgRefusjonskrav.filterValue(v -> v.getKravDokumentType() != KravDokumentType.SØKNAD);
+            oppdaterTidslinjeForAktivitet(fraværsperioderSammenslått, aktivitetIdent, tidslinjeRefusjon);
 
             //for de deler hvor IM er trekt, 'vinner' søknad. Søknad er registret på aktivitet uten arbeidsforhold satt, så må oppdateres der
-            var tidslinjeRefusjonskravTrukketSøknadFinnes = tidlinjeImBeriket.filterValue(v -> v.getKravDokumentType() == KravDokumentType.SØKNAD);
+            var tidslinjeRefusjonskravTrukketSøknadFinnes = tidslinjeSøknadOgRefusjonskrav.filterValue(v -> v.getKravDokumentType() == KravDokumentType.SØKNAD);
             if (!tidslinjeRefusjonskravTrukketSøknadFinnes.isEmpty()) {
                 AktivitetIdentifikator søknadAktivitetIdent = finnSøknadAktivitetIdent(fraværsperioderSøknad.keySet(), aktivitetIdent).orElseThrow();
-                tidslinjeSammenslått = fraværsperioderSammenslått.getOrDefault(søknadAktivitetIdent, (LocalDateTimeline<WrappedOppgittFraværPeriode>) LocalDateTimeline.EMPTY_TIMELINE);
-                fraværsperioderSammenslått.put(søknadAktivitetIdent, slåSammenTidslinjer(tidslinjeSammenslått, tidslinjeRefusjonskravTrukketSøknadFinnes));
+                oppdaterTidslinjeForAktivitet(fraværsperioderSammenslått, søknadAktivitetIdent, tidslinjeRefusjonskravTrukketSøknadFinnes);
             }
         });
         return fraværsperioderSammenslått;
     }
 
-    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> slåSammenSøknaderOgStøttendeIm(
-        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSøknad,
-        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> støttendeIM) {
-
-        // registrerer på søknadene hvor det finnes samtidige fraværsperioder fra IM uten refusjonskrav, her kalt støttende IM
-        var fraværsperioderSøknadMedStøttendeIM = new LinkedHashMap<>(fraværsperioderSøknad);
-        støttendeIM.forEach((aktivitetIdent, tidslinjeIm) -> {
-            var tidslinjeSøknad = finnSøknadTidslinje(fraværsperioderSøknadMedStøttendeIM, aktivitetIdent);
-            fraværsperioderSøknadMedStøttendeIM.put(aktivitetIdent, registrerStøtteFraInntektsmeldinger(tidslinjeSøknad, tidslinjeIm));
-        });
-        return fraværsperioderSøknadMedStøttendeIM;
+    void oppdaterTidslinjeForAktivitet(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSammenslått, AktivitetIdentifikator aktivitetIdent, LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinje) {
+        var tidslinjeSammenslått = fraværsperioderSammenslått.getOrDefault(aktivitetIdent, (LocalDateTimeline<WrappedOppgittFraværPeriode>) LocalDateTimeline.EMPTY_TIMELINE);
+        fraværsperioderSammenslått.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeSammenslått, tidslinje));
     }
 
-    private static BiPredicate<KravDokumentType, VurdertSøktPeriode<OppgittFraværPeriode>> ignorerFraværPerioderUtenRefusjon = (dokumentType, vurdertPeriode) -> !erImUtenRefusjonskravOgUtenTrektPeriode(dokumentType, vurdertPeriode);
+    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> slåSammenSøknadOgImUtenRefusjonskrav(
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderSøknad,
+        Map<AktivitetIdentifikator, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsperioderImUtenRefusjonskrav) {
 
-    private static BiPredicate<KravDokumentType, VurdertSøktPeriode<OppgittFraværPeriode>> ikkeFiltrer = (dokumentType, vurdertPeriode) -> true;
+        // registrerer på søknadene hvor det finnes samtidige fraværsperioder fra IM uten refusjonskrav
+        var resultat = new LinkedHashMap<>(fraværsperioderSøknad);
+        fraværsperioderImUtenRefusjonskrav.forEach((aktivitetIdent, tidslinjeIm) -> {
+            finnSøknadAktivitetIdent(resultat.keySet(), aktivitetIdent).ifPresent(søknadAktivitetIdent -> {
+                var tidslinjeSøknad = resultat.get(søknadAktivitetIdent);
+                resultat.put(søknadAktivitetIdent, registrerStøtteFraInntektsmeldinger(tidslinjeSøknad, tidslinjeIm));
+            });
+        });
+        return resultat;
+    }
 
     private SamtidigKravStatus initiellKravtype(KravDokumentType type, Duration fraværPerDag) {
         return switch (type) {
@@ -135,7 +127,7 @@ public class KravDokumentFravær {
             case INNTEKTSMELDING -> harTrektKrav(fraværPerDag)
                 ? SamtidigKravStatus.refusjonskravTrekt()
                 : SamtidigKravStatus.refusjonskravFinnes();
-            case INNTEKTSMELDING_UTEN_REFUSJONSKRAV -> SamtidigKravStatus.støttendeInntektsmeldingFinnes();
+            case INNTEKTSMELDING_UTEN_REFUSJONSKRAV -> SamtidigKravStatus.inntektsmeldingUtenRefusjonskravFinnes();
         };
     }
 
@@ -149,7 +141,7 @@ public class KravDokumentFravær {
      * - oppdaterer SamtidigKravStatus
      * - erstatter med søknad hvis IM er trukket
      */
-    private LocalDateTimeline<WrappedOppgittFraværPeriode> berikMedSøknad(LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeIm, LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeSøknad) {
+    private LocalDateTimeline<WrappedOppgittFraværPeriode> slåSammenSøknadOgRefusjonskrav(LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeIm, LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeSøknad) {
         return tidslinjeIm.combine(tidslinjeSøknad, this::oppdaterPeriode, LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
 
@@ -170,14 +162,7 @@ public class KravDokumentFravær {
             .findFirst();
     }
 
-    private static boolean erImUtenRefusjonskravOgUtenTrektPeriode(KravDokumentType type, VurdertSøktPeriode<OppgittFraværPeriode> vurdertPeriode) {
-        var erTrektPeriode = vurdertPeriode.getRaw().getFraværPerDag() != null && vurdertPeriode.getRaw().getFraværPerDag().isZero();
-        return type == KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV && !erTrektPeriode;
-    }
-
-    private LocalDateSegment<WrappedOppgittFraværPeriode> oppdaterPeriode(LocalDateInterval di,
-                                                                          LocalDateSegment<WrappedOppgittFraværPeriode> førsteVersjon,
-                                                                          LocalDateSegment<WrappedOppgittFraværPeriode> sisteVersjon) {
+    private LocalDateSegment<WrappedOppgittFraværPeriode> oppdaterPeriode(LocalDateInterval di, LocalDateSegment<WrappedOppgittFraværPeriode> førsteVersjon, LocalDateSegment<WrappedOppgittFraværPeriode> sisteVersjon) {
         if (førsteVersjon == null && sisteVersjon != null) {
             return nyPeriode(di, sisteVersjon);
         } else if (sisteVersjon == null && førsteVersjon != null) {
@@ -221,7 +206,7 @@ public class KravDokumentFravær {
         if (!imErTrekt) {
             return status.oppdaterRefusjonskravFinnes();
         }
-        if (status.refusjonskrav() == SamtidigKravStatus.KravStatus.FINNES) {
+        if (status.inntektsmeldingMedRefusjonskrav() == SamtidigKravStatus.KravStatus.FINNES) {
             //kan ikke sette TREKT, siden det finnes krav fra et annet arbeidsforhold
             return status;
         }
@@ -234,20 +219,20 @@ public class KravDokumentFravær {
         }
         WrappedOppgittFraværPeriode wofpSøknad = søknad.getValue();
         OppgittFraværPeriode fp = new OppgittFraværPeriode(di.getFomDato(), di.getTomDato(), wofpSøknad.getPeriode());
-        boolean kanOppdatereStatus = wofpSøknad.getSamtidigeKrav().støttendeInntektsmelding() != SamtidigKravStatus.KravStatus.FINNES;
+        boolean kanOppdatereStatus = wofpSøknad.getSamtidigeKrav().inntektsmeldingUtenRefusjonskrav() != SamtidigKravStatus.KravStatus.FINNES;
         var nyStatus = harTrektKrav(støttendeIm.getValue()) ? SamtidigKravStatus.KravStatus.TREKT : SamtidigKravStatus.KravStatus.FINNES;
         SamtidigKravStatus samtidigeKrav = kanOppdatereStatus
-            ? wofpSøknad.getSamtidigeKrav().oppdaterStøttendeImStatus(nyStatus)
+            ? wofpSøknad.getSamtidigeKrav().oppdaterInntektsmeldingUtenRefusjonskravStatus(nyStatus)
             : wofpSøknad.getSamtidigeKrav(); //verdi aggregeres på arbeidsgiver. siden OK at søker er borte fra bare ett arbeidsforhold, kan vi ikke sette TREKT som aggregert status når finnes JA på ett arbeidsforhold
         WrappedOppgittFraværPeriode wofp = new WrappedOppgittFraværPeriode(fp, wofpSøknad.getInnsendingstidspunkt(), wofpSøknad.getKravDokumentType(), wofpSøknad.getSøknadsfristUtfall(), samtidigeKrav);
         return new LocalDateSegment<>(di, wofp);
     }
 
-    private boolean harTrektKrav(WrappedOppgittFraværPeriode im) {
+    private static boolean harTrektKrav(WrappedOppgittFraværPeriode im) {
         return harTrektKrav(im.getPeriode().getFraværPerDag());
     }
 
-    private boolean harTrektKrav(Duration fraværPrDag) {
+    private static boolean harTrektKrav(Duration fraværPrDag) {
         return fraværPrDag != null && fraværPrDag.isZero();
     }
 
