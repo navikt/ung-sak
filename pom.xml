@@ -20,6 +20,7 @@
         <!--Ytelsespesifikke moduler -->
         <module>ytelse-omsorgspenger</module>
         <module>ytelse-pleiepengerbarn</module>
+        <module>ytelse-opplaeringspenger</module>
         <module>ytelse-frisinn</module>
         <module>ytelse-unntaksbehandling</module>
 
@@ -338,7 +339,11 @@
                 <artifactId>ytelse-omsorgspenger</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>no.nav.k9.sak.ytelse</groupId>
+                <artifactId>ytelse-opplaeringspenger</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
                 <artifactId>soknad-frisinn-jakarta</artifactId>
