@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.vedtak.ekstern;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -22,6 +23,7 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
@@ -125,9 +127,15 @@ public class OverlappendeYtelserTjeneste {
             .map(BeregningsresultatEntitet::getBeregningsresultatPerioder)
             .filter(perioder -> !perioder.isEmpty())
             .map(perioder -> perioder.stream()
-                .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true))
+                .filter(brPeriode -> utbetalingsgradStørreEnn0(brPeriode))
+                .map(brPeriode -> new LocalDateSegment<>(brPeriode.getPeriode().getFomDato(), brPeriode.getPeriode().getTomDato(), true))
                 .collect(Collectors.toSet()))
             .orElse(Set.of());
         return new LocalDateTimeline<>(tilkjentYtelsePerioder);
+    }
+
+    private boolean utbetalingsgradStørreEnn0(BeregningsresultatPeriode brPeriode) {
+        var utbetalingsgrad = brPeriode.getLavestUtbetalingsgrad().orElse(BigDecimal.ZERO);
+        return utbetalingsgrad.compareTo(BigDecimal.ZERO) > 0;
     }
 }
