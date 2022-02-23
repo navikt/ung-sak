@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.iverksett;
 
 import java.util.Optional;
 
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 public interface OpprettProsessTaskIverksett {
@@ -11,6 +12,7 @@ public interface OpprettProsessTaskIverksett {
         opprettIverksettingstasker(behandling);
     }
 
-    default void opprettYtelsesSpesifikkeTasks(@SuppressWarnings("unused") Behandling behandling) {
+    default Optional<ProsessTaskData> opprettYtelsesSpesifikkeTasks(@SuppressWarnings("unused") Behandling behandling) {
+        return Optional.empty();
     }
 }
