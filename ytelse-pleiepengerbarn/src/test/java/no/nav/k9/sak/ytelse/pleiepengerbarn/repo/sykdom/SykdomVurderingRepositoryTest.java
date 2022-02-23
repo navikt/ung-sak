@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 import jakarta.inject.Inject;
@@ -100,6 +101,58 @@ class SykdomVurderingRepositoryTest {
         repo.lagre(vurdering, vurderinger);
         repo.lagre(versjon1);
         repo.lagre(versjon2);
+    }
+
+    @Test
+    void lagreVurderingVersjonBesluttet() throws Exception {
+        AktørId barnAktørId = new AktørId("023456789");
+        final SykdomPerson barn = repo.hentEllerLagre(new SykdomPerson(
+            barnAktørId,
+            barnAktørId.getId()
+        ));
+        final SykdomVurderinger vurderinger = repo.hentEllerLagre(new SykdomVurderinger(
+            barn,
+            "test",
+            LocalDateTime.now()
+        ));
+
+        final SykdomVurdering vurdering = new SykdomVurdering(
+            SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
+            Collections.emptyList(),
+            "test",
+            LocalDateTime.now()
+        );
+        vurdering.setRangering(1L);
+
+        final SykdomPerson mor = repo.hentEllerLagre(new SykdomPerson(
+            new AktørId("222456789"),
+            "22211111111"
+        ));
+
+        final SykdomVurderingVersjon vurderingVersjonUtenBesluttet = new SykdomVurderingVersjon(
+            vurdering,
+            "Lorem Ipsum",
+            Resultat.IKKE_OPPFYLT,
+            Long.valueOf(1L),
+            "",
+            LocalDateTime.now(),
+            UUID.randomUUID(),
+            "abc",
+            mor,
+            null,
+            Collections.emptyList(),
+            Arrays.asList()
+        );
+
+        repo.lagre(vurdering, vurderinger);
+        repo.lagre(vurderingVersjonUtenBesluttet);
+        SykdomVurderingVersjonBesluttet besluttet = new SykdomVurderingVersjonBesluttet("test", LocalDateTime.now(), vurderingVersjonUtenBesluttet);
+        repo.lagre(besluttet);
+
+        Optional<SykdomVurderingVersjonBesluttet> versjonBesluttet = repo.hentBesluttet(vurderingVersjonUtenBesluttet);
+
+        assertThat(versjonBesluttet.isPresent());
+        assertThat(versjonBesluttet.get().getId()).isEqualTo(vurderingVersjonUtenBesluttet.getId());
     }
 
     @Test

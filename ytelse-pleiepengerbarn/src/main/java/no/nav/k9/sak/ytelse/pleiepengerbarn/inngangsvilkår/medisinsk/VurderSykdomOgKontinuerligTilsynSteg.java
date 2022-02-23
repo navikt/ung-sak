@@ -44,6 +44,7 @@ import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PleiePeriode;
@@ -53,10 +54,13 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
 @BehandlingStegRef(kode = "VURDER_MEDISINSK")
@@ -73,6 +77,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private VilkårResultatRepository vilkårResultatRepository;
     private SykdomVurderingService sykdomVurderingService;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private SykdomDokumentRepository sykdomDokumentRepository;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     VurderSykdomOgKontinuerligTilsynSteg() {
@@ -85,7 +90,8 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                                                 @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                 SykdomVurderingService sykdomVurderingService,
                                                 SykdomGrunnlagRepository sykdomGrunnlagRepository,
-                                                SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
+                                                SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+                                                SykdomDokumentRepository sykdomDokumentRepository) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
@@ -94,6 +100,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         this.sykdomVurderingService = sykdomVurderingService;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
+        this.sykdomDokumentRepository = sykdomDokumentRepository;
     }
 
     private static final <T> NavigableSet<T> union(NavigableSet<T> s1, NavigableSet<T> s2) {
@@ -180,6 +187,18 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
     private boolean trengerAksjonspunkt(BehandlingskontrollKontekst kontekst, final Behandling behandling,
                                         final SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
+        Optional<SykdomVurderingVersjon> ubesluttet = sykdomGrunnlagBehandling.getGrunnlag().getVurderinger()
+            .stream()
+            .filter(v -> !v.isBesluttet())
+            .findFirst();
+        if (ubesluttet.isEmpty()) {
+            AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
+            boolean dokumenterUtenUtkvittering = !sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(pleietrengende).isEmpty();
+            if (dokumenterUtenUtkvittering) {
+                return false;
+            }
+        }
+
         final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()));
         final boolean trengerInput = !sykdomAksjonspunkt.isKanLøseAksjonspunkt() || sykdomAksjonspunkt.isHarDataSomIkkeHarBlittTattMedIBehandling();
         final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && sykdomGrunnlagBehandling.isFørsteGrunnlagPåBehandling();
