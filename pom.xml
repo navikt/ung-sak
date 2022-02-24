@@ -387,7 +387,7 @@
             <dependency>
                 <groupId>no.nav.fpsak.nare</groupId>
                 <artifactId>fpsak-nare-core</artifactId>
-                <version>2.2.0</version>
+                <version>2.2.2</version>
             </dependency>
 
             <!-- Prosjektets egne TEST AVHENGIGHETER -->
