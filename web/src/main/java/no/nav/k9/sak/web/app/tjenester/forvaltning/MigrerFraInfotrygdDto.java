@@ -9,7 +9,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import no.nav.k9.abac.AbacAttributt;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_ABSENT, content = JsonInclude.Include.NON_EMPTY)
@@ -24,14 +27,14 @@ public class MigrerFraInfotrygdDto {
 
     @JsonProperty(value = "saksnummer", required = true)
     @NotNull
-    @Valid
-    private SaksnummerDto saksnummer;
-
+    @Size(max = 19)
+    @Pattern(regexp = "^[a-zA-Z0-9]*$")
+    private String saksnummer;
 
     public MigrerFraInfotrygdDto() {
     }
 
-    public MigrerFraInfotrygdDto(LocalDate skjæringstidspunkt, SaksnummerDto saksnummer) {
+    public MigrerFraInfotrygdDto(LocalDate skjæringstidspunkt, String saksnummer) {
         this.skjæringstidspunkt = skjæringstidspunkt;
         this.saksnummer = saksnummer;
     }
@@ -40,7 +43,10 @@ public class MigrerFraInfotrygdDto {
         return skjæringstidspunkt;
     }
 
-    public SaksnummerDto getSaksnummer() {
-        return saksnummer;
+    @AbacAttributt("saksnummer")
+    public Saksnummer getSaksnummer() {
+        return new Saksnummer(saksnummer);
     }
+
+
 }
