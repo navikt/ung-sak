@@ -22,7 +22,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.FraKalkulusMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
@@ -305,22 +304,23 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         if (!togglePsbMigrering) {
             return Collections.emptySet();
         }
-        return beregnInput.stream().flatMap(i -> i.getInputOverstyringPeriode().stream()).flatMap(overstyrtPeriode -> {
-            LocalDate stp = overstyrtPeriode.getSkjæringstidspunkt();
-            return overstyrtPeriode.getAktivitetOverstyringer().stream()
-                .filter(a -> a.getAktivitetStatus().erArbeidstaker())
-                .map(a -> InntektsmeldingBuilder.builder()
-                    .medInnsendingstidspunkt(stp.atStartOfDay())
-                    .medArbeidsgiver(a.getArbeidsgiver())
-                    .medStartDatoPermisjon(stp)
-                    .medRefusjon(a.getRefusjonPrÅr() == null ? BigDecimal.ZERO :
-                        a.getRefusjonPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP), a.getOpphørRefusjon())
-                    .medBeløp(a.getInntektPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP))
-                    .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
-                    .medJournalpostId("OVERSTYRT_FOR_INFOTRYGDMIGRERING")
-                    .medKanalreferanse("OVERSTYRT_FOR_INFOTRYGDMIGRERING")
-                    .build());
-        }).collect(Collectors.toSet());
+        return beregnInput.stream().flatMap(i -> i.getInputOverstyringPeriode().stream())
+            .flatMap(overstyrtPeriode -> {
+                LocalDate stp = overstyrtPeriode.getSkjæringstidspunkt();
+                return overstyrtPeriode.getAktivitetOverstyringer().stream()
+                    .filter(a -> a.getAktivitetStatus().erArbeidstaker())
+                    .map(a -> InntektsmeldingBuilder.builder()
+                        .medInnsendingstidspunkt(stp.atStartOfDay())
+                        .medArbeidsgiver(a.getArbeidsgiver())
+                        .medStartDatoPermisjon(stp)
+                        .medRefusjon(a.getRefusjonPrÅr() == null ? BigDecimal.ZERO :
+                            a.getRefusjonPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP), a.getOpphørRefusjon())
+                        .medBeløp(a.getInntektPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP))
+                        .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
+                        .medJournalpostId("OVERSTYRT_FOR_INFOTRYGDMIGRERING" + stp)
+                        .medKanalreferanse("OVERSTYRT_FOR_INFOTRYGDMIGRERING" + stp)
+                        .build());
+            }).collect(Collectors.toSet());
     }
 
     protected SamletKalkulusResultat mapFraTilstand(Collection<TilstandResponse> response, Collection<BgRef> bgReferanser) {
