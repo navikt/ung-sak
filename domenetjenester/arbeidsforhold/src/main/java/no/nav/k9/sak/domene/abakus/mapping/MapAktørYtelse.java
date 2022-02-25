@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.abakus.iaygrunnlag.Aktør;
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.Organisasjon;
 import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.PersonIdent;
 import no.nav.abakus.iaygrunnlag.ytelse.v1.AnvisningDto;
+import no.nav.abakus.iaygrunnlag.ytelse.v1.AnvistAndelDto;
 import no.nav.abakus.iaygrunnlag.ytelse.v1.FordelingDto;
 import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelseDto;
 import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelseGrunnlagDto;
@@ -22,6 +24,8 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
+import no.nav.k9.sak.domene.iay.modell.YtelseAnvistAndel;
+import no.nav.k9.sak.domene.iay.modell.YtelseAnvistAndelBuilder;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvistBuilder;
 import no.nav.k9.sak.domene.iay.modell.YtelseBuilder;
 import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlag;
@@ -30,7 +34,9 @@ import no.nav.k9.sak.domene.iay.modell.YtelseStørrelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseStørrelseBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.typer.Stillingsprosent;
@@ -38,11 +44,11 @@ import no.nav.k9.sak.typer.Stillingsprosent;
 public class MapAktørYtelse {
 
     private static final Comparator<YtelseDto> COMP_YTELSE = Comparator
-            .comparing(YtelseDto::getSaksnummer, Comparator.nullsLast(Comparator.naturalOrder()))
-            .thenComparing(dto -> dto.getYtelseType() == null ? null : dto.getYtelseType().getKode(), Comparator.nullsLast(Comparator.naturalOrder()))
-            .thenComparing(dto -> dto.getTemaUnderkategori() == null ? null : dto.getTemaUnderkategori().getKode(), Comparator.nullsLast(Comparator.naturalOrder()))
-            .thenComparing(dto -> dto.getPeriode().getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
-            .thenComparing(dto -> dto.getPeriode().getTom(), Comparator.nullsLast(Comparator.naturalOrder()));
+        .comparing(YtelseDto::getSaksnummer, Comparator.nullsLast(Comparator.naturalOrder()))
+        .thenComparing(dto -> dto.getYtelseType() == null ? null : dto.getYtelseType().getKode(), Comparator.nullsLast(Comparator.naturalOrder()))
+        .thenComparing(dto -> dto.getTemaUnderkategori() == null ? null : dto.getTemaUnderkategori().getKode(), Comparator.nullsLast(Comparator.naturalOrder()))
+        .thenComparing(dto -> dto.getPeriode().getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
+        .thenComparing(dto -> dto.getPeriode().getTom(), Comparator.nullsLast(Comparator.naturalOrder()));
 
     private MapAktørYtelse() {
         // skjul public constructor
@@ -72,7 +78,9 @@ public class MapAktørYtelse {
             return builder;
         }
 
-        /** Returnerer person sin aktørId. Denne trenger ikke være samme som søkers aktørid men kan f.eks. være annen part i en sak. */
+        /**
+         * Returnerer person sin aktørId. Denne trenger ikke være samme som søkers aktørid men kan f.eks. være annen part i en sak.
+         */
         private AktørId tilAktørId(PersonIdent person) {
             if (!(person instanceof AktørIdPersonident)) {
                 throw new IllegalArgumentException("Støtter kun " + AktørIdPersonident.class.getSimpleName() + " her");
@@ -103,12 +111,37 @@ public class MapAktørYtelse {
         private YtelseAnvist mapYtelseAnvist(AnvisningDto anvisning, YtelseAnvistBuilder anvistBuilder) {
             if (anvisning == null)
                 return null;
+            if (anvisning.getAndeler() != null) {
+                anvisning.getAndeler().stream()
+                    .map(this::mapTilAnvistAndel)
+                    .forEach(anvistBuilder::leggTilYtelseAnvistAndel);
+            }
             return anvistBuilder
                 .medAnvistPeriode(mapPeriode(anvisning.getPeriode()))
                 .medBeløp(anvisning.getBeløp())
                 .medDagsats(anvisning.getDagsats())
                 .medUtbetalingsgradProsent(anvisning.getUtbetalingsgrad())
                 .build();
+        }
+
+        private YtelseAnvistAndel mapTilAnvistAndel(AnvistAndelDto a) {
+            return YtelseAnvistAndelBuilder.ny().medDagsats(a.getDagsats())
+                .medInntektskategori(a.getInntektskategori())
+                .medRefusjonsgrad(a.getRefusjonsgrad())
+                .medUtbetalingsgrad(a.getUtbetalingsgrad())
+                .medArbeidsgiver(mapArbeidsgiver(a.getArbeidsgiver()))
+                .medArbeidsforholdRef(a.getArbeidsforholdId() == null ? InternArbeidsforholdRef.nullRef() : InternArbeidsforholdRef.ref(a.getArbeidsforholdId()))
+                .build();
+        }
+
+        private Arbeidsgiver mapArbeidsgiver(Aktør arbeidsgiver) {
+            if (arbeidsgiver == null) {
+                return null;
+            }
+            if (arbeidsgiver.getErOrganisasjon()) {
+                return Arbeidsgiver.virksomhet(new OrgNummer(arbeidsgiver.getIdent()));
+            }
+            return Arbeidsgiver.person(new AktørId(arbeidsgiver.getIdent()));
         }
 
         private YtelseGrunnlag mapYtelseGrunnlag(YtelseGrunnlagDto grunnlag, YtelseGrunnlagBuilder grunnlagBuilder) {
@@ -190,7 +223,7 @@ public class MapAktørYtelse {
             ytelse.getYtelseGrunnlag().map(this::mapYtelseGrunnlag).ifPresent(dto::setGrunnlag);
 
             Comparator<AnvisningDto> compAnvisning = Comparator
-                .comparing((AnvisningDto anv) -> anv.getPeriode().getFom() , Comparator.nullsFirst(Comparator.naturalOrder()))
+                .comparing((AnvisningDto anv) -> anv.getPeriode().getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
                 .thenComparing(anv -> anv.getPeriode().getTom(), Comparator.nullsLast(Comparator.naturalOrder()));
 
             var anvisninger = ytelse.getYtelseAnvist().stream().map(this::map).sorted(compAnvisning).collect(Collectors.toList());
@@ -224,11 +257,11 @@ public class MapAktørYtelse {
          * De dataene er som er dårlig kan finnes vha <code>select * from IAY_RELATERT_YTELSE where TOM < FOM</code>
          * Sakene avdekkes gjennom:
          * <code>
-            select iyt.*, gr.*, f.* from iay_aktoer_ytelse iyt
-            inner join gr_arbeid_inntekt gr on gr.register_id = iyt.inntekt_arbeid_ytelser_id
-            inner join behandling b on b.id = gr.behandling_id
-            inner join fagsak f on f.id = b.fagsak_id
-            where iyt.id in (select aktoer_ytelse_id from iay_relatert_ytelse where tom < fom);
+         * select iyt.*, gr.*, f.* from iay_aktoer_ytelse iyt
+         * inner join gr_arbeid_inntekt gr on gr.register_id = iyt.inntekt_arbeid_ytelser_id
+         * inner join behandling b on b.id = gr.behandling_id
+         * inner join fagsak f on f.id = b.fagsak_id
+         * where iyt.id in (select aktoer_ytelse_id from iay_relatert_ytelse where tom < fom);
          * </code>
          */
         private static Periode mapPeriode(LocalDate fom, LocalDate tom) {
