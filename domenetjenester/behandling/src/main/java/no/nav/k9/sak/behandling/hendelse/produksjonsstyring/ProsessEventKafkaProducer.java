@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.hendelse;
+package no.nav.k9.sak.behandling.hendelse.produksjonsstyring;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -17,6 +17,7 @@ import org.apache.kafka.common.errors.RetriableException;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.sak.behandling.hendelse.HendelseKafkaProducerFeil;
 
 @ApplicationScoped
 public class ProsessEventKafkaProducer {

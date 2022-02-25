@@ -355,6 +355,7 @@ public class AksjonspunktApplikasjonTjeneste {
             .orElseThrow(() -> new IllegalStateException("Utvikler-feil: Har ikke aksjonspunkt av type: " + dto.getKode()));
 
         EndringsresultatSnapshot snapshotFør = endringsresultatSjekker.opprettEndringsresultatIdPåBehandlingSnapshot(behandling);
+        aksjonspunkt.setAnsvarligSaksbehandler(getCurrentUserId());
 
         AksjonspunktOppdaterer<BekreftetAksjonspunktDto> oppdaterer = finnAksjonspunktOppdaterer(dto.getClass(), dto.getKode());
         AksjonspunktOppdaterParameter param = new AksjonspunktOppdaterParameter(behandling, Optional.of(aksjonspunkt), skjæringstidspunkter, vilkårBuilder, dto);

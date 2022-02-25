@@ -28,12 +28,15 @@ public record AksjonspunktTilstandDto(
     @JsonProperty(value = "venteårsak")
     Venteårsak venteårsak,
 
+    @JsonProperty(value = "ansvarligSaksbehandler")
+    String ansvarligSaksbehandler,
+
     @JsonProperty(value = "fristTid")
     LocalDateTime fristTid
 ) {
 
     public AksjonspunktTilstandDto(AksjonspunktTilstandDto kopierFra) {
-        this(kopierFra.aksjonspunktKode, kopierFra.status, kopierFra.venteårsak, kopierFra.fristTid);
+        this(kopierFra.aksjonspunktKode, kopierFra.status, kopierFra.venteårsak, kopierFra.ansvarligSaksbehandler, kopierFra.fristTid);
     }
 
     @Override
@@ -42,6 +45,7 @@ public record AksjonspunktTilstandDto(
             "aksjonspunktKode='" + aksjonspunktKode + '\'' +
             ", status='" + status + '\'' +
             ", venteårsak='" + venteårsak + '\'' +
+            ", ansvarligSaksbehandler='" + ansvarligSaksbehandler + '\'' +
             ", fristTid=" + fristTid +
             '}';
     }
