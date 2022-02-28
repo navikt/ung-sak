@@ -19,26 +19,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 
+import no.nav.k9.aarskvantum.kontrakter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
-import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
-import no.nav.k9.aarskvantum.kontrakter.Barn;
-import no.nav.k9.aarskvantum.kontrakter.BarnType;
-import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
-import no.nav.k9.aarskvantum.kontrakter.FraværÅrsak;
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
-import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
-import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
-import no.nav.k9.aarskvantum.kontrakter.SøknadÅrsak;
-import no.nav.k9.aarskvantum.kontrakter.Utfall;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -284,7 +268,8 @@ public class ÅrskvantumTjeneste {
                 wrappedOppgittFraværPeriode.getInnsendingstidspunkt(),
                 utledFraværÅrsak(fraværPeriode),
                 utledSøknadÅrsak(fraværPeriode),
-                opprinneligBehandlingUuid.map(UUID::toString).orElse(null));
+                opprinneligBehandlingUuid.map(UUID::toString).orElse(null),
+                AvvikImSøknad.UDEFINERT); // TODO TE mappe avviket
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
