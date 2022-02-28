@@ -44,6 +44,10 @@ public class SamtidigKravStatus {
         return new SamtidigKravStatus(KravStatus.FINNES_IKKE, KravStatus.FINNES_IKKE, KravStatus.FINNES);
     }
 
+    public static SamtidigKravStatus inntektsmeldingUtenRefusjonskravTrekt() {
+        return new SamtidigKravStatus(KravStatus.FINNES_IKKE, KravStatus.FINNES_IKKE, KravStatus.TREKT);
+    }
+
     public SamtidigKravStatus oppdaterRefusjonskravFinnes() {
         return oppdaterRefusjonskravStatus(KravStatus.FINNES);
     }

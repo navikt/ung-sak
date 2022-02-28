@@ -469,6 +469,52 @@ class KravDokumentFraværTest {
         assertThat(fp1.getSamtidigeKrav()).isEqualTo(SamtidigKravStatus.søknadFinnes().oppdaterInntektsmeldingTrekt());
     }
 
+
+    @Test
+    void skal_nulle_refusjonskrav_med_trekt_krav_selv_med_refusjonsbeløp_0() {
+        // Refusjonsbeløp = 0 tolkes vanligvis som IM uten refusjonskrav, men trekt fravær vil overstyre dersom det også er oppgitt
+        var imMedRefusjon = InntektsmeldingBuilder.builder()
+            .medJournalpostId("1")
+            .medInnsendingstidspunkt(LocalDateTime.now().minusDays(2))
+            .medOppgittFravær(List.of(new PeriodeAndel(LocalDate.now().minusDays(10), LocalDate.now(), Duration.ofHours(4))))
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
+            .medArbeidsforholdId(EksternArbeidsforholdRef.nullRef())
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("AR123")
+            .medRefusjon(BigDecimal.TEN)
+            .build();
+        var imTrektRefusjon = InntektsmeldingBuilder.builder()
+            .medJournalpostId("2")
+            .medInnsendingstidspunkt(LocalDateTime.now().minusDays(1))
+            .medOppgittFravær(List.of(new PeriodeAndel(LocalDate.now().minusDays(10), LocalDate.now(), Duration.ZERO))) // Trekk av periode
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
+            .medArbeidsforholdId(EksternArbeidsforholdRef.nullRef())
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("AR123")
+            .medRefusjon(BigDecimal.ZERO) // Gir KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV
+            .build();
+        var kravdokImMedRefusjon = mapTilKravdok(imMedRefusjon);
+        var kravdokImTrektRefusjon = mapTilKravdok(imTrektRefusjon);
+
+        var input = Map.of(
+            kravdokImMedRefusjon.getKey(), kravdokImMedRefusjon.getValue(),
+            kravdokImTrektRefusjon.getKey(), kravdokImTrektRefusjon.getValue());
+
+        List<WrappedOppgittFraværPeriode> resultat = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(input);
+
+        assertThat(resultat).hasSize(1);
+        WrappedOppgittFraværPeriode fp1 = resultat.get(0);
+        assertThat(fp1.getPeriode().getFraværPerDag()).isEqualTo(Duration.ZERO);
+        assertThat(fp1.getPeriode().getFom()).isEqualTo(LocalDate.now().minusDays(10));
+        assertThat(fp1.getPeriode().getTom()).isEqualTo(LocalDate.now());
+        assertThat(fp1.getPeriode().getArbeidsgiver()).isEqualTo(Arbeidsgiver.virksomhet("000000000"));
+        assertThat(fp1.getPeriode().getArbeidsforholdRef()).isEqualTo(InternArbeidsforholdRef.nullRef());
+        assertThat(fp1.getSamtidigeKrav()).isEqualTo(SamtidigKravStatus.inntektsmeldingUtenRefusjonskravTrekt());
+    }
+
+
     @Test
     void skal_prioritere_fravær_fra_søknad_dersom_im_har_trekt_krav_også_når_det_er_2_arbeidsforhold() {
         Duration fraværImMedRefusjon = Duration.ofHours(4);

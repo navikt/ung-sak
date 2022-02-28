@@ -127,7 +127,9 @@ public class KravDokumentFravær {
             case INNTEKTSMELDING -> harTrektKrav(fraværPerDag)
                 ? SamtidigKravStatus.refusjonskravTrekt()
                 : SamtidigKravStatus.refusjonskravFinnes();
-            case INNTEKTSMELDING_UTEN_REFUSJONSKRAV -> SamtidigKravStatus.inntektsmeldingUtenRefusjonskravFinnes();
+            case INNTEKTSMELDING_UTEN_REFUSJONSKRAV -> harTrektKrav(fraværPerDag)
+                ? SamtidigKravStatus.inntektsmeldingUtenRefusjonskravTrekt()
+                : SamtidigKravStatus.inntektsmeldingUtenRefusjonskravFinnes();
         };
     }
 
