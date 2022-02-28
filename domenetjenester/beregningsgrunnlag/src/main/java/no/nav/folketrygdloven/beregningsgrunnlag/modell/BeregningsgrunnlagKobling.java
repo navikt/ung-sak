@@ -8,10 +8,12 @@ public class BeregningsgrunnlagKobling {
 
     private LocalDate skjæringstidspunkt;
     private UUID referanse;
+    private boolean erTilVurdering;
 
-    public BeregningsgrunnlagKobling(LocalDate skjæringstidspunkt, UUID referanse) {
+    public BeregningsgrunnlagKobling(LocalDate skjæringstidspunkt, UUID referanse, boolean erTilVurdering) {
         this.skjæringstidspunkt = skjæringstidspunkt;
         this.referanse = referanse;
+        this.erTilVurdering = erTilVurdering;
     }
 
     public LocalDate getSkjæringstidspunkt() {
@@ -20,6 +22,10 @@ public class BeregningsgrunnlagKobling {
 
     public UUID getReferanse() {
         return referanse;
+    }
+
+    public boolean getErTilVurdering() {
+        return erTilVurdering;
     }
 
     @Override
@@ -41,6 +47,7 @@ public class BeregningsgrunnlagKobling {
         return "BeregningsgrunnlagKobling{" +
             "skjæringstidspunkt=" + skjæringstidspunkt +
             ", referanse=" + referanse +
+            ", erTilVurdering=" + erTilVurdering +
             '}';
     }
 }

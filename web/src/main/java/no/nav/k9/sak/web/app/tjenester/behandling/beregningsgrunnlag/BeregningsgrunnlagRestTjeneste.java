@@ -102,7 +102,7 @@ public class BeregningsgrunnlagRestTjeneste {
 
         return kalkulusTjeneste.hentKoblingerForInnvilgedePerioder(BehandlingReferanse.fra(behandling))
             .stream()
-            .map(it -> new BeregningsgrunnlagKoblingDto(it.getSkjæringstidspunkt(), it.getReferanse()))
+            .map(it -> new BeregningsgrunnlagKoblingDto(it.getSkjæringstidspunkt(), it.getReferanse(), it.getErTilVurdering()))
             .collect(Collectors.toList());
     }
 

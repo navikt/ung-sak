@@ -13,7 +13,6 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +42,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
+import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
@@ -54,19 +54,19 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     private static final Logger log = LoggerFactory.getLogger(BeregningsgrunnlagTjeneste.class);
 
     private final Instance<KalkulusApiTjeneste> kalkulusTjenester;
-    private final VilkårResultatRepository vilkårResultatRepository;
     private final BeregningPerioderGrunnlagRepository grunnlagRepository;
     private final HentReferanserTjeneste hentReferanserTjeneste;
+    private final VilkårTjeneste vilkårTjeneste;
     private final boolean enableForlengelse;
 
     @Inject
     public BeregningsgrunnlagTjeneste(@Any Instance<KalkulusApiTjeneste> kalkulusTjenester,
                                       VilkårResultatRepository vilkårResultatRepository,
                                       BeregningPerioderGrunnlagRepository grunnlagRepository,
-                                      @KonfigVerdi(value = "forlengelse.beregning.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
+                                      VilkårTjeneste vilkårTjeneste, @KonfigVerdi(value = "forlengelse.beregning.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
         this.kalkulusTjenester = kalkulusTjenester;
-        this.vilkårResultatRepository = vilkårResultatRepository;
         this.grunnlagRepository = grunnlagRepository;
+        this.vilkårTjeneste = vilkårTjeneste;
         this.hentReferanserTjeneste = new HentReferanserTjeneste(grunnlagRepository, vilkårResultatRepository);
         this.enableForlengelse = enableForlengelse;
     }
@@ -173,7 +173,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioderInkludertAvslag(BehandlingReferanse ref) {
-        var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
+        var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
         var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
 
         var perioder = vilkår.getPerioder()
@@ -189,7 +189,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioder(BehandlingReferanse ref) {
-        var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
+        var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
         var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
 
         List<LocalDate> skjæringstidspunkt = vilkår.getPerioder()
@@ -264,7 +264,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         var beregningsgrunnlagPerioderGrunnlag = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
         if (harGrunnlagsperioder(beregningsgrunnlagPerioderGrunnlag)) {
             var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
-            var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
+            var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
             var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
             var grunnlag = beregningsgrunnlagPerioderGrunnlag.get();
 
@@ -296,11 +296,11 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         return tjeneste.hentGrunnlag(ref, bgReferanser);
     }
 
-    @Override
     public List<BeregningsgrunnlagKobling> hentKoblingerForInnvilgedePerioder(BehandlingReferanse ref) {
-        var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
-        var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
+        var perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
+        var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
+        var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
         var skjæringstidspunkter = vilkår.getPerioder()
             .stream()
             .map(VilkårPeriode::getSkjæringstidspunkt)
@@ -310,7 +310,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         var referanser = hentReferanserTjeneste.finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkter, false, false);
         return referanser.stream()
             .filter(it -> !it.erGenerertReferanse())
-            .map(it -> new BeregningsgrunnlagKobling(it.getStp(), it.getRef()))
+            .map(it -> new BeregningsgrunnlagKobling(it.getStp(), it.getRef(), perioderTilVurdering.stream().anyMatch(p -> p.getFomDato().equals(it.getStp()))))
             .collect(Collectors.toList());
     }
 

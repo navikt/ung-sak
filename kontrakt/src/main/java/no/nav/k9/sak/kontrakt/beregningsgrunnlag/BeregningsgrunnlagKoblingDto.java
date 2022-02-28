@@ -3,13 +3,13 @@ package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import jakarta.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.validation.constraints.NotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -24,11 +24,18 @@ public class BeregningsgrunnlagKoblingDto {
     @JsonProperty(required = true, value = "referanse")
     private UUID referanse;
 
+    @NotNull
+    @JsonProperty(required = true, value = "erTilVurdering")
+    private boolean erTilVurdering;
+
+
     @JsonCreator
-    public BeregningsgrunnlagKoblingDto(@JsonProperty(required = true, value = "skjæringstidspunkt") @NotNull LocalDate skjæringstidspunkt,
-                                        @JsonProperty(required = true, value = "referanse") @NotNull UUID referanse) {
+    public BeregningsgrunnlagKoblingDto(@JsonProperty(required = true, value = "skjæringstidspunkt") LocalDate skjæringstidspunkt,
+                                        @JsonProperty(required = true, value = "referanse") UUID referanse,
+                                        @JsonProperty(required = true, value = "erTilVurdering") boolean erTilVurdering) {
         this.skjæringstidspunkt = skjæringstidspunkt;
         this.referanse = referanse;
+        this.erTilVurdering = erTilVurdering;
     }
 
     public LocalDate getSkjæringstidspunkt() {
@@ -37,5 +44,9 @@ public class BeregningsgrunnlagKoblingDto {
 
     public UUID getReferanse() {
         return referanse;
+    }
+
+    public boolean getErTilVurdering() {
+        return erTilVurdering;
     }
 }

@@ -90,7 +90,7 @@ public interface BeregningTjeneste {
      * Deaktivering skal kun kalles i første steg i beregning.
      *
      * @param ref Behandlingreferanse
-     * @param skjæringstidspunkt
+     * @param skjæringstidspunkter Skjæringstidspunkter
      */
     public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter);
 
