@@ -20,7 +20,59 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.integrasjon.pdl.*;
+import no.nav.k9.felles.integrasjon.pdl.Bostedsadresse;
+import no.nav.k9.felles.integrasjon.pdl.BostedsadresseResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.DeltBostedResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Doedsfall;
+import no.nav.k9.felles.integrasjon.pdl.DoedsfallResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Foedsel;
+import no.nav.k9.felles.integrasjon.pdl.FoedselResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.FolkeregistermetadataResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Folkeregisterpersonstatus;
+import no.nav.k9.felles.integrasjon.pdl.FolkeregisterpersonstatusResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.ForelderBarnRelasjonResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.ForelderBarnRelasjonRolle;
+import no.nav.k9.felles.integrasjon.pdl.HentPersonQueryRequest;
+import no.nav.k9.felles.integrasjon.pdl.InnflyttingTilNorgeResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Kjoenn;
+import no.nav.k9.felles.integrasjon.pdl.KjoennResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.KjoennType;
+import no.nav.k9.felles.integrasjon.pdl.Kontaktadresse;
+import no.nav.k9.felles.integrasjon.pdl.KontaktadresseResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Matrikkeladresse;
+import no.nav.k9.felles.integrasjon.pdl.MatrikkeladresseResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Navn;
+import no.nav.k9.felles.integrasjon.pdl.NavnResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.OppholdResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Oppholdsadresse;
+import no.nav.k9.felles.integrasjon.pdl.OppholdsadresseResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
+import no.nav.k9.felles.integrasjon.pdl.Person;
+import no.nav.k9.felles.integrasjon.pdl.PersonBostedsadresseParametrizedInput;
+import no.nav.k9.felles.integrasjon.pdl.PersonFolkeregisterpersonstatusParametrizedInput;
+import no.nav.k9.felles.integrasjon.pdl.PersonKontaktadresseParametrizedInput;
+import no.nav.k9.felles.integrasjon.pdl.PersonOppholdParametrizedInput;
+import no.nav.k9.felles.integrasjon.pdl.PersonOppholdsadresseParametrizedInput;
+import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.PersonStatsborgerskapParametrizedInput;
+import no.nav.k9.felles.integrasjon.pdl.PostadresseIFrittFormat;
+import no.nav.k9.felles.integrasjon.pdl.PostadresseIFrittFormatResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Postboksadresse;
+import no.nav.k9.felles.integrasjon.pdl.PostboksadresseResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Sivilstand;
+import no.nav.k9.felles.integrasjon.pdl.SivilstandResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Sivilstandstype;
+import no.nav.k9.felles.integrasjon.pdl.Statsborgerskap;
+import no.nav.k9.felles.integrasjon.pdl.StatsborgerskapResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.UkjentBosted;
+import no.nav.k9.felles.integrasjon.pdl.UkjentBostedResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.UtenlandskAdresse;
+import no.nav.k9.felles.integrasjon.pdl.UtenlandskAdresseIFrittFormat;
+import no.nav.k9.felles.integrasjon.pdl.UtenlandskAdresseIFrittFormatResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.UtenlandskAdresseResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.UtflyttingFraNorgeResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Vegadresse;
+import no.nav.k9.felles.integrasjon.pdl.VegadresseResponseProjection;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -30,6 +82,7 @@ import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.person.SivilstandType;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
+import no.nav.k9.sak.behandlingslager.aktør.DeltBosted;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.AdressePeriode;
@@ -398,7 +451,7 @@ public class PersoninfoTjeneste {
         return Gyldighetsperiode.innenfor(gyldigFra, gyldigTil);
     }
 
-    public List<no.nav.k9.sak.behandlingslager.aktør.DeltBosted> mapDeltBosted(List<DeltBosted> deltBostedFraPdl) {
+    public List<DeltBosted> mapDeltBosted(List<no.nav.k9.felles.integrasjon.pdl.DeltBosted> deltBostedFraPdl) {
         return deltBostedFraPdl
             .stream()
             .map(p -> new no.nav.k9.sak.behandlingslager.aktør.DeltBosted(
