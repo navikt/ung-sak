@@ -22,6 +22,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.pdl.Bostedsadresse;
 import no.nav.k9.felles.integrasjon.pdl.BostedsadresseResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.DeltBostedResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Doedsfall;
 import no.nav.k9.felles.integrasjon.pdl.DoedsfallResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Foedsel;
@@ -81,6 +82,7 @@ import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.person.SivilstandType;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
+import no.nav.k9.sak.behandlingslager.aktør.DeltBosted;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.AdressePeriode;
@@ -271,7 +273,10 @@ public class PersoninfoTjeneste {
                                         .postboksNummerNavn().bySted().regionDistriktOmraade().postkode().landkode())
                         .utenlandskAdresseIFrittFormat(
                                 new UtenlandskAdresseIFrittFormatResponseProjection().adresselinje1().adresselinje2()
-                                        .adresselinje3().byEllerStedsnavn().postkode().landkode()));
+                                        .adresselinje3().byEllerStedsnavn().postkode().landkode()))
+                .deltBosted(new DeltBostedResponseProjection().startdatoForKontrakt().sluttdatoForKontrakt()
+                    .vegadresse(new VegadresseResponseProjection().matrikkelId().adressenavn().husnummer().husbokstav().postnummer()));
+
 
         var personFraPdl = pdlKlient.hentPerson(query, projection);
 
@@ -295,6 +300,7 @@ public class PersoninfoTjeneste {
                 personFraPdl.getSivilstand());
         var adresser = mapAdresser(personFraPdl.getBostedsadresse(), personFraPdl.getKontaktadresse(),
                 personFraPdl.getOppholdsadresse());
+        var deltBosted = mapDeltBosted(personFraPdl.getDeltBosted());
 
         return new Personinfo.Builder()
                 .medAktørId(aktørId)
@@ -310,7 +316,8 @@ public class PersoninfoTjeneste {
                 .medRegion(Region.finnHøyestRangertRegion(List.of(statsborgerskap.getKode())))
                 .medFamilierelasjon(familierelasjoner)
                 .medAdresseInfoList(adresser)
-                .build();
+                .medDeltBostedList(deltBosted)
+            .build();
     }
 
     public Personhistorikkinfo hentPersoninfoHistorikk(AktørId aktørId, Periode periode) {
@@ -442,6 +449,16 @@ public class PersoninfoTjeneste {
         var gyldigFra = dateFom == null ? null
                 : LocalDateTime.ofInstant(dateFom.toInstant(), ZoneId.systemDefault()).toLocalDate();
         return Gyldighetsperiode.innenfor(gyldigFra, gyldigTil);
+    }
+
+    public List<DeltBosted> mapDeltBosted(List<no.nav.k9.felles.integrasjon.pdl.DeltBosted> deltBostedFraPdl) {
+        return deltBostedFraPdl
+            .stream()
+            .map(p -> new DeltBosted(
+                new Periode(LocalDate.parse(p.getStartdatoForKontrakt(), DateTimeFormatter.ISO_LOCAL_DATE),
+                    p.getSluttdatoForKontrakt() == null ? Tid.TIDENES_ENDE : LocalDate.parse(p.getSluttdatoForKontrakt(), DateTimeFormatter.ISO_LOCAL_DATE)),
+                mapVegadresse(AdresseType.BOSTEDSADRESSE, p.getVegadresse())))
+            .collect(Collectors.toList());
     }
 
     private static AdressePeriode mapAdresseinfoTilAdressePeriode(Gyldighetsperiode periode, Adresseinfo adresseinfo) {

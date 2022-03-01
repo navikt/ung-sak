@@ -41,6 +41,8 @@ public class Personinfo {
     private List<Adresseinfo> adresseInfoList = new ArrayList<>();
     private SivilstandType sivilstand;
 
+    private List<DeltBosted> deltBostedList = new ArrayList<>();
+
     private Personinfo() {
     }
 
@@ -126,6 +128,10 @@ public class Personinfo {
 
     public Landkoder getLandkode() {
         return landkode;
+    }
+
+    public List<DeltBosted> getDeltBostedList() {
+        return deltBostedList;
     }
 
     @Override
@@ -247,6 +253,11 @@ public class Personinfo {
 
         public Builder medLandkode(Landkoder landkode) {
             personinfoMal.landkode = landkode;
+            return this;
+        }
+
+        public Builder medDeltBostedList(List<DeltBosted> deltBostedList) {
+            personinfoMal.deltBostedList = deltBostedList;
             return this;
         }
 
