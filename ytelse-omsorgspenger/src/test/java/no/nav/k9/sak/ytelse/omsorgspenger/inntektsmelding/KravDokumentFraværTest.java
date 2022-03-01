@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -618,6 +619,45 @@ class KravDokumentFraværTest {
         List<WrappedOppgittFraværPeriode> oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(input);
 
         assertThat(oppgittFraværPeriode).isEmpty();
+    }
+
+    @Test
+    void skal_støtte_flere_arbeidssteder_i_samme_søknad() {
+        //se TSF-2491
+
+        Arbeidsgiver virksomhet1 = Arbeidsgiver.virksomhet("000000000");
+        Arbeidsgiver virksomhet2 = Arbeidsgiver.virksomhet("000000001");
+
+        Duration fraværVirksomhet1 = Duration.ofHours(1);
+        Duration fraværVirksomhet2 = Duration.ofHours(2);
+        // IM mottas først, men prioriteres likevel over søknad
+        var innsendingsSøknad = LocalDateTime.now().minusDays(1);
+
+        var jpSøknad = new JournalpostId("1");
+        var kravDokSøknad = new KravDokument(jpSøknad, innsendingsSøknad, KravDokumentType.SØKNAD);
+        var fraværsperioderSøknad = List.of(
+            lagSøknadsperiode(jpSøknad, LocalDate.now().minusDays(10), LocalDate.now(), fraværVirksomhet1, UttakArbeidType.ARBEIDSTAKER, virksomhet1),
+            lagSøknadsperiode(jpSøknad, LocalDate.now().minusDays(10), LocalDate.now(), fraværVirksomhet2, UttakArbeidType.ARBEIDSTAKER, virksomhet2));
+
+        var input = Map.of(
+            kravDokSøknad, fraværsperioderSøknad);
+
+        List<WrappedOppgittFraværPeriode> resultat = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(input);
+
+        resultat = resultat.stream().sorted(Comparator.comparing(wofp -> wofp.getPeriode().getArbeidsgiver().getOrgnr())).toList();
+        assertThat(resultat).hasSize(2);
+        WrappedOppgittFraværPeriode fp1 = resultat.get(0);
+        assertThat(fp1.getPeriode().getArbeidsgiver()).isEqualTo(virksomhet1);
+        assertThat(fp1.getPeriode().getFraværPerDag()).isEqualTo(fraværVirksomhet1);
+        assertThat(fp1.getPeriode().getFom()).isEqualTo(LocalDate.now().minusDays(10));
+        assertThat(fp1.getPeriode().getTom()).isEqualTo(LocalDate.now());
+        assertThat(fp1.getSamtidigeKrav()).isEqualTo(SamtidigKravStatus.søknadFinnes());
+        WrappedOppgittFraværPeriode fp2 = resultat.get(1);
+        assertThat(fp2.getPeriode().getArbeidsgiver()).isEqualTo(virksomhet2);
+        assertThat(fp2.getPeriode().getFraværPerDag()).isEqualTo(fraværVirksomhet2);
+        assertThat(fp2.getPeriode().getFom()).isEqualTo(LocalDate.now().minusDays(10));
+        assertThat(fp2.getPeriode().getTom()).isEqualTo(LocalDate.now());
+        assertThat(fp2.getSamtidigeKrav()).isEqualTo(SamtidigKravStatus.søknadFinnes());
     }
 
     private static Map.Entry<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> mapTilKravdok(Inntektsmelding im) {

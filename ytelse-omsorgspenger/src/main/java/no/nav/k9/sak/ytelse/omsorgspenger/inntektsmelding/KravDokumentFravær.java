@@ -54,19 +54,20 @@ public class KravDokumentFravær {
             .sorted(Comparator.comparing(e -> e.getKey().getInnsendingsTidspunkt()))
             .forEachOrdered(dokumentEntry -> {
                 KravDokument dok = dokumentEntry.getKey();
-                var fraværPerioder = dokumentEntry.getValue();
-                var aktivitetIdent = unikAktivitetIdentifikator(fraværPerioder);
+                dokumentEntry.getValue().stream().collect(Collectors.groupingBy(AktivitetIdentifikator::lagAktivitetIdentifikator)).forEach(
+                    (aktivitetIdent, fraværPerioder) -> {
+                        var wrappedFaværPerioder = fraværPerioder.stream()
+                            .filter(vurdertPeriode -> periodefilter.test(dok.getType(), vurdertPeriode))
+                            .map(v -> new WrappedOppgittFraværPeriode(v.getRaw(), dok.getInnsendingsTidspunkt(), dok.getType(), utledUtfall(v), initiellKravtype(dok.getType(), v.getRaw().getFraværPerDag())))
+                            .toList();
 
-                var wrappedFaværPerioder = fraværPerioder.stream()
-                    .filter(vurdertPeriode -> periodefilter.test(dok.getType(), vurdertPeriode))
-                    .map(v -> new WrappedOppgittFraværPeriode(v.getRaw(), dok.getInnsendingsTidspunkt(), dok.getType(), utledUtfall(v), initiellKravtype(dok.getType(), v.getRaw().getFraværPerDag())))
-                    .toList();
+                        var tidslinjeNy = mapTilTimeline(wrappedFaværPerioder);
+                        var tidslinjeSammenslått = mapByAktivitet.getOrDefault(aktivitetIdent, (LocalDateTimeline<WrappedOppgittFraværPeriode>) LocalDateTimeline.EMPTY_TIMELINE);
 
-                var tidslinjeNy = mapTilTimeline(wrappedFaværPerioder);
-                var tidslinjeSammenslått = mapByAktivitet.getOrDefault(aktivitetIdent, (LocalDateTimeline<WrappedOppgittFraværPeriode>) LocalDateTimeline.EMPTY_TIMELINE);
-
-                ryddOppIBerørteArbeidsforhold(mapByAktivitet, aktivitetIdent, tidslinjeNy);
-                mapByAktivitet.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeSammenslått, tidslinjeNy));
+                        ryddOppIBerørteArbeidsforhold(mapByAktivitet, aktivitetIdent, tidslinjeNy);
+                        mapByAktivitet.put(aktivitetIdent, slåSammenTidslinjer(tidslinjeSammenslått, tidslinjeNy));
+                    }
+                );
             });
 
         return mapByAktivitet;
@@ -286,11 +287,4 @@ public class KravDokumentFravær {
         return pa.getUtfall();
     }
 
-    private AktivitetIdentifikator unikAktivitetIdentifikator(Collection<VurdertSøktPeriode<OppgittFraværPeriode>> søktePerioder) {
-        Set<AktivitetIdentifikator> resultat = søktePerioder.stream().map(AktivitetIdentifikator::lagAktivitetIdentifikator).collect(Collectors.toSet());
-        if (resultat.size() == 1) {
-            return resultat.iterator().next();
-        }
-        throw new IllegalArgumentException("Forventer nøyaktig 1 aktivitet identifikator pr kravdokument, men fikk " + resultat.size());
-    }
 }
