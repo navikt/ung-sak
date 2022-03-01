@@ -222,7 +222,7 @@ public class PersoninfoTjeneste {
                                 new UtenlandskAdresseIFrittFormatResponseProjection().adresselinje1().adresselinje2()
                                         .adresselinje3().byEllerStedsnavn().postkode().landkode()))
                 .deltBosted(new DeltBostedResponseProjection().startdatoForKontrakt().sluttdatoForKontrakt()
-                    .matrikkeladresse(new MatrikkeladresseResponseProjection().matrikkelId().bruksenhetsnummer().tilleggsnavn().postnummer()));
+                    .vegadresse(new VegadresseResponseProjection().matrikkelId().adressenavn().husnummer().husbokstav().postnummer()));
 
 
         var personFraPdl = pdlKlient.hentPerson(query, projection);
