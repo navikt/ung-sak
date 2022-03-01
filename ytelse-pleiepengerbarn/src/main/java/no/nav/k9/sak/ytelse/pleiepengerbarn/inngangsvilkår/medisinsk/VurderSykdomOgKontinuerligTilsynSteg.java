@@ -187,18 +187,6 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
     private boolean trengerAksjonspunkt(BehandlingskontrollKontekst kontekst, final Behandling behandling,
                                         final SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
-        Optional<SykdomVurderingVersjon> ubesluttet = sykdomGrunnlagBehandling.getGrunnlag().getVurderinger()
-            .stream()
-            .filter(v -> !v.isBesluttet())
-            .findFirst();
-        if (ubesluttet.isEmpty()) {
-            AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
-            boolean dokumenterUtenUtkvittering = !sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(pleietrengende).isEmpty();
-            if (dokumenterUtenUtkvittering) {
-                return false;
-            }
-        }
-
         final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()));
         final boolean trengerInput = !sykdomAksjonspunkt.isKanLøseAksjonspunkt() || sykdomAksjonspunkt.isHarDataSomIkkeHarBlittTattMedIBehandling();
         final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && sykdomGrunnlagBehandling.isFørsteGrunnlagPåBehandling();

@@ -57,13 +57,17 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
 
             SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(behandling.getUuid());
 
-            String beslutter = behandling.getAnsvarligBeslutter();
+            String endretAv = behandling.isToTrinnsBehandling() ? behandling.getAnsvarligBeslutter() : behandling.getAnsvarligSaksbehandler();
             LocalDateTime nå = LocalDateTime.now();
 
             sykdomGrunnlagBehandling.getGrunnlag().getVurderinger()
                 .stream()
                 .forEach(v -> {
-                    sykdomVurderingRepository.lagre(new SykdomVurderingVersjonBesluttet(beslutter, nå, v)); //On conflict do nothing
+                    sykdomVurderingRepository.lagre(
+                        new SykdomVurderingVersjonBesluttet(
+                            endretAv,
+                            nå,
+                            v)); //On conflict do nothing
                 });
 
             log.info("Utført for behandling: {}", behandlingId);
