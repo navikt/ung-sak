@@ -454,8 +454,9 @@ public class PersoninfoTjeneste {
     public List<DeltBosted> mapDeltBosted(List<no.nav.k9.felles.integrasjon.pdl.DeltBosted> deltBostedFraPdl) {
         return deltBostedFraPdl
             .stream()
-            .map(p -> new no.nav.k9.sak.behandlingslager.aktør.DeltBosted(
-                new Periode(LocalDate.parse(p.getStartdatoForKontrakt(), DateTimeFormatter.ISO_LOCAL_DATE), LocalDate.parse(p.getSluttdatoForKontrakt(), DateTimeFormatter.ISO_LOCAL_DATE)),
+            .map(p -> new DeltBosted(
+                new Periode(LocalDate.parse(p.getStartdatoForKontrakt(), DateTimeFormatter.ISO_LOCAL_DATE),
+                    p.getSluttdatoForKontrakt() == null ? Tid.TIDENES_ENDE : LocalDate.parse(p.getSluttdatoForKontrakt(), DateTimeFormatter.ISO_LOCAL_DATE)),
                 mapVegadresse(AdresseType.BOSTEDSADRESSE, p.getVegadresse())))
             .collect(Collectors.toList());
     }
