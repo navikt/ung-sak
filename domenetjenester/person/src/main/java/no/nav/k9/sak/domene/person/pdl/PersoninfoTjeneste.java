@@ -20,58 +20,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.integrasjon.pdl.Bostedsadresse;
-import no.nav.k9.felles.integrasjon.pdl.BostedsadresseResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Doedsfall;
-import no.nav.k9.felles.integrasjon.pdl.DoedsfallResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Foedsel;
-import no.nav.k9.felles.integrasjon.pdl.FoedselResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.FolkeregistermetadataResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Folkeregisterpersonstatus;
-import no.nav.k9.felles.integrasjon.pdl.FolkeregisterpersonstatusResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.ForelderBarnRelasjonResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.ForelderBarnRelasjonRolle;
-import no.nav.k9.felles.integrasjon.pdl.HentPersonQueryRequest;
-import no.nav.k9.felles.integrasjon.pdl.InnflyttingTilNorgeResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Kjoenn;
-import no.nav.k9.felles.integrasjon.pdl.KjoennResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.KjoennType;
-import no.nav.k9.felles.integrasjon.pdl.Kontaktadresse;
-import no.nav.k9.felles.integrasjon.pdl.KontaktadresseResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Matrikkeladresse;
-import no.nav.k9.felles.integrasjon.pdl.MatrikkeladresseResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Navn;
-import no.nav.k9.felles.integrasjon.pdl.NavnResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.OppholdResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Oppholdsadresse;
-import no.nav.k9.felles.integrasjon.pdl.OppholdsadresseResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
-import no.nav.k9.felles.integrasjon.pdl.Person;
-import no.nav.k9.felles.integrasjon.pdl.PersonBostedsadresseParametrizedInput;
-import no.nav.k9.felles.integrasjon.pdl.PersonFolkeregisterpersonstatusParametrizedInput;
-import no.nav.k9.felles.integrasjon.pdl.PersonKontaktadresseParametrizedInput;
-import no.nav.k9.felles.integrasjon.pdl.PersonOppholdParametrizedInput;
-import no.nav.k9.felles.integrasjon.pdl.PersonOppholdsadresseParametrizedInput;
-import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.PersonStatsborgerskapParametrizedInput;
-import no.nav.k9.felles.integrasjon.pdl.PostadresseIFrittFormat;
-import no.nav.k9.felles.integrasjon.pdl.PostadresseIFrittFormatResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Postboksadresse;
-import no.nav.k9.felles.integrasjon.pdl.PostboksadresseResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Sivilstand;
-import no.nav.k9.felles.integrasjon.pdl.SivilstandResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Sivilstandstype;
-import no.nav.k9.felles.integrasjon.pdl.Statsborgerskap;
-import no.nav.k9.felles.integrasjon.pdl.StatsborgerskapResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.UkjentBosted;
-import no.nav.k9.felles.integrasjon.pdl.UkjentBostedResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.UtenlandskAdresse;
-import no.nav.k9.felles.integrasjon.pdl.UtenlandskAdresseIFrittFormat;
-import no.nav.k9.felles.integrasjon.pdl.UtenlandskAdresseIFrittFormatResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.UtenlandskAdresseResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.UtflyttingFraNorgeResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Vegadresse;
-import no.nav.k9.felles.integrasjon.pdl.VegadresseResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -271,7 +220,10 @@ public class PersoninfoTjeneste {
                                         .postboksNummerNavn().bySted().regionDistriktOmraade().postkode().landkode())
                         .utenlandskAdresseIFrittFormat(
                                 new UtenlandskAdresseIFrittFormatResponseProjection().adresselinje1().adresselinje2()
-                                        .adresselinje3().byEllerStedsnavn().postkode().landkode()));
+                                        .adresselinje3().byEllerStedsnavn().postkode().landkode()))
+                .deltBosted(new DeltBostedResponseProjection().startdatoForKontrakt().sluttdatoForKontrakt()
+                    .matrikkeladresse(new MatrikkeladresseResponseProjection().matrikkelId().bruksenhetsnummer().tilleggsnavn().postnummer()));
+
 
         var personFraPdl = pdlKlient.hentPerson(query, projection);
 
@@ -295,6 +247,7 @@ public class PersoninfoTjeneste {
                 personFraPdl.getSivilstand());
         var adresser = mapAdresser(personFraPdl.getBostedsadresse(), personFraPdl.getKontaktadresse(),
                 personFraPdl.getOppholdsadresse());
+        var deltBosted = mapDeltBosted(personFraPdl.getDeltBosted());
 
         return new Personinfo.Builder()
                 .medAktørId(aktørId)
@@ -310,7 +263,8 @@ public class PersoninfoTjeneste {
                 .medRegion(Region.finnHøyestRangertRegion(List.of(statsborgerskap.getKode())))
                 .medFamilierelasjon(familierelasjoner)
                 .medAdresseInfoList(adresser)
-                .build();
+                .medDeltBostedList(deltBosted)
+            .build();
     }
 
     public Personhistorikkinfo hentPersoninfoHistorikk(AktørId aktørId, Periode periode) {
@@ -442,6 +396,15 @@ public class PersoninfoTjeneste {
         var gyldigFra = dateFom == null ? null
                 : LocalDateTime.ofInstant(dateFom.toInstant(), ZoneId.systemDefault()).toLocalDate();
         return Gyldighetsperiode.innenfor(gyldigFra, gyldigTil);
+    }
+
+    public List<no.nav.k9.sak.behandlingslager.aktør.DeltBosted> mapDeltBosted(List<DeltBosted> deltBostedFraPdl) {
+        return deltBostedFraPdl
+            .stream()
+            .map(p -> new no.nav.k9.sak.behandlingslager.aktør.DeltBosted(
+                new Periode(LocalDate.parse(p.getStartdatoForKontrakt(), DateTimeFormatter.ISO_LOCAL_DATE), LocalDate.parse(p.getSluttdatoForKontrakt(), DateTimeFormatter.ISO_LOCAL_DATE)),
+                mapVegadresse(AdresseType.BOSTEDSADRESSE, p.getVegadresse())))
+            .collect(Collectors.toList());
     }
 
     private static AdressePeriode mapAdresseinfoTilAdressePeriode(Gyldighetsperiode periode, Adresseinfo adresseinfo) {

@@ -318,7 +318,9 @@ public class ÅrskvantumTjeneste {
     private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(Personinfo personinfoSøker, Tuple<Familierelasjon, Optional<Personinfo>> relasjonMedBarn) {
         var personinfoBarn = relasjonMedBarn.getElement2().orElseThrow();
         var harSammeBosted = relasjonMedBarn.getElement1().getHarSammeBosted(personinfoSøker, personinfoBarn);
-        return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBosted, BarnType.VANLIG);
+        var perioderMedSammeBosted = relasjonMedBarn.getElement1().getPerioderMedSammeBosted(personinfoSøker, personinfoBarn);
+        var lukketPeriodeMedSammeBosted = perioderMedSammeBosted.stream().map(p -> new LukketPeriode(p.getFom(), p.getTom())).collect(Collectors.toList());
+        return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBosted, lukketPeriodeMedSammeBosted, BarnType.VANLIG);
     }
 
     private boolean kreverArbeidsgiverRefusjon(Set<Inntektsmelding> sakInntektsmeldinger,
