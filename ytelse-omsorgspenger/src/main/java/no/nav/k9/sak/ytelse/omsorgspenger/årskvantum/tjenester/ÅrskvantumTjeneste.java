@@ -282,13 +282,16 @@ public class ÅrskvantumTjeneste {
         var refusjonskrav = kravStatus.inntektsmeldingMedRefusjonskrav();
         var imUtenRefusjonskrav = kravStatus.inntektsmeldingUtenRefusjonskrav();
 
-        if (refusjonskrav == SamtidigKravStatus.KravStatus.FINNES && søknad == SamtidigKravStatus.KravStatus.FINNES) {
-            return AvvikImSøknad.IM_REFUSJONSKRAV_TRUMFER_SØKNAD;
+        if (søknad == SamtidigKravStatus.KravStatus.FINNES) {
+            if (refusjonskrav == SamtidigKravStatus.KravStatus.FINNES) {
+                return AvvikImSøknad.IM_REFUSJONSKRAV_TRUMFER_SØKNAD;
+            }
+            if (imUtenRefusjonskrav != SamtidigKravStatus.KravStatus.FINNES) {
+                return AvvikImSøknad.SØKNAD_UTEN_MATCHENDE_IM;
+            }
+            return AvvikImSøknad.INGEN_AVVIK;
         }
-        if (søknad == SamtidigKravStatus.KravStatus.FINNES && imUtenRefusjonskrav != SamtidigKravStatus.KravStatus.FINNES) {
-            return AvvikImSøknad.SØKNAD_UTEN_MATCHENDE_IM;
-        }
-        return AvvikImSøknad.INGEN_AVVIK;
+        return AvvikImSøknad.UDEFINERT;
     }
 
     private Utfall utledUtfallIngangsvilkår(WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode) {
