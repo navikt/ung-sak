@@ -8,7 +8,7 @@ public class SamtidigKravStatus {
     private final KravStatus imMedRefusjonskrav;
     private final KravStatus imUtenRefusjonskrav;
 
-    enum KravStatus {
+    public enum KravStatus {
         FINNES,
         FINNES_IKKE,
         TREKT;
