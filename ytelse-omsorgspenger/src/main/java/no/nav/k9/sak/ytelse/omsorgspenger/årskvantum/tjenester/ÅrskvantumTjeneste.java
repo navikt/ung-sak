@@ -38,8 +38,10 @@ import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -88,6 +90,7 @@ public class ÅrskvantumTjeneste {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private Boolean skruPåAvslagSøknadManglerIm;
 
     ÅrskvantumTjeneste() {
         // CDI
@@ -103,7 +106,8 @@ public class ÅrskvantumTjeneste {
                               @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                               TrekkUtFraværTjeneste trekkUtFraværTjeneste,
                               OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste,
-                              MottatteDokumentRepository mottatteDokumentRepository) {
+                              MottatteDokumentRepository mottatteDokumentRepository,
+                              @KonfigVerdi(value = "OMP_AVSLAG_SOKNAD_MANGLER_IM", defaultVerdi = "false") Boolean skruPåAvslagSøknadManglerIm) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -114,6 +118,7 @@ public class ÅrskvantumTjeneste {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.opptjeningTjeneste = opptjeningTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.skruPåAvslagSøknadManglerIm = skruPåAvslagSøknadManglerIm;
     }
 
     public void bekreftUttaksplan(Long behandlingId) {
@@ -277,17 +282,17 @@ public class ÅrskvantumTjeneste {
                 utledSøknadÅrsak(fraværPeriode),
                 opprinneligBehandlingUuid.map(UUID::toString).orElse(null),
                 avvikImSøknad,
-                utledVurderteVilkår(arbeidforholdStatus, utfallInngangsvilkår, avvikImSøknad));
+                utledVurderteVilkår(arbeidforholdStatus, utfallInngangsvilkår, avvikImSøknad, fraværPeriode.getAktivitetType()));
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
     }
 
-    private VurderteVilkår utledVurderteVilkår(ArbeidsforholdStatus arbeidsforholdStatus, Utfall utfallInngangsvilkår, AvvikImSøknad avvikImSøknad) {
+    private VurderteVilkår utledVurderteVilkår(ArbeidsforholdStatus arbeidsforholdStatus, Utfall utfallInngangsvilkår, AvvikImSøknad avvikImSøknad, UttakArbeidType aktivitetType) {
         NavigableMap<Vilkår, Utfall> vilkårMap = new TreeMap<>();
         vilkårMap.put(Vilkår.ARBEIDSFORHOLD, arbeidsforholdStatus == ArbeidsforholdStatus.AKTIVT ? Utfall.INNVILGET : Utfall.AVSLÅTT);
         vilkårMap.put(Vilkår.INNGANGSVILKÅR, utfallInngangsvilkår);
-        vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, avvikImSøknad == AvvikImSøknad.SØKNAD_UTEN_MATCHENDE_IM ? Utfall.AVSLÅTT : Utfall.INNVILGET);
+        vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, skruPåAvslagSøknadManglerIm && aktivitetType == UttakArbeidType.ARBEIDSTAKER && avvikImSøknad == AvvikImSøknad.SØKNAD_UTEN_MATCHENDE_IM ? Utfall.AVSLÅTT : Utfall.INNVILGET);
         return new VurderteVilkår(vilkårMap);
     }
 
