@@ -11,6 +11,7 @@ import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,8 @@ import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
 import no.nav.k9.aarskvantum.kontrakter.SøknadÅrsak;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
+import no.nav.k9.aarskvantum.kontrakter.Vilkår;
+import no.nav.k9.aarskvantum.kontrakter.VurderteVilkår;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
@@ -259,21 +262,32 @@ public class ÅrskvantumTjeneste {
                     arb.getAktørId() != null ? arb.getAktørId().getId() : null,
                     arbeidsforholdId);
             }
+            var arbeidforholdStatus = utledArbeidsforholdStatus(wrappedOppgittFraværPeriode);
+            var utfallInngangsvilkår = utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode);
             var uttaksperiodeOmsorgspenger = new FraværPeriode(arbeidsforhold,
-                utledArbeidsforholdStatus(wrappedOppgittFraværPeriode),
+                arbeidforholdStatus,
                 periode,
                 fraværPeriode.getFraværPerDag(),
                 true,
                 kreverRefusjon,
-                utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode),
+                utfallInngangsvilkår,
                 wrappedOppgittFraværPeriode.getInnsendingstidspunkt(),
                 utledFraværÅrsak(fraværPeriode),
                 utledSøknadÅrsak(fraværPeriode),
                 opprinneligBehandlingUuid.map(UUID::toString).orElse(null),
-                utedAvvikImSøknad(wrappedOppgittFraværPeriode));
+                utedAvvikImSøknad(wrappedOppgittFraværPeriode),
+                utledVurderteVilkår(arbeidforholdStatus, utfallInngangsvilkår));
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
+    }
+
+    private VurderteVilkår utledVurderteVilkår(ArbeidsforholdStatus arbeidsforholdStatus, Utfall utfallInngangsvilkår) {
+        NavigableMap<Vilkår, Utfall> vilkårMap = new TreeMap<>();
+        vilkårMap.put(Vilkår.ARBEIDSFORHOLD, arbeidsforholdStatus == ArbeidsforholdStatus.AKTIVT ? Utfall.INNVILGET : Utfall.AVSLÅTT);
+        vilkårMap.put(Vilkår.INNGANGSVILKÅR, utfallInngangsvilkår);
+        vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, Utfall.INNVILGET); // TODO TE mappe inn riktig verdi her
+        return new VurderteVilkår(vilkårMap);
     }
 
     private AvvikImSøknad utedAvvikImSøknad(WrappedOppgittFraværPeriode oppgittFraværPeriode) {
