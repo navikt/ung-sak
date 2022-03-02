@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
@@ -32,6 +33,7 @@ public class YrkesaktivitetFilter {
     private LocalDate skjæringstidspunkt;
     private Boolean ventreSideAvSkjæringstidspunkt;
     private Collection<Yrkesaktivitet> yrkesaktiviteter;
+    private DatoIntervallEntitet periode;
 
     public YrkesaktivitetFilter(ArbeidsforholdInformasjon overstyringer, Collection<Yrkesaktivitet> yrkesaktiviteter) {
         this.arbeidsforholdOverstyringer = overstyringer;
@@ -163,6 +165,7 @@ public class YrkesaktivitetFilter {
 
     public YrkesaktivitetFilter etter(LocalDate skjæringstidspunkt) {
         var filter = new YrkesaktivitetFilter(arbeidsforholdOverstyringer, getAlleYrkesaktiviteter());
+        filter.periode = null;
         filter.skjæringstidspunkt = skjæringstidspunkt;
         filter.ventreSideAvSkjæringstidspunkt = !(skjæringstidspunkt != null);
         return filter;
@@ -170,12 +173,24 @@ public class YrkesaktivitetFilter {
 
     public YrkesaktivitetFilter før(LocalDate skjæringstidspunkt) {
         var filter = new YrkesaktivitetFilter(arbeidsforholdOverstyringer, getAlleYrkesaktiviteter());
+        filter.periode = null;
         filter.skjæringstidspunkt = skjæringstidspunkt;
         filter.ventreSideAvSkjæringstidspunkt = (skjæringstidspunkt != null);
         return filter;
     }
 
+    public YrkesaktivitetFilter i(DatoIntervallEntitet periode) {
+        var filter = new YrkesaktivitetFilter(arbeidsforholdOverstyringer, getAlleYrkesaktiviteter());
+        filter.periode = periode;
+        filter.skjæringstidspunkt = null;
+        filter.ventreSideAvSkjæringstidspunkt = null;
+        return filter;
+    }
+
     boolean skalMedEtterSkjæringstidspunktVurdering(AktivitetsAvtale ap) {
+        if (periode != null) {
+            return ap.getPeriode().overlapper(periode);
+        }
 
         if (skjæringstidspunkt != null) {
             if (ventreSideAvSkjæringstidspunkt) {
