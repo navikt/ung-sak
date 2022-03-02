@@ -89,14 +89,10 @@ public class SykdomVurderingRepository {
         entityManager.flush();
     }
 
-    public Optional<SykdomVurderingVersjonBesluttet> hentBesluttet(SykdomVurderingVersjon vurderingVersjon) {
+    public boolean hentErBesluttet(SykdomVurderingVersjon vurderingVersjon) {
         SykdomVurderingVersjonBesluttet besluttet = entityManager.find(SykdomVurderingVersjonBesluttet.class, vurderingVersjon.getId());
 
-        if (besluttet == null) {
-            return Optional.empty();
-        } else {
-            return Optional.of(besluttet);
-        }
+        return besluttet != null;
     }
 
     public Optional<SykdomVurdering> hentVurdering(AktørId pleietrengende, Long vurderingId) {

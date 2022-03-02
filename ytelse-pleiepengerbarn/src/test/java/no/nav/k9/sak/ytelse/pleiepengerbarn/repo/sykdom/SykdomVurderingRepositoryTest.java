@@ -149,10 +149,9 @@ class SykdomVurderingRepositoryTest {
         SykdomVurderingVersjonBesluttet besluttet = new SykdomVurderingVersjonBesluttet("test", LocalDateTime.now(), vurderingVersjonUtenBesluttet);
         repo.lagre(besluttet);
 
-        Optional<SykdomVurderingVersjonBesluttet> versjonBesluttet = repo.hentBesluttet(vurderingVersjonUtenBesluttet);
+        boolean erBesluttet = repo.hentErBesluttet(vurderingVersjonUtenBesluttet);
 
-        assertThat(versjonBesluttet.isPresent());
-        assertThat(versjonBesluttet.get().getId()).isEqualTo(vurderingVersjonUtenBesluttet.getId());
+        assertThat(erBesluttet);
     }
 
     @Test

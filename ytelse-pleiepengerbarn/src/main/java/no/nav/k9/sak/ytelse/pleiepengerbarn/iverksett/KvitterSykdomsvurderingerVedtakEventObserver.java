@@ -9,6 +9,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -50,27 +52,41 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
         if (fagsak.getYtelseType() != FagsakYtelseType.PSB) {
             return;
         }
-        if (IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
-            var behandlingId = event.getBehandlingId();
-            var behandling = behandlingRepository.hentBehandling(behandlingId);
-            //logContext(behandling); //TODO: antar jeg burde ha mdc-logging her også?
-
-            SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(behandling.getUuid());
-
-            String endretAv = behandling.isToTrinnsBehandling() ? behandling.getAnsvarligBeslutter() : behandling.getAnsvarligSaksbehandler();
-            LocalDateTime nå = LocalDateTime.now();
-
-            sykdomGrunnlagBehandling.getGrunnlag().getVurderinger()
-                .stream()
-                .forEach(v -> {
-                    sykdomVurderingRepository.lagre(
-                        new SykdomVurderingVersjonBesluttet(
-                            endretAv,
-                            nå,
-                            v)); //On conflict do nothing
-                });
-
-            log.info("Utført for behandling: {}", behandlingId);
+        if (!IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
+            return;
         }
+        var behandlingId = event.getBehandlingId();
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        //logContext(behandling); //TODO: antar jeg burde ha mdc-logging her også?
+
+        SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(behandling.getUuid());
+
+        if (!behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)) {
+            if(harUbesluttet(sykdomGrunnlagBehandling)) {
+                throw new IllegalArgumentException("Har ubesluttede sykdomsvurderinger uten at AP9001 har blitt generert");
+            }
+            return;
+        }
+
+        String endretAv = behandling.getAnsvarligBeslutter();
+        LocalDateTime nå = LocalDateTime.now();
+
+        sykdomGrunnlagBehandling.getGrunnlag().getVurderinger()
+            .stream()
+            .forEach(v -> {
+                sykdomVurderingRepository.lagre(
+                    new SykdomVurderingVersjonBesluttet(
+                        endretAv,
+                        nå,
+                        v)); //On conflict do nothing
+            });
+
+        log.info("Utført for behandling: {}", behandlingId);
+    }
+
+    private boolean harUbesluttet(SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
+        return sykdomGrunnlagBehandling.getGrunnlag().getVurderinger()
+            .stream()
+            .anyMatch(v -> !sykdomVurderingRepository.hentErBesluttet(v));
     }
 }
