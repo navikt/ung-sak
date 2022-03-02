@@ -15,6 +15,9 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -79,6 +82,8 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient
 @Default
 public class ÅrskvantumTjeneste {
 
+    private static final Logger logger = LoggerFactory.getLogger(ÅrskvantumTjeneste.class);
+
     private final MapOppgittFraværOgVilkårsResultat mapOppgittFraværOgVilkårsResultat = new MapOppgittFraværOgVilkårsResultat();
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
@@ -91,6 +96,7 @@ public class ÅrskvantumTjeneste {
     private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private Boolean skruPåAvslagSøknadManglerIm;
+    private Boolean brukFerdigutledetFlaggRefusjon;
 
     ÅrskvantumTjeneste() {
         // CDI
@@ -107,7 +113,8 @@ public class ÅrskvantumTjeneste {
                               TrekkUtFraværTjeneste trekkUtFraværTjeneste,
                               OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste,
                               MottatteDokumentRepository mottatteDokumentRepository,
-                              @KonfigVerdi(value = "OMP_AVSLAG_SOKNAD_MANGLER_IM", defaultVerdi = "false") Boolean skruPåAvslagSøknadManglerIm) {
+                              @KonfigVerdi(value = "OMP_AVSLAG_SOKNAD_MANGLER_IM", defaultVerdi = "false") Boolean skruPåAvslagSøknadManglerIm,
+                              @KonfigVerdi(value = "OMP_AARSKVANTUMTJENESTE_BRUK_FERDIGUTLEDET_FLAGG_REFUSJON", defaultVerdi = "true") Boolean brukFerdigutledetFlaggRefusjon) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -119,6 +126,7 @@ public class ÅrskvantumTjeneste {
         this.opptjeningTjeneste = opptjeningTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.skruPåAvslagSøknadManglerIm = skruPåAvslagSøknadManglerIm;
+        this.brukFerdigutledetFlaggRefusjon = brukFerdigutledetFlaggRefusjon;
     }
 
     public void bekreftUttaksplan(Long behandlingId) {
@@ -255,6 +263,9 @@ public class ÅrskvantumTjeneste {
             Arbeidsgiver arb = fraværPeriode.getArbeidsgiver();
 
             Arbeidsforhold arbeidsforhold;
+
+            boolean kreverRefusjonFerdigutledet = wrappedOppgittFraværPeriode.getSamtidigeKrav().inntektsmeldingMedRefusjonskrav() == SamtidigKravStatus.KravStatus.FINNES;
+            boolean refusjonskravTrekt = wrappedOppgittFraværPeriode.getSamtidigeKrav().inntektsmeldingMedRefusjonskrav() == SamtidigKravStatus.KravStatus.TREKT;
             boolean kreverRefusjon = false;
             if (arb == null) {
                 arbeidsforhold = new Arbeidsforhold(fraværPeriode.getAktivitetType().getKode(), null, null, null);
@@ -267,6 +278,14 @@ public class ÅrskvantumTjeneste {
                     arb.getAktørId() != null ? arb.getAktørId().getId() : null,
                     arbeidsforholdId);
             }
+
+            if (kreverRefusjon != kreverRefusjonFerdigutledet) {
+                if (refusjonskravTrekt) {
+                    logger.info("Flagg for krever refusjon er ulikt på ny/gammel utledning. Gammel utlednig sa {}, ny sier {}. Skjer her fordi krav er trekt", kreverRefusjon, kreverRefusjonFerdigutledet);
+                } else {
+                    logger.warn("Flagg for krever refusjon er ulikt på ny/gammel utledning. Gammel utlednig sa {}, ny sier {}.", kreverRefusjon, kreverRefusjonFerdigutledet);
+                }
+            }
             var arbeidforholdStatus = utledArbeidsforholdStatus(wrappedOppgittFraværPeriode);
             var utfallInngangsvilkår = utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode);
             var avvikImSøknad = utedAvvikImSøknad(wrappedOppgittFraværPeriode);
@@ -275,7 +294,7 @@ public class ÅrskvantumTjeneste {
                 periode,
                 fraværPeriode.getFraværPerDag(),
                 true,
-                kreverRefusjon,
+                brukFerdigutledetFlaggRefusjon ? kreverRefusjonFerdigutledet : kreverRefusjon,
                 utfallInngangsvilkår,
                 wrappedOppgittFraværPeriode.getInnsendingstidspunkt(),
                 utledFraværÅrsak(fraværPeriode),
