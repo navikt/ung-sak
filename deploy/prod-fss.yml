@@ -225,6 +225,8 @@ spec:
       value: "false"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "false"
+    - name: OMP_AVSLAG_SOKNAD_MANGLER_IM
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
