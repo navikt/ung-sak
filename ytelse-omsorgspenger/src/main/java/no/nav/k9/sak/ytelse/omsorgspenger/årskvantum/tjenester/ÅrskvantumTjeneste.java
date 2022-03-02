@@ -264,6 +264,7 @@ public class ÅrskvantumTjeneste {
             }
             var arbeidforholdStatus = utledArbeidsforholdStatus(wrappedOppgittFraværPeriode);
             var utfallInngangsvilkår = utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode);
+            var avvikImSøknad = utedAvvikImSøknad(wrappedOppgittFraværPeriode);
             var uttaksperiodeOmsorgspenger = new FraværPeriode(arbeidsforhold,
                 arbeidforholdStatus,
                 periode,
@@ -275,18 +276,18 @@ public class ÅrskvantumTjeneste {
                 utledFraværÅrsak(fraværPeriode),
                 utledSøknadÅrsak(fraværPeriode),
                 opprinneligBehandlingUuid.map(UUID::toString).orElse(null),
-                utedAvvikImSøknad(wrappedOppgittFraværPeriode),
-                utledVurderteVilkår(arbeidforholdStatus, utfallInngangsvilkår));
+                avvikImSøknad,
+                utledVurderteVilkår(arbeidforholdStatus, utfallInngangsvilkår, avvikImSøknad));
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
     }
 
-    private VurderteVilkår utledVurderteVilkår(ArbeidsforholdStatus arbeidsforholdStatus, Utfall utfallInngangsvilkår) {
+    private VurderteVilkår utledVurderteVilkår(ArbeidsforholdStatus arbeidsforholdStatus, Utfall utfallInngangsvilkår, AvvikImSøknad avvikImSøknad) {
         NavigableMap<Vilkår, Utfall> vilkårMap = new TreeMap<>();
         vilkårMap.put(Vilkår.ARBEIDSFORHOLD, arbeidsforholdStatus == ArbeidsforholdStatus.AKTIVT ? Utfall.INNVILGET : Utfall.AVSLÅTT);
         vilkårMap.put(Vilkår.INNGANGSVILKÅR, utfallInngangsvilkår);
-        vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, Utfall.INNVILGET); // TODO TE mappe inn riktig verdi her
+        vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, avvikImSøknad == AvvikImSøknad.SØKNAD_UTEN_MATCHENDE_IM ? Utfall.AVSLÅTT : Utfall.INNVILGET);
         return new VurderteVilkår(vilkårMap);
     }
 
