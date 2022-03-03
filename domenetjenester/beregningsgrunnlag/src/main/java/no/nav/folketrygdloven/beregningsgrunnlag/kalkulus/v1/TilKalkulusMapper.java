@@ -70,6 +70,7 @@ import no.nav.k9.kodeverk.arbeidsforhold.YtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
@@ -114,18 +115,26 @@ public class TilKalkulusMapper {
         };
     }
 
-    public static ArbeidsforholdInformasjonDto mapTilArbeidsforholdInformasjonDto(ArbeidsforholdInformasjon arbeidsforholdInformasjon) {
+    public static ArbeidsforholdInformasjonDto mapTilArbeidsforholdInformasjonDto(ArbeidsforholdInformasjon arbeidsforholdInformasjon, Collection<Inntektsmelding> sakInntektsmeldinger) {
         List<ArbeidsforholdOverstyringDto> resultat = arbeidsforholdInformasjon.getOverstyringer().stream()
             .map(arbeidsforholdOverstyring -> new ArbeidsforholdOverstyringDto(mapTilAktør(arbeidsforholdOverstyring.getArbeidsgiver()),
                 arbeidsforholdOverstyring.getArbeidsforholdRef().gjelderForSpesifiktArbeidsforhold() ? new InternArbeidsforholdRefDto(arbeidsforholdOverstyring.getArbeidsforholdRef().getReferanse())
                     : null,
-                ArbeidsforholdHandlingType.fraKode(arbeidsforholdOverstyring.getHandling().getKode())))
+                utledHandling(arbeidsforholdOverstyring, sakInntektsmeldinger)))
             .collect(Collectors.toList());
 
         if (!resultat.isEmpty()) {
             return new ArbeidsforholdInformasjonDto(resultat);
         }
         return null;
+    }
+
+    private static ArbeidsforholdHandlingType utledHandling(ArbeidsforholdOverstyring arbeidsforholdOverstyring, Collection<Inntektsmelding> sakInntektsmeldinger) {
+        var harMottattInntektsmelding = sakInntektsmeldinger.stream().anyMatch(im -> im.getArbeidsgiver().equals(arbeidsforholdOverstyring.getArbeidsgiver()) && im.getArbeidsforholdRef().gjelderFor(arbeidsforholdOverstyring.getArbeidsforholdRef()));
+        var erLagtTilAvSaksbehandler = arbeidsforholdOverstyring.getHandling().equals(no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER);
+        return erLagtTilAvSaksbehandler && harMottattInntektsmelding ?
+            ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING :
+            ArbeidsforholdHandlingType.fraKode(arbeidsforholdOverstyring.getHandling().getKode());
     }
 
     public static OppgittEgenNæringDto mapOppgittEgenNæring(OppgittEgenNæring oppgittEgenNæring) {
@@ -402,7 +411,8 @@ public class TilKalkulusMapper {
         inntektArbeidYtelseGrunnlagDto.medInntekterDto(mapInntektDto(alleRelevanteInntekter));
         inntektArbeidYtelseGrunnlagDto.medYtelserDto(mapYtelseDto(ytelseFilter.getAlleYtelser()));
         inntektArbeidYtelseGrunnlagDto.medInntektsmeldingerDto(mapTilDto(imTjeneste, sakInntektsmeldinger, vilkårsPeriode, referanse));
-        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon().map(TilKalkulusMapper::mapTilArbeidsforholdInformasjonDto).orElse(null));
+        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon().map(arbeidsforholdInformasjon ->
+            mapTilArbeidsforholdInformasjonDto(arbeidsforholdInformasjon, sakInntektsmeldinger)).orElse(null));
         inntektArbeidYtelseGrunnlagDto.medOppgittOpptjeningDto(mapTilOppgittOpptjeningDto(oppgittOpptjening));
 
         return inntektArbeidYtelseGrunnlagDto;
