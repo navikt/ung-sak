@@ -79,6 +79,16 @@ public class BehandlingskontrollEventObserver {
         }
     }
 
+    public void observerBehandlingOpprettetEvent(@Observes BehandlingStatusEvent.BehandlingOpprettetEvent event) {
+        try {
+            ProsessTaskData prosessTaskData = opprettProsessTaskBehandlingOpprettetEvent(event.getBehandlingId());
+//            prosessTaskRepository.lagre(prosessTaskData); // Aktiveres etter kontraktsoppdatering i los
+        } catch (Exception ex) {
+            log.warn("Publisering av BehandlingOpprettetHendelse feilet", ex);
+        }
+    }
+
+
     public void observerBehandlingAvsluttetEvent(@Observes BehandlingStatusEvent.BehandlingAvsluttetEvent event) {
         try {
             ProsessTaskData prosessTaskData = opprettProsessTaskBehandlingprosess(event.getBehandlingId(), EventHendelse.AKSJONSPUNKT_AVBRUTT);
