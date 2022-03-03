@@ -17,7 +17,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes(value = {
         @JsonSubTypes.Type(name = "KRAVDOKUMENT", value = ProduksjonsstyringDokumentHendelse.class),
         @JsonSubTypes.Type(name = "AKSJONSPUNKT", value = ProduksjonsstyringAksjonspunktHendelse.class),
-        @JsonSubTypes.Type(name = "BEHANDLING", value = ProduksjonsstyringBehandlingHendelse.class),
+        @JsonSubTypes.Type(name = "BEHANDLING_OPPRETTET", value = ProduksjonsstyringBehandlingOpprettetHendelse.class),
+        @JsonSubTypes.Type(name = "BEHANDLING_AVSLUTTET", value = ProduksjonsstyringBehandlingAvsluttetHendelse.class),
 })
 public abstract class ProduksjonsstyringHendelse {
     public final UUID eksternId;
