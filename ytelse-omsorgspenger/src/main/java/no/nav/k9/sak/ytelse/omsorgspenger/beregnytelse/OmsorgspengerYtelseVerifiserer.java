@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
@@ -117,6 +118,8 @@ public class OmsorgspengerYtelseVerifiserer {
     }
 
     private Arbeidsgiver mapArbeidsgiver(OppgittFraværPeriode periode) {
-        return periode.getArbeidsgiver();
+        return periode.getAktivitetType() == UttakArbeidType.ARBEIDSTAKER
+            ? periode.getArbeidsgiver()
+            : null; //kan opplyse orgnr også for SN, men må fjernes i sammenligning siden den ikke blir med til tilkjent ytelse
     }
 }
