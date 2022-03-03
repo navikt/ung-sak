@@ -25,8 +25,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjonBe
 @ApplicationScoped
 public class KvitterSykdomsvurderingerVedtakEventObserver {
 
-    public static final String TASKTYPE = "iverksetteVedtak.kvitterSykdomsvurderinger"; //TODO: Fjerne?
-
     private static final Logger log = LoggerFactory.getLogger(no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett.KvitterSykdomsvurderingerVedtakEventObserver.class);
 
     private BehandlingRepository behandlingRepository;
@@ -57,7 +55,6 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
         }
         var behandlingId = event.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        //logContext(behandling); //TODO: antar jeg burde ha mdc-logging her også?
 
         SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(behandling.getUuid());
 
