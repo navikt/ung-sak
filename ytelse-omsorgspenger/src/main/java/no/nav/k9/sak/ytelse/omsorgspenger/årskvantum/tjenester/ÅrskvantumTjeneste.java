@@ -301,18 +301,25 @@ public class ÅrskvantumTjeneste {
                 utledSøknadÅrsak(fraværPeriode),
                 opprinneligBehandlingUuid.map(UUID::toString).orElse(null),
                 avvikImSøknad,
-                utledVurderteVilkår(arbeidforholdStatus, utfallInngangsvilkår, avvikImSøknad, fraværPeriode.getAktivitetType()));
+                utledVurderteVilkår(arbeidforholdStatus, utfallInngangsvilkår, avvikImSøknad, fraværPeriode));
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
     }
 
-    private VurderteVilkår utledVurderteVilkår(ArbeidsforholdStatus arbeidsforholdStatus, Utfall utfallInngangsvilkår, AvvikImSøknad avvikImSøknad, UttakArbeidType aktivitetType) {
+    private VurderteVilkår utledVurderteVilkår(ArbeidsforholdStatus arbeidsforholdStatus, Utfall utfallInngangsvilkår, AvvikImSøknad avvikImSøknad, OppgittFraværPeriode fraværPeriode) {
         NavigableMap<Vilkår, Utfall> vilkårMap = new TreeMap<>();
         vilkårMap.put(Vilkår.ARBEIDSFORHOLD, arbeidsforholdStatus == ArbeidsforholdStatus.AKTIVT ? Utfall.INNVILGET : Utfall.AVSLÅTT);
         vilkårMap.put(Vilkår.INNGANGSVILKÅR, utfallInngangsvilkår);
-        vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, skruPåAvslagSøknadManglerIm && aktivitetType == UttakArbeidType.ARBEIDSTAKER && avvikImSøknad == AvvikImSøknad.SØKNAD_UTEN_MATCHENDE_IM ? Utfall.AVSLÅTT : Utfall.INNVILGET);
+        vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, skruPåAvslagSøknadManglerIm && avslåFraværFraArbeidPgaManglendeIm(avvikImSøknad, fraværPeriode.getAktivitetType(), fraværPeriode.getSøknadÅrsak()) ? Utfall.AVSLÅTT : Utfall.INNVILGET);
         return new VurderteVilkår(vilkårMap);
+    }
+
+    private boolean avslåFraværFraArbeidPgaManglendeIm(AvvikImSøknad avvikImSøknad, UttakArbeidType aktivitetType, no.nav.k9.kodeverk.uttak.SøknadÅrsak søknadÅrsak) {
+        return aktivitetType == UttakArbeidType.ARBEIDSTAKER
+            && avvikImSøknad == AvvikImSøknad.SØKNAD_UTEN_MATCHENDE_IM
+            && søknadÅrsak != no.nav.k9.kodeverk.uttak.SøknadÅrsak.ARBEIDSGIVER_KONKURS
+            && søknadÅrsak != no.nav.k9.kodeverk.uttak.SøknadÅrsak.KONFLIKT_MED_ARBEIDSGIVER;
     }
 
     private AvvikImSøknad utedAvvikImSøknad(WrappedOppgittFraværPeriode oppgittFraværPeriode) {
