@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.kravperioder;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.TreeSet;
@@ -84,7 +85,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     public StatusForPerioderPåBehandling hentPerioderTilBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
-        StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref, behandling);
+        StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref, behandling, VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType()));
 
         return statusForPerioderPåBehandling;
     }
@@ -104,31 +105,38 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     public StatusForPerioderPåBehandlingInkludertVilkår hentPerioderMedVilkårForBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
-        StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref, behandling);
+        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
+        StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref, behandling, perioderTilVurderingTjeneste);
 
         return new StatusForPerioderPåBehandlingInkludertVilkår(statusForPerioderPåBehandling,
-            mapVilkårMedUtfall(behandling.getId()),
-            behandling.getOriginalBehandlingId().map(this::mapVilkårMedUtfall).orElse(List.of()));
+            mapVilkårMedUtfall(behandling.getId(), perioderTilVurderingTjeneste),
+            behandling.getOriginalBehandlingId().map(behandlingId -> mapVilkårMedUtfall(behandlingId, perioderTilVurderingTjeneste)).orElse(List.of()));
     }
 
-    private List<PeriodeMedUtfall> mapVilkårMedUtfall(Long behandlingId) {
+    private List<PeriodeMedUtfall> mapVilkårMedUtfall(Long behandlingId, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         var opt = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
 
-        if (opt.isEmpty() || opt.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).isEmpty()) {
-            return List.of();
+        var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
+
+        var result = new ArrayList<PeriodeMedUtfall>();
+
+        for (VilkårType vilkårType : definerendeVilkår) {
+            if (opt.isEmpty() || opt.get().getVilkår(vilkårType).isEmpty()) {
+                continue;
+            }
+
+            var vilkår = opt.get().getVilkår(vilkårType).orElseThrow();
+            result.addAll(vilkår.getPerioder()
+                .stream()
+                .map(it -> new PeriodeMedUtfall(it.getPeriode().tilPeriode(), it.getGjeldendeUtfall()))
+                .toList());
         }
 
-        var vilkår = opt.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
-
-        return vilkår.getPerioder()
-            .stream()
-            .map(it -> new PeriodeMedUtfall(it.getPeriode().tilPeriode(), it.getGjeldendeUtfall()))
-            .toList();
+        return result;
     }
 
-    private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref, Behandling behandling) {
+    private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref, Behandling behandling, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         var søknadsfristTjeneste = søknadsfristTjenesteProvider.finnVurderSøknadsfristTjeneste(ref);
-        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
 
         var kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(ref);
         var perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(ref.getBehandlingId());
