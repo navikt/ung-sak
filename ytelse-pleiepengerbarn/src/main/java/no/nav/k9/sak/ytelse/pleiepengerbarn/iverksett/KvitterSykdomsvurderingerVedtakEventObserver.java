@@ -61,7 +61,7 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
 
         SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(behandling.getUuid());
 
-        if (!behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)) {
+        if (!behandling.isToTrinnsBehandling()) {
             if(harUbesluttet(sykdomGrunnlagBehandling)) {
                 throw new IllegalArgumentException("Har ubesluttede sykdomsvurderinger uten at AP9001 har blitt generert");
             }

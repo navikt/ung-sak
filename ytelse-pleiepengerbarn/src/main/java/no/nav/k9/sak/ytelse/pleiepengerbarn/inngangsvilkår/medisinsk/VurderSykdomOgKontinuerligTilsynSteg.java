@@ -77,7 +77,6 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private VilkårResultatRepository vilkårResultatRepository;
     private SykdomVurderingService sykdomVurderingService;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
-    private SykdomDokumentRepository sykdomDokumentRepository;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     VurderSykdomOgKontinuerligTilsynSteg() {
@@ -90,8 +89,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                                                 @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                 SykdomVurderingService sykdomVurderingService,
                                                 SykdomGrunnlagRepository sykdomGrunnlagRepository,
-                                                SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-                                                SykdomDokumentRepository sykdomDokumentRepository) {
+                                                SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
@@ -100,7 +98,6 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         this.sykdomVurderingService = sykdomVurderingService;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
-        this.sykdomDokumentRepository = sykdomDokumentRepository;
     }
 
     private static final <T> NavigableSet<T> union(NavigableSet<T> s1, NavigableSet<T> s2) {
