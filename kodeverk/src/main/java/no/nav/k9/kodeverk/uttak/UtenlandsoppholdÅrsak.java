@@ -24,7 +24,7 @@ public enum UtenlandsoppholdÅrsak implements Kodeverdi {
         "Barnet er innlagt i helseinstitusjon dekket etter avtale med annet land om trygd (mottar pleiepenger som i Norge, telles ikke i 8 uker)"),
     INGEN(
         "INGEN",
-        "Ingen av årsakene over (kan motta pleiepenger i 8 uker)");
+        "Ingen årsak til utenlandsoppholdet er oppgitt, perioden telles i 8 uker");
 
     @JsonValue
     private final String kode;
