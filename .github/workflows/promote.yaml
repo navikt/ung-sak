@@ -29,7 +29,7 @@ jobs:
             github.rest.issues.get( {
               owner: context.issue.owner,
               repo: context.issue.repo,
-              issue_number: ${{ github.event.client_payload.github.payload.issue.number }} })
+              issue_number: context.payload.issue.number })
             .then(response => {
               core.setOutput('sha', response.data.body);
             });
