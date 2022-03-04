@@ -15,8 +15,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 /**
  * Brukt til å filtrere registrerte yrkesaktiviteter, overstyrte arbeidsforhold og frilans arbeidsforhold etter skjæringstidspunkt.
@@ -132,7 +130,6 @@ public class YrkesaktivitetFilter {
                     yrkesaktivitetBuilder.leggTilAktivitetsAvtale(aktivitetsAvtaleMedStillingsprosent);
                 }
                 var yrkesaktivitetEntitet = yrkesaktivitetBuilder.build();
-                // yrkesaktivitetEntitet.setAktørArbeid(this); // OJR/FC: er samstemte om at denne ikke trengs
                 fiktiveArbeidsforhold.add(yrkesaktivitetEntitet);
             }
         }
@@ -203,14 +200,6 @@ public class YrkesaktivitetFilter {
         return true;
     }
 
-    public Collection<AktivitetsAvtale> getAktivitetsAvtalerForArbeid(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef internArbeidsforholdRef) {
-        return getYrkesaktiviteter().stream()
-            .filter(yt -> yt.gjelderFor(arbeidsgiver, internArbeidsforholdRef))
-            .map(this::getAktivitetsAvtalerForArbeid)
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
-    }
-
     private Collection<AktivitetsAvtale> filterAktivitetsAvtaleOverstyring(Yrkesaktivitet ya, Collection<AktivitetsAvtale> yaAvtaler) {
 
         Optional<ArbeidsforholdOverstyring> overstyringOpt = finnMatchendeOverstyring(ya);
@@ -226,7 +215,7 @@ public class YrkesaktivitetFilter {
         ArbeidsforholdHandlingType handling = overstyring.getHandling();
 
         List<ArbeidsforholdOverstyrtePerioder> overstyrtePerioder = overstyring.getArbeidsforholdOverstyrtePerioder();
-        if ((ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER.equals(handling)) && !overstyrtePerioder.isEmpty()) {
+        if (erLagtTilAvSaksbehandler(handling) && !overstyrtePerioder.isEmpty()) {
             Set<AktivitetsAvtale> avtaler = new LinkedHashSet<>();
             overstyrtePerioder.forEach(overstyrtPeriode -> yaAvtaler.stream()
                 .filter(AktivitetsAvtale::erAnsettelsesPeriode)
@@ -235,13 +224,18 @@ public class YrkesaktivitetFilter {
                 .forEach(avtale -> avtaler.add(new AktivitetsAvtale(avtale, overstyrtPeriode.getOverstyrtePeriode()))));
 
             // legg til resten, bruk av set hindrer oss i å legge dobbelt.
-            yaAvtaler.stream().forEach(avtale -> avtaler.add(new AktivitetsAvtale(avtale)));
+            yaAvtaler.forEach(avtale -> avtaler.add(new AktivitetsAvtale(avtale)));
             return avtaler;
         } else {
             // ingen overstyring, returner samme
             return yaAvtaler;
         }
 
+    }
+
+    private boolean erLagtTilAvSaksbehandler(ArbeidsforholdHandlingType handling) {
+        return ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER.equals(handling) ||
+            ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING.equals(handling);
     }
 
     private Optional<ArbeidsforholdOverstyring> finnMatchendeOverstyring(Yrkesaktivitet ya) {
@@ -273,14 +267,6 @@ public class YrkesaktivitetFilter {
             return filtrert;
         }
         return Collections.emptyList();
-    }
-
-    /**
-     * @see #getAktivitetsAvtalerForArbeid(Yrkesaktivitet)
-     */
-    public Collection<AktivitetsAvtale> getAktivitetsAvtalerForArbeid(Collection<Yrkesaktivitet> yrkesaktiviteter) {
-        var aktivitetsavtaler = yrkesaktiviteter.stream().flatMap(ya -> getAktivitetsAvtalerForArbeid(ya).stream()).collect(Collectors.toList());
-        return aktivitetsavtaler;
     }
 
     /**
