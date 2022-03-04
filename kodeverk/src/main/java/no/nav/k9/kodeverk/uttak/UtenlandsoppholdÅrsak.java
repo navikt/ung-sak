@@ -1,16 +1,17 @@
 package no.nav.k9.kodeverk.uttak;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -25,13 +26,12 @@ public enum UtenlandsoppholdÅrsak implements Kodeverdi {
         "INGEN",
         "Ingen av årsakene over (kan motta pleiepenger i 8 uker)");
 
-    @JsonIgnore
+    @JsonValue
     private final String kode;
     private final String navn;
 
     public static final String KODEVERK = "UTENLANDSOPPHOLD_ÅRSAK";
 
-    @JsonIgnore
     private static final Map<String, UtenlandsoppholdÅrsak> KODER = new LinkedHashMap<>();
 
     static {
@@ -60,7 +60,10 @@ public enum UtenlandsoppholdÅrsak implements Kodeverdi {
         return ad;
     }
 
-    @JsonProperty
+    public static Map<String, UtenlandsoppholdÅrsak> kodeMap() {
+        return Collections.unmodifiableMap(KODER);
+    }
+
     @Override
     public String getKode() {
         return kode;
@@ -76,8 +79,8 @@ public enum UtenlandsoppholdÅrsak implements Kodeverdi {
         return this.getKode();
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
+    @JsonProperty
     public String getKodeverk() {
         return KODEVERK;
     }
