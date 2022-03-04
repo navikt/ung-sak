@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.sak.kontrakt.krav.KravDokumentType;
 
@@ -18,7 +19,10 @@ public class ProduksjonsstyringDokumentHendelse extends ProduksjonsstyringHendel
     public final List<KravDokumentType> kravdokumenter;
 
     @JsonCreator
-    public ProduksjonsstyringDokumentHendelse(UUID eksternId, LocalDateTime hendelseTid, List<KravDokumentType> kravdokumenter) {
+    public ProduksjonsstyringDokumentHendelse(
+        @JsonProperty("eksternId") UUID eksternId,
+        @JsonProperty("hendelseTid") LocalDateTime hendelseTid,
+        @JsonProperty("kravdokumenter") List<KravDokumentType> kravdokumenter) {
         super(eksternId, hendelseTid, K9SakHendelseType.KRAVDOKUMENT);
         this.kravdokumenter = kravdokumenter;
     }
