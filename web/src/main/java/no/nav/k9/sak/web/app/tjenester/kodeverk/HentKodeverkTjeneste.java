@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.api.Kodeverdi;
@@ -59,6 +58,7 @@ import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 
 @ApplicationScoped
@@ -115,6 +115,7 @@ public class HentKodeverkTjeneste {
         map.put(Språkkode.class.getSimpleName(), Språkkode.kodeMap().values());
         map.put(VedtakResultatType.class.getSimpleName(), VedtakResultatType.kodeMap().values());
         map.put(DokumentTypeId.class.getSimpleName(), DokumentTypeId.kodeMap().values());
+        map.put(ÅrsakTilVurdering.class.getSimpleName(), ÅrsakTilVurdering.kodeMap().values());
 
         Map<String, Collection<?>> mapFiltered = new LinkedHashMap<>();
 
