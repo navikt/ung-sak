@@ -54,6 +54,7 @@ import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.SivilstandType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.kodeverk.uttak.UtenlandsoppholdÅrsak;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -115,6 +116,7 @@ public class HentKodeverkTjeneste {
         map.put(Språkkode.class.getSimpleName(), Språkkode.kodeMap().values());
         map.put(VedtakResultatType.class.getSimpleName(), VedtakResultatType.kodeMap().values());
         map.put(DokumentTypeId.class.getSimpleName(), DokumentTypeId.kodeMap().values());
+        map.put(UtenlandsoppholdÅrsak.class.getSimpleName(), UtenlandsoppholdÅrsak.kodeMap().values());
         map.put(ÅrsakTilVurdering.class.getSimpleName(), ÅrsakTilVurdering.kodeMap().values());
 
         Map<String, Collection<?>> mapFiltered = new LinkedHashMap<>();

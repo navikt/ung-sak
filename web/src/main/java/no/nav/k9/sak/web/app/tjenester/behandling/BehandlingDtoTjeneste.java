@@ -74,6 +74,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRes
 import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilsyn.VurderTilsynRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.PleiepengerUttakRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UtenlandsoppholdRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.DokumenterMedUstrukturerteDataRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
@@ -388,6 +389,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.SYKDOM_DIAGNOSEKODER_PATH, "sykdom-diagnosekoder", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_UTTAKSPLAN_PATH, "pleiepenger-sykt-barn-uttaksplan", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_SKULLE_SØKT_OM_PATH, "psb-manglende-arbeidstid", uuidQueryParams));
+                dto.leggTil(getFraMap(UtenlandsoppholdRestTjeneste.UTTAK_UTENLANDSOPPHOLD, "utenlandsopphold", uuidQueryParams));
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
                 dto.leggTil(getFraMap(OverlapendeYtelserRestTjeneste.OVERLAPPENDE_YTELSER_PATH, "overlappende-ytelser", uuidQueryParams));
