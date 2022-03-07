@@ -297,6 +297,22 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     public List<BeregningsgrunnlagKobling> hentKoblingerForInnvilgedePerioder(BehandlingReferanse ref) {
+        var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
+        var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
+        var skjæringstidspunkter = vilkår.getPerioder()
+            .stream()
+            .map(VilkårPeriode::getSkjæringstidspunkt)
+            .sorted()
+            .distinct()
+            .collect(Collectors.toList());
+        var referanser = hentReferanserTjeneste.finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkter, false, false);
+        return referanser.stream()
+            .filter(it -> !it.erGenerertReferanse())
+            .map(it -> new BeregningsgrunnlagKobling(it.getStp(), it.getRef()))
+            .collect(Collectors.toList());
+    }
+
+    public List<BeregningsgrunnlagKobling> hentKoblingerForInnvilgedePerioderTilVurdering(BehandlingReferanse ref) {
         var perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
         var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
@@ -310,7 +326,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         var referanser = hentReferanserTjeneste.finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkter, false, false);
         return referanser.stream()
             .filter(it -> !it.erGenerertReferanse())
-            .map(it -> new BeregningsgrunnlagKobling(it.getStp(), it.getRef(), perioderTilVurdering.stream().anyMatch(p -> p.getFomDato().equals(it.getStp()))))
+            .filter(it -> perioderTilVurdering.stream().anyMatch(p -> p.getFomDato().equals(it.getStp())))
+            .map(it -> new BeregningsgrunnlagKobling(it.getStp(), it.getRef()))
             .collect(Collectors.toList());
     }
 

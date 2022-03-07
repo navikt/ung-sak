@@ -24,18 +24,12 @@ public class BeregningsgrunnlagKoblingDto {
     @JsonProperty(required = true, value = "referanse")
     private UUID referanse;
 
-    @NotNull
-    @JsonProperty(required = true, value = "erTilVurdering")
-    private boolean erTilVurdering;
-
 
     @JsonCreator
     public BeregningsgrunnlagKoblingDto(@JsonProperty(required = true, value = "skjæringstidspunkt") LocalDate skjæringstidspunkt,
-                                        @JsonProperty(required = true, value = "referanse") UUID referanse,
-                                        @JsonProperty(required = true, value = "erTilVurdering") boolean erTilVurdering) {
+                                        @JsonProperty(required = true, value = "referanse") UUID referanse) {
         this.skjæringstidspunkt = skjæringstidspunkt;
         this.referanse = referanse;
-        this.erTilVurdering = erTilVurdering;
     }
 
     public LocalDate getSkjæringstidspunkt() {
@@ -46,7 +40,4 @@ public class BeregningsgrunnlagKoblingDto {
         return referanse;
     }
 
-    public boolean getErTilVurdering() {
-        return erTilVurdering;
-    }
 }
