@@ -32,6 +32,7 @@ import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktTilstandDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingProsessHendelse;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringAksjonspunktHendelse;
+import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingAvsluttetHendelse;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingOpprettetHendelse;
 
 @ApplicationScoped
@@ -82,7 +83,7 @@ public class BehandlingskontrollEventObserver {
     public void observerBehandlingOpprettetEvent(@Observes BehandlingStatusEvent.BehandlingOpprettetEvent event) {
         try {
             ProsessTaskData prosessTaskData = opprettProsessTaskBehandlingOpprettetEvent(event.getBehandlingId());
-//            prosessTaskRepository.lagre(prosessTaskData); // Aktiveres etter kontraktsoppdatering i los
+            prosessTaskRepository.lagre(prosessTaskData);
         } catch (Exception ex) {
             log.warn("Publisering av BehandlingOpprettetHendelse feilet", ex);
         }
@@ -95,6 +96,13 @@ public class BehandlingskontrollEventObserver {
             prosessTaskRepository.lagre(prosessTaskData);
         } catch (Exception ex) {
             log.warn("Publisering av BehandlingAvsluttetEvent feilet", ex);
+        }
+
+        try {
+            ProsessTaskData prosessTaskData = opprettProsessTaskBehandlingAvsluttetEvent(event.getBehandlingId());
+            prosessTaskRepository.lagre(prosessTaskData);
+        } catch (Exception ex) {
+            log.warn("Publisering av BehandlingAvsluttetHendelse for produksjonsstyring feilet", ex);
         }
     }
 
@@ -149,6 +157,25 @@ public class BehandlingskontrollEventObserver {
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.BESKRIVELSE, "BehandlingOpprettetHendelseTask");
         return taskData;
     }
+
+    private ProsessTaskData opprettProsessTaskBehandlingAvsluttetEvent(Long behandlingId) throws IOException {
+        ProsessTaskData taskData = new ProsessTaskData(PubliserProduksjonsstyringHendelseTask.TASKTYPE);
+        taskData.setCallIdFraEksisterende();
+        taskData.setPrioritet(50);
+
+        Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId).get();
+        ProduksjonsstyringBehandlingAvsluttetHendelse dto = new ProduksjonsstyringBehandlingAvsluttetHendelse(
+            behandling.getUuid(),
+            behandling.getOpprettetTidspunkt(),
+            behandling.getBehandlingResultatType()
+        );
+
+        taskData.setPayload(JsonObjectMapper.getJson(dto));
+        taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
+        taskData.setProperty(PubliserProduksjonsstyringHendelseTask.BESKRIVELSE, "BehandlingOpprettetHendelseTask");
+        return taskData;
+    }
+
 
 
     private ProsessTaskData opprettProsessTaskAksjonspunkthendelse(Long behandlingId, AksjonspunktStatusEvent hendelse) throws IOException {
