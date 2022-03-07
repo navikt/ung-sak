@@ -292,9 +292,8 @@ public class MapInputTilUttakTjeneste {
     private Pleiebehov mapToPleiebehov(Pleiegrad grad) {
         return switch (grad) {
             case INGEN -> Pleiebehov.PROSENT_0;
-            case KONTINUERLIG_TILSYN -> Pleiebehov.PROSENT_100;
+            case KONTINUERLIG_TILSYN, LIVETS_SLUTT_TILSYN -> Pleiebehov.PROSENT_100;
             case UTVIDET_KONTINUERLIG_TILSYN, INNLEGGELSE -> Pleiebehov.PROSENT_200;
-            case LIVETS_SLUTT_TILSYN -> Pleiebehov.PROSENT_6000;
             default -> throw new IllegalStateException("Ukjent Pleiegrad: " + grad);
         };
     }

@@ -64,8 +64,9 @@ public class VilkårPeriodeFilter {
             var periodeFraInfotrygd = vilkår.get()
                 .getPerioder()
                 .stream()
-                .filter(it -> sakInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).anyMatch(stp -> it.getSkjæringstidspunkt().equals(stp)))
-                .map(VilkårPeriode::getPeriode).toList();
+                .map(VilkårPeriode::getPeriode)
+                .filter(periode -> sakInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).anyMatch(periode::inkluderer))
+                .toList();
             periodeFraInfotrygd.forEach(p -> filterPerioder.removeIf(fp -> fp.getPeriode().equals(p)));
         }
         if (skalIgnorereForlengelser) {

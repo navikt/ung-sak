@@ -14,22 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import no.nav.k9.aarskvantum.kontrakter.*;
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
-import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
-import no.nav.k9.aarskvantum.kontrakter.Bekreftet;
-import no.nav.k9.aarskvantum.kontrakter.FraværÅrsak;
-import no.nav.k9.aarskvantum.kontrakter.Hjemmel;
-import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
-import no.nav.k9.aarskvantum.kontrakter.Periodetype;
-import no.nav.k9.aarskvantum.kontrakter.SøknadÅrsak;
-import no.nav.k9.aarskvantum.kontrakter.Utfall;
-import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
-import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.Vilkår;
-import no.nav.k9.aarskvantum.kontrakter.VurderteVilkår;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 
 public class MapFraÅrskvantumResultatTest {
@@ -105,13 +92,13 @@ public class MapFraÅrskvantumResultatTest {
 
     private Uttaksperiode innvilget(LocalDate fom, LocalDate tom, BigDecimal utbetalingsgrad) {
         Map<Vilkår, Utfall> emptyVurderteVilkår = new HashMap<>();
-        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.INNVILGET, new VurderteVilkår(emptyVurderteVilkår), hjemler, utbetalingsgrad, Periodetype.NY, tom.atStartOfDay(), null, Bekreftet.SYSTEMBEKREFTET, FraværÅrsak.ORDINÆRT_FRAVÆR, SøknadÅrsak.UDEFINERT, null, true);
+        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.INNVILGET, new VurderteVilkår(emptyVurderteVilkår), hjemler, utbetalingsgrad, Periodetype.NY, tom.atStartOfDay(), null, Bekreftet.SYSTEMBEKREFTET, FraværÅrsak.ORDINÆRT_FRAVÆR, SøknadÅrsak.UDEFINERT, null, true, AvvikImSøknad.UDEFINERT);
 
     }
 
     private Uttaksperiode avslått(LocalDate fom, LocalDate tom) {
         Map<Vilkår, Utfall> emptyVurderteVilkår = new HashMap<>();
-        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, new VurderteVilkår(emptyVurderteVilkår), hjemler, BigDecimal.ZERO, Periodetype.NY, tom.atStartOfDay(), null, Bekreftet.SYSTEMBEKREFTET, FraværÅrsak.ORDINÆRT_FRAVÆR, SøknadÅrsak.UDEFINERT, null, true);
+        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, new VurderteVilkår(emptyVurderteVilkår), hjemler, BigDecimal.ZERO, Periodetype.NY, tom.atStartOfDay(), null, Bekreftet.SYSTEMBEKREFTET, FraværÅrsak.ORDINÆRT_FRAVÆR, SøknadÅrsak.UDEFINERT, null, true, AvvikImSøknad.UDEFINERT);
 
     }
 }

@@ -1,10 +1,9 @@
 package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import no.nav.fpsak.nare.doc.RuleDocumentationGrunnlag;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.inngangsvilkår.VilkårGrunnlag;
 
 @RuleDocumentationGrunnlag
@@ -13,8 +12,8 @@ public class MedisinskVilkårGrunnlag implements VilkårGrunnlag {
     private final LocalDate fom;
     private final LocalDate tom;
 
-    private List<LocalDateInterval> relevantLivetsSlutt = List.of();
-    private List<PleiePeriode> innleggelsesPerioder;
+    private LocalDateTimeline<Void> dokumentertLivetsSluttfasePerioder;
+    private LocalDateTimeline<Void> innleggelsesPerioder;
 
     public MedisinskVilkårGrunnlag(LocalDate fom, LocalDate tom) {
         this.fom = fom;
@@ -29,24 +28,20 @@ public class MedisinskVilkårGrunnlag implements VilkårGrunnlag {
         return tom;
     }
 
-    public LocalDateInterval getInterval() {
-        return new LocalDateInterval(fom, tom);
+    public LocalDateTimeline<Void> getDokumentertLivetsSluttfasePerioder() {
+        return dokumentertLivetsSluttfasePerioder;
     }
 
-    public List<LocalDateInterval> getRelevantVurderingLivetsSlutt() {
-        return relevantLivetsSlutt;
-    }
-
-    public List<PleiePeriode> getInnleggelsesPerioder() {
+    public LocalDateTimeline<Void> getInnleggelsesPerioder() {
         return innleggelsesPerioder;
     }
 
-    public MedisinskVilkårGrunnlag medLivetsSluttBehov(List<LocalDateInterval> relevantLivetsSlutt) {
-        this.relevantLivetsSlutt = relevantLivetsSlutt;
+    public MedisinskVilkårGrunnlag medDokumentertLivetsSluttfasePerioder(LocalDateTimeline<Void> dokumentertLivetsSluttfasePerioder) {
+        this.dokumentertLivetsSluttfasePerioder = dokumentertLivetsSluttfasePerioder;
         return this;
     }
 
-    public MedisinskVilkårGrunnlag medInnleggelsesPerioder(List<PleiePeriode> innleggelsesPerioder) {
+    public MedisinskVilkårGrunnlag medInnleggelsesPerioder(LocalDateTimeline<Void> innleggelsesPerioder) {
         this.innleggelsesPerioder = innleggelsesPerioder;
         return this;
     }
@@ -56,7 +51,8 @@ public class MedisinskVilkårGrunnlag implements VilkårGrunnlag {
     public String toString() {
         return "MedisinskvilkårGrunnlag{" +
             "fom=" + fom +
-            ", relevantLivetsSlutt=" + relevantLivetsSlutt +
+            "tom=" + tom +
+            ", dokumentertLivetsSluttfasePerioder=" + dokumentertLivetsSluttfasePerioder +
             ", innleggelsesPerioder=" + innleggelsesPerioder +
             '}';
     }

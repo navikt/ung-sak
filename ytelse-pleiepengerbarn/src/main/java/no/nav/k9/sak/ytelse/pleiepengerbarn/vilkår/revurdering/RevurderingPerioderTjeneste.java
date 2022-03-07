@@ -1,8 +1,10 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering;
 
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -66,16 +68,16 @@ public class RevurderingPerioderTjeneste {
             .collect(Collectors.toSet());
     }
 
-    public Set<DatoIntervallEntitet> utledPerioderFraInntektsmeldinger(BehandlingReferanse referanse) {
+    public NavigableSet<DatoIntervallEntitet> utledPerioderFraInntektsmeldinger(BehandlingReferanse referanse, NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
         if (!referanse.erRevurdering()) {
-            return Set.of();
+            return new TreeSet<>();
         }
         var mottatteInntektsmeldinger = mottatteDokumentRepository.hentMottatteDokumentForBehandling(referanse.getFagsakId(),
             referanse.getBehandlingId(),
             List.of(Brevkode.INNTEKTSMELDING), false, DokumentStatus.GYLDIG);
 
         if (mottatteInntektsmeldinger.isEmpty()) {
-            return Set.of();
+            return new TreeSet<>();
         }
 
         var cacheEntries = cache.get(referanse.getSaksnummer());
@@ -83,11 +85,13 @@ public class RevurderingPerioderTjeneste {
         // Checke cache
         // if OK, return
         if (cacheErGood(cacheEntries, mottatteInntektsmeldinger)) {
-            return cacheEntries.stream()
+            return datoIntervallEntitets.stream()
+                .filter(it -> cacheEntries.stream()
                 .map(InntektsmeldingMedPerioder::getPeriode)
                 .filter(Objects::nonNull)
-                .map(it -> kompletthetForBeregningTjeneste.utledRelevantPeriode(referanse, it))
-                .collect(Collectors.toSet());
+                .map(at -> kompletthetForBeregningTjeneste.utledRelevantPeriode(referanse, at))
+                .anyMatch(at -> at.overlapper(it.getFomDato().minusDays(1), it.getTomDato().plusDays(1))))
+                .collect(Collectors.toCollection(TreeSet::new));
         }
 
         var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer(), referanse.getAktørId(), referanse.getFagsakYtelseType());
@@ -98,11 +102,13 @@ public class RevurderingPerioderTjeneste {
             .collect(Collectors.toList());
         cache.put(referanse.getSaksnummer(), inntektsmeldingerMedPeriode);
 
-        return inntektsmeldingerMedPeriode.stream()
-            .map(InntektsmeldingMedPerioder::getPeriode)
-            .filter(Objects::nonNull)
-            .map(it -> kompletthetForBeregningTjeneste.utledRelevantPeriode(referanse, it))
-            .collect(Collectors.toSet());
+        return datoIntervallEntitets.stream()
+            .filter(it -> inntektsmeldingerMedPeriode.stream()
+                .map(InntektsmeldingMedPerioder::getPeriode)
+                .filter(Objects::nonNull)
+                .map(at -> kompletthetForBeregningTjeneste.utledRelevantPeriode(referanse, at))
+                .anyMatch(at -> at.overlapper(it.getFomDato().minusDays(1), it.getTomDato().plusDays(1))))
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private boolean cacheErGood(List<InntektsmeldingMedPerioder> cacheEntries, List<MottattDokument> mottatteInntektsmeldinger) {

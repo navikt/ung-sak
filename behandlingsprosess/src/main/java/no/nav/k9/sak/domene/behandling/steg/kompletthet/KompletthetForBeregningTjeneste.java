@@ -189,8 +189,9 @@ public class KompletthetForBeregningTjeneste {
     }
 
     public List<Inntektsmelding> utledInntektsmeldingerSomBenytteMotBeregningForPeriode(BehandlingReferanse referanse, Set<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {
-        var inntektsmeldings = finnInntektsmeldingForBeregningTjeneste(referanse).begrensSakInntektsmeldinger(referanse, alleInntektsmeldingerPåSak, periode);
-        return finnInntektsmeldingForBeregningTjeneste(referanse).utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldings, periode);
+        var tjeneste = finnInntektsmeldingForBeregningTjeneste(referanse);
+        var inntektsmeldings = tjeneste.begrensSakInntektsmeldinger(referanse, alleInntektsmeldingerPåSak, periode);
+        return tjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldings, periode);
     }
 
     private <V extends ArbeidsforholdRef> List<ManglendeVedlegg> utledManglendeInntektsmeldingerPerDag(Set<Inntektsmelding> inntektsmeldinger,

@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -30,6 +29,7 @@ import no.nav.k9.sak.hendelse.brukerdialoginnsyn.BrukerdialoginnsynService;
 import no.nav.k9.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.mottak.dokumentmottak.OppgittOpptjeningMapper;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -55,6 +55,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private BrukerdialoginnsynService brukerdialoginnsynService;
+    private DokumentmottakerFelles dokumentMottakerFelles;
     private boolean skalBrukeUtledetEndringsperiode;
 
     DokumentmottakerPleiepengerSyktBarnSøknad() {
@@ -70,6 +71,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                                               OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
                                               SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                               BrukerdialoginnsynService brukerdialoginnsynService,
+                                              DokumentmottakerFelles dokumentMottakerFelles,
                                               @KonfigVerdi(value = "ENABLE_UTLEDET_ENDRINGSPERIODE", defaultVerdi = "false") boolean skalBrukeUtledetEndringsperiode) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
@@ -79,6 +81,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.brukerdialoginnsynService = brukerdialoginnsynService;
+        this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.skalBrukeUtledetEndringsperiode = skalBrukeUtledetEndringsperiode;
     }
 
@@ -95,6 +98,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
             // Søknadsinnhold som persisteres "lokalt" i k9-sak
             persister(søknad, behandling, dokument.getJournalpostId());
+            dokumentMottakerFelles.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), dokument.getJournalpostId(), dokument.getType());
             // Søknadsinnhold som persisteres eksternt (abakus)
             lagreOppgittOpptjeningFraSøknad(søknad, behandling, dokument);
         }

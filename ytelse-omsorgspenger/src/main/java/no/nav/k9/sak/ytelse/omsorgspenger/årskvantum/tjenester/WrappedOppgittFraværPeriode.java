@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.SamtidigKravStatus;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 class WrappedOppgittFraværPeriode {
@@ -13,16 +14,18 @@ class WrappedOppgittFraværPeriode {
     private Boolean iPermisjon;
     private ArbeidStatus arbeidStatus;
     private Boolean avslåttInngangsvilkår;
+    private SamtidigKravStatus samtidigeKrav;
 
     public WrappedOppgittFraværPeriode(ArbeidStatus arbeidStatus) {
-        this(null, null, null, arbeidStatus, null);
+        this(null, null, null, arbeidStatus, null, null);
     }
 
-    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, LocalDateTime innsendingstidspunkt, Boolean iPermisjon, ArbeidStatus arbeidStatus, Boolean avslåttInngangsvilkår) {
+    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, LocalDateTime innsendingstidspunkt, Boolean iPermisjon, ArbeidStatus arbeidStatus, Boolean avslåttInngangsvilkår, SamtidigKravStatus samtidigeKrav) {
         this.periode = periode;
         this.innsendingstidspunkt = innsendingstidspunkt;
         this.iPermisjon = iPermisjon;
         this.arbeidStatus = arbeidStatus;
+        this.samtidigeKrav = samtidigeKrav;
         if (periode != null && periode.getAktivitetType() != null) {
             this.aktivitet = new Aktivitet(periode.getAktivitetType(), periode.getArbeidsgiver(), periode.getArbeidsforholdRef() != null ? periode.getArbeidsforholdRef() : InternArbeidsforholdRef.nullRef());
         } else {
@@ -55,6 +58,10 @@ class WrappedOppgittFraværPeriode {
         return arbeidStatus;
     }
 
+    public SamtidigKravStatus getSamtidigeKrav() {
+        return samtidigeKrav;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -65,6 +72,7 @@ class WrappedOppgittFraværPeriode {
             && Objects.equals(arbeidStatus, that.arbeidStatus)
             && Objects.equals(iPermisjon, that.iPermisjon)
             && Objects.equals(aktivitet, that.aktivitet)
+            && Objects.equals(samtidigeKrav, that.samtidigeKrav)
             && periodeEquals(that);
     }
 
@@ -78,7 +86,7 @@ class WrappedOppgittFraværPeriode {
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode.getFraværPerDag(), periode.getAktivitetType(), aktivitet, avslåttInngangsvilkår, iPermisjon, arbeidStatus, innsendingstidspunkt);
+        return Objects.hash(periode.getFraværPerDag(), periode.getAktivitetType(), aktivitet, avslåttInngangsvilkår, iPermisjon, arbeidStatus, innsendingstidspunkt, samtidigeKrav);
     }
 
     @Override

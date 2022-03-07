@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -12,18 +11,19 @@ import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Default;
-import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Default;
+import jakarta.inject.Inject;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
+import no.nav.k9.aarskvantum.kontrakter.AvvikImSøknad;
 import no.nav.k9.aarskvantum.kontrakter.Barn;
 import no.nav.k9.aarskvantum.kontrakter.BarnType;
 import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
@@ -34,13 +34,17 @@ import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
 import no.nav.k9.aarskvantum.kontrakter.SøknadÅrsak;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
+import no.nav.k9.aarskvantum.kontrakter.Vilkår;
+import no.nav.k9.aarskvantum.kontrakter.VurderteVilkår;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -60,7 +64,6 @@ import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.k9.sak.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
@@ -68,6 +71,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.SamtidigKravStatus;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
@@ -78,7 +82,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient
 @Default
 public class ÅrskvantumTjeneste {
 
-    private static final Logger log = LoggerFactory.getLogger(ÅrskvantumTjeneste.class);
+    private static final Logger logger = LoggerFactory.getLogger(ÅrskvantumTjeneste.class);
 
     private final MapOppgittFraværOgVilkårsResultat mapOppgittFraværOgVilkårsResultat = new MapOppgittFraværOgVilkårsResultat();
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
@@ -91,6 +95,8 @@ public class ÅrskvantumTjeneste {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private Boolean skruPåAvslagSøknadManglerIm;
+    private Boolean brukFerdigutledetFlaggRefusjon;
 
     ÅrskvantumTjeneste() {
         // CDI
@@ -106,7 +112,9 @@ public class ÅrskvantumTjeneste {
                               @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                               TrekkUtFraværTjeneste trekkUtFraværTjeneste,
                               OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste,
-                              MottatteDokumentRepository mottatteDokumentRepository) {
+                              MottatteDokumentRepository mottatteDokumentRepository,
+                              @KonfigVerdi(value = "OMP_AVSLAG_SOKNAD_MANGLER_IM", defaultVerdi = "false") Boolean skruPåAvslagSøknadManglerIm,
+                              @KonfigVerdi(value = "OMP_AARSKVANTUMTJENESTE_BRUK_FERDIGUTLEDET_FLAGG_REFUSJON", defaultVerdi = "true") Boolean brukFerdigutledetFlaggRefusjon) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -117,10 +125,8 @@ public class ÅrskvantumTjeneste {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.opptjeningTjeneste = opptjeningTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-    }
-
-    public void deaktiverUttakForBehandling(UUID behandlingUuid) {
-        årskvantumKlient.deaktiverUttakForBehandling(behandlingUuid);
+        this.skruPåAvslagSøknadManglerIm = skruPåAvslagSøknadManglerIm;
+        this.brukFerdigutledetFlaggRefusjon = brukFerdigutledetFlaggRefusjon;
     }
 
     public void bekreftUttaksplan(Long behandlingId) {
@@ -160,7 +166,7 @@ public class ÅrskvantumTjeneste {
             // kan ikke være empty når vi sender årskvantum
             throw new IllegalStateException("Har ikke fraværs perioder for fagsak.periode[" + ref.getFagsakPeriode() + "]"
                 + ",\trelevant perioder=" + relevantePerioder
-                + ",\toppgitt fravær=" + oppgittFravær
+                + ",\toppgitt fravær er tom="
                 + ",\tvilkårsperioder[" + vilkårType + "]=" + vilkårsperioder
                 + ",\tfagsakFravær=" + fagsakFravær);
         }
@@ -173,7 +179,7 @@ public class ÅrskvantumTjeneste {
             .filter(it -> !it.getPersonIdent().erFdatNummer())
             .map(this::innhentPersonopplysningForBarn)
             .map((Tuple<Familierelasjon, Optional<Personinfo>> relasjonBarn) -> mapBarn(personMedRelasjoner, relasjonBarn))
-            .collect(Collectors.toList());
+            .toList();
 
         return new ÅrskvantumGrunnlag(ref.getSaksnummer().getVerdi(),
             ref.getBehandlingUuid().toString(),
@@ -216,12 +222,6 @@ public class ÅrskvantumTjeneste {
     public ÅrskvantumResultat beregnÅrskvantumUttak(BehandlingReferanse ref) {
         var årskvantumRequest = hentForRef(ref);
 
-        try {
-            log.debug("Sender request til årskvantum" +
-                "\nrequest='{}'", JsonObjectMapper.getJson(årskvantumRequest));
-        } catch (IOException e) {
-            log.info("Feilet i serialisering av årskvantum request: " + årskvantumRequest);
-        }
         return årskvantumKlient.hentÅrskvantumUttak(årskvantumRequest);
     }
 
@@ -242,7 +242,8 @@ public class ÅrskvantumTjeneste {
                                                   Vilkårene vilkårene,
                                                   InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                   Set<Inntektsmelding> sakInntektsmeldinger,
-                                                  NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktiveter, Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> perioder,
+                                                  NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktiveter,
+                                                  Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> perioder,
                                                   Behandling behandling) {
         var fraværPerioder = new ArrayList<FraværPeriode>();
         var fagsakPeriode = behandling.getFagsak().getPeriode();
@@ -250,9 +251,9 @@ public class ÅrskvantumTjeneste {
             .values()
             .stream()
             .flatMap(Collection::stream)
-            .collect(Collectors.toList());
+            .toList();
         var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(ref.getFagsakId()).stream()
-            .collect(Collectors.toMap(e -> e.getJournalpostId(), e -> e));
+            .collect(Collectors.toMap(MottattDokument::getJournalpostId, e -> e));
 
         for (WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode : fraværsPerioderMedUtfallOgPerArbeidsgiver) {
             var fraværPeriode = wrappedOppgittFraværPeriode.getPeriode();
@@ -262,6 +263,9 @@ public class ÅrskvantumTjeneste {
             Arbeidsgiver arb = fraværPeriode.getArbeidsgiver();
 
             Arbeidsforhold arbeidsforhold;
+
+            boolean kreverRefusjonFerdigutledet = wrappedOppgittFraværPeriode.getSamtidigeKrav().inntektsmeldingMedRefusjonskrav() == SamtidigKravStatus.KravStatus.FINNES;
+            boolean refusjonskravTrekt = wrappedOppgittFraværPeriode.getSamtidigeKrav().inntektsmeldingMedRefusjonskrav() == SamtidigKravStatus.KravStatus.TREKT;
             boolean kreverRefusjon = false;
             if (arb == null) {
                 arbeidsforhold = new Arbeidsforhold(fraværPeriode.getAktivitetType().getKode(), null, null, null);
@@ -274,20 +278,66 @@ public class ÅrskvantumTjeneste {
                     arb.getAktørId() != null ? arb.getAktørId().getId() : null,
                     arbeidsforholdId);
             }
+
+            if (kreverRefusjon != kreverRefusjonFerdigutledet) {
+                if (refusjonskravTrekt) {
+                    logger.info("Flagg for krever refusjon er ulikt på ny/gammel utledning. Gammel utlednig sa {}, ny sier {}. Skjer her fordi krav er trekt", kreverRefusjon, kreverRefusjonFerdigutledet);
+                } else {
+                    logger.warn("Flagg for krever refusjon er ulikt på ny/gammel utledning. Gammel utlednig sa {}, ny sier {}.", kreverRefusjon, kreverRefusjonFerdigutledet);
+                }
+            }
+            var arbeidforholdStatus = utledArbeidsforholdStatus(wrappedOppgittFraværPeriode);
+            var utfallInngangsvilkår = utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode);
+            var avvikImSøknad = utedAvvikImSøknad(wrappedOppgittFraværPeriode);
             var uttaksperiodeOmsorgspenger = new FraværPeriode(arbeidsforhold,
-                utledArbeidsforholdStatus(wrappedOppgittFraværPeriode),
+                arbeidforholdStatus,
                 periode,
                 fraværPeriode.getFraværPerDag(),
                 true,
-                kreverRefusjon,
-                utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode),
+                brukFerdigutledetFlaggRefusjon ? kreverRefusjonFerdigutledet : kreverRefusjon,
+                utfallInngangsvilkår,
                 wrappedOppgittFraværPeriode.getInnsendingstidspunkt(),
                 utledFraværÅrsak(fraværPeriode),
                 utledSøknadÅrsak(fraværPeriode),
-                opprinneligBehandlingUuid.map(UUID::toString).orElse(null));
+                opprinneligBehandlingUuid.map(UUID::toString).orElse(null),
+                avvikImSøknad,
+                utledVurderteVilkår(arbeidforholdStatus, utfallInngangsvilkår, avvikImSøknad, fraværPeriode));
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
+    }
+
+    private VurderteVilkår utledVurderteVilkår(ArbeidsforholdStatus arbeidsforholdStatus, Utfall utfallInngangsvilkår, AvvikImSøknad avvikImSøknad, OppgittFraværPeriode fraværPeriode) {
+        NavigableMap<Vilkår, Utfall> vilkårMap = new TreeMap<>();
+        vilkårMap.put(Vilkår.ARBEIDSFORHOLD, arbeidsforholdStatus == ArbeidsforholdStatus.AKTIVT ? Utfall.INNVILGET : Utfall.AVSLÅTT);
+        vilkårMap.put(Vilkår.INNGANGSVILKÅR, utfallInngangsvilkår);
+        vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, skruPåAvslagSøknadManglerIm && avslåFraværFraArbeidPgaManglendeIm(avvikImSøknad, fraværPeriode.getAktivitetType(), fraværPeriode.getSøknadÅrsak()) ? Utfall.AVSLÅTT : Utfall.INNVILGET);
+        return new VurderteVilkår(vilkårMap);
+    }
+
+    private boolean avslåFraværFraArbeidPgaManglendeIm(AvvikImSøknad avvikImSøknad, UttakArbeidType aktivitetType, no.nav.k9.kodeverk.uttak.SøknadÅrsak søknadÅrsak) {
+        return aktivitetType == UttakArbeidType.ARBEIDSTAKER
+            && avvikImSøknad == AvvikImSøknad.SØKNAD_UTEN_MATCHENDE_IM
+            && søknadÅrsak != no.nav.k9.kodeverk.uttak.SøknadÅrsak.ARBEIDSGIVER_KONKURS
+            && søknadÅrsak != no.nav.k9.kodeverk.uttak.SøknadÅrsak.KONFLIKT_MED_ARBEIDSGIVER;
+    }
+
+    private AvvikImSøknad utedAvvikImSøknad(WrappedOppgittFraværPeriode oppgittFraværPeriode) {
+        var kravStatus = oppgittFraværPeriode.getSamtidigeKrav();
+        var søknad = kravStatus.søknad();
+        var refusjonskrav = kravStatus.inntektsmeldingMedRefusjonskrav();
+        var imUtenRefusjonskrav = kravStatus.inntektsmeldingUtenRefusjonskrav();
+
+        if (søknad == SamtidigKravStatus.KravStatus.FINNES) {
+            if (refusjonskrav == SamtidigKravStatus.KravStatus.FINNES) {
+                return AvvikImSøknad.IM_REFUSJONSKRAV_TRUMFER_SØKNAD;
+            }
+            if (imUtenRefusjonskrav != SamtidigKravStatus.KravStatus.FINNES) {
+                return AvvikImSøknad.SØKNAD_UTEN_MATCHENDE_IM;
+            }
+            return AvvikImSøknad.INGEN_AVVIK;
+        }
+        return AvvikImSøknad.UDEFINERT;
     }
 
     private Utfall utledUtfallIngangsvilkår(WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode) {
@@ -296,21 +346,21 @@ public class ÅrskvantumTjeneste {
     }
 
     private FraværÅrsak utledFraværÅrsak(OppgittFraværPeriode periode) {
-        switch (periode.getFraværÅrsak()) {
-            case ORDINÆRT_FRAVÆR: return FraværÅrsak.ORDINÆRT_FRAVÆR;
-            case SMITTEVERNHENSYN: return FraværÅrsak.SMITTEVERNHENSYN;
-            case STENGT_SKOLE_ELLER_BARNEHAGE: return FraværÅrsak.STENGT_SKOLE_ELLER_BARNEHAGE;
-            default: return FraværÅrsak.UDEFINERT;
-        }
+        return switch (periode.getFraværÅrsak()) {
+            case ORDINÆRT_FRAVÆR -> FraværÅrsak.ORDINÆRT_FRAVÆR;
+            case SMITTEVERNHENSYN -> FraværÅrsak.SMITTEVERNHENSYN;
+            case STENGT_SKOLE_ELLER_BARNEHAGE -> FraværÅrsak.STENGT_SKOLE_ELLER_BARNEHAGE;
+            default -> FraværÅrsak.UDEFINERT;
+        };
     }
 
     private SøknadÅrsak utledSøknadÅrsak(OppgittFraværPeriode periode) {
-        switch (periode.getSøknadÅrsak()) {
-            case ARBEIDSGIVER_KONKURS: return SøknadÅrsak.ARBEIDSGIVER_KONKURS;
-            case NYOPPSTARTET_HOS_ARBEIDSGIVER: return SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER;
-            case KONFLIKT_MED_ARBEIDSGIVER: return SøknadÅrsak.KONFLIKT_MED_ARBEIDSGIVER;
-            default: return SøknadÅrsak.UDEFINERT;
-        }
+        return switch (periode.getSøknadÅrsak()) {
+            case ARBEIDSGIVER_KONKURS -> SøknadÅrsak.ARBEIDSGIVER_KONKURS;
+            case NYOPPSTARTET_HOS_ARBEIDSGIVER -> SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER;
+            case KONFLIKT_MED_ARBEIDSGIVER -> SøknadÅrsak.KONFLIKT_MED_ARBEIDSGIVER;
+            default -> SøknadÅrsak.UDEFINERT;
+        };
     }
 
     private ArbeidsforholdStatus utledArbeidsforholdStatus(WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode) {
@@ -333,7 +383,9 @@ public class ÅrskvantumTjeneste {
     private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(Personinfo personinfoSøker, Tuple<Familierelasjon, Optional<Personinfo>> relasjonMedBarn) {
         var personinfoBarn = relasjonMedBarn.getElement2().orElseThrow();
         var harSammeBosted = relasjonMedBarn.getElement1().getHarSammeBosted(personinfoSøker, personinfoBarn);
-        return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBosted, BarnType.VANLIG);
+        var perioderMedSammeBosted = relasjonMedBarn.getElement1().getPerioderMedSammeBosted(personinfoSøker, personinfoBarn);
+        var lukketPeriodeMedSammeBosted = perioderMedSammeBosted.stream().map(p -> new LukketPeriode(p.getFom(), p.getTom())).collect(Collectors.toList());
+        return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBosted, lukketPeriodeMedSammeBosted, BarnType.VANLIG);
     }
 
     private boolean kreverArbeidsgiverRefusjon(Set<Inntektsmelding> sakInntektsmeldinger,

@@ -78,6 +78,8 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
         }
         taskData.addNesteSekvensiell(new ProsessTaskData(AvsluttBehandlingTask.TASKTYPE));
 
+        opprettYtelsesSpesifikkeTasks(behandling).ifPresent(taskData::addNesteSekvensiell);
+
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
 
         taskData.setCallIdFraEksisterende();
@@ -91,8 +93,6 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
 
         infotrygdFeedService.publiserHendelse(behandling);
         stønadstatistikkService.publiserHendelse(behandling);
-
-        opprettYtelsesSpesifikkeTasks(behandling);
     }
 
     private boolean skalVurdereOppgaveTilArena(Behandling behandling) {

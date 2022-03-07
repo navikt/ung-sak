@@ -1,11 +1,12 @@
 package no.nav.k9.sak.domene.vedtak.ekstern;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
@@ -67,8 +69,8 @@ public class OverlappendeYtelserTjeneste {
         return doFinnOverlappendeYtelser(ref.getSaksnummer(), tilkjentYtelseTidslinje, new YtelseFilter(aktørYtelse.get()).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType())));
     }
 
-    public static Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(Saksnummer saksnummer, LocalDateTimeline<Boolean> tilkjentYtelseTimeline, YtelseFilter ytelseFilter) {
-        Map<Ytelse, NavigableSet<LocalDateInterval>> overlapp = new TreeMap<>();
+    private Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(Saksnummer saksnummer, LocalDateTimeline<Boolean> tilkjentYtelseTimeline, YtelseFilter ytelseFilter) {
+        Map<Ytelse, NavigableSet<LocalDateInterval>> overlappendeYtelser = new HashMap<>();
         if (!tilkjentYtelseTimeline.isEmpty()) {
 
             for (var yt : ytelseFilter.getFiltrertYtelser()) {
@@ -89,19 +91,21 @@ public class OverlappendeYtelserTjeneste {
                             .collect(Collectors.toCollection(LinkedHashSet::new));
 
                         var anvistTimeline = new LocalDateTimeline<>(anvistSegmenter, StandardCombinators::alwaysTrueForMatch);
-                        var intersection = anvistTimeline.intersection(tilkjentYtelseTimeline);
-                        if (!intersection.isEmpty()) {
-                            overlapp.put(yt, intersection.getDatoIntervaller());
+                        var ovelappendeTidslinje = anvistTimeline.intersection(tilkjentYtelseTimeline);
+                        if (!ovelappendeTidslinje.isEmpty()) {
+                            var ovelappendeDatoIntervaller = new TreeSet<>(overlappendeYtelser.getOrDefault(yt, new TreeSet<>()));
+                            ovelappendeDatoIntervaller.addAll(ovelappendeTidslinje.getLocalDateIntervals());
+                            overlappendeYtelser.put(yt, ovelappendeDatoIntervaller);
                         }
                     }
                 }
             }
         }
-        return overlapp;
+        return overlappendeYtelser;
     }
 
     private static NavigableSet<LocalDateInterval> innvilgelseOverlapperMedAnnenYtelse(LocalDateTimeline<Boolean> vilkårPeriode, DatoIntervallEntitet ytp) {
-        return vilkårPeriode.getDatoIntervaller()
+        return vilkårPeriode.getLocalDateIntervals()
             .stream()
             .map(it -> it.overlap(new LocalDateInterval(ytp.getFomDato(), ytp.getTomDato())))
             .filter(Optional::isPresent)
@@ -123,9 +127,15 @@ public class OverlappendeYtelserTjeneste {
             .map(BeregningsresultatEntitet::getBeregningsresultatPerioder)
             .filter(perioder -> !perioder.isEmpty())
             .map(perioder -> perioder.stream()
-                .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true))
+                .filter(brPeriode -> utbetalingsgradStørreEnn0(brPeriode))
+                .map(brPeriode -> new LocalDateSegment<>(brPeriode.getPeriode().getFomDato(), brPeriode.getPeriode().getTomDato(), true))
                 .collect(Collectors.toSet()))
             .orElse(Set.of());
         return new LocalDateTimeline<>(tilkjentYtelsePerioder);
+    }
+
+    private boolean utbetalingsgradStørreEnn0(BeregningsresultatPeriode brPeriode) {
+        var utbetalingsgrad = brPeriode.getLavestUtbetalingsgrad().orElse(BigDecimal.ZERO);
+        return utbetalingsgrad.compareTo(BigDecimal.ZERO) > 0;
     }
 }

@@ -4,7 +4,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NavigableSet;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.VurderStatusInput;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
@@ -29,13 +29,14 @@ class OpptjeningAktivitetArbeidVurderer {
         }
 
         // Permisjoner på yrkesaktivitet
-        List<LocalDateTimeline<Boolean>> aktivPermisjonTidslinjer = yrkesaktivitet.getPermisjon().stream()
+        List<LocalDateTimeline<Boolean>> aktivPermisjonTidslinjer = yrkesaktivitet.getPermisjon()
+            .stream()
             .filter(permisjon -> erStørreEllerLik100Prosent(permisjon.getProsentsats()))
             .map(permisjon -> new LocalDateTimeline<>(permisjon.getFraOgMed(), permisjon.getTilOgMed(), Boolean.TRUE))
-            .collect(Collectors.toList());
+            .toList();
         LocalDateTimeline<Boolean> aktivPermisjonTidslinje = new LocalDateTimeline<>(List.of());
         for (LocalDateTimeline<Boolean> linje : aktivPermisjonTidslinjer) {
-            aktivPermisjonTidslinje = aktivPermisjonTidslinje.combine(linje, this::mergePerioder, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            aktivPermisjonTidslinje = aktivPermisjonTidslinje.combine(linje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
         // Vurder kun permisjonsperioder som overlapper opptjeningsperiode

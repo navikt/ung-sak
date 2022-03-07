@@ -39,9 +39,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 @Dependent
 public class SykdomVurderingService {
 
-    //TODO PPN bruke konstanter fra Tid-klassen istedet?
-    public static final Periode PERIODE_SYKDOMSVURDERING_PPN = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2099, 12, 31));
-
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     private SykdomVurderingRepository sykdomVurderingRepository;
@@ -168,7 +165,7 @@ public class SykdomVurderingService {
         LocalDateTimeline<SykdomVurderingVersjon> vurderinger = hentVurderinger(SykdomVurderingType.LIVETS_SLUTTFASE, behandling);
         LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
 
-        List<Periode> perioderKreverVurdering = behandledeSøknadsperioder.isEmpty() ? List.of() : List.of(PERIODE_SYKDOMSVURDERING_PPN);
+        List<Periode> perioderKreverVurdering = behandledeSøknadsperioder.stream().map(s->new Periode(s.getFom(), s.getTom())).toList();
         LocalDateTimeline<Boolean> tidslinjeKreverVurdering = new LocalDateTimeline<>(perioderKreverVurdering.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true)).toList());
 
         LocalDateTimeline<Boolean> innleggelserTidslinje = hentAlleInnleggelserTidslinje(behandling);
@@ -185,23 +182,13 @@ public class SykdomVurderingService {
 
         return new SykdomVurderingerOgPerioder(
             vurderinger,
-            konverterTilVurderingsperiodeTidslinjePPN(behandledeSøknadsperioder),
-            behandledeSøknadsperioder.stream().map(segment -> new Periode(segment.getFom(), segment.getTom())).toList(),
+            behandledeSøknadsperioder,
+            perioderKreverVurdering,
             resterendeVurderingsperioder,
             resterendeValgfrieVurderingsperioder,
             nyeSøknadsperioder,
             SykdomUtils.toPeriodeList(innleggelserTidslinje)
         );
-    }
-
-    private static LocalDateTimeline<Set<Saksnummer>> konverterTilVurderingsperiodeTidslinjePPN(LocalDateTimeline<Set<Saksnummer>> søknadsperioderTidslinje) {
-        Set<Saksnummer> saksnumre = søknadsperioderTidslinje.toSegments().stream()
-            .flatMap(segment -> segment.getValue().stream())
-            .collect(Collectors.toSet());
-
-        return søknadsperioderTidslinje.isEmpty()
-            ? søknadsperioderTidslinje
-            : new LocalDateTimeline<>(PERIODE_SYKDOMSVURDERING_PPN.getFom(), PERIODE_SYKDOMSVURDERING_PPN.getTom(), saksnumre);
     }
 
     @SuppressWarnings("unchecked")
