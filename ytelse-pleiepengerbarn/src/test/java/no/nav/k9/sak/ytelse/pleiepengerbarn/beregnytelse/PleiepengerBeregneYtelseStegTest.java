@@ -13,15 +13,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMemoryTjeneste;
@@ -48,6 +47,7 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
@@ -90,7 +90,12 @@ public class PleiepengerBeregneYtelseStegTest {
         beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         bgGrunnlagRepository = new BeregningPerioderGrunnlagRepository(entityManager, repositoryProvider.getVilkårResultatRepository());
-        beregningTjeneste = new BeregningsgrunnlagTjeneste(new UnitTestLookupInstanceImpl<>(kalkulusTjeneste), repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository, true);
+        beregningTjeneste = new BeregningsgrunnlagTjeneste(
+            new UnitTestLookupInstanceImpl<>(kalkulusTjeneste),
+            repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository,
+            new VilkårTjeneste(behandlingRepository,
+                null, null, repositoryProvider.getVilkårResultatRepository(), repositoryProvider.getFagsakRepository()),
+            true);
         beregningsresultat = BeregningsresultatEntitet.builder()
             .medRegelInput("regelInput")
             .medRegelSporing("regelSporing")

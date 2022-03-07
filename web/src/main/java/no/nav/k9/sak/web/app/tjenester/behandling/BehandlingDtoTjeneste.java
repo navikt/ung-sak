@@ -358,6 +358,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_FASTSATT, "uttak-fastsatt", uuidQueryParams));
                 dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.OPPGITT_OPPTJENING_PATH_V2, "oppgitt-opptjening-v2", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
+                dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregning-koblinger-til-vurdering", uuidQueryParams));
                 break;
             case OMSORGSPENGER:
                 dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
@@ -365,6 +366,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(ÅrskvantumRestTjeneste.FORBRUKTEDAGER, "forbrukte-dager", uuidQueryParams));
                 dto.leggTil(getFraMap(ÅrskvantumRestTjeneste.FULL_UTTAKSPLAN, "full-uttaksplan", saksnummerAndUuidQueryParam));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
+                dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregning-koblinger-til-vurdering", uuidQueryParams));
                 dto.leggTil(getFraMap(OverlapendeYtelserRestTjeneste.OVERLAPPENDE_YTELSER_PATH, "overlappende-ytelser", uuidQueryParams));
                 break;
             case OMSORGSPENGER_KS:
@@ -392,6 +394,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(UtenlandsoppholdRestTjeneste.UTTAK_UTENLANDSOPPHOLD, "utenlandsopphold", uuidQueryParams));
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
+                dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregning-koblinger-til-vurdering", uuidQueryParams));
                 dto.leggTil(getFraMap(OverlapendeYtelserRestTjeneste.OVERLAPPENDE_YTELSER_PATH, "overlappende-ytelser", uuidQueryParams));
                 dto.leggTil(getFraMap(VurderTilsynRestTjeneste.BASEPATH, "pleiepenger-sykt-barn-tilsyn", uuidQueryParams));
                 dto.leggTil(getFraMap(RettVedDødRestTjeneste.BASEPATH, "rett-ved-dod", uuidQueryParams));
@@ -415,6 +418,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_UTTAKSPLAN_PATH, "pleiepenger-sykt-barn-uttaksplan", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_SKULLE_SØKT_OM_PATH, "psb-manglende-arbeidstid", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
+                dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregning-koblinger-til-vurdering", uuidQueryParams));
                 dto.leggTil(getFraMap(OverlapendeYtelserRestTjeneste.OVERLAPPENDE_YTELSER_PATH, "overlappende-ytelser", uuidQueryParams));
                 dto.leggTil(getFraMap(VurderTilsynRestTjeneste.BASEPATH, "pleiepenger-sykt-barn-tilsyn", uuidQueryParams));
                 dto.leggTil(getFraMap(PleietrengendeRestTjeneste.BASE_PATH, "om-pleietrengende", uuidQueryParams));
