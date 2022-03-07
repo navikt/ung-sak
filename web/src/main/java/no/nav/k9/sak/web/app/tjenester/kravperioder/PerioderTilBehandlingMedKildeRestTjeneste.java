@@ -3,9 +3,10 @@ package no.nav.k9.sak.web.app.tjenester.kravperioder;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -26,13 +27,21 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
+import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.krav.PeriodeMedUtfall;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
@@ -40,6 +49,9 @@ import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandlingInkludertVilkå
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristTjenesteProvider;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 
 @ApplicationScoped
 @Transactional
@@ -50,6 +62,8 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     public static final String BEHANDLING_PERIODER = "/behandling/perioder";
     public static final String BEHANDLING_PERIODER_MED_VILKÅR = "/behandling/perioder-med-vilkar";
     private BehandlingRepository behandlingRepository;
+    private BehandlingModellRepository behandlingModellRepository;
+    private UttakTjeneste uttakTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private SøknadsfristTjenesteProvider søknadsfristTjenesteProvider;
     private UtledStatusPåPerioderTjeneste statusPåPerioderTjeneste;
@@ -61,9 +75,13 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     @Inject
     public PerioderTilBehandlingMedKildeRestTjeneste(BehandlingRepository behandlingRepository,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                                     BehandlingModellRepository behandlingModellRepository,
+                                                     UttakTjeneste uttakTjeneste,
                                                      VilkårResultatRepository vilkårResultatRepository,
                                                      SøknadsfristTjenesteProvider søknadsfristTjenesteProvider) {
         this.behandlingRepository = behandlingRepository;
+        this.behandlingModellRepository = behandlingModellRepository;
+        this.uttakTjeneste = uttakTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
         this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste();
@@ -108,31 +126,64 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
         StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref, behandling, perioderTilVurderingTjeneste);
 
+        var timelineTilVurdering = utledTidslinjeTilVurdering(behandling, perioderTilVurderingTjeneste);
+
         return new StatusForPerioderPåBehandlingInkludertVilkår(statusForPerioderPåBehandling,
-            mapVilkårMedUtfall(behandling.getId(), perioderTilVurderingTjeneste),
-            behandling.getOriginalBehandlingId().map(behandlingId -> mapVilkårMedUtfall(behandlingId, perioderTilVurderingTjeneste)).orElse(List.of()));
+            mapVilkårMedUtfall(behandling, timelineTilVurdering),
+            behandling.getOriginalBehandlingId()
+                .map(it -> behandlingRepository.hentBehandling(it))
+                .map(b -> mapVilkårMedUtfall(b, new LocalDateTimeline<>(List.of()))).orElse(List.of()));
     }
 
-    private List<PeriodeMedUtfall> mapVilkårMedUtfall(Long behandlingId, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
-        var opt = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
-
+    private LocalDateTimeline<Utfall> utledTidslinjeTilVurdering(Behandling behandling, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
 
-        var result = new ArrayList<PeriodeMedUtfall>();
+        return new LocalDateTimeline<>(definerendeVilkår.stream()
+            .map(it -> perioderTilVurderingTjeneste.utled(behandling.getId(), it))
+            .flatMap(Collection::stream)
+            .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), Utfall.IKKE_VURDERT))
+            .collect(Collectors.toSet()));
+    }
 
-        for (VilkårType vilkårType : definerendeVilkår) {
-            if (opt.isEmpty() || opt.get().getVilkår(vilkårType).isEmpty()) {
-                continue;
+    private List<PeriodeMedUtfall> mapVilkårMedUtfall(Behandling behandling, LocalDateTimeline<Utfall> timelineTilVurdering) {
+        var timeline = new LocalDateTimeline<Utfall>(List.of());
+        if (harPSBUttak(behandling) &&
+            (behandling.getStatus().erFerdigbehandletStatus() || harKommetTilUttak(behandling))) {
+            var uttaksplan = uttakTjeneste.hentUttaksplan(behandling.getUuid(), true);
+
+            for (Map.Entry<LukketPeriode, UttaksperiodeInfo> entry : uttaksplan.getPerioder().entrySet()) {
+                timeline = timeline.combine(new LocalDateSegment<>(entry.getKey().getFom(), entry.getKey().getTom(),
+                        mapUtfall(entry.getValue().getUtfall())),
+                    StandardCombinators::coalesceRightHandSide,
+                    LocalDateTimeline.JoinStyle.CROSS_JOIN);
             }
-
-            var vilkår = opt.get().getVilkår(vilkårType).orElseThrow();
-            result.addAll(vilkår.getPerioder()
-                .stream()
-                .map(it -> new PeriodeMedUtfall(it.getPeriode().tilPeriode(), it.getGjeldendeUtfall()))
-                .toList());
         }
 
-        return result;
+        timeline = timeline.combine(timelineTilVurdering, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
+        return timeline.compress()
+            .toSegments()
+            .stream()
+            .map(it -> new PeriodeMedUtfall(DatoIntervallEntitet.fra(it.getLocalDateInterval()).tilPeriode(), it.getValue()))
+            .toList();
+    }
+
+    private boolean harPSBUttak(Behandling behandling) {
+        return Set.of(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+            FagsakYtelseType.OPPLÆRINGSPENGER).contains(behandling.getFagsakYtelseType());
+    }
+
+    private Utfall mapUtfall(no.nav.pleiepengerbarn.uttak.kontrakter.Utfall utfall) {
+        return switch (utfall) {
+            case OPPFYLT -> Utfall.OPPFYLT;
+            case IKKE_OPPFYLT -> Utfall.IKKE_OPPFYLT;
+        };
+    }
+
+    private boolean harKommetTilUttak(Behandling behandling) {
+        final BehandlingModell modell = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType());
+        return !modell.erStegAFørStegB(behandling.getAktivtBehandlingSteg(), BehandlingStegType.VURDER_UTTAK_V2);
     }
 
     private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref, Behandling behandling, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
