@@ -102,9 +102,13 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                                                                  LocalDate skjæringstidspunktForOpptjening,
                                                                  Yrkesaktivitet registerAktivitet) {
         if (registerAktivitet.erArbeidsforhold()) {
-            return MapAnsettelsesPeriodeOgPermisjon.beregn(grunnlag, registerAktivitet);
+            var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), registerAktivitet);
+
+            return filter.getAnsettelsesPerioder(registerAktivitet);
         }
-        return new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon().orElse(null), registerAktivitet).før(skjæringstidspunktForOpptjening).getAktivitetsAvtalerForArbeid();
+        return new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon().orElse(null), registerAktivitet)
+            .før(skjæringstidspunktForOpptjening)
+            .getAktivitetsAvtalerForArbeid();
     }
 
 }

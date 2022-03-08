@@ -33,10 +33,6 @@
 			<groupId>no.nav.k9.felles</groupId>
 			<artifactId>k9-felles-db</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>no.nav.k9.felles.integrasjon</groupId>
-            <artifactId>k9-kafka-klient</artifactId>
-        </dependency>
 
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>

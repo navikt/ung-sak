@@ -37,7 +37,7 @@ class MapDtoTilRequest {
 
     public static HåndterBeregningDto map(BekreftetBeregningsgrunnlagDto dto, String begrunnelse) {
         HåndterBeregningDto håndterBeregningDto = mapSpesifikkDto(dto);
-        håndterBeregningDto.setBegrunnelse(begrunnelse);
+        håndterBeregningDto.setBegrunnelse(dto.getBegrunnelse() != null ? dto.getBegrunnelse() : begrunnelse);
         return håndterBeregningDto;
     }
 

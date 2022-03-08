@@ -104,9 +104,16 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+        final Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         if (søknadsperiodeTjeneste.utledFullstendigPeriode(kontekst.getBehandlingId()).isEmpty() ) {
+            if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)) {
+                behandling.getAksjonspunktFor(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)
+                    .avbryt();
+                behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+            }
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
+
 
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
 
@@ -122,7 +129,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         final var perioderTilVurderingUtenOmsorgenFor = kunPerioderMedOmsorgenFor(perioderUnder18årTidslinje.union(perioder18årTidslinje, StandardCombinators::coalesceLeftHandSide), Utfall.IKKE_OPPFYLT);
         // TODO: Fjern søknadsperioder: perioderTilVurderingUtenOmsorgenFor
 
-        final Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+
         final SykdomGrunnlagBehandling sykdomGrunnlagBehandling = opprettGrunnlag(perioderSamlet, perioderTilVurderingUtenOmsorgenFor, behandling);
 
         final boolean finnesKunPerioderMedManglendeOmsorgenFor = perioderSamlet.isEmpty() && !perioderTilVurderingUtenOmsorgenFor.isEmpty();

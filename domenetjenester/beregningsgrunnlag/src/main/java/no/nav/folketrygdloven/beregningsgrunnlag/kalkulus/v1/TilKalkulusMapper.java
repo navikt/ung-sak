@@ -33,6 +33,7 @@ import no.nav.folketrygdloven.kalkulus.iay.inntekt.v1.RefusjonDto;
 import no.nav.folketrygdloven.kalkulus.iay.inntekt.v1.UtbetalingDto;
 import no.nav.folketrygdloven.kalkulus.iay.inntekt.v1.UtbetalingsPostDto;
 import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
+import no.nav.folketrygdloven.kalkulus.iay.ytelse.v1.AnvistAndel;
 import no.nav.folketrygdloven.kalkulus.iay.ytelse.v1.YtelseAnvistDto;
 import no.nav.folketrygdloven.kalkulus.iay.ytelse.v1.YtelseDto;
 import no.nav.folketrygdloven.kalkulus.iay.ytelse.v1.YtelseFordelingDto;
@@ -49,6 +50,10 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.OpptjeningAktivitetType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.PermisjonsbeskrivelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.RelatertYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.TemaUnderkategori;
+import no.nav.folketrygdloven.kalkulus.kodeverk.UtbetaltNæringsYtelseType;
+import no.nav.folketrygdloven.kalkulus.kodeverk.UtbetaltPensjonTrygdType;
+import no.nav.folketrygdloven.kalkulus.kodeverk.UtbetaltYtelseFraOffentligeType;
+import no.nav.folketrygdloven.kalkulus.kodeverk.UtbetaltYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.VirksomhetType;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.MidlertidigInaktivType;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittArbeidsforholdDto;
@@ -58,9 +63,14 @@ import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningAktiviteterDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningPeriodeDto;
+import no.nav.k9.kodeverk.arbeidsforhold.NæringsinntektType;
+import no.nav.k9.kodeverk.arbeidsforhold.OffentligYtelseType;
+import no.nav.k9.kodeverk.arbeidsforhold.PensjonTrygdType;
+import no.nav.k9.kodeverk.arbeidsforhold.YtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
@@ -76,6 +86,7 @@ import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
+import no.nav.k9.sak.domene.iay.modell.YtelseAnvistAndel;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.YtelseStørrelse;
@@ -104,18 +115,26 @@ public class TilKalkulusMapper {
         };
     }
 
-    public static ArbeidsforholdInformasjonDto mapTilArbeidsforholdInformasjonDto(ArbeidsforholdInformasjon arbeidsforholdInformasjon) {
+    public static ArbeidsforholdInformasjonDto mapTilArbeidsforholdInformasjonDto(ArbeidsforholdInformasjon arbeidsforholdInformasjon, Collection<Inntektsmelding> sakInntektsmeldinger) {
         List<ArbeidsforholdOverstyringDto> resultat = arbeidsforholdInformasjon.getOverstyringer().stream()
             .map(arbeidsforholdOverstyring -> new ArbeidsforholdOverstyringDto(mapTilAktør(arbeidsforholdOverstyring.getArbeidsgiver()),
                 arbeidsforholdOverstyring.getArbeidsforholdRef().gjelderForSpesifiktArbeidsforhold() ? new InternArbeidsforholdRefDto(arbeidsforholdOverstyring.getArbeidsforholdRef().getReferanse())
                     : null,
-                ArbeidsforholdHandlingType.fraKode(arbeidsforholdOverstyring.getHandling().getKode())))
+                utledHandling(arbeidsforholdOverstyring, sakInntektsmeldinger)))
             .collect(Collectors.toList());
 
         if (!resultat.isEmpty()) {
             return new ArbeidsforholdInformasjonDto(resultat);
         }
         return null;
+    }
+
+    private static ArbeidsforholdHandlingType utledHandling(ArbeidsforholdOverstyring arbeidsforholdOverstyring, Collection<Inntektsmelding> sakInntektsmeldinger) {
+        var harMottattInntektsmelding = sakInntektsmeldinger.stream().anyMatch(im -> im.getArbeidsgiver().equals(arbeidsforholdOverstyring.getArbeidsgiver()) && im.getArbeidsforholdRef().gjelderFor(arbeidsforholdOverstyring.getArbeidsforholdRef()));
+        var erLagtTilAvSaksbehandler = arbeidsforholdOverstyring.getHandling().equals(no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER);
+        return erLagtTilAvSaksbehandler && harMottattInntektsmelding ?
+            ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING :
+            ArbeidsforholdHandlingType.fraKode(arbeidsforholdOverstyring.getHandling().getKode());
     }
 
     public static OppgittEgenNæringDto mapOppgittEgenNæring(OppgittEgenNæring oppgittEgenNæring) {
@@ -236,13 +255,32 @@ public class TilKalkulusMapper {
         return ytelseAnvist.stream().map(ya -> {
             BeløpDto beløpDto = mapBeløp(ya.getBeløp());
             BeløpDto dagsatsDto = mapBeløp(ya.getDagsats());
-            BigDecimal bigDecimal = ya.getUtbetalingsgradProsent().isPresent() ? ya.getUtbetalingsgradProsent().get().getVerdi() : null;
+            BigDecimal utbetalingsgrad = ya.getUtbetalingsgradProsent().isPresent() ? ya.getUtbetalingsgradProsent().get().getVerdi() : null;
             return new YtelseAnvistDto(new Periode(
                 ya.getAnvistFOM(), ya.getAnvistTOM()),
                 beløpDto,
                 dagsatsDto,
-                bigDecimal);
+                utbetalingsgrad,
+                mapAndeler(ya.getYtelseAnvistAndeler()));
         }).collect(Collectors.toSet());
+    }
+
+    private static List<AnvistAndel> mapAndeler(Set<YtelseAnvistAndel> ytelseAnvistAndeler) {
+        return ytelseAnvistAndeler == null ? null : ytelseAnvistAndeler.stream()
+            .map(TilKalkulusMapper::mapAndel)
+            .toList();
+    }
+
+    private static AnvistAndel mapAndel(YtelseAnvistAndel a) {
+        return new AnvistAndel(
+            a.getArbeidsgiver().map(TilKalkulusMapper::mapTilAktør).orElse(null),
+            a.getArbeidsforholdRef().getReferanse() == null ? null : new InternArbeidsforholdRefDto(a.getArbeidsforholdRef().getReferanse()),
+            a.getDagsats() == null ? null : new BeløpDto(a.getDagsats().getVerdi()),
+            a.getUtbetalingsgradProsent() == null ? null : a.getUtbetalingsgradProsent().getVerdi(),
+            a.getRefusjonsgradProsent() == null ? null : a.getRefusjonsgradProsent().getVerdi(),
+            a.getInntektskategori() == null ?
+                no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori.UDEFINERT : no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori.fraKode(a.getInntektskategori().getKode())
+        );
     }
 
     public static InntekterDto mapInntektDto(List<Inntekt> alleInntektBeregningsgrunnlag) {
@@ -263,11 +301,27 @@ public class TilKalkulusMapper {
     }
 
     private static UtbetalingsPostDto mapTilDto(Inntektspost inntektspost) {
-        return new UtbetalingsPostDto(
+        var utbetalingsPostDto = new UtbetalingsPostDto(
             mapPeriode(inntektspost.getPeriode()),
             InntektspostType.fraKode(inntektspost.getInntektspostType().getKode()),
             inntektspost.getBeløp().getVerdi());
+        if (inntektspost.getYtelseType() != null) {
+            var ytelseType = inntektspost.getYtelseType();
+            utbetalingsPostDto.medUtbetaltYtelseType(mapUtbetaltYtelseTypeTilGrunnlag(ytelseType));
+        }
+        return utbetalingsPostDto;
     }
+
+    static UtbetaltYtelseType mapUtbetaltYtelseTypeTilGrunnlag(YtelseType type) {
+        String kode = type.getKode();
+        return switch (type.getKodeverk()) {
+            case OffentligYtelseType.KODEVERK -> new UtbetaltYtelseFraOffentligeType(kode);
+            case NæringsinntektType.KODEVERK -> new UtbetaltNæringsYtelseType(kode);
+            case PensjonTrygdType.KODEVERK -> new UtbetaltPensjonTrygdType(kode);
+            default -> throw new IllegalArgumentException("Ukjent UtbetaltYtelseType: " + type);
+        };
+    }
+
 
     public static ArbeidDto mapArbeidDto(Collection<Yrkesaktivitet> yrkesaktiviteterForBeregning) {
         List<YrkesaktivitetDto> yrkesaktivitetDtoer = yrkesaktiviteterForBeregning.stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList());
@@ -357,7 +411,8 @@ public class TilKalkulusMapper {
         inntektArbeidYtelseGrunnlagDto.medInntekterDto(mapInntektDto(alleRelevanteInntekter));
         inntektArbeidYtelseGrunnlagDto.medYtelserDto(mapYtelseDto(ytelseFilter.getAlleYtelser()));
         inntektArbeidYtelseGrunnlagDto.medInntektsmeldingerDto(mapTilDto(imTjeneste, sakInntektsmeldinger, vilkårsPeriode, referanse));
-        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon().map(TilKalkulusMapper::mapTilArbeidsforholdInformasjonDto).orElse(null));
+        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon().map(arbeidsforholdInformasjon ->
+            mapTilArbeidsforholdInformasjonDto(arbeidsforholdInformasjon, sakInntektsmeldinger)).orElse(null));
         inntektArbeidYtelseGrunnlagDto.medOppgittOpptjeningDto(mapTilOppgittOpptjeningDto(oppgittOpptjening));
 
         return inntektArbeidYtelseGrunnlagDto;

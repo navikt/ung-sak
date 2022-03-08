@@ -14,8 +14,8 @@
     <name>K9SAK :: Webapp</name>
 
     <properties>
-        <simple.client.version>0.14.1</simple.client.version>
-        <swagger-ui.version>4.5.0</swagger-ui.version>
+        <simple.client.version>0.15.0</simple.client.version>
+        <swagger-ui.version>4.5.2</swagger-ui.version>
     </properties>
 
 
@@ -31,7 +31,7 @@
             <dependency>
                 <groupId>org.glassfish.jersey</groupId>
                 <artifactId>jersey-bom</artifactId>
-                <version>3.0.3</version>
+                <version>3.0.4</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

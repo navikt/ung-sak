@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Acknowledge command
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           script: |
             github.rest.reactions.createForIssueComment({
@@ -19,6 +19,19 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               content: '+1',
+            });
+      - name: Henter informasjon fra issuet
+        id: issue_comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.get( {
+              owner: context.issue.owner,
+              repo: context.issue.repo,
+              issue_number: context.payload.issue.number })
+            .then(response => {
+              core.setOutput('sha', response.data.body);
             });
       - name: Set variabler for deploy
         shell: bash
@@ -28,9 +41,9 @@ jobs:
           echo "CLUSTER=$(echo '${{github.event.comment.body}}' | cut -d' ' -f2)" >> $GITHUB_ENV
 
       - name: Sjekk ut kode
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
         with:
-          ref: ${{ env.TAG }}
+          ref: ${{ steps.issue_comment.outputs.sha }}
 
       - name: Promoter til cluster
         uses: nais/deploy/actions/deploy@v1
@@ -41,7 +54,7 @@ jobs:
 
       - name: Oppdater kommentar med deployment status ved feil
         if: failure()
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
@@ -54,7 +67,7 @@ jobs:
 
       - name: Oppdater kommentar med deployment status
         if: success()
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |

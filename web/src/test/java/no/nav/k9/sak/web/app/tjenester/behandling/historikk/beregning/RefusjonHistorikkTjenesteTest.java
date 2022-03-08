@@ -66,8 +66,8 @@ public class RefusjonHistorikkTjenesteTest {
         assertThat(historikkinnslagDeler.size()).isEqualTo(1);
         assertThat(historikkinnslagDeler.get(0).getHistorikkinnslagFelt().size()).isEqualTo(1);
         HistorikkinnslagFelt historikkinnslagFelt = historikkinnslagDeler.get(0).getHistorikkinnslagFelt().get(0);
-        assertThat(historikkinnslagFelt.getFraVerdi()).isEqualTo(gammelRefusjon.toString());
-        assertThat(historikkinnslagFelt.getTilVerdi()).isEqualTo(nyRefusjon.toString());
+        assertThat(historikkinnslagFelt.getFraVerdi()).isEqualTo("200 000");
+        assertThat(historikkinnslagFelt.getTilVerdi()).isEqualTo("350 000");
         assertThat(historikkinnslagFelt.getNavnVerdi()).isEqualTo(ORGANISASJONEN + " (" + ORGNR + ")");
     }
 
@@ -94,7 +94,7 @@ public class RefusjonHistorikkTjenesteTest {
         assertThat(historikkinnslagDeler.size()).isEqualTo(1);
         assertThat(historikkinnslagDeler.get(0).getHistorikkinnslagFelt().size()).isEqualTo(1);
         HistorikkinnslagFelt historikkinnslagFelt = historikkinnslagDeler.get(0).getHistorikkinnslagFelt().get(0);
-        assertThat(historikkinnslagFelt.getTilVerdi()).isEqualTo(nyRefusjon.toString());
+        assertThat(historikkinnslagFelt.getTilVerdi()).isEqualTo("350 000");
         assertThat(historikkinnslagFelt.getNavnVerdi()).isEqualTo(ORGANISASJONEN + " (" + ORGNR + ")");
     }
 
@@ -122,8 +122,8 @@ public class RefusjonHistorikkTjenesteTest {
         assertThat(historikkinnslagDeler.size()).isEqualTo(1);
         assertThat(historikkinnslagDeler.get(0).getHistorikkinnslagFelt().size()).isEqualTo(1);
         HistorikkinnslagFelt historikkinnslagFelt = historikkinnslagDeler.get(0).getHistorikkinnslagFelt().get(0);
-        assertThat(historikkinnslagFelt.getFraVerdi()).isEqualTo(gammelRefusjon.toString());
-        assertThat(historikkinnslagFelt.getTilVerdi()).isEqualTo(nyRefusjon.toString());
+        assertThat(historikkinnslagFelt.getFraVerdi()).isEqualTo("200 000");
+        assertThat(historikkinnslagFelt.getTilVerdi()).isEqualTo("350 000");
         assertThat(historikkinnslagFelt.getNavn()).isEqualTo(HistorikkEndretFeltType.FASTSETT_ETTERLØNN_SLUTTPAKKE.toString());
     }
 

@@ -323,7 +323,7 @@ public class MapArbeid {
                 .flatMap(Collection::stream)
                 .forEach(p -> mapArbeidsopplysningerFraDokument(periode, arbeidsforhold, midlertidigInaktivPeriode, p, input));
 
-            var dødsdatoIPerioden = input.getUtvidetPeriodeSomFølgeAvDødsfall() != null && periode.overlapper(periodeMedDødsfall(input));
+            var dødsdatoIPerioden = input.getUtvidetPeriodeSomFølgeAvDødsfall() != null && periodeOverlapperMedDødsdato(periode, input);
             var harKravFørDødsfallOgDetteErSiste = fiktivtKravPgaDødsfall.getHarKravdokumentInnsendtFørDødsfall() && Objects.equals(at.getJournalpostId(), fiktivtKravPgaDødsfall.getSisteKravFørDødsfall());
             if (dødsdatoIPerioden && !fiktivtKravPgaDødsfall.getHarHåndtertDødsfall() && (harKravFørDødsfallOgDetteErSiste || !fiktivtKravPgaDødsfall.getHarKravdokumentInnsendtFørDødsfall())) {
                 håndterDødsfall(arbeidsforhold, input, midlertidigInaktivPeriode, periode, fiktivtKravPgaDødsfall);
@@ -332,6 +332,11 @@ public class MapArbeid {
         } else {
             throw new IllegalStateException("Fant " + dokumenter.size() + " for dokumentet : " + at);
         }
+    }
+
+    private boolean periodeOverlapperMedDødsdato(DatoIntervallEntitet periode, ArbeidstidMappingInput input) {
+        var dødsdato = DatoIntervallEntitet.fraOgMedTilOgMed(input.getUtvidetPeriodeSomFølgeAvDødsfall().getFomDato().minusDays(1), input.getUtvidetPeriodeSomFølgeAvDødsfall().getFomDato());
+        return periode.overlapper(dødsdato);
     }
 
     private DatoIntervallEntitet periodeMedDødsfall(ArbeidstidMappingInput input) {
@@ -366,6 +371,9 @@ public class MapArbeid {
 
         for (LocalDateSegment<WrappedArbeid> segment : manglendePerioderIDødsPerioden.toSegments()) {
             var value = finnVerdiForutFor(perioder, segment.getLocalDateInterval());
+            if (value == null) {
+                continue;
+            }
             var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), new WrappedArbeid(value.getPeriode(), Duration.ZERO))));
             perioder = perioder.combine(timeline.intersection(periodeSomSkalJusteresSomFølgeAvDødsfall.toLocalDateInterval()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
@@ -383,7 +391,11 @@ public class MapArbeid {
 
     private WrappedArbeid finnVerdiForutFor(LocalDateTimeline<WrappedArbeid> perioder, LocalDateInterval interval) {
         var dato = interval.getFomDato().minusDays(1);
-        return perioder.intersection(new LocalDateInterval(dato, dato)).toSegments().iterator().next().getValue();
+        var iterator = perioder.intersection(new LocalDateInterval(dato, dato)).toSegments().iterator();
+        if (!iterator.hasNext()) {
+            return null;
+        }
+        return iterator.next().getValue();
     }
 
     private AktivitetIdentifikator utledKey(LocalDateTimeline<WrappedArbeid> intersection) {
@@ -443,7 +455,7 @@ public class MapArbeid {
             var segmenter = yrkesaktivitet.getAnsettelsesPeriode()
                 .stream()
                 .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), true))
-                .collect(Collectors.toList());
+                .toList();
             // Har ikke helt kontroll på aa-reg mtp overlapp her så better safe than sorry
             for (LocalDateSegment<Boolean> segment : segmenter) {
                 var arbeidsforholdTidslinje = new LocalDateTimeline<>(List.of(segment));
@@ -453,7 +465,7 @@ public class MapArbeid {
             var relevantePermitteringer = yrkesaktivitet.getPermisjon().stream()
                 .filter(it -> Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.PERMITTERING))
                 .filter(it -> erStørreEllerLik100Prosent(it.getProsentsats()))
-                .collect(Collectors.toList());
+                .toList();
 
             for (Permisjon permisjon : relevantePermitteringer) {
                 var permittert = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(permisjon.getFraOgMed(), permisjon.getTilOgMed(), true)));

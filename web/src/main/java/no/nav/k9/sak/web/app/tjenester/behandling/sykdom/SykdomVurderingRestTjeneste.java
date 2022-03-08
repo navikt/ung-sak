@@ -284,7 +284,7 @@ public class SykdomVurderingRestTjeneste {
 
         switch (behandling.getFagsakYtelseType()) {
             case PLEIEPENGER_SYKT_BARN -> sikreAtOppdateringIkkeKrysser18årsdag(behandling, sykdomVurderingOppdatering.getPerioder());
-            case PLEIEPENGER_NÆRSTÅENDE -> sikreKonsistentPeriode(sykdomVurderingOppdatering.getPerioder());
+            case PLEIEPENGER_NÆRSTÅENDE -> ingenValidering();
             default -> throw new IllegalStateException("Ikke-støttet ytelsetype: " + behandling.getFagsakYtelseType());
         }
     }
@@ -365,7 +365,7 @@ public class SykdomVurderingRestTjeneste {
         FagsakYtelseType fagsakYtelseType = behandling.getFagsakYtelseType();
         switch (fagsakYtelseType) {
             case PLEIEPENGER_SYKT_BARN -> sikreAtOppdateringIkkeKrysser18årsdag(behandling, sykdomVurderingOpprettelse.getPerioder());
-            case PLEIEPENGER_NÆRSTÅENDE -> sikreKonsistentPeriode(sykdomVurderingOpprettelse.getPerioder());
+            case PLEIEPENGER_NÆRSTÅENDE -> ingenValidering();
             default -> throw new IllegalStateException("Ikke-støttet ytelsetype: " + fagsakYtelseType);
         }
 
@@ -376,17 +376,12 @@ public class SykdomVurderingRestTjeneste {
         }
     }
 
+    private void ingenValidering() {
+    }
+
     private void validerSykdomvurderingTyper(SykdomVurderingOpprettelseDto sykdomVurderingOpprettelse, Set<SykdomVurderingType> tillatteSykdomVurderingTyper) {
         if (!tillatteSykdomVurderingTyper.contains(sykdomVurderingOpprettelse.getType())) {
             throw new IllegalArgumentException("Ikke-støttet sykdomtype " + sykdomVurderingOpprettelse.getType() + " for aktuell ytelsetype");
-        }
-    }
-
-    private void sikreKonsistentPeriode(List<Periode> perioder) {
-        for (Periode periode : perioder) {
-            if (!periode.equals(SykdomVurderingService.PERIODE_SYKDOMSVURDERING_PPN)) {
-                throw new IllegalArgumentException("Ikke-støttet periode for sykdomsvurdring PPN");
-            }
         }
     }
 
