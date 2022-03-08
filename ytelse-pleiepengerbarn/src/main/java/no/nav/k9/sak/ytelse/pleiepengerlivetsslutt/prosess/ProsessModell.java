@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.prosess;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -36,13 +35,13 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, StartpunktType.KONTROLLER_ARBEIDSFORHOLD)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
+            .medSteg(BehandlingStegType.VURDER_PLEIES_I_HJEMMET)
             .medSteg(BehandlingStegType.VURDER_MEDISINSKVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDISINSK)
             .medSteg(BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP)
             .medSteg(BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE, StartpunktType.OPPTJENING)
             .medSteg(BehandlingStegType.VURDER_OPPTJENING_FAKTA)
             .medSteg(BehandlingStegType.VURDER_OPPTJENINGSVILKÅR)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_UTTAK, StartpunktType.UTTAKSVILKÅR, StartpunktType.BEREGNING)
-            //.medSteg(BehandlingStegType.VURDER_UTTAK)
             .medSteg(BehandlingStegType.PRECONDITION_BEREGNING)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING)
             .medSteg(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING)
@@ -82,13 +81,13 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, StartpunktType.KONTROLLER_ARBEIDSFORHOLD)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
+            .medSteg(BehandlingStegType.VURDER_PLEIES_I_HJEMMET)
             .medSteg(BehandlingStegType.VURDER_MEDISINSKVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDISINSK, StartpunktType.INNGANGSVILKÅR_OMSORGENFOR)
             .medSteg(BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP)
             .medSteg(BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE, StartpunktType.OPPTJENING)
             .medSteg(BehandlingStegType.VURDER_OPPTJENING_FAKTA)
             .medSteg(BehandlingStegType.VURDER_OPPTJENINGSVILKÅR)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_UTTAK, StartpunktType.UTTAKSVILKÅR, StartpunktType.BEREGNING)
-            //.medSteg(BehandlingStegType.VURDER_UTTAK)
             .medSteg(BehandlingStegType.PRECONDITION_BEREGNING)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING)
             .medSteg(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING)
