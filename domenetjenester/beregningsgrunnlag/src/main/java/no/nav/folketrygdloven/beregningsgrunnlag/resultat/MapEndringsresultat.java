@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
+import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.BeregningAktivitetEndring;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.RefusjonoverstyringEndring;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.VarigEndretEllerNyoppstartetNæringEndring;
@@ -28,12 +29,34 @@ public class MapEndringsresultat {
                 mapFaktaOmBeregningVurderinger(oppdateringRespons.getFaktaOmBeregningVurderinger()),
                 mapVarigEndretNæringVurdering(oppdateringRespons.getVarigEndretNæringEndring()),
                 mapEndringRefusjon(oppdateringRespons.getRefusjonoverstyringEndring()),
-                bgReferanse
-            );
+                bgReferanse,
+                mapTilBeregningAktiviteterEndring(oppdateringRespons.getBeregningAktiviteterEndring()));
+    }
+
+    private static BeregningAktiviteterEndring mapTilBeregningAktiviteterEndring(no.nav.folketrygdloven.kalkulus.response.v1.håndtering.BeregningAktiviteterEndring beregningAktiviteterEndring) {
+        return beregningAktiviteterEndring == null ? null : new BeregningAktiviteterEndring(
+            beregningAktiviteterEndring.getAktivitetEndringer().stream().map(MapEndringsresultat::mapTilAktivitetEndring).toList()
+        );
+    }
+
+    private static no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningAktivitetEndring mapTilAktivitetEndring(BeregningAktivitetEndring beregningAktivitetEndring) {
+        return new no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningAktivitetEndring(
+            mapNøkkel(beregningAktivitetEndring.getAktivitetNøkkel()),
+            mapTilToggle(beregningAktivitetEndring.getSkalBrukesEndring()),
+            mapDatoEndring(beregningAktivitetEndring.getTomDatoEndring())
+        );
+    }
+
+    private static BeregningAktivitetNøkkel mapNøkkel(no.nav.folketrygdloven.kalkulus.response.v1.håndtering.BeregningAktivitetNøkkel aktivitetNøkkel) {
+        return new BeregningAktivitetNøkkel(
+            OpptjeningAktivitetType.fraKode(aktivitetNøkkel.getOpptjeningAktivitetType().getKode()),
+            aktivitetNøkkel.getFom(),
+            mapArbeidsgiver(aktivitetNøkkel.getArbeidsgiver()),
+            aktivitetNøkkel.getArbeidsforholdRef() != null ? mapArbeidsforholdRef(aktivitetNøkkel.getArbeidsforholdRef().getAbakusReferanse()) : InternArbeidsforholdRef.nullRef());
     }
 
     private static no.nav.folketrygdloven.beregningsgrunnlag.resultat.RefusjonoverstyringEndring mapEndringRefusjon(RefusjonoverstyringEndring refusjonoverstyringEndring) {
-        if (refusjonoverstyringEndring ==  null) {
+        if (refusjonoverstyringEndring == null) {
             return null;
         }
         return new no.nav.folketrygdloven.beregningsgrunnlag.resultat.RefusjonoverstyringEndring(

@@ -9,6 +9,7 @@ public class OppdaterBeregningsgrunnlagResultat {
     private LocalDate skjæringstidspunkt;
     private final UUID referanse;
     private final BeregningsgrunnlagEndring beregningsgrunnlagEndring;
+    private final BeregningAktiviteterEndring beregningAktiviteterEndring;
     private final FaktaOmBeregningVurderinger faktaOmBeregningVurderinger;
     private final VarigEndretNæringVurdering varigEndretNæringVurdering;
     private final RefusjonoverstyringEndring refusjonoverstyringEndring;
@@ -16,12 +17,14 @@ public class OppdaterBeregningsgrunnlagResultat {
     public OppdaterBeregningsgrunnlagResultat(BeregningsgrunnlagEndring beregningsgrunnlagEndring,
                                               FaktaOmBeregningVurderinger faktaOmBeregningVurderinger,
                                               VarigEndretNæringVurdering varigEndretNæringVurdering,
-                                              RefusjonoverstyringEndring refusjonoverstyringEndring, UUID referanse) {
+                                              RefusjonoverstyringEndring refusjonoverstyringEndring, UUID referanse,
+                                              BeregningAktiviteterEndring beregningAktiviteterEndring) {
         this.beregningsgrunnlagEndring = beregningsgrunnlagEndring;
         this.faktaOmBeregningVurderinger = faktaOmBeregningVurderinger;
         this.refusjonoverstyringEndring = refusjonoverstyringEndring;
         this.referanse = referanse;
         this.varigEndretNæringVurdering = varigEndretNæringVurdering;
+        this.beregningAktiviteterEndring = beregningAktiviteterEndring;
     }
 
     public Optional<BeregningsgrunnlagEndring> getBeregningsgrunnlagEndring() {
@@ -37,7 +40,11 @@ public class OppdaterBeregningsgrunnlagResultat {
     }
 
     public Optional<RefusjonoverstyringEndring> getRefusjonoverstyringEndring() {
-        return Optional.of(refusjonoverstyringEndring);
+        return Optional.ofNullable(refusjonoverstyringEndring);
+    }
+
+    public Optional<BeregningAktiviteterEndring> getBeregningAktiviteterEndring() {
+        return Optional.ofNullable(beregningAktiviteterEndring);
     }
 
     public LocalDate getSkjæringstidspunkt() {

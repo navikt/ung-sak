@@ -6,8 +6,8 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.FinnNavnForManueltLagtTilArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
@@ -34,9 +34,19 @@ public class ArbeidsgiverHistorikkinnslag {
                                                                 Optional<InternArbeidsforholdRef> arbeidsforholdRef,
                                                                 List<ArbeidsforholdOverstyring> overstyringer) {
         return arbeidsgiver.map(arbGiv -> arbeidsforholdRef.isPresent() && arbeidsforholdRef.get().gjelderForSpesifiktArbeidsforhold()
-            ? lagArbeidsgiverHistorikkinnslagTekst(arbGiv, arbeidsforholdRef.get(), overstyringer)
-            : lagArbeidsgiverHistorikkinnslagTekst(arbGiv, overstyringer))
+                ? lagArbeidsgiverHistorikkinnslagTekst(arbGiv, arbeidsforholdRef.get(), overstyringer)
+                : lagArbeidsgiverHistorikkinnslagTekst(arbGiv, overstyringer))
             .orElse(aktivitetStatus.getNavn());
+    }
+
+    public String lagHistorikkinnslagTekstForBeregningaktivitet(Arbeidsgiver arbeidsgiver,
+                                                                InternArbeidsforholdRef arbeidsforholdRef,
+                                                                OpptjeningAktivitetType opptjeningAktivitetType,
+                                                                List<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer) {
+        if (arbeidsgiver != null) {
+            return lagArbeidsgiverHistorikkinnslagTekst(arbeidsgiver, arbeidsforholdRef, arbeidsforholdOverstyringer);
+        }
+        return opptjeningAktivitetType.getNavn();
     }
 
     public String lagArbeidsgiverHistorikkinnslagTekst(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, List<ArbeidsforholdOverstyring> overstyringer) {
