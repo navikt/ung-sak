@@ -1,10 +1,11 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.kompletthetssjekk;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -12,8 +13,9 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetFraværFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
-import no.nav.k9.sak.perioder.KravDokumentType;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetTypeArbeidsgiver;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.OppgittFraværHolder;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.SamtidigKravStatus;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 
 @ApplicationScoped
@@ -34,24 +36,15 @@ public class OMPKompletthetFraværFilter implements KompletthetFraværFilter {
     }
 
     @Override
-    public boolean harFraværFraArbeidetIPerioden(BehandlingReferanse ref,
-                                                 DatoIntervallEntitet vilkårsperiode,
-                                                 ManglendeVedlegg manglendeVedlegg) {
+    public boolean harFraværFraArbeidetIPerioden(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode, ManglendeVedlegg manglendeVedlegg) {
         var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
-        var fraværFraSøknad = trekkUtFraværTjeneste.fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(behandling).stream()
-            .filter(it -> it.getKravDokumentType() == KravDokumentType.SØKNAD)
-            .map(it -> it.getPeriode())
-            .toList();
 
-        return harFraværFraArbeidsgiverIPerioden(fraværFraSøknad, vilkårsperiode, manglendeVedlegg);
-    }
+        Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> fraværPrAktivitet = trekkUtFraværTjeneste.fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(behandling);
 
-    private boolean harFraværFraArbeidsgiverIPerioden(List<OppgittFraværPeriode> fraværPerioder, DatoIntervallEntitet vilkårsperiode, ManglendeVedlegg at) {
-        return fraværPerioder.stream()
-            .filter(fp -> UttakArbeidType.ARBEIDSTAKER.equals(fp.getAktivitetType()))
-            .filter(fp -> fp.getPeriode().overlapper(vilkårsperiode))
-            .anyMatch(fp -> Objects.equals(at.getArbeidsgiver(), fp.getArbeidsgiver())
-                && (fp.getFraværPerDag() == null || !fp.getFraværPerDag().isZero()));
+        LocalDateTimeline<OppgittFraværHolder> fraværTidslinjeHosArbeidsgiver = fraværPrAktivitet.get(new AktivitetTypeArbeidsgiver(UttakArbeidType.ARBEIDSTAKER, manglendeVedlegg.getArbeidsgiver()));
+        return fraværTidslinjeHosArbeidsgiver.stream()
+            .map(LocalDateSegment::getValue)
+            .anyMatch(fraværHolder -> fraværHolder.samtidigKravStatus().søknad() == SamtidigKravStatus.KravStatus.FINNES);
     }
 
 }

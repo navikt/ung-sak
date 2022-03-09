@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -32,8 +33,9 @@ import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist.InntektsmeldingSøktePerioderMapper;
 import no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist.SøknadPerioderTjeneste;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetTypeArbeidsgiver;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.KravDokumentFravær;
-import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.OppgittFraværHolder;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
@@ -107,7 +109,7 @@ public class TrekkUtFraværTjeneste {
         var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), søkteFraværsperioder);
         log.info("Fant {} inntektsmeldinger og {} søknader knyttet til behandlingen:", countIm(vurdertePerioder), countSøknad(vurdertePerioder));
 
-        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).toList();
+        return trekkUtFraværMapTilOppgittFraværPerioder(vurdertePerioder);
     }
 
     public List<OppgittFraværPeriode> fraværFraInntektsmeldingerPåFagsak(Behandling behandling) {
@@ -116,7 +118,7 @@ public class TrekkUtFraværTjeneste {
         var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), fraværPåFagsak);
         log.info("Fant {} inntektsmeldinger knyttet med fræværsperioder for fagsaken:", countIm(vurdertePerioder));
 
-        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).toList();
+        return trekkUtFraværMapTilOppgittFraværPerioder(vurdertePerioder);
     }
 
     public List<OppgittFraværPeriode> fraværsperioderFraSøknaderPåFagsak(Behandling behandling) {
@@ -124,7 +126,7 @@ public class TrekkUtFraværTjeneste {
         var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), søkteFraværsperioder);
         log.info("Fant {} søknader knyttet til fagsaken:", countSøknad(vurdertePerioder));
 
-        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).toList();
+        return trekkUtFraværMapTilOppgittFraværPerioder(vurdertePerioder);
     }
 
     public List<OppgittFraværPeriode> alleFraværsperioderPåFagsak(Behandling behandling) {
@@ -135,7 +137,18 @@ public class TrekkUtFraværTjeneste {
         var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), søkteFraværsperioder);
         log.info("Fant {} inntektsmeldinger med fraværsperioder og {} søknader knyttet til fagsaken", countIm(vurdertePerioder), countSøknad(vurdertePerioder));
 
-        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).toList();
+        return trekkUtFraværMapTilOppgittFraværPerioder(vurdertePerioder);
+    }
+
+    public Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> alleFraværsperioderPåFagsakNy(Behandling behandling) {
+        Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søkteFraværsperioder = new LinkedHashMap<>();
+        søkteFraværsperioder.putAll(søktFraværFraImPåFagsak(behandling.getFagsak()));
+        søkteFraværsperioder.putAll(fraværFraSøknaderPåFagsak(behandling));
+
+        var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), søkteFraværsperioder);
+        log.info("Fant {} inntektsmeldinger med fraværsperioder og {} søknader knyttet til fagsaken", countIm(vurdertePerioder), countSøknad(vurdertePerioder));
+
+        return trekkUtFraværNy(vurdertePerioder);
     }
 
     private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søktFraværFraImPåBehandling(Behandling behandling) {
@@ -172,9 +185,9 @@ public class TrekkUtFraværTjeneste {
         return søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåBehandling(BehandlingReferanse.fra(behandling));
     }
 
-    public List<WrappedOppgittFraværPeriode> fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(Behandling behandling) {
+    public Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(Behandling behandling) {
         var kravdokumenterMedFraværsperioder = søknadsfristTjeneste.vurderSøknadsfrist(BehandlingReferanse.fra(behandling));
-        return trekkUtFravær(kravdokumenterMedFraværsperioder);
+        return trekkUtFraværNy(kravdokumenterMedFraværsperioder);
     }
 
     private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentFraværFraInntektsmeldinger(Fagsak fagsak, Set<JournalpostId> inntektsmeldingerJournalposter) {
@@ -218,10 +231,14 @@ public class TrekkUtFraværTjeneste {
         }
     }
 
-    // Slår sammen overlappende perioder fra kravdokumenter (IM-er, søknader)
-    public List<WrappedOppgittFraværPeriode> trekkUtFravær(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværPerKravdokument) {
-        return new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(fraværPerKravdokument);
+    public Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> trekkUtFraværNy(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværPerKravdokument) {
+        return new KravDokumentFravær().trekkUtFravær(fraværPerKravdokument);
     }
+
+    public List<OppgittFraværPeriode> trekkUtFraværMapTilOppgittFraværPerioder(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværPerKravdokument) {
+        return new KravDokumentFravær().trekkUtFraværMapTilOppgittFraværPeriode(fraværPerKravdokument);
+    }
+
 
     private long countIm(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder) {
         return vurdertePerioder.keySet().stream().filter(type -> List.of(KravDokumentType.INNTEKTSMELDING, KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV).contains(type.getType())).count();
