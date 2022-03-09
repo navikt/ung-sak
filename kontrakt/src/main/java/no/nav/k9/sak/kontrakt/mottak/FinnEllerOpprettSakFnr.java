@@ -66,7 +66,7 @@ public class FinnEllerOpprettSakFnr {
         return periode;
     }
 
-    @AbacAttributt(value = "søker", masker = true)
+    @AbacAttributt(value = "fnr", masker = true)
     public String getSøker() {
         return søker;
     }
