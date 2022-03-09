@@ -41,10 +41,10 @@ public class KravDokumentFravær {
                     (aktivitetIdent, fraværPerioder) -> {
                         InternArbeidsforholdRef arbeidsforholdRef = aktivitetIdent.getArbeidsgiverArbeidsforhold() != null ? aktivitetIdent.getArbeidsgiverArbeidsforhold().getArbeidsforhold() : InternArbeidsforholdRef.nullRef();
                         var tidslinjeNy = new LocalDateTimeline<>(fraværPerioder.stream()
-                            .map(v -> new LocalDateSegment<>(v.getPeriode().toLocalDateInterval(), map(dok.getType(), dok.getInnsendingsTidspunkt(), arbeidsforholdRef, v)))
+                            .map(v -> new LocalDateSegment<>(v.getPeriode().toLocalDateInterval(), mapTilFraværHolder(dok.getType(), dok.getInnsendingsTidspunkt(), arbeidsforholdRef, v)))
                             .toList());
 
-                        AktivitetTypeArbeidsgiver aktivitetTypeArbeidsgiver = utenArbeidsforhold(aktivitetIdent);
+                        AktivitetTypeArbeidsgiver aktivitetTypeArbeidsgiver = fjernArbeidsforholdFra(aktivitetIdent);
                         var tidslinjeSammenslått = resultat.getOrDefault(aktivitetTypeArbeidsgiver, (LocalDateTimeline<OppgittFraværHolder>) LocalDateTimeline.EMPTY_TIMELINE);
                         resultat.put(aktivitetTypeArbeidsgiver, tidslinjeSammenslått.combine(tidslinjeNy, this::merge, LocalDateTimeline.JoinStyle.CROSS_JOIN));
                     }
@@ -57,11 +57,11 @@ public class KravDokumentFravær {
     private Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> komprimerOgFjernTommeTidslinjer(Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> mapByAktivitet) {
         return mapByAktivitet.entrySet()
             .stream()
-            .filter(e -> !e.getValue().filterValue(ofh -> ofh.søknadGjelder() || ofh.refusjonskravGjelder()).isEmpty())
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().filterValue(ofh -> ofh.søknadGjelder() || ofh.refusjonskravGjelder()).compress()));
+            .filter(e -> !e.getValue().filterValue(fraværHolder -> fraværHolder.søknadGjelder() || fraværHolder.refusjonskravGjelder()).isEmpty())
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().filterValue(fraværHolder -> fraværHolder.søknadGjelder() || fraværHolder.refusjonskravGjelder()).compress()));
     }
 
-    private AktivitetTypeArbeidsgiver utenArbeidsforhold(AktivitetIdentifikator aktivitetIdentifikator) {
+    private AktivitetTypeArbeidsgiver fjernArbeidsforholdFra(AktivitetIdentifikator aktivitetIdentifikator) {
         return aktivitetIdentifikator.getArbeidsgiverArbeidsforhold() != null
             ? new AktivitetTypeArbeidsgiver(aktivitetIdentifikator.getAktivitetType(), aktivitetIdentifikator.getArbeidsgiverArbeidsforhold().getArbeidsgiver())
             : new AktivitetTypeArbeidsgiver(aktivitetIdentifikator.getAktivitetType(), null);
@@ -81,7 +81,7 @@ public class KravDokumentFravær {
     }
 
 
-    private OppgittFraværHolder map(KravDokumentType kravDokumentType, LocalDateTime innsendingstidspunkt, InternArbeidsforholdRef arbeidsforholdRef, VurdertSøktPeriode<OppgittFraværPeriode> vsp) {
+    private OppgittFraværHolder mapTilFraværHolder(KravDokumentType kravDokumentType, LocalDateTime innsendingstidspunkt, InternArbeidsforholdRef arbeidsforholdRef, VurdertSøktPeriode<OppgittFraværPeriode> vsp) {
         OppgittFraværPeriode fp = vsp.getRaw();
         OppgittFraværVerdi oppgittFraværVerdi = new OppgittFraværVerdi(innsendingstidspunkt, fp.getFraværPerDag(), fp.getFraværÅrsak(), fp.getSøknadÅrsak(), utledUtfall(vsp));
         OppgittFraværHolder oppgittFraværHolder = switch (kravDokumentType) {

@@ -87,7 +87,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var fraværPåSak = trekkUtFraværTjeneste.alleFraværsperioderPåFagsakNy(behandling);
+        var fraværPåSak = trekkUtFraværTjeneste.alleFraværsperioderPåFagsak(behandling);
         List<OppgittFraværPeriode> fraværsperioderSak = KravDokumentFravær.mapTilOppgittFraværPeriode(fraværPåSak);
 
         // filtrer bort perioder som ikke kan tilbakestilles pga andre krav fra andre arbeidsgivere på samme dato
@@ -98,7 +98,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var fraværPåSak = trekkUtFraværTjeneste.alleFraværsperioderPåFagsakNy(behandling);
+        var fraværPåSak = trekkUtFraværTjeneste.alleFraværsperioderPåFagsak(behandling);
         List<OppgittFraværPeriode> fraværsperioderSak = KravDokumentFravær.mapTilOppgittFraværPeriode(fraværPåSak);
 
         return søktePerioder.utledPeriodeFraSøknadsPerioder(fraværsperioderSak);

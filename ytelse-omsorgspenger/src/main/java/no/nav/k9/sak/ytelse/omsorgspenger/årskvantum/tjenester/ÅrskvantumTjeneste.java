@@ -196,17 +196,17 @@ public class ÅrskvantumTjeneste {
     }
 
     Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> utledPerioder(NavigableSet<DatoIntervallEntitet> vilkårsperioder,
-                                                                                         Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> fagsakFravær,
-                                                                                         Set<OppgittFraværPeriode> behandlingFravær) {
+                                                                                         Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> fraværPåFagsak,
+                                                                                         Set<OppgittFraværPeriode> fraværPåBehandling) {
 
-        LocalDateTimeline<Boolean> tildslinjeVilkårsperioder = new LocalDateTimeline<>(vilkårsperioder.stream().map(vp -> new LocalDateSegment<>(vp.toLocalDateInterval(), true)).toList());
-        LocalDateTimeline<Boolean> tidslinjeNulledePerioderForBehandling = new LocalDateTimeline<>(behandlingFravær.stream()
-            .filter(bf -> Duration.ZERO.equals(bf.getFraværPerDag()))
-            .map(bf -> new LocalDateSegment<>(bf.getFom(), bf.getTom(), true)).toList(), StandardCombinators::alwaysTrueForMatch);
+        LocalDateTimeline<Boolean> tildslinjeVilkårsperioder = new LocalDateTimeline<>(vilkårsperioder.stream().map(vilkårperiode -> new LocalDateSegment<>(vilkårperiode.toLocalDateInterval(), true)).toList());
+        LocalDateTimeline<Boolean> tidslinjeNulledePerioderForBehandling = new LocalDateTimeline<>(fraværPåBehandling.stream()
+            .filter(fraværBehandling -> Duration.ZERO.equals(fraværBehandling.getFraværPerDag()))
+            .map(fraværBehandling -> new LocalDateSegment<>(fraværBehandling.getFom(), fraværBehandling.getTom(), true)).toList(), StandardCombinators::alwaysTrueForMatch);
 
         LocalDateTimeline<Boolean> tidlinjeAllePerioderForBehandling = tildslinjeVilkårsperioder.crossJoin(tidslinjeNulledePerioderForBehandling).compress();
         var resultat = new LinkedHashMap<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>>();
-        for (var entry : fagsakFravær.entrySet()) {
+        for (var entry : fraværPåFagsak.entrySet()) {
             var behandlingTidslinje = entry.getValue().intersection(tidlinjeAllePerioderForBehandling);
             if (!behandlingTidslinje.isEmpty()) {
                 resultat.put(entry.getKey(), behandlingTidslinje);

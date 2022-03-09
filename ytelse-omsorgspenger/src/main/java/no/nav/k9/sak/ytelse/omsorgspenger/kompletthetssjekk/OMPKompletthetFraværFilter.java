@@ -15,7 +15,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetTypeArbeidsgiver;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.OppgittFraværHolder;
-import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.SamtidigKravStatus;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 
 @ApplicationScoped
@@ -44,7 +43,7 @@ public class OMPKompletthetFraværFilter implements KompletthetFraværFilter {
         LocalDateTimeline<OppgittFraværHolder> fraværTidslinjeHosArbeidsgiver = fraværPrAktivitet.get(new AktivitetTypeArbeidsgiver(UttakArbeidType.ARBEIDSTAKER, manglendeVedlegg.getArbeidsgiver()));
         return fraværTidslinjeHosArbeidsgiver.stream()
             .map(LocalDateSegment::getValue)
-            .anyMatch(fraværHolder -> fraværHolder.samtidigKravStatus().søknad() == SamtidigKravStatus.KravStatus.FINNES);
+            .anyMatch(fraværHolder -> fraværHolder.søknadGjelder());
     }
 
 }
