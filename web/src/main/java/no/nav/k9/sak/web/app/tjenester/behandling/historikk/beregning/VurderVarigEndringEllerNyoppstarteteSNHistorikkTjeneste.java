@@ -82,7 +82,7 @@ public class VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste {
 
         næringEndring.ifPresent(inntektEndring ->
             historikkAdapter.tekstBuilder().medEndretFelt(HistorikkEndretFeltType.BRUTTO_NAERINGSINNTEKT,
-                varigEndretNæringEndring.getFraVerdi() != null && varigEndretNæringEndring.getFraVerdi() ? inntektEndring.getFraBeløp().orElse(null) : null,
+                varigEndretNæringEndring.getFraVerdiEllerNull() != null && varigEndretNæringEndring.getFraVerdiEllerNull() ? inntektEndring.getFraBeløp().orElse(null) : null,
                 inntektEndring.getTilBeløp()));
     }
 

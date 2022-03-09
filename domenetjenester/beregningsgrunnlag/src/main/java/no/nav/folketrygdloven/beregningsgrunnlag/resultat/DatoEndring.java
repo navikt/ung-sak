@@ -17,6 +17,10 @@ public class DatoEndring {
         this.tilVerdi = tilVerdi;
     }
 
+    public boolean erEndret() {
+        return tilVerdi != null && (fraVerdi == null || !tilVerdi.equals(fraVerdi));
+    }
+
     public LocalDate getFraVerdi() {
         return fraVerdi;
     }
