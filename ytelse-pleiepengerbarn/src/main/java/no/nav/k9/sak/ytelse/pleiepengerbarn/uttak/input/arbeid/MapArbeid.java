@@ -20,6 +20,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
@@ -252,6 +253,7 @@ public class MapArbeid {
 
         var aktiviteterPåStp = opptjening.get().getOpptjeningAktivitet()
             .stream()
+            .filter(it -> Set.of(OpptjeningAktivitetKlassifisering.ANTATT_GODKJENT, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT).contains(it.getKlassifisering()))
             .filter(it -> DatoIntervallEntitet.fraOgMedTilOgMed(vilkårPeriode.getSkjæringstidspunkt().minusDays(1), vilkårPeriode.getSkjæringstidspunkt().minusDays(1)).overlapper(it.getFom(), it.getTom()))
             .toList();
         return !aktiviteterPåStp.isEmpty() &&
