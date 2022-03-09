@@ -1,6 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.resultat;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,7 +10,7 @@ public class OppdaterBeregningsgrunnlagResultat {
     private LocalDate skjæringstidspunkt;
     private final UUID referanse;
     private final BeregningsgrunnlagEndring beregningsgrunnlagEndring;
-    private final BeregningAktiviteterEndring beregningAktiviteterEndring;
+    private final List<BeregningAktivitetEndring> beregningAktivitetEndringer;
     private final FaktaOmBeregningVurderinger faktaOmBeregningVurderinger;
     private final VarigEndretNæringVurdering varigEndretNæringVurdering;
     private final RefusjonoverstyringEndring refusjonoverstyringEndring;
@@ -18,13 +19,13 @@ public class OppdaterBeregningsgrunnlagResultat {
                                               FaktaOmBeregningVurderinger faktaOmBeregningVurderinger,
                                               VarigEndretNæringVurdering varigEndretNæringVurdering,
                                               RefusjonoverstyringEndring refusjonoverstyringEndring, UUID referanse,
-                                              BeregningAktiviteterEndring beregningAktiviteterEndring) {
+                                              List<BeregningAktivitetEndring> beregningAktivitetEndringer) {
         this.beregningsgrunnlagEndring = beregningsgrunnlagEndring;
         this.faktaOmBeregningVurderinger = faktaOmBeregningVurderinger;
         this.refusjonoverstyringEndring = refusjonoverstyringEndring;
         this.referanse = referanse;
         this.varigEndretNæringVurdering = varigEndretNæringVurdering;
-        this.beregningAktiviteterEndring = beregningAktiviteterEndring;
+        this.beregningAktivitetEndringer = beregningAktivitetEndringer;
     }
 
     public Optional<BeregningsgrunnlagEndring> getBeregningsgrunnlagEndring() {
@@ -43,8 +44,8 @@ public class OppdaterBeregningsgrunnlagResultat {
         return Optional.ofNullable(refusjonoverstyringEndring);
     }
 
-    public Optional<BeregningAktiviteterEndring> getBeregningAktiviteterEndring() {
-        return Optional.ofNullable(beregningAktiviteterEndring);
+    public List<BeregningAktivitetEndring> getBeregningAktivitetEndringer() {
+        return beregningAktivitetEndringer;
     }
 
     public LocalDate getSkjæringstidspunkt() {

@@ -1,11 +1,11 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningAktivitetEndring;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningAktiviteterEndring;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -31,11 +31,11 @@ public class BeregningsaktivitetHistorikkTjeneste {
 
     public void lagHistorikkForSkjæringstidspunkt(Long behandlingId,
                                                   HistorikkInnslagTekstBuilder tekstBuilder,
-                                                  BeregningAktiviteterEndring beregningAktiviteterEndring,
+                                                  List<BeregningAktivitetEndring> beregningAktivitetEndringer,
                                                   LocalDate gjeldendeFra, String begrunnelse) {
         tekstBuilder.medBegrunnelse(begrunnelse).medNavnOgGjeldendeFra(HistorikkEndretFeltType.AKTIVITET, null, gjeldendeFra);
         var arbeidsforholdOverstyringer = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId).getArbeidsforholdOverstyringer();
-        beregningAktiviteterEndring.getAktivitetEndringer().forEach(aktivitetEndring -> {
+        beregningAktivitetEndringer.forEach(aktivitetEndring -> {
             var aktivitetnavn = arbeidsgiverHistorikkinnslagTjeneste.lagHistorikkinnslagTekstForBeregningaktivitet(
                 aktivitetEndring.getAktivitetNøkkel().getArbeidsgiver(),
                 aktivitetEndring.getAktivitetNøkkel().getArbeidsforholdRef(),

@@ -64,7 +64,7 @@ public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<Avkla
     private void lagHistorikk(AvklarteAktiviteterDtoer dto,
                               BehandlingReferanse behandlingReferanse,
                               List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningsgrunnlagResultater) {
-        if (oppdaterBeregningsgrunnlagResultater.stream().anyMatch(e -> e.getBeregningAktiviteterEndring().isPresent())) {
+        if (oppdaterBeregningsgrunnlagResultater.stream().anyMatch(e -> !e.getBeregningAktivitetEndringer().isEmpty())) {
             var historikkInnslagTekstBuilder = historikkTjenesteAdapter.tekstBuilder();
             historikkInnslagTekstBuilder.medSkjermlenke(SkjermlenkeType.FAKTA_OM_BEREGNING);
             oppdaterBeregningsgrunnlagResultater.forEach(resultat -> lagOgFerdigstillHistorikkdelForPeriode(dto, behandlingReferanse, historikkInnslagTekstBuilder, resultat));
@@ -73,12 +73,11 @@ public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<Avkla
     }
 
     private void lagOgFerdigstillHistorikkdelForPeriode(AvklarteAktiviteterDtoer dto, BehandlingReferanse behandlingReferanse, HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder, OppdaterBeregningsgrunnlagResultat resultat) {
-        resultat.getBeregningAktiviteterEndring().ifPresent(
-            endring -> historikkTjeneste.lagHistorikkForSkjæringstidspunkt(behandlingReferanse.getId(),
-                historikkInnslagTekstBuilder,
-                endring,
-                resultat.getSkjæringstidspunkt(),
-                finnBegrunnelse(dto, resultat.getSkjæringstidspunkt())));
+        historikkTjeneste.lagHistorikkForSkjæringstidspunkt(behandlingReferanse.getId(),
+            historikkInnslagTekstBuilder,
+            resultat.getBeregningAktivitetEndringer(),
+            resultat.getSkjæringstidspunkt(),
+            finnBegrunnelse(dto, resultat.getSkjæringstidspunkt()));
         historikkInnslagTekstBuilder.ferdigstillHistorikkinnslagDel();
     }
 

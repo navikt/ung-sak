@@ -63,12 +63,13 @@ public class BeregningsaktivitetOverstyringshåndterer extends AbstractOverstyri
 
     private void lagHistorikk(OverstyrBeregningsaktiviteterDto dto, Behandling behandling, OppdaterBeregningsgrunnlagResultat oppdaterBeregningsgrunnlagResultat) {
         var tekstBuilder = getHistorikkAdapter().tekstBuilder();
-        oppdaterBeregningsgrunnlagResultat.getBeregningAktiviteterEndring().ifPresent(
-            endring -> historikkTjeneste.lagHistorikkForSkjæringstidspunkt(behandling.getId(),
+        if (!oppdaterBeregningsgrunnlagResultat.getBeregningAktivitetEndringer().isEmpty()) {
+            historikkTjeneste.lagHistorikkForSkjæringstidspunkt(behandling.getId(),
                 tekstBuilder,
-                endring,
+                oppdaterBeregningsgrunnlagResultat.getBeregningAktivitetEndringer(),
                 oppdaterBeregningsgrunnlagResultat.getSkjæringstidspunkt(),
-                dto.getBegrunnelse()));
+                dto.getBegrunnelse());
+        }
         tekstBuilder.medSkjermlenke(SkjermlenkeType.FAKTA_OM_BEREGNING);
         getHistorikkAdapter().opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.FAKTA_ENDRET); // Lager historikk for fakta siden det er fakta om overstyres
     }

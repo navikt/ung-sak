@@ -1,5 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.resultat;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,13 +31,12 @@ public class MapEndringsresultat {
                 mapVarigEndretNæringVurdering(oppdateringRespons.getVarigEndretNæringEndring()),
                 mapEndringRefusjon(oppdateringRespons.getRefusjonoverstyringEndring()),
                 bgReferanse,
-                mapTilBeregningAktiviteterEndring(oppdateringRespons.getBeregningAktiviteterEndring()));
+                mapBeregningAktivitetEndringer(oppdateringRespons.getBeregningAktiviteterEndring()));
     }
 
-    private static BeregningAktiviteterEndring mapTilBeregningAktiviteterEndring(no.nav.folketrygdloven.kalkulus.response.v1.håndtering.BeregningAktiviteterEndring beregningAktiviteterEndring) {
-        return beregningAktiviteterEndring == null ? null : new BeregningAktiviteterEndring(
-            beregningAktiviteterEndring.getAktivitetEndringer().stream().map(MapEndringsresultat::mapTilAktivitetEndring).toList()
-        );
+    private static List<no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningAktivitetEndring> mapBeregningAktivitetEndringer(no.nav.folketrygdloven.kalkulus.response.v1.håndtering.BeregningAktiviteterEndring beregningAktiviteterEndring) {
+        return beregningAktiviteterEndring == null ? Collections.emptyList() :
+            beregningAktiviteterEndring.getAktivitetEndringer().stream().map(MapEndringsresultat::mapTilAktivitetEndring).toList();
     }
 
     private static no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningAktivitetEndring mapTilAktivitetEndring(BeregningAktivitetEndring beregningAktivitetEndring) {
