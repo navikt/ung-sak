@@ -20,7 +20,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
 
     MANUELT_REVURDERER_PERIODE("MANUELT_REVURDERER_PERIODE", "Manuell revurdering"),
     // Ligger kant-i-kant med ny periode eller endring og blir dermed tatt med til vurdering
-    REVURDERER_BERØRT_PERIODE("REVURDERER_BERØRT_PERIODE", "Revurdering av periode"),
+    REVURDERER_BERØRT_PERIODE("REVURDERER_BERØRT_PERIODE", "Tilstøtende periode"),
     // Tilkommet opplysninger på ny søknad fra bruker / punsj
     ENDRING_FRA_BRUKER("ENDRING_FRA_BRUKER", "Endring fra digital søknad/Punsj"),
     // Kravet for perioden har blitt trukket

@@ -75,7 +75,7 @@ public class UtledStatusPåPerioderTjeneste {
         var perioder = tidslinje.compress()
             .toSegments()
             .stream()
-            .map(it -> new PeriodeMedÅrsaker(new Periode(it.getFom(), it.getTom()), it.getValue() != null ? it.getValue().getÅrsaker() : Set.of()))
+            .map(it -> new PeriodeMedÅrsaker(new Periode(it.getFom(), it.getTom()), transformerÅrsaker(it)))
             .collect(Collectors.toList());
 
         var perioderTilVurderingKombinert = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()))
@@ -86,6 +86,22 @@ public class UtledStatusPåPerioderTjeneste {
             .collect(Collectors.toCollection(TreeSet::new));
 
         return new StatusForPerioderPåBehandling(perioderTilVurderingKombinert.stream().map(DatoIntervallEntitet::tilPeriode).collect(Collectors.toSet()), perioder, mapKravTilDto(relevanteDokumenterMedPeriode));
+    }
+
+    private Set<ÅrsakTilVurdering> transformerÅrsaker(LocalDateSegment<ÅrsakerTilVurdering> segment) {
+        if (segment.getValue() == null) {
+            return Set.of();
+        }
+
+        var årsaker = segment.getValue().getÅrsaker();
+
+        if (årsaker.size() > 1 && årsaker.contains(ÅrsakTilVurdering.REVURDERER_BERØRT_PERIODE)) {
+            return årsaker.stream()
+                .filter(it -> !it.equals(ÅrsakTilVurdering.REVURDERER_BERØRT_PERIODE))
+                .collect(Collectors.toSet());
+        }
+
+        return årsaker;
     }
 
     private LocalDateTimeline<ÅrsakerTilVurdering> mergeTidslinjer(List<LocalDateTimeline<ÅrsakerTilVurdering>> relevanteTidslinjer, KantIKantVurderer kantIKantVurderer, LocalDateSegmentCombinator<ÅrsakerTilVurdering, ÅrsakerTilVurdering, ÅrsakerTilVurdering> mergeSegments) {
