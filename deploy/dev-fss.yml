@@ -86,6 +86,8 @@ spec:
       value: k9saksbehandling.aapen-k9-stonadstatistikk-v1
     - name: KAFKA_BRUKERDIALOGINNSYN_TOPIC
       value: dusseldorf.privat-k9-sak-innsyn-v1
+    - name: KAFKA_PRODUKSJONSSTYRING_TOPIC
+      value: k9saksbehandling.privat-k9-produksjonsstyring-sak-v1
 
     # Baseurl
     - name: SCHEMA_REGISTRY_URL
@@ -229,6 +231,10 @@ spec:
     - name: KOMPLETTHET_BEREGNING_OMP
       value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
+      value: "true"
+    - name: OMP_AVSLAG_SOKNAD_MANGLER_IM
+      value: "true"
+    - name: OMP_AARSKVANTUMTJENESTE_BRUK_FERDIGUTLEDET_FLAGG_REFUSJON
       value: "true"
 
 

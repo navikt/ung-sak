@@ -6,6 +6,8 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -16,9 +18,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OverstyrInputBeregningTjeneste;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
@@ -43,6 +42,7 @@ public class BeregningsgrunnlagRestTjeneste {
 
     static public final String PATH = "/behandling/beregningsgrunnlag";
     static public final String PATH_KOBLINGER = "/behandling/beregningsgrunnlag/koblinger";
+    static public final String PATH_KOBLINGER_TIL_VURDERING = "/behandling/beregningsgrunnlag/koblingerTilVurdering";
     static public final String PATH_ALLE = "/behandling/beregningsgrunnlag/alle";
     static public final String PATH_OVERSTYR_INPUT = "/behandling/beregningsgrunnlag/overstyrInput";
     private BehandlingRepository behandlingRepository;
@@ -101,6 +101,20 @@ public class BeregningsgrunnlagRestTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
 
         return kalkulusTjeneste.hentKoblingerForInnvilgedePerioder(BehandlingReferanse.fra(behandling))
+            .stream()
+            .map(it -> new BeregningsgrunnlagKoblingDto(it.getSkjæringstidspunkt(), it.getReferanse()))
+            .collect(Collectors.toList());
+    }
+
+    @GET
+    @Operation(description = "Henter alle koblingene til vurdering for angitt behandling",
+        summary = ("Henter alle koblingene til vurdering for angitt behandling"), tags = "beregningsgrunnlag")
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @Path(PATH_KOBLINGER_TIL_VURDERING)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public List<BeregningsgrunnlagKoblingDto> hentNøklerTilVurdering(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        return kalkulusTjeneste.hentKoblingerForInnvilgedePerioderTilVurdering(BehandlingReferanse.fra(behandling))
             .stream()
             .map(it -> new BeregningsgrunnlagKoblingDto(it.getSkjæringstidspunkt(), it.getReferanse()))
             .collect(Collectors.toList());

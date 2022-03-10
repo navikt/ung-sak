@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.hendelse;
+package no.nav.k9.sak.behandling.hendelse.produksjonsstyring;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.sak.behandling.PubliserEventTask;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 
 /**

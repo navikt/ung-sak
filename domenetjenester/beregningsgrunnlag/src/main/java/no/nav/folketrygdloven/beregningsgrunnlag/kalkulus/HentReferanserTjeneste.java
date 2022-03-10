@@ -135,6 +135,7 @@ class HentReferanserTjeneste {
             return List.of();
         }
 
+
         var bgReferanser = finnBeregningsgrunnlagsReferanseForGrunnlag(behandlingId, grunnlagOptional.get(), skjæringstidspunkter, skalLageNyVedLikSomInitiell);
 
         if (bgReferanser.isEmpty() && !skjæringstidspunkter.isEmpty()) {

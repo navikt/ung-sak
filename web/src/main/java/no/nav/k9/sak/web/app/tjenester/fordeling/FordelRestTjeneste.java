@@ -66,6 +66,7 @@ import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.mottak.AktørListeDto;
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak;
+import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSakFnr;
 import no.nav.k9.sak.kontrakt.mottak.FinnSak;
 import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto;
 import no.nav.k9.sak.kontrakt.søknad.innsending.Innsending;
@@ -203,6 +204,41 @@ public class FordelRestTjeneste {
 
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
     }
+    
+    @POST
+    @Path("/fagsak/opprett/fnr")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(JSON_UTF8)
+    @Operation(description = "Finn eller opprett ny sak basert på D-/fødselsnummer.", summary = ("Finn eller opprett ny fagsak basert på D-/fødselsnummer."), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    @Deprecated
+    public SaksnummerDto opprettSakMedFnr(@Parameter(description = "Oppretter fagsak") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) FinnEllerOpprettSakFnr opprettSakDto) {
+        var ytelseType = finnYtelseType(opprettSakDto);
+
+        AktørId aktørId = aktørTjeneste.hentAktørIdForPersonIdent(PersonIdent.fra(opprettSakDto.getSøker())).orElseThrow();
+        AktørId pleietrengendeAktørId = null;
+        if (opprettSakDto.getPleietrengende() != null) {
+            pleietrengendeAktørId = aktørTjeneste.hentAktørIdForPersonIdent(PersonIdent.fra(opprettSakDto.getPleietrengende())).orElseThrow();
+        }
+
+        AktørId relatertPersonAktørId = null;
+        if (opprettSakDto.getRelatertPerson() != null) {
+            relatertPersonAktørId = aktørTjeneste.hentAktørIdForPersonIdent(PersonIdent.fra(opprettSakDto.getRelatertPerson())).orElseThrow();
+        }
+
+        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
+
+        Periode periode = opprettSakDto.getPeriode();
+        if (periode == null) {
+            throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + opprettSakDto);
+        }
+
+        var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
+
+        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom());
+
+        return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
+    }
 
     @POST
     @Path("/fagsak/sok")
@@ -245,6 +281,10 @@ public class FordelRestTjeneste {
     }
 
     private FagsakYtelseType finnYtelseType(FinnEllerOpprettSak dto) {
+        return FagsakYtelseType.fraKode(dto.getYtelseType());
+    }
+    
+    private FagsakYtelseType finnYtelseType(FinnEllerOpprettSakFnr dto) {
         return FagsakYtelseType.fraKode(dto.getYtelseType());
     }
 

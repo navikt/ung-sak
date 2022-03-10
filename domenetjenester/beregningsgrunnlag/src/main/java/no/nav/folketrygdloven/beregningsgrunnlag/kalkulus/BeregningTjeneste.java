@@ -85,12 +85,15 @@ public interface BeregningTjeneste {
 
     List<BeregningsgrunnlagKobling> hentKoblingerForInnvilgedePerioder(BehandlingReferanse ref);
 
+    List<BeregningsgrunnlagKobling> hentKoblingerForInnvilgedePerioderTilVurdering(BehandlingReferanse ref);
+
+
     /** Deaktiverer beregningsgrunnlaget og tilhørende input. Fører til at man ikke har noen aktive beregningsgrunnlag.
      *
      * Deaktivering skal kun kalles i første steg i beregning.
      *
      * @param ref Behandlingreferanse
-     * @param skjæringstidspunkt
+     * @param skjæringstidspunkter Skjæringstidspunkter
      */
     public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter);
 

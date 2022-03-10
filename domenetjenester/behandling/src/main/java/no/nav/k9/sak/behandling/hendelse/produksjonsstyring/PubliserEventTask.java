@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling;
+package no.nav.k9.sak.behandling.hendelse.produksjonsstyring;
 
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 

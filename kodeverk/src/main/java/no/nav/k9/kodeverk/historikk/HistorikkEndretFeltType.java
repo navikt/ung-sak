@@ -56,6 +56,7 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     KOMPLETTHET("KOMPLETTHET", "Avklar inntektsgrunnlag for skjæringstidspunkt"),
     NY_STARTDATO_REFUSJON("NY_STARTDATO_REFUSJON", "Ny startdato for refusjon"),
     DELVIS_REFUSJON_FØR_STARTDATO("DELVIS_REFUSJON_FØR_STARTDATO", "Delvis refusjon før startdato"),
+    PERIODE_TOM("PERIODE_TOM", "Periode t.o.m."),
 
     /** Medlemskap og utenlandstilsnitt. */
     ER_SOKER_BOSATT_I_NORGE("ER_SOKER_BOSATT_I_NORGE", "Er søker bosatt i Norge?"),
