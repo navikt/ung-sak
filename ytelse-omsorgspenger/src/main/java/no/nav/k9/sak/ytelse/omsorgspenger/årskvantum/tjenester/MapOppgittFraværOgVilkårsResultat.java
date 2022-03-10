@@ -278,7 +278,7 @@ public class MapOppgittFraværOgVilkårsResultat {
     }
 
     private Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> begrensTil(Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> perioder, DatoIntervallEntitet fagsakPeriode) {
-        //TODO kan dette skje i praksis??
+        //fraværsperioder utenfor fagsakperiode har oppstått før det ble innført en sperre mot at IM kan ha fraværsperiode for mer enn ett kalenderår
         LocalDateTimeline<Void> tidslinjeFagsakPeriode = new LocalDateTimeline<>(fagsakPeriode.toLocalDateInterval(), null);
 
         var resultat = new LinkedHashMap<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>>();
