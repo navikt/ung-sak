@@ -12,6 +12,7 @@ public class VurderStatusInput {
     private BehandlingReferanse behandlingReferanse;
     private DatoIntervallEntitet opptjeningsperiode;
     private Yrkesaktivitet registerAktivitet;
+    private DatoIntervallEntitet aktivitetPeriode;
 
     public VurderStatusInput(OpptjeningAktivitetType type, BehandlingReferanse behandlingReferanse) {
         this.type = Objects.requireNonNull(type);
@@ -40,5 +41,13 @@ public class VurderStatusInput {
 
     public void setRegisterAktivitet(Yrkesaktivitet yrkesaktivitet) {
         this.registerAktivitet = yrkesaktivitet;
+    }
+
+    public DatoIntervallEntitet getAktivitetPeriode() {
+        return aktivitetPeriode;
+    }
+
+    public void setAktivitetPeriode(DatoIntervallEntitet aktivitetPeriode) {
+        this.aktivitetPeriode = aktivitetPeriode;
     }
 }
