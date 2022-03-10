@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -21,6 +21,9 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
 import no.nav.k9.aarskvantum.kontrakter.AvvikImSøknad;
@@ -71,6 +74,8 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetTypeArbeidsgiver;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.OppgittFraværHolder;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.SamtidigKravStatus;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
@@ -190,33 +195,24 @@ public class ÅrskvantumTjeneste {
             barna);
     }
 
-    Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> utledPerioder(NavigableSet<DatoIntervallEntitet> vilkårsperioder,
-                                                                                                      List<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> fagsakFravær,
-                                                                                                      Set<OppgittFraværPeriode> behandlingFravær) {
-        return fagsakFravær.stream()
-            .filter(it -> vilkårsperioder.stream().anyMatch(at -> at.overlapper(it.getPeriode().getPeriode())) ||
-                erNullTimerTilBehandling(behandlingFravær, it) ||
-                erAvslagPåSøknadsfristIBehandling(behandlingFravær, it))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
+    Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> utledPerioder(NavigableSet<DatoIntervallEntitet> vilkårsperioder,
+                                                                                         Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> fraværPåFagsak,
+                                                                                         Set<OppgittFraværPeriode> fraværPåBehandling) {
 
-    private boolean erAvslagPåSøknadsfristIBehandling(Set<OppgittFraværPeriode> behandlingFravær, no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode it) {
-        return no.nav.k9.kodeverk.vilkår.Utfall.IKKE_OPPFYLT.equals(it.getSøknadsfristUtfall()) &&
-            behandlingFravær.stream()
-                .anyMatch(at -> at.getPeriode().overlapper(it.getPeriode().getPeriode()) && matcherArbeidsforhold(it.getPeriode(), at));
-    }
+        LocalDateTimeline<Boolean> tildslinjeVilkårsperioder = new LocalDateTimeline<>(vilkårsperioder.stream().map(vilkårperiode -> new LocalDateSegment<>(vilkårperiode.toLocalDateInterval(), true)).toList());
+        LocalDateTimeline<Boolean> tidslinjeNulledePerioderForBehandling = new LocalDateTimeline<>(fraværPåBehandling.stream()
+            .filter(fraværBehandling -> Duration.ZERO.equals(fraværBehandling.getFraværPerDag()))
+            .map(fraværBehandling -> new LocalDateSegment<>(fraværBehandling.getFom(), fraværBehandling.getTom(), true)).toList(), StandardCombinators::alwaysTrueForMatch);
 
-    private boolean erNullTimerTilBehandling(Set<OppgittFraværPeriode> behandlingFravær, no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode it) {
-        return Duration.ZERO.equals(it.getPeriode().getFraværPerDag()) &&
-            behandlingFravær.stream()
-                .anyMatch(at -> at.getPeriode().overlapper(it.getPeriode().getPeriode()) && Duration.ZERO.equals(at.getFraværPerDag()) && matcherArbeidsforhold(it.getPeriode(), at));
-    }
-
-    private boolean matcherArbeidsforhold(OppgittFraværPeriode periode, OppgittFraværPeriode at) {
-        if (periode.getAktivitetType().erArbeidstakerEllerFrilans() && at.getAktivitetType().erArbeidstakerEllerFrilans()) {
-            return periode.getArbeidsgiver().equals(at.getArbeidsgiver()) && periode.getArbeidsforholdRef().equals(at.getArbeidsforholdRef());
+        LocalDateTimeline<Boolean> tidlinjeAllePerioderForBehandling = tildslinjeVilkårsperioder.crossJoin(tidslinjeNulledePerioderForBehandling).compress();
+        var resultat = new LinkedHashMap<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>>();
+        for (var entry : fraværPåFagsak.entrySet()) {
+            var behandlingTidslinje = entry.getValue().intersection(tidlinjeAllePerioderForBehandling);
+            if (!behandlingTidslinje.isEmpty()) {
+                resultat.put(entry.getKey(), behandlingTidslinje);
+            }
         }
-        return periode.getAktivitetType().equals(at.getAktivitetType());
+        return resultat;
     }
 
     public ÅrskvantumResultat beregnÅrskvantumUttak(BehandlingReferanse ref) {
@@ -243,7 +239,7 @@ public class ÅrskvantumTjeneste {
                                                   InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                   Set<Inntektsmelding> sakInntektsmeldinger,
                                                   NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktiveter,
-                                                  Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> perioder,
+                                                  Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> perioder,
                                                   Behandling behandling) {
         var fraværPerioder = new ArrayList<FraværPeriode>();
         var fagsakPeriode = behandling.getFagsak().getPeriode();
