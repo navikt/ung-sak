@@ -61,23 +61,10 @@ class OpptjeningsgrunnlagAdapter {
             ReferanseType refType = getAktivtetReferanseType(opptjeningsnøkkel.getType());
 
             if (refType != null) {
-                if (opptjeningsnøkkel.harType(Opptjeningsnøkkel.Type.ARBEIDSFORHOLD_ID)) {
-                    Aktivitet aktivitet = new Aktivitet(Opptjeningsvilkår.ARBEID, getAktivitetReferanseFraNøkkel(opptjeningsnøkkel), refType);
-                    opptjeningsGrunnlag.leggTilRapportertInntekt(dateInterval, aktivitet, beløpHeltall);
-                } else {
-                    Aktivitet aktivitet = new Aktivitet(Opptjeningsvilkår.ARBEID, opptjeningsnøkkel.getVerdi(), refType);
-                    opptjeningsGrunnlag.leggTilRapportertInntekt(dateInterval, aktivitet, beløpHeltall);
-                }
+                Aktivitet aktivitet = new Aktivitet(Opptjeningsvilkår.ARBEID, opptjeningsnøkkel.getAktivitetReferanse(), refType);
+                opptjeningsGrunnlag.leggTilRapportertInntekt(dateInterval, aktivitet, beløpHeltall);
             }
         }
-    }
-
-    private String getAktivitetReferanseFraNøkkel(Opptjeningsnøkkel opptjeningsnøkkel) {
-        String nøkkel = opptjeningsnøkkel.getForType(Opptjeningsnøkkel.Type.ORG_NUMMER);
-        if (nøkkel == null) {
-            nøkkel = opptjeningsnøkkel.getForType(Opptjeningsnøkkel.Type.AKTØR_ID);
-        }
-        return nøkkel;
     }
 
     private ReferanseType getAktivtetReferanseType(Opptjeningsnøkkel.Type type) {
