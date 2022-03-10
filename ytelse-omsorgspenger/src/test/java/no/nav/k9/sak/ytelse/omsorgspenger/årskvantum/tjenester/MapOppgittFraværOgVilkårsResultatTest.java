@@ -14,7 +14,6 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -82,7 +81,6 @@ class MapOppgittFraværOgVilkårsResultatTest {
         }
     }
 
-    @NotNull
     private BehandlingReferanse opprettRef(AktørId dummy) {
         return BehandlingReferanse.fra(FagsakYtelseType.OMP, null, null, dummy, null, null, null, null, null, null, java.util.Optional.empty(), null, null, null);
     }

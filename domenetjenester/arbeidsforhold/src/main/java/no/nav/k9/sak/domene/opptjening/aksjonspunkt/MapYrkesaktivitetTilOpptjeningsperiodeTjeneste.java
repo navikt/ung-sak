@@ -8,7 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -17,6 +22,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
+import no.nav.k9.sak.domene.opptjening.MellomliggendePeriodeUtleder;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -25,6 +31,7 @@ import no.nav.k9.sak.typer.Stillingsprosent;
 
 public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
 
+    private static final MellomliggendePeriodeUtleder mellomliggendePeriodeUtleder = new MellomliggendePeriodeUtleder();
 
     private MapYrkesaktivitetTilOpptjeningsperiodeTjeneste() {
     }
@@ -55,20 +62,86 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                                                                                   DatoIntervallEntitet opptjeningPeriode) {
         List<OpptjeningsperiodeForSaksbehandling> perioderForAktivitetsavtaler = new ArrayList<>();
         LocalDate skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
+        var permisjonstidslinje = utledPermisjonstidslinjeForPerioden(registerAktivitet, opptjeningPeriode);
         for (AktivitetsAvtale avtale : gjeldendeAvtaler(grunnlag, skjæringstidspunkt, registerAktivitet)) {
-            var builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
-                .medOpptjeningAktivitetType(type)
-                .medPeriode(avtale.getPeriode())
-                .medBegrunnelse(avtale.getBeskrivelse())
-                .medStillingsandel(finnStillingsprosent(registerAktivitet, skjæringstidspunkt));
-            settArbeidsgiverInformasjon(registerAktivitet, builder);
-            var input = new VurderStatusInput(type, behandlingReferanse);
-            input.setOpptjeningsperiode(opptjeningPeriode);
-            input.setRegisterAktivitet(registerAktivitet);
-            builder.medVurderingsStatus(vurderForSaksbehandling.vurderStatus(input));
-            perioderForAktivitetsavtaler.add(builder.build());
+            var perioder = utledPerioderEtterÅTattHensynTilPermisjoner(permisjonstidslinje, avtale);
+            for (DatoIntervallEntitet periode : perioder) {
+                var builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
+                    .medOpptjeningAktivitetType(type)
+                    .medPeriode(periode)
+                    .medBegrunnelse(avtale.getBeskrivelse())
+                    .medStillingsandel(finnStillingsprosent(registerAktivitet, skjæringstidspunkt));
+                settArbeidsgiverInformasjon(registerAktivitet, builder);
+                var input = new VurderStatusInput(type, behandlingReferanse);
+                input.setOpptjeningsperiode(opptjeningPeriode);
+                input.setRegisterAktivitet(registerAktivitet);
+                input.setAktivitetPeriode(periode);
+                builder.medVurderingsStatus(vurderForSaksbehandling.vurderStatus(input));
+                perioderForAktivitetsavtaler.add(builder.build());
+            }
         }
         return perioderForAktivitetsavtaler;
+    }
+
+    private static LocalDateTimeline<Boolean> utledPermisjonstidslinjeForPerioden(Yrkesaktivitet yrkesaktivitet, DatoIntervallEntitet opptjeningsperiode) {
+        // Permisjoner på yrkesaktivitet
+        List<LocalDateTimeline<Boolean>> aktivPermisjonTidslinjer = yrkesaktivitet.getPermisjon()
+            .stream()
+            .filter(permisjon -> erStørreEllerLik100Prosent(permisjon.getProsentsats()))
+            .map(permisjon -> new LocalDateTimeline<>(permisjon.getFraOgMed(), permisjon.getTilOgMed(), Boolean.FALSE))
+            .toList();
+        LocalDateTimeline<Boolean> aktivPermisjonTidslinje = new LocalDateTimeline<>(List.of());
+        for (LocalDateTimeline<Boolean> linje : aktivPermisjonTidslinjer) {
+            aktivPermisjonTidslinje = aktivPermisjonTidslinje.combine(linje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        // Vurder kun permisjonsperioder som overlapper opptjeningsperiode
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(opptjeningsperiode.getFomDato(), opptjeningsperiode.getTomDato(), Boolean.FALSE)));
+        tidslinjeTilVurdering = tidslinjeTilVurdering.intersection(aktivPermisjonTidslinje.compress());
+
+        // Legg til mellomliggende periode dersom helg mellom permisjonsperioder
+        LocalDateTimeline<Boolean> mellomliggendePerioder = mellomliggendePeriodeUtleder.beregnMellomliggendePeriode(tidslinjeTilVurdering.compress());
+        for (LocalDateSegment<Boolean> mellomliggendePeriode : mellomliggendePerioder) {
+            tidslinjeTilVurdering = tidslinjeTilVurdering.combine(mellomliggendePeriode, MapYrkesaktivitetTilOpptjeningsperiodeTjeneste::mergePerioder, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        return tidslinjeTilVurdering.compress();
+    }
+
+    private static boolean erStørreEllerLik100Prosent(Stillingsprosent prosentsats) {
+        return Stillingsprosent.HUNDRED.getVerdi().intValue() <= prosentsats.getVerdi().intValue();
+    }
+
+    private static LocalDateSegment<Boolean> mergePerioder(LocalDateInterval di, LocalDateSegment<Boolean> førsteVersjon, LocalDateSegment<Boolean> sisteVersjon) {
+
+        if ((førsteVersjon == null || førsteVersjon.getValue() == null) && sisteVersjon != null) {
+            return lagSegment(di, sisteVersjon.getValue());
+        } else if ((sisteVersjon == null || sisteVersjon.getValue() == null) && førsteVersjon != null) {
+            return lagSegment(di, førsteVersjon.getValue());
+        }
+
+        var første = førsteVersjon.getValue();
+        var siste = sisteVersjon.getValue();
+        return lagSegment(di, første || siste);
+    }
+
+    private static Set<DatoIntervallEntitet> utledPerioderEtterÅTattHensynTilPermisjoner(LocalDateTimeline<Boolean> permisjonsTidslinje, AktivitetsAvtale avtale) {
+        var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(avtale.getPeriode().toLocalDateInterval(), true)));
+
+        timeline = timeline.combine(permisjonsTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
+        return timeline.compress()
+            .toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+            .collect(Collectors.toSet());
+    }
+
+    private static LocalDateSegment<Boolean> lagSegment(LocalDateInterval di, Boolean siste) {
+        if (siste == null) {
+            return new LocalDateSegment<>(di, null);
+        }
+        return new LocalDateSegment<>(di, siste);
     }
 
     public static void settArbeidsgiverInformasjon(Yrkesaktivitet yrkesaktivitet, OpptjeningsperiodeForSaksbehandling.Builder builder) {

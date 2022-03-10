@@ -12,20 +12,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.k9.kodeverk.arbeidsforhold.TemaUnderkategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -148,6 +148,29 @@ class OpptjeningsperioderTjenesteTest {
         // Assert
         assertThat(perioder.size()).isEqualTo(1);
         assertThat(perioder.get(0).getVurderingsStatus()).isEqualTo(VurderingsStatus.TIL_VURDERING);
+    }
+
+    @Test
+    void skal_returnere_periode_for_arbeidsforhold_fra_AAREG_med_permisjon() {
+        // Arrange
+        var behandling = opprettBehandling(skjæringstidspunkt);
+        var opptjening = opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(28), skjæringstidspunkt.minusDays(1), false);
+
+        var inntektsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusYears(1), skjæringstidspunkt);
+        var permisjon = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(25), skjæringstidspunkt.minusDays(5));
+        var register = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(AKTØRID, ARBEIDSFORHOLD_ID, inntektsperiode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, Arbeidsgiver.virksomhet(ORG_NUMMER), permisjon);
+        iayTjeneste.lagreIayAggregat(behandling.getId(), register);
+
+        var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
+
+        // Act
+        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode());
+
+        // Assert
+        assertThat(perioder.size()).isEqualTo(3);
+        assertThat(perioder.get(0).getVurderingsStatus()).isEqualTo(VurderingsStatus.TIL_VURDERING);
+        assertThat(perioder.get(1).getVurderingsStatus()).isEqualTo(VurderingsStatus.UNDERKJENT);
+        assertThat(perioder.get(2).getVurderingsStatus()).isEqualTo(VurderingsStatus.TIL_VURDERING);
     }
 
     @Test
@@ -426,7 +449,7 @@ class OpptjeningsperioderTjenesteTest {
 
     private InntektArbeidYtelseAggregatBuilder opprettInntektArbeidYtelseAggregatForYrkesaktivitet(AktørId aktørId, InternArbeidsforholdRef ref,
                                                                                                    DatoIntervallEntitet periode, ArbeidType type,
-                                                                                                   Arbeidsgiver virksomhet) {
+                                                                                                   Arbeidsgiver virksomhet, DatoIntervallEntitet permisjon) {
         var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
 
         var aktørArbeidBuilder = builder.getAktørArbeidBuilder(aktørId);
@@ -444,9 +467,23 @@ class OpptjeningsperioderTjenesteTest {
             .leggTilAktivitetsAvtale(aktivitetsAvtale)
             .leggTilAktivitetsAvtale(ansettelsesperiode);
 
+        if (permisjon != null) {
+            var permisjonBuilder = yrkesaktivitetBuilder.getPermisjonBuilder();
+            yrkesaktivitetBuilder.leggTilPermisjon(permisjonBuilder.medPeriode(permisjon.getFomDato(), permisjon.getTomDato())
+                .medPermisjonsbeskrivelseType(PermisjonsbeskrivelseType.PERMITTERING)
+                .medProsentsats(BigDecimal.valueOf(100))
+                .build());
+        }
+
         builder.leggTilAktørArbeid(aktørArbeidBuilder.leggTilYrkesaktivitet(yrkesaktivitetBuilder));
 
         return builder;
+    }
+
+    private InntektArbeidYtelseAggregatBuilder opprettInntektArbeidYtelseAggregatForYrkesaktivitet(AktørId aktørId, InternArbeidsforholdRef ref,
+                                                                                                   DatoIntervallEntitet periode, ArbeidType type,
+                                                                                                   Arbeidsgiver virksomhet) {
+        return opprettInntektArbeidYtelseAggregatForYrkesaktivitet(aktørId, ref, periode, type, virksomhet, null);
     }
 
     private void opprettInntektForFrilanser(InntektArbeidYtelseAggregatBuilder bekreftet, AktørId aktørId, InternArbeidsforholdRef ref, DatoIntervallEntitet periode,

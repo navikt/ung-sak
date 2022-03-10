@@ -1,12 +1,18 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeløpEndring;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningsgrunnlagPeriodeEndring;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningsgrunnlagPrStatusOgAndelEndring;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.InntektskategoriEndring;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
@@ -21,7 +27,9 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.OverstyrBeregningsgrunnlagDto;
+import no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning.BeregningsgrunnlagVerdierHistorikkTjeneste;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = OverstyrBeregningsgrunnlagDto.class, adapter = Overstyringshåndterer.class)
@@ -29,6 +37,7 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
 
     private BeregningTjeneste kalkulusTjeneste;
     private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
+    private BeregningsgrunnlagVerdierHistorikkTjeneste verdierHistorikkTjeneste;
 
     BeregningsgrunnlagOverstyringshåndterer() {
         // for CDI proxy
@@ -37,10 +46,11 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
     @Inject
     public BeregningsgrunnlagOverstyringshåndterer(HistorikkTjenesteAdapter historikkAdapter,
                                                    BeregningTjeneste kalkulusTjeneste,
-                                                   BeregningsgrunnlagVilkårTjeneste vilkårTjeneste) {
+                                                   BeregningsgrunnlagVilkårTjeneste vilkårTjeneste, BeregningsgrunnlagVerdierHistorikkTjeneste verdierHistorikkTjeneste) {
         super(historikkAdapter, AksjonspunktDefinisjon.OVERSTYRING_AV_BEREGNINGSGRUNNLAG);
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.vilkårTjeneste = vilkårTjeneste;
+        this.verdierHistorikkTjeneste = verdierHistorikkTjeneste;
     }
 
     @Override
@@ -49,8 +59,10 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
         HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.mapOverstyring(dto);
         var behandlingReferanse = BehandlingReferanse.fra(behandling);
         validerOppdatering(dto.getPeriode().getFom(), behandlingReferanse);
-        kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, behandlingReferanse, dto.getPeriode().getFom());
-        // Lag historikk
+        var oppdaterBeregningsgrunnlagResultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, behandlingReferanse, dto.getPeriode().getFom());
+        oppdaterBeregningsgrunnlagResultat.getBeregningsgrunnlagEndring().ifPresent(
+            endring -> verdierHistorikkTjeneste.lagHistorikkForBeregningsgrunnlagVerdier(behandling.getId(),
+            endring.getBeregningsgrunnlagPeriodeEndringer().get(0), getHistorikkAdapter().tekstBuilder()));
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         fjernOverstyrtAksjonspunkt(behandling)
             .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
@@ -63,7 +75,7 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
 
     @Override
     protected void lagHistorikkInnslag(Behandling behandling, OverstyrBeregningsgrunnlagDto dto) {
-        // TODO Fiks historikk
+        // Håndteres ved oppdatering for å kunne bruke endringsobjekt som returneres fra kalkulus
     }
 
     private void validerOppdatering(LocalDate stp,

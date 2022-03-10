@@ -20,7 +20,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
 
     MANUELT_REVURDERER_PERIODE("MANUELT_REVURDERER_PERIODE", "Manuell revurdering"),
     // Ligger kant-i-kant med ny periode eller endring og blir dermed tatt med til vurdering
-    REVURDERER_BERØRT_PERIODE("REVURDERER_BERØRT_PERIODE", "Revurdering av periode"),
+    REVURDERER_BERØRT_PERIODE("REVURDERER_BERØRT_PERIODE", "Tilstøtende periode"),
     // Tilkommet opplysninger på ny søknad fra bruker / punsj
     ENDRING_FRA_BRUKER("ENDRING_FRA_BRUKER", "Endring fra digital søknad/Punsj"),
     // Kravet for perioden har blitt trukket
@@ -44,7 +44,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     private static final Map<BehandlingÅrsakType, ÅrsakTilVurdering> SAMMENHENG = Map.of(
         BehandlingÅrsakType.RE_SATS_REGULERING, G_REGULERING,
         BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_ENDRING_FRA_ANNEN_PART,
-        BehandlingÅrsakType.RE_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON,
+        BehandlingÅrsakType.RE_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON,
         BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON,
         BehandlingÅrsakType.RE_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON,
         BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING, REVURDERER_NY_INNTEKTSMELDING);
