@@ -81,7 +81,7 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     }
 
     private boolean erAvslåttArbeid(Opptjening opptjening, OpptjeningsperiodeForSaksbehandling oa) {
-        return oa.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.ARBEID) &&
+        return !oa.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.ARBEID) ||
             opptjening.getOpptjeningAktivitet().stream().filter(a -> a.getAktivitetType().equals(oa.getOpptjeningAktivitetType()) &&
                 a.getAktivitetReferanse().equals(oa.getOpptjeningsnøkkel().getAktivitetReferanse())).anyMatch(a ->
                 a.getKlassifisering().equals(OpptjeningAktivitetKlassifisering.BEKREFTET_AVVIST));
