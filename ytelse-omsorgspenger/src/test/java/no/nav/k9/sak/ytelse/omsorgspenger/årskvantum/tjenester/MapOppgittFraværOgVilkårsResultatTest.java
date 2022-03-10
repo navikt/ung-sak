@@ -16,7 +16,6 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -82,7 +81,6 @@ class MapOppgittFraværOgVilkårsResultatTest {
         return oppgittFravær.getPerioder().stream().map(it -> new no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode(it, LocalDate.now().atStartOfDay(), KravDokumentType.INNTEKTSMELDING, Utfall.OPPFYLT, SamtidigKravStatus.refusjonskravFinnes())).collect(Collectors.toSet());
     }
 
-    @NotNull
     private BehandlingReferanse opprettRef(AktørId dummy) {
         return BehandlingReferanse.fra(FagsakYtelseType.OMP, null, null, dummy, null, null, null, null, null, null, java.util.Optional.empty(), null, null, null);
     }
