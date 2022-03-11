@@ -46,7 +46,7 @@ public class OpptjeningAktivitetArbeidVurdererTest {
     public void skal_godkjenne_permisjon_inntil_14_dager() {
         var permisjonPeriode14Dager = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(13), skjæringstidspunkt);
         var iayBuilder = opprettIAYMedYrkesaktivitet();
-        leggTilPermisjon(iayBuilder, permisjonPeriode14Dager);
+        leggTilPermisjon(iayBuilder, permisjonPeriode14Dager, PermisjonsbeskrivelseType.PERMITTERING);
         InntektArbeidYtelseGrunnlag iayGrunnlag = lagreIayGrunnlag(iayBuilder);
 
         VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
@@ -59,7 +59,7 @@ public class OpptjeningAktivitetArbeidVurdererTest {
         var permisjonPeriode15Dager = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(14), skjæringstidspunkt);
 
         var iayBuilder = opprettIAYMedYrkesaktivitet();
-        leggTilPermisjon(iayBuilder, permisjonPeriode15Dager);
+        leggTilPermisjon(iayBuilder, permisjonPeriode15Dager, PermisjonsbeskrivelseType.PERMITTERING);
         var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
 
         VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
@@ -73,8 +73,8 @@ public class OpptjeningAktivitetArbeidVurdererTest {
         var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(10), skjæringstidspunkt);
 
         var iayBuilder = opprettIAYMedYrkesaktivitet();
-        leggTilPermisjon(iayBuilder, permisjonPeriode1);
-        leggTilPermisjon(iayBuilder, permisjonPeriode2);
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.PERMITTERING);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.PERMITTERING);
         var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
 
         VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
@@ -84,14 +84,30 @@ public class OpptjeningAktivitetArbeidVurdererTest {
 
 
     @Test
+    public void skal_ikke_underkjenne_sammenhengende_permisjoner_som_overstiger_14_dager_hvis_migrert_stp_og_velferdspermisjon() {
+        var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(15), skjæringstidspunkt.minusDays(10));
+        var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(10), skjæringstidspunkt);
+
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
+        var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
+
+        VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
+        input.setErMigrertSkjæringstidspunkt(true);
+
+        assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.TIL_VURDERING);
+    }
+
+    @Test
     public void skal_underkjenne_permisjoner_som_skjøtes_sammen_over_helg_til_14_dager() {
         var førsteLørdagIPeriode = hentFørsteLørdagIPeriode(opptjeningPeriode28Dager.getFomDato(), opptjeningPeriode28Dager.getTomDato());
         var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode28Dager.getFomDato(), førsteLørdagIPeriode); // 1-7 dager
         var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(førsteLørdagIPeriode.plusDays(2), førsteLørdagIPeriode.plusDays(15)); // 14 dager
 
         var iayBuilder = opprettIAYMedYrkesaktivitet();
-        leggTilPermisjon(iayBuilder, permisjonPeriode1);
-        leggTilPermisjon(iayBuilder, permisjonPeriode2);
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.PERMITTERING);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.PERMITTERING);
         var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
 
         VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
@@ -110,7 +126,7 @@ public class OpptjeningAktivitetArbeidVurdererTest {
         return neste;
     }
 
-    private void leggTilPermisjon(InntektArbeidYtelseAggregatBuilder iayBuilder, DatoIntervallEntitet permisjonPeriode14Dager) {
+    private void leggTilPermisjon(InntektArbeidYtelseAggregatBuilder iayBuilder, DatoIntervallEntitet permisjonPeriode14Dager, PermisjonsbeskrivelseType permittering) {
         var aktørArbeidBuilder = iayBuilder.getAktørArbeidBuilder(dummy);
         YrkesaktivitetBuilder yrkesaktivitetBuilder = aktørArbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(
             new Opptjeningsnøkkel(arbeidsforholdId, virksomhet.getIdentifikator(), null), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
@@ -118,7 +134,7 @@ public class OpptjeningAktivitetArbeidVurdererTest {
             .leggTilPermisjon(YrkesaktivitetBuilder.nyPermisjonBuilder()
                 .medPeriode(permisjonPeriode14Dager.getFomDato(), permisjonPeriode14Dager.getTomDato())
                 .medProsentsats(BigDecimal.valueOf(100))
-                .medPermisjonsbeskrivelseType(PermisjonsbeskrivelseType.PERMITTERING)
+                .medPermisjonsbeskrivelseType(permittering)
                 .build());
     }
 
