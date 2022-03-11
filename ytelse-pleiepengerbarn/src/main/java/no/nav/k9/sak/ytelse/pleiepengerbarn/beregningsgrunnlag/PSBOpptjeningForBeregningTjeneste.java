@@ -21,7 +21,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
-import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingBeregning;
+import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
@@ -33,7 +33,7 @@ import no.nav.k9.sak.typer.Periode;
 @FagsakYtelseTypeRef("PPN")
 public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
-    private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
+    private final OpptjeningAktivitetVurderingOpptjeningsvilkår vurderOpptjening = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
     private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
 
