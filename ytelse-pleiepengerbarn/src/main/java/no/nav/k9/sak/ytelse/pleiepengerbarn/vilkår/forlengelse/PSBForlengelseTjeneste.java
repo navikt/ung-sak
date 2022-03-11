@@ -9,7 +9,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -61,9 +60,7 @@ public class PSBForlengelseTjeneste implements ForlengelseTjeneste {
             return resultat;
         }
 
-        var relevantePerioder = søknadsperiodeTjeneste.utledPeriode(referanse.getBehandlingId());
-
-        if (relevantePerioder.isEmpty() || perioderTilVurdering.isEmpty()) {
+        if (perioderTilVurdering.isEmpty()) {
             return resultat;
         }
 
@@ -80,6 +77,7 @@ public class PSBForlengelseTjeneste implements ForlengelseTjeneste {
         var vilkårForrigeVedtak = vilkårResultatRepository.hentHvisEksisterer(referanse.getOriginalBehandlingId().orElseThrow()).orElseThrow()
             .getVilkår(vilkårType)
             .orElseThrow();
+        var relevantePerioder = søknadsperiodeTjeneste.utledPeriode(referanse.getBehandlingId());
 
         resultat = vilkåretOpt.get()
             .getPerioder()
