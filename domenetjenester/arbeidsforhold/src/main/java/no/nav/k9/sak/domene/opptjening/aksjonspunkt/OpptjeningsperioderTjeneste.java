@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -64,7 +63,7 @@ public class OpptjeningsperioderTjeneste {
     public List<OpptjeningsperiodeForSaksbehandling> mapPerioderForSaksbehandling(BehandlingReferanse ref,
                                                                                   InntektArbeidYtelseGrunnlag grunnlag,
                                                                                   OpptjeningAktivitetVurdering vurderOpptjening,
-                                                                                  DatoIntervallEntitet opptjeningPeriode) {
+                                                                                  DatoIntervallEntitet opptjeningPeriode, DatoIntervallEntitet vilkårsPeriode) {
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
 
         var aktørId = ref.getAktørId();
@@ -74,7 +73,7 @@ public class OpptjeningsperioderTjeneste {
         var erMigrertSkjæringstidspunkt = fagsakRepository.hentSakInfotrygdMigreringer(ref.getFagsakId())
             .stream()
             .map(SakInfotrygdMigrering::getSkjæringstidspunkt)
-            .anyMatch(it -> Objects.equals(skjæringstidspunkt, it));
+            .anyMatch(vilkårsPeriode::inkluderer);
 
         var mapArbeidOpptjening = OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner();
         var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(skjæringstidspunkt);

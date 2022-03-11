@@ -58,11 +58,12 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
      *
      * @param behandlingReferanse Aktuell behandling referanse
      * @param iayGrunnlag         {@link InntektArbeidYtelseGrunnlag}
+     * @param vilkårsperiode
      * @return {@link OpptjeningsperiodeForSaksbehandling}er
      */
     private List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregning(BehandlingReferanse behandlingReferanse,
                                                                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                                                      LocalDate stp) {
+                                                                                                      DatoIntervallEntitet vilkårsperiode) {
 
         Long behandlingId = behandlingReferanse.getId();
 
@@ -70,10 +71,10 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
         if (opptjeningResultat.isEmpty()) {
             return Collections.emptyList();
         }
-        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(stp)).orElseThrow();
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode());
+        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(vilkårsperiode.getFomDato())).orElseThrow();
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), vilkårsperiode);
         return aktiviteter.stream()
-            .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
+            .filter(oa -> oa.getPeriode().getFomDato().isBefore(vilkårsperiode.getFomDato()))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
             .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType()))
             .filter(oa -> !erAvslåttArbeid(oa))
@@ -92,7 +93,7 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
 
     private Optional<OpptjeningAktiviteter> hentOpptjeningForBeregning(BehandlingReferanse ref,
                                                                        InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                       LocalDate stp) {
+                                                                       DatoIntervallEntitet stp) {
         var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregning(ref, iayGrunnlag, stp)
             .stream()
             .map(this::mapOpptjeningPeriode)
@@ -106,7 +107,7 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     @Override
     public Optional<OpptjeningAktiviteter> hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
                                                                             InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
-        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode.getFomDato());
+        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode);
         return opptjeningAktiviteter;
     }
 
