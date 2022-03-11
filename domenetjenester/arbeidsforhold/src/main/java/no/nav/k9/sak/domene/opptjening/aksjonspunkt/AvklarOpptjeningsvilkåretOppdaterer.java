@@ -1,13 +1,14 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
-import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
@@ -25,7 +26,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
-import no.nav.k9.sak.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkårDto;
@@ -35,6 +35,8 @@ import no.nav.k9.sak.typer.Periode;
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOpptjeningsvilkårDto.class, adapter = AksjonspunktOppdaterer.class)
 public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdaterer<AvklarOpptjeningsvilkårDto> {
+
+    private static final Logger log = LoggerFactory.getLogger(AvklarOpptjeningsvilkåretOppdaterer.class);
 
     private HistorikkTjenesteAdapter historikkAdapter;
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -48,8 +50,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
     @Inject
     public AvklarOpptjeningsvilkåretOppdaterer(HistorikkTjenesteAdapter historikkAdapter,
                                                InntektArbeidYtelseTjeneste iayTjeneste,
-                                               OpptjeningsperioderTjeneste opptjeningsperioderTjeneste,
-                                               OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste) {
+                                               OpptjeningsperioderTjeneste opptjeningsperioderTjeneste) {
 
         this.historikkAdapter = historikkAdapter;
         this.iayTjeneste = iayTjeneste;
@@ -98,18 +99,34 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         return tilVerdiHistorikk;
     }
 
-    // TODO: Bedre løsning på sikt at endepunkt opptjening-v2 kobler sammen vilkårsperioder med opptjeningsperioder.
-    //  Her kobler man heller aksjonspunktet man får i retur
     private List<Tuple<VilkårPeriodeVurderingDto, Periode>> sammenkoblePerioder(AvklarOpptjeningsvilkårDto dto) {
         var vilkårPeriodeVurderinger = dto.getVilkårPeriodeVurderinger();
         var opptjeningPerioder = dto.getOpptjeningPerioder();
 
-        validerKonsistens(vilkårPeriodeVurderinger, opptjeningPerioder);
-
-        var sammenkobledePerioder = IntStream.range(0, vilkårPeriodeVurderinger.size())
-            .mapToObj(i -> new Tuple<>(vilkårPeriodeVurderinger.get(i), opptjeningPerioder.get(i)))
+        var sammenkobledePerioder = vilkårPeriodeVurderinger.stream()
+            .map(vilkårPeriodeVurderingDto -> new Tuple<>(vilkårPeriodeVurderingDto, finnTilhørendeOpptjeningsperiode(opptjeningPerioder, vilkårPeriodeVurderingDto.getPeriode())))
             .collect(Collectors.toList());
+
+        validerKonsistens(sammenkobledePerioder);
+
         return sammenkobledePerioder;
+    }
+
+    private void validerKonsistens(List<Tuple<VilkårPeriodeVurderingDto, Periode>> sammenkobledePerioder) {
+        if (sammenkobledePerioder.stream().anyMatch(it -> Objects.isNull(it.getElement2()))) {
+            var perioderMedMangler = sammenkobledePerioder.stream()
+                .filter(it -> Objects.isNull(it.getElement2()))
+                .map(Tuple::getElement1)
+                .map(VilkårPeriodeVurderingDto::getPeriode);
+
+            log.info("Inkonsistens i data fra frontend, perioder som mangler informasjon om opptjeningsperioden :: {}", perioderMedMangler);
+            throw new IllegalArgumentException("Inkonsistens i data fra frontend, det mangler data om opptjeningsperioder");
+        }
+    }
+
+    private Periode finnTilhørendeOpptjeningsperiode(List<Periode> opptjeningPerioder, Periode periode) {
+        var sisteDagIOpptjeningsperioden = periode.getFom().minusDays(1);
+        return opptjeningPerioder.stream().filter(it -> Objects.equals(it.getTom(), sisteDagIOpptjeningsperioden)).findAny().orElse(null);
     }
 
     private void oppdaterUtfallOgLagre(Utfall utfallType, VilkårPeriodeVurderingDto vilkårPeriode, VilkårBuilder vilkårBuilder) {
@@ -159,28 +176,5 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         historikkAdapter.tekstBuilder()
             .medBegrunnelse(begrunnelse, erBegrunnelseForAksjonspunktEndret)
             .medSkjermlenke(SkjermlenkeType.PUNKT_FOR_OPPTJENING);
-    }
-
-    private void validerKonsistens(List<VilkårPeriodeVurderingDto> vilkårPeriodeVurderinger, List<Periode> opptjeningPerioder) {
-        if (vilkårPeriodeVurderinger.size() != opptjeningPerioder.size()) {
-            throw new IllegalArgumentException("Antall vilkårsperioder, " + vilkårPeriodeVurderinger.size()
-                + ", matcher ikke antall korresponderende opptjeningsperioder, " + opptjeningPerioder.size());
-        }
-
-        var sortertVp = vilkårPeriodeVurderinger.stream()
-            .sorted(Comparator.comparing(VilkårPeriodeVurderingDto::getPeriode))
-            .collect(Collectors.toList())
-            .equals(vilkårPeriodeVurderinger);
-        if (!sortertVp) {
-            throw new IllegalArgumentException("Vilkårsperioder er ikke sortert etter periode");
-        }
-
-        var sortertOp = opptjeningPerioder.stream()
-            .sorted()
-            .collect(Collectors.toList())
-            .equals(opptjeningPerioder);
-        if (!sortertOp) {
-            throw new IllegalArgumentException("Opptjeningsperioder er ikke sortert etter periode");
-        }
     }
 }
