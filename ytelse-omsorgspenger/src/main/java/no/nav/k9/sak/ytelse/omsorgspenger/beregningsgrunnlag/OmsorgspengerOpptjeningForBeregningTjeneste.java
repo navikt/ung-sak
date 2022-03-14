@@ -55,23 +55,23 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
      *
      * @param behandlingReferanse Aktuell behandling referanse
      * @param iayGrunnlag {@link InntektArbeidYtelseGrunnlag}
-     * @param stp
+     * @param vilkårsperiode
      * @return {@link OpptjeningsperiodeForSaksbehandling}er
      */
     private List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregning(BehandlingReferanse behandlingReferanse,
                                                                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                                                      DatoIntervallEntitet stp) {
+                                                                                                      DatoIntervallEntitet vilkårsperiode) {
         Long behandlingId = behandlingReferanse.getId();
 
         var opptjeningResultat = opptjeningsperioderTjeneste.hentOpptjeningHvisFinnes(behandlingId);
         if (opptjeningResultat.isEmpty()) {
             return Collections.emptyList();
         }
-        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(stp.getFomDato())).orElseThrow(() -> new IllegalStateException("Finner ingen opptjeningsaktivitet for skjæringstidspunkt=" + stp));
+        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(vilkårsperiode.getFomDato())).orElseThrow(() -> new IllegalStateException("Finner ingen opptjeningsaktivitet for skjæringstidspunkt=" + vilkårsperiode));
 
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), stp);
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), vilkårsperiode);
         return aktiviteter.stream()
-            .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp.getFomDato()))
+            .filter(oa -> oa.getPeriode().getFomDato().isBefore(vilkårsperiode.getFomDato()))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
             .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType()))
             .collect(Collectors.toList());
@@ -85,8 +85,8 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
 
     private Optional<OpptjeningAktiviteter> hentOpptjeningForBeregning(BehandlingReferanse ref,
                                                                        InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                       DatoIntervallEntitet stp) {
-        var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregning(ref, iayGrunnlag, stp)
+                                                                       DatoIntervallEntitet vilkårsperiode) {
+        var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregning(ref, iayGrunnlag, vilkårsperiode)
             .stream()
             .map(this::mapOpptjeningPeriode)
             .collect(Collectors.toList());
