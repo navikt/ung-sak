@@ -381,7 +381,7 @@ public class ÅrskvantumTjeneste {
         var harSammeBosted = relasjonMedBarn.getElement1().getHarSammeBosted(personinfoSøker, personinfoBarn);
         var perioderMedDeltBosted = relasjonMedBarn.getElement1().getPerioderMedDeltBosted(personinfoSøker, personinfoBarn);
         var lukketPeriodeMedDeltBosted = perioderMedDeltBosted.stream().map(p -> new LukketPeriode(p.getFom(), p.getTom())).collect(Collectors.toList());
-        return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBosted, lukketPeriodeMedDeltBosted, lukketPeriodeMedDeltBosted, BarnType.VANLIG);
+        return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBosted, lukketPeriodeMedDeltBosted, BarnType.VANLIG);
     }
 
     private boolean kreverArbeidsgiverRefusjon(Set<Inntektsmelding> sakInntektsmeldinger,
