@@ -13,6 +13,7 @@ public class VurderStatusInput {
     private DatoIntervallEntitet opptjeningsperiode;
     private Yrkesaktivitet registerAktivitet;
     private DatoIntervallEntitet aktivitetPeriode;
+    private boolean erMigrertSkjæringstidspunkt = false;
 
     public VurderStatusInput(OpptjeningAktivitetType type, BehandlingReferanse behandlingReferanse) {
         this.type = Objects.requireNonNull(type);
@@ -49,5 +50,13 @@ public class VurderStatusInput {
 
     public void setAktivitetPeriode(DatoIntervallEntitet aktivitetPeriode) {
         this.aktivitetPeriode = aktivitetPeriode;
+    }
+
+    public boolean getErMigrertSkjæringstidspunkt() {
+        return erMigrertSkjæringstidspunkt;
+    }
+
+    public void setErMigrertSkjæringstidspunkt(boolean erMigrertSkjæringstidspunkt) {
+        this.erMigrertSkjæringstidspunkt = erMigrertSkjæringstidspunkt;
     }
 }

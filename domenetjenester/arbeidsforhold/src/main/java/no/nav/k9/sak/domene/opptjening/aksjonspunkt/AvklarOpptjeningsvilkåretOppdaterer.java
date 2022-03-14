@@ -75,7 +75,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
             lagHistorikkInnslag(param, tilVerdiHistorikk, vilkårPeriodeVurdering.getBegrunnelse());
 
             if (nyttUtfall.equals(Utfall.OPPFYLT)) {
-                sjekkOmVilkåretKanSettesTilOppfylt(param.getRef(), opptjeningPeriode, innvilgelseMerknad);
+                sjekkOmVilkåretKanSettesTilOppfylt(param.getRef(), opptjeningPeriode, innvilgelseMerknad, vilkårPeriodeVurdering.getPeriode());
             }
             oppdaterUtfallOgLagre(nyttUtfall, vilkårPeriodeVurdering, vilkårBuilder);
         }
@@ -137,11 +137,11 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
             .medAvslagsårsak(!utfallType.equals(Utfall.OPPFYLT) ? Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING : null));
     }
 
-    private void sjekkOmVilkåretKanSettesTilOppfylt(BehandlingReferanse ref, Periode opptjeningPeriode, VilkårUtfallMerknad innvilgelseMerknad) {
+    private void sjekkOmVilkåretKanSettesTilOppfylt(BehandlingReferanse ref, Periode opptjeningPeriode, VilkårUtfallMerknad innvilgelseMerknad, Periode periode) {
         var opptjPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode.getFom(), opptjeningPeriode.getTom());
         var stp = opptjPeriode.getTomDato().plusDays(1);
         var iayGrunnlag = iayTjeneste.finnGrunnlag(ref.getBehandlingId()).orElseThrow();
-        var opptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjPeriode);
+        var opptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjPeriode, DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()));
 
         // Validering før opptjening kan gå videre til beregningsvilkår
         long antall = opptjeningAktiviteter.stream()
