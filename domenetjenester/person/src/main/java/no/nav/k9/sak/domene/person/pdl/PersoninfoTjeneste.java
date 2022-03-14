@@ -17,7 +17,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -99,7 +98,6 @@ import no.nav.k9.sak.typer.PersonIdent;
 public class PersoninfoTjeneste {
 
     private static final String HARDKODET_POSTNR = "XXXX";
-    private static final int MAKS_STØRRELSE_ADRESSELINJE = 75;
 
     private static final Set<Sivilstandstype> JURIDISK_GIFT = Set.of(Sivilstandstype.GIFT, Sivilstandstype.SEPARERT,
             Sivilstandstype.REGISTRERT_PARTNER, Sivilstandstype.SEPARERT_PARTNER);
@@ -464,32 +462,17 @@ public class PersoninfoTjeneste {
     }
 
     private static AdressePeriode mapAdresseinfoTilAdressePeriode(Gyldighetsperiode periode, Adresseinfo adresseinfo) {
-        var linje1 = adresseinfo.getAdresselinje1();
-        var linje2 = adresseinfo.getAdresselinje2();
-        var linje3 = adresseinfo.getAdresselinje3();
-        var linje4 = adresseinfo.getAdresselinje4();
-        var lengsteLinje = Stream.of(lengde(linje1), lengde(linje2), lengde(linje3), lengde(linje4)).max(Comparator.naturalOrder()).orElse(0);
-        if (lengsteLinje > MAKS_STØRRELSE_ADRESSELINJE) {
-            linje1 = "Adresse overstiger maks antall støttede tegn.";
-            linje2 = "Slå opp adresse i Folkeregisteret.";
-            linje3 = null;
-            linje4 = null;
-        }
         return AdressePeriode.builder()
                 .medGyldighetsperiode(periode)
                 .medMatrikkelId(adresseinfo.getMatrikkelId())
-                .medAdresselinje1(linje1)
-                .medAdresselinje2(linje2)
-                .medAdresselinje3(linje3)
-                .medAdresselinje4(linje4)
+                .medAdresselinje1(adresseinfo.getAdresselinje1())
+                .medAdresselinje2(adresseinfo.getAdresselinje2())
+                .medAdresselinje3(adresseinfo.getAdresselinje3())
+                .medAdresselinje4(adresseinfo.getAdresselinje4())
                 .medAdresseType(adresseinfo.getGjeldendePostadresseType())
                 .medPostnummer(adresseinfo.getPostNr())
                 .medLand(adresseinfo.getLand())
                 .build();
-    }
-
-    private static int lengde(String str) {
-        return str != null ? str.length() : 0;
     }
 
     private static StatsborgerskapPeriode mapStatsborgerskapHistorikk(Statsborgerskap statsborgerskap) {
