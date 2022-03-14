@@ -135,8 +135,8 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         return resultatBuilder;
     }
 
-    private Set<VilkårPeriode> finnPerioderMedUtfall(Vilkårene vilkårene,
-                                                     NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, Utfall utfall) {
+    private NavigableSet<VilkårPeriode> finnPerioderMedUtfall(Vilkårene vilkårene,
+                                                              NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, Utfall utfall) {
         var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
 
         return definerendeVilkår.stream()
@@ -145,10 +145,10 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             .flatMap(Collection::stream)
             .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
             .filter(it -> Objects.equals(utfall, it.getUtfall()))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private void justerPeriodeForAndreVilkår(Set<VilkårPeriode> avslåttePerioder, Set<VilkårPeriode> innvilgedePerioder, VilkårResultatBuilder resultatBuilder) {
+    private void justerPeriodeForAndreVilkår(NavigableSet<VilkårPeriode> avslåttePerioder, Set<VilkårPeriode> innvilgedePerioder, VilkårResultatBuilder resultatBuilder) {
         for (VilkårType vilkårType : Set.of(VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.OPPTJENINGSVILKÅRET, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET)) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
             var perioderSomSkalTilbakestilles = avslåttePerioder.stream()
