@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.opptjening;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,10 +8,8 @@ import org.slf4j.LoggerFactory;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
+import no.nav.k9.sak.domene.opptjening.aksjonspunkt.PermisjonPerYrkesaktivitet;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.VurderStatusInput;
-import no.nav.k9.sak.typer.Stillingsprosent;
 
 
 class OpptjeningAktivitetArbeidVurderer {
@@ -27,17 +24,9 @@ class OpptjeningAktivitetArbeidVurderer {
             return VurderingsStatus.TIL_VURDERING;
         }
 
+        var tidslinjePerYtelse = input.getTidslinjePerYtelse();
         // Permisjoner på yrkesaktivitet
-        List<LocalDateTimeline<Boolean>> aktivPermisjonTidslinjer = yrkesaktivitet.getPermisjon()
-            .stream()
-            .filter(it -> !input.getErMigrertSkjæringstidspunkt() || !Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.VELFERDSPERMISJON))
-            .filter(permisjon -> erStørreEllerLik100Prosent(permisjon.getProsentsats()))
-            .map(permisjon -> new LocalDateTimeline<>(permisjon.getFraOgMed(), permisjon.getTilOgMed(), Boolean.TRUE))
-            .toList();
-        LocalDateTimeline<Boolean> aktivPermisjonTidslinje = new LocalDateTimeline<>(List.of());
-        for (LocalDateTimeline<Boolean> linje : aktivPermisjonTidslinjer) {
-            aktivPermisjonTidslinje = aktivPermisjonTidslinje.combine(linje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
+        LocalDateTimeline<Boolean> aktivPermisjonTidslinje = PermisjonPerYrkesaktivitet.utledPermisjonPerYrkesaktivitet(yrkesaktivitet, tidslinjePerYtelse, input.getErMigrertSkjæringstidspunkt());
 
         // Vurder kun permisjonsperioder som overlapper opptjeningsperiode && aktivitetens lengde
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(opptjeningsperiode.getFomDato(), opptjeningsperiode.getTomDato(), Boolean.TRUE)));
@@ -56,14 +45,10 @@ class OpptjeningAktivitetArbeidVurderer {
             .filter(segment -> segment.getValue() == Boolean.TRUE && segment.getLocalDateInterval().days() > 14)
             .findFirst();
         if (permisjonOver14Dager.isPresent()) {
-            log.info("Opptjeningsaktivitet for virksomhet={} underkjennes pga permisjoner som overstiger 14 dager. Permitteringsperiode={}, opptjeningsperiode={}", yrkesaktivitet.getArbeidsgiver(), permisjonOver14Dager.get().getLocalDateInterval() ,opptjeningsperiode);
+            log.info("Opptjeningsaktivitet for virksomhet={} underkjennes pga permisjoner som overstiger 14 dager. Permitteringsperiode={}, opptjeningsperiode={}", yrkesaktivitet.getArbeidsgiver(), permisjonOver14Dager.get().getLocalDateInterval(), opptjeningsperiode);
             return VurderingsStatus.UNDERKJENT;
         }
         return VurderingsStatus.TIL_VURDERING;
-    }
-
-    private boolean erStørreEllerLik100Prosent(Stillingsprosent prosentsats) {
-        return Stillingsprosent.HUNDRED.getVerdi().intValue() <= prosentsats.getVerdi().intValue();
     }
 
     private LocalDateSegment<Boolean> mergePerioder(LocalDateInterval di, LocalDateSegment<Boolean> førsteVersjon, LocalDateSegment<Boolean> sisteVersjon) {

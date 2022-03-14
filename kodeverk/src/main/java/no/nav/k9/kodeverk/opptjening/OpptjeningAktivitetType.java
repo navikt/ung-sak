@@ -113,13 +113,17 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
         Set.of()),
     ;
 
-    public static final Set<OpptjeningAktivitetType> YTELSE = Set.of(SYKEPENGER,
+    public static final Set<OpptjeningAktivitetType> YTELSE = Set.of(
+        SYKEPENGER, SYKEPENGER_AV_DAGPENGER,
         FORELDREPENGER,
-        PLEIEPENGER,
+        PLEIEPENGER, PLEIEPENGER_AV_DAGPENGER,
         SVANGERSKAPSPENGER,
         OPPLÆRINGSPENGER,
         FRISINN,
         OMSORGSPENGER);
+    public static final Set<OpptjeningAktivitetType> K9_YTELSER = Set.of(
+        PLEIEPENGER, PLEIEPENGER_AV_DAGPENGER,
+        OPPLÆRINGSPENGER);
     public static final String KODEVERK = "OPPTJENING_AKTIVITET_TYPE";
     public static final Set<OpptjeningAktivitetType> ANNEN_OPPTJENING = Set.of(VENTELØNN_VARTPENGER, MILITÆR_ELLER_SIVILTJENESTE, ETTERLØNN_SLUTTPAKKE,
         VIDERE_ETTERUTDANNING, UTENLANDSK_ARBEIDSFORHOLD, FRILANS);
