@@ -5,10 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.FaktaOmBeregningTilfelleDto;
-import no.nav.folketrygdloven.kalkulus.kodeverk.AktivitetStatus;
 import no.nav.folketrygdloven.kalkulus.kodeverk.AndelKilde;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori;
-import no.nav.folketrygdloven.kalkulus.kodeverk.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.ArbeidstakerandelUtenIMMottarYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.AvklarteAktiviteterDto;
@@ -379,11 +377,6 @@ public class OppdatererDtoMapper {
             redigerbarAndel.getArbeidsgiverId(),
             redigerbarAndel.getArbeidsforholdId().getReferanse(),
             redigerbarAndel.getNyAndel(),
-            redigerbarAndel.getAktivitetStatus() == null ? null : AktivitetStatus.fraKode(redigerbarAndel.getAktivitetStatus().getKode()),
-            redigerbarAndel.getArbeidsforholdType() == null ? null : OpptjeningAktivitetType.fraKode(redigerbarAndel.getArbeidsforholdType().getKode()),
-            redigerbarAndel.getLagtTilAvSaksbehandler(),
-            redigerbarAndel.getBeregningsperiodeFom(),
-            redigerbarAndel.getBeregningsperiodeTom(),
             redigerbarAndel.getKilde() == null ? AndelKilde.PROSESS_START : AndelKilde.fraKode(redigerbarAndel.getKilde().getKode())
             );
     }
