@@ -1,7 +1,10 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
@@ -13,6 +16,7 @@ public class VurderStatusInput {
     private DatoIntervallEntitet opptjeningsperiode;
     private Yrkesaktivitet registerAktivitet;
     private DatoIntervallEntitet aktivitetPeriode;
+    private Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse = new HashMap<>();
     private boolean erMigrertSkjæringstidspunkt = false;
 
     public VurderStatusInput(OpptjeningAktivitetType type, BehandlingReferanse behandlingReferanse) {
@@ -58,5 +62,13 @@ public class VurderStatusInput {
 
     public void setErMigrertSkjæringstidspunkt(boolean erMigrertSkjæringstidspunkt) {
         this.erMigrertSkjæringstidspunkt = erMigrertSkjæringstidspunkt;
+    }
+
+    public Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> getTidslinjePerYtelse() {
+        return tidslinjePerYtelse;
+    }
+
+    public void setTidslinjePerYtelse(Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse) {
+        this.tidslinjePerYtelse = tidslinjePerYtelse;
     }
 }
