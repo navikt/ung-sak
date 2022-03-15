@@ -131,8 +131,8 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     private boolean harIngenRefusjonskravFraMottatteInntektsmeldinger(BehandlingReferanse ref) {
         List<Inntektsmelding> inntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt());
-        return inntektsmeldinger.size() > 0
-            && inntektsmeldinger.stream().allMatch(im -> !im.harRefusjonskrav());
+        return inntektsmeldinger.stream()
+            .allMatch(im -> !im.harRefusjonskrav());
     }
 
     @Override
