@@ -1,22 +1,17 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling;
 
-import java.time.LocalDate;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import no.nav.k9.kodeverk.beregningsgrunnlag.AndelKilde;
-import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -24,10 +19,6 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FordelRedigerbarAndelDto {
 
-    @JsonProperty(value = "aktivitetStatus", required = true)
-    @NotNull
-    @Valid
-    private AktivitetStatus aktivitetStatus;
 
     @JsonProperty(value = "andelsnr", required = true)
     @NotNull
@@ -39,23 +30,10 @@ public class FordelRedigerbarAndelDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsforholdId;
 
-    @JsonProperty(value = "arbeidsforholdType", required = true)
-    @NotNull
-    @Valid
-    private OpptjeningAktivitetType arbeidsforholdType;
 
     @JsonProperty(value = "arbeidsgiverId")
     @Pattern(regexp = "[\\d]{9}|[\\d]{13}")
     private String arbeidsgiverId;
-
-    @JsonProperty(value = "beregningsperiodeFom")
-    private LocalDate beregningsperiodeFom;
-
-    @JsonProperty(value = "beregningsperiodeTom")
-    private LocalDate beregningsperiodeTom;
-
-    @JsonProperty(value = "lagtTilAvSaksbehandler")
-    private Boolean lagtTilAvSaksbehandler;
 
     @JsonProperty(value = "nyAndel")
     private Boolean nyAndel;
@@ -68,11 +46,6 @@ public class FordelRedigerbarAndelDto {
         //
     }
 
-
-    public AktivitetStatus getAktivitetStatus() {
-        return aktivitetStatus;
-    }
-
     public Long getAndelsnr() {
         return andelsnr;
     }
@@ -81,32 +54,12 @@ public class FordelRedigerbarAndelDto {
         return InternArbeidsforholdRef.ref(arbeidsforholdId);
     }
 
-    public OpptjeningAktivitetType getArbeidsforholdType() {
-        return arbeidsforholdType;
-    }
-
     public String getArbeidsgiverId() {
         return arbeidsgiverId;
     }
 
-    public LocalDate getBeregningsperiodeFom() {
-        return beregningsperiodeFom;
-    }
-
-    public LocalDate getBeregningsperiodeTom() {
-        return beregningsperiodeTom;
-    }
-
-    public Boolean getLagtTilAvSaksbehandler() {
-        return lagtTilAvSaksbehandler;
-    }
-
     public Boolean getNyAndel() {
         return nyAndel;
-    }
-
-    public void setAktivitetStatus(AktivitetStatus aktivitetStatus) {
-        this.aktivitetStatus = aktivitetStatus;
     }
 
     public void setAndelsnr(Long andelsnr) {
@@ -117,24 +70,8 @@ public class FordelRedigerbarAndelDto {
         this.arbeidsforholdId = arbeidsforholdId;
     }
 
-    public void setArbeidsforholdType(OpptjeningAktivitetType arbeidsforholdType) {
-        this.arbeidsforholdType = arbeidsforholdType;
-    }
-
     public void setArbeidsgiverId(String arbeidsgiverId) {
         this.arbeidsgiverId = arbeidsgiverId;
-    }
-
-    public void setBeregningsperiodeFom(LocalDate beregningsperiodeFom) {
-        this.beregningsperiodeFom = beregningsperiodeFom;
-    }
-
-    public void setBeregningsperiodeTom(LocalDate beregningsperiodeTom) {
-        this.beregningsperiodeTom = beregningsperiodeTom;
-    }
-
-    public void setLagtTilAvSaksbehandler(Boolean lagtTilAvSaksbehandler) {
-        this.lagtTilAvSaksbehandler = lagtTilAvSaksbehandler;
     }
 
     public void setNyAndel(Boolean nyAndel) {
