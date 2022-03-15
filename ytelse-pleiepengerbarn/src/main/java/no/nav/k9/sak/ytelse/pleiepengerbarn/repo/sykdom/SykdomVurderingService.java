@@ -166,7 +166,9 @@ public class SykdomVurderingService {
         LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
 
         List<Periode> perioderKreverVurdering = behandledeSøknadsperioder.stream().map(s->new Periode(s.getFom(), s.getTom())).toList();
-        LocalDateTimeline<Boolean> tidslinjeKreverVurdering = new LocalDateTimeline<>(perioderKreverVurdering.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true)).toList());
+        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.I_LIVETS_SLUTTFASE);
+        LocalDateTimeline<Boolean> tidslinjeKreverVurdering = new LocalDateTimeline<>(perioderTilVurdering.stream().map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), true)).toList());
 
         LocalDateTimeline<Boolean> innleggelserTidslinje = hentAlleInnleggelserTidslinje(behandling);
         LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(tidslinjeKreverVurdering, vurderinger);
