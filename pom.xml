@@ -162,7 +162,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt-jakarta</artifactId>
-                <version>1.5.27</version>
+                <version>1.5.29</version>
             </dependency>
 
             <dependency>
