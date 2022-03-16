@@ -114,9 +114,9 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
     ;
 
     public static final Set<OpptjeningAktivitetType> YTELSE = Set.of(
-        SYKEPENGER, SYKEPENGER_AV_DAGPENGER,
+        SYKEPENGER,
         FORELDREPENGER,
-        PLEIEPENGER, PLEIEPENGER_AV_DAGPENGER,
+        PLEIEPENGER,
         SVANGERSKAPSPENGER,
         OPPLÆRINGSPENGER,
         FRISINN,
