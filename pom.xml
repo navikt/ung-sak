@@ -53,9 +53,7 @@
         over arv) da de overstyrer andre scope definisjoner. Sett det heller der
         det brukes. -->
     <dependencyManagement>
-
         <dependencies>
-
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
