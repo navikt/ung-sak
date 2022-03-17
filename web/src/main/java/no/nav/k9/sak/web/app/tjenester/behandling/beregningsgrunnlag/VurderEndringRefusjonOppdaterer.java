@@ -37,7 +37,7 @@ public class VurderEndringRefusjonOppdaterer implements AksjonspunktOppdaterer<V
     public OppdateringResultat oppdater(VurderRefusjonBeregningsgrunnlagDtoer dtoer, AksjonspunktOppdaterParameter param) {
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto1 -> MapDtoTilRequest.map(dto1, dtoer.getBegrunnelse())));
-        var oppdaterResultat = oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
+        var oppdaterResultat = oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef(), true);
         historikkTjeneste.lagHistorikk(param, dtoer, oppdaterResultat);
         return OppdateringResultat.utenOverhopp();
     }

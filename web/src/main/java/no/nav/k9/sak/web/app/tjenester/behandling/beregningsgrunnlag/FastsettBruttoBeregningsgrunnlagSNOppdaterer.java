@@ -33,7 +33,7 @@ public class FastsettBruttoBeregningsgrunnlagSNOppdaterer implements Aksjonspunk
     public OppdateringResultat oppdater(FastsettBruttoBeregningsgrunnlagSNDtoer dtoer, AksjonspunktOppdaterParameter param) {
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto1 -> MapDtoTilRequest.map(dto1, dtoer.getBegrunnelse())));
-        oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
+        oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef(), false);
         // TODO FIKS HISTORIKK
         return OppdateringResultat.utenOverhopp();
     }

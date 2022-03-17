@@ -1,18 +1,11 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.NavigableSet;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeløpEndring;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningsgrunnlagPeriodeEndring;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningsgrunnlagPrStatusOgAndelEndring;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.InntektskategoriEndring;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
@@ -25,10 +18,9 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.OverstyrBeregningsgrunnlagDto;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning.BeregningsgrunnlagVerdierHistorikkTjeneste;
 
 @ApplicationScoped
@@ -38,6 +30,7 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
     private BeregningTjeneste kalkulusTjeneste;
     private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
     private BeregningsgrunnlagVerdierHistorikkTjeneste verdierHistorikkTjeneste;
+    private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
     BeregningsgrunnlagOverstyringshåndterer() {
         // for CDI proxy
@@ -46,11 +39,13 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
     @Inject
     public BeregningsgrunnlagOverstyringshåndterer(HistorikkTjenesteAdapter historikkAdapter,
                                                    BeregningTjeneste kalkulusTjeneste,
-                                                   BeregningsgrunnlagVilkårTjeneste vilkårTjeneste, BeregningsgrunnlagVerdierHistorikkTjeneste verdierHistorikkTjeneste) {
+                                                   BeregningsgrunnlagVilkårTjeneste vilkårTjeneste, BeregningsgrunnlagVerdierHistorikkTjeneste verdierHistorikkTjeneste,
+                                                   VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         super(historikkAdapter, AksjonspunktDefinisjon.OVERSTYRING_AV_BEREGNINGSGRUNNLAG);
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.vilkårTjeneste = vilkårTjeneste;
         this.verdierHistorikkTjeneste = verdierHistorikkTjeneste;
+        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
     }
 
     @Override
@@ -62,7 +57,7 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
         var oppdaterBeregningsgrunnlagResultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, behandlingReferanse, dto.getPeriode().getFom());
         oppdaterBeregningsgrunnlagResultat.getBeregningsgrunnlagEndring().ifPresent(
             endring -> verdierHistorikkTjeneste.lagHistorikkForBeregningsgrunnlagVerdier(behandling.getId(),
-            endring.getBeregningsgrunnlagPeriodeEndringer().get(0), getHistorikkAdapter().tekstBuilder()));
+                endring.getBeregningsgrunnlagPeriodeEndringer().get(0), getHistorikkAdapter().tekstBuilder()));
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         fjernOverstyrtAksjonspunkt(behandling)
             .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
@@ -80,8 +75,11 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
 
     private void validerOppdatering(LocalDate stp,
                                     BehandlingReferanse ref) {
-        NavigableSet<DatoIntervallEntitet> perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, false);
-        var erTilVurdering = perioderSomSkalKunneVurderes.stream().anyMatch(p -> p.getFomDato().equals(stp));
+        var filter = vilkårPeriodeFilterProvider.getFilter(ref, false);
+        filter.ignorerAvslagPåKompletthet();
+        filter.ignorerForlengelseperioder();
+        var perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, filter);
+        var erTilVurdering = perioderSomSkalKunneVurderes.stream().anyMatch(p -> p.getPeriode().equals(stp));
         if (!erTilVurdering) {
             throw new IllegalStateException("Prøver å endre grunnlag med skjæringstidspunkt" + stp + " men denne er ikke i" +
                 " listen over vilkårsperioder som er til vurdering " + perioderSomSkalKunneVurderes);

@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,8 +21,9 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
-import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingBeregning;
+import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
+import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Periode;
@@ -31,7 +33,7 @@ import no.nav.k9.sak.typer.Periode;
 @FagsakYtelseTypeRef("PPN")
 public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
-    private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
+    private final OpptjeningAktivitetVurderingOpptjeningsvilkår vurderOpptjening = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
     private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
 
@@ -56,11 +58,12 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
      *
      * @param behandlingReferanse Aktuell behandling referanse
      * @param iayGrunnlag         {@link InntektArbeidYtelseGrunnlag}
+     * @param vilkårsperiode
      * @return {@link OpptjeningsperiodeForSaksbehandling}er
      */
     private List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregning(BehandlingReferanse behandlingReferanse,
                                                                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                                                      LocalDate stp) {
+                                                                                                      DatoIntervallEntitet vilkårsperiode) {
 
         Long behandlingId = behandlingReferanse.getId();
 
@@ -68,13 +71,18 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
         if (opptjeningResultat.isEmpty()) {
             return Collections.emptyList();
         }
-        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(stp)).orElseThrow();
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode());
+        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(vilkårsperiode.getFomDato())).orElseThrow();
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), vilkårsperiode);
         return aktiviteter.stream()
-            .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
+            .filter(oa -> oa.getPeriode().getFomDato().isBefore(vilkårsperiode.getFomDato()))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
             .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType()))
+            .filter(oa -> !erAvslåttArbeid(oa))
             .collect(Collectors.toList());
+    }
+
+    private boolean erAvslåttArbeid(OpptjeningsperiodeForSaksbehandling oa) {
+        return oa.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.ARBEID) && Objects.equals(oa.getVurderingsStatus(), VurderingsStatus.UNDERKJENT);
     }
 
     @Override
@@ -85,7 +93,7 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
 
     private Optional<OpptjeningAktiviteter> hentOpptjeningForBeregning(BehandlingReferanse ref,
                                                                        InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                       LocalDate stp) {
+                                                                       DatoIntervallEntitet stp) {
         var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregning(ref, iayGrunnlag, stp)
             .stream()
             .map(this::mapOpptjeningPeriode)
@@ -99,7 +107,7 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     @Override
     public Optional<OpptjeningAktiviteter> hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
                                                                             InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
-        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode.getFomDato());
+        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode);
         return opptjeningAktiviteter;
     }
 

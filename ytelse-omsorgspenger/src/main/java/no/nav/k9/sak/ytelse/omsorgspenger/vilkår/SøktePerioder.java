@@ -1,10 +1,10 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.vilkår;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -35,7 +35,7 @@ class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
         }
     }
 
-    NavigableSet<DatoIntervallEntitet> utledPeriodeFraSøknadsPerioder(Set<OppgittFraværPeriode> søktePerioder) {
+    NavigableSet<DatoIntervallEntitet> utledPeriodeFraSøknadsPerioder(Collection<OppgittFraværPeriode> søktePerioder) {
         var perioder = søktePerioder
             .stream()
             .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))

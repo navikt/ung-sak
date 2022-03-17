@@ -2,7 +2,6 @@ package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
 
 import java.time.LocalDate;
-import java.util.NavigableSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -20,9 +19,9 @@ import no.nav.k9.sak.behandling.aksjonspunkt.Overstyringshåndterer;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.OverstyrBeregningsaktiviteterDto;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning.BeregningsaktivitetHistorikkTjeneste;
 
 @ApplicationScoped
@@ -32,6 +31,7 @@ public class BeregningsaktivitetOverstyringshåndterer extends AbstractOverstyri
     private BeregningTjeneste kalkulusTjeneste;
     private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
     private BeregningsaktivitetHistorikkTjeneste historikkTjeneste;
+    private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
     BeregningsaktivitetOverstyringshåndterer() {
         // for CDI proxy
@@ -41,11 +41,13 @@ public class BeregningsaktivitetOverstyringshåndterer extends AbstractOverstyri
     public BeregningsaktivitetOverstyringshåndterer(HistorikkTjenesteAdapter historikkAdapter,
                                                     BeregningTjeneste kalkulusTjeneste,
                                                     BeregningsgrunnlagVilkårTjeneste vilkårTjeneste,
-                                                    BeregningsaktivitetHistorikkTjeneste historikkTjeneste) {
+                                                    BeregningsaktivitetHistorikkTjeneste historikkTjeneste,
+                                                    VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         super(historikkAdapter, AksjonspunktDefinisjon.OVERSTYRING_AV_BEREGNINGSAKTIVITETER);
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.vilkårTjeneste = vilkårTjeneste;
         this.historikkTjeneste = historikkTjeneste;
+        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
     }
 
     @Override
@@ -81,8 +83,11 @@ public class BeregningsaktivitetOverstyringshåndterer extends AbstractOverstyri
 
     private void validerOppdatering(LocalDate stp,
                                     BehandlingReferanse ref) {
-        NavigableSet<DatoIntervallEntitet> perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, false);
-        var erTilVurdering = perioderSomSkalKunneVurderes.stream().anyMatch(p -> p.getFomDato().equals(stp));
+        var filter = vilkårPeriodeFilterProvider.getFilter(ref, false);
+        filter.ignorerAvslagPåKompletthet();
+        filter.ignorerForlengelseperioder();
+        var perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, filter);
+        var erTilVurdering = perioderSomSkalKunneVurderes.stream().anyMatch(p -> p.getPeriode().getFomDato().equals(stp));
         if (!erTilVurdering) {
             throw new IllegalStateException("Prøver å endre grunnlag med skjæringstidspunkt" + stp + " men denne er ikke i" +
                 " listen over vilkårsperioder som er til vurdering " + perioderSomSkalKunneVurderes);
