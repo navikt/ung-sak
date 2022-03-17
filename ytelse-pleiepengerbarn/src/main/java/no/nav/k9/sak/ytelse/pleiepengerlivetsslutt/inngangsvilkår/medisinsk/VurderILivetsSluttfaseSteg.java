@@ -100,9 +100,11 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
 
         SykdomGrunnlagBehandling sykdomGrunnlagBehandling = opprettGrunnlag(perioder, behandling);
 
-        boolean manglerVurdering = harUklassifiserteDokumenter(pleietrengendeAktørId) || manglerSykdomVurdering(pleietrengendeAktørId);
+        boolean trengerAksjonspunkt = harUklassifiserteDokumenter(pleietrengendeAktørId)
+            || manglerGodkjentLegeerklæring(pleietrengendeAktørId)
+            || manglerSykdomVurdering(pleietrengendeAktørId);
         final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && sykdomGrunnlagBehandling.isFørsteGrunnlagPåBehandling();
-        if (manglerVurdering || førsteGangManuellRevurdering) {
+        if (trengerAksjonspunkt || førsteGangManuellRevurdering) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
@@ -115,6 +117,10 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
 
     private boolean harUklassifiserteDokumenter(AktørId pleietrengendeAktørId) {
         return sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
+    }
+
+    private boolean manglerGodkjentLegeerklæring(final AktørId pleietrengende) {
+        return sykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).isEmpty();
     }
 
     private boolean harSykdomDokumenter(AktørId pleietrengendeAktørId) {
