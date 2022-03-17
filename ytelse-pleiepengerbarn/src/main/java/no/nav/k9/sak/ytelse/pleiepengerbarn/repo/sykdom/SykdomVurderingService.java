@@ -72,10 +72,11 @@ public class SykdomVurderingService {
         }
 
         final boolean harUklassifiserteDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
+        boolean dokumenterUtenUtkvittering = !sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(pleietrengende).isEmpty();
+
         final boolean manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring(pleietrengende);
 
         final boolean eksisterendeVurderinger = !sykdomVurderingRepository.hentSisteVurderingerFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, pleietrengende).isEmpty();
-        boolean dokumenterUtenUtkvittering = !sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(pleietrengende).isEmpty();
         final boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger = dokumenterUtenUtkvittering && eksisterendeVurderinger;
 
         final boolean harDataSomIkkeHarBlittTattMedIBehandling = sykdomGrunnlagService.harDataSomIkkeHarBlittTattMedIBehandling(behandling);
@@ -95,6 +96,12 @@ public class SykdomVurderingService {
                 manglerVurderingAvKontinuerligTilsynOgPleie = !hentVurderingerForKontinuerligTilsynOgPleie(behandling).getResterendeVurderingsperioder().isEmpty();
                 manglerVurderingAvToOmsorgspersoner = !hentVurderingerForToOmsorgspersoner(behandling).getResterendeVurderingsperioder().isEmpty();
                 manglerVurderingAvILivetsSluttfase = false;
+
+                boolean harUbesluttedeVurderinger = harUbesluttedeVurderinger(behandling);
+
+                if (!harUbesluttedeVurderinger && !harUklassifiserteDokumenter && !dokumenterUtenUtkvittering && !manglerVurderingAvKontinuerligTilsynOgPleie && !manglerVurderingAvToOmsorgspersoner) {
+                    return SykdomAksjonspunkt.bareFalse();
+                }
             }
             case PLEIEPENGER_NÆRSTÅENDE -> {
                 manglerDiagnosekode = false;
@@ -114,6 +121,15 @@ public class SykdomVurderingService {
             manglerVurderingAvILivetsSluttfase,
             harDataSomIkkeHarBlittTattMedIBehandling,
             nyttDokumentHarIkkekontrollertEksisterendeVurderinger);
+    }
+
+    private boolean harUbesluttedeVurderinger(Behandling behandling) {
+        SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(behandling.getUuid());
+
+        boolean harUbesluttet = sykdomGrunnlagBehandling.getGrunnlag().getVurderinger()
+            .stream()
+            .anyMatch(v -> !v.isBesluttet());
+        return harUbesluttet;
     }
 
     private boolean manglerGodkjentLegeerklæring(final AktørId pleietrengende) {
