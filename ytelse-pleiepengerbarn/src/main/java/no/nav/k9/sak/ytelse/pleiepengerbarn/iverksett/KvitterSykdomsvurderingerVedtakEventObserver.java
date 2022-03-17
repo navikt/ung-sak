@@ -70,14 +70,13 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
 
         sykdomGrunnlagBehandling.getGrunnlag().getVurderinger()
             .stream()
+            .filter(v -> !v.isBesluttet())
             .forEach(v -> {
-                if (!v.isBesluttet()) {
                     sykdomVurderingRepository.lagre(
                         new SykdomVurderingVersjonBesluttet(
                             endretAv,
                             nå,
                             v)); //On conflict do nothing
-                }
             });
 
         log.info("Utført for behandling: {}", behandlingId);
