@@ -41,7 +41,7 @@ public class VurderVarigEndringEllerNyoppstartetSNOppdaterer implements Aksjonsp
         OppdateringResultat.Builder resultatBuilder = OppdateringResultat.utenTransisjon();
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto1 -> MapDtoTilRequest.map(dto1, dtoer.getBegrunnelse())));
-        List<OppdaterBeregningsgrunnlagResultat> utførteOppdateringer = oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
+        List<OppdaterBeregningsgrunnlagResultat> utførteOppdateringer = oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef(), false);
         historikkTjeneste.lagHistorikkInnslag(param, dtoer, utførteOppdateringer);
         return resultatBuilder.build();
     }

@@ -29,11 +29,11 @@ public class Familierelasjon {
         return utledSammeBosted(fra, til);
     }
 
-    public List<Periode> getPerioderMedSammeBosted(Personinfo fra, Personinfo til) {
-        return utledSammeBostedPerioder(fra, til);
+    public List<Periode> getPerioderMedDeltBosted(Personinfo fra, Personinfo til) {
+        return utledDeltBostedPerioder(fra, til);
     }
 
-    private List<Periode> utledSammeBostedPerioder(Personinfo fra, Personinfo til) {
+    private List<Periode> utledDeltBostedPerioder(Personinfo fra, Personinfo til) {
         var fraAdresser = fra.getAdresseInfoList().stream()
             .filter(ad -> AdresseType.BOSTEDSADRESSE.equals(ad.getGjeldendePostadresseType()))
             .collect(Collectors.toList());

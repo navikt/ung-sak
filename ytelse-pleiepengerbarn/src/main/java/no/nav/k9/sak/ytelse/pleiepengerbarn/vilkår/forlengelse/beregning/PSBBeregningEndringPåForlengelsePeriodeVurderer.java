@@ -8,10 +8,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårTypeKoder;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -42,6 +46,7 @@ public class PSBBeregningEndringPåForlengelsePeriodeVurderer implements Endring
     private MottatteDokumentRepository mottatteDokumentRepository;
     private InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning;
     private ProsessTriggereRepository prosessTriggereRepository;
+    private Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere;
 
     PSBBeregningEndringPåForlengelsePeriodeVurderer() {
     }
@@ -50,11 +55,13 @@ public class PSBBeregningEndringPåForlengelsePeriodeVurderer implements Endring
     public PSBBeregningEndringPåForlengelsePeriodeVurderer(BehandlingRepository behandlingRepository,
                                                            MottatteDokumentRepository mottatteDokumentRepository,
                                                            ProsessTriggereRepository prosessTriggereRepository,
+                                                           @Any Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere,
                                                            @FagsakYtelseTypeRef("PSB") InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning) {
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.endringsVurderere = endringsVurderere;
     }
 
     @Override
@@ -67,7 +74,9 @@ public class PSBBeregningEndringPåForlengelsePeriodeVurderer implements Endring
             return true;
         }
 
-        return false;
+        var vurderer = EndringPåForlengelsePeriodeVurderer.finnVurderer(endringsVurderere, VilkårType.OPPTJENINGSVILKÅRET, FagsakYtelseType.PSB);
+
+        return vurderer.harPeriodeEndring(input, periode);
     }
 
     private boolean harEndringPåInntektsmeldingerTilBrukForPerioden(EndringPåForlengelseInput input, DatoIntervallEntitet periode) {

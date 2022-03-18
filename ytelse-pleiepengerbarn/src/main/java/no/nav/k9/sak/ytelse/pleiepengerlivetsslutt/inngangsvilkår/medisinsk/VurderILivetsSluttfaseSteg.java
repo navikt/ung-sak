@@ -14,6 +14,8 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -49,6 +51,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
+import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.LivetsSluttfaseDokumentasjon;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 
 @BehandlingStegRef(kode = "VURDER_MEDISINSK")
@@ -97,9 +100,11 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
 
         SykdomGrunnlagBehandling sykdomGrunnlagBehandling = opprettGrunnlag(perioder, behandling);
 
-        boolean manglerVurdering = harUklassifiserteDokumenter(pleietrengendeAktørId) || manglerSykdomVurdering(pleietrengendeAktørId);
+        boolean trengerAksjonspunkt = harUklassifiserteDokumenter(pleietrengendeAktørId)
+            || manglerGodkjentLegeerklæring(pleietrengendeAktørId)
+            || manglerSykdomVurdering(pleietrengendeAktørId);
         final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && sykdomGrunnlagBehandling.isFørsteGrunnlagPåBehandling();
-        if (manglerVurdering || førsteGangManuellRevurdering) {
+        if (trengerAksjonspunkt || førsteGangManuellRevurdering) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
@@ -112,6 +117,10 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
 
     private boolean harUklassifiserteDokumenter(AktørId pleietrengendeAktørId) {
         return sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
+    }
+
+    private boolean manglerGodkjentLegeerklæring(final AktørId pleietrengende) {
+        return sykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).isEmpty();
     }
 
     private boolean harSykdomDokumenter(AktørId pleietrengendeAktørId) {
@@ -173,6 +182,22 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
             .medRegelInput(vilkårData.getRegelInput())
             .medAvslagsårsak(vilkårData.getAvslagsårsak())
             .medMerknad(vilkårData.getVilkårUtfallMerknad()));
+
+        // Håndtering av Delvis innvilgelse
+        if (vilkårData.getUtfallType().equals(Utfall.OPPFYLT)) {
+            final var ekstraVilkårresultat = (MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat();
+            ekstraVilkårresultat.getDokumentasjonLivetsSluttfasePerioder()
+                .stream()
+                .filter(it -> LivetsSluttfaseDokumentasjon.IKKE_DOKUMENTERT.equals(it.getLivetsSluttfaseDokumentasjon()))
+                .filter(it -> periode.overlapper(it.getFraOgMed(), it.getTilOgMed()))
+                .forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFraOgMed(), it.getTilOgMed())
+                    .medUtfall(Utfall.IKKE_OPPFYLT)
+                    .medMerknadParametere(vilkårData.getMerknadParametere())
+                    .medRegelEvaluering(vilkårData.getRegelEvaluering())
+                    .medRegelInput(vilkårData.getRegelInput())
+                    .medAvslagsårsak(Avslagsårsak.MANGLENDE_DOKUMENTASJON)
+                    .medMerknad(vilkårData.getVilkårUtfallMerknad())));
+        }
     }
 
     private void oppdaterPleiebehovResultat(Long behandlingId, DatoIntervallEntitet periodeTilVurdering, VilkårData vilkårData) {

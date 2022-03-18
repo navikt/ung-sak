@@ -14,7 +14,7 @@ public class SamtidigKravStatus {
         TREKT;
     }
 
-    private SamtidigKravStatus(KravStatus søknad, KravStatus imMedRefusjonskrav, KravStatus imUtenRefusjonskrav) {
+    public SamtidigKravStatus(KravStatus søknad, KravStatus imMedRefusjonskrav, KravStatus imUtenRefusjonskrav) {
         this.søknad = søknad;
         this.imMedRefusjonskrav = imMedRefusjonskrav;
         this.imUtenRefusjonskrav = imUtenRefusjonskrav;
@@ -56,11 +56,6 @@ public class SamtidigKravStatus {
         return oppdaterRefusjonskravStatus(KravStatus.TREKT);
     }
 
-    public SamtidigKravStatus oppdaterInntektsmeldingTrekt() {
-        return oppdaterRefusjonskravStatus(KravStatus.TREKT)
-            .oppdaterInntektsmeldingUtenRefusjonskravStatus(KravStatus.TREKT);
-    }
-
     public SamtidigKravStatus oppdaterRefusjonskravStatus(KravStatus refusjonskrav) {
         return new SamtidigKravStatus(søknad, refusjonskrav, imUtenRefusjonskrav);
     }
@@ -98,5 +93,14 @@ public class SamtidigKravStatus {
     @Override
     public int hashCode() {
         return Objects.hash(søknad, imMedRefusjonskrav, imUtenRefusjonskrav);
+    }
+
+    @Override
+    public String toString() {
+        return "SamtidigKravStatus{" +
+            "søknad=" + søknad +
+            ", imMedRefusjonskrav=" + imMedRefusjonskrav +
+            ", imUtenRefusjonskrav=" + imUtenRefusjonskrav +
+            '}';
     }
 }

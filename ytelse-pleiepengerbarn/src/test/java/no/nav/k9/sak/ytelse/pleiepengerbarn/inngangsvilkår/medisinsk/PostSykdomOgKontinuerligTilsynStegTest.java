@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedlemskap;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 
 class PostSykdomOgKontinuerligTilsynStegTest {
@@ -29,7 +31,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
     private BehandlingRepositoryProvider mockProvider = mock(BehandlingRepositoryProvider.class); // Brukes ikke, men kan ikke være null
     private BeregningPerioderGrunnlagRepository mockrep = mock(BeregningPerioderGrunnlagRepository.class); // Brukes ikke, men kan ikke være null
     private AksjonspunktutlederForMedlemskap mockUtleder = mock(AksjonspunktutlederForMedlemskap.class); // Brukes ikke, men kan ikke være null
-    private PostSykdomOgKontinuerligTilsynSteg steg = new PostSykdomOgKontinuerligTilsynSteg(mockProvider, mockrep, new VilkårsPerioderTilVurderingTjeneste() {
+    private final VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = new VilkårsPerioderTilVurderingTjeneste() {
         @Override
         public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
             return null;
@@ -46,10 +48,17 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         }
 
         @Override
+        public Set<VilkårType> definerendeVilkår() {
+            return Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+        }
+
+        @Override
         public KantIKantVurderer getKantIKantVurderer() {
             return new PåTversAvHelgErKantIKantVurderer();
         }
-    }, mockUtleder);
+    };
+    private UnitTestLookupInstanceImpl<VilkårsPerioderTilVurderingTjeneste> instance = new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste);
+    private PostSykdomOgKontinuerligTilsynSteg steg = new PostSykdomOgKontinuerligTilsynSteg(mockProvider, mockrep, instance, mockUtleder);
 
     @Test
     void skal_justere_utfall_ved_perioder_med_avslag_på_medisinsk() {
@@ -73,7 +82,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering));
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -114,7 +123,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering));
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -158,7 +167,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
             .medUtfall(Utfall.IKKE_OPPFYLT));
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering));
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -198,7 +207,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering));
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -237,7 +246,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering));
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -275,7 +284,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering));
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -317,7 +326,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering));
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
