@@ -162,6 +162,9 @@ public class FordelRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public Response leggTilPbPerson(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
         final Optional<Fagsak> fagsakOpt = fagsakTjeneste.finnFagsakGittSaksnummer(s.getVerdi(), false);
+        if (fagsakOpt.get().getYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+            throw new IllegalArgumentException("Kun PSB-fagsaker kan få PB-flagg satt.");
+        }
         psbPbSakRepository.lagre(fagsakOpt.get().getId());
         
         return Response.noContent().build();
