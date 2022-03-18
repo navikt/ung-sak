@@ -22,6 +22,12 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -32,19 +38,13 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectWriter;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
@@ -60,6 +60,7 @@ import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.dokument.arkiv.journal.SafAdapter;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
@@ -83,6 +84,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbInfotrygdRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbPbSakRepository;
 
 /**
  * Mottar dokumenter fra f.eks. FPFORDEL og håndterer dispatch internt for saksbehandlingsløsningen.
@@ -103,6 +105,7 @@ public class FordelRestTjeneste {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private PsbInfotrygdRepository psbInfotrygdRepository;
     private AktørTjeneste aktørTjeneste;
+    private PsbPbSakRepository psbPbSakRepository;
     private ObjectWriter objectWriter = new JacksonJsonConfig().getObjectMapper().writerFor(Innsending.class);
 
     public FordelRestTjeneste() {// For Rest-CDI
@@ -115,7 +118,8 @@ public class FordelRestTjeneste {
                               MottatteDokumentRepository mottatteDokumentRepository,
                               SøknadMottakTjenesteContainer søknadMottakere,
                               PsbInfotrygdRepository psbInfotrygdRepository,
-                              AktørTjeneste aktørTjeneste) {
+                              AktørTjeneste aktørTjeneste,
+                              PsbPbSakRepository psbPbSakRepository) {
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.safAdapter = safAdapter;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -123,6 +127,7 @@ public class FordelRestTjeneste {
         this.søknadMottakere = søknadMottakere;
         this.psbInfotrygdRepository= psbInfotrygdRepository;
         this.aktørTjeneste = aktørTjeneste;
+        this.psbPbSakRepository = psbPbSakRepository;
     }
 
 
@@ -147,6 +152,18 @@ public class FordelRestTjeneste {
         if (sb.length() > 0) {
             return Response.status(400, sb.toString()).build();
         }
+        return Response.noContent().build();
+    }
+    
+    @POST
+    @Path("/sett-til-pb")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Setter at angitt saksnumre skal behandles som PB (gammel ordning) for PSB-saker.", summary = ("Setter at angitt saksnumre skal behandles som PB (gammel ordning) for PSB-saker."), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public Response leggTilPbPerson(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
+        final Optional<Fagsak> fagsakOpt = fagsakTjeneste.finnFagsakGittSaksnummer(s.getVerdi(), false);
+        psbPbSakRepository.lagre(fagsakOpt.get().getId());
+        
         return Response.noContent().build();
     }
 
