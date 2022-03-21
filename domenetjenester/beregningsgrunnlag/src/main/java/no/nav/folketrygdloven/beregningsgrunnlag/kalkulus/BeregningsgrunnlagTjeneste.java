@@ -332,18 +332,31 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter) {
-        var sortert = new TreeSet<>(skjæringstidspunkter);
-        var referanser = hentReferanserTjeneste.finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), sortert, false, false);
-        if (!referanser.isEmpty()) {
-            Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = Objects.equals(ref.getBehandlingType(), BehandlingType.REVURDERING) ? grunnlagRepository.getInitiellVersjon(ref.getBehandlingId()) : Optional.empty();
-            var bgReferanser = referanser.stream()
-                .filter(it -> !it.erGenerertReferanse())
-                .filter(it -> erIkkeInitiellVersjon(initiellVersjon, it))
-                .map(BgRef::getRef)
+    public void deaktiverBeregningsgrunnlagUtenTilknytningTilVilkår(BehandlingReferanse ref) {
+        var vilkårOptional = vilkårTjeneste.hentHvisEksisterer(ref.getBehandlingId())
+            .flatMap(v -> v.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+
+        if (vilkårOptional.isPresent()) {
+            var vilkår = vilkårOptional.get();
+            var vilkårsSkjæringspunkter = vilkår.getPerioder().stream().map(VilkårPeriode::getSkjæringstidspunkt).collect(Collectors.toSet());
+            var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+
+            var referanserUtenKnytningTilVilkårsPerioder = grunnlagOpt.stream().flatMap(g -> g.getGrunnlagPerioder()
+                    .stream())
+                .map(p -> new BgRef(p.getEksternReferanse(), p.getSkjæringstidspunkt()))
+                .filter(it -> vilkårsSkjæringspunkter.stream().noneMatch(vstp -> it.getStp().equals(vstp)))
                 .collect(Collectors.toList());
-            finnTjeneste(ref.getFagsakYtelseType()).deaktiverBeregningsgrunnlag(ref.getFagsakYtelseType(), ref.getSaksnummer(), bgReferanser);
+
+            if (!referanserUtenKnytningTilVilkårsPerioder.isEmpty()) {
+                Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = Objects.equals(ref.getBehandlingType(), BehandlingType.REVURDERING) ? grunnlagRepository.getInitiellVersjon(ref.getBehandlingId()) : Optional.empty();
+                var bgReferanser = referanserUtenKnytningTilVilkårsPerioder.stream()
+                    .filter(it -> erIkkeInitiellVersjon(initiellVersjon, it))
+                    .map(BgRef::getRef)
+                    .collect(Collectors.toList());
+                finnTjeneste(ref.getFagsakYtelseType()).deaktiverBeregningsgrunnlag(ref.getFagsakYtelseType(), ref.getSaksnummer(), bgReferanser);
+            }
         }
+
     }
 
     @Override
