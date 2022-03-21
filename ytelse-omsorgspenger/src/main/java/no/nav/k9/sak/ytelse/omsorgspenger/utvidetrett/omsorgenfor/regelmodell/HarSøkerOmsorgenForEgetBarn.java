@@ -34,7 +34,6 @@ public class HarSøkerOmsorgenForEgetBarn extends LeafSpecification<OmsorgenForV
             .anyMatch(it -> søkersAdresser.stream().anyMatch(it::erSammeAdresse));
     }
 
-    @SuppressWarnings("unused")
     private boolean harSammeBosted(OmsorgenForVilkårGrunnlag grunnlag) {
         final var søkersAdresser = grunnlag.getSøkersAdresser();
         return grunnlag.getBarnsAdresser().stream().anyMatch(it -> søkersAdresser.stream().anyMatch(it::erSammeAdresse));
