@@ -25,9 +25,10 @@ import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @BehandlingTypeRef("BT-004")
 @ApplicationScoped
-public class PSBForlengelseTjeneste implements ForlengelseTjeneste {
+public class PleiepengerForlengelseTjeneste implements ForlengelseTjeneste {
 
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -35,15 +36,15 @@ public class PSBForlengelseTjeneste implements ForlengelseTjeneste {
     private BehandlingRepository behandlingRepository;
     private Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere;
 
-    PSBForlengelseTjeneste() {
+    PleiepengerForlengelseTjeneste() {
     }
 
     @Inject
-    public PSBForlengelseTjeneste(SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-                                  VilkårResultatRepository vilkårResultatRepository,
-                                  InntektArbeidYtelseTjeneste iayTjeneste,
-                                  BehandlingRepository behandlingRepository,
-                                  @Any Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere) {
+    public PleiepengerForlengelseTjeneste(SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+                                          VilkårResultatRepository vilkårResultatRepository,
+                                          InntektArbeidYtelseTjeneste iayTjeneste,
+                                          BehandlingRepository behandlingRepository,
+                                          @Any Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere) {
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.iayTjeneste = iayTjeneste;

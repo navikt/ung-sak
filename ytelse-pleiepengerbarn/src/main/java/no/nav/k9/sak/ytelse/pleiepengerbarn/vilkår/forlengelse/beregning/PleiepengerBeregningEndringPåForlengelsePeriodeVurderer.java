@@ -32,9 +32,10 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.PSBEndringPåForlengelseInput;
 
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 @VilkårTypeRef(VilkårTypeKoder.FP_VK_41)
 @ApplicationScoped
-public class PSBBeregningEndringPåForlengelsePeriodeVurderer implements EndringPåForlengelsePeriodeVurderer {
+public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements EndringPåForlengelsePeriodeVurderer {
 
     private static final Set<BehandlingÅrsakType> RELEVANTE_ÅRSAKER = Set.of(
         BehandlingÅrsakType.RE_SATS_REGULERING,
@@ -44,19 +45,19 @@ public class PSBBeregningEndringPåForlengelsePeriodeVurderer implements Endring
 
     private BehandlingRepository behandlingRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning;
+    private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private ProsessTriggereRepository prosessTriggereRepository;
     private Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere;
 
-    PSBBeregningEndringPåForlengelsePeriodeVurderer() {
+    PleiepengerBeregningEndringPåForlengelsePeriodeVurderer() {
     }
 
     @Inject
-    public PSBBeregningEndringPåForlengelsePeriodeVurderer(BehandlingRepository behandlingRepository,
-                                                           MottatteDokumentRepository mottatteDokumentRepository,
-                                                           ProsessTriggereRepository prosessTriggereRepository,
-                                                           @Any Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere,
-                                                           @FagsakYtelseTypeRef("PSB") InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning) {
+    public PleiepengerBeregningEndringPåForlengelsePeriodeVurderer(BehandlingRepository behandlingRepository,
+                                                                   MottatteDokumentRepository mottatteDokumentRepository,
+                                                                   ProsessTriggereRepository prosessTriggereRepository,
+                                                                   @Any Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere,
+                                                                   @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning) {
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
@@ -115,8 +116,9 @@ public class PSBBeregningEndringPåForlengelsePeriodeVurderer implements Endring
     }
 
     private List<Inntektsmelding> utledRelevanteForPeriode(BehandlingReferanse referanse, Collection<Inntektsmelding> inntektsmeldinger, DatoIntervallEntitet periode) {
-        var inntektsmeldingBegrenset = inntektsmeldingerRelevantForBeregning.begrensSakInntektsmeldinger(referanse, inntektsmeldinger, periode);
-        return inntektsmeldingerRelevantForBeregning.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingBegrenset, periode);
+        var relevanteImTjeneste = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregning, referanse.getFagsakYtelseType());
+        var inntektsmeldingBegrenset = relevanteImTjeneste.begrensSakInntektsmeldinger(referanse, inntektsmeldinger, periode);
+        return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingBegrenset, periode);
     }
 
     private LocalDateTime finnEksaktMottattTidspunkt(Inntektsmelding inntektsmelding, List<MottattDokument> mottatteInntektsmeldinger) {
