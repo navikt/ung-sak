@@ -248,18 +248,26 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     }
 
     private List<BeregningsresultatAndel> finnAndeler(AktivitetStatus aktivitetFraUttaksplan, Arbeidsforhold arbeidsforholdFraUttaksplan, List<BeregningsresultatAndel> beregningsresultatAndeler) {
+        final AktivitetStatus as = medIkkeYrkesaktivSomArbeidstaker(aktivitetFraUttaksplan);
         final List<BeregningsresultatAndel> kandidater = beregningsresultatAndeler.stream()
                 .filter(a -> {
                     if (a.getAktivitetStatus().erArbeidstaker() || a.getAktivitetStatus().erFrilanser()) {
                         final Arbeidsforhold beregningsarbeidsforhold = toArbeidsforhold(a);
-                        return aktivitetFraUttaksplan == a.getAktivitetStatus() && arbeidsforholdFraUttaksplan.gjelderFor(beregningsarbeidsforhold);
+                        return as == a.getAktivitetStatus() && arbeidsforholdFraUttaksplan.gjelderFor(beregningsarbeidsforhold);
                     } else {
-                        return aktivitetFraUttaksplan == a.getAktivitetStatus();
+                        return as == a.getAktivitetStatus();
                     }
                 })
                 .toList();
 
         return kandidater;
+    }
+    
+    private static AktivitetStatus medIkkeYrkesaktivSomArbeidstaker(AktivitetStatus as) {
+        if (as == AktivitetStatus.IKKE_YRKESAKTIV) {
+            return AktivitetStatus.ARBEIDSTAKER;
+        }
+        return as;
     }
 
     private Arbeidsforhold toArbeidsforhold(BeregningsresultatAndel andel) {
