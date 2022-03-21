@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -17,11 +17,9 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
-import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtfallOversetter;
@@ -33,23 +31,15 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.omsorgenfor.regelmodell.Om
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.omsorgenfor.regelmodell.Relasjon;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.omsorgenfor.regelmodell.RelasjonsRolle;
 
-@ApplicationScoped
+@Dependent
 public class OmsorgenForTjeneste {
 
     private VilkårUtfallOversetter utfallOversetter;
-    private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
-    private TpsTjeneste tpsTjeneste;
-
-    OmsorgenForTjeneste() {
-        // CDI
-    }
 
     @Inject
-    OmsorgenForTjeneste(VilkårResultatRepository vilkårResultatRepository, BehandlingRepository behandlingRepository, BasisPersonopplysningTjeneste personopplysningTjeneste, TpsTjeneste tpsTjeneste) {
-        this.vilkårResultatRepository = vilkårResultatRepository;
-        this.tpsTjeneste = tpsTjeneste;
+    OmsorgenForTjeneste(BehandlingRepository behandlingRepository, BasisPersonopplysningTjeneste personopplysningTjeneste) {
         this.utfallOversetter = new VilkårUtfallOversetter();
         this.behandlingRepository = behandlingRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
@@ -69,19 +59,18 @@ public class OmsorgenForTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         Fagsak fagsak = behandling.getFagsak();
         var søkerAktørId = fagsak.getAktørId();
-        var pleietrengende = fagsak.getPleietrengendeAktørId();
+        var barnAktørId = fagsak.getPleietrengendeAktørId();
 
         var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, søkerAktørId, omsluttendePeriode(vilkårsperioder)).orElseThrow();
         var søkerBostedsadresser = personopplysningerAggregat.getAdresserFor(søkerAktørId)
             .stream()
             .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
             .toList();
-        var pleietrengendeBostedsadresser = personopplysningerAggregat.getAdresserFor(pleietrengende)
+        var barnBostedsadresser = personopplysningerAggregat.getAdresserFor(barnAktørId)
             .stream()
             .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
             .toList();
-
-        var deltBostedAdresser = personopplysningerAggregat.getAdresserFor(pleietrengende)
+        var deltBostedAdresser = personopplysningerAggregat.getAdresserFor(barnAktørId)
             .stream()
             .filter(it -> AdresseType.DELT_BOSTEDSADRESSE.equals(it.getAdresseType()))
             .toList();
@@ -89,9 +78,9 @@ public class OmsorgenForTjeneste {
         return new LocalDateTimeline<>(vilkårsperioder.stream()
             .map(vilkårsperiode ->
                 new LocalDateSegment<>(vilkårsperiode.getFom(), vilkårsperiode.getTom(), new OmsorgenForVilkårGrunnlag(
-                    mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
+                    mapRelasjonMellomSøkerOgBarn(personopplysningerAggregat, barnAktørId),
                     mapAdresser(søkerBostedsadresser),
-                    mapAdresser(pleietrengendeBostedsadresser),
+                    mapAdresser(barnBostedsadresser),
                     mapDeltBostedAdresser(deltBostedAdresser, vilkårsperiode))
                 )
             )
@@ -113,19 +102,19 @@ public class OmsorgenForTjeneste {
         return DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
     }
 
-    private List<BostedsAdresse> mapAdresser(List<PersonAdresseEntitet> pleietrengendeBostedsadresser) {
-        return pleietrengendeBostedsadresser.stream()
+    private List<BostedsAdresse> mapAdresser(List<PersonAdresseEntitet> bostedsadresser) {
+        return bostedsadresser.stream()
             .map(it -> new BostedsAdresse(it.getAktørId().getId(), it.getAdresselinje1(), it.getAdresselinje2(), it.getAdresselinje3(), it.getPostnummer(), it.getLand()))
-            .collect(Collectors.toList());
+            .toList();
     }
 
-    private Relasjon mapReleasjonMellomPleietrengendeOgSøker(PersonopplysningerAggregat aggregat, AktørId pleietrengende) {
-        final var relasjoner = aggregat.getSøkersRelasjoner().stream().filter(it -> it.getTilAktørId().equals(pleietrengende)).collect(Collectors.toSet());
+    private Relasjon mapRelasjonMellomSøkerOgBarn(PersonopplysningerAggregat aggregat, AktørId barnAktørId) {
+        final var relasjoner = aggregat.getSøkersRelasjoner().stream().filter(it -> it.getTilAktørId().equals(barnAktørId)).collect(Collectors.toSet());
         if (relasjoner.size() > 1) {
             throw new IllegalStateException("Fant flere relasjoner til barnet. Vet ikke hvilken som skal prioriteres");
         } else if (relasjoner.size() == 1) {
             final var relasjonen = relasjoner.iterator().next();
-            return new Relasjon(relasjonen.getAktørId().getId(), relasjonen.getTilAktørId().getId(), RelasjonsRolle.find(relasjonen.getRelasjonsrolle().getKode()), relasjonen.getHarSammeBosted());
+            return new Relasjon(relasjonen.getAktørId().getId(), relasjonen.getTilAktørId().getId(), RelasjonsRolle.find(relasjonen.getRelasjonsrolle().getKode()));
         } else {
             return null;
         }

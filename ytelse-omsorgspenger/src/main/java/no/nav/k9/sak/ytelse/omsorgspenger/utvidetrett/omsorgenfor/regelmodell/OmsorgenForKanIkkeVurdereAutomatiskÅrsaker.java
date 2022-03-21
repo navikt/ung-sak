@@ -2,14 +2,15 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.omsorgenfor.regelmodell;
 
 import no.nav.fpsak.nare.evaluation.RuleReasonRef;
 import no.nav.fpsak.nare.evaluation.RuleReasonRefImpl;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 
-enum OmsorgenForAvslagsårsaker {
-    IKKE_DOKUMENTERT_OMSORGEN_FOR("1071", "Ikke dokumentert omsorgen for.");
+enum OmsorgenForKanIkkeVurdereAutomatiskÅrsaker {
+    KAN_IKKE_AUTOMATISK_INNVILGE_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE, "Kan ikke automatisk innvilge omsorgen for.");
 
     private final String kode;
     private final String årsak;
 
-    OmsorgenForAvslagsårsaker(String kode, String årsak) {
+    OmsorgenForKanIkkeVurdereAutomatiskÅrsaker(String kode, String årsak) {
         this.kode = kode;
         this.årsak = årsak;
     }

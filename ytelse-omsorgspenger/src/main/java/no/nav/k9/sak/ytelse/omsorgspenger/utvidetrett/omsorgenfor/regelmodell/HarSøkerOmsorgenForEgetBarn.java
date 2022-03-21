@@ -17,14 +17,15 @@ public class HarSøkerOmsorgenForEgetBarn extends LeafSpecification<OmsorgenForV
 
     @Override
     public Evaluation evaluate(OmsorgenForVilkårGrunnlag grunnlag) {
-        final var relasjon = grunnlag.getRelasjonMellomSøkerOgBarn();
+        var relasjon = grunnlag.getRelasjonMellomSøkerOgBarn();
 
-        //TODO logikk bør splittes til å håndteres i regelmotoren?
-        if (erMorEllerFarTilBarnet(relasjon) && (harSammeBosted(grunnlag) || harDeltBosted(grunnlag))) {
+        boolean erForelderTilBarnet = erForelderTilBarnet(relasjon);
+        boolean harSammeBosted = harSammeAdresse(grunnlag) || harDeltBosted(grunnlag);
+        if (erForelderTilBarnet && harSammeBosted) {
             return ja();
         }
 
-        return nei(OmsorgenForAvslagsårsaker.IKKE_DOKUMENTERT_OMSORGEN_FOR.toRuleReason());
+        return nei(OmsorgenForKanIkkeVurdereAutomatiskÅrsaker.KAN_IKKE_AUTOMATISK_INNVILGE_OMSORGEN_FOR.toRuleReason());
     }
 
     private boolean harDeltBosted(OmsorgenForVilkårGrunnlag grunnlag) {
@@ -34,12 +35,12 @@ public class HarSøkerOmsorgenForEgetBarn extends LeafSpecification<OmsorgenForV
             .anyMatch(it -> søkersAdresser.stream().anyMatch(it::erSammeAdresse));
     }
 
-    private boolean harSammeBosted(OmsorgenForVilkårGrunnlag grunnlag) {
+    private boolean harSammeAdresse(OmsorgenForVilkårGrunnlag grunnlag) {
         final var søkersAdresser = grunnlag.getSøkersAdresser();
         return grunnlag.getBarnsAdresser().stream().anyMatch(it -> søkersAdresser.stream().anyMatch(it::erSammeAdresse));
     }
 
-    private boolean erMorEllerFarTilBarnet(Relasjon relasjon) {
+    private boolean erForelderTilBarnet(Relasjon relasjon) {
         return relasjon != null && RelasjonsRolle.BARN == relasjon.getRelasjonsRolle();
     }
 }

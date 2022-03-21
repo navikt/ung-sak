@@ -5,13 +5,11 @@ public class Relasjon {
     private final String fraAktørId;
     private final String tilAktørId;
     private final RelasjonsRolle relasjonsRolle;
-    private final boolean harSammeBosted;
 
-    public Relasjon(String fraAktørId, String tilAktørId, RelasjonsRolle relasjonsRolle, boolean harSammeBosted) {
+    public Relasjon(String fraAktørId, String tilAktørId, RelasjonsRolle relasjonsRolle) {
         this.fraAktørId = fraAktørId;
         this.tilAktørId = tilAktørId;
         this.relasjonsRolle = relasjonsRolle;
-        this.harSammeBosted = harSammeBosted;
     }
 
     public String getFraAktørId() {
@@ -26,17 +24,12 @@ public class Relasjon {
         return relasjonsRolle;
     }
 
-    public boolean getHarSammeBosted() {
-        return harSammeBosted;
-    }
-
     @Override
     public String toString() {
         return "Relasjon{" +
             "fraAktørId='" + fraAktørId + '\'' +
             ", tilAktørId='" + tilAktørId + '\'' +
             ", relasjonsRolle='" + relasjonsRolle + '\'' +
-            ", harSammeBosted=" + harSammeBosted +
             '}';
     }
 }

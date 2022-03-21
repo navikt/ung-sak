@@ -65,12 +65,12 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         if (automatiserVedtak) {
-            return utførStegDelautomatisk(kontekst);
+            return utførStegAutomatisk(kontekst);
         }
-        return utførStegHelmanuelt(kontekst);
+        return utførStegManuelt(kontekst);
     }
 
-    public BehandleStegResultat utførStegDelautomatisk(BehandlingskontrollKontekst kontekst) {
+    public BehandleStegResultat utførStegAutomatisk(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var vilkår = vilkårene.getVilkår(VilkårType.OMSORGEN_FOR).orElseThrow();
@@ -80,11 +80,8 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
             Vilkårene oppdaterteVilkår = oppdaterVilkårene(kontekst, vilkårene, vilkårData);
             vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
 
-            //regelsett er ikke komplett (f.eks fosterbarn), saksbehandler skal kunne innvilge perioder som avslås her
-            boolean altInnvilget = vilkårData.stream().allMatch(vp -> vp.getUtfallType() == Utfall.OPPFYLT);
-            return altInnvilget
-                ? BehandleStegResultat.utførtUtenAksjonspunkter()
-                : BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR));
+            List<AksjonspunktDefinisjon> aksjonspunkter = vilkårData.stream().flatMap(vd -> vd.getApDefinisjoner().stream()).distinct().toList();
+            return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
         } else {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
@@ -117,7 +114,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
             .medMerknad(vilkårData.getVilkårUtfallMerknad()));
     }
 
-    public BehandleStegResultat utførStegHelmanuelt(BehandlingskontrollKontekst kontekst) {
+    public BehandleStegResultat utførStegManuelt(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var vilkår = vilkårene.getVilkår(VilkårType.OMSORGEN_FOR).orElseThrow();
