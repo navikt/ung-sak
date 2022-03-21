@@ -1,10 +1,8 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -21,7 +19,6 @@ import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
@@ -150,25 +147,6 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
     private void avslåVilkår(BehandlingskontrollKontekst kontekst,
                              Avslagsårsak avslagsårsak, DatoIntervallEntitet vilkårsPeriode) {
         beregningsgrunnlagVilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, vilkårsPeriode, avslagsårsak);
-    }
-
-    @Override
-    public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (!BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING.equals(tilSteg)) {
-            Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            var ref = BehandlingReferanse.fra(behandling);
-            NavigableSet<DatoIntervallEntitet> perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false);
-            deaktiverResultatOgSettPeriodeTilVurdering(ref, kontekst, perioderTilVurdering);
-        }
-    }
-
-    private void deaktiverResultatOgSettPeriodeTilVurdering(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst, NavigableSet<DatoIntervallEntitet> perioder) {
-        if (perioder.isEmpty()) {
-            return;
-        }
-        beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, perioder);
-        List<LocalDate> skjæringstidspunkter = perioder.stream().map(DatoIntervallEntitet::getFomDato).collect(Collectors.toList());
-        kalkulusTjeneste.deaktiverBeregningsgrunnlag(ref, skjæringstidspunkter);
     }
 
 }
