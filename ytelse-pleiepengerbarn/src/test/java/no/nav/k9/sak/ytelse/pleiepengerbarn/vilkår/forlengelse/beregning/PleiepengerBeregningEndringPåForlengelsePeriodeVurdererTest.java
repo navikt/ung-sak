@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.k9.sak.typer.JournalpostId;
 
-class PSBBeregningEndringPåForlengelsePeriodeVurdererTest {
+class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
 
-    private PSBBeregningEndringPåForlengelsePeriodeVurderer vurderer = new PSBBeregningEndringPåForlengelsePeriodeVurderer();
+    private PleiepengerBeregningEndringPåForlengelsePeriodeVurderer vurderer = new PleiepengerBeregningEndringPåForlengelsePeriodeVurderer();
 
     @Test
     void skal_vurdere_set_som_like_hvis_inneholder_de_samme() {

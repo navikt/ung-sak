@@ -19,11 +19,9 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelev
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -189,9 +187,9 @@ public class KompletthetForBeregningTjeneste {
     }
 
     public List<Inntektsmelding> utledInntektsmeldingerSomBenytteMotBeregningForPeriode(BehandlingReferanse referanse, Set<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {
-        var tjeneste = finnInntektsmeldingForBeregningTjeneste(referanse);
-        var inntektsmeldings = tjeneste.begrensSakInntektsmeldinger(referanse, alleInntektsmeldingerPåSak, periode);
-        return tjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldings, periode);
+        var relevanteImTjeneste = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregning, referanse.getFagsakYtelseType());
+        var inntektsmeldings = relevanteImTjeneste.begrensSakInntektsmeldinger(referanse, alleInntektsmeldingerPåSak, periode);
+        return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldings, periode);
     }
 
     private <V extends ArbeidsforholdRef> List<ManglendeVedlegg> utledManglendeInntektsmeldingerPerDag(Set<Inntektsmelding> inntektsmeldinger,
@@ -241,9 +239,4 @@ public class KompletthetForBeregningTjeneste {
             .collect(Collectors.toSet());
     }
 
-    private InntektsmeldingerRelevantForBeregning finnInntektsmeldingForBeregningTjeneste(BehandlingReferanse referanse) {
-        FagsakYtelseType ytelseType = referanse.getFagsakYtelseType();
-        return FagsakYtelseTypeRef.Lookup.find(inntektsmeldingerRelevantForBeregning, ytelseType)
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + InntektsmeldingerRelevantForBeregning.class.getSimpleName() + " for ytelseType=" + ytelseType));
-    }
 }

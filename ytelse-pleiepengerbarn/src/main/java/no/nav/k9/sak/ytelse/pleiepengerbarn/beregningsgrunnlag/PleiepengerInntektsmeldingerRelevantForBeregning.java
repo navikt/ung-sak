@@ -23,15 +23,15 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
 @FagsakYtelseTypeRef("PPN")
-public class PSBInntektsmeldingerRelevantForBeregning implements InntektsmeldingerRelevantForBeregning {
+public class PleiepengerInntektsmeldingerRelevantForBeregning implements InntektsmeldingerRelevantForBeregning {
 
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
 
-    public PSBInntektsmeldingerRelevantForBeregning() {
+    public PleiepengerInntektsmeldingerRelevantForBeregning() {
     }
 
     @Inject
-    public PSBInntektsmeldingerRelevantForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
+    public PleiepengerInntektsmeldingerRelevantForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
     }
 
