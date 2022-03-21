@@ -237,7 +237,7 @@ spec:
     - name: OMP_AARSKVANTUMTJENESTE_BRUK_FERDIGUTLEDET_FLAGG_REFUSJON
       value: "true"
     - name: OMP_DELT_BOSTED_RAMMEVEDTAK
-      value: "false"
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
