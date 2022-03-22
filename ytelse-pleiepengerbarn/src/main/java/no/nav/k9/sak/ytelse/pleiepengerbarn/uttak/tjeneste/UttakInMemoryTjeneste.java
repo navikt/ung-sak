@@ -18,7 +18,6 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.SøktUttak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
-import no.nav.pleiepengerbarn.uttak.kontrakter.UtenlandsoppholdÅrsak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
@@ -69,7 +68,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             uttakPerioder.put(periode.getPeriode(), mapTilUttaksperiodeInfo(periode, input));
         }
 
-        var plan = new Uttaksplan(uttakPerioder, List.of());
+        var plan = new Uttaksplan(uttakPerioder, List.of(), null);
 
         lagreUttakResultatPerioder(saksnummer, behandlingUuid, plan);
 
@@ -102,9 +101,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             null,
             null,
             null,
-            false,
-            null,
-            UtenlandsoppholdÅrsak.INGEN);
+            false);
     }
 
     private Map<String, Utfall> mapInngangsvilkår(Map<String, List<Vilkårsperiode>> inngangsvilkår) {
