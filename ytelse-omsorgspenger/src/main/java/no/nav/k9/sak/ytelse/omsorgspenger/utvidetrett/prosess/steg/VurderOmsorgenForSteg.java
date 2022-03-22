@@ -23,6 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.omsorgenfor.OmsorgenForTjeneste;
@@ -74,17 +75,14 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         Long behandlingId = kontekst.getBehandlingId();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var vilkår = vilkårene.getVilkår(VilkårType.OMSORGEN_FOR).orElseThrow();
-        if (vilkår.getPerioder().stream().anyMatch(v -> v.getUtfall() == Utfall.IKKE_VURDERT)) {
-            LocalDateTimeline<OmsorgenForVilkårGrunnlag> grunnlagsdata = omsorgenForTjeneste.oversettSystemdataTilRegelModellGrunnlag(kontekst.getBehandlingId(), vilkår.getPerioder());
-            List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(grunnlagsdata);
-            Vilkårene oppdaterteVilkår = oppdaterVilkårene(kontekst, vilkårene, vilkårData);
-            vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
+        List<VilkårPeriode> ikkeVurdertePerioder = vilkår.getPerioder().stream().filter(v -> v.getUtfall() == Utfall.IKKE_VURDERT).toList();
+        LocalDateTimeline<OmsorgenForVilkårGrunnlag> grunnlagsdata = omsorgenForTjeneste.oversettSystemdataTilRegelModellGrunnlag(kontekst.getBehandlingId(), ikkeVurdertePerioder);
+        List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(grunnlagsdata);
+        Vilkårene oppdaterteVilkår = oppdaterVilkårene(kontekst, vilkårene, vilkårData);
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
 
-            List<AksjonspunktDefinisjon> aksjonspunkter = vilkårData.stream().flatMap(vd -> vd.getApDefinisjoner().stream()).distinct().toList();
-            return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
-        } else {
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
+        List<AksjonspunktDefinisjon> aksjonspunkter = vilkårData.stream().flatMap(vd -> vd.getApDefinisjoner().stream()).distinct().toList();
+        return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
     }
 
     private Vilkårene oppdaterVilkårene(BehandlingskontrollKontekst kontekst, Vilkårene vilkårene, List<VilkårData> vilkårData) {
