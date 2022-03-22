@@ -6,8 +6,9 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
@@ -15,8 +16,6 @@ import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
 import no.nav.k9.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP_KS")
@@ -64,6 +63,8 @@ public class UtvidetRettOpprettProsessTaskIverksett implements OpprettProsessTas
 
         taskData.addNesteSekvensiell(new ProsessTaskData(AvsluttBehandlingTask.TASKTYPE));
 
+        opprettYtelsesSpesifikkeTasks(behandling).ifPresent(taskData::addNesteSekvensiell);
+
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
 
         taskData.setCallIdFraEksisterende();
@@ -71,8 +72,6 @@ public class UtvidetRettOpprettProsessTaskIverksett implements OpprettProsessTas
         var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
         fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId.toString(), taskData);
-
-        opprettYtelsesSpesifikkeTasks(behandling);
     }
 
 }

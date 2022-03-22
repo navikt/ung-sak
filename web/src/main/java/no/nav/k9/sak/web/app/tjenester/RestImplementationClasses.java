@@ -35,6 +35,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRes
 import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilsyn.VurderTilsynRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.PleiepengerUttakRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UtenlandsoppholdRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.DokumenterMedUstrukturerteDataRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
@@ -42,6 +43,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningInfotrygMigreringRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelHendelseRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DiagnostikkRestTjeneste;
@@ -101,6 +103,7 @@ public class RestImplementationClasses {
         classes.add(IAYRegisterdataCallbackRestTjeneste.class);
         classes.add(UttakRestTjeneste.class);
         classes.add(PleiepengerUttakRestTjeneste.class);
+        classes.add(UtenlandsoppholdRestTjeneste.class);
         classes.add(VurderTilsynRestTjeneste.class);
         classes.add(RettVedDødRestTjeneste.class);
         classes.add(PleietrengendeRestTjeneste.class);
@@ -113,6 +116,7 @@ public class RestImplementationClasses {
         classes.add(ForvaltningMidlertidigDriftRestTjeneste.class);
         classes.add(ForvaltningOppdragRestTjeneste.class);
         classes.add(ForvaltningBeregningRestTjeneste.class);
+        classes.add(ForvaltningInfotrygMigreringRestTjeneste.class);
         classes.add(DiagnostikkRestTjeneste.class);
         classes.add(RapporteringRestTjeneste.class);
 

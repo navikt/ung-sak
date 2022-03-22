@@ -79,6 +79,17 @@ public class UtenlandsoppholdPeriode extends BaseEntitet implements IndexKey {
         return periode;
     }
 
+    public UtenlandsoppholdÅrsak getÅrsak() {
+        return årsak;
+    }
+
+    public Landkoder getLand() {
+        return land;
+    }
+
+    public boolean isAktiv() {
+        return aktiv;
+    }
 
     @Override
     public String getIndexKey() {

@@ -315,10 +315,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.AUTOPUNKT, "Venter på punsjet søknad", BehandlingStatus.UTREDES, BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, ENTRINN, TILBAKE, AVBRYTES, EnumSet.of(PSB)),
     TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE(AksjonspunktKodeDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE,
-        AksjonspunktType.MANUELL, "Mangler søknad for periode i inneværende år", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, VurderingspunktType.UT,
+        AksjonspunktType.MANUELL, "Mangler søknad for periode i inneværende år", BehandlingStatus.UTREDES, BehandlingStegType.OVERGANG_FRA_INFOTRYGD, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.INFOTRYGD_MIGRERING, TOTRINN, EnumSet.of(PSB)),
     TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART(AksjonspunktKodeDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART,
-        AksjonspunktType.MANUELL, "Mangler søknad for annen parts periode", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, VurderingspunktType.UT,
+        AksjonspunktType.MANUELL, "Mangler søknad for annen parts periode", BehandlingStatus.UTREDES, BehandlingStegType.OVERGANG_FRA_INFOTRYGD, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.INFOTRYGD_MIGRERING, TOTRINN, EnumSet.of(PSB)),
 
     // Gruppe: 92xx - Pleiepenger

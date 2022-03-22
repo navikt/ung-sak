@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Optional;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
@@ -18,7 +17,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.Beregn
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 
 /**
  * BeregningTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt (https://github.com/navikt/ft-kalkulus/)
@@ -33,7 +32,7 @@ public interface BeregningTjeneste {
      * @param vilkårsperioder - alle perioder til vurdering
      * @return SamletKalkulusResultat {@link SamletKalkulusResultat}
      */
-    SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, Collection<DatoIntervallEntitet> vilkårsperioder, BehandlingStegType stegType);
+    SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, Collection<PeriodeTilVurdering> vilkårsperioder, BehandlingStegType stegType);
 
     /**
      * Kjører en beregning videre fra gitt steg <br>
@@ -49,7 +48,14 @@ public interface BeregningTjeneste {
      * @param stegType {@link BehandlingStegType}
      * @return SamletKalkulusResultat {@link KalkulusResultat}
      */
-    SamletKalkulusResultat beregn(BehandlingReferanse referanse, Collection<DatoIntervallEntitet> vilkårsperioder, BehandlingStegType stegType);
+    SamletKalkulusResultat beregn(BehandlingReferanse referanse, Collection<PeriodeTilVurdering> vilkårsperioder, BehandlingStegType stegType);
+
+    /** Kopierer beregningsgrunnlaget lagret i steg VURDER_VILKAR_BERGRUNN (Vurder vilkår) fra original behandling for hver vilkårsperiode
+     * @param referanse Behandlingreferanse
+     * @param vilkårsperioder Vilkårsperioder
+     */
+    void kopier(BehandlingReferanse referanse, Collection<PeriodeTilVurdering> vilkårsperioder);
+
 
     /**
      * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt
@@ -78,14 +84,16 @@ public interface BeregningTjeneste {
 
     List<BeregningsgrunnlagKobling> hentKoblingerForInnvilgedePerioder(BehandlingReferanse ref);
 
+    List<BeregningsgrunnlagKobling> hentKoblingerForInnvilgedePerioderTilVurdering(BehandlingReferanse ref);
+
+
     /** Deaktiverer beregningsgrunnlaget og tilhørende input. Fører til at man ikke har noen aktive beregningsgrunnlag.
      *
      * Deaktivering skal kun kalles i første steg i beregning.
+     *  @param ref Behandlingreferanse
      *
-     * @param ref Behandlingreferanse
-     * @param skjæringstidspunkt
      */
-    public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter);
+    public void deaktiverBeregningsgrunnlagUtenTilknytningTilVilkår(BehandlingReferanse ref);
 
     /** Gjenoppretter det første beregningsgrunnlaget som var opprettet for behandlingen
      *

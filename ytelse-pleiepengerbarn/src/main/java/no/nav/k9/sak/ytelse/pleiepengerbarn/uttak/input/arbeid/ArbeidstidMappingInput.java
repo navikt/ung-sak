@@ -9,6 +9,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -26,6 +27,7 @@ public class ArbeidstidMappingInput {
     private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivTidslinje;
     private Map<Saksnummer, Set<LocalDate>> sakerSomMåSpesialhåndteres = new HashMap<>();
     private InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag;
+    private DatoIntervallEntitet utvidetPeriodeSomFølgeAvDødsfall;
 
     public ArbeidstidMappingInput() {
     }
@@ -104,6 +106,15 @@ public class ArbeidstidMappingInput {
 
     public Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> getInaktivTidslinje() {
         return inaktivTidslinje != null ? inaktivTidslinje : Map.of();
+    }
+
+    public DatoIntervallEntitet getUtvidetPeriodeSomFølgeAvDødsfall() {
+        return utvidetPeriodeSomFølgeAvDødsfall;
+    }
+
+    public ArbeidstidMappingInput medAutomatiskUtvidelseVedDødsfall(DatoIntervallEntitet utvidetPeriodeSomFølgeAvDødsfall) {
+        this.utvidetPeriodeSomFølgeAvDødsfall = utvidetPeriodeSomFølgeAvDødsfall;
+        return this;
     }
 
     public Saksnummer getSaksnummer() {

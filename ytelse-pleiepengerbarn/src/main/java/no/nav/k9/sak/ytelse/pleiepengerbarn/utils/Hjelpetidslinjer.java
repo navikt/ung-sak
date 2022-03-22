@@ -10,14 +10,14 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 
 public final class Hjelpetidslinjer {
-    
+
     private Hjelpetidslinjer() {}
 
     public static LocalDateTimeline<Boolean> lagTidslinjeMedKunHelger(LocalDateTimeline<?> tidslinje) {
         var timeline = new LocalDateTimeline<Boolean>(List.of());
         for (LocalDateSegment<?> segment : tidslinje.toSegments()) {
             var min = segment.getFom();
-            var max = segment.getTom();
+            var max = finnNærmeste(DayOfWeek.MONDAY, segment.getTom());
             LocalDate next = min;
 
             while (next.isBefore(max)) {
@@ -35,7 +35,7 @@ public final class Hjelpetidslinjer {
         }
         return timeline;
     }
-    
+
     private static LocalDate finnNeste(LocalDate max, LocalDate start) {
         LocalDate next;
         next = finnNærmeste(DayOfWeek.SUNDAY, start);

@@ -10,10 +10,12 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -49,8 +51,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
+import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.LivetsSluttfaseDokumentasjon;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
-import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.Pleielokasjon;
 
 @BehandlingStegRef(kode = "VURDER_MEDISINSK")
 @BehandlingTypeRef
@@ -98,8 +100,11 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
 
         SykdomGrunnlagBehandling sykdomGrunnlagBehandling = opprettGrunnlag(perioder, behandling);
 
-        boolean manglerVurdering = harUklassifiserteDokumenter(pleietrengendeAktørId) || manglerSykdomVurdering(pleietrengendeAktørId);
-        if (manglerVurdering || behandling.erManueltOpprettet()) {
+        boolean trengerAksjonspunkt = harUklassifiserteDokumenter(pleietrengendeAktørId)
+            || manglerGodkjentLegeerklæring(pleietrengendeAktørId)
+            || manglerSykdomVurdering(pleietrengendeAktørId);
+        final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && sykdomGrunnlagBehandling.isFørsteGrunnlagPåBehandling();
+        if (trengerAksjonspunkt || førsteGangManuellRevurdering) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
@@ -114,19 +119,23 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         return sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
     }
 
+    private boolean manglerGodkjentLegeerklæring(final AktørId pleietrengende) {
+        return sykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).isEmpty();
+    }
+
     private boolean harSykdomDokumenter(AktørId pleietrengendeAktørId) {
         Set<SykdomDokumentType> aktuelleDokumenttyper = Set.of(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS, SykdomDokumentType.MEDISINSKE_OPPLYSNINGER);
         return sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId).stream().anyMatch(d -> aktuelleDokumenttyper.contains(d.getType()));
     }
 
     private boolean manglerSykdomVurdering(AktørId pleietrengende) {
-        if (!harSykdomDokumenter(pleietrengende)){
+        if (!harSykdomDokumenter(pleietrengende)) {
             //uten sykdomsdokumenter, kan ikke sykdomsvurdering utføres
             return false;
         }
         var gjeldendeSykdomVurdering = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.LIVETS_SLUTTFASE, pleietrengende);
         var sykdomVurderingSegmenter = gjeldendeSykdomVurdering.toSegments();
-        if (sykdomVurderingSegmenter.isEmpty()){
+        if (sykdomVurderingSegmenter.isEmpty()) {
             return true;
         }
         return sykdomVurderingSegmenter
@@ -173,6 +182,22 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
             .medRegelInput(vilkårData.getRegelInput())
             .medAvslagsårsak(vilkårData.getAvslagsårsak())
             .medMerknad(vilkårData.getVilkårUtfallMerknad()));
+
+        // Håndtering av Delvis innvilgelse
+        if (vilkårData.getUtfallType().equals(Utfall.OPPFYLT)) {
+            final var ekstraVilkårresultat = (MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat();
+            ekstraVilkårresultat.getDokumentasjonLivetsSluttfasePerioder()
+                .stream()
+                .filter(it -> LivetsSluttfaseDokumentasjon.IKKE_DOKUMENTERT.equals(it.getLivetsSluttfaseDokumentasjon()))
+                .filter(it -> periode.overlapper(it.getFraOgMed(), it.getTilOgMed()))
+                .forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFraOgMed(), it.getTilOgMed())
+                    .medUtfall(Utfall.IKKE_OPPFYLT)
+                    .medMerknadParametere(vilkårData.getMerknadParametere())
+                    .medRegelEvaluering(vilkårData.getRegelEvaluering())
+                    .medRegelInput(vilkårData.getRegelInput())
+                    .medAvslagsårsak(Avslagsårsak.MANGLENDE_DOKUMENTASJON)
+                    .medMerknad(vilkårData.getVilkårUtfallMerknad())));
+        }
     }
 
     private void oppdaterPleiebehovResultat(Long behandlingId, DatoIntervallEntitet periodeTilVurdering, VilkårData vilkårData) {
@@ -181,11 +206,11 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         builder.tilbakeStill(periodeTilVurdering);
         final var vilkårresultat = ((MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat());
 
-        vilkårresultat.getPleieperioder().forEach(periode -> {
-            Pleiegrad pleiegrad = periode.getPleielokasjon() == Pleielokasjon.HJEMME ? Pleiegrad.LIVETS_SLUTT_TILSYN : Pleiegrad.INGEN;
-            var etablertPleieperiode = new EtablertPleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), pleiegrad);
-            builder.leggTil(etablertPleieperiode);
-        });
+        LocalDateTimeline<Pleiegrad> pleiegradTidslinje = PleiegradKalkulator.regnUtPleiegrad(vilkårresultat);
+        pleiegradTidslinje.stream()
+            .map(periode -> new EtablertPleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()), periode.getValue()))
+            .forEach(builder::leggTil);
+
         resultatRepository.lagreOgFlush(behandlingId, builder);
     }
 

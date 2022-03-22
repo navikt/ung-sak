@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
@@ -64,7 +63,7 @@ public class EtablertTilsynTjeneste {
         final EtablertTilsyn forrigeBehandlingEtablertTilsyn = behandlingOpt.flatMap(behandlingId -> etablertTilsynRepository.hentHvisEksisterer(behandlingId))
             .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
             .orElse(new EtablertTilsyn(List.of()));
-        return uhåndterteEndringerFraForrige(behandlingRef, forrigeBehandlingEtablertTilsyn);
+        return uhåndterteEndringerFraForrige(behandlingRef, forrigeBehandlingEtablertTilsyn).compress();
     }
 
     public LocalDateTimeline<Boolean> finnForskjellerFraEksisterendeVersjon(BehandlingReferanse behandlingRef) {
@@ -77,7 +76,7 @@ public class EtablertTilsynTjeneste {
             .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
             .orElse(new EtablertTilsyn(List.of()));
 
-        return uhåndterteEndringerFraForrige(behandlingRef, forrigeEtablertTilsyn);
+        return uhåndterteEndringerFraForrige(behandlingRef, forrigeEtablertTilsyn).compress();
     }
 
     private LocalDateTimeline<Boolean> uhåndterteEndringerFraForrige(BehandlingReferanse behandlingRef, EtablertTilsyn forrigeBehandlingEtablertTilsyn) {

@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -30,12 +32,8 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.exception.TekniskException;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
@@ -79,7 +77,6 @@ public class DokumentRestTjeneste {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private VirksomhetTjeneste virksomhetTjeneste;
     private BehandlingRepository behandlingRepository;
-    private Boolean enablePsbHenleggelse;
 
     public DokumentRestTjeneste() {
         // For Rest-CDI
@@ -91,15 +88,13 @@ public class DokumentRestTjeneste {
                                 FagsakRepository fagsakRepository,
                                 MottatteDokumentRepository mottatteDokumentRepository,
                                 VirksomhetTjeneste virksomhetTjeneste,
-                                BehandlingRepository behandlingRepository,
-                                @KonfigVerdi(value = "BEHANDLINGID_DOKUMENTLIST_ENABLET", defaultVerdi = "false") Boolean enablePsbHenleggelse) {
+                                BehandlingRepository behandlingRepository) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.virksomhetTjeneste = virksomhetTjeneste;
         this.behandlingRepository = behandlingRepository;
-        this.enablePsbHenleggelse = enablePsbHenleggelse;
     }
 
     @GET
@@ -145,9 +140,6 @@ public class DokumentRestTjeneste {
     }
 
     private void leggTilBehandling(DokumentDto dto, List<Behandling> behandlinger) {
-        if (!enablePsbHenleggelse) {
-            return;
-        }
         var behandlingTidslinje = opprettTidslinje(behandlinger);
         var behandlingId = utledBehandling(dto, behandlingTidslinje);
 
@@ -160,6 +152,9 @@ public class DokumentRestTjeneste {
     }
 
     Long utledBehandling(DokumentDto dto, NavigableSet<BehandlingPeriode> behandlingTidslinje) {
+        if (dto.getTidspunkt() == null) {
+            return null;
+        }
         if (Objects.equals(dto.getKommunikasjonsretning(), Kommunikasjonsretning.UT)) {
             // finn nærmeste TOM
             return behandlingTidslinje.stream()

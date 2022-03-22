@@ -10,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -24,6 +25,8 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningStegTjeneste.FortsettBeregningResultatCallback;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @FagsakYtelseTypeRef("*")
 @BehandlingStegRef(kode = "VURDER_VILKAR_BERGRUNN")
@@ -34,6 +37,8 @@ public class VurderBeregningsgrunnlagVilkårSteg implements BeregningsgrunnlagSt
     private BehandlingRepository behandlingRepository;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private BeregningStegTjeneste beregningStegTjeneste;
+    private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
+    private boolean enableForlengelse;
 
     protected VurderBeregningsgrunnlagVilkårSteg() {
         // CDI Proxy
@@ -42,11 +47,15 @@ public class VurderBeregningsgrunnlagVilkårSteg implements BeregningsgrunnlagSt
     @Inject
     public VurderBeregningsgrunnlagVilkårSteg(BehandlingRepository behandlingRepository,
                                               BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                              BeregningStegTjeneste beregningStegTjeneste) {
+                                              BeregningStegTjeneste beregningStegTjeneste,
+                                              VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
+                                              @KonfigVerdi(value = "forlengelse.beregning.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
 
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.beregningStegTjeneste = beregningStegTjeneste;
+        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
+        this.enableForlengelse = enableForlengelse;
     }
 
     @Override
@@ -62,7 +71,13 @@ public class VurderBeregningsgrunnlagVilkårSteg implements BeregningsgrunnlagSt
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var ref = BehandlingReferanse.fra(behandling);
-        beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false)
+        var periodeTilVurderingFilter = vilkårPeriodeFilterProvider.getFilter(ref, enableForlengelse);
+        periodeTilVurderingFilter.ignorerAvslagPåKompletthet();
+        if (enableForlengelse) {
+            periodeTilVurderingFilter.ignorerForlengelseperioder();
+        }
+        beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, periodeTilVurderingFilter)
+            .stream().map(PeriodeTilVurdering::getPeriode)
             .forEach(periode -> beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, periode));
     }
 

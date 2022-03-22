@@ -43,8 +43,7 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
         return new EtablertTilsynNattevåkOgBeredskapDto(
             tilEtablertTilsyn(behandlingRef),
             tilNattevåk(nattevåk, behandlingRef.getAktørId()),
-            tilBeredskap(beredskap, behandlingRef.getAktørId())
-        );
+            tilBeredskap(beredskap, behandlingRef.getAktørId()));
     }
 
     private List<EtablertTilsynPeriodeDto> tilEtablertTilsyn(BehandlingReferanse behandlingRef) {
@@ -84,7 +83,9 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
                 new Periode(uetPeriode.getPeriode().getFomDato(), uetPeriode.getPeriode().getTomDato()),
                 uetPeriode.getBegrunnelse(),
                 uetPeriode.getResultat(),
-                tilKilde(søkersAktørId, uetPeriode.getAktørId())
+                tilKilde(søkersAktørId, uetPeriode.getAktørId()),
+                uetPeriode.getOpprettetAv(),
+                uetPeriode.getOpprettetTidspunkt()
             )
         ).toList();
     }

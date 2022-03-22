@@ -5,6 +5,10 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Objects;
 
+import org.hibernate.annotations.Immutable;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
@@ -18,11 +22,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.Immutable;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.SøknadÅrsak;
@@ -221,6 +220,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, Søk
             ", journalpostId=" + journalpostId +
             ", aktivitetType=" + aktivitet +
             ", fraværÅrsak=" + fraværÅrsak +
+            ", søknadÅrsak=" + søknadÅrsak +
             (arbeidsgiver != null ? ", arbeidsgiver=" + arbeidsgiver : "") +
             (arbeidsforholdRef != null ? ", arbeidsforholdRef=" + arbeidsforholdRef : "") +
             (fraværPerDag != null ? ", fraværPerDag=" + fraværPerDag : "") +

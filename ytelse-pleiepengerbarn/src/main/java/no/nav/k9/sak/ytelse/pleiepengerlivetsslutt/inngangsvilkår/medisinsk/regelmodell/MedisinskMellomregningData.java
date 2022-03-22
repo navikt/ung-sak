@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.re
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 
@@ -11,45 +10,60 @@ public class MedisinskMellomregningData {
 
     private final MedisinskVilkårGrunnlag grunnlag;
     private LocalDateTimeline<Pleielokasjon> pleiesHjemmetidslinje;
+    private LocalDateTimeline<LivetsSluttfaseDokumentasjon> dokumentasjonStatusLivetsSluttfaseTidslinje;
 
     MedisinskMellomregningData(MedisinskVilkårGrunnlag grunnlag) {
         Objects.requireNonNull(grunnlag);
         this.grunnlag = grunnlag;
-        this.pleiesHjemmetidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(grunnlag.getFom(), grunnlag.getTom(), Pleielokasjon.HJEMME)));
+        this.pleiesHjemmetidslinje = new LocalDateTimeline<>(grunnlag.getFom(), grunnlag.getTom(), Pleielokasjon.HJEMME);
+        this.dokumentasjonStatusLivetsSluttfaseTidslinje = new LocalDateTimeline<>(grunnlag.getFom(), grunnlag.getTom(), LivetsSluttfaseDokumentasjon.IKKE_DOKUMENTERT);
     }
 
     public MedisinskVilkårGrunnlag getGrunnlag() {
         return grunnlag;
     }
 
-    void addInnleggelsePeriode(PleiePeriode periode) {
-        Objects.requireNonNull(periode);
-        final var segment = new LocalDateSegment<>(periode.getFraOgMed(), periode.getTilOgMed(), periode.getPleielokasjon());
-        final var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
+    void registrerInnleggelser(LocalDateTimeline<Void> innleggelsePerioder) {
+        pleiesHjemmetidslinje = pleiesHjemmetidslinje.combine(
+            innleggelsePerioder.mapValue(f -> Pleielokasjon.INNLAGT),
+            StandardCombinators::coalesceRightHandSide,
+            LocalDateTimeline.JoinStyle.LEFT_JOIN);
+    }
 
-        pleiesHjemmetidslinje = pleiesHjemmetidslinje.combine(periodeTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+    void registrerDokumentasjonLivetsSluttfase(LocalDateTimeline<Void> dokumentertLivetsSluttfase) {
+        dokumentasjonStatusLivetsSluttfaseTidslinje = dokumentasjonStatusLivetsSluttfaseTidslinje.combine(
+            dokumentertLivetsSluttfase.mapValue(f -> LivetsSluttfaseDokumentasjon.DOKUMENTERT),
+            StandardCombinators::coalesceRightHandSide,
+            LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
 
     List<PleiePeriode> getBeregnedePerioderMedPleielokasjon() {
         return pleiesHjemmetidslinje.compress()
-            .toSegments()
             .stream()
             .map(segment -> new PleiePeriode(segment.getFom(), segment.getTom(), segment.getValue()))
             .toList();
     }
 
+    List<LivetsSluttfaseDokumentasjonPeriode> getDokumentasjonStatusLivetsSluttfasePerioder() {
+        return dokumentasjonStatusLivetsSluttfaseTidslinje.compress()
+            .stream()
+            .map(segment -> new LivetsSluttfaseDokumentasjonPeriode(segment.getFom(), segment.getTom(), segment.getValue()))
+            .toList();
+    }
 
     void oppdaterResultat(MedisinskVilkårResultat resultatStruktur) {
         Objects.requireNonNull(resultatStruktur);
 
         resultatStruktur.setPleieperioder(getBeregnedePerioderMedPleielokasjon());
+        resultatStruktur.setDokumentasjonLivetsSluttfasePerioder(getDokumentasjonStatusLivetsSluttfasePerioder());
     }
 
     @Override
     public String toString() {
         return "MedisinskMellomregningData{" +
             "grunnlag=" + grunnlag +
-            ", pleiesHjemmetidslinje=" + pleiesHjemmetidslinje +
+            ", pleiesHjemmetidslinje=" + getDokumentasjonStatusLivetsSluttfasePerioder() +
+            ", dokumentertLivetsSluttfasePerioder=" + getDokumentasjonStatusLivetsSluttfasePerioder() +
             '}';
     }
 }

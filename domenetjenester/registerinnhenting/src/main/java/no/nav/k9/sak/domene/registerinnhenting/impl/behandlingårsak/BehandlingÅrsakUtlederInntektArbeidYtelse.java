@@ -5,12 +5,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -61,8 +60,8 @@ class BehandlingÅrsakUtlederInntektArbeidYtelse implements BehandlingÅrsakUtle
     private Set<BehandlingÅrsakType> hentAlleBehandlingÅrsakTyperForInntektArbeidYtelse(BehandlingReferanse ref, LocalDate skjæringstidspunkt, UUID grunnlagUuid1, UUID grunnlagUuid2) {
         Saksnummer saksnummer = ref.getSaksnummer();
 
-        InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag1 = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagUuid1);
-        InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag2 = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagUuid2);
+        InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag1 = grunnlagUuid1 != null ? inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagUuid1) : null;
+        InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag2 = grunnlagUuid2 != null ? inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagUuid2) : null;
 
         Set<BehandlingÅrsakType> behandlingÅrsakTyper = new HashSet<>();
 

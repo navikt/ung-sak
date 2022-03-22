@@ -6,9 +6,6 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.UUID;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -31,6 +28,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
@@ -40,9 +39,7 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.pleiepengerbarn.uttak.kontrakter.EndrePerioderGrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Simuleringsgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
@@ -73,8 +70,6 @@ public class UttakRestKlient {
     private OidcRestClient restKlient;
     private URI endpointUttaksplan;
     private URI endpointSimuleringUttaksplan;
-    private URI endpointSimuleringUttaksplanV2;
-    private URI endpointEndringUttaksplan;
     private String psbUttakToken;
 
     protected UttakRestKlient() {
@@ -88,8 +83,6 @@ public class UttakRestKlient {
         this.restKlient = restKlient;
         this.endpointUttaksplan = toUri(endpoint, "/uttaksplan");
         this.endpointSimuleringUttaksplan = toUri(endpoint, "/uttaksplan/simulering");
-        this.endpointSimuleringUttaksplanV2 = toUri(endpoint, "/uttaksplan/simulering/v2");
-        this.endpointEndringUttaksplan = toUri(endpoint, "/uttaksplan/endring");
         this.psbUttakToken = psbUttakToken;
     }
 
@@ -105,13 +98,6 @@ public class UttakRestKlient {
         }
     }
 
-    /**
-     * Benytt simuleringV2
-     *
-     * @param request
-     * @return
-     */
-    @Deprecated(forRemoval = true)
     public Simulering simulerUttaksplan(Uttaksgrunnlag request) {
         URIBuilder builder = new URIBuilder(endpointSimuleringUttaksplan);
         try {
@@ -119,30 +105,6 @@ public class UttakRestKlient {
             var json = objectMapper.writer().writeValueAsString(request);
             kall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
             return utførOgHent(kall, json, new ObjectReaderResponseHandler<>(endpointSimuleringUttaksplan, simuleringReader));
-        } catch (IOException | URISyntaxException e) {
-            throw RestTjenesteFeil.FEIL.feilKallTilUttak(UUID.fromString(request.getBehandlingUUID()), e).toException();
-        }
-    }
-
-    public Simulering simulerUttaksplanV2(Simuleringsgrunnlag request) {
-        URIBuilder builder = new URIBuilder(endpointSimuleringUttaksplanV2);
-        try {
-            HttpPost kall = new HttpPost(builder.build());
-            var json = objectMapper.writer().writeValueAsString(request);
-            kall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
-            return utførOgHent(kall, json, new ObjectReaderResponseHandler<>(endpointSimuleringUttaksplanV2, simuleringReader));
-        } catch (IOException | URISyntaxException e) {
-            throw RestTjenesteFeil.FEIL.feilKallTilUttak(UUID.fromString(request.getUttaksgrunnlag().getBehandlingUUID()), e).toException();
-        }
-    }
-
-    public Uttaksplan endreUttaksplan(EndrePerioderGrunnlag request) {
-        URIBuilder builder = new URIBuilder(endpointEndringUttaksplan);
-        try {
-            HttpPost kall = new HttpPost(builder.build());
-            var json = objectMapper.writer().writeValueAsString(request);
-            kall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
-            return utførOgHent(kall, json, new ObjectReaderResponseHandler<>(endpointEndringUttaksplan, uttaksplanReader));
         } catch (IOException | URISyntaxException e) {
             throw RestTjenesteFeil.FEIL.feilKallTilUttak(UUID.fromString(request.getBehandlingUUID()), e).toException();
         }

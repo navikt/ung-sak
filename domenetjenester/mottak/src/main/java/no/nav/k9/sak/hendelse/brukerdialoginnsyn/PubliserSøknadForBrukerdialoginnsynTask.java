@@ -3,13 +3,11 @@ package no.nav.k9.sak.hendelse.brukerdialoginnsyn;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.innsyn.InnsynHendelse;
 import no.nav.k9.innsyn.PsbSøknadsinnhold;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -82,7 +80,7 @@ public class PubliserSøknadForBrukerdialoginnsynTask implements ProsessTaskHand
         final String saksnummer = fagsak.getSaksnummer().getVerdi();
         final String gruppe = PubliserSøknadForBrukerdialoginnsynTask.TASKTYPE + "-" + saksnummer;
         pd.setGruppe(gruppe);
-        pd.setSekvens(lagSekvensnummer(behandling));
+        pd.setSekvens(PubliserJsonForBrukerdialoginnsynTask.lagSekvensnummer(behandling));
         pd.setSaksnummer(saksnummer);
         pd.setAktørId(fagsak.getAktørId().getId());
         pd.setProperty(PLEIETRENGENDE_AKTØR_ID, fagsak.getPleietrengendeAktørId().getId());
@@ -90,20 +88,5 @@ public class PubliserSøknadForBrukerdialoginnsynTask implements ProsessTaskHand
         pd.setCallIdFraEksisterende();
         
         return pd;
-    }
-    
-    private static String lagSekvensnummer(Behandling behandling) {
-        // Sekvensnummeret bør la seg sortere slik at meldingene blir sendt (når det er mulig) i riktig rekkefølge.
-        int antallSiffer = 10; // et vilkårlig antall siffer som er stort nok til å holde på et versjonsnummer
-        String sekvensnummerFagsak = tallMedPrefiks(behandling.getFagsak().getVersjon(), antallSiffer);
-        String sekvensnummerBehandling = tallMedPrefiks(behandling.getVersjon(), antallSiffer);
-        return String.format("%s-%s", sekvensnummerFagsak, sekvensnummerBehandling);
-    }
-    
-    private static String tallMedPrefiks(long versjon, int antallSiffer) {
-        if (Long.toString(versjon).length() > antallSiffer) {
-            throw new IllegalArgumentException("Versjonsnummeret er for stort");
-        }
-        return StringUtils.leftPad(Long.toString(versjon), antallSiffer, '0');
     }
 }

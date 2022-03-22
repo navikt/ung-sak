@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.arbeidsforhold;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektFilter;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -31,13 +33,13 @@ public class IAYGrunnlagDiff {
     }
 
     public boolean erEndringPåInntektsmelding() {
-        var eksisterende = grunnlag1.getInntektsmeldinger();
-        var nye = grunnlag2.getInntektsmeldinger();
+        var eksisterende = Optional.ofNullable(grunnlag1).flatMap(InntektArbeidYtelseGrunnlag::getInntektsmeldinger);
+        var nye = Optional.ofNullable(grunnlag2).flatMap(InntektArbeidYtelseGrunnlag::getInntektsmeldinger);
 
         // quick check
         if (eksisterende.isPresent() != nye.isPresent()) {
             return true;
-        } else if (eksisterende.isEmpty() && nye.isEmpty()) {
+        } else if (eksisterende.isEmpty()) {
             return false;
         } else {
             if (eksisterende.get().getAlleInntektsmeldinger().size() != nye.get().getAlleInntektsmeldinger().size()) {
@@ -50,13 +52,13 @@ public class IAYGrunnlagDiff {
     }
 
     public boolean erEndringPåAktørArbeidForAktør(LocalDate skjæringstidspunkt, AktørId aktørId) {
-        var eksisterendeAktørArbeid = grunnlag1.getAktørArbeidFraRegister(aktørId);
-        var nyAktørArbeid = grunnlag2.getAktørArbeidFraRegister(aktørId);
+        var eksisterendeAktørArbeid = Optional.ofNullable(grunnlag1).flatMap(it -> it.getAktørArbeidFraRegister(aktørId));
+        var nyAktørArbeid = Optional.ofNullable(grunnlag2).flatMap(it -> it.getAktørArbeidFraRegister(aktørId));
 
         // quick check
         if (eksisterendeAktørArbeid.isPresent() != nyAktørArbeid.isPresent()) {
             return true;
-        } else if (eksisterendeAktørArbeid.isEmpty() && nyAktørArbeid.isEmpty()) {
+        } else if (eksisterendeAktørArbeid.isEmpty()) {
             return false;
         } else {
             var eksisterendeFilter = new YrkesaktivitetFilter(null, eksisterendeAktørArbeid).før(skjæringstidspunkt);
@@ -72,19 +74,65 @@ public class IAYGrunnlagDiff {
         return !diff.isEmpty();
     }
 
+    public boolean erEndringPåAktørArbeidForAktør(DatoIntervallEntitet periode, AktørId aktørId) {
+        var eksisterendeAktørArbeid = Optional.ofNullable(grunnlag1).flatMap(it -> it.getAktørArbeidFraRegister(aktørId));
+        var nyAktørArbeid = Optional.ofNullable(grunnlag2).flatMap(it -> it.getAktørArbeidFraRegister(aktørId));
+
+        // quick check
+        if (eksisterendeAktørArbeid.isPresent() != nyAktørArbeid.isPresent()) {
+            return true;
+        } else if (eksisterendeAktørArbeid.isEmpty()) {
+            return false;
+        } else {
+            var eksisterendeFilter = new YrkesaktivitetFilter(null, eksisterendeAktørArbeid).i(periode);
+            var nyFilter = new YrkesaktivitetFilter(null, nyAktørArbeid).i(periode);
+            if (eksisterendeFilter.getYrkesaktiviteter().size() != nyFilter.getYrkesaktiviteter().size()
+                || eksisterendeFilter.getAnsettelsesPerioder().size() != nyFilter.getAnsettelsesPerioder().size()) {
+                return true;
+            }
+        }
+
+        // deep check
+        DiffResult diff = new IAYDiffsjekker().getDiffEntity().diff(eksisterendeAktørArbeid.get(), nyAktørArbeid.get());
+        return !diff.isEmpty();
+    }
+
     public boolean erEndringPåAktørInntektForAktør(LocalDate skjæringstidspunkt, AktørId aktørId) {
 
-        var eksisterende = grunnlag1.getAktørInntektFraRegister(aktørId);
-        var nye = grunnlag2.getAktørInntektFraRegister(aktørId);
+        var eksisterende = Optional.ofNullable(grunnlag1).flatMap(it -> it.getAktørInntektFraRegister(aktørId));
+        var nye = Optional.ofNullable(grunnlag2).flatMap(it -> it.getAktørInntektFraRegister(aktørId));
 
         // quick check
         if (eksisterende.isPresent() != nye.isPresent()) {
             return true;
-        } else if (eksisterende.isEmpty() && nye.isEmpty()) {
+        } else if (eksisterende.isEmpty()) {
             return false;
         } else {
             var eksisterendeInntektFilter = new InntektFilter(eksisterende).før(skjæringstidspunkt);
             var nyeInntektFilter = new InntektFilter(nye).før(skjæringstidspunkt);
+            // TODO - raffinere med tanke på Startpunkt BEREGNING. Kan sjekke på diff pensjonsgivende, beregning og Sigrun
+            if (eksisterendeInntektFilter.getFiltrertInntektsposter().size() != nyeInntektFilter.getFiltrertInntektsposter().size()) {
+                return true;
+            }
+        }
+        // deep check
+        DiffResult diff = new IAYDiffsjekker().getDiffEntity().diff(eksisterende.get(), nye.get());
+        return !diff.isEmpty();
+    }
+
+    public boolean erEndringPåAktørInntektForAktør(DatoIntervallEntitet periode, AktørId aktørId) {
+
+        var eksisterende = Optional.ofNullable(grunnlag1).flatMap(it -> it.getAktørInntektFraRegister(aktørId));
+        var nye = Optional.ofNullable(grunnlag2).flatMap(it -> it.getAktørInntektFraRegister(aktørId));
+
+        // quick check
+        if (eksisterende.isPresent() != nye.isPresent()) {
+            return true;
+        } else if (eksisterende.isEmpty()) {
+            return false;
+        } else {
+            var eksisterendeInntektFilter = new InntektFilter(eksisterende).i(periode);
+            var nyeInntektFilter = new InntektFilter(nye).i(periode);
             // TODO - raffinere med tanke på Startpunkt BEREGNING. Kan sjekke på diff pensjonsgivende, beregning og Sigrun
             if (eksisterendeInntektFilter.getFiltrertInntektsposter().size() != nyeInntektFilter.getFiltrertInntektsposter().size()) {
                 return true;
@@ -114,9 +162,34 @@ public class IAYGrunnlagDiff {
         return new AktørYtelseEndring(erEksklusiveYtlserEndret, erAndreYtelserEndret);
     }
 
+    public boolean endringPåAktørYtelseForAktør(Saksnummer egetSaksnummer, DatoIntervallEntitet periode, AktørId aktørId) {
+        Predicate<Ytelse> predikatYtelseTyper = ytelse -> (ytelse.getSaksnummer() == null || !ytelse.getSaksnummer().equals(egetSaksnummer));
+        // Setter fris for å få med nye "parallelle" søknader, men unngår overlapp med neste barn. Kan tunes. Annen søknad får AP når denne vedtatt
+
+        List<Ytelse> førYtelserEkstern = hentYtelserForAktør(grunnlag1, periode, aktørId, predikatYtelseTyper);
+        List<Ytelse> nåYtelserEkstern = hentYtelserForAktør(grunnlag2, periode, aktørId, predikatYtelseTyper);
+        boolean erAndreYtelserEndret = !new IAYDiffsjekker().getDiffEntity().diff(førYtelserEkstern, nåYtelserEkstern).isEmpty();
+
+        return erAndreYtelserEndret;
+    }
+
     private List<Ytelse> hentYtelserForAktør(InntektArbeidYtelseGrunnlag grunnlag, LocalDate skjæringstidspunkt, AktørId aktørId,
                                              Predicate<Ytelse> predikatYtelseskilde) {
+        if (grunnlag == null) {
+            return List.of();
+        }
         var filter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(skjæringstidspunkt);
+        return filter.getFiltrertYtelser().stream()
+            .filter(predikatYtelseskilde)
+            .collect(Collectors.toList());
+    }
+
+    private List<Ytelse> hentYtelserForAktør(InntektArbeidYtelseGrunnlag grunnlag, DatoIntervallEntitet periode, AktørId aktørId,
+                                             Predicate<Ytelse> predikatYtelseskilde) {
+        if (grunnlag == null) {
+            return List.of();
+        }
+        var filter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).i(periode);
         return filter.getFiltrertYtelser().stream()
             .filter(predikatYtelseskilde)
             .collect(Collectors.toList());

@@ -1,7 +1,6 @@
 package no.nav.k9.sak.vilkår;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -21,6 +20,8 @@ import org.slf4j.Logger;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -35,7 +36,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet.VilkårUtfall;
@@ -61,7 +61,8 @@ public class VilkårTjeneste {
     public VilkårTjeneste(BehandlingRepository behandlingRepository,
                           @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                           @Any Instance<ForlengelseTjeneste> forlengelseTjenester,
-                          VilkårResultatRepository vilkårResultatRepository, FagsakRepository fagsakRepository) {
+                          VilkårResultatRepository vilkårResultatRepository,
+                          FagsakRepository fagsakRepository) {
         this.behandlingRepository = behandlingRepository;
         this.forlengelseTjenester = forlengelseTjenester;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -115,7 +116,7 @@ public class VilkårTjeneste {
                                                                 Avslagsårsak avslagsårsak) {
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(vilkårType)
-            .medKantIKantVurderer(getVilkårsPerioderTilVurderingTjeneste(behandling).getKantIKantVurderer());
+            .medKantIKantVurderer(getVilkårsPerioderTilVurderingTjeneste(behandling.getFagsakYtelseType(), behandling.getType()).getKantIKantVurderer());
         vilkårBuilder
             .leggTil(vilkårBuilder
                 .hentBuilderFor(vilkårsPeriode)
@@ -134,7 +135,7 @@ public class VilkårTjeneste {
     private VilkårResultatBuilder opprettVilkårsResultat(Vilkårene vilkårene, VilkårType vilkårType, DatoIntervallEntitet vilkårsPeriode, Behandling behandling, Avslagsårsak avslagsårsak) {
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(vilkårType)
-            .medKantIKantVurderer(getVilkårsPerioderTilVurderingTjeneste(behandling).getKantIKantVurderer());
+            .medKantIKantVurderer(getVilkårsPerioderTilVurderingTjeneste(behandling.getFagsakYtelseType(), behandling.getType()).getKantIKantVurderer());
         boolean oppfylt = avslagsårsak == null;
         vilkårBuilder
             .leggTil(vilkårBuilder
@@ -146,9 +147,7 @@ public class VilkårTjeneste {
         return builder;
     }
 
-    private VilkårsPerioderTilVurderingTjeneste getVilkårsPerioderTilVurderingTjeneste(Behandling behandling) {
-        var ytelseType = behandling.getFagsakYtelseType();
-        var behandlingType = behandling.getType();
+    private VilkårsPerioderTilVurderingTjeneste getVilkårsPerioderTilVurderingTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
         return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, vilkårsPerioderTilVurderingTjenester, ytelseType, behandlingType)
             .orElseThrow(() -> new UnsupportedOperationException(
                 "VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + ytelseType + "], behandlingtype [" + behandlingType + "]"));
@@ -171,7 +170,7 @@ public class VilkårTjeneste {
         }
         log.info("Setter {} til vurdering", vilkårsPerioder);
         Behandling behandling = hentBehandling(behandlingId);
-        var vilkårsPerioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling);
+        var vilkårsPerioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling.getFagsakYtelseType(), behandling.getType());
         vilkårResultatRepository.tilbakestillPerioder(behandlingId, vilkårType, vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer(), vilkårsPerioder);
     }
 
@@ -189,6 +188,10 @@ public class VilkårTjeneste {
         return behandlingRepository.hentBehandling(behandlingId);
     }
 
+    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType) {
+        return utledPerioderTilVurdering(ref, vilkårType, false, false, false);
+    }
+
     public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType,
                                                                         boolean skalIgnorereAvslåttePerioder) {
         return utledPerioderTilVurdering(ref, vilkårType, skalIgnorereAvslåttePerioder, false, false);
@@ -196,41 +199,27 @@ public class VilkårTjeneste {
 
     public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType,
                                                                         boolean skalIgnorereAvslåttePerioder,
-                                                                        boolean skalIgnorereAvslagPåKompletthet, boolean skalIgnorerePerioderFraInfotrygd) {
-        Long behandlingId = ref.getBehandlingId();
-        var behandling = hentBehandling(behandlingId);
-        var perioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling);
-        var sakInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(ref.getFagsakId());
-
-        var vilkår = hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
+                                                                        boolean skalIgnorereAvslagPåKompletthet,
+                                                                        boolean skalIgnorerePerioderFraInfotrygd) {
+        var vilkårPeriodeFilter = new VilkårPeriodeFilter(false, ref, fagsakRepository, vilkårResultatRepository, getForlengelsetjeneste(ref.getFagsakYtelseType(), ref.getBehandlingType()));
+        if (skalIgnorereAvslåttePerioder) {
+            vilkårPeriodeFilter.ignorerAvslåttePerioder();
+        }
+        if (skalIgnorereAvslagPåKompletthet) {
+            vilkårPeriodeFilter.ignorerAvslagPåKompletthet();
+        }
+        if (skalIgnorerePerioderFraInfotrygd) {
+            vilkårPeriodeFilter.ignorerPerioderFraInfotrygd();
+        }
+        var behandlingId = ref.getBehandlingId();
+        var perioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(ref.getFagsakYtelseType(), ref.getBehandlingType());
         var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(behandlingId, vilkårType));
         var utvidetTilVUrdering = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref);
-
         if (!utvidetTilVUrdering.isEmpty()) {
             perioder.addAll(utvidetTilVUrdering);
         }
 
-        if (vilkår.isPresent() && skalIgnorereAvslåttePerioder) {
-            var avslåttePerioder = vilkår.get()
-                .getPerioder()
-                .stream()
-                .filter(it -> skalFiltreresBort(it, skalIgnorereAvslagPåKompletthet))
-                .map(VilkårPeriode::getPeriode).toList();
-            avslåttePerioder.forEach(perioder::remove);
-        }
-        if (vilkår.isPresent() && skalIgnorerePerioderFraInfotrygd) {
-            var periodeFraInfotrygd = vilkår.get()
-                .getPerioder()
-                .stream()
-                .filter(it -> sakInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).anyMatch(stp -> it.getSkjæringstidspunkt().equals(stp)))
-                .map(VilkårPeriode::getPeriode).toList();
-            periodeFraInfotrygd.forEach(perioder::remove);
-        }
-        return Collections.unmodifiableNavigableSet(perioder);
-    }
-
-    private boolean skalFiltreresBort(VilkårPeriode it, boolean skalIgnoreAvslagPåKompletthet) {
-        return Utfall.IKKE_OPPFYLT.equals(it.getUtfall()) && (skalIgnoreAvslagPåKompletthet || !Avslagsårsak.MANGLENDE_INNTEKTSGRUNNLAG.equals(it.getAvslagsårsak()));
+        return vilkårPeriodeFilter.utledPerioderTilVurdering(perioder, vilkårType).stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
     }
 
     public Optional<Vilkårene> hentHvisEksisterer(Long behandlingId) {
@@ -306,5 +295,12 @@ public class VilkårTjeneste {
         var resultat = timeline.mapValue(v -> VilkårUtfallSamlet.fra(v))
             .filterValue(v -> v.getUnderliggendeVilkårUtfall().stream().map(VilkårUtfall::getVilkårType).collect(Collectors.toSet()).containsAll(minimumVilkår));
         return resultat;
+    }
+
+
+    private ForlengelseTjeneste getForlengelsetjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        return BehandlingTypeRef.Lookup.find(ForlengelseTjeneste.class, forlengelseTjenester, ytelseType, behandlingType)
+            .orElseThrow(() -> new UnsupportedOperationException(
+                "ForlengelseTjeneste ikke implementert for ytelse [" + ytelseType + "], behandlingtype [" + behandlingType + "]"));
     }
 }

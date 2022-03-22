@@ -133,6 +133,7 @@ public enum Region implements Kodeverdi {
         return getKode();
     }
 
+
     public Set<String> getLand() {
         return land;
     }
@@ -147,10 +148,10 @@ public enum Region implements Kodeverdi {
             .collect(Collectors.toList());
     }
 
-    public static Region finnHøyestRangertRegion(List<String> statsborgerskap) {
+    public static Region finnHøyestRangertRegion(List<String> landkoder) {
         Set<Region> regioner = new HashSet<>();
-        for (String skap : statsborgerskap) {
-            regioner.addAll(finnRegioner(skap));
+        for (String landkode : landkoder) {
+            regioner.addAll(finnRegioner(landkode));
         }
         return regioner.stream().min(Comparator.comparing(Region::rangerRegion)).get();
     }

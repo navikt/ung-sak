@@ -10,14 +10,15 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
@@ -34,35 +35,33 @@ import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingException;
 @Dependent
 public class InnhentDokumentTjeneste {
 
-    private Instance<Dokumentmottaker> mottakere;
-
-    private Behandlingsoppretter behandlingsoppretter;
-    private Kompletthetskontroller kompletthetskontroller;
-    private DokumentmottakerFelles dokumentMottakerFelles;
-    private BehandlingRevurderingRepository revurderingRepository;
-    private BehandlingRepository behandlingRepository;
-
-    private BehandlingLåsRepository behandlingLåsRepository;
-    private ProsessTaskRepository taskRepository;
+    private final Instance<Dokumentmottaker> mottakere;
+    private final Behandlingsoppretter behandlingsoppretter;
+    private final DokumentmottakerFelles dokumentMottakerFelles;
+    private final BehandlingRevurderingRepository revurderingRepository;
+    private final BehandlingRepository behandlingRepository;
+    private final BehandlingLåsRepository behandlingLåsRepository;
+    private final BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
+    private final ProsessTaskRepository taskRepository;
 
     @Inject
     public InnhentDokumentTjeneste(@Any Instance<Dokumentmottaker> mottakere,
                                    DokumentmottakerFelles dokumentMottakerFelles,
                                    Behandlingsoppretter behandlingsoppretter,
-                                   Kompletthetskontroller kompletthetskontroller,
                                    BehandlingRepositoryProvider repositoryProvider,
+                                   BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                                    ProsessTaskRepository taskRepository) {
         this.mottakere = mottakere;
         this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.behandlingsoppretter = behandlingsoppretter;
-        this.kompletthetskontroller = kompletthetskontroller;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
         this.behandlingLåsRepository = repositoryProvider.getBehandlingLåsRepository();
+        this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.taskRepository = taskRepository;
     }
 
-    public void mottaDokument(Long kjørendeTaskId, Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
+    public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
         var brevkodeMap = mottattDokument
             .stream()
             .collect(Collectors.groupingBy(MottattDokument::getType));
@@ -75,17 +74,21 @@ public class InnhentDokumentTjeneste {
 
         var resultat = finnEllerOpprettBehandling(fagsak, behandlingÅrsak);
 
-        ProsessTaskData startTask;
+        ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
         if (resultat.nyopprettet) {
-            startTask = asynkStartBehandling(resultat.behandling);
+            taskGruppe.addNesteSekvensiell(asynkStartBehandling(resultat.behandling));
         } else if (prosessenStårStillePåAksjonspunktForSøknadsfrist(resultat.behandling)) {
-            startTask = restartBehandling(resultat.behandling, behandlingÅrsak);
+            taskGruppe.addNesteSekvensiell(restartBehandling(resultat.behandling, behandlingÅrsak));
         } else {
-            startTask = asynkVurderKompletthetForÅpenBehandling(kjørendeTaskId, resultat.behandling, behandlingÅrsak);
+            taskGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(resultat.behandling, false, false);
         }
         lagreDokumenter(brevkodeMap, resultat.behandling);
 
-        taskRepository.lagre(startTask);
+        if (taskGruppe == null) {
+            throw new IllegalStateException("Det er planlagt kjøringer som ikke har garantert rekkefølge. Sjekk oversikt over ventende tasker for eventuelt avbryte disse.");
+        }
+        // Lagrer tasks til slutt for å sikre at disse blir kjørt etter at dokumentasjon er lagret
+        taskRepository.lagre(taskGruppe);
     }
 
     private ProsessTaskData restartBehandling(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
@@ -141,12 +144,6 @@ public class InnhentDokumentTjeneste {
                 Dokumentmottaker dokumentmottaker = getDokumentmottaker(key, behandling.getFagsak());
                 dokumentmottaker.lagreDokumentinnhold(mottattDokument.get(key), behandling);
             });
-    }
-
-    ProsessTaskData asynkVurderKompletthetForÅpenBehandling(Long kjørendeTaskId, Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
-        dokumentMottakerFelles.leggTilBehandlingsårsak(behandling, behandlingÅrsak);
-        dokumentMottakerFelles.opprettHistorikkinnslagForBehandlingOppdatertMedNyInntektsmelding(behandling, behandlingÅrsak);
-        return kompletthetskontroller.asynkVurderKompletthet(kjørendeTaskId, behandling);
     }
 
     private BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode, Fagsak fagsak) {

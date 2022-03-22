@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -18,8 +17,6 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårPeriodeResultatDto;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -85,9 +82,9 @@ class HentReferanserTjeneste {
      * @param bgReferanser Referanser fra denne behandlingen
      * @return Map fra referanse i denne behandlingen til liste av referanser i original behandling
      */
-    Map<UUID, List<UUID>> finnMapTilOriginaleReferanserUtenAvslag(BehandlingReferanse ref,
-                                                                    Collection<DatoIntervallEntitet> vilkårsperioder,
-                                                                    List<BgRef> bgReferanser) {
+    Map<UUID, Map<LocalDate, UUID>> finnMapTilOriginaleReferanserUtenAvslag(BehandlingReferanse ref,
+                                                                            Collection<DatoIntervallEntitet> vilkårsperioder,
+                                                                            List<BgRef> bgReferanser) {
 
         return ref.getOriginalBehandlingId()
             .map(id -> {
@@ -98,25 +95,24 @@ class HentReferanserTjeneste {
             .orElse(Collections.emptyMap());
     }
 
-    private Map<UUID, List<UUID>> finnOrginalReferanserForAllePerioder(Collection<DatoIntervallEntitet> vilkårsperioder,
-                                                                         List<BgRef> bgReferanser,
-                                                                         Optional<BeregningsgrunnlagPerioderGrunnlag> originaltGrunnlag,
-                                                                         Optional<Vilkårene> originalVilkår) {
+    private Map<UUID, Map<LocalDate, UUID>> finnOrginalReferanserForAllePerioder(Collection<DatoIntervallEntitet> vilkårsperioder,
+                                                                                 List<BgRef> bgReferanser,
+                                                                                 Optional<BeregningsgrunnlagPerioderGrunnlag> originaltGrunnlag,
+                                                                                 Optional<Vilkårene> originalVilkår) {
         return vilkårsperioder.stream()
             .collect(Collectors.toMap(
             p -> finnReferanseFraPeriode(bgReferanser, p).getRef(),
             p  -> finnReferanserUtenAvslagSomOverlapperPeriode(p, originaltGrunnlag, originalVilkår)));
     }
 
-    private List<UUID> finnReferanserUtenAvslagSomOverlapperPeriode(DatoIntervallEntitet vilkårsperiode,
-                                                                    Optional<BeregningsgrunnlagPerioderGrunnlag> originaltGrunnlag,
-                                                                    Optional<Vilkårene> originaleVilkår) {
+    private Map<LocalDate, UUID> finnReferanserUtenAvslagSomOverlapperPeriode(DatoIntervallEntitet vilkårsperiode,
+                                                                              Optional<BeregningsgrunnlagPerioderGrunnlag> originaltGrunnlag,
+                                                                              Optional<Vilkårene> originaleVilkår) {
         return originaltGrunnlag
             .stream().flatMap(gr -> gr.getGrunnlagPerioder().stream())
             .filter(periode -> vilkårsperiode.inkluderer(periode.getSkjæringstidspunkt()))
             .filter(periode -> harKunOppfylteVilkår(originaleVilkår, periode))
-            .map(BeregningsgrunnlagPeriode::getEksternReferanse)
-            .toList();
+            .collect(Collectors.toMap(BeregningsgrunnlagPeriode::getSkjæringstidspunkt, BeregningsgrunnlagPeriode::getEksternReferanse));
     }
 
     private boolean harKunOppfylteVilkår(Optional<Vilkårene> originalVilkår, BeregningsgrunnlagPeriode periode) {
@@ -138,6 +134,7 @@ class HentReferanserTjeneste {
         if (grunnlagOptional.isEmpty()) {
             return List.of();
         }
+
 
         var bgReferanser = finnBeregningsgrunnlagsReferanseForGrunnlag(behandlingId, grunnlagOptional.get(), skjæringstidspunkter, skalLageNyVedLikSomInitiell);
 

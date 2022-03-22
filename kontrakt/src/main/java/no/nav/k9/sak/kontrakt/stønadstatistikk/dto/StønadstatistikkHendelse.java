@@ -75,6 +75,11 @@ public class StønadstatistikkHendelse {
     @NotNull
     @Valid
     private List<StønadstatistikkPeriode> perioder;
+    
+    @JsonProperty(value = "relasjon", required = false)
+    @Size(max=100000)
+    @Valid
+    private List<StønadstatistikkRelasjonPeriode> relasjon;
 
     
     public StønadstatistikkHendelse() {
@@ -90,7 +95,8 @@ public class StønadstatistikkHendelse {
             UUID behandlingUuid,
             UUID forrigeBehandlingUuid,
             LocalDateTime vedtakstidspunkt,
-            List<StønadstatistikkPeriode> perioder) {
+            List<StønadstatistikkPeriode> perioder,
+            List<StønadstatistikkRelasjonPeriode> relasjon) {
         this.ytelseType = ytelseType;
         this.søker = søker;
         this.pleietrengende = pleietrengende;
@@ -101,6 +107,7 @@ public class StønadstatistikkHendelse {
         this.forrigeBehandlingUuid = forrigeBehandlingUuid;
         this.vedtakstidspunkt = vedtakstidspunkt;
         this.perioder = perioder;
+        this.relasjon = relasjon;
     }
 
     
@@ -142,5 +149,12 @@ public class StønadstatistikkHendelse {
 
     public List<StønadstatistikkPeriode> getPerioder() {
         return perioder;
+    }
+    
+    public List<StønadstatistikkRelasjonPeriode> getRelasjon() {
+        if (relasjon == null) {
+            return List.of();
+        }
+        return relasjon;
     }
 }

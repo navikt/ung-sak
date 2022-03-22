@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
@@ -34,7 +33,7 @@ public class FordelBeregningsgrunnlagOppdaterer implements AksjonspunktOppdatere
     public OppdateringResultat oppdater(FordelBeregningsgrunnlagDtoer dtoer, AksjonspunktOppdaterParameter param) {
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto1 -> MapDtoTilRequest.map(dto1, dtoer.getBegrunnelse())));
-        oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
+        oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef(), true);
         // TODO FIKS HISTORIKK
         return OppdateringResultat.utenOverhopp();
     }

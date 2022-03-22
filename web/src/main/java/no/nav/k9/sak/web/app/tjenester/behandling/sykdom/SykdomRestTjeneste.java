@@ -3,6 +3,11 @@ package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -13,20 +18,14 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomAksjonspunktDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -64,10 +63,10 @@ public class SykdomRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public SykdomAksjonspunktDto hentSykdomAksjonspunkt(@NotNull @QueryParam(BehandlingUuidDto.NAME)
-                @Parameter(description = BehandlingUuidDto.DESC)
-                @Valid
-                @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-                BehandlingUuidDto behandlingUuid) {
+                                                        @Parameter(description = BehandlingUuidDto.DESC)
+                                                        @Valid
+                                                        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+                                                            BehandlingUuidDto behandlingUuid) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).get();
         final var aksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandling);
 
@@ -76,12 +75,13 @@ public class SykdomRestTjeneste {
 
     private SykdomAksjonspunktDto toSykdomAksjonspunktDto(final SykdomAksjonspunkt aksjonspunkt) {
         return new SykdomAksjonspunktDto(aksjonspunkt.isKanLøseAksjonspunkt(),
-                aksjonspunkt.isHarUklassifiserteDokumenter(),
-                aksjonspunkt.isManglerDiagnosekode(),
-                aksjonspunkt.isManglerGodkjentLegeerklæring(),
-                aksjonspunkt.isManglerVurderingAvKontinuerligTilsynOgPleie(),
-                aksjonspunkt.isManglerVurderingAvToOmsorgspersoner(),
-                aksjonspunkt.isHarDataSomIkkeHarBlittTattMedIBehandling(),
-                aksjonspunkt.isNyttDokumentHarIkkekontrollertEksisterendeVurderinger());
+            aksjonspunkt.isHarUklassifiserteDokumenter(),
+            aksjonspunkt.isManglerDiagnosekode(),
+            aksjonspunkt.isManglerGodkjentLegeerklæring(),
+            aksjonspunkt.isManglerVurderingAvKontinuerligTilsynOgPleie(),
+            aksjonspunkt.isManglerVurderingAvToOmsorgspersoner(),
+            aksjonspunkt.isManglerVurderingAvILivetsSluttfase(),
+            aksjonspunkt.isHarDataSomIkkeHarBlittTattMedIBehandling(),
+            aksjonspunkt.isNyttDokumentHarIkkekontrollertEksisterendeVurderinger());
     }
 }

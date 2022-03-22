@@ -6,7 +6,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
-
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
@@ -45,6 +44,7 @@ public class OppgittFraværDump implements DebugDumpFagsak {
                     ,cast(omp.arbeidsforhold_intern_id as varchar) arbeidsforhold_intern_id
                     ,omp.journalpost_id
                     ,omp.fravaer_arsak
+                    ,omp.soknad_arsak
                     ,replace(cast(omp.opprettet_tid as varchar), ' ', 'T') opprettet_tid
                     from
                     gr_omp_aktivitet gr

@@ -1,7 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
 public class LagBeregnRequestTjeneste {
@@ -89,23 +87,13 @@ public class LagBeregnRequestTjeneste {
                                                                   List<BeregnInput> beregnInput,
                                                                   InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                   Collection<Inntektsmelding> sakInntektsmeldinger) {
-        return lagRequestMedKalkulatorInput(referanse, iayGrunnlag, sakInntektsmeldinger, beregnInput, Collections.emptyList());
+        return lagRequestMedKalkulatorInput(referanse, iayGrunnlag, sakInntektsmeldinger, beregnInput);
     }
-
-    public List<BeregnForRequest> lagRequestForReferanserForForlengelse(BehandlingReferanse referanse,
-                                                                        List<BeregnInput> beregnInput,
-                                                                        InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                        Collection<Inntektsmelding> sakInntektsmeldinger,
-                                                                        List<DatoIntervallEntitet> forlengelseperioder) {
-        return lagRequestMedKalkulatorInput(referanse, iayGrunnlag, sakInntektsmeldinger, beregnInput, forlengelseperioder);
-    }
-
 
     private List<BeregnForRequest> lagRequestMedKalkulatorInput(BehandlingReferanse behandlingReferanse,
                                                                 InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                 Collection<Inntektsmelding> sakInntektsmeldinger,
-                                                                List<BeregnInput> beregnInput,
-                                                                List<DatoIntervallEntitet> forlengelseperioder) {
+                                                                List<BeregnInput> beregnInput) {
         var referanseRelasjoner = beregnInput.stream().collect(Collectors.toMap(BeregnInput::getBgReferanse, BeregnInput::getOriginalReferanser));
         Map<UUID, KalkulatorInputDto> input = lagInputPrReferanse(behandlingReferanse, iayGrunnlag, sakInntektsmeldinger, beregnInput);
         return input.entrySet().stream()
@@ -114,8 +102,17 @@ public class LagBeregnRequestTjeneste {
                 e.getKey(), // KoblingReferanse
                 referanseRelasjoner.get(e.getKey()), // Kobling -> Original Referanse relasjon
                 e.getValue(), // Kalkulatorinput
-                forlengelseperioder.stream().map(p -> new Periode(p.getFomDato(), p.getTomDato())).toList() // Forlengelseperioder
+                finnForlengelseperiode(e.getKey(), beregnInput) // Forlengelseperioder
             )).toList();
+    }
+
+    private List<Periode> finnForlengelseperiode(UUID key, List<BeregnInput> beregnInput) {
+        // Foreløpig mappes hele vilkårsperioden som forlengelseperiode. Det betyr at vi tillater endring i hele perioden ved forlengelse.
+        return beregnInput.stream().filter(i -> i.getBgReferanse().equals(key))
+            .filter(BeregnInput::erForlengelse).findFirst()
+            .map(BeregnInput::getVilkårsperiode)
+            .map(p -> List.of(new Periode(p.getFomDato(), p.getTomDato())))
+            .orElse(null);
     }
 
     private Map<UUID, KalkulatorInputDto> lagInputPrReferanse(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag iayGrunnlag, Collection<Inntektsmelding> sakInntektsmeldinger, List<BeregnInput> beregnInput) {

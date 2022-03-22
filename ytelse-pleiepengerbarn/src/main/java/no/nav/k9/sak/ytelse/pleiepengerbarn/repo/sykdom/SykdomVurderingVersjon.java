@@ -149,8 +149,16 @@ public class SykdomVurderingVersjon implements Comparable<SykdomVurderingVersjon
         return endretForPerson;
     }
 
+    public boolean isBesluttet() {
+        return besluttet != null;
+    }
+
     public SykdomVurderingVersjonBesluttet getBesluttet() {
         return besluttet;
+    }
+
+    public void setBesluttet(SykdomVurderingVersjonBesluttet besluttet) {
+        this.besluttet = besluttet;
     }
 
     public List<SykdomDokument> getDokumenter() {

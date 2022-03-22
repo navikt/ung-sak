@@ -9,14 +9,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -74,7 +73,7 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
         ref = BehandlingReferanse.fra(behandling);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, FØRSTE_UTTAKSDAG.minusMonths(10), FØRSTE_UTTAKSDAG.minusDays(1), false);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, SKJÆRINGSTIDSPUNKT.minusMonths(10), SKJÆRINGSTIDSPUNKT.minusDays(1), false);
-        tjeneste = new OmsorgspengerOpptjeningForBeregningTjeneste(new OpptjeningsperioderTjeneste(opptjeningRepository, oppgittOpptjeningFilterProvider), oppgittOpptjeningFilterProvider);
+        tjeneste = new OmsorgspengerOpptjeningForBeregningTjeneste(new OpptjeningsperioderTjeneste(opptjeningRepository, repositoryProvider.getFagsakRepository(), oppgittOpptjeningFilterProvider), oppgittOpptjeningFilterProvider);
     }
 
     @Test

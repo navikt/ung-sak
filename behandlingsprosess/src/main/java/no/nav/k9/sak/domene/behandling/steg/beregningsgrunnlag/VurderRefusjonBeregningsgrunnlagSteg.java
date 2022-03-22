@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -57,7 +56,7 @@ public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagS
         var ref = BehandlingReferanse.fra(behandling);
         validerVurdertVilkår(ref);
         var callback = new HåndterResultat();
-        beregningStegTjeneste.fortsettBeregning(ref, VURDER_REF_BERGRUNN, callback);
+        beregningStegTjeneste.fortsettBeregningInkludertForlengelser(ref, VURDER_REF_BERGRUNN, callback);
         return BehandleStegResultat.utførtMedAksjonspunktResultater(callback.aksjonspunktResultater);
     }
 

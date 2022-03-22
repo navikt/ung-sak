@@ -3,19 +3,19 @@ package no.nav.k9.sak.behandling.prosessering;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -163,10 +163,10 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         gruppe.addNesteSekvensiell(registerdataOppdatererTask);
         if (innhentRegisterdataFørst) {
             log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandling.getId());
-            leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe);
+            leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, true);
         } else {
             log.info("Sjekker om det har tilkommet nye søknader/inntektsmeldinger og annet for behandling: {}", behandling.getId());
-            leggTilTaskForDiffOgReposisjoner(behandling, gruppe);
+            leggTilTaskForDiffOgReposisjoner(behandling, gruppe, true);
         }
         ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
         fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
@@ -216,6 +216,18 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
         Long fagsakId = behandling.getFagsakId();
         Long behandlingId = behandling.getId();
+        ProsessTaskGruppe gruppe = opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, true);
+        if (gruppe == null) {
+            return;
+        }
+        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, gruppe);
+    }
+
+    @Override
+    public ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker) {
+        Long fagsakId = behandling.getFagsakId();
+        Long behandlingId = behandling.getId();
+
         if (behandling.erSaksbehandlingAvsluttet()) {
             throw new IllegalStateException("Utvikler-feil: kan ikke gjenoppta behandling når saksbehandling er avsluttet: behandlingId=" + behandlingId + ", status=" + behandling.getStatus());
         }
@@ -227,7 +239,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         var eksisterendeGjenopptaTask = getEksisterendeTaskAvType(fagsakId, behandlingId, gjenopptaTaskType);
         if (eksisterendeGjenopptaTask.isPresent()) {
             log.warn("Har eksisterende task [{}], oppretter ikke nye for fagsakId={}, behandlingId={}: {}", gjenopptaTaskType, fagsakId, behandlingId, eksisterendeGjenopptaTask.get());
-            return;
+            return null;
         }
 
         gjenopptaBehandlingTask.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
@@ -235,10 +247,10 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
         if (skalHenteInnRegisterData(behandling)) {
             log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandlingId);
-            leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe);
+            leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, skalUtledeÅrsaker);
         } else {
             log.info("Sjekker om det har tilkommet nye inntektsmeldinger for behandling: {}", behandlingId);
-            leggTilTaskForDiffOgReposisjoner(behandling, gruppe);
+            leggTilTaskForDiffOgReposisjoner(behandling, gruppe, skalUtledeÅrsaker);
         }
 
         var fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
@@ -250,17 +262,17 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         } else {
             gruppe.setCallIdFraEksisterende();
         }
-        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, gruppe);
-
+        return gruppe;
     }
 
-    private void leggTilTasksForInnhentRegisterdataPåNytt(Behandling behandling, ProsessTaskGruppe gruppe) {
+    private void leggTilTasksForInnhentRegisterdataPåNytt(Behandling behandling, ProsessTaskGruppe gruppe, boolean skalUtledeÅrsaker) {
         leggTilInnhentRegisterdataTasks(behandling, gruppe);
-        leggTilTaskForDiffOgReposisjoner(behandling, gruppe);
+        leggTilTaskForDiffOgReposisjoner(behandling, gruppe, skalUtledeÅrsaker);
     }
 
-    private void leggTilTaskForDiffOgReposisjoner(Behandling behandling, ProsessTaskGruppe gruppe) {
+    private void leggTilTaskForDiffOgReposisjoner(Behandling behandling, ProsessTaskGruppe gruppe, boolean skalUtledeÅrsaker) {
         var diffOgReposisjoner = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
+        diffOgReposisjoner.setProperty(DiffOgReposisjonerTask.UTLED_ÅRSAKER, "" + skalUtledeÅrsaker);
         diffOgReposisjoner.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         try {
             var snapshotFørInnhenting = endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandling.getId());
@@ -296,27 +308,11 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
     private void leggTilInnhentRegisterdataTasks(Behandling behandling, ProsessTaskGruppe gruppe) {
 
-        var tasks = new ArrayList<ProsessTaskData>();
+        var taskTyper = utledRegisterinnhentingTaskTyper(behandling);
 
-        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, PersonInformasjonEntitet.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
-            var innhentPersonopplysniger = new ProsessTaskData(InnhentPersonopplysningerTask.TASKTYPE);
-            innhentPersonopplysniger.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-            tasks.add(innhentPersonopplysniger);
-        });
-
-        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, MedlemskapAggregat.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
-            var innhentMedlemskapOpplysniger = new ProsessTaskData(InnhentMedlemskapOpplysningerTask.TASKTYPE);
-            innhentMedlemskapOpplysniger.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-            tasks.add(innhentMedlemskapOpplysniger);
-        });
-
-        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, InntektArbeidYtelseGrunnlag.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
-            if (skalInnhenteAbakus(behandling)) {
-                var abakusRegisterInnheting = new ProsessTaskData(InnhentIAYIAbakusTask.TASKTYPE);
-                abakusRegisterInnheting.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-                tasks.add(abakusRegisterInnheting);
-            }
-        });
+        var tasks = taskTyper.stream()
+            .map(it -> mapTilTask(it, behandling))
+            .collect(Collectors.toList());
 
         if (tasks.isEmpty()) {
             throw new UnsupportedOperationException("Utvikler-feil: Håpet på å hente inn noe registerdata for ytelseType=" + behandling.getFagsakYtelseType());
@@ -328,6 +324,30 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         ProsessTaskData oppdaterInnhentTidspunkt = new ProsessTaskData(SettRegisterdataInnhentetTidspunktTask.TASKTYPE);
         oppdaterInnhentTidspunkt.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(oppdaterInnhentTidspunkt);
+    }
+
+    private ProsessTaskData mapTilTask(String taskType, Behandling behandling) {
+        var task = new ProsessTaskData(taskType);
+        task.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+        return task;
+    }
+
+    @Override
+    public List<String> utledRegisterinnhentingTaskTyper(Behandling behandling) {
+        var tasks = new ArrayList<String>();
+
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, PersonInformasjonEntitet.class, behandling.getFagsakYtelseType())
+            .ifPresent(u -> tasks.add(InnhentPersonopplysningerTask.TASKTYPE));
+
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, MedlemskapAggregat.class, behandling.getFagsakYtelseType())
+            .ifPresent(u -> tasks.add(InnhentMedlemskapOpplysningerTask.TASKTYPE));
+
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, InntektArbeidYtelseGrunnlag.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
+            if (skalInnhenteAbakus(behandling)) {
+                tasks.add(InnhentIAYIAbakusTask.TASKTYPE);
+            }
+        });
+        return tasks;
     }
 
     private boolean skalInnhenteAbakus(Behandling behandling) {

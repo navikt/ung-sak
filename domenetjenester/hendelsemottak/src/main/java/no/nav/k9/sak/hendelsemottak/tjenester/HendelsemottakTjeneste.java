@@ -1,14 +1,17 @@
 package no.nav.k9.sak.hendelsemottak.tjenester;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.hendelser.HendelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -21,6 +24,8 @@ import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 public class HendelsemottakTjeneste {
+
+    private final Logger log = LoggerFactory.getLogger(HendelsemottakTjeneste.class);
 
     private Instance<FagsakerTilVurderingUtleder> utledere;
 
@@ -42,7 +47,7 @@ public class HendelsemottakTjeneste {
 
     private List<FagsakerTilVurderingUtleder> finnMatchendeUtledere(HendelseType hendelseType) {
         var matchendeUtledere = HendelseTypeRef.Lookup.list(utledere, hendelseType.getKode());
-        return matchendeUtledere.stream().collect(Collectors.toList());
+        return new ArrayList<>(matchendeUtledere);
     }
 
     public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(AktørId aktørId, Hendelse hendelse) {
@@ -50,12 +55,14 @@ public class HendelsemottakTjeneste {
             .stream()
             .map(utleder -> utleder.finnFagsakerTilVurdering(aktørId, hendelse))
             .flatMap(map -> map.entrySet().stream())
-            .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return fagsakerMedBehandlingÅrsak;
     }
 
     public Map<Fagsak, BehandlingÅrsakType> mottaHendelse(AktørId aktørId, Hendelse payload) {
         var kandidaterTilRevurdering = finnFagsakerTilVurdering(aktørId, payload);
+
+        log.info("Mottok hendelse '{}', fant {} relevante fagsaker.", payload.getHendelseType(), kandidaterTilRevurdering.keySet().size());
 
         for (Map.Entry<Fagsak, BehandlingÅrsakType> entry : kandidaterTilRevurdering.entrySet()) {
             var fagsak = entry.getKey();

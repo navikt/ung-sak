@@ -9,6 +9,10 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.engine.jdbc.ClobProxy;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
@@ -23,11 +27,7 @@ import jakarta.persistence.PersistenceException;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.engine.jdbc.ClobProxy;
-
+import no.nav.k9.felles.jpa.converters.PropertiesToStringConverter;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -39,13 +39,12 @@ import no.nav.k9.sak.behandlingslager.kodeverk.AvslagsårsakKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.UtfallKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.VurderUtfallMerknadKodeverdiConverter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.felles.jpa.converters.PropertiesToStringConverter;
 
 @Entity
 @Table(name = "VR_VILKAR_PERIODE")
 @DynamicInsert
 @DynamicUpdate
-public class VilkårPeriode extends BaseEntitet implements IndexKey {
+public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<VilkårPeriode> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VILKAR_PERIODE")
@@ -123,6 +122,33 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
         this.regelEvalueringCached = vilkårPeriode.regelEvalueringCached;
 
         this.begrunnelse = vilkårPeriode.begrunnelse;
+    }
+
+    private static String getPayload(Clob payload, AtomicReference<String> payloadStringRef) {
+        var payloadString = payloadStringRef.get();
+        if (payloadString != null && !payloadString.isBlank()) {
+            return payloadString; // quick return, deserialisert tidligere
+        }
+
+        if (payload == null || (payloadString != null && payloadString.isEmpty())) {
+            return null; // quick return, har ikke eller er tom
+        }
+
+        payloadString = ""; // dummy value for å signalisere at er allerede deserialisert
+        try {
+            BufferedReader in = new BufferedReader(payload.getCharacterStream());
+            String line;
+            StringBuilder sb = new StringBuilder(2048);
+            while ((line = in.readLine()) != null) {
+                sb.append(line);
+            }
+            payloadString = sb.toString();
+        } catch (SQLException | IOException e) {
+            throw new PersistenceException("Kunne ikke lese payload: ", e);
+        }
+        payloadStringRef.set(payloadString);
+        return payloadString;
+
     }
 
     @Override
@@ -294,30 +320,8 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
             '}';
     }
 
-    private static String getPayload(Clob payload, AtomicReference<String> payloadStringRef) {
-        var payloadString = payloadStringRef.get();
-        if (payloadString != null && !payloadString.isBlank()) {
-            return payloadString; // quick return, deserialisert tidligere
-        }
-
-        if (payload == null || (payloadString != null && payloadString.isEmpty())) {
-            return null; // quick return, har ikke eller er tom
-        }
-
-        payloadString = ""; // dummy value for å signalisere at er allerede deserialisert
-        try {
-            BufferedReader in = new BufferedReader(payload.getCharacterStream());
-            String line;
-            StringBuilder sb = new StringBuilder(2048);
-            while ((line = in.readLine()) != null) {
-                sb.append(line);
-            }
-            payloadString = sb.toString();
-        } catch (SQLException | IOException e) {
-            throw new PersistenceException("Kunne ikke lese payload: ", e);
-        }
-        payloadStringRef.set(payloadString);
-        return payloadString;
-
+    @Override
+    public int compareTo(VilkårPeriode o) {
+        return getPeriode().compareTo(o.getPeriode());
     }
 }

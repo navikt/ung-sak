@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
@@ -21,7 +20,7 @@ class StartpunktUtlederInntektsmeldinger {
 
     StartpunktType utledStartpunkt(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag grunnlag1) {
 
-        if (inntektsmeldingErSøknad(ref)) {
+        if (inntektsmeldingErSøknad(ref) && grunnlag1 != null) {
             var nyeInntektsmeldinger = inntektArbeidYtelseTjeneste.hentInntektsmeldingerSidenRef(ref.getSaksnummer(), ref.getBehandlingId(), grunnlag1.getEksternReferanse());
 
             // TODO: Validere at det faktisk blir endring i periodene

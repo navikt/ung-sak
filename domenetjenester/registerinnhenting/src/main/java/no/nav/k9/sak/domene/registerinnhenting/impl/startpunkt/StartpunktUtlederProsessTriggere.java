@@ -4,12 +4,11 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -55,6 +54,9 @@ class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
     private StartpunktType mapTilStartPunktType(Trigger it) {
         if (BehandlingÅrsakType.RE_SATS_REGULERING.equals(it.getÅrsak())) {
             return StartpunktType.BEREGNING;
+        }
+        if (BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON.equals(it.getÅrsak())) {
+            return StartpunktType.UTTAKSVILKÅR;
         }
         log.info("Ukjent trigger {} med ukjent startpunkt, starter fra starten", it.getÅrsak());
         return StartpunktType.INIT_PERIODER;

@@ -2,16 +2,16 @@ package no.nav.k9.sak.ytelse.omsorgspenger.kompletthetssjekk;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -22,7 +22,9 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
+import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
@@ -42,6 +44,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     private KompletthetsjekkerFelles fellesUtil;
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
 
     OmsorgspengerKompletthetsjekker() {
         // CDI
@@ -53,13 +56,14 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
                                            BehandlingRepository behandlingRepository,
                                            KompletthetsjekkerFelles fellesUtil,
                                            OmsorgspengerGrunnlagRepository grunnlagRepository,
-                                           MottatteDokumentRepository mottatteDokumentRepository) {
+                                           MottatteDokumentRepository mottatteDokumentRepository, KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
         this.kompletthetssjekkerInntektsmelding = kompletthetssjekkerInntektsmelding;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.fellesUtil = fellesUtil;
         this.grunnlagRepository = grunnlagRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
     }
 
     @Override
@@ -127,8 +131,8 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     private boolean harIngenRefusjonskravFraMottatteInntektsmeldinger(BehandlingReferanse ref) {
         List<Inntektsmelding> inntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt());
-        return inntektsmeldinger.size() > 0
-            && inntektsmeldinger.stream().allMatch(im -> !im.harRefusjonskrav());
+        return inntektsmeldinger.stream()
+            .allMatch(im -> !im.harRefusjonskrav());
     }
 
     @Override
@@ -153,6 +157,11 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
             .stream()
             .map(e -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, e.getArbeidsgiver(), true))
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggForPerioder(BehandlingReferanse ref) {
+        return kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref);
     }
 
     private KompletthetssjekkerInntektsmelding getKompletthetsjekkerInntektsmelding(BehandlingReferanse ref) {

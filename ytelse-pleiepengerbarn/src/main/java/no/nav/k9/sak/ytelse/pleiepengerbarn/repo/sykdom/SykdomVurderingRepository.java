@@ -73,6 +73,28 @@ public class SykdomVurderingRepository {
         entityManager.flush();
     }
 
+    public void lagre(SykdomVurderingVersjonBesluttet besluttet) {
+        String sql = "INSERT INTO sykdom_vurdering_versjon_besluttet" +
+            " (sykdom_vurdering_versjon_id, endret_av, endret_tid)" +
+            " VALUES(:id, :endretAv, :endretTid)" +
+            " ON CONFLICT DO NOTHING";
+
+        Query query = entityManager.createNativeQuery(sql)
+            .setParameter("id", besluttet.getSykdomVurderingVersjon().getId())
+            .setParameter("endretAv", besluttet.getEndretAv())
+            .setParameter("endretTid", besluttet.getEndretTidspunkt());
+
+
+        query.executeUpdate();
+        entityManager.flush();
+    }
+
+    public boolean hentErBesluttet(SykdomVurderingVersjon vurderingVersjon) {
+        SykdomVurderingVersjonBesluttet besluttet = entityManager.find(SykdomVurderingVersjonBesluttet.class, vurderingVersjon.getId());
+
+        return besluttet != null;
+    }
+
     public Optional<SykdomVurdering> hentVurdering(AktørId pleietrengende, Long vurderingId) {
         final TypedQuery<SykdomVurdering> q = entityManager.createQuery(
             "SELECT v " +

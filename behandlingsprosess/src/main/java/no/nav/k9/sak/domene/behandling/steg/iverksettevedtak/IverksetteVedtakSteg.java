@@ -2,14 +2,13 @@ package no.nav.k9.sak.domene.behandling.steg.iverksettevedtak;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -28,7 +27,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
-import no.nav.k9.sak.domene.vedtak.IdentifiserOverlappendeInfotrygdYtelseTjeneste;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 
@@ -40,7 +38,6 @@ public class IverksetteVedtakSteg implements BehandlingSteg {
 
     private static final Logger log = LoggerFactory.getLogger(IverksetteVedtakSteg.class);
     private Instance<OpprettProsessTaskIverksett> opprettProsessTaskIverksett;
-    private IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse;
     private HistorikkRepository historikkRepository;
     private VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse;
 
@@ -54,12 +51,10 @@ public class IverksetteVedtakSteg implements BehandlingSteg {
     @Inject
     public IverksetteVedtakSteg(BehandlingRepositoryProvider repositoryProvider,
                                 @Any Instance<OpprettProsessTaskIverksett> opprettProsessTaskIverksett,
-                                IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse,
                                 VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         this.opprettProsessTaskIverksett = opprettProsessTaskIverksett;
-        this.identifiserOverlappendeInfotrygdYtelse = identifiserOverlappendeInfotrygdYtelse;
         this.historikkRepository = repositoryProvider.getHistorikkRepository();
         this.tidligereBehandlingUnderIverksettelse = tidligereBehandlingUnderIverksettelse;
     }
@@ -85,7 +80,6 @@ public class IverksetteVedtakSteg implements BehandlingSteg {
             // Behandlingsprosessen stopper og denne behandlingen blir plukket opp av avsluttBehandling.
             return BehandleStegResultat.startet();
         }
-        førIverksetting(behandling, vedtak);
         log.info("Behandling {}: Iverksetter vedtak", behandlingId);
         iverksetter(behandling);
 
@@ -120,9 +114,6 @@ public class IverksetteVedtakSteg implements BehandlingSteg {
         historikkRepository.lagre(historikkinnslag);
     }
 
-    private void førIverksetting(Behandling behandling, BehandlingVedtak behandlingVedtak) {
-        identifiserOverlappendeInfotrygdYtelse.vurderOgLagreEventueltOverlapp(behandling, behandlingVedtak);
-    }
 
     private void iverksetter(Behandling behandling) {
         FagsakYtelseTypeRef.Lookup.find(opprettProsessTaskIverksett, behandling.getFagsakYtelseType()).orElseThrow().opprettIverksettingstasker(behandling);

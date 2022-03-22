@@ -10,15 +10,14 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.jetbrains.annotations.NotNull;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.AktivitetDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.OmsorgspengerGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedUtbetalingsgradDto;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradArbeidsforholdDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradPrAktivitetDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
@@ -113,7 +112,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         return fullUttaksplan.getAktiviteter();
     }
 
-    private UtbetalingsgradPrAktivitetDto mapTilUtbetalingsgrad(List<Uttaksperiode> perioder, UtbetalingsgradArbeidsforholdDto arbeidsforhold) {
+    private UtbetalingsgradPrAktivitetDto mapTilUtbetalingsgrad(List<Uttaksperiode> perioder, AktivitetDto arbeidsforhold) {
         var utbetalingsgrad = mapUtbetalingsgradPerioder(perioder);
 
         if (perioder.size() != utbetalingsgrad.size()) {
@@ -143,14 +142,14 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         return p.getUtbetalingsgrad();
     }
 
-    private UtbetalingsgradArbeidsforholdDto mapTilKalkulusArbeidsforhold(Arbeidsforhold arb) {
+    private AktivitetDto mapTilKalkulusArbeidsforhold(Arbeidsforhold arb) {
         if (erTypeMedArbeidsforhold(arb)) {
             var aktør = mapTilKalkulusAktør(arb);
             var type = mapType(arb.getType());
             var internArbeidsforholdId = mapArbeidsforholdId(arb.getArbeidsforholdId());
-            return new UtbetalingsgradArbeidsforholdDto(aktør, internArbeidsforholdId, type);
+            return new AktivitetDto(aktør, internArbeidsforholdId, type);
         } else {
-            return new UtbetalingsgradArbeidsforholdDto(null, null, mapType(arb.getType()));
+            return new AktivitetDto(null, null, mapType(arb.getType()));
         }
     }
 

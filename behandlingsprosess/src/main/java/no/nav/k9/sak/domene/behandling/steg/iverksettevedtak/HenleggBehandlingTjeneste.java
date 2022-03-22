@@ -5,14 +5,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -89,7 +88,7 @@ public class HenleggBehandlingTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE).contains(behandling.getFagsakYtelseType())) {
-            throw new IllegalArgumentException("Det er p.t. ikke støttet å henlegge behandlinger for fagsak Pleiepenger sykt barn.");
+            throw new IllegalArgumentException("Det er p.t. ikke støttet å henlegge behandlinger for fagsak " + behandling.getFagsakYtelseType().getNavn());
         }
 
         validerÅrsakMotKrav(årsakKode, behandling);

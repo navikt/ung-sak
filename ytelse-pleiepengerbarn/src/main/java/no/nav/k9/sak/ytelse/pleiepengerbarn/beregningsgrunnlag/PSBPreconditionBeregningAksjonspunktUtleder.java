@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
@@ -126,8 +125,8 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
     }
 
     private boolean harFrilansIInfotrygdOgManglerSøknad(NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
-                                                       List<SakInfotrygdMigrering> eksisterendeMigreringTilVurdering,
-                                                       YtelseFilter psbInfotrygdFilter, Long behandlingId) {
+                                                        List<SakInfotrygdMigrering> eksisterendeMigreringTilVurdering,
+                                                        YtelseFilter psbInfotrygdFilter, Long behandlingId) {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
         return eksisterendeMigreringTilVurdering.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt)
             .anyMatch(stp -> harFrilansIInfotrygd(perioderTilVurdering, psbInfotrygdFilter, stp) &&
@@ -146,15 +145,19 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
 
 
     private boolean harNæringIInfotrygd(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, YtelseFilter psbInfotrygdFilter, LocalDate stp) {
+        var overlappendePerioder = finnOverlappendePerioder(perioderTilVurdering, psbInfotrygdFilter, stp);
+        return !overlappendePerioder.isEmpty() && overlappendePerioder.stream().allMatch(this::harKategoriMedNæring);
+    }
+
+    private List<Ytelse> finnOverlappendePerioder(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, YtelseFilter psbInfotrygdFilter, LocalDate stp) {
         return psbInfotrygdFilter.getFiltrertYtelser()
             .stream().filter(y -> harOverlappendePeriode(perioderTilVurdering, stp, y))
-            .allMatch(this::harKategoriMedNæring);
+            .toList();
     }
 
     private boolean harFrilansIInfotrygd(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, YtelseFilter psbInfotrygdFilter, LocalDate stp) {
-        return psbInfotrygdFilter.getFiltrertYtelser()
-            .stream().filter(y -> harOverlappendePeriode(perioderTilVurdering, stp, y))
-            .allMatch(this::harKategoriMedFrilans);
+        var overlappendePerioder = finnOverlappendePerioder(perioderTilVurdering, psbInfotrygdFilter, stp);
+        return !overlappendePerioder.isEmpty() && overlappendePerioder.stream().allMatch(this::harKategoriMedFrilans);
     }
 
     private boolean harOverlappendePeriode(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LocalDate stp, Ytelse y) {
@@ -211,14 +214,12 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
     }
 
 
-
     private YtelseFilter finnPSBInfotryd(AksjonspunktUtlederInput param) {
         InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId());
         Optional<AktørYtelse> aktørYtelse = iayGrunnlag.getAktørYtelseFraRegister(param.getAktørId());
         YtelseFilter ytelseFilter = lagInfotrygdPSBFilter(aktørYtelse);
         return ytelseFilter;
     }
-
 
 
     private List<SakInfotrygdMigrering> finnEksisterendeMigreringTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer) {
@@ -228,7 +229,12 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         var antallPerioderMedOverlapp = perioderTilVurdering.stream().filter(periode -> migreringTilVurdering.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt)
             .anyMatch(periode::inkluderer)).count();
         if (migreringTilVurdering.size() > antallPerioderMedOverlapp) {
-            throw new IllegalStateException("Forventer maksimalt en migrering til vurdering per periode");
+            throw new IllegalStateException(
+                String.format("Forventer maksimalt en migrering til vurdering per periode. " +
+                        "Migrerte skjæringstidspunkt : %s, " +
+                        "Perioder til vurdering: %s",
+                    eksisterendeInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).collect(Collectors.toSet()),
+                    perioderTilVurdering));
         }
         return migreringTilVurdering;
     }
