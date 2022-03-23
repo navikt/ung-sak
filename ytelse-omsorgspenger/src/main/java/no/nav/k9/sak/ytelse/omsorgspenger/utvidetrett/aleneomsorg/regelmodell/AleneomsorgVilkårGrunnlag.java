@@ -10,7 +10,7 @@ public class AleneomsorgVilkårGrunnlag implements VilkårGrunnlag {
 
     private final AktørId søkerAktørId;
     private final List<BostedsAdresse> søkerAdresser;
-    private final Map<AktørId, List<BostedsAdresse>> foreldreAdresser;
+    private final Map<AktørId, List<BostedsAdresse>> foreldreAdresser; //må ha med begge foreldres adresser ettersom søker kan være fosterforelder
 
     public AleneomsorgVilkårGrunnlag(AktørId søkerAktørId, List<BostedsAdresse> søkerAdresser, Map<AktørId, List<BostedsAdresse>> foreldreAdresser) {
         this.søkerAktørId = søkerAktørId;

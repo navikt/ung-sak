@@ -8,9 +8,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -31,9 +28,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder
 @FagsakYtelseTypeRef("OMP_AO")
 @BehandlingTypeRef
 @RequestScoped
-public class AleneomsorgVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(AleneomsorgVilkårsVurderingTjeneste.class);
+public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -42,15 +37,15 @@ public class AleneomsorgVilkårsVurderingTjeneste implements VilkårsPerioderTil
 
     private UtvidetRettSøknadPerioder søktePerioder;
 
-    AleneomsorgVilkårsVurderingTjeneste() {
+    AleneomsorgVilkårsPerioderTilVurderingTjeneste() {
         // for proxy
     }
 
     @Inject
-    public AleneomsorgVilkårsVurderingTjeneste(BehandlingRepository behandlingRepository,
-                                               VilkårResultatRepository vilkårResultatRepository,
-                                               PersoninfoAdapter personinfoAdapter,
-                                               SøknadRepository søknadRepository) {
+    public AleneomsorgVilkårsPerioderTilVurderingTjeneste(BehandlingRepository behandlingRepository,
+                                                          VilkårResultatRepository vilkårResultatRepository,
+                                                          PersoninfoAdapter personinfoAdapter,
+                                                          SøknadRepository søknadRepository) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personinfoAdapter = personinfoAdapter;

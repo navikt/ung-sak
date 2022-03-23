@@ -4,16 +4,17 @@ import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.RuleReasonRef;
 import no.nav.fpsak.nare.specification.LeafSpecification;
 
-public class IkkeVurderbar extends LeafSpecification {
+/** Brukes for å trigge manuell vurdering når automatisk regel ikke kan vurderes til innvilget/avslått */
+public class IkkeVurderbar<T> extends LeafSpecification<T> {
 
-    private RuleReasonRef ruleReasonRef;
+    private final RuleReasonRef ruleReasonRef;
 
     public IkkeVurderbar(RuleReasonRef ruleReasonRef){
         super(ruleReasonRef.getReasonCode());
         this.ruleReasonRef = ruleReasonRef;
     }
     @Override
-    public Evaluation evaluate(Object grunnlag) {
+    public Evaluation evaluate(T grunnlag) {
         return kanIkkeVurdere(ruleReasonRef);
     }
 

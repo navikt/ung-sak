@@ -23,7 +23,7 @@ public class AleneomsorgSøknadMottaker implements SøknadMottakTjeneste<Innsend
 
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
-    private AleneomsorgVilkårsVurderingTjeneste vilkårsVurderingTjeneste;
+    private AleneomsorgVilkårsPerioderTilVurderingTjeneste vilkårsVurderingTjeneste;
 
     AleneomsorgSøknadMottaker() {
         // proxy
@@ -31,7 +31,7 @@ public class AleneomsorgSøknadMottaker implements SøknadMottakTjeneste<Innsend
 
     @Inject
     public AleneomsorgSøknadMottaker(SaksnummerRepository saksnummerRepository,
-                                     @Any AleneomsorgVilkårsVurderingTjeneste vilkårsVurderingTjeneste,
+                                     @Any AleneomsorgVilkårsPerioderTilVurderingTjeneste vilkårsVurderingTjeneste,
                                      FagsakTjeneste fagsakTjeneste) {
         this.vilkårsVurderingTjeneste = vilkårsVurderingTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;

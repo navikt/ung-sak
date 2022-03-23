@@ -21,7 +21,7 @@ public class HarAleneomsorgForBarnet extends LeafSpecification<AleneomsorgVilkå
             return ja();
         }
 
-        return nei(AleneomsorgKanIkkeVurdereAutomatiskÅrsaker.KAN_IKKE_AUTOMATISK_INNVILGE_OMSORGEN_FOR.toRuleReason());
+        return kanIkkeVurdere(AleneomsorgKanIkkeVurdereAutomatiskÅrsaker.KAN_IKKE_AUTOMATISK_INNVILGE_OMSORGEN_FOR.toRuleReason());
     }
 
     private boolean søkerHarSammeAdresseSomEnAnnenForelder(AleneomsorgVilkårGrunnlag grunnlag) {

@@ -93,7 +93,7 @@ public class AleneomsorgTjeneste {
         Personinfo personInfoAnnenForelder = tpsTjeneste.hentBrukerForAktør(aktørId).orElseThrow();
         return personInfoAnnenForelder.getAdresseInfoList().stream()
             .filter(adresseinfo -> adresseinfo.getGjeldendePostadresseType() == AdresseType.BOSTEDSADRESSE)
-            .map(adresseinfo -> new BostedsAdresse(aktørId.getAktørId(), adresseinfo.getAdresselinje1(), adresseinfo.getAdresselinje2(), adresseinfo.getAdresselinje3(), adresseinfo.getPostNr(), adresseinfo.getLand()))
+            .map(adresseinfo -> new BostedsAdresse(adresseinfo.getAdresselinje1(), adresseinfo.getAdresselinje2(), adresseinfo.getAdresselinje3(), adresseinfo.getPostNr(), adresseinfo.getLand()))
             .toList();
     }
 

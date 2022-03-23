@@ -11,7 +11,7 @@ import no.nav.k9.sak.inngangsvilkår.Oppfylt;
 @RuleDocumentation(value = AleneomsorgVilkår.ID, specificationReference = "")
 public class AleneomsorgVilkår implements RuleService<AleneomsorgVilkårGrunnlag> {
 
-    public static final String ID = "OMP_VK 9.5";
+    public static final String ID = "OMP_VK 9.6.1";
 
     @Override
     public Evaluation evaluer(AleneomsorgVilkårGrunnlag grunnlag) {
@@ -24,7 +24,7 @@ public class AleneomsorgVilkår implements RuleService<AleneomsorgVilkårGrunnla
         Ruleset<AleneomsorgVilkårGrunnlag> rs = new Ruleset<>();
         return rs.hvisRegel(HarAleneomsorgForBarnet.ID, "Har søker aleneomsorg.")
             .hvis(new HarAleneomsorgForBarnet(), new Oppfylt())
-            .ellers(new IkkeVurderbar(AleneomsorgKanIkkeVurdereAutomatiskÅrsaker.KAN_IKKE_AUTOMATISK_INNVILGE_OMSORGEN_FOR.toRuleReason()));
+            .ellers(new IkkeVurderbar<>(AleneomsorgKanIkkeVurdereAutomatiskÅrsaker.KAN_IKKE_AUTOMATISK_INNVILGE_OMSORGEN_FOR.toRuleReason()));
     }
 
 }
