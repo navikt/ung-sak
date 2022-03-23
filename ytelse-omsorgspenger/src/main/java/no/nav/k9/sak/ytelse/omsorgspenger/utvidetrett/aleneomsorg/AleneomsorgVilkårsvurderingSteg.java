@@ -31,13 +31,13 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg.regelmodell.AleneOmOmsorgenVilkårGrunnlag;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg.regelmodell.AleneomsorgVilkårGrunnlag;
 
 @FagsakYtelseTypeRef("OMP_AO")
 @BehandlingStegRef(kode = "MANUELL_VILKÅRSVURDERING")
 @BehandlingTypeRef
 @ApplicationScoped
-public class AleneOmsorgManuellVilkårsvurderingSteg implements BehandlingSteg {
+public class AleneomsorgVilkårsvurderingSteg implements BehandlingSteg {
 
     private AksjonspunktDefinisjon aksjonspunktDef = AksjonspunktDefinisjon.VURDER_OMS_UTVIDET_RETT;
     private final VilkårType VILKÅRET = VilkårType.UTVIDETRETT;
@@ -47,27 +47,27 @@ public class AleneOmsorgManuellVilkårsvurderingSteg implements BehandlingSteg {
     private SøknadRepository søknadRepository;
     private VilkårTjeneste vilkårTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
-    private AleneOmOmsorgenTjeneste aleneOmOmsorgenTjeneste;
+    private AleneomsorgTjeneste aleneomsorgTjeneste;
     private boolean automatiserVedtak;
 
-    public AleneOmsorgManuellVilkårsvurderingSteg() {
+    public AleneomsorgVilkårsvurderingSteg() {
         // CDO
     }
 
     @Inject
-    public AleneOmsorgManuellVilkårsvurderingSteg(BehandlingRepository behandlingRepository,
-                                                  SøknadRepository søknadRepository,
-                                                  VilkårTjeneste vilkårTjeneste,
-                                                  VilkårResultatRepository vilkårResultatRepository,
-                                                  @FagsakYtelseTypeRef("OMP_AO") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                                  AleneOmOmsorgenTjeneste aleneOmOmsorgenTjeneste,
-                                                  @KonfigVerdi(value = "OMP_DELT_BOSTED_RAMMEVEDTAK", defaultVerdi = "true") boolean automatiserVedtak) {
+    public AleneomsorgVilkårsvurderingSteg(BehandlingRepository behandlingRepository,
+                                           SøknadRepository søknadRepository,
+                                           VilkårTjeneste vilkårTjeneste,
+                                           VilkårResultatRepository vilkårResultatRepository,
+                                           @FagsakYtelseTypeRef("OMP_AO") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                           AleneomsorgTjeneste aleneomsorgTjeneste,
+                                           @KonfigVerdi(value = "OMP_DELT_BOSTED_RAMMEVEDTAK", defaultVerdi = "true") boolean automatiserVedtak) {
         this.behandlingRepository = behandlingRepository;
         this.søknadRepository = søknadRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
-        this.aleneOmOmsorgenTjeneste = aleneOmOmsorgenTjeneste;
+        this.aleneomsorgTjeneste = aleneomsorgTjeneste;
         this.automatiserVedtak = automatiserVedtak;
     }
 
@@ -102,8 +102,8 @@ public class AleneOmsorgManuellVilkårsvurderingSteg implements BehandlingSteg {
 
         Vilkår vilkår = vilkårene.getVilkår(VILKÅRET).orElseThrow();
         List<VilkårPeriode> ikkeVurdertePerioder = vilkår.getPerioder().stream().filter(v -> v.getUtfall() == Utfall.IKKE_VURDERT).toList();
-        LocalDateTimeline<AleneOmOmsorgenVilkårGrunnlag> grunnlagsdata = aleneOmOmsorgenTjeneste.oversettSystemdataTilRegelModellGrunnlag(kontekst.getBehandlingId(), ikkeVurdertePerioder);
-        List<VilkårData> vilkårData = aleneOmOmsorgenTjeneste.vurderPerioder(grunnlagsdata);
+        LocalDateTimeline<AleneomsorgVilkårGrunnlag> grunnlagsdata = aleneomsorgTjeneste.oversettSystemdataTilRegelModellGrunnlag(kontekst.getBehandlingId(), ikkeVurdertePerioder);
+        List<VilkårData> vilkårData = aleneomsorgTjeneste.vurderPerioder(grunnlagsdata);
         Vilkårene oppdaterteVilkår = oppdaterVilkårene(vilkårene, vilkårData);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
 

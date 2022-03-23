@@ -8,12 +8,11 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
@@ -32,9 +31,9 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder
 @FagsakYtelseTypeRef("OMP_AO")
 @BehandlingTypeRef
 @RequestScoped
-public class AleneOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
+public class AleneomsorgVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
     @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(AleneOmsorgVilkårsVurderingTjeneste.class);
+    private static final Logger log = LoggerFactory.getLogger(AleneomsorgVilkårsVurderingTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -43,12 +42,12 @@ public class AleneOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderTil
 
     private UtvidetRettSøknadPerioder søktePerioder;
 
-    AleneOmsorgVilkårsVurderingTjeneste() {
+    AleneomsorgVilkårsVurderingTjeneste() {
         // for proxy
     }
 
     @Inject
-    public AleneOmsorgVilkårsVurderingTjeneste(BehandlingRepository behandlingRepository,
+    public AleneomsorgVilkårsVurderingTjeneste(BehandlingRepository behandlingRepository,
                                                VilkårResultatRepository vilkårResultatRepository,
                                                PersoninfoAdapter personinfoAdapter,
                                                SøknadRepository søknadRepository) {

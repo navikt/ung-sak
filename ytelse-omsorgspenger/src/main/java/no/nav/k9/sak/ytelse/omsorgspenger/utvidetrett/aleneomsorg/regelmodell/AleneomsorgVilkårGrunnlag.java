@@ -6,13 +6,13 @@ import java.util.Map;
 import no.nav.k9.sak.inngangsvilkår.VilkårGrunnlag;
 import no.nav.k9.sak.typer.AktørId;
 
-public class AleneOmOmsorgenVilkårGrunnlag implements VilkårGrunnlag {
+public class AleneomsorgVilkårGrunnlag implements VilkårGrunnlag {
 
     private final AktørId søkerAktørId;
     private final List<BostedsAdresse> søkerAdresser;
     private final Map<AktørId, List<BostedsAdresse>> foreldreAdresser;
 
-    public AleneOmOmsorgenVilkårGrunnlag(AktørId søkerAktørId, List<BostedsAdresse> søkerAdresser, Map<AktørId, List<BostedsAdresse>> foreldreAdresser) {
+    public AleneomsorgVilkårGrunnlag(AktørId søkerAktørId, List<BostedsAdresse> søkerAdresser, Map<AktørId, List<BostedsAdresse>> foreldreAdresser) {
         this.søkerAktørId = søkerAktørId;
         this.søkerAdresser = søkerAdresser;
         this.foreldreAdresser = foreldreAdresser;

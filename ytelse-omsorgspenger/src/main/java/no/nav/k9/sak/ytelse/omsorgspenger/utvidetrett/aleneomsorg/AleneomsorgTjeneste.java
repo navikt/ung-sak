@@ -26,35 +26,35 @@ import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtfallOversetter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg.regelmodell.AleneOmOmsorgenVilkårGrunnlag;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg.regelmodell.AleneomsorgVilkår;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg.regelmodell.AleneomsorgVilkårGrunnlag;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg.regelmodell.BostedsAdresse;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg.regelmodell.OmsorgenForVilkår;
 
 @Dependent
-public class AleneOmOmsorgenTjeneste {
+public class AleneomsorgTjeneste {
 
     private VilkårUtfallOversetter utfallOversetter;
     private BehandlingRepository behandlingRepository;
     private TpsTjeneste tpsTjeneste;
 
     @Inject
-    AleneOmOmsorgenTjeneste(BehandlingRepository behandlingRepository, TpsTjeneste tpsTjeneste) {
+    AleneomsorgTjeneste(BehandlingRepository behandlingRepository, TpsTjeneste tpsTjeneste) {
         this.utfallOversetter = new VilkårUtfallOversetter();
         this.behandlingRepository = behandlingRepository;
         this.tpsTjeneste = tpsTjeneste;
     }
 
-    public List<VilkårData> vurderPerioder(LocalDateTimeline<AleneOmOmsorgenVilkårGrunnlag> samletOmsorgenForTidslinje) {
+    public List<VilkårData> vurderPerioder(LocalDateTimeline<AleneomsorgVilkårGrunnlag> samletOmsorgenForTidslinje) {
         List<VilkårData> resultat = new ArrayList<>();
-        for (LocalDateSegment<AleneOmOmsorgenVilkårGrunnlag> s : samletOmsorgenForTidslinje.toSegments()) {
-            var evaluation = new OmsorgenForVilkår().evaluer(s.getValue());
+        for (LocalDateSegment<AleneomsorgVilkårGrunnlag> s : samletOmsorgenForTidslinje.toSegments()) {
+            var evaluation = new AleneomsorgVilkår().evaluer(s.getValue());
             var vilkårData = utfallOversetter.oversett(VilkårType.OMSORGEN_FOR, evaluation, s.getValue(), DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()));
             resultat.add(vilkårData);
         }
         return resultat;
     }
 
-    public LocalDateTimeline<AleneOmOmsorgenVilkårGrunnlag> oversettSystemdataTilRegelModellGrunnlag(Long behandlingId, Collection<VilkårPeriode> vilkårsperioder) {
+    public LocalDateTimeline<AleneomsorgVilkårGrunnlag> oversettSystemdataTilRegelModellGrunnlag(Long behandlingId, Collection<VilkårPeriode> vilkårsperioder) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         Fagsak fagsak = behandling.getFagsak();
         var søkerAktørId = fagsak.getAktørId();
@@ -63,7 +63,7 @@ public class AleneOmOmsorgenTjeneste {
         List<BostedsAdresse> søkerBostedAdresser = finnBostedAdresser(søkerAktørId);
 
         return new LocalDateTimeline<>(vilkårsperioder.stream()
-            .map(vilkårsperiode -> new LocalDateSegment<>(vilkårsperiode.getFom(), vilkårsperiode.getTom(), new AleneOmOmsorgenVilkårGrunnlag(søkerAktørId, søkerBostedAdresser, foreldreBostedAdresser)))
+            .map(vilkårsperiode -> new LocalDateSegment<>(vilkårsperiode.getFom(), vilkårsperiode.getTom(), new AleneomsorgVilkårGrunnlag(søkerAktørId, søkerBostedAdresser, foreldreBostedAdresser)))
             .toList()
         );
     }
