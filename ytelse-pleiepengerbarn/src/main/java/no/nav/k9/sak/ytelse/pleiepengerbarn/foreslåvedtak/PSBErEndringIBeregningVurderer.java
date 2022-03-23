@@ -13,6 +13,7 @@ import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.ErEndringIBeregningVu
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("PPN")
 public class PSBErEndringIBeregningVurderer implements ErEndringIBeregningVurderer {
 
     public PSBErEndringIBeregningVurderer() {
