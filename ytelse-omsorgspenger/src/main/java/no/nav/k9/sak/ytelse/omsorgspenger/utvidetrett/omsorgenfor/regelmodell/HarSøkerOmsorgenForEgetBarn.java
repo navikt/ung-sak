@@ -25,7 +25,7 @@ public class HarSøkerOmsorgenForEgetBarn extends LeafSpecification<OmsorgenForV
             return ja();
         }
 
-        return nei(OmsorgenForKanIkkeVurdereAutomatiskÅrsaker.KAN_IKKE_AUTOMATISK_INNVILGE_OMSORGEN_FOR.toRuleReason());
+        return kanIkkeVurdere(OmsorgenForKanIkkeVurdereAutomatiskÅrsaker.KAN_IKKE_AUTOMATISK_INNVILGE_OMSORGEN_FOR.toRuleReason());
     }
 
     private boolean harDeltBosted(OmsorgenForVilkårGrunnlag grunnlag) {

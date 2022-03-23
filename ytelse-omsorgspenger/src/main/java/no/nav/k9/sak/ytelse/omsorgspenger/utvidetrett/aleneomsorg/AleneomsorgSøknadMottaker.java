@@ -6,7 +6,6 @@ import java.util.Objects;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -20,20 +19,20 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @FagsakYtelseTypeRef("OMP_AO")
 @ApplicationScoped
-public class AleneOmsorgSøknadMottaker implements SøknadMottakTjeneste<InnsendingInnhold> {
+public class AleneomsorgSøknadMottaker implements SøknadMottakTjeneste<InnsendingInnhold> {
 
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
-    private AleneOmsorgVilkårsVurderingTjeneste vilkårsVurderingTjeneste;
+    private AleneomsorgVilkårsPerioderTilVurderingTjeneste vilkårsVurderingTjeneste;
 
-    AleneOmsorgSøknadMottaker() {
+    AleneomsorgSøknadMottaker() {
         // proxy
     }
 
     @Inject
-    public AleneOmsorgSøknadMottaker(SaksnummerRepository saksnummerRepository,
-                                       @Any AleneOmsorgVilkårsVurderingTjeneste vilkårsVurderingTjeneste,
-                                       FagsakTjeneste fagsakTjeneste) {
+    public AleneomsorgSøknadMottaker(SaksnummerRepository saksnummerRepository,
+                                     @Any AleneomsorgVilkårsPerioderTilVurderingTjeneste vilkårsVurderingTjeneste,
+                                     FagsakTjeneste fagsakTjeneste) {
         this.vilkårsVurderingTjeneste = vilkårsVurderingTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.saksnummerRepository = saksnummerRepository;
