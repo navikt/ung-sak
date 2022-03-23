@@ -3,8 +3,9 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -44,10 +45,10 @@ public class AleneOmOmsorgenTjeneste {
     }
 
     public List<VilkårData> vurderPerioder(LocalDateTimeline<AleneOmOmsorgenVilkårGrunnlag> samletOmsorgenForTidslinje) {
-        final List<VilkårData> resultat = new ArrayList<>();
+        List<VilkårData> resultat = new ArrayList<>();
         for (LocalDateSegment<AleneOmOmsorgenVilkårGrunnlag> s : samletOmsorgenForTidslinje.toSegments()) {
-            final var evaluation = new OmsorgenForVilkår().evaluer(s.getValue());
-            final var vilkårData = utfallOversetter.oversett(VilkårType.OMSORGEN_FOR, evaluation, s.getValue(), DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()));
+            var evaluation = new OmsorgenForVilkår().evaluer(s.getValue());
+            var vilkårData = utfallOversetter.oversett(VilkårType.OMSORGEN_FOR, evaluation, s.getValue(), DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()));
             resultat.add(vilkårData);
         }
         return resultat;
@@ -58,18 +59,22 @@ public class AleneOmOmsorgenTjeneste {
         Fagsak fagsak = behandling.getFagsak();
         var søkerAktørId = fagsak.getAktørId();
         var barnAktørId = fagsak.getPleietrengendeAktørId();
-
-        AktørId annenForelderAktørId = finnAnnenForelder(søkerAktørId, barnAktørId);
-        List<BostedsAdresse> søkerBostedsadresser = hentBostedAdresser(søkerAktørId);
-        List<BostedsAdresse> annenForeldersBostedAdresser = hentBostedAdresser(annenForelderAktørId);
+        Map<AktørId, List<BostedsAdresse>> foreldreBostedAdresser = finnForeldresAdresser(barnAktørId);
+        List<BostedsAdresse> søkerBostedAdresser = finnBostedAdresser(søkerAktørId);
 
         return new LocalDateTimeline<>(vilkårsperioder.stream()
-            .map(vilkårsperiode -> new LocalDateSegment<>(vilkårsperiode.getFom(), vilkårsperiode.getTom(), new AleneOmOmsorgenVilkårGrunnlag(annenForelderAktørId, søkerBostedsadresser, annenForeldersBostedAdresser)))
+            .map(vilkårsperiode -> new LocalDateSegment<>(vilkårsperiode.getFom(), vilkårsperiode.getTom(), new AleneOmOmsorgenVilkårGrunnlag(søkerAktørId, søkerBostedAdresser, foreldreBostedAdresser)))
             .toList()
         );
     }
 
-    private AktørId finnAnnenForelder(AktørId søkerAktørId, AktørId barnAktørId) {
+    private Map<AktørId, List<BostedsAdresse>> finnForeldresAdresser(AktørId barnAktørId) {
+        Set<AktørId> foreldre = finnForeldre(barnAktørId);
+        return foreldre.stream()
+            .collect(Collectors.toMap(forelder -> forelder, this::finnBostedAdresser));
+    }
+
+    private Set<AktørId> finnForeldre(AktørId barnAktørId) {
         Personinfo personinfoBarnet = tpsTjeneste.hentBrukerForAktør(barnAktørId).orElseThrow();
 
         Set<RelasjonsRolleType> foreldreroller = Set.of(RelasjonsRolleType.FARA, RelasjonsRolleType.MORA, RelasjonsRolleType.MEDMOR);
@@ -79,27 +84,17 @@ public class AleneOmOmsorgenTjeneste {
             .distinct()
             .toList();
 
-        List<AktørId> andreForeldre = foreldreFnr.stream()
+        return foreldreFnr.stream()
             .map(personIdent -> tpsTjeneste.hentAktørForFnr(personIdent).orElseThrow())
-            .filter(aktørId -> !Objects.equals(aktørId, søkerAktørId))
-            .distinct()
-            .toList();
-        if (andreForeldre.size() > 1) {
-            throw new IllegalArgumentException("Fant flere enn 1 andre foreldre for barnet");
-        }
-        return andreForeldre.isEmpty() ? null : andreForeldre.get(0);
+            .collect(Collectors.toSet());
     }
 
-    private List<BostedsAdresse> hentBostedAdresser(AktørId annenForelder) {
-        if (annenForelder != null) {
-            Personinfo personInfoAnnenForelder = tpsTjeneste.hentBrukerForAktør(annenForelder).orElseThrow();
-            return personInfoAnnenForelder.getAdresseInfoList().stream()
-                .filter(adresseinfo -> adresseinfo.getGjeldendePostadresseType() == AdresseType.BOSTEDSADRESSE)
-                .map(adresseinfo -> new BostedsAdresse(annenForelder.getAktørId(), adresseinfo.getAdresselinje1(), adresseinfo.getAdresselinje2(), adresseinfo.getAdresselinje3(), adresseinfo.getPostNr(), adresseinfo.getLand()))
-                .toList();
-        } else {
-            return List.of();
-        }
+    private List<BostedsAdresse> finnBostedAdresser(AktørId aktørId) {
+        Personinfo personInfoAnnenForelder = tpsTjeneste.hentBrukerForAktør(aktørId).orElseThrow();
+        return personInfoAnnenForelder.getAdresseInfoList().stream()
+            .filter(adresseinfo -> adresseinfo.getGjeldendePostadresseType() == AdresseType.BOSTEDSADRESSE)
+            .map(adresseinfo -> new BostedsAdresse(aktørId.getAktørId(), adresseinfo.getAdresselinje1(), adresseinfo.getAdresselinje2(), adresseinfo.getAdresselinje3(), adresseinfo.getPostNr(), adresseinfo.getLand()))
+            .toList();
     }
 
 }
