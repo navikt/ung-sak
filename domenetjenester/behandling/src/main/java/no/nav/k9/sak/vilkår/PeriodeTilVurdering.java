@@ -7,7 +7,7 @@ public class PeriodeTilVurdering implements Comparable<PeriodeTilVurdering> {
     private final DatoIntervallEntitet periode;
     private boolean erForlengelse;
 
-    PeriodeTilVurdering(DatoIntervallEntitet periode) {
+    public PeriodeTilVurdering(DatoIntervallEntitet periode) {
         this.periode = periode;
     }
 
