@@ -131,7 +131,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
                 .noneMatch(at -> at.getUttakAktiviteter().stream().allMatch(ad -> BigDecimal.ZERO.compareTo(ad.getUtbetalingsgrad()) == 0)))
             .map(LocalDateSegment::getTom)
             .max(LocalDate::compareTo)
-            .orElse(uttakTimeline.getMaxLocalDate());
+            .orElse(uttakTimeline.getMinLocalDate()); // Setter til MIN date, da det ikke er noen utbetaling i hele tidslinjen. Det bør ikke stoppe her
         return maksUtbetalingsDato;
     }
 
