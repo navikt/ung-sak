@@ -58,7 +58,7 @@ public class PSBYtelsespesifikkForeslåVedtak implements YtelsespesifikkForeslå
 
         if (harUbesluttedeSykdomsVurderinger && behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE).isEmpty()) {
             Aksjonspunkt aksjonspunkt = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
-            aksjonspunktKontrollRepository.setTilUtført(aksjonspunkt, "Maskinelt utført - Vurderinger besluttet på annen part");
+            aksjonspunktKontrollRepository.setTilUtført(aksjonspunkt, "Automatisk gjenbruk av ubesluttede vurderinger fra annen fagsak.");
             behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling.getId()));
         }
 
