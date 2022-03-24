@@ -60,7 +60,7 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
 
         if (!behandling.isToTrinnsBehandling()) {
             if(harUbesluttet(sykdomGrunnlagBehandling)) {
-                log.warn("Har ubesluttede sykdomsvurderinger uten at AP9001 har blitt generert")
+                log.warn("Har ubesluttede sykdomsvurderinger uten at AP9001 har blitt generert");
             }
             return;
         }
