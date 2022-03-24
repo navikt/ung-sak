@@ -52,24 +52,14 @@ public class PSBYtelsespesifikkForeslåVedtak implements YtelsespesifikkForeslå
         }
 
         SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(behandling.getUuid());
-
         boolean harUbesluttedeSykdomsVurderinger = sykdomGrunnlagBehandling.getGrunnlag().getVurderinger()
             .stream()
             .anyMatch(v -> !v.isBesluttet());
 
-        if (harUbesluttedeSykdomsVurderinger) {
-            Optional<Aksjonspunkt> ap9001 = behandling.getAksjonspunkter().stream().filter(a -> a.getAksjonspunktDefinisjon().getKode().equals(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE)).findFirst();
-            Aksjonspunkt aksjonspunkt;
-            if (ap9001.isEmpty()) {
-                aksjonspunkt = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
-            } else {
-                aksjonspunkt = ap9001.get();
-            }
-            if (aksjonspunkt.getStatus().erÅpentAksjonspunkt()) {
-                aksjonspunktKontrollRepository.setTilUtført(aksjonspunkt, "Maskinelt utført - Vurderinger besluttet på annen part");
-                behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling.getId()));
-            }
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        if (harUbesluttedeSykdomsVurderinger && behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE).isEmpty()) {
+            Aksjonspunkt aksjonspunkt = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
+            aksjonspunktKontrollRepository.setTilUtført(aksjonspunkt, "Maskinelt utført - Vurderinger besluttet på annen part");
+            behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling.getId()));
         }
 
         return null;
