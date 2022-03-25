@@ -11,7 +11,6 @@ import jakarta.inject.Inject;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -51,7 +50,7 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         var vedtakHendelse = JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), Ytelse.class);
-        var fagsakYtelseType = FagsakYtelseType.fromString(vedtakHendelse.getType().getKode());
+        var fagsakYtelseType = VedtaksHendelseHåndterer.mapYtelse(vedtakHendelse);
         LOG_CONTEXT.add("ytelseType", fagsakYtelseType);
 
         var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste
