@@ -9,6 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.Anvisning;
+import no.nav.abakus.vedtak.ytelse.v1.anvisning.Inntektklasse;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
@@ -58,7 +59,7 @@ class VedtattYtelseMapperTest {
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getErOrganisasjon()).isTrue();
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getIdent()).isEqualTo(arbeidsgiver.getIdentifikator());
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsforholdId()).isEqualTo(eksternReferanse);
-        assertThat(anvisninger.get(0).getAndeler().get(0).getInntektskategori()).isEqualTo(no.nav.abakus.iaygrunnlag.kodeverk.Inntektskategori.ARBEIDSTAKER);
+        assertThat(anvisninger.get(0).getAndeler().get(0).getInntektklasse()).isEqualTo(Inntektklasse.ARBEIDSTAKER);
         assertThat(anvisninger.get(0).getAndeler().get(0).getUtbetalingsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
         assertThat(anvisninger.get(0).getAndeler().get(0).getDagsats().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(dagsats));
         assertThat(anvisninger.get(0).getAndeler().get(0).getRefusjonsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.ZERO);
@@ -97,6 +98,7 @@ class VedtattYtelseMapperTest {
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getIdent()).isEqualTo(arbeidsgiver1.getIdentifikator());
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsforholdId()).isEqualTo(eksternReferanse1);
         assertThat(anvisninger.get(0).getAndeler().get(0).getInntektskategori()).isEqualTo(no.nav.abakus.iaygrunnlag.kodeverk.Inntektskategori.ARBEIDSTAKER);
+        assertThat(anvisninger.get(0).getAndeler().get(0).getInntektklasse()).isEqualTo(Inntektklasse.ARBEIDSTAKER);
         assertThat(anvisninger.get(0).getAndeler().get(0).getUtbetalingsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
         assertThat(anvisninger.get(0).getAndeler().get(0).getDagsats().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(dagsats1));
         assertThat(anvisninger.get(0).getAndeler().get(0).getRefusjonsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
@@ -104,7 +106,7 @@ class VedtattYtelseMapperTest {
         assertThat(anvisninger.get(0).getAndeler().get(1).getArbeidsgiver().getErOrganisasjon()).isTrue();
         assertThat(anvisninger.get(0).getAndeler().get(1).getArbeidsgiver().getIdent()).isEqualTo(arbeidsgiver2.getIdentifikator());
         assertThat(anvisninger.get(0).getAndeler().get(1).getArbeidsforholdId()).isEqualTo(eksternReferanse2);
-        assertThat(anvisninger.get(0).getAndeler().get(1).getInntektskategori()).isEqualTo(no.nav.abakus.iaygrunnlag.kodeverk.Inntektskategori.ARBEIDSTAKER);
+        assertThat(anvisninger.get(0).getAndeler().get(0).getInntektklasse()).isEqualTo(Inntektklasse.ARBEIDSTAKER);
         assertThat(anvisninger.get(0).getAndeler().get(1).getUtbetalingsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
         assertThat(anvisninger.get(0).getAndeler().get(1).getDagsats().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(dagsats2));
         assertThat(anvisninger.get(0).getAndeler().get(1).getRefusjonsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
@@ -139,7 +141,7 @@ class VedtattYtelseMapperTest {
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getErOrganisasjon()).isTrue();
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getIdent()).isEqualTo(arbeidsgiver.getIdentifikator());
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsforholdId()).isEqualTo(eksternReferanse);
-        assertThat(anvisninger.get(0).getAndeler().get(0).getInntektskategori()).isEqualTo(no.nav.abakus.iaygrunnlag.kodeverk.Inntektskategori.ARBEIDSTAKER);
+        assertThat(anvisninger.get(0).getAndeler().get(0).getInntektklasse()).isEqualTo(Inntektklasse.ARBEIDSTAKER);
         assertThat(anvisninger.get(0).getAndeler().get(0).getUtbetalingsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
         assertThat(anvisninger.get(0).getAndeler().get(0).getDagsats().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(dagsats));
         assertThat(anvisninger.get(0).getAndeler().get(0).getRefusjonsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
@@ -169,7 +171,7 @@ class VedtattYtelseMapperTest {
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getErOrganisasjon()).isTrue();
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getIdent()).isEqualTo(arbeidsgiver.getIdentifikator());
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsforholdId()).isEqualTo(null);
-        assertThat(anvisninger.get(0).getAndeler().get(0).getInntektskategori()).isEqualTo(no.nav.abakus.iaygrunnlag.kodeverk.Inntektskategori.ARBEIDSTAKER);
+        assertThat(anvisninger.get(0).getAndeler().get(0).getInntektklasse()).isEqualTo(Inntektklasse.ARBEIDSTAKER);
         assertThat(anvisninger.get(0).getAndeler().get(0).getUtbetalingsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
         assertThat(anvisninger.get(0).getAndeler().get(0).getDagsats().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(dagsats));
         assertThat(anvisninger.get(0).getAndeler().get(0).getRefusjonsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
@@ -203,7 +205,7 @@ class VedtattYtelseMapperTest {
 
         assertThat(anvisninger.size()).isEqualTo(1);
         assertThat(anvisninger.get(0).getAndeler().size()).isEqualTo(1);
-        assertThat(anvisninger.get(0).getAndeler().get(0).getInntektskategori()).isEqualTo(no.nav.abakus.iaygrunnlag.kodeverk.Inntektskategori.DAGPENGER);
+        assertThat(anvisninger.get(0).getAndeler().get(0).getInntektklasse()).isEqualTo(Inntektklasse.DAGPENGER);
         assertThat(anvisninger.get(0).getAndeler().get(0).getUtbetalingsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
         assertThat(anvisninger.get(0).getAndeler().get(0).getDagsats().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(dagsats));
         assertThat(anvisninger.get(0).getAndeler().get(0).getRefusjonsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.ZERO);

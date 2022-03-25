@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.Organisasjon;
@@ -14,6 +13,7 @@ import no.nav.abakus.vedtak.ytelse.Desimaltall;
 import no.nav.abakus.vedtak.ytelse.Periode;
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.Anvisning;
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.AnvistAndel;
+import no.nav.abakus.vedtak.ytelse.v1.anvisning.Inntektklasse;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
@@ -64,8 +64,24 @@ class VedtattYtelseMapper {
             new Desimaltall(finnTotalBeløp(e.getValue())),
             finnUtbetalingsgrad(e.getValue()),
             new Desimaltall(finnRefusjonsgrad(e.getValue())),
-            no.nav.abakus.iaygrunnlag.kodeverk.Inntektskategori.fraKode(e.getKey().getInntektskategori().getKode())
+            mapInntektklasse(e.getKey().getInntektskategori())
         );
+    }
+
+    private static Inntektklasse mapInntektklasse(Inntektskategori inntektskategori) {
+        return switch(inntektskategori) {
+            case ARBEIDSTAKER -> Inntektklasse.ARBEIDSTAKER;
+            case ARBEIDSTAKER_UTEN_FERIEPENGER -> Inntektklasse.ARBEIDSTAKER_UTEN_FERIEPENGER;
+            case FRILANSER -> Inntektklasse.FRILANSER;
+            case SELVSTENDIG_NÆRINGSDRIVENDE -> Inntektklasse.SELVSTENDIG_NÆRINGSDRIVENDE;
+            case DAGPENGER -> Inntektklasse.DAGPENGER;
+            case ARBEIDSAVKLARINGSPENGER -> Inntektklasse.ARBEIDSAVKLARINGSPENGER;
+            case SJØMANN -> Inntektklasse.MARITIM;
+            case DAGMAMMA -> Inntektklasse.DAGMAMMA;
+            case JORDBRUKER -> Inntektklasse.JORDBRUKER;
+            case FISKER -> Inntektklasse.FISKER;
+            default -> Inntektklasse.INGEN;
+        };
     }
 
     private static BigDecimal finnRefusjonsgrad(List<BeregningsresultatAndel> resultatAndeler) {
