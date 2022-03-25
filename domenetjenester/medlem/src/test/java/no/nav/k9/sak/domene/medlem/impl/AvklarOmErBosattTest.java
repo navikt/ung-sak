@@ -7,13 +7,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -188,7 +187,7 @@ public class AvklarOmErBosattTest {
         Personas persona = builderForRegisteropplysninger
             .medPersonas()
             .kvinne(søkerAktørId, SivilstandType.UOPPGITT, Region.UDEFINERT)
-            .personstatus(PersonstatusType.UDEFINERT)
+            .personstatus(PersonstatusType.BOSA)
             .statsborgerskap(adresseLand);
 
         PersonAdresse.Builder adresseBuilder = PersonAdresse.builder().adresselinje1("Portveien 2").land(adresseLand);
