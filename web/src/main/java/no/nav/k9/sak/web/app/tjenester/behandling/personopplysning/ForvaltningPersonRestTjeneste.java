@@ -94,7 +94,7 @@ public class ForvaltningPersonRestTjeneste {
 
     }
 
-    public static Optional<DumpOutput> dumpResultSetToCsv(String path, List<AktørIdOgFnrDto> results) {
+    private static Optional<DumpOutput> dumpResultSetToCsv(String path, List<AktørIdOgFnrDto> results) {
         if (results.isEmpty()) {
             return Optional.empty();
         }
