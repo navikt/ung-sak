@@ -27,6 +27,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -108,6 +109,7 @@ public class ForvaltningPersonRestTjeneste {
     public static class HentFnr implements AbacDto {
 
         @NotNull
+        @Pattern(regexp = "^[\\p{Alnum}\\s]+$", message = "HentFnr [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
         private String aktørIder;
 
         public HentFnr() {
