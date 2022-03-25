@@ -36,20 +36,26 @@ public final class SykdomUtils {
         return new LocalDateTimeline<Boolean>(datoer.stream().map(p -> new LocalDateSegment<Boolean>(p.getFomDato(), p.getTomDato(), true)).collect(Collectors.toList())).compress();
     }
 
+    public static <T> LocalDateTimeline<Boolean> unionTilBoolean(LocalDateTimeline<Boolean> timeline, LocalDateTimeline<T> other) {
+        return timeline.union(other, new LocalDateSegmentCombinator<Boolean, T, Boolean>() {
+
+            @Override
+            public LocalDateSegment<Boolean> combine(LocalDateInterval datoInterval, LocalDateSegment<Boolean> datoSegment, LocalDateSegment<T> datoSegment2) {
+                return new LocalDateSegment<Boolean>(datoInterval, true);
+            }
+        });
+    }
+
     public static <E> List<E> values(LocalDateTimeline<E> elements) {
         return elements.compress().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
     }
 
-    public static <T, U> LocalDateTimeline<T> kunPerioderSomIkkeFinnesI(LocalDateTimeline<T> perioder, LocalDateTimeline<U> perioderSomSkalTrekkesFra) {
-        return perioder.combine(perioderSomSkalTrekkesFra, new LocalDateSegmentCombinator<T, U, T>() {
-            @Override
-            public LocalDateSegment<T> combine(LocalDateInterval datoInterval,
-                    LocalDateSegment<T> datoSegment, LocalDateSegment<U> datoSegment2) {
-                if (datoSegment2 == null) {
-                    return new LocalDateSegment<>(datoInterval, datoSegment.getValue());
-                }
-                return null;
+    public static <T> LocalDateTimeline<T> kunPerioderSomIkkeFinnesI(LocalDateTimeline<T> perioder, LocalDateTimeline<?> perioderSomSkalTrekkesFra) {
+        return perioder.combine(perioderSomSkalTrekkesFra, (datoInterval, datoSegment, datoSegment2) -> {
+            if (datoSegment2 == null) {
+                return new LocalDateSegment<>(datoInterval, datoSegment.getValue());
             }
+            return null;
         }, JoinStyle.LEFT_JOIN).compress();
     }
 
