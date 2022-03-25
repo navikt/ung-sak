@@ -17,25 +17,24 @@ import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FastsattBrukersAndel {
 
-    @JsonProperty(value = "andelsnr", required = true)
+    @JsonProperty(value = "andelsnr")
     @Min(0)
     @Max(Long.MAX_VALUE)
-    @NotNull
     private Long andelsnr;
-    
+
     @JsonProperty(value = "fastsattBeløp")
     @NotNull
     @Min(0)
     @Max(Integer.MAX_VALUE)
     private Integer fastsattBeløp;
-    
+
     @JsonProperty(value = "inntektskategori", required = true)
     @NotNull
     private Inntektskategori inntektskategori;
-    
+
     @JsonProperty(value = "lagtTilAvSaksbehandler")
     private Boolean lagtTilAvSaksbehandler;
-    
+
     @JsonProperty(value = "nyAndel", required = true)
     @NotNull
     private Boolean nyAndel;
