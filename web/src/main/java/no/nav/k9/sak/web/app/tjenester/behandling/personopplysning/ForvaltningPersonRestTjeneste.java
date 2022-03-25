@@ -44,7 +44,6 @@ import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.person.AktørIdOgFnrDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRestTjeneste;
 
 
 @ApplicationScoped
@@ -138,7 +137,7 @@ public class ForvaltningPersonRestTjeneste {
             @Override
             public boolean isReadable(Class<?> type, Type genericType,
                                       Annotation[] annotations, MediaType mediaType) {
-                return (type == ForvaltningMidlertidigDriftRestTjeneste.OpprettManuellRevurdering.class);
+                return (type == HentFnr.class);
             }
 
             @Override
