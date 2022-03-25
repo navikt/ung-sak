@@ -11,13 +11,13 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Alternative;
-
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.SøktUttak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utenlandsopphold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UtenlandsoppholdÅrsak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
@@ -103,8 +103,8 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             null,
             null,
             false,
-            null,
-            UtenlandsoppholdÅrsak.INGEN);
+            new Utenlandsopphold(null,
+            UtenlandsoppholdÅrsak.INGEN));
     }
 
     private Map<String, Utfall> mapInngangsvilkår(Map<String, List<Vilkårsperiode>> inngangsvilkår) {
