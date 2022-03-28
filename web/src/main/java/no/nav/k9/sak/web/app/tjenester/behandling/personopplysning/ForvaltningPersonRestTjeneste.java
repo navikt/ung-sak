@@ -18,6 +18,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.glassfish.jersey.message.internal.VariantSelector;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -90,7 +92,7 @@ public class ForvaltningPersonRestTjeneste {
         String path = "";
 
         var output = dumpResultSetToCsv(path, results).orElseThrow();
-        return Response.ok(output.getContent()).build();
+        return Response.ok(output.getContent(), MediaType.TEXT_PLAIN_TYPE).build();
 
 
     }
