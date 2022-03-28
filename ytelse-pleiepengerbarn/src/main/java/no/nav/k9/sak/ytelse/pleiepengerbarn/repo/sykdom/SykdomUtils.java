@@ -11,6 +11,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.Periode;
@@ -37,13 +38,7 @@ public final class SykdomUtils {
     }
 
     public static <T> LocalDateTimeline<Boolean> unionTilBoolean(LocalDateTimeline<Boolean> timeline, LocalDateTimeline<T> other) {
-        return timeline.union(other, new LocalDateSegmentCombinator<Boolean, T, Boolean>() {
-
-            @Override
-            public LocalDateSegment<Boolean> combine(LocalDateInterval datoInterval, LocalDateSegment<Boolean> datoSegment, LocalDateSegment<T> datoSegment2) {
-                return new LocalDateSegment<Boolean>(datoInterval, true);
-            }
-        });
+        return timeline.union(other, StandardCombinators::alwaysTrueForMatch);
     }
 
     public static <E> List<E> values(LocalDateTimeline<E> elements) {
