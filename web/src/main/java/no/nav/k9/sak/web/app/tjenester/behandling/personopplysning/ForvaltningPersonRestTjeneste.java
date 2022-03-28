@@ -18,8 +18,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.glassfish.jersey.message.internal.VariantSelector;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,6 +28,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -67,6 +66,7 @@ public class ForvaltningPersonRestTjeneste {
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/hentFnr")
     @Operation(description = "Hent fnr for aktørid", tags = "forvaltning - person", responses = {
         @ApiResponse(responseCode = "200",
@@ -93,8 +93,6 @@ public class ForvaltningPersonRestTjeneste {
 
         var output = dumpResultSetToCsv(path, results).orElseThrow();
         return Response.ok(output.getContent(), MediaType.TEXT_PLAIN_TYPE).build();
-
-
     }
 
     private static Optional<DumpOutput> dumpResultSetToCsv(String path, List<AktørIdOgFnrDto> results) {
