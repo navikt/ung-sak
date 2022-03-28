@@ -100,7 +100,7 @@ public class ForvaltningPersonRestTjeneste {
             return Optional.empty();
         }
         var toCsv = new LinkedHashMap<String, Function<AktørIdOgFnrDto, ?>>();
-        toCsv.put("aktørId", AktørIdOgFnrDto::getAktørId);
+        toCsv.put("aktørId", AktørIdOgFnrDto::getAktørIdString);
         toCsv.put("fnr", AktørIdOgFnrDto::getFnr);
         return Optional.of(dumpAsCsv(true, results, path, toCsv));
     }

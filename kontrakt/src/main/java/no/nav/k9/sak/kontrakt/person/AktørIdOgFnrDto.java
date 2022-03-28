@@ -40,6 +40,9 @@ public class AktørIdOgFnrDto {
         return aktørId;
     }
 
+    public String getAktørIdString() {
+        return aktørId.getAktørId();
+    }
 
     @AbacAttributt("fnr")
     public String getFnr() {
