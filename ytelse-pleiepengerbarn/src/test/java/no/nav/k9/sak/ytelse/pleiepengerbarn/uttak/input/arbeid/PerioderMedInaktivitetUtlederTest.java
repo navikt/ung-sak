@@ -38,7 +38,7 @@ class PerioderMedInaktivitetUtlederTest {
 
     @Test
     void skal_utlede_tom_tidslinje_hvis_ingen_perioder_er_til_vurdering() {
-        var input = new InaktivitetUtlederInput(AktørId.dummy(), LocalDateTimeline.EMPTY_TIMELINE, null);
+        var input = new InaktivitetUtlederInput(AktørId.dummy(), LocalDateTimeline.empty(), null);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).isEmpty();

@@ -260,11 +260,10 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    @SuppressWarnings("unchecked")
     private LocalDateTimeline<Boolean> uttaksendringerSidenForrigeBehandling(BehandlingReferanse referanse) {
         final Uttaksplan uttaksplan = uttakTjeneste.hentUttaksplan(referanse.getBehandlingUuid(), false);
         if (uttaksplan == null) {
-            return LocalDateTimeline.EMPTY_TIMELINE;
+            return LocalDateTimeline.empty();
         }
 
         final List<LocalDateSegment<Boolean>> segments = uttaksplan.getPerioder()

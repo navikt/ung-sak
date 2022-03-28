@@ -189,7 +189,7 @@ public class SykdomVurderingService {
         LocalDateTimeline<Boolean> innleggelserTidslinje = hentAlleInnleggelserTidslinje(behandling);
         LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(tidslinjeKreverVurdering, vurderinger);
         if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
-            alleResterendeVurderingsperioder = LocalDateTimeline.EMPTY_TIMELINE;
+            alleResterendeVurderingsperioder = LocalDateTimeline.empty();
         }
 
         List<Periode> resterendeVurderingsperioder = toPeriodeList(alleResterendeVurderingsperioder);
@@ -209,7 +209,6 @@ public class SykdomVurderingService {
         );
     }
 
-    @SuppressWarnings("unchecked")
     public SykdomVurderingerOgPerioder utledPerioder(SykdomVurderingType sykdomVurderingType, Behandling behandling) {
         final LocalDateTimeline<SykdomVurderingVersjon> vurderinger = hentVurderinger(sykdomVurderingType, behandling);
         final LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
@@ -221,7 +220,7 @@ public class SykdomVurderingService {
 
         LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(perioderTilVurdering, vurderinger);
         if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
-            alleResterendeVurderingsperioder = LocalDateTimeline.EMPTY_TIMELINE;
+            alleResterendeVurderingsperioder = LocalDateTimeline.empty();
         }
 
         alleResterendeVurderingsperioder = kunPerioderSomIkkeFinnesI(alleResterendeVurderingsperioder, innleggelseUnder18årTidslinje);
