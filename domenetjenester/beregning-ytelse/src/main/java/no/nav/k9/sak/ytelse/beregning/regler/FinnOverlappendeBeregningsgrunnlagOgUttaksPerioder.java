@@ -74,12 +74,11 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         return resultatTimeline.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked")
     private LocalDateTimeline<BeregningsresultatPeriode> intersectTimelines(LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline, LocalDateTimeline<List<UttakResultatPeriode>> uttakTimeline,
                                                                             Map<String, Object> resultater, boolean skalVurdereGjelderFor) {
 
         if (grunnlagTimeline.isEmpty() || uttakTimeline.isEmpty()) {
-            return LocalDateTimeline.EMPTY_TIMELINE;
+            return LocalDateTimeline.empty();
         }
 
         var startFørsteÅr = grunnlagTimeline.getMinLocalDate().withDayOfYear(1);

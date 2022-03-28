@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -47,13 +46,12 @@ public class SykdomGrunnlagService {
         final var resultat = utledRelevanteEndringerSidenForrigeGrunnlag(behandling);
         return resultat.harBlittEndret();
     }
-    
-    @SuppressWarnings("unchecked")
+
     LocalDateTimeline<VilkårPeriode> hentOmsorgenForTidslinje(Long behandlingId) {
         final var vilkåreneOpt = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
-        return vilkåreneOpt.map(v -> v.getVilkårTimeline(VilkårType.OMSORGEN_FOR)).orElse(LocalDateTimeline.EMPTY_TIMELINE);
+        return vilkåreneOpt.map(v -> v.getVilkårTimeline(VilkårType.OMSORGEN_FOR)).orElse(LocalDateTimeline.empty());
     }
-    
+
     public List<Periode> hentManglendeOmsorgenForPerioder(Long behandlingId) {
         return SykdomUtils.toPeriodeList(hentOmsorgenForTidslinje(behandlingId).filterValue(v -> v.getUtfall() == Utfall.IKKE_OPPFYLT));
     }
@@ -89,7 +87,6 @@ public class SykdomGrunnlagService {
         return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder);
     }
 
-    @SuppressWarnings("unchecked")
     LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<SykdomGrunnlag> grunnlagBehandling, SykdomGrunnlag utledetGrunnlag) {
         LocalDateTimeline<SykdomSamletVurdering> grunnlagBehandlingTidslinje;
 
@@ -97,7 +94,7 @@ public class SykdomGrunnlagService {
             final SykdomGrunnlag forrigeGrunnlag = grunnlagBehandling.get();
             grunnlagBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(forrigeGrunnlag);
         } else {
-            grunnlagBehandlingTidslinje = LocalDateTimeline.EMPTY_TIMELINE;
+            grunnlagBehandlingTidslinje = LocalDateTimeline.empty();
         }
         final LocalDateTimeline<SykdomSamletVurdering> forrigeGrunnlagTidslinje = grunnlagBehandlingTidslinje;
 
