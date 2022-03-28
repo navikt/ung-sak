@@ -12,14 +12,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -45,7 +44,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
 import no.nav.k9.sak.domene.registerinnhenting.EndringsresultatSjekker;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktKode;
@@ -72,8 +70,6 @@ public class AksjonspunktApplikasjonTjeneste {
 
     private AksjonspunktRepository aksjonspunktRepository;
 
-    private HenleggBehandlingTjeneste henleggBehandlingTjeneste;
-
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
 
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
@@ -94,7 +90,6 @@ public class AksjonspunktApplikasjonTjeneste {
                                            BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
                                            SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                            HistorikkTjenesteAdapter historikkTjenesteAdapter,
-                                           HenleggBehandlingTjeneste henleggBehandlingTjeneste,
                                            EndringsresultatSjekker endringsresultatSjekker) {
 
         this.aksjonspunktRepository = aksjonspunktRepository;
@@ -104,7 +99,6 @@ public class AksjonspunktApplikasjonTjeneste {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.henleggBehandlingTjeneste = henleggBehandlingTjeneste;
         this.endringsresultatSjekker = endringsresultatSjekker;
 
     }

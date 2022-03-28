@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -17,15 +18,14 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.PreconditionBeregningAksjonspunktUtleder;
 import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -33,7 +33,8 @@ import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.opptjening.PSBOppgittOpptjeningFilter;
 
 @ApplicationScoped
@@ -42,13 +43,15 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private PSBOpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste;
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private FagsakRepository fagsakRepository;
     private PSBOppgittOpptjeningFilter oppgittOpptjeningFilter;
+    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
+    private VilkårPeriodeFilterProvider periodeFilterProvider;
 
 
     private boolean toggleMigrering;
-    private PåTversAvHelgErKantIKantVurderer kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
+    private boolean enableForlengelse;
+    private final PåTversAvHelgErKantIKantVurderer kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
 
     public PSBPreconditionBeregningAksjonspunktUtleder() {
@@ -57,16 +60,20 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
     @Inject
     public PSBPreconditionBeregningAksjonspunktUtleder(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                        @FagsakYtelseTypeRef("PSB") PSBOpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste,
-                                                       @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                        FagsakRepository fagsakRepository,
                                                        @FagsakYtelseTypeRef("PSB") PSBOppgittOpptjeningFilter oppgittOpptjeningFilter,
-                                                       @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering) {
+                                                       BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
+                                                       VilkårPeriodeFilterProvider periodeFilterProvider,
+                                                       @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering,
+                                                       @KonfigVerdi(value = "forlengelse.beregning.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
-        this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.oppgittOpptjeningFilter = oppgittOpptjeningFilter;
+        this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
+        this.periodeFilterProvider = periodeFilterProvider;
         this.toggleMigrering = toggleMigrering;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+        this.enableForlengelse = enableForlengelse;
     }
 
     @Override
@@ -74,8 +81,7 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         if (!toggleMigrering) {
             return Collections.emptyList();
         }
-        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-
+        var perioderTilVurdering = finnPerioderTilVurdering(param);
         if (perioderTilVurdering.isEmpty()) {
             return Collections.emptyList();
         }
@@ -105,6 +111,17 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         }
 
         return Collections.emptyList();
+    }
+
+    private TreeSet<DatoIntervallEntitet> finnPerioderTilVurdering(AksjonspunktUtlederInput param) {
+        var periodeFilter = periodeFilterProvider.getFilter(param.getRef(), false);
+        if (enableForlengelse) {
+            periodeFilter.ignorerForlengelseperioder();
+        }
+        periodeFilter.ignorerAvslåttePerioder();
+        periodeFilter.ignorerAvslagPåKompletthet();
+        return beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(param.getRef(), periodeFilter)
+            .stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
     }
 
     private AksjonspunktResultat ventepunkt(Venteårsak venteårsak) {

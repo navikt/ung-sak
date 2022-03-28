@@ -70,6 +70,8 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     VM_8001("8001", "avkortet grunnet annen inntekt"),
     VM_8002("8002", "ingen stønadsdager i søknadsperioden"),
 
+    VM_9002("9002", "Kan ikke automatisk innvilge omsorgen for vilkåret"),
+    VM_9013("9013", "Kan ikke automatisk innvilge alene om omsorgen vilkåret"),
 
     UDEFINERT("-", "Ikke definert"),
 

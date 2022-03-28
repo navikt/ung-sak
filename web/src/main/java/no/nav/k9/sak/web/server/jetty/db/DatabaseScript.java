@@ -19,7 +19,6 @@ public final class DatabaseScript {
             conf.setInitSql(initSql);
         }
         Flyway flyway = new Flyway(conf);
-        flyway.repair();
         try {
             flyway.migrate();
         } catch (FlywayException fwe) {

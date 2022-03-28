@@ -4,7 +4,6 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -16,10 +15,10 @@ import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 @FagsakYtelseTypeRef("OMP_AO")
 @BehandlingTypeRef
 @ApplicationScoped
-public class AleneOmsorgKompletthetSjekker implements Kompletthetsjekker {
+public class AleneomsorgKompletthetSjekker implements Kompletthetsjekker {
 
     @Inject
-    public AleneOmsorgKompletthetSjekker() {
+    public AleneomsorgKompletthetSjekker() {
     }
 
     @Override

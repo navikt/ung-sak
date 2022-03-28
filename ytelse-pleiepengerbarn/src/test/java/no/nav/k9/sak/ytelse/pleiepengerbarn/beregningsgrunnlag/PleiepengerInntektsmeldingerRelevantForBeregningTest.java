@@ -13,9 +13,9 @@ import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
-class PsbInntektsmeldingerRelevantForBeregningTest {
+class PleiepengerInntektsmeldingerRelevantForBeregningTest {
 
-    private PSBInntektsmeldingerRelevantForBeregning tjeneste = new PSBInntektsmeldingerRelevantForBeregning();
+    private PleiepengerInntektsmeldingerRelevantForBeregning tjeneste = new PleiepengerInntektsmeldingerRelevantForBeregning();
 
     @Test
     void skal_velge_rett_inntektsmelding() {

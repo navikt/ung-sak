@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -32,7 +31,7 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerAleneO
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP_AO")
 @DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_AO_KODE)
-public class DokumentmottakerSøknadAleneOmOmsorg implements Dokumentmottaker {
+public class DokumentmottakerSøknadAleneomsorg implements Dokumentmottaker {
 
     private SøknadRepository søknadRepository;
 
@@ -40,14 +39,14 @@ public class DokumentmottakerSøknadAleneOmOmsorg implements Dokumentmottaker {
 
     private PersoninfoAdapter personinfoAdapter;
 
-    DokumentmottakerSøknadAleneOmOmsorg() {
+    DokumentmottakerSøknadAleneomsorg() {
         // for CDI proxy
     }
 
     @Inject
-    DokumentmottakerSøknadAleneOmOmsorg(BehandlingRepositoryProvider repositoryProvider,
-                                        PersoninfoAdapter personinfoAdapter,
-                                        MottatteDokumentRepository mottatteDokumentRepository) {
+    DokumentmottakerSøknadAleneomsorg(BehandlingRepositoryProvider repositoryProvider,
+                                      PersoninfoAdapter personinfoAdapter,
+                                      MottatteDokumentRepository mottatteDokumentRepository) {
         this.personinfoAdapter = personinfoAdapter;
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.mottatteDokumentRepository = mottatteDokumentRepository;

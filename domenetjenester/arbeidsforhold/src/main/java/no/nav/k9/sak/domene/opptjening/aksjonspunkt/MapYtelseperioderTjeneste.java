@@ -73,13 +73,13 @@ public class MapYtelseperioderTjeneste {
         return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
     }
 
-    public List<OpptjeningsperiodeForSaksbehandling> mapYtelsePerioder(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag grunnlag, OpptjeningAktivitetVurdering vurderOpptjening, DatoIntervallEntitet opptjeningPeriode) {
+    public List<OpptjeningsperiodeForSaksbehandling> mapYtelsePerioder(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag grunnlag, OpptjeningAktivitetVurdering vurderOpptjening, DatoIntervallEntitet opptjeningPeriode, boolean skalIkkeTaMedEgenSak) {
         AktørId aktørId = behandlingReferanse.getAktørId();
         var filter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato());
         List<OpptjeningsperiodeForSaksbehandling> ytelsePerioder = new ArrayList<>();
         filter.getFiltrertYtelser().stream()
             .filter(ytelse -> !(Fagsystem.INFOTRYGD.equals(ytelse.getKilde()) && RelatertYtelseTilstand.ÅPEN.equals(ytelse.getStatus())))
-            .filter(ytelse -> !(ytelse.getKilde().equals(Fagsystem.K9SAK) && ytelse.getSaksnummer().equals(behandlingReferanse.getSaksnummer())))
+            .filter(ytelse -> !skalIkkeTaMedEgenSak || !(ytelse.getKilde().equals(Fagsystem.K9SAK) && ytelse.getSaksnummer().equals(behandlingReferanse.getSaksnummer())))
             .filter(ytelse -> ytelse.getYtelseType().girOpptjeningsTid(behandlingReferanse.getFagsakYtelseType()))
             .forEach(behandlingRelaterteYtelse -> {
                 List<OpptjeningsperiodeForSaksbehandling> periode = mapYtelseAnvist(behandlingRelaterteYtelse, behandlingReferanse, vurderOpptjening);

@@ -1,5 +1,19 @@
 package no.nav.k9.sak.domene.registerinnhenting;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -9,15 +23,18 @@ import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
+import no.nav.k9.sak.behandlingslager.aktør.DeltBosted;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.AdressePeriode;
@@ -38,17 +55,14 @@ import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.registerinnhenting.impl.SaksopplysningerFeil;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.*;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.AlleRelasjonFilter;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.IngenRelasjonFilter;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.OmsorgspengerRelasjonsFilter;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.PleietrengendeRelasjonsFilter;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.YtelsesspesifikkRelasjonsFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.AktørId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class RegisterdataInnhenter {
@@ -71,6 +85,7 @@ public class RegisterdataInnhenter {
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BehandlingLåsRepository behandlingLåsRepository;
     private Instance<InformasjonselementerUtleder> informasjonselementer;
+    private boolean lagreDeltBostedForRammevedtakOMP;
 
     RegisterdataInnhenter() {
         // for CDI proxy
@@ -83,7 +98,8 @@ public class RegisterdataInnhenter {
                                  MedlemskapRepository medlemskapRepository,
                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                  AbakusTjeneste abakusTjeneste,
-                                 @Any Instance<InformasjonselementerUtleder> utledInformasjonselementer) {
+                                 @Any Instance<InformasjonselementerUtleder> utledInformasjonselementer,
+                                 @KonfigVerdi(value = "OMP_DELT_BOSTED_RAMMEVEDTAK", defaultVerdi = "true") boolean lagreDeltBostedForRammevedtakOMP) {
         this.personinfoAdapter = personinfoAdapter;
         this.medlemTjeneste = medlemTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
@@ -93,6 +109,7 @@ public class RegisterdataInnhenter {
         this.medlemskapRepository = medlemskapRepository;
         this.abakusTjeneste = abakusTjeneste;
         this.informasjonselementer = utledInformasjonselementer;
+        this.lagreDeltBostedForRammevedtakOMP = lagreDeltBostedForRammevedtakOMP;
     }
 
     public Personinfo innhentSaksopplysningerForSøker(AktørId søkerAktørId) {
@@ -324,6 +341,22 @@ public class RegisterdataInnhenter {
                     .medLand(adresse.getLand())
                     .medAdresseType(adresse.getGjeldendePostadresseType())
                     .medPeriode(periode));
+            }
+
+            if (lagreDeltBostedForRammevedtakOMP) {
+                for (DeltBosted deltBosted : personinfo.getDeltBostedList()) {
+                    Adresseinfo adresse = deltBosted.getAdresseinfo();
+                    final PersonInformasjonBuilder.AdresseBuilder adresseBuilder = informasjonBuilder.getAdresseBuilder(personinfo.getAktørId(),
+                        periode, AdresseType.DELT_BOSTEDSADRESSE);
+                    informasjonBuilder.leggTil(adresseBuilder
+                        .medAdresselinje1(adresse.getAdresselinje1())
+                        .medAdresselinje2(adresse.getAdresselinje2())
+                        .medAdresselinje3(adresse.getAdresselinje3())
+                        .medPostnummer(adresse.getPostNr())
+                        .medLand(adresse.getLand())
+                        .medAdresseType(AdresseType.DELT_BOSTEDSADRESSE)
+                        .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(deltBosted.getPeriode().getFom(), deltBosted.getPeriode().getTom())));
+                }
             }
         }
 

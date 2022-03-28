@@ -79,7 +79,7 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
         filter.ignorerAvslagPåKompletthet();
         filter.ignorerForlengelseperioder();
         var perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, filter);
-        var erTilVurdering = perioderSomSkalKunneVurderes.stream().anyMatch(p -> p.getPeriode().equals(stp));
+        var erTilVurdering = perioderSomSkalKunneVurderes.stream().anyMatch(p -> p.getPeriode().getFomDato().equals(stp));
         if (!erTilVurdering) {
             throw new IllegalStateException("Prøver å endre grunnlag med skjæringstidspunkt" + stp + " men denne er ikke i" +
                 " listen over vilkårsperioder som er til vurdering " + perioderSomSkalKunneVurderes);

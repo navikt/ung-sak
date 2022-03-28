@@ -40,10 +40,10 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <junit.version>5.8.2</junit.version>
-        <felles.version>0.7.19</felles.version>
+        <felles.version>0.7.20</felles.version>
         <swagger.version>2.1.13</swagger.version>
-        <k9format.version>5.8.1</k9format.version>
-        <jackson.version>2.13.1</jackson.version>
+        <k9format.version>5.8.3</k9format.version>
+        <jackson.version>2.13.2</jackson.version>
         <asm.version>9.2</asm.version>
         <kotlin-stdlib.version>1.6.10</kotlin-stdlib.version>
     </properties>
@@ -155,12 +155,12 @@
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
                 <artifactId>abakus-kontrakt-jakarta</artifactId>
-                <version>1.3.28</version>
+                <version>1.3.29</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt-jakarta</artifactId>
-                <version>1.5.29</version>
+                <version>1.5.31</version>
             </dependency>
 
             <dependency>
@@ -379,7 +379,7 @@
             <dependency>
                 <groupId>no.nav.pleiepengerbarn.uttak</groupId>
                 <artifactId>kontrakter</artifactId>
-                <version>1.1.21</version>
+                <version>1.1.25</version>
             </dependency>
 
             <dependency>
@@ -444,7 +444,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.10.13</version>
+                <version>2.10.14</version>
             </dependency>
             <dependency>
                 <groupId>org.jasypt</groupId>
@@ -589,7 +589,7 @@
             <dependency>
                 <groupId>com.vladmihalcea</groupId>
                 <artifactId>hibernate-types-55</artifactId>
-                <version>2.14.0</version>
+                <version>2.14.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.fasterxml.jackson.module</groupId>

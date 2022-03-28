@@ -2,18 +2,18 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -103,7 +103,7 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
         LocalDate søknadFom = førsteSøktePeriode.getFomDato();
         var fristFørSøknadsdato = søknadFom.minusYears(3).withMonth(1).withDayOfMonth(1);
 
-        var mindato = Set.of(fødselsdato, fristFørSøknadsdato).stream().max(LocalDate::compareTo).get();
+        var mindato = List.of(fødselsdato, fristFørSøknadsdato).stream().max(LocalDate::compareTo).get();
 
         // kan ikke gå lenger enn til 18 år (kun oppfylt i årskvantum om kronisk syk også fins
         var maksdato = barninfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31);

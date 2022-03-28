@@ -25,6 +25,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.RammevedtakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.ÅrskvantumRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.ForvaltningPersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PleietrengendeRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomRestTjeneste;
@@ -117,6 +118,7 @@ public class RestImplementationClasses {
         classes.add(ForvaltningOppdragRestTjeneste.class);
         classes.add(ForvaltningBeregningRestTjeneste.class);
         classes.add(ForvaltningInfotrygMigreringRestTjeneste.class);
+        classes.add(ForvaltningPersonRestTjeneste.class);
         classes.add(DiagnostikkRestTjeneste.class);
         classes.add(RapporteringRestTjeneste.class);
 

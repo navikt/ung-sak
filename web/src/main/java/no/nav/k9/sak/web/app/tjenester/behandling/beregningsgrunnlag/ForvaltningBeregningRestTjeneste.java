@@ -122,7 +122,7 @@ public class ForvaltningBeregningRestTjeneste {
 
         var mapper = forvaltningBeregning.getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
 
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false);
 
         List<KalkulatorInputPrVilkårperiodeDto> inputListe = perioderTilVurdering.stream()
             .filter(periode -> !periodeErUtenforFagsaksIntervall(periode, behandling.getFagsak().getPeriode()))

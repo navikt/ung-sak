@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
@@ -18,19 +17,19 @@ import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP_AO")
-public class AleneOmsorgSkjæringstidspunktTjeneste implements SkjæringstidspunktTjeneste {
+public class AleneomsorgSkjæringstidspunktTjeneste implements SkjæringstidspunktTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private SøknadRepository søknadRepository;
 
     private Period periodeFør = Period.parse("P12M");
 
-    AleneOmsorgSkjæringstidspunktTjeneste() {
+    AleneomsorgSkjæringstidspunktTjeneste() {
     }
 
     @Inject
-    AleneOmsorgSkjæringstidspunktTjeneste(BehandlingRepository behandlingRepository,
-                                               SøknadRepository søknadRepository) {
+    AleneomsorgSkjæringstidspunktTjeneste(BehandlingRepository behandlingRepository,
+                                          SøknadRepository søknadRepository) {
         this.behandlingRepository = behandlingRepository;
         this.søknadRepository = søknadRepository;
     }
