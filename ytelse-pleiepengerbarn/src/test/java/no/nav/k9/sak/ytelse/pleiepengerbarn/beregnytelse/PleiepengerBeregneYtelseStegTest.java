@@ -55,6 +55,8 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakInMemoryTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utenlandsopphold;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UtenlandsoppholdÅrsak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
@@ -189,7 +191,8 @@ public class PleiepengerBeregneYtelseStegTest {
     private void byggUttakPlanResultat(Behandling behandling, LocalDate stp) {
         var periode = new LukketPeriode(stp, stp.plusDays(2));
         var uttaksplan = new Uttaksplan(Map.of(periode, new UttaksperiodeInfo(no.nav.pleiepengerbarn.uttak.kontrakter.Utfall.OPPFYLT,
-            BigDecimal.valueOf(100), List.of(), BigDecimal.valueOf(100), null, Set.of(), Map.of(), BigDecimal.valueOf(100), null, Set.of(), behandling.getUuid().toString(), AnnenPart.ALENE, null, null, null, false)), List.of(), null);
+            BigDecimal.valueOf(100), List.of(), BigDecimal.valueOf(100), null, Set.of(), Map.of(), BigDecimal.valueOf(100), null, Set.of(), behandling.getUuid().toString(), AnnenPart.ALENE, null, null, null, false, new Utenlandsopphold(null,
+        UtenlandsoppholdÅrsak.INGEN))), List.of());
 
         uttakTjeneste.lagreUttakResultatPerioder(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), uttaksplan);
     }
