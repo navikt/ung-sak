@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_UTTAK_V2;
+
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -26,7 +28,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
 @ApplicationScoped
-@BehandlingStegRef(kode = "VURDER_UTTAK_V2")
+@BehandlingStegRef(stegtype = VURDER_UTTAK_V2)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PSB")
 @FagsakYtelseTypeRef("PPN")
@@ -84,7 +86,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (!BehandlingStegType.VURDER_UTTAK_V2.equals(tilSteg)) {
+        if (!VURDER_UTTAK_V2.equals(tilSteg)) {
             var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
             uttakTjeneste.slettUttaksplan(behandling.getUuid());
         }

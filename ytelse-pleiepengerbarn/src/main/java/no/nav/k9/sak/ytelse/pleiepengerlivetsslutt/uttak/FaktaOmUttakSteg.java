@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.uttak;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_UTTAK;
+
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +22,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.PerioderMedSykdomInnvilgetUtle
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
 
 @ApplicationScoped
-@BehandlingStegRef(kode = "KOFAKUT")
+@BehandlingStegRef(stegtype = KONTROLLER_FAKTA_UTTAK)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PPN")
 public class FaktaOmUttakSteg implements BehandlingSteg {

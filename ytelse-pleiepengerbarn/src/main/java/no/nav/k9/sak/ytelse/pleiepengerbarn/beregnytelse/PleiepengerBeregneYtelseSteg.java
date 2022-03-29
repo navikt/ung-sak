@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.BEREGN_YTELSE;
+
 import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -29,7 +31,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 
 @FagsakYtelseTypeRef("PSB")
 @FagsakYtelseTypeRef("PPN")
-@BehandlingStegRef(kode = "BERYT")
+@BehandlingStegRef(stegtype = BEREGN_YTELSE)
 @BehandlingTypeRef
 @ApplicationScoped
 public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {

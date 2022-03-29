@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.INIT_PERIODER;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,7 +39,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderHolder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
 @ApplicationScoped
-@BehandlingStegRef(kode = "INIT_PERIODER")
+@BehandlingStegRef(stegtype = INIT_PERIODER)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PSB")
 @FagsakYtelseTypeRef("PPN")

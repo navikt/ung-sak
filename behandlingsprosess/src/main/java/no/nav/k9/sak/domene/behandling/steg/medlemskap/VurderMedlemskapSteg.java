@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.medlemskap;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,7 +41,7 @@ import no.nav.k9.sak.inngangsvilkår.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.k9.sak.inngangsvilkår.medlemskap.VurdertMedlemskapOgForlengelser;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
-@BehandlingStegRef(kode = "VURDERMV")
+@BehandlingStegRef(stegtype = VURDER_MEDLEMSKAPVILKÅR)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

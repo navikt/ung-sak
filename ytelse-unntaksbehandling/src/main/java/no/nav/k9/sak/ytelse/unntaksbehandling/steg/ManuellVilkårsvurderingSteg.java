@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.steg;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.MANUELL_VILKÅRSVURDERING;
+
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,7 +18,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(kode = "MANUELL_VILKÅRSVURDERING")
+@BehandlingStegRef(stegtype = MANUELL_VILKÅRSVURDERING)
 @BehandlingTypeRef("BT-010")
 @ApplicationScoped
 public class ManuellVilkårsvurderingSteg implements BehandlingSteg {

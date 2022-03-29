@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.filter;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VARIANT_FILTER;
+
 import jakarta.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -10,7 +12,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 
 @FagsakYtelseTypeRef("OMP")
-@BehandlingStegRef(kode = "VARIANT_FILTER")
+@BehandlingStegRef(stegtype = VARIANT_FILTER)
 @BehandlingTypeRef
 @ApplicationScoped
 public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {

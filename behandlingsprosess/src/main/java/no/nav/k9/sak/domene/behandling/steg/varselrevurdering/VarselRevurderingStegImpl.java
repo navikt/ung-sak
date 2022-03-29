@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.varselrevurdering;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VARSEL_REVURDERING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -14,7 +15,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
-@BehandlingStegRef(kode = "VRSLREV")
+@BehandlingStegRef(stegtype = VARSEL_REVURDERING)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

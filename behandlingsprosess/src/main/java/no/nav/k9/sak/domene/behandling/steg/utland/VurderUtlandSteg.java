@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.utland;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_UTLAND;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE;
 
@@ -29,7 +30,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 
-@BehandlingStegRef(kode = "VURDER_UTLAND")
+@BehandlingStegRef(stegtype = VURDER_UTLAND)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

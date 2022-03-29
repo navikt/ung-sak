@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.søknadsfrist;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_SØKNADSFRIST;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.perioder.SøknadsfristTjeneste;
 
-@BehandlingStegRef(kode = "VURDER_SØKNADSFRIST")
+@BehandlingStegRef(stegtype = VURDER_SØKNADSFRIST)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

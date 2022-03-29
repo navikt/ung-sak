@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_KOMPLETTHET;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENTER_PÅ_KOMPLETT_SØKNAD;
 import static no.nav.k9.sak.domene.behandling.steg.kompletthet.VurderKompletthetStegFelles.autopunktAlleredeUtført;
 
@@ -22,7 +23,7 @@ import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@BehandlingStegRef(kode = "VURDERKOMPLETT")
+@BehandlingStegRef(stegtype = VURDER_KOMPLETTHET)
 @BehandlingTypeRef("BT-004")
 @FagsakYtelseTypeRef
 @ApplicationScoped

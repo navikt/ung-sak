@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.innhentsaksopplysninger;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.INNHENT_REGISTEROPP;
+
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -19,7 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 
-@BehandlingStegRef(kode = "INREG")
+@BehandlingStegRef(stegtype = INNHENT_REGISTEROPP)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("*")
 @ApplicationScoped

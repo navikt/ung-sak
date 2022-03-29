@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_MEDISINSKVILKÅR;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -54,7 +56,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepositor
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.LivetsSluttfaseDokumentasjon;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 
-@BehandlingStegRef(kode = "VURDER_MEDISINSK")
+@BehandlingStegRef(stegtype = VURDER_MEDISINSKVILKÅR)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PPN")
 @ApplicationScoped

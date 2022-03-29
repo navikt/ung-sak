@@ -18,7 +18,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
 @FagsakYtelseTypeRef("*")
-@BehandlingStegRef(kode = "KOFAKBER")
+@BehandlingStegRef(stegtype = KONTROLLER_FAKTA_BEREGNING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class KontrollerFaktaBeregningSteg implements BeregningsgrunnlagSteg {

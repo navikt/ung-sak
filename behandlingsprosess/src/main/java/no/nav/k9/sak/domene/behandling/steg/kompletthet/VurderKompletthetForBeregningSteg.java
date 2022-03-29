@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -39,7 +41,7 @@ import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
 @FagsakYtelseTypeRef("PSB")
 @FagsakYtelseTypeRef("PPN")
 @FagsakYtelseTypeRef("OMP")
-@BehandlingStegRef(kode = "KOMPLETT_FOR_BEREGNING")
+@BehandlingStegRef(stegtype = VURDER_KOMPLETTHET_BEREGNING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg {

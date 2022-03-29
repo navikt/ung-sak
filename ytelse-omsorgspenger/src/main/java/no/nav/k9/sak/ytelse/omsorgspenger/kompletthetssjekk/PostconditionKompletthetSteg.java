@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.kompletthetssjekk;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.POSTCONDITION_KOMPLETTHET;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -18,7 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@BehandlingStegRef(kode = "POSTCONDITION_KOMPLETTHET")
+@BehandlingStegRef(stegtype = POSTCONDITION_KOMPLETTHET)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("OMP")
 @ApplicationScoped

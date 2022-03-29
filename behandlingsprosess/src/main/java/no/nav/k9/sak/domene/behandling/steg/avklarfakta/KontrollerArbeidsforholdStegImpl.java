@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.avklarfakta;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -16,7 +18,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@BehandlingStegRef(kode = "KOARB")
+@BehandlingStegRef(stegtype = KONTROLLER_FAKTA_ARBEIDSFORHOLD)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @StartpunktRef("KONTROLLER_ARBEIDSFORHOLD")

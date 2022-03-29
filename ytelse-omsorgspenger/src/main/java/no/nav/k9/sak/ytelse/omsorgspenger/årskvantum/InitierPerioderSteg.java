@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.INIT_PERIODER;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -15,7 +17,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
  * Samle sammen fakta for fravær.
  */
 @ApplicationScoped
-@BehandlingStegRef(kode = "INIT_PERIODER")
+@BehandlingStegRef(stegtype = INIT_PERIODER)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("OMP")
 public class InitierPerioderSteg implements BehandlingSteg {

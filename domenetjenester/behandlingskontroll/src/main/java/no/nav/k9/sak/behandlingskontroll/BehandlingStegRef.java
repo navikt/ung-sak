@@ -47,7 +47,7 @@ public @interface BehandlingStegRef {
      *
      * @see no.nav.k9.kodeverk.behandling.BehandlingStegType
      */
-    String kode();
+    BehandlingStegType stegtype();
 
 
     /**
@@ -56,7 +56,7 @@ public @interface BehandlingStegRef {
      * Eks. for bruk i:<br>
      * {@link CDI#current#select(jakarta.enterprise.util.TypeLiteral, java.lang.annotation.Annotation...)}.
      */
-    public static class BehandlingStegRefLiteral extends AnnotationLiteral<BehandlingStegRef> implements BehandlingStegRef {
+/*    public static class BehandlingStegRefLiteral extends AnnotationLiteral<BehandlingStegRef> implements BehandlingStegRef {
 
         private String stegKode;
 
@@ -73,8 +73,26 @@ public @interface BehandlingStegRef {
         }
 
         @Override
-        public String kode() {
+        public String stegtype() {
             return stegKode;
+        }
+    }*/
+
+    public static class BehandlingStegRefEnum extends AnnotationLiteral<BehandlingStegRef> implements BehandlingStegRef {
+
+        private BehandlingStegType stegtype;
+
+        public BehandlingStegRefEnum() {
+            throw new IllegalArgumentException("Type er obligatorisk");
+        }
+
+        public BehandlingStegRefEnum(BehandlingStegType stegtype) {
+            this.stegtype = stegtype;
+        }
+
+        @Override
+        public BehandlingStegType stegtype() {
+            return stegtype;
         }
 
     }
@@ -85,7 +103,7 @@ public @interface BehandlingStegRef {
         private Lookup() {
         }
 
-        public static <I> Optional<I> find(Class<I> cls, String ytelseTypeKode, String behandlingType, String behandlingStegRef) {
+        public static <I> Optional<I> find(Class<I> cls, String ytelseTypeKode, String behandlingType, BehandlingStegType behandlingStegRef) {
             return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType, behandlingStegRef);
         }
 
@@ -98,10 +116,10 @@ public @interface BehandlingStegRef {
             return find(cls, instances,
                 ytelseTypeKode == null ? null : ytelseTypeKode.getKode(),
                 behandlingType == null ? null : behandlingType.getKode(),
-                behandlingStegRef == null ? null : behandlingStegRef.getKode());
+                behandlingStegRef);
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String fagsakYtelseType, String behandlingType, String behandlingStegRef) { // NOSONAR
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String fagsakYtelseType, String behandlingType, BehandlingStegType behandlingStegRef) { // NOSONAR
             Objects.requireNonNull(instances, "instances");
 
             for (var fagsakLiteral : coalesce(fagsakYtelseType, "*")) {
@@ -114,17 +132,17 @@ public @interface BehandlingStegRef {
                         if (binst.isUnsatisfied()) {
                             continue;
                         }
-                        for (var stegRef : coalesce(behandlingStegRef, "*")) {
-                            var cinst = select(cls, binst, new BehandlingStegRefLiteral(stegRef));
-                            if (cinst.isResolvable()) {
-                                return Optional.of(getInstance(cinst));
-                            } else {
-                                if (cinst.isAmbiguous()) {
-                                    throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType="
-                                        + fagsakLiteral + ", behandlingType=" + behandlingLiteral + ", behandlingStegRef=" + stegRef);
-                                }
+
+                        var cinst = select(cls, binst, new BehandlingStegRefEnum(behandlingStegRef));
+                        if (cinst.isResolvable()) {
+                            return Optional.of(getInstance(cinst));
+                        } else {
+                            if (cinst.isAmbiguous()) {
+                                throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType="
+                                    + fagsakLiteral + ", behandlingType=" + behandlingLiteral + ", behandlingStegRef=" + behandlingStegRef);
                             }
                         }
+
                     }
                 }
 

@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_OMSORG_FOR;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -41,7 +43,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.OmsorgenForVilkårGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.RelasjonsRolle;
 
-@BehandlingStegRef(kode = "VURDER_OMSORG_FOR")
+@BehandlingStegRef(stegtype = VURDER_OMSORG_FOR)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped

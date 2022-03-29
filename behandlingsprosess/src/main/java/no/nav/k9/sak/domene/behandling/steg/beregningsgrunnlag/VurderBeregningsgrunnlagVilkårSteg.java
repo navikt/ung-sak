@@ -29,7 +29,7 @@ import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @FagsakYtelseTypeRef("*")
-@BehandlingStegRef(kode = "VURDER_VILKAR_BERGRUNN")
+@BehandlingStegRef(stegtype = VURDER_VILKAR_BERGRUNN)
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderBeregningsgrunnlagVilkårSteg implements BeregningsgrunnlagSteg {

@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.steg;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -11,7 +13,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(kode = "KOFAK")
+@BehandlingStegRef(stegtype = KONTROLLER_FAKTA)
 @BehandlingTypeRef("BT-010")
 @ApplicationScoped
 public class KontrollerFaktaUnntaksbehandlingSteg implements BehandlingSteg {

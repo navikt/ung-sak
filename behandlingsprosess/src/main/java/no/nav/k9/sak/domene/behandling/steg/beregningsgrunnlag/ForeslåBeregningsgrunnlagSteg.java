@@ -17,7 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
 @FagsakYtelseTypeRef("*")
-@BehandlingStegRef(kode = "FORS_BERGRUNN")
+@BehandlingStegRef(stegtype = FORESLÅ_BEREGNINGSGRUNNLAG)
 @BehandlingTypeRef
 @ApplicationScoped
 public class ForeslåBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {

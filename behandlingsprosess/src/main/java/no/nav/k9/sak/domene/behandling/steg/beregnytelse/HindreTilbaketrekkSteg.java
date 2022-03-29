@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.beregnytelse;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.HINDRE_TILBAKETREKK;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -26,7 +28,7 @@ import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.BeregningsresultatTidslinjetj
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.HindreTilbaketrekkNårAlleredeUtbetalt;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.KopierFeriepenger;
 
-@BehandlingStegRef(kode = "BERYT_OPPDRAG")
+@BehandlingStegRef(stegtype = HINDRE_TILBAKETREKK)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

@@ -518,7 +518,7 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
 
         @Override
         public BehandlingStegModellImpl apply(BehandlingStegType stegType, BehandlingType behandlingType, FagsakYtelseType ytelseType) {
-            var annotationLiteral = new BehandlingStegRef.BehandlingStegRefLiteral(stegType);
+            var annotationLiteral = new BehandlingStegRef.BehandlingStegRefEnum(stegType);
 
             Instance<BehandlingSteg> instance = CDI.current().select(BehandlingSteg.class, annotationLiteral);
             return new BehandlingStegModellImpl(behandlingModell, instance, stegType);

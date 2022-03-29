@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.BEKREFT_UTTAK;
+
 import jakarta.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -10,7 +12,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 @ApplicationScoped
-@BehandlingStegRef(kode = "BEKREFT_UTTAK")
+@BehandlingStegRef(stegtype = BEKREFT_UTTAK)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("OMP")
 public class BekreftÅrskvantumUttakSteg implements BehandlingSteg {

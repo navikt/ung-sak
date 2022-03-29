@@ -20,7 +20,7 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningStegTjen
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @FagsakYtelseTypeRef("*")
-@BehandlingStegRef(kode = "FAST_BERGRUNN")
+@BehandlingStegRef(stegtype = FASTSETT_BEREGNINGSGRUNNLAG)
 @BehandlingTypeRef
 @ApplicationScoped
 public class FastsettBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {

@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår;
 
 import static java.util.Collections.singletonList;
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 
-@BehandlingStegRef(kode = "VURDEROP")
+@BehandlingStegRef(stegtype = KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped
@@ -26,7 +27,7 @@ public class SøkersopplysningspliktVilkårStegImpl extends InngangsvilkårStegI
 
     @Inject
     public SøkersopplysningspliktVilkårStegImpl(BehandlingRepositoryProvider repositoryProvider, InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste) {
-        super(repositoryProvider, inngangsvilkårFellesTjeneste, BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT);
+        super(repositoryProvider, inngangsvilkårFellesTjeneste, KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT);
     }
 
     @Override

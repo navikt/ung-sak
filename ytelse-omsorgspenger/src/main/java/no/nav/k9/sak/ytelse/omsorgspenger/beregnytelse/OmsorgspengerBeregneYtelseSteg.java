@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.BEREGN_YTELSE;
+
 import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,7 +45,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjene
 
 
 @FagsakYtelseTypeRef("OMP")
-@BehandlingStegRef(kode = "BERYT")
+@BehandlingStegRef(stegtype = BEREGN_YTELSE)
 @BehandlingTypeRef
 @ApplicationScoped
 public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {

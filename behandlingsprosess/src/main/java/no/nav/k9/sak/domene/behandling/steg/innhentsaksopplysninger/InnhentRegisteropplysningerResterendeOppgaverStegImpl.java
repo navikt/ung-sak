@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.innhentsaksopplysninger;
 
 import static java.util.Collections.singletonList;
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.INREG_AVSL;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENT_ETTERLYST_INNTEKTSMELDING;
 import static no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat.opprettForAksjonspunkt;
 import static no.nav.k9.sak.domene.behandling.steg.kompletthet.VurderKompletthetStegFelles.autopunktAlleredeUtført;
@@ -26,7 +27,7 @@ import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.kompletthet.KompletthetModell;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 
-@BehandlingStegRef(kode = "INREG_AVSL")
+@BehandlingStegRef(stegtype = INREG_AVSL)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

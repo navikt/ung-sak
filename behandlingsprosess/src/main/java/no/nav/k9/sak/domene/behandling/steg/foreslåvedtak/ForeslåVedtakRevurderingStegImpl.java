@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.foreslåvedtak;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FORESLÅ_VEDTAK;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.dokument.bestill.tjenester.FormidlingDokumentdataTjeneste;
 
-@BehandlingStegRef(kode = "FORVEDSTEG")
+@BehandlingStegRef(stegtype = FORESLÅ_VEDTAK)
 @BehandlingTypeRef("BT-004") //Revurdering
 @FagsakYtelseTypeRef
 @ApplicationScoped
@@ -104,7 +106,7 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (!BehandlingStegType.FORESLÅ_VEDTAK.equals(tilSteg)) {
+        if (!FORESLÅ_VEDTAK.equals(tilSteg)) {
             formidlingDokumentdataTjeneste.ryddVedTilbakehopp(kontekst.getBehandlingId());
         }
     }

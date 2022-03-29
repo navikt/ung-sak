@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.foreslåresultat;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -11,7 +13,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@BehandlingStegRef(kode = "FORBRES")
+@BehandlingStegRef(stegtype = FORESLÅ_BEHANDLINGSRESULTAT)
 @FagsakYtelseTypeRef
 @BehandlingTypeRef("BT-002")
 @ApplicationScoped

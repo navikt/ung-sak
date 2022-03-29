@@ -23,7 +23,7 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningStegTjen
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @FagsakYtelseTypeRef("*")
-@BehandlingStegRef(kode = "FORDEL_BERGRUNN")
+@BehandlingStegRef(stegtype = FORDEL_BEREGNINGSGRUNNLAG)
 @BehandlingTypeRef
 @ApplicationScoped
 public class FordelBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {

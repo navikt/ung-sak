@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.MANUELL_VILKÅRSVURDERING;
+
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -23,7 +25,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
 @FagsakYtelseTypeRef("OMP_KS")
-@BehandlingStegRef(kode = "MANUELL_VILKÅRSVURDERING")
+@BehandlingStegRef(stegtype = MANUELL_VILKÅRSVURDERING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class KroniskSykManuellVilkårsvurderingSteg implements BehandlingSteg {
