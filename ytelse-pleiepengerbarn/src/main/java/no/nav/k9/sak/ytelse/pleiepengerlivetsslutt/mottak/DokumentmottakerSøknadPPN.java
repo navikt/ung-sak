@@ -8,18 +8,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -43,12 +42,13 @@ import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase;
 @DokumentGruppeRef(Brevkode.SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE_KODE)
 class DokumentmottakerSøknadPPN implements Dokumentmottaker {
 
-    private Logger logger = LoggerFactory.getLogger(DokumentmottakerSøknadPPN.class);
+    private static final Logger logger = LoggerFactory.getLogger(DokumentmottakerSøknadPPN.class);
+
     private SøknadOversetter søknadOversetter;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SøknadParser søknadParser;
     private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
 
     DokumentmottakerSøknadPPN() {
@@ -60,13 +60,13 @@ class DokumentmottakerSøknadPPN implements Dokumentmottaker {
                               SøknadParser søknadParser,
                               SøknadOversetter søknadOversetter,
                               SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
-                              ProsessTaskRepository prosessTaskRepository,
+                              ProsessTaskTjeneste taskTjeneste,
                               OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
         this.søknadOversetter = søknadOversetter;
-        this.prosessTaskRepository = prosessTaskRepository;
+        this.taskTjeneste = taskTjeneste;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
     }
 
@@ -106,7 +106,7 @@ class DokumentmottakerSøknadPPN implements Dokumentmottaker {
                 mottatteDokumentRepository.oppdaterStatus(List.of(dokument), DokumentStatus.GYLDIG);
                 return;
             }
-            var enkeltTask = new ProsessTaskData(AsyncAbakusLagreOpptjeningTask.TASKTYPE);
+            var enkeltTask = ProsessTaskData.forProsessTask(AsyncAbakusLagreOpptjeningTask.class);
             var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
             enkeltTask.setPayload(payload);
 
@@ -117,7 +117,7 @@ class DokumentmottakerSøknadPPN implements Dokumentmottaker {
             enkeltTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
             enkeltTask.setCallIdFraEksisterende();
 
-            prosessTaskRepository.lagre(enkeltTask);
+            taskTjeneste.lagre(enkeltTask);
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Opprettelse av task for lagring av oppgitt opptjening i abakus feiler.", e).toException();
         }

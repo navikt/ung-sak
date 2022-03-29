@@ -6,11 +6,12 @@ import java.util.UUID;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkBegrunnelseType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.k9.sak.behandling.prosessering.task.ÅpneBehandlingForEndringerTask;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -20,8 +21,6 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 
 @Dependent
 public class BehandlingsprosessApplikasjonTjeneste {
@@ -141,12 +140,12 @@ public class BehandlingsprosessApplikasjonTjeneste {
         AktørId aktørId = behandling.getAktørId();
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
 
-        ProsessTaskData åpneBehandlingForEndringerTask = new ProsessTaskData(ÅpneBehandlingForEndringerTask.TASKTYPE);
+        ProsessTaskData åpneBehandlingForEndringerTask =  ProsessTaskData.forProsessTask(ÅpneBehandlingForEndringerTask.class);
         åpneBehandlingForEndringerTask.setProperty(ÅpneBehandlingForEndringerTask.START_STEG, startSteg.getKode());
         åpneBehandlingForEndringerTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
         gruppe.addNesteSekvensiell(åpneBehandlingForEndringerTask);
 
-        ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
+        ProsessTaskData fortsettBehandlingTask =  ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
         fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
         fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);

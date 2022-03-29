@@ -5,15 +5,14 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -33,11 +32,11 @@ public class MottatteDokumentTjeneste {
 
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRepository behandlingRepository;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
 
     @Inject
     public MottatteDokumentTjeneste(MottatteDokumentRepository mottatteDokumentRepository,
-                                    ProsessTaskRepository prosessTaskRepository,
+                                    ProsessTaskTjeneste prosessTaskRepository,
                                     BehandlingRepositoryProvider behandlingRepositoryProvider) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.prosessTaskRepository = prosessTaskRepository;
@@ -80,7 +79,7 @@ public class MottatteDokumentTjeneste {
         AktørId aktørId = behandling.getAktørId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
 
-        var enkeltTask = new ProsessTaskData(LagreMottattInntektsmeldingerTask.TASKTYPE);
+        var enkeltTask = ProsessTaskData.forProsessTask(LagreMottattInntektsmeldingerTask.class);
         enkeltTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
         enkeltTask.setSaksnummer(saksnummer.getVerdi());
         enkeltTask.setCallIdFraEksisterende();

@@ -12,7 +12,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
  * har en frist som er passert.
  */
 @ApplicationScoped
-@ProsessTask(AutomatiskGjenopptagelseBatchTask.TASKTYPE)
+@ProsessTask(value = AutomatiskGjenopptagelseBatchTask.TASKTYPE, cronExpression = "0 0 7 * * *")
 public class AutomatiskGjenopptagelseBatchTask implements ProsessTaskHandler {
 
     public static final String TASKTYPE = "batch.automatiskGjenopptaglese";

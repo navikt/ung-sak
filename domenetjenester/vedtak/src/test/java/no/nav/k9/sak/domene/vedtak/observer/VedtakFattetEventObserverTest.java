@@ -26,7 +26,7 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -42,7 +42,7 @@ import no.nav.k9.sak.typer.AktørId;
 public class VedtakFattetEventObserverTest {
 
     @Mock
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
 
     @Mock
     private BehandlingRepository behandlingRepository;

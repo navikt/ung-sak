@@ -9,16 +9,15 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 
 @ApplicationScoped
-@ProsessTask(FinnFagsakerForAvsluttningBatchTask.TASKTYPE)
+@ProsessTask(value = "batch.finnFagsakerForAvsluttning", cronExpression = "0 30 17 * * *", maxFailedRuns = 1)
 public class FinnFagsakerForAvsluttningBatchTask implements ProsessTaskHandler {
 
-    public static final String TASKTYPE = "batch.finnFagsakerForAvsluttning";
     private static final Logger log = LoggerFactory.getLogger(FinnFagsakerForAvsluttningBatchTask.class);
     private FagsakAvsluttningTjeneste tjeneste;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
     private boolean enableFagsakAvslutting;
 
     FinnFagsakerForAvsluttningBatchTask() {
@@ -26,7 +25,7 @@ public class FinnFagsakerForAvsluttningBatchTask implements ProsessTaskHandler {
     }
 
     @Inject
-    public FinnFagsakerForAvsluttningBatchTask(FagsakAvsluttningTjeneste tjeneste, ProsessTaskRepository prosessTaskRepository,
+    public FinnFagsakerForAvsluttningBatchTask(FagsakAvsluttningTjeneste tjeneste, ProsessTaskTjeneste prosessTaskRepository,
                                                @KonfigVerdi(value = "enable.fagsak.avslutting", defaultVerdi = "true") boolean enableFagsakAvslutting) {
         this.tjeneste = tjeneste;
         this.prosessTaskRepository = prosessTaskRepository;

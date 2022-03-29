@@ -12,14 +12,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
-import jakarta.persistence.Query;
-import jakarta.persistence.TypedQuery;
-
 import org.hibernate.jpa.QueryHints;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
@@ -27,14 +19,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskEvent;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe.Entry;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.prosesstask.impl.ProsessTaskEntitet;
 import no.nav.k9.prosesstask.impl.TaskManager;
 
@@ -47,7 +46,7 @@ public class FagsakProsessTaskRepository {
     private static final Logger log = LoggerFactory.getLogger(FagsakProsessTaskRepository.class);
     private final Set<ProsessTaskStatus> ferdigStatuser = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
     private EntityManager em;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
     private TaskManager taskManager;
 
     FagsakProsessTaskRepository() {
@@ -55,7 +54,7 @@ public class FagsakProsessTaskRepository {
     }
 
     @Inject
-    public FagsakProsessTaskRepository(EntityManager entityManager, ProsessTaskRepository prosessTaskRepository, TaskManager taskManager) {
+    public FagsakProsessTaskRepository(EntityManager entityManager, ProsessTaskTjeneste prosessTaskRepository, TaskManager taskManager) {
         this.em = entityManager;
         this.prosessTaskRepository = prosessTaskRepository;
         this.taskManager = taskManager;

@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -23,8 +20,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
+import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
+import no.nav.k9.prosesstask.impl.TaskManager;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
@@ -35,16 +41,10 @@ import no.nav.k9.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTaskProperties;
+import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTask;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.økonomi.SendØkonomiOppdragTask;
 import no.nav.k9.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
-import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
-import no.nav.k9.prosesstask.impl.TaskManager;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @Disabled
 @ExtendWith(CdiAwareExtension.class)
@@ -56,15 +56,15 @@ public class OpprettProsessTaskIverksettTest {
     @Inject
     private EntityManager entityManager;
 
-    private ProsessTaskRepository prosessTaskRepository ;
-    private FagsakProsessTaskRepository fagsakProsessTaskRepository ;
+    private ProsessTaskTjeneste prosessTaskRepository;
+    private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
     @Mock
     private OppgaveTjeneste oppgaveTjeneste;
 
     @Mock
     private InfotrygdFeedService infotrygdFeedService;
-    
+
     @Mock
     private StønadstatistikkService stønadstatistikkService;
 
@@ -74,7 +74,7 @@ public class OpprettProsessTaskIverksettTest {
 
     @BeforeEach
     public void setup() {
-        prosessTaskRepository = new ProsessTaskRepositoryImpl(entityManager, null, null);
+        prosessTaskRepository = new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null));
         fagsakProsessTaskRepository = new FagsakProsessTaskRepository(entityManager, prosessTaskRepository, Mockito.mock(TaskManager.class));
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
@@ -114,7 +114,7 @@ public class OpprettProsessTaskIverksettTest {
         List<String> tasktyper = prosessTaskDataList.stream().map(ProsessTaskData::getTaskType).collect(Collectors.toList());
         assertThat(tasktyper).contains(AvsluttBehandlingTask.TASKTYPE,
             SendVedtaksbrevTask.TASKTYPE,
-            AvsluttOppgaveTaskProperties.TASKTYPE,
+            AvsluttOppgaveTask.TASKTYPE,
             SendØkonomiOppdragTask.TASKTYPE,
             VurderOppgaveArenaTask.TASKTYPE,
             VurderOppgaveTilbakekrevingTask.TASKTYPE);
@@ -122,7 +122,7 @@ public class OpprettProsessTaskIverksettTest {
     }
 
     private void mockOpprettTaskAvsluttOppgave() {
-        ProsessTaskData prosessTaskData = new ProsessTaskData(AvsluttOppgaveTaskProperties.TASKTYPE);
+        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(AvsluttOppgaveTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setOppgaveId("1001");
         when(oppgaveTjeneste.opprettTaskAvsluttOppgave(any(Behandling.class), any(OppgaveÅrsak.class), anyBoolean())).thenReturn(Optional.of(prosessTaskData));

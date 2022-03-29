@@ -10,10 +10,8 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 
 @ApplicationScoped
-@ProsessTask(AvsluttFagsakTask.TASKTYPE)
+@ProsessTask(value = "fagsak.avsluttFagsak", maxFailedRuns = 1)
 public class AvsluttFagsakTask extends FagsakProsessTask {
-
-    public static final String TASKTYPE = "fagsak.avsluttFagsak";
 
     private FagsakAvsluttningTjeneste fagsakAvsluttningTjeneste;
 
@@ -28,7 +26,7 @@ public class AvsluttFagsakTask extends FagsakProsessTask {
     }
 
     static ProsessTaskData opprettTask(Fagsak fagsak) {
-        var taskData = new ProsessTaskData(TASKTYPE);
+        var taskData = ProsessTaskData.forProsessTask(AvsluttFagsakTask.class);
         taskData.setFagsak(fagsak.getId(), fagsak.getAktørId().getAktørId());
 
         return taskData;
