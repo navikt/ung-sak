@@ -565,7 +565,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
-                <version>4.8.141</version>
+                <version>4.8.143</version>
             </dependency>
 
             <!-- Java11 -->
