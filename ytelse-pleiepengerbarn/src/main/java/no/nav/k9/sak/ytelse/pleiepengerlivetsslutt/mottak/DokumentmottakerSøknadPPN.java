@@ -34,7 +34,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.SykdomsDokumentVedleggHåndte
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.felles.type.Journalpost;
-import no.nav.k9.søknad.ytelse.pls.v1.PleiepengerLivetsSluttfaseSøknadValidator;
 import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase;
 
 @ApplicationScoped
@@ -124,7 +123,6 @@ class DokumentmottakerSøknadPPN implements Dokumentmottaker {
     }
 
     private void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {
-        new PleiepengerLivetsSluttfaseSøknadValidator().forsikreValidert(søknad);
         søknadOversetter.persister(søknad, journalpostId, behandling);
 
         for (Journalpost journalpost : søknad.getJournalposter()) {
