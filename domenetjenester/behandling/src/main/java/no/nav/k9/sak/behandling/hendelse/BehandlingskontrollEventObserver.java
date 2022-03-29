@@ -161,7 +161,7 @@ public class BehandlingskontrollEventObserver {
     }
 
     private ProsessTaskData opprettProsessTaskBehandlingAvsluttetEvent(Long behandlingId) throws IOException {
-        ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserProduksjonsstyringHendelseTask.class);
+        ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserProduksjonsstyringHendelseTaskImpl.class);
         taskData.setCallIdFraEksisterende();
         taskData.setPrioritet(50);
 
