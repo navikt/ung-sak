@@ -7,14 +7,13 @@ import java.util.Optional;
 import java.util.Set;
 
 import no.nav.k9.kodeverk.api.IndexKey;
-import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
-public class YtelseAnvist extends BaseEntitet implements IndexKey {
+public class YtelseAnvist implements IndexKey {
 
     @ChangeTracked
     private DatoIntervallEntitet anvistPeriode;

@@ -3,11 +3,9 @@ package no.nav.k9.sak.domene.iay.modell;
 import java.util.Objects;
 import java.util.Optional;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import no.nav.abakus.iaygrunnlag.kodeverk.IndexKey;
 import no.nav.abakus.iaygrunnlag.kodeverk.Inntektskategori;
-import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -16,8 +14,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
 
-public class YtelseAnvistAndel extends BaseEntitet implements IndexKey {
-
+public class YtelseAnvistAndel implements IndexKey {
 
     @ChangeTracked
     private Arbeidsgiver arbeidsgiver;
@@ -36,7 +33,6 @@ public class YtelseAnvistAndel extends BaseEntitet implements IndexKey {
     @ChangeTracked
     private Stillingsprosent refusjonsgradProsent;
 
-    @Column(name = "inntektskategori", nullable = false, updatable = false)
     private Inntektskategori inntektskategori = Inntektskategori.UDEFINERT;
 
     public YtelseAnvistAndel() {
@@ -132,7 +128,7 @@ public class YtelseAnvistAndel extends BaseEntitet implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { arbeidsgiver, dagsats, inntektskategori, utbetalingsgradProsent, refusjonsgradProsent };
+        Object[] keyParts = {arbeidsgiver, dagsats, inntektskategori, utbetalingsgradProsent, refusjonsgradProsent};
         return IndexKeyComposer.createKey(keyParts);
     }
 }
