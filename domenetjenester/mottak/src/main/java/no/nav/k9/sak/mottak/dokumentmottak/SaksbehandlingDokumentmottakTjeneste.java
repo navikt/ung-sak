@@ -10,14 +10,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.typer.JournalpostId;
 
@@ -26,7 +25,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(SaksbehandlingDokumentmottakTjeneste.class);
 
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private DokumentValidatorProvider dokumentValidatorProvider;
 
@@ -35,10 +34,10 @@ public class SaksbehandlingDokumentmottakTjeneste {
     }
 
     @Inject
-    public SaksbehandlingDokumentmottakTjeneste(ProsessTaskRepository prosessTaskRepository,
+    public SaksbehandlingDokumentmottakTjeneste(ProsessTaskTjeneste taskTjeneste,
                                                 DokumentValidatorProvider dokumentValidatorProvider,
                                                 MottatteDokumentTjeneste mottatteDokumentTjeneste) {
-        this.prosessTaskRepository = prosessTaskRepository;
+        this.taskTjeneste = taskTjeneste;
         this.dokumentValidatorProvider = dokumentValidatorProvider;
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
     }
@@ -85,11 +84,11 @@ public class SaksbehandlingDokumentmottakTjeneste {
         }
 
         if (antallOk == antall) {
-            var prosessTaskData = new ProsessTaskData(HåndterMottattDokumentTask.TASKTYPE);
+            var prosessTaskData = ProsessTaskData.forProsessTask(HåndterMottattDokumentTask.class);
             prosessTaskData.setFagsakId(fagsakId);
             prosessTaskData.setProperty(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY, String.join(",", mottattDokumentIder));
             prosessTaskData.setCallIdFraEksisterende();
-            prosessTaskRepository.lagre(prosessTaskData);
+            taskTjeneste.lagre(prosessTaskData);
         } else if (antallOk > 0 && antallOk < antall) {
             // blanda drops
             throw new IllegalArgumentException("Fikk noe gyldig [" + antallOk + "] og noen ugyldige [" + (antall - antallOk) + "] meldinger, av totalt [" + antall + "]. Kan ikke behandle videre.");

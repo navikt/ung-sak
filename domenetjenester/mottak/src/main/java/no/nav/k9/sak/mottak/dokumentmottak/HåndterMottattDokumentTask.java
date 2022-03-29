@@ -4,12 +4,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -22,7 +21,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 
 @ApplicationScoped
-@ProsessTask(HåndterMottattDokumentTask.TASKTYPE)
+@ProsessTask(value = HåndterMottattDokumentTask.TASKTYPE, maxFailedRuns = 10, firstDelay = 120, thenDelay = 120)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class HåndterMottattDokumentTask extends FagsakProsessTask {
 

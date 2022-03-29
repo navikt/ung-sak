@@ -12,7 +12,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -21,7 +20,7 @@ import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -48,14 +47,13 @@ public class HenleggBehandlingTjeneste {
     private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
     private SøknadRepository søknadRepository;
     private FagsakRepository fagsakRepository;
     private HistorikkRepository historikkRepository;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester;
-    private Boolean enablePsbHenleggelse;
 
     public HenleggBehandlingTjeneste() {
         // for CDI proxy
@@ -66,10 +64,9 @@ public class HenleggBehandlingTjeneste {
                                      BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                      DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
                                      FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                     ProsessTaskRepository prosessTaskRepository,
+                                     ProsessTaskTjeneste prosessTaskRepository,
                                      MottatteDokumentRepository mottatteDokumentRepository,
-                                     @Any Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester,
-                                     @KonfigVerdi(value = "HENLEGGELSE_PSB_ENABLET", defaultVerdi = "false") Boolean enablePsbHenleggelse) {
+                                     @Any Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -80,7 +77,6 @@ public class HenleggBehandlingTjeneste {
         this.historikkRepository = repositoryProvider.getHistorikkRepository();
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.henleggelsePostopsTjenester = henleggelsePostopsTjenester;
-        this.enablePsbHenleggelse = enablePsbHenleggelse;
     }
 
     public void henleggBehandlingAvSaksbehandler(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
@@ -184,7 +180,7 @@ public class HenleggBehandlingTjeneste {
     }
 
     private void opprettOppgaveTilInfotrygd(Behandling behandling) {
-        ProsessTaskData data = new ProsessTaskData(OpprettOppgaveSendTilInfotrygdTask.TASKTYPE);
+        ProsessTaskData data = ProsessTaskData.forProsessTask(OpprettOppgaveSendTilInfotrygdTask.class);
         data.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         data.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(data);

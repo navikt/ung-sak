@@ -27,7 +27,6 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -53,7 +52,7 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
     @Inject
     public ForvaltningInfotrygMigreringRestTjeneste(FagsakRepository fagsakRepository,
                                                     BehandlingRepository behandlingRepository,
-                                                    @FagsakYtelseTypeRef("PSB") PSBVilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, ProsessTaskRepository prosessTaskRepository) {
+                                                    @FagsakYtelseTypeRef("PSB") PSBVilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;

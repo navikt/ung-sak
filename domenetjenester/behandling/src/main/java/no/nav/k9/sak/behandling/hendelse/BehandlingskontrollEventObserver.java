@@ -18,9 +18,11 @@ import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.hendelse.EventHendelse;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserEventTask;
+import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserEventTaskImpl;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserProduksjonsstyringHendelseTask;
+import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserProduksjonsstyringHendelseTaskImpl;
 import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent;
@@ -40,14 +42,14 @@ public class BehandlingskontrollEventObserver {
 
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
 
     public BehandlingskontrollEventObserver() {
     }
 
     @Inject
-    public BehandlingskontrollEventObserver(ProsessTaskRepository prosessTaskRepository, BehandlingRepository behandlingRepository) {
+    public BehandlingskontrollEventObserver(ProsessTaskTjeneste prosessTaskRepository, BehandlingRepository behandlingRepository) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
     }
@@ -116,7 +118,7 @@ public class BehandlingskontrollEventObserver {
     }
 
     private ProsessTaskData opprettProsessTaskBehandlingprosess(Long behandlingId, EventHendelse eventHendelse) throws IOException {
-        ProsessTaskData taskData = new ProsessTaskData(PubliserEventTask.TASKTYPE);
+        ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
         taskData.setCallIdFraEksisterende();
         taskData.setPrioritet(50);
 
@@ -132,11 +134,11 @@ public class BehandlingskontrollEventObserver {
 
 
     private ProsessTaskData opprettProsessTaskBehandlingOpprettetEvent(Long behandlingId) throws IOException {
-        ProsessTaskData taskData = new ProsessTaskData(PubliserProduksjonsstyringHendelseTask.TASKTYPE);
+        ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserProduksjonsstyringHendelseTaskImpl.class);
         taskData.setCallIdFraEksisterende();
         taskData.setPrioritet(50);
 
-        Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId).get();
+        Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId).orElseThrow();
         Fagsak fagsak = behandling.getFagsak();
 
         ProduksjonsstyringBehandlingOpprettetHendelse dto = new ProduksjonsstyringBehandlingOpprettetHendelse(
@@ -159,11 +161,11 @@ public class BehandlingskontrollEventObserver {
     }
 
     private ProsessTaskData opprettProsessTaskBehandlingAvsluttetEvent(Long behandlingId) throws IOException {
-        ProsessTaskData taskData = new ProsessTaskData(PubliserProduksjonsstyringHendelseTask.TASKTYPE);
+        ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserProduksjonsstyringHendelseTask.class);
         taskData.setCallIdFraEksisterende();
         taskData.setPrioritet(50);
 
-        Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId).get();
+        Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId).orElseThrow();
         ProduksjonsstyringBehandlingAvsluttetHendelse dto = new ProduksjonsstyringBehandlingAvsluttetHendelse(
             behandling.getUuid(),
             behandling.getOpprettetTidspunkt(),
@@ -177,13 +179,12 @@ public class BehandlingskontrollEventObserver {
     }
 
 
-
     private ProsessTaskData opprettProsessTaskAksjonspunkthendelse(Long behandlingId, AksjonspunktStatusEvent hendelse) throws IOException {
-        ProsessTaskData taskData = new ProsessTaskData(PubliserProduksjonsstyringHendelseTask.TASKTYPE);
+        ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserProduksjonsstyringHendelseTaskImpl.class);
         taskData.setCallIdFraEksisterende();
         taskData.setPrioritet(50);
 
-        Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId).get();
+        Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId).orElseThrow();
         ProduksjonsstyringAksjonspunktHendelse dto = new ProduksjonsstyringAksjonspunktHendelse(
             behandling.getUuid(),
             LocalDateTime.now(),

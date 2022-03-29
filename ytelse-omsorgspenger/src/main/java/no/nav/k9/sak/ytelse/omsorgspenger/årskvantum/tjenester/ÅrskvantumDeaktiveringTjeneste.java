@@ -12,7 +12,7 @@ public class ÅrskvantumDeaktiveringTjeneste {
 
     public Optional<ProsessTaskData> meldFraDersomDeaktivering(Behandling behandling) {
         if (ÅrskvantumDeaktiveringTask.skalDeaktivere(behandling)) {
-            ProsessTaskData prosessTaskData = new ProsessTaskData(ÅrskvantumDeaktiveringTask.TASKTYPE);
+            ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(ÅrskvantumDeaktiveringTask.class);
 
             prosessTaskData.setBehandling(behandling.getFagsak().getSaksnummer().getVerdi(), behandling.getId().toString(), behandling.getAktørId().getId());
             return Optional.of(prosessTaskData);

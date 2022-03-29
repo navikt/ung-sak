@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
@@ -49,7 +48,7 @@ public class VurderManueltBrevSteg implements BehandlingSteg {
     private void lagTaskForÅTaAvVent(BehandlingskontrollKontekst kontekst) {
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
 
-        ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
+        ProsessTaskData fortsettBehandlingTask =  ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
         fortsettBehandlingTask.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId(), kontekst.getAktørId().getId());
         // NB: Viktig
         fortsettBehandlingTask.setProperty(FortsettBehandlingTask.GJENOPPTA_STEG, BehandlingStegType.VURDER_MANUELT_BREV.getKode());

@@ -2,13 +2,12 @@ package no.nav.k9.sak.hendelse.stønadstatistikk;
 
 import java.util.Objects;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -26,7 +25,7 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
     private StønadstatistikkService stønadstatistikkService;
     private StønadstatistikkHendelseMeldingProducer meldingProducer;
 
-    
+
     public PubliserStønadstatistikkHendelseTask() {}
 
     @Inject
@@ -36,7 +35,7 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
         this.meldingProducer = meldingProducer;
     }
 
-    
+
     @Override
     public void doTask(ProsessTaskData pd) {
         final String key = Objects.requireNonNull(pd.getSaksnummer());
@@ -45,17 +44,17 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
             logger.info("Publiserer IKKE hendelse til stønadstatistikk. Key: '{}'", key);
             return;
         }
-        
+
         final String value = StønadstatistikkSerializer.toJson(hendelse);
-        
+
         logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}'", key);
 
         meldingProducer.send(key, value);
     }
-    
-    
+
+
     public static ProsessTaskData createProsessTaskData(Behandling behandling) {
-        final ProsessTaskData pd = new ProsessTaskData(PubliserStønadstatistikkHendelseTask.TASKTYPE);
+        final ProsessTaskData pd =  ProsessTaskData.forProsessTask(PubliserStønadstatistikkHendelseTask.class);
         final Fagsak fagsak = behandling.getFagsak();
         final String saksnummer = fagsak.getSaksnummer().getVerdi();
         final String gruppe = PubliserStønadstatistikkHendelseTask.TASKTYPE + "-" + saksnummer;
@@ -63,10 +62,10 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
         pd.setSekvens(lagSekvensnummer(behandling));
         pd.setBehandling(behandling.getFagsak().getSaksnummer().getVerdi(), behandling.getId().toString(), behandling.getAktørId().getId());
         pd.setCallIdFraEksisterende();
-        
+
         return pd;
     }
-    
+
     private static String lagSekvensnummer(Behandling behandling) {
         // Sekvensnummeret bør la seg sortere slik at meldingene blir sendt (når det er mulig) i riktig rekkefølge.
 
@@ -75,7 +74,7 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
         String sekvensnummerBehandling = tallMedPrefiks(behandling.getVersjon(), antallSiffer);
         return String.format("%s-%s", sekvensnummerFagsak, sekvensnummerBehandling);
     }
-    
+
     private static String tallMedPrefiks(long versjon, int antallSiffer) {
         if (Long.toString(versjon).length() > antallSiffer) {
             throw new IllegalArgumentException("Versjonsnummeret er for stort");
