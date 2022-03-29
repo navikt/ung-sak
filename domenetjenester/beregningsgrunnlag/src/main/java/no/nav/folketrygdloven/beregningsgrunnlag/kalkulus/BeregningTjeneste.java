@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Optional;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
@@ -17,6 +18,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.Beregn
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 
 /**
@@ -90,10 +92,11 @@ public interface BeregningTjeneste {
     /** Deaktiverer beregningsgrunnlaget og tilhørende input. Fører til at man ikke har noen aktive beregningsgrunnlag.
      *
      * Deaktivering skal kun kalles i første steg i beregning.
-     *  @param ref Behandlingreferanse
+     * @param ref Behandlingreferanse
+     * @param perioderTilVurdering
      *
      */
-    public void deaktiverBeregningsgrunnlagUtenTilknytningTilVilkår(BehandlingReferanse ref);
+    public void deaktiverPeriodeTilVurderingOgUtenTilknytningTilVilkår(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderTilVurdering);
 
     /** Gjenoppretter det første beregningsgrunnlaget som var opprettet for behandlingen
      *

@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -78,7 +79,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var referanse = BehandlingReferanse.fra(behandling);
 
-        // Setter perioder til vurdering, deaktiverer grunnlag for referanser som er inaktive (utdaterte skjæringstidspunkt)
+        // Setter perioder til vurdering, deaktiverer grunnlag for referanser som er inaktive (utdaterte skjæringstidspunkt) eller skal vurderes i behandlingen
         deaktiverResultatOgSettPeriodeTilVurdering(referanse, kontekst);
 
         // Avslår dersom vi ikke har grunnlag for å kalle kalkulus (mangler data eller har avslag)
@@ -153,13 +154,13 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
 
 
     private void deaktiverResultatOgSettPeriodeTilVurdering(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        ryddVedtaksresultatForPerioderTilVurdering(kontekst, ref);
-        kalkulusTjeneste.deaktiverBeregningsgrunnlagUtenTilknytningTilVilkår(ref);
-    }
-
-    private void ryddVedtaksresultatForPerioderTilVurdering(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
         var tjeneste = getPerioderTilVurderingTjeneste(ref);
         var perioderTilVurdering = tjeneste.utled(ref.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        ryddVedtaksresultatForPerioderTilVurdering(kontekst, ref, perioderTilVurdering);
+        kalkulusTjeneste.deaktiverPeriodeTilVurderingOgUtenTilknytningTilVilkår(ref, perioderTilVurdering);
+    }
+
+    private void ryddVedtaksresultatForPerioderTilVurdering(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, perioderTilVurdering);
     }
 
