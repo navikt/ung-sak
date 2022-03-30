@@ -7,10 +7,12 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 
 @ApplicationScoped
 @ProsessTask(value = "fagsak.avsluttFagsak", maxFailedRuns = 1)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class AvsluttFagsakTask extends FagsakProsessTask {
 
     private FagsakAvsluttningTjeneste fagsakAvsluttningTjeneste;
