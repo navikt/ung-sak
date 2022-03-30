@@ -56,37 +56,18 @@ public @interface BehandlingStegRef {
      * Eks. for bruk i:<br>
      * {@link CDI#current#select(jakarta.enterprise.util.TypeLiteral, java.lang.annotation.Annotation...)}.
      */
-/*    public static class BehandlingStegRefLiteral extends AnnotationLiteral<BehandlingStegRef> implements BehandlingStegRef {
-
-        private String stegKode;
-
-        public BehandlingStegRefLiteral() {
-            this("*");
-        }
-
-        public BehandlingStegRefLiteral(String stegKode) {
-            this.stegKode = stegKode;
-        }
-
-        public BehandlingStegRefLiteral(BehandlingStegType stegType) {
-            this(stegType == null ? "*" : stegType.getKode());
-        }
-
-        @Override
-        public String stegtype() {
-            return stegKode;
-        }
-    }*/
-
-    public static class BehandlingStegRefEnum extends AnnotationLiteral<BehandlingStegRef> implements BehandlingStegRef {
+   public static class BehandlingStegRefLiteral extends AnnotationLiteral<BehandlingStegRef> implements BehandlingStegRef {
 
         private BehandlingStegType stegtype;
 
-        public BehandlingStegRefEnum() {
+        public BehandlingStegRefLiteral() {
             throw new IllegalArgumentException("Type er obligatorisk");
         }
 
-        public BehandlingStegRefEnum(BehandlingStegType stegtype) {
+        public BehandlingStegRefLiteral(BehandlingStegType stegtype) {
+        if (stegtype == null) {
+            throw new IllegalArgumentException("Type er obligatorisk");
+        }
             this.stegtype = stegtype;
         }
 
@@ -133,7 +114,7 @@ public @interface BehandlingStegRef {
                             continue;
                         }
 
-                        var cinst = select(cls, binst, new BehandlingStegRefEnum(behandlingStegRef));
+                        var cinst = select(cls, binst, new BehandlingStegRefLiteral(behandlingStegRef));
                         if (cinst.isResolvable()) {
                             return Optional.of(getInstance(cinst));
                         } else {
