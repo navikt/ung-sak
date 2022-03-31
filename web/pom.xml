@@ -16,6 +16,7 @@
     <properties>
         <simple.client.version>0.15.0</simple.client.version>
         <swagger-ui.version>4.9.1</swagger-ui.version>
+        <apache-httpclient.version>4.5.13</apache-httpclient.version>
     </properties>
 
 
@@ -194,6 +195,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
+            <version>${apache-httpclient.version}</version>
         </dependency>
 
         <!-- Server -->

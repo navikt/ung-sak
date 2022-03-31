@@ -432,10 +432,14 @@
                 <artifactId>logback-syslog4j</artifactId>
                 <version>1.0.0</version>
                 <exclusions>
+                    <!-- ekskluderer fordi snyk rapporterer falsk positiv, vi bruker nyere logcack-classic -->
                     <exclusion>
-                        <!-- ekskluderer denne fordi snyk rapporterer falsk positiv, vi bruker nyere logcack-classic -->
                         <groupId>ch.qos.logback</groupId>
                         <artifactId>logback-classic</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>ch.qos.logback</groupId>
+                        <artifactId>logback-core</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
