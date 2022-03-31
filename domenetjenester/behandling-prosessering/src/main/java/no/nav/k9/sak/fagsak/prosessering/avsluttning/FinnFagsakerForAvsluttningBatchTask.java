@@ -34,15 +34,14 @@ public class FinnFagsakerForAvsluttningBatchTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        log.info("Finner saker som kan avsluttes");
+        var fagsakerSomKanAvsluttes = tjeneste.finnFagsakerSomSkalAvsluttes();
+
+        log.info("Fant {} saker som kan avsluttes", fagsakerSomKanAvsluttes.size());
 
         if (!enableFagsakAvslutting) {
             log.info("Fagsak avslutting er togglet av");
             return;
         }
-        var fagsakerSomKanAvsluttes = tjeneste.finnFagsakerSomSkalAvsluttes();
-
-        log.info("Fant {} saker som kan avsluttes", fagsakerSomKanAvsluttes.size());
 
         fagsakerSomKanAvsluttes.stream()
             .map(AvsluttFagsakTask::opprettTask)
