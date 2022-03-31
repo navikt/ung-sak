@@ -3,24 +3,23 @@ package no.nav.k9.sak.domene.vedtak.observer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 
 @ApplicationScoped
 public class VedtakFattetEventObserver {
 
-    private ProsessTaskRepository taskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
 
     public VedtakFattetEventObserver() {
     }
 
     @Inject
-    public VedtakFattetEventObserver(ProsessTaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
+    public VedtakFattetEventObserver(ProsessTaskTjeneste taskTjeneste) {
+        this.taskTjeneste = taskTjeneste;
     }
 
     public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
@@ -30,7 +29,7 @@ public class VedtakFattetEventObserver {
             if (erBehandlingAvRettTypeForAbakus(event)) {
                 gruppe.addNesteSekvensiell(opprettTaskForPubliseringAvVedtakMedYtelse(event));
             }
-            taskRepository.lagre(gruppe);
+            taskTjeneste.lagre(gruppe);
         }
     }
 
@@ -39,14 +38,14 @@ public class VedtakFattetEventObserver {
     }
 
     private ProsessTaskData opprettTaskForPubliseringAvVedtakMedYtelse(BehandlingVedtakEvent event) {
-        final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtattYtelseHendelseTask.TASKTYPE);
+        final ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserVedtattYtelseHendelseTask.class);
         taskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().toString());
         taskData.setCallIdFraEksisterende();
         return taskData;
     }
 
     private ProsessTaskData opprettTaskForPubliseringAvVedtak(BehandlingVedtakEvent event) {
-        final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtakHendelseTask.TASKTYPE);
+        final ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserVedtakHendelseTask.class);
         taskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().toString());
         taskData.setCallIdFraEksisterende();
         return taskData;

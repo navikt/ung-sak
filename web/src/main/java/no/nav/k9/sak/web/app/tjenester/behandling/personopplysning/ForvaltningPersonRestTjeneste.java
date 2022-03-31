@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,6 +39,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
+import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -80,13 +82,17 @@ public class ForvaltningPersonRestTjeneste {
         var aktørIder = new LinkedHashSet<>(Arrays.asList(alleAktørIder.split("\\s+")));
         var results = aktørIder.stream().flatMap(a -> {
             var aktørId = new AktørId(a);
-            var fnr = tpsTjeneste.hentFnr(aktørId);
-            return fnr.map(f -> {
-                var dto = new AktørIdOgFnrDto();
-                dto.setFnr(f.getIdent());
-                dto.setAktørId(aktørId);
-                return dto;
-            }).stream();
+            try {
+                var fnr = tpsTjeneste.hentFnr(aktørId);
+                return fnr.map(f -> {
+                    var dto = new AktørIdOgFnrDto();
+                    dto.setFnr(f.getIdent());
+                    dto.setAktørId(aktørId);
+                    return dto;
+                }).stream();
+            } catch (ManglerTilgangException e) {
+                return Stream.empty();
+            }
         }).toList();
 
         String path = "";
@@ -100,7 +106,7 @@ public class ForvaltningPersonRestTjeneste {
             return Optional.empty();
         }
         var toCsv = new LinkedHashMap<String, Function<AktørIdOgFnrDto, ?>>();
-        toCsv.put("aktørId", AktørIdOgFnrDto::getAktørId);
+        toCsv.put("aktørId", AktørIdOgFnrDto::getAktørIdString);
         toCsv.put("fnr", AktørIdOgFnrDto::getFnr);
         return Optional.of(dumpAsCsv(true, results, path, toCsv));
     }

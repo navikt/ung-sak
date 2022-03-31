@@ -190,7 +190,7 @@ public class SykdomVurderingService {
         LocalDateTimeline<Boolean> innleggelserTidslinje = hentAlleInnleggelserTidslinje(behandling);
         LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(behandling, tidslinjeKreverVurdering, vurderinger);
         if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
-            alleResterendeVurderingsperioder = LocalDateTimeline.EMPTY_TIMELINE;
+            alleResterendeVurderingsperioder = LocalDateTimeline.empty();
         }
 
         List<Periode> resterendeVurderingsperioder = toPeriodeList(alleResterendeVurderingsperioder);
@@ -210,7 +210,6 @@ public class SykdomVurderingService {
         );
     }
 
-    @SuppressWarnings("unchecked")
     public SykdomVurderingerOgPerioder utledPerioder(SykdomVurderingType sykdomVurderingType, Behandling behandling) {
         final LocalDateTimeline<SykdomVurderingVersjon> eksisterendeVurderinger = hentVurderinger(sykdomVurderingType, behandling);
         final LocalDateTimeline<Set<Saksnummer>> søknadsperioderPåPleietrengende = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
@@ -247,7 +246,7 @@ public class SykdomVurderingService {
             return new LocalDateTimeline<Boolean>(LocalDate.MIN, LocalDate.MAX, true);
         }
 
-        LocalDateTimeline<Boolean> skalIkkeVurderes = LocalDateTimeline.EMPTY_TIMELINE;
+        LocalDateTimeline<Boolean> skalIkkeVurderes = LocalDateTimeline.empty();
 
         skalIkkeVurderes = SykdomUtils.unionTilBoolean(skalIkkeVurderes, hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling));
         skalIkkeVurderes = SykdomUtils.unionTilBoolean(skalIkkeVurderes, hentInnleggelseUnder18årTidslinje(behandling));

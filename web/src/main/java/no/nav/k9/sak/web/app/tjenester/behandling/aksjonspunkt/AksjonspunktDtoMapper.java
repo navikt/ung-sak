@@ -56,6 +56,8 @@ class AksjonspunktDtoMapper {
         dto.setToTrinnsBehandling(aksjonspunkt.isToTrinnsBehandling() || aksjonspunktDefinisjon.getDefaultTotrinnBehandling());
         dto.setFristTid(aksjonspunkt.getFristTid());
         dto.setVenteårsak(aksjonspunkt.getVenteårsak());
+        dto.setVenteårsakVariant(aksjonspunkt.getVenteårsakVariant());
+        dto.setOpprettetAv(aksjonspunkt.getOpprettetAv());
 
         if (ttVurderinger != null && !ttVurderinger.isEmpty()) {
             Optional<Totrinnsvurdering> vurdering = ttVurderinger.stream().filter(v -> v.getAksjonspunktDefinisjon() == aksjonspunkt.getAksjonspunktDefinisjon()).findFirst();

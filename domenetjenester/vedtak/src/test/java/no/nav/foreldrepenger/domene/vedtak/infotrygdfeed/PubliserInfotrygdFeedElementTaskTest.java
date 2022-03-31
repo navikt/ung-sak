@@ -20,12 +20,12 @@ import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka.InfotrygdFeedMeld
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 public class PubliserInfotrygdFeedElementTaskTest {
 
@@ -53,7 +53,7 @@ public class PubliserInfotrygdFeedElementTaskTest {
 
     @Test
     public void skal_sende_melding() {
-        ProsessTaskData pd = new ProsessTaskData(PubliserInfotrygdFeedElementTask.TASKTYPE);
+        ProsessTaskData pd =  ProsessTaskData.forProsessTask(PubliserInfotrygdFeedElementTask.class);
         pd.setBehandling("", "", "");
         pd.setProperty(PubliserInfotrygdFeedElementTask.KAFKA_KEY_PROPERTY, "kafka-key");
         pd.setPayload("payload");

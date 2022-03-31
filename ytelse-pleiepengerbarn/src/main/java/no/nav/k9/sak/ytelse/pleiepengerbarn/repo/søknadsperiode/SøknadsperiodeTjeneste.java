@@ -13,7 +13,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -96,14 +95,13 @@ public class SøknadsperiodeTjeneste {
         var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
         var brevkode = MapTilBrevkode.finnBrevkodeMapper(brevkodeMappere, fagsak.getYtelseType()).getBrevkode();
         final List<MottattDokument> mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(fagsakId)
-                .stream()
-                .filter(it -> brevkode.equals(it.getType()))
-                .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
-                .sorted(Comparator.comparing(MottattDokument::getInnsendingstidspunkt))
-                .toList();
+            .stream()
+            .filter(it -> brevkode.equals(it.getType()))
+            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
+            .sorted(Comparator.comparing(MottattDokument::getInnsendingstidspunkt))
+            .toList();
 
-        @SuppressWarnings("unchecked")
-        LocalDateTimeline<Kravperiode> tidslinje = LocalDateTimeline.EMPTY_TIMELINE;
+        LocalDateTimeline<Kravperiode> tidslinje = LocalDateTimeline.empty();
         for (MottattDokument kd : mottatteDokumenter) {
             var segments = søknadsperioders.stream()
                 .filter(sp -> sp.getJournalpostId().equals(kd.getJournalpostId()))

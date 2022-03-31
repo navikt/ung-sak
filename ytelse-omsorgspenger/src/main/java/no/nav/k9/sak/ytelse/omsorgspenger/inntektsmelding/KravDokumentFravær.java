@@ -45,7 +45,7 @@ public class KravDokumentFravær {
                             .toList());
 
                         AktivitetTypeArbeidsgiver aktivitetTypeArbeidsgiver = fjernArbeidsforholdFra(aktivitetIdent);
-                        var tidslinjeSammenslått = resultat.getOrDefault(aktivitetTypeArbeidsgiver, (LocalDateTimeline<OppgittFraværHolder>) LocalDateTimeline.EMPTY_TIMELINE);
+                        var tidslinjeSammenslått = resultat.getOrDefault(aktivitetTypeArbeidsgiver, LocalDateTimeline.empty());
                         resultat.put(aktivitetTypeArbeidsgiver, tidslinjeSammenslått.combine(tidslinjeNy, this::merge, LocalDateTimeline.JoinStyle.CROSS_JOIN));
                     }
                 );

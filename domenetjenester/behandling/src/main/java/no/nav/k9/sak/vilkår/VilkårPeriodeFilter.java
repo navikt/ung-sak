@@ -74,7 +74,7 @@ public class VilkårPeriodeFilter {
             forlengelser.forEach(p -> filterPerioder.removeIf(fp -> fp.getPeriode().equals(p)));
         } else if (skalMarkereForlengelser) {
             var forlengelser = forlengelseTjeneste.utledPerioderSomSkalBehandlesSomForlengelse(behandlingReferanse, filterPerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new)), vilkårType);
-            forlengelser.forEach(p -> filterPerioder.forEach(fp -> fp.setErForlengelse(fp.getPeriode().equals(p))));
+            filterPerioder.forEach(fp -> fp.setErForlengelse(forlengelser.stream().anyMatch(p -> fp.getPeriode().equals(p))));
         }
         return Collections.unmodifiableNavigableSet(filterPerioder);
     }

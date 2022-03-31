@@ -68,7 +68,7 @@ public class HendelsemottakTjeneste {
             var fagsak = entry.getKey();
             var behandlingÅrsak = entry.getValue();
 
-            ProsessTaskData tilRevurderingTaskData = new ProsessTaskData(OpprettRevurderingEllerOpprettDiffTask.TASKNAME);
+            ProsessTaskData tilRevurderingTaskData =  ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, behandlingÅrsak.getKode());
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, payload.getHendelsePeriode().getFom().toString());
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, payload.getHendelsePeriode().getTom().toString());

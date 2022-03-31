@@ -1,11 +1,10 @@
 package no.nav.k9.sak.behandling.hendelse.produksjonsstyring;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
@@ -17,7 +16,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 @ApplicationScoped
 @ProsessTask(PubliserEventTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
-class PubliserEventTaskImpl implements PubliserEventTask {
+public class PubliserEventTaskImpl implements PubliserEventTask {
     private static final Logger log = LoggerFactory.getLogger(PubliserEventTaskImpl.class);
 
     private ProsessEventKafkaProducer kafkaProducer;

@@ -4,36 +4,35 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingKandidaterRepository;
-import no.nav.k9.sak.produksjonsstyring.behandlingenhet.OppdaterBehandlendeEnhetTask;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingKandidaterRepository;
+import no.nav.k9.sak.produksjonsstyring.behandlingenhet.OppdaterBehandlendeEnhetTask;
 
 /**
  * Flytting iht PFP-4662
  */
 @ApplicationScoped
-@ProsessTask(FlyttEnhetBatchTjeneste.TASKTYPE)
-public class FlyttEnhetBatchTjeneste implements ProsessTaskHandler {
+@ProsessTask(FlyttEnhetBatchTask.TASKTYPE)
+public class FlyttEnhetBatchTask implements ProsessTaskHandler {
 
     public static final String KEY_ENHET = "enhet";
     public static final String TASKTYPE = "batch.flyttTilEnhet";
     private BehandlingKandidaterRepository behandlingKandidaterRepository;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
 
-    FlyttEnhetBatchTjeneste() {
+    FlyttEnhetBatchTask() {
         // for CDI proxy
     }
 
     @Inject
-    public FlyttEnhetBatchTjeneste(BehandlingKandidaterRepository behandlingKandidaterRepository,
-                                   ProsessTaskRepository prosessTaskRepository) {
+    public FlyttEnhetBatchTask(BehandlingKandidaterRepository behandlingKandidaterRepository,
+                               ProsessTaskTjeneste taskTjeneste) {
         this.behandlingKandidaterRepository = behandlingKandidaterRepository;
-        this.prosessTaskRepository = prosessTaskRepository;
+        this.taskTjeneste = taskTjeneste;
     }
 
     @Override
@@ -45,10 +44,10 @@ public class FlyttEnhetBatchTjeneste implements ProsessTaskHandler {
 
         List<Behandling> kandidater = behandlingKandidaterRepository.finnBehandlingerIkkeAvsluttetPåAngittEnhet(enhetValue);
         kandidater.forEach(beh -> {
-            ProsessTaskData taskData = new ProsessTaskData(OppdaterBehandlendeEnhetTask.TASKTYPE);
+            ProsessTaskData taskData = ProsessTaskData.forProsessTask(OppdaterBehandlendeEnhetTask.class);
             taskData.setBehandling(beh.getFagsakId(), beh.getId(), beh.getAktørId().getId());
             taskData.setCallIdFraEksisterende();
-            prosessTaskRepository.lagre(taskData);
+            taskTjeneste.lagre(taskData);
         });
     }
 }

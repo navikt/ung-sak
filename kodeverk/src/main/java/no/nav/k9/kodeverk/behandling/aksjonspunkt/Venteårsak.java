@@ -56,6 +56,7 @@ public enum Venteårsak implements Kodeverdi {
     INNTEKTSMELDING("INNTEKTSMELDING", "Inntektsmelding", true),
     LEGEERKLÆRING("LEGEERKLÆRING", "Legeerklæring fra riktig lege", true),
     MEDISINSKE_OPPLYSNINGER("MEDISINSKE_OPPLYSNINGER", "Medisinske opplysninger", true),
+    ANNET("ANNET", "Annet", true),
 
     VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER("VENTER_ETTERLYS_IM", "Venter på inntektsmeldinger etter etterlysning", false),
     VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER_MED_VARSEL("VENTER_ETTERLYS_IM_VARSEL", "Venter på inntektsmeldinger etter etterlysning med varsel om mulig avslag", false),

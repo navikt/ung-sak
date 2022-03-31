@@ -63,20 +63,18 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
             fagsakYtelseType, vedtakHendelse.getSaksnummer(), kandidaterTilRevurdering);
 
         for (SakMedPeriode kandidatsaksnummer : kandidaterTilRevurdering) {
-            ProsessTaskData tilRevurderingTaskData = new ProsessTaskData(
-                OpprettRevurderingEllerOpprettDiffTask.TASKNAME);
-            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK,
-                BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON.getKode());
-            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODER,
-                utledPerioder(kandidatsaksnummer.getPerioder()));
+            var taskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
+            taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON.getKode());
+            taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODER, utledPerioder(kandidatsaksnummer.getPerioder()));
+
             var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer.getSaksnummer(), false)
                 .orElseThrow();
             var tilRevurdering = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId())
                 .orElseThrow();
-            tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(),
+            taskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(),
                 tilRevurdering.getAktørId().getId());
 
-            fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
+            fagsakProsessTaskRepository.lagreNyGruppe(taskData);
         }
     }
 
