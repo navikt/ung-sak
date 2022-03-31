@@ -99,7 +99,7 @@ public class SykdomVurderingService {
 
                 boolean harUbesluttedeVurderinger = harUbesluttedeVurderinger(behandling);
 
-                if (!harUbesluttedeVurderinger && !harUklassifiserteDokumenter && !dokumenterUtenUtkvittering && !manglerVurderingAvKontinuerligTilsynOgPleie && !manglerVurderingAvToOmsorgspersoner) {
+                if (!manglerDiagnosekode && !harUbesluttedeVurderinger && !harUklassifiserteDokumenter && !dokumenterUtenUtkvittering && !manglerVurderingAvKontinuerligTilsynOgPleie && !manglerVurderingAvToOmsorgspersoner) {
                     return SykdomAksjonspunkt.bareFalse();
                 }
             }
