@@ -11,6 +11,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.Periode;
@@ -36,20 +37,20 @@ public final class SykdomUtils {
         return new LocalDateTimeline<Boolean>(datoer.stream().map(p -> new LocalDateSegment<Boolean>(p.getFomDato(), p.getTomDato(), true)).collect(Collectors.toList())).compress();
     }
 
+    public static <T> LocalDateTimeline<Boolean> unionTilBoolean(LocalDateTimeline<Boolean> timeline, LocalDateTimeline<T> other) {
+        return timeline.union(other, StandardCombinators::alwaysTrueForMatch);
+    }
+
     public static <E> List<E> values(LocalDateTimeline<E> elements) {
         return elements.compress().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
     }
 
-    public static <T, U> LocalDateTimeline<T> kunPerioderSomIkkeFinnesI(LocalDateTimeline<T> perioder, LocalDateTimeline<U> perioderSomSkalTrekkesFra) {
-        return perioder.combine(perioderSomSkalTrekkesFra, new LocalDateSegmentCombinator<T, U, T>() {
-            @Override
-            public LocalDateSegment<T> combine(LocalDateInterval datoInterval,
-                    LocalDateSegment<T> datoSegment, LocalDateSegment<U> datoSegment2) {
-                if (datoSegment2 == null) {
-                    return new LocalDateSegment<>(datoInterval, datoSegment.getValue());
-                }
-                return null;
+    public static <T> LocalDateTimeline<T> kunPerioderSomIkkeFinnesI(LocalDateTimeline<T> perioder, LocalDateTimeline<?> perioderSomSkalTrekkesFra) {
+        return perioder.combine(perioderSomSkalTrekkesFra, (datoInterval, datoSegment, datoSegment2) -> {
+            if (datoSegment2 == null) {
+                return new LocalDateSegment<>(datoInterval, datoSegment.getValue());
             }
+            return null;
         }, JoinStyle.LEFT_JOIN).compress();
     }
 
