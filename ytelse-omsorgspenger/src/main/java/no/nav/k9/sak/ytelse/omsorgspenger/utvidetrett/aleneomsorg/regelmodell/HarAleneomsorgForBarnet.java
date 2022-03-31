@@ -27,7 +27,7 @@ public class HarAleneomsorgForBarnet extends LeafSpecification<AleneomsorgVilkå
     private boolean søkerHarSammeAdresseSomEnAnnenForelder(AleneomsorgVilkårGrunnlag grunnlag) {
         List<BostedsAdresse> andreForeldresAdresser = finnAdresserForForeldreUtenomSøker(grunnlag);
         List<BostedsAdresse> søkersAdresser = grunnlag.getSøkerAdresser();
-        return andreForeldresAdresser.stream().anyMatch(it -> søkersAdresser.stream().anyMatch(it::erSammeAdresse));
+        return andreForeldresAdresser.stream().anyMatch(it -> søkersAdresser.stream().anyMatch(it::erSammeAdresseOgOverlapperTidsmessig));
     }
 
     private List<BostedsAdresse> finnAdresserForForeldreUtenomSøker(AleneomsorgVilkårGrunnlag grunnlag) {

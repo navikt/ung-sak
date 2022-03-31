@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,15 +17,20 @@ import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.AdressePeriode;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.Gyldighetsperiode;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtfallOversetter;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg.regelmodell.AleneomsorgVilkår;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg.regelmodell.AleneomsorgVilkårGrunnlag;
@@ -36,12 +42,14 @@ public class AleneomsorgTjeneste {
     private VilkårUtfallOversetter utfallOversetter;
     private BehandlingRepository behandlingRepository;
     private TpsTjeneste tpsTjeneste;
+    private PersoninfoTjeneste personinfoTjeneste;
 
     @Inject
-    AleneomsorgTjeneste(BehandlingRepository behandlingRepository, TpsTjeneste tpsTjeneste) {
+    AleneomsorgTjeneste(BehandlingRepository behandlingRepository, TpsTjeneste tpsTjeneste, PersoninfoTjeneste personinfoTjeneste) {
         this.utfallOversetter = new VilkårUtfallOversetter();
         this.behandlingRepository = behandlingRepository;
         this.tpsTjeneste = tpsTjeneste;
+        this.personinfoTjeneste = personinfoTjeneste;
     }
 
     public List<VilkårData> vurderPerioder(LocalDateTimeline<AleneomsorgVilkårGrunnlag> samletOmsorgenForTidslinje) {
@@ -59,8 +67,9 @@ public class AleneomsorgTjeneste {
         Fagsak fagsak = behandling.getFagsak();
         var søkerAktørId = fagsak.getAktørId();
         var barnAktørId = fagsak.getPleietrengendeAktørId();
-        Map<AktørId, List<BostedsAdresse>> foreldreBostedAdresser = finnForeldresAdresser(barnAktørId);
-        List<BostedsAdresse> søkerBostedAdresser = finnBostedAdresser(søkerAktørId);
+        Periode periodeForDatainnhenting = omsluttendePeriode(vilkårsperioder);
+        Map<AktørId, List<BostedsAdresse>> foreldreBostedAdresser = finnForeldresAdresser(barnAktørId, periodeForDatainnhenting);
+        List<BostedsAdresse> søkerBostedAdresser = finnBostedAdresser(søkerAktørId, periodeForDatainnhenting);
 
         return new LocalDateTimeline<>(vilkårsperioder.stream()
             .map(vilkårsperiode -> new LocalDateSegment<>(vilkårsperiode.getFom(), vilkårsperiode.getTom(), new AleneomsorgVilkårGrunnlag(søkerAktørId, søkerBostedAdresser, foreldreBostedAdresser)))
@@ -68,10 +77,17 @@ public class AleneomsorgTjeneste {
         );
     }
 
-    private Map<AktørId, List<BostedsAdresse>> finnForeldresAdresser(AktørId barnAktørId) {
+    private Periode omsluttendePeriode(Collection<VilkårPeriode> vilkårPerioder) {
+        return new Periode(
+            vilkårPerioder.stream().map(VilkårPeriode::getFom).min(Comparator.naturalOrder()).orElseThrow(),
+            vilkårPerioder.stream().map(VilkårPeriode::getTom).max(Comparator.naturalOrder()).orElseThrow()
+        );
+    }
+
+    private Map<AktørId, List<BostedsAdresse>> finnForeldresAdresser(AktørId barnAktørId, Periode periode) {
         Set<AktørId> foreldre = finnForeldre(barnAktørId);
         return foreldre.stream()
-            .collect(Collectors.toMap(forelder -> forelder, this::finnBostedAdresser));
+            .collect(Collectors.toMap(forelder -> forelder, forelder -> finnBostedAdresser(forelder, periode)));
     }
 
     private Set<AktørId> finnForeldre(AktørId barnAktørId) {
@@ -89,12 +105,25 @@ public class AleneomsorgTjeneste {
             .collect(Collectors.toSet());
     }
 
-    private List<BostedsAdresse> finnBostedAdresser(AktørId aktørId) {
-        Personinfo personInfoAnnenForelder = tpsTjeneste.hentBrukerForAktør(aktørId).orElseThrow();
-        return personInfoAnnenForelder.getAdresseInfoList().stream()
-            .filter(adresseinfo -> adresseinfo.getGjeldendePostadresseType() == AdresseType.BOSTEDSADRESSE)
-            .map(adresseinfo -> new BostedsAdresse(adresseinfo.getAdresselinje1(), adresseinfo.getAdresselinje2(), adresseinfo.getAdresselinje3(), adresseinfo.getPostNr(), adresseinfo.getLand()))
+    private List<BostedsAdresse> finnBostedAdresser(AktørId aktørId, Periode periode) {
+        Personhistorikkinfo personhistorikkinfo = personinfoTjeneste.hentPersoninfoHistorikk(aktørId, periode);
+        return personhistorikkinfo.getAdressehistorikk().stream()
+            .filter(adressePeriode -> overlapper(periode, adressePeriode))
+            .filter(adressePeriode -> adressePeriode.getAdresse().getAdresseType() == AdresseType.BOSTEDSADRESSE)
+            .map(adressePeriode -> {
+                AdressePeriode.Adresse adresse = adressePeriode.getAdresse();
+                Periode p = tilPeriode(adressePeriode.getGyldighetsperiode());
+                return new BostedsAdresse(p, adresse.getAdresselinje1(), adresse.getAdresselinje2(), adresse.getAdresselinje3(), adresse.getPostnummer(), adresse.getLand());
+            })
             .toList();
+    }
+
+    private boolean overlapper(Periode periode, AdressePeriode adresseinfo) {
+        return periode.overlaps(tilPeriode(adresseinfo.getGyldighetsperiode()));
+    }
+
+    private Periode tilPeriode(Gyldighetsperiode gyldighetsperiode) {
+        return new Periode(gyldighetsperiode.getFom(), gyldighetsperiode.getTom());
     }
 
 }
