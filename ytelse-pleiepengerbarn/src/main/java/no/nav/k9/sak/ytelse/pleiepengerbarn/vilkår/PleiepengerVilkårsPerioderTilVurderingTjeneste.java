@@ -145,14 +145,10 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     }
 
     private LocalDateTimeline<Boolean> opprettTidslinje(NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
-
-        var tidslinje = new LocalDateTimeline<Boolean>(List.of());
-
-        for (DatoIntervallEntitet periode : datoIntervallEntitets) {
-            var segmentLinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(justerMotHelg(periode).toLocalDateInterval(), true)));
-            tidslinje = tidslinje.combine(segmentLinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
-
+        List<LocalDateSegment<Boolean>> segmenter = datoIntervallEntitets.stream()
+            .map(periode -> new LocalDateSegment<>(justerMotHelg(periode).toLocalDateInterval(), true))
+            .toList();
+        var tidslinje = new LocalDateTimeline<>(segmenter, StandardCombinators::coalesceRightHandSide);
         return tidslinje.compress();
     }
 

@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.kravperioder;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -146,17 +147,15 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     }
 
     private List<PeriodeMedUtfall> mapVilkårMedUtfall(Behandling behandling, LocalDateTimeline<Utfall> timelineTilVurdering) {
-        var timeline = new LocalDateTimeline<Utfall>(List.of());
+        LocalDateTimeline<Utfall> timeline = LocalDateTimeline.empty();
         if (harPSBUttak(behandling) &&
             (behandling.getStatus().erFerdigbehandletStatus() || harKommetTilUttak(behandling))) {
             var uttaksplan = uttakTjeneste.hentUttaksplan(behandling.getUuid(), true);
-
+            List<LocalDateSegment<Utfall>> utfallFraUttak = new ArrayList<>();
             for (Map.Entry<LukketPeriode, UttaksperiodeInfo> entry : uttaksplan.getPerioder().entrySet()) {
-                timeline = timeline.combine(new LocalDateSegment<>(entry.getKey().getFom(), entry.getKey().getTom(),
-                        mapUtfall(entry.getValue().getUtfall())),
-                    StandardCombinators::coalesceRightHandSide,
-                    LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                utfallFraUttak.add(new LocalDateSegment<>(entry.getKey().getFom(), entry.getKey().getTom(), mapUtfall(entry.getValue().getUtfall())));
             }
+            timeline = new LocalDateTimeline<>(utfallFraUttak, StandardCombinators::coalesceRightHandSide);
         }
 
         timeline = timeline.combine(timelineTilVurdering, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
