@@ -15,7 +15,7 @@ import no.nav.k9.sak.domene.opptjening.aksjonspunkt.VurderStatusInput;
 class OpptjeningAktivitetArbeidVurderer {
     private final Logger log = LoggerFactory.getLogger(OpptjeningAktivitetArbeidVurderer.class);
 
-    private MellomliggendePeriodeUtleder mellomliggendePeriodeUtleder = new MellomliggendePeriodeUtleder();
+    private MellomliggendeHelgUtleder mellomliggendeHelgUtleder = new MellomliggendeHelgUtleder();
 
     VurderingsStatus vurderArbeid(VurderStatusInput input) {
         var opptjeningsperiode = input.getOpptjeningsperiode();
@@ -35,7 +35,7 @@ class OpptjeningAktivitetArbeidVurderer {
         tidslinjeTilVurdering = tidslinjeTilVurdering.intersection(aktivitetsTidslinje.compress());
 
         // Legg til mellomliggende periode dersom helg mellom permisjonsperioder
-        LocalDateTimeline<Boolean> mellomliggendePerioder = mellomliggendePeriodeUtleder.beregnMellomliggendePeriode(tidslinjeTilVurdering.compress());
+        LocalDateTimeline<Boolean> mellomliggendePerioder = mellomliggendeHelgUtleder.beregnMellomliggendeHelg(tidslinjeTilVurdering);
         for (LocalDateSegment<Boolean> mellomliggendePeriode : mellomliggendePerioder) {
             tidslinjeTilVurdering = tidslinjeTilVurdering.combine(mellomliggendePeriode, this::mergePerioder, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
