@@ -19,8 +19,8 @@ import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("FRISINN")
-@BehandlingTypeRef("BT-002")
-@BehandlingTypeRef("BT-004")
+@BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
+@BehandlingTypeRef(BehandlingType.REVURDERING)
 public class InformasjonselementerUtlederFrisinn implements InformasjonselementerUtleder {
 
     private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(

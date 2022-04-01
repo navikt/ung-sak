@@ -21,8 +21,8 @@ import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
 @FagsakYtelseTypeRef("PPN")
-@BehandlingTypeRef("BT-002")
-@BehandlingTypeRef("BT-004")
+@BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
+@BehandlingTypeRef(BehandlingType.REVURDERING)
 class PSBInformasjonselementerUtleder implements InformasjonselementerUtleder {
 
     private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(

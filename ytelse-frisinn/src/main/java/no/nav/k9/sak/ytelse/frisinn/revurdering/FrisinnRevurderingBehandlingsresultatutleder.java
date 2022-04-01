@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.frisinn.revurdering;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingType.REVURDERING;
 import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.GUNST;
 import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.UGUNST;
 
@@ -9,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -28,7 +30,7 @@ import no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresul
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("FRISINN")
-@BehandlingTypeRef("BT-004")
+@BehandlingTypeRef(REVURDERING)
 public class FrisinnRevurderingBehandlingsresultatutleder implements RevurderingBehandlingsresultatutleder {
 
     private final BeregningsresultatRepository beregningsresultatRepository;

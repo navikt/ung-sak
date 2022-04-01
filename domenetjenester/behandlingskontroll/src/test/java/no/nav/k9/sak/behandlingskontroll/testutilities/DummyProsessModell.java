@@ -19,7 +19,7 @@ public class DummyProsessModell {
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.SVANGERSKAPSPENGER;
 
     @FagsakYtelseTypeRef(YTELSE)
-    @BehandlingTypeRef("BT-002")
+    @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
     @ApplicationScoped
     public BehandlingModell førstegangsbehandling() {

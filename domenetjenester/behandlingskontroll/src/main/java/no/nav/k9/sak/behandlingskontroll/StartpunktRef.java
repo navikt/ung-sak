@@ -76,7 +76,7 @@ public @interface StartpunktRef {
         private Lookup() {
         }
 
-        public static <I> Optional<I> find(Class<I> cls, String ytelseTypeKode, String behandlingType, String startpunktRef) {
+        public static <I> Optional<I> find(Class<I> cls, String ytelseTypeKode, BehandlingType behandlingType, String startpunktRef) {
             return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType, startpunktRef);
         }
 
@@ -88,11 +88,11 @@ public @interface StartpunktRef {
                                            String startpunktRef) {
             return find(cls, instances,
                 ytelseTypeKode == null ? null : ytelseTypeKode.getKode(),
-                behandlingType == null ? null : behandlingType.getKode(),
+                behandlingType,
                 startpunktRef);
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String fagsakYtelseType, String behandlingType, String startpunktRef) { // NOSONAR
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String fagsakYtelseType, BehandlingType behandlingType, String startpunktRef) { // NOSONAR
             Objects.requireNonNull(instances, "instances");
 
             for (var fagsakLiteral : coalesce(fagsakYtelseType, "*")) {
@@ -100,20 +100,18 @@ public @interface StartpunktRef {
                 if (inst.isUnsatisfied()) {
                     continue;
                 } else {
-                    for (var behandlingLiteral : coalesce(behandlingType, "*")) {
-                        var binst = select(cls, inst, new BehandlingTypeRefLiteral(behandlingLiteral));
-                        if (binst.isUnsatisfied()) {
-                            continue;
-                        }
-                        for (var start : coalesce(startpunktRef, "*")) {
-                            var sinst = select(cls, binst, new StartpunktRefLiteral(start));
-                            if (sinst.isResolvable()) {
-                                return Optional.of(getInstance(sinst));
-                            } else {
-                                if (sinst.isAmbiguous()) {
-                                    throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType="
-                                        + fagsakLiteral + ", behandlingType=" + behandlingLiteral + ", startpunktRef=" + start);
-                                }
+                    var binst = select(cls, inst, new BehandlingTypeRefLiteral(behandlingType));
+                    if (binst.isUnsatisfied()) {
+                        continue;
+                    }
+                    for (var start : coalesce(startpunktRef, "*")) {
+                        var sinst = select(cls, binst, new StartpunktRefLiteral(start));
+                        if (sinst.isResolvable()) {
+                            return Optional.of(getInstance(sinst));
+                        } else {
+                            if (sinst.isAmbiguous()) {
+                                throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType="
+                                    + fagsakLiteral + ", behandlingType=" + behandlingType + ", startpunktRef=" + start);
                             }
                         }
                     }

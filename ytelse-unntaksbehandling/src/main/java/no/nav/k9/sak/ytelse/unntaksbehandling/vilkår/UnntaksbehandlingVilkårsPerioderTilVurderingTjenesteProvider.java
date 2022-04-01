@@ -1,9 +1,12 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.vilkår;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingType.UNNTAKSBEHANDLING;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -27,7 +30,7 @@ public class UnntaksbehandlingVilkårsPerioderTilVurderingTjenesteProvider {
     }
 
     @FagsakYtelseTypeRef(YTELSE_OMS)
-    @BehandlingTypeRef("BT-010")
+    @BehandlingTypeRef(UNNTAKSBEHANDLING)
     @Produces
     @ApplicationScoped
     public VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjenesteOMS() {
@@ -35,7 +38,7 @@ public class UnntaksbehandlingVilkårsPerioderTilVurderingTjenesteProvider {
     }
 
     @FagsakYtelseTypeRef(YTELSE_PLEIEPENGER)
-    @BehandlingTypeRef("BT-010")
+    @BehandlingTypeRef(UNNTAKSBEHANDLING)
     @Produces
     @ApplicationScoped
     public VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjenestePSB() {
@@ -43,7 +46,7 @@ public class UnntaksbehandlingVilkårsPerioderTilVurderingTjenesteProvider {
     }
 
     @FagsakYtelseTypeRef(YTELSE_FRISINN)
-    @BehandlingTypeRef("BT-010")
+    @BehandlingTypeRef(UNNTAKSBEHANDLING)
     @Produces
     @ApplicationScoped
     public VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjenesteFRI() {

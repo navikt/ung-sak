@@ -14,8 +14,8 @@ import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 @FagsakYtelseTypeRef("OMP_KS")
 @FagsakYtelseTypeRef("OMP_MA")
 @FagsakYtelseTypeRef("OMP_AO")
-@BehandlingTypeRef("BT-002")
-@BehandlingTypeRef("BT-004")
+@BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
+@BehandlingTypeRef(BehandlingType.REVURDERING)
 class UtvidetRettInformasjonselementerUtleder implements InformasjonselementerUtleder {
     @Override
     public Set<RegisterdataType> utled(BehandlingType behandlingType) {

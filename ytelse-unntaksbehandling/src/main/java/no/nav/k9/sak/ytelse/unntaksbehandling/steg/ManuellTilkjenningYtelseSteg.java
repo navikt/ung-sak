@@ -1,8 +1,10 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.steg;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.MANUELL_TILKJENNING_YTELSE;
+import static no.nav.k9.kodeverk.behandling.BehandlingType.UNNTAKSBEHANDLING;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -12,7 +14,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 @FagsakYtelseTypeRef
 @BehandlingStegRef(stegtype = MANUELL_TILKJENNING_YTELSE)
-@BehandlingTypeRef("BT-010")
+@BehandlingTypeRef(UNNTAKSBEHANDLING)
 @ApplicationScoped
 public class ManuellTilkjenningYtelseSteg implements BehandlingSteg {
 

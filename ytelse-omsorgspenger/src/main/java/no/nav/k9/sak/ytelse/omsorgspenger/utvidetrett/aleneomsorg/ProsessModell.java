@@ -19,7 +19,7 @@ public class ProsessModell {
     private static final String YTELSE = "OMP_AO";
 
     @FagsakYtelseTypeRef(YTELSE)
-    @BehandlingTypeRef("BT-002")
+    @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
     @ApplicationScoped
     public BehandlingModell førstegangsbehandling() {
@@ -41,7 +41,7 @@ public class ProsessModell {
     }
 
     @FagsakYtelseTypeRef(YTELSE)
-    @BehandlingTypeRef("BT-004")
+    @BehandlingTypeRef(BehandlingType.REVURDERING)
     @Produces
     @ApplicationScoped
     public BehandlingModell revurdering() {

@@ -25,7 +25,7 @@ public class ProsessModell {
     private static final FagsakYtelseType YTELSE_TYPE_FRISINN = FagsakYtelseType.FRISINN;
 
     @FagsakYtelseTypeRef(YTELSE_OMS)
-    @BehandlingTypeRef("BT-010")
+    @BehandlingTypeRef(BehandlingType.UNNTAKSBEHANDLING)
     @Produces
     @ApplicationScoped
     public BehandlingModell manuellBehandlingOmsorgspenger() {
@@ -45,7 +45,7 @@ public class ProsessModell {
     }
 
     @FagsakYtelseTypeRef(YTELSE_FRISINN)
-    @BehandlingTypeRef("BT-010")
+    @BehandlingTypeRef(BehandlingType.UNNTAKSBEHANDLING)
     @Produces
     @ApplicationScoped
     public BehandlingModell manuellBehandlingFrisinn() {
@@ -65,7 +65,7 @@ public class ProsessModell {
     }
 
     @FagsakYtelseTypeRef(YTELSE_PLEIEPENGER)
-    @BehandlingTypeRef("BT-010")
+    @BehandlingTypeRef(BehandlingType.UNNTAKSBEHANDLING)
     @Produces
     @ApplicationScoped
     public BehandlingModell manuellBehandlingPleiepenger() {

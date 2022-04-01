@@ -1,12 +1,14 @@
 package no.nav.k9.sak.domene.behandling.steg.beregnytelse;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_TILBAKETREKK;
+import static no.nav.k9.kodeverk.behandling.BehandlingType.REVURDERING;
 
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -23,7 +25,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.AksjonspunktutlederTilbaketrekk;
 
 @BehandlingStegRef(stegtype = VURDER_TILBAKETREKK)
-@BehandlingTypeRef("BT-004")
+@BehandlingTypeRef(REVURDERING)
 @FagsakYtelseTypeRef
 
 @ApplicationScoped

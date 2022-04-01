@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_KOMPLETTHET;
+import static no.nav.k9.kodeverk.behandling.BehandlingType.REVURDERING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENTER_PÅ_KOMPLETT_SØKNAD;
 import static no.nav.k9.sak.domene.behandling.steg.kompletthet.VurderKompletthetStegFelles.autopunktAlleredeUtført;
 
@@ -9,6 +10,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -24,7 +26,7 @@ import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @BehandlingStegRef(stegtype = VURDER_KOMPLETTHET)
-@BehandlingTypeRef("BT-004")
+@BehandlingTypeRef(REVURDERING)
 @FagsakYtelseTypeRef
 @ApplicationScoped
 public class VurderKompletthetRevurderingStegImpl implements VurderKompletthetSteg {
