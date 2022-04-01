@@ -43,7 +43,6 @@ import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.person.AktørIdOgFnrDto;
 import no.nav.k9.sak.typer.AktørId;
@@ -67,6 +66,7 @@ public class ForvaltningPersonRestTjeneste {
     }
 
     @POST
+    @Deprecated() // mangler abac-kontroll
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/hentFnr")
@@ -133,10 +133,8 @@ public class ForvaltningPersonRestTjeneste {
 
         @Override
         public AbacDataAttributter abacAttributter() {
-            var aktørIder = new LinkedHashSet<>(Arrays.asList(getAktørIder().split("\\s+")));
-            var abacDataAttributter = AbacDataAttributter.opprett();
-            aktørIder.forEach(it -> abacDataAttributter.leggTil(StandardAbacAttributtType.AKTØR_ID, it));
-            return abacDataAttributter;
+            // Har midlertidig ingen abac-kontroll for å kunne filtrere ut basert på tilgang
+            return AbacDataAttributter.opprett();
         }
 
         @Provider
