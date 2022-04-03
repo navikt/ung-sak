@@ -153,11 +153,9 @@ public class RegisterdataInnhenter {
         var fagsakYtelseType = behandling.getFagsakYtelseType();
         var opplysningsperioden = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), fagsakYtelseType, true);
         var personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(søkerPersonInfo.getAktørId(), opplysningsperioden);
-        if (personhistorikkinfo != null) {
-            mapAdresser(personhistorikkinfo.getAdressehistorikk(), informasjonBuilder, søkerPersonInfo);
-            mapStatsborgerskap(personhistorikkinfo.getStatsborgerskaphistorikk(), informasjonBuilder, søkerPersonInfo);
-            mapPersonstatus(personhistorikkinfo.getPersonstatushistorikk(), informasjonBuilder, søkerPersonInfo);
-        }
+        mapAdresser(personhistorikkinfo.getAdressehistorikk(), informasjonBuilder, søkerPersonInfo);
+        mapStatsborgerskap(personhistorikkinfo.getStatsborgerskaphistorikk(), informasjonBuilder, søkerPersonInfo);
+        mapPersonstatus(personhistorikkinfo.getPersonstatushistorikk(), informasjonBuilder, søkerPersonInfo);
 
         mapTilPersonopplysning(søkerPersonInfo, informasjonBuilder, true, false, behandling);
 
@@ -170,6 +168,7 @@ public class RegisterdataInnhenter {
             leggTilRelatertPerson(informasjonBuilder, behandling);
 
         }
+
 
         return informasjonBuilder;
     }
@@ -272,6 +271,9 @@ public class RegisterdataInnhenter {
         if (skalHenteBarnRelasjoner) {
             List<Personinfo> barna = hentBarnRelatertTil(personinfo, behandling);
             barna.forEach(barn -> {
+                if (informasjonBuilder.harIkkeFåttAdresseHistorikk(barn.getAktørId())){
+
+                }
                 mapInfoTilEntitet(barn, informasjonBuilder, true);
                 mapRelasjon(personinfo, barn, Collections.singletonList(RelasjonsRolleType.BARN), informasjonBuilder);
                 mapRelasjon(barn, personinfo, utledRelasjonsrolleTilBarn(personinfo, barn), informasjonBuilder);
