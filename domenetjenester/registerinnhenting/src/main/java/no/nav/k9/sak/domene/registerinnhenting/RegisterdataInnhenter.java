@@ -38,6 +38,7 @@ import no.nav.k9.sak.behandlingslager.aktør.DeltBosted;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.AdressePeriode;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.PersonstatusPeriode;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.StatsborgerskapPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -86,6 +87,7 @@ public class RegisterdataInnhenter {
     private BehandlingLåsRepository behandlingLåsRepository;
     private Instance<InformasjonselementerUtleder> informasjonselementer;
     private boolean lagreDeltBostedForRammevedtakOMP;
+    private boolean alltidHenteHistorikk;
 
     RegisterdataInnhenter() {
         // for CDI proxy
@@ -110,6 +112,7 @@ public class RegisterdataInnhenter {
         this.abakusTjeneste = abakusTjeneste;
         this.informasjonselementer = utledInformasjonselementer;
         this.lagreDeltBostedForRammevedtakOMP = lagreDeltBostedForRammevedtakOMP;
+        this.alltidHenteHistorikk = lagreDeltBostedForRammevedtakOMP;
     }
 
     public Personinfo innhentSaksopplysningerForSøker(AktørId søkerAktørId) {
@@ -127,7 +130,9 @@ public class RegisterdataInnhenter {
         }
 
         // Innhent øvrige data fra TPS
-        var personInformasjonBuilder = byggPersonopplysningMedRelasjoner(søkerInfo, behandling);
+        var personInformasjonBuilder = alltidHenteHistorikk
+            ? byggPersonopplysningMedRelasjonerOgKomplettHistorikk(søkerInfo, behandling)
+            : byggPersonopplysningMedRelasjoner(søkerInfo, behandling);
 
         // lagre alt
         behandlingLåsRepository.taLås(behandling.getId());
@@ -142,6 +147,34 @@ public class RegisterdataInnhenter {
         // Innhent medl for søker
         List<MedlemskapPerioderEntitet> medlemskapsperioder = innhentMedlemskapsopplysninger(behandling.getAktørId(), behandling);
         medlemskapRepository.lagreMedlemskapRegisterOpplysninger(behandlingId, medlemskapsperioder);
+    }
+
+    private PersonInformasjonBuilder byggPersonopplysningMedRelasjonerOgKomplettHistorikk(Personinfo søkerPersonInfo,
+                                                                                          Behandling behandling) {
+
+        var informasjonBuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
+
+        // Historikk for søker
+        var fagsakYtelseType = behandling.getFagsakYtelseType();
+        var opplysningsperioden = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), fagsakYtelseType, true);
+
+        Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(søkerPersonInfo.getAktørId(), opplysningsperioden);
+        mapInfoMedHistorikkTilEntitet(søkerPersonInfo, personhistorikkinfo, informasjonBuilder);
+
+
+        if (fagsakYtelseType.harRelatertePersoner()) {
+            // legg til pleietrengende
+            leggTilPleietrengendeMedHistorikk(informasjonBuilder, behandling, opplysningsperioden);
+            // Ektefelle
+            leggTilEktefelleMedHistorikk(søkerPersonInfo, informasjonBuilder, opplysningsperioden);
+            // Relatert person
+            leggTilRelatertPersonMedHistorikk(informasjonBuilder, behandling, opplysningsperioden);
+
+        }
+
+        leggTilSøkersBarn(søkerPersonInfo, behandling, informasjonBuilder, opplysningsperioden);
+
+        return informasjonBuilder;
     }
 
     private PersonInformasjonBuilder byggPersonopplysningMedRelasjoner(Personinfo søkerPersonInfo,
@@ -173,6 +206,34 @@ public class RegisterdataInnhenter {
         return informasjonBuilder;
     }
 
+    private void leggTilSøkersBarn(Personinfo søkerPersonInfo, Behandling behandling, PersonInformasjonBuilder informasjonBuilder, no.nav.k9.sak.typer.Periode opplysningsperioden) {
+        List<Personinfo> barna = hentBarnRelatertTil(søkerPersonInfo, behandling);
+        barna.forEach(barn -> {
+            Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(barn.getAktørId(), opplysningsperioden);
+            mapInfoMedHistorikkTilEntitet(barn, personhistorikkinfo, informasjonBuilder);
+            mapRelasjon(søkerPersonInfo, barn, Collections.singletonList(RelasjonsRolleType.BARN), informasjonBuilder);
+            mapRelasjon(barn, søkerPersonInfo, utledRelasjonsrolleTilBarn(søkerPersonInfo, barn), informasjonBuilder);
+        });
+    }
+
+    private void leggTilPleietrengendeMedHistorikk(PersonInformasjonBuilder informasjonBuilder, Behandling behandling, no.nav.k9.sak.typer.Periode opplysningsperioden) {
+        var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
+        if (pleietrengende.isPresent()) {
+            var aktørId = pleietrengende.get();
+            var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
+            if (personinfo != null) {
+                log.info("Fant personinfo for angitt pleietrengende fra fagsak");
+                if (harAktør(informasjonBuilder, personinfo)) {
+                    return;
+                }
+                Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(personinfo.getAktørId(), opplysningsperioden);
+                mapInfoMedHistorikkTilEntitet(personinfo, personhistorikkinfo, informasjonBuilder);
+            } else {
+                throw new IllegalStateException("Finner ikke personinfo i PDL for pleietrengende aktørid");
+            }
+        }
+    }
+
     private void leggTilPleietrengende(PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
         var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
         if (pleietrengende.isPresent()) {
@@ -192,6 +253,21 @@ public class RegisterdataInnhenter {
 
     private boolean harAktør(PersonInformasjonBuilder informasjonBuilder, Personinfo personinfo) {
         return informasjonBuilder.harAktørId(personinfo.getAktørId());
+    }
+
+    private void leggTilRelatertPersonMedHistorikk(PersonInformasjonBuilder informasjonBuilder, Behandling behandling, no.nav.k9.sak.typer.Periode opplysningsperioden) {
+        var relatertPerson = Optional.ofNullable(behandling.getFagsak().getRelatertPersonAktørId());
+        if (relatertPerson.isPresent()) {
+            var aktørId = relatertPerson.get();
+            var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
+            if (personinfo != null) {
+                log.info("Fant personinfo for angitt relatert person fra fagsak");
+                Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(personinfo.getAktørId(), opplysningsperioden);
+                mapInfoMedHistorikkTilEntitet(personinfo, personhistorikkinfo, informasjonBuilder);
+            } else {
+                throw new IllegalStateException("Finner ikke personinfo i PDL for relatert person aktørid");
+            }
+        }
     }
 
     private void leggTilRelatertPerson(PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
@@ -271,9 +347,6 @@ public class RegisterdataInnhenter {
         if (skalHenteBarnRelasjoner) {
             List<Personinfo> barna = hentBarnRelatertTil(personinfo, behandling);
             barna.forEach(barn -> {
-                if (informasjonBuilder.harIkkeFåttAdresseHistorikk(barn.getAktørId())){
-
-                }
                 mapInfoTilEntitet(barn, informasjonBuilder, true);
                 mapRelasjon(personinfo, barn, Collections.singletonList(RelasjonsRolleType.BARN), informasjonBuilder);
                 mapRelasjon(barn, personinfo, utledRelasjonsrolleTilBarn(personinfo, barn), informasjonBuilder);
@@ -308,6 +381,43 @@ public class RegisterdataInnhenter {
             .findAny()
             .map(familierelasjon -> familierelasjon.getHarSammeBosted(personinfo, barn));
         return sammeBosted.orElse(false);
+    }
+
+    private void mapInfoMedHistorikkTilEntitet(Personinfo personinfo, Personhistorikkinfo personhistorikkinfo, PersonInformasjonBuilder informasjonBuilder) {
+        if (harAktør(informasjonBuilder, personinfo)) {
+            return;
+        }
+
+        final DatoIntervallEntitet periode = getPeriode(personinfo.getFødselsdato(), Tid.TIDENES_ENDE);
+        final PersonInformasjonBuilder.PersonopplysningBuilder builder = informasjonBuilder.getPersonopplysningBuilder(personinfo.getAktørId());
+        builder.medFødselsdato(personinfo.getFødselsdato())
+            .medNavn(personinfo.getNavn())
+            .medDødsdato(personinfo.getDødsdato())
+            .medKjønn(personinfo.getKjønn())
+            .medSivilstand(personinfo.getSivilstandType())
+            .medRegion(personinfo.getRegion());
+        informasjonBuilder.leggTil(builder);
+
+        if (lagreDeltBostedForRammevedtakOMP) {
+            for (DeltBosted deltBosted : personinfo.getDeltBostedList()) {
+                Adresseinfo adresse = deltBosted.getAdresseinfo();
+                final PersonInformasjonBuilder.AdresseBuilder adresseBuilder = informasjonBuilder.getAdresseBuilder(personinfo.getAktørId(),
+                    periode, AdresseType.DELT_BOSTEDSADRESSE);
+                informasjonBuilder.leggTil(adresseBuilder
+                    .medAdresselinje1(adresse.getAdresselinje1())
+                    .medAdresselinje2(adresse.getAdresselinje2())
+                    .medAdresselinje3(adresse.getAdresselinje3())
+                    .medPostnummer(adresse.getPostNr())
+                    .medLand(adresse.getLand())
+                    .medAdresseType(AdresseType.DELT_BOSTEDSADRESSE)
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(deltBosted.getPeriode().getFom(), deltBosted.getPeriode().getTom())));
+            }
+        }
+
+        mapAdresser(personhistorikkinfo.getAdressehistorikk(), informasjonBuilder, personinfo);
+        mapStatsborgerskap(personhistorikkinfo.getStatsborgerskaphistorikk(), informasjonBuilder, personinfo);
+        mapPersonstatus(personhistorikkinfo.getPersonstatushistorikk(), informasjonBuilder, personinfo);
+
     }
 
     private void mapInfoTilEntitet(Personinfo personinfo, PersonInformasjonBuilder informasjonBuilder, boolean lagreIHistoriskeTabeller) {
@@ -371,6 +481,30 @@ public class RegisterdataInnhenter {
 
     private DatoIntervallEntitet getPeriode(LocalDate fom, LocalDate tom) {
         return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom != null ? tom : Tid.TIDENES_ENDE);
+    }
+
+    private void leggTilEktefelleMedHistorikk(Personinfo søkerPersonInfo, PersonInformasjonBuilder informasjonBuilder, no.nav.k9.sak.typer.Periode opplysningsperioden) {
+        // Ektefelle
+        final List<Familierelasjon> familierelasjoner = søkerPersonInfo.getFamilierelasjoner()
+            .stream()
+            .filter(f -> f.getRelasjonsrolle().equals(RelasjonsRolleType.EKTE) ||
+                f.getRelasjonsrolle().equals(RelasjonsRolleType.REGISTRERT_PARTNER) ||
+                f.getRelasjonsrolle().equals(RelasjonsRolleType.SAMBOER))
+            .collect(Collectors.toList());
+        for (Familierelasjon familierelasjon : familierelasjoner) {
+            var ident = familierelasjon.getPersonIdent();
+            Optional<Personinfo> ektefelleInfo = personinfoAdapter.innhentSaksopplysninger(ident);
+            if (ektefelleInfo.isPresent()) {
+                final Personinfo personinfo = ektefelleInfo.get();
+                Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(personinfo.getAktørId(), opplysningsperioden);
+                mapInfoMedHistorikkTilEntitet(personinfo, personhistorikkinfo, informasjonBuilder);
+
+                mapRelasjon(søkerPersonInfo, personinfo, Collections.singletonList(familierelasjon.getRelasjonsrolle()), informasjonBuilder);
+                mapRelasjon(personinfo, søkerPersonInfo, Collections.singletonList(familierelasjon.getRelasjonsrolle()), informasjonBuilder);
+            } else {
+                log.warn("Fant ikke personinfo for familierelasjon: {}", familierelasjon.getRelasjonsrolle());
+            }
+        }
     }
 
     private void leggTilEktefelle(Personinfo søkerPersonInfo, PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
