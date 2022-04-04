@@ -17,7 +17,7 @@ import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
-@FagsakYtelseTypeRef("OMP_AO")
+@FagsakYtelseTypeRef(FagsakYtelseType.OMSORGSPENGER_AO)
 @ApplicationScoped
 public class AleneomsorgSøknadMottaker implements SøknadMottakTjeneste<InnsendingInnhold> {
 

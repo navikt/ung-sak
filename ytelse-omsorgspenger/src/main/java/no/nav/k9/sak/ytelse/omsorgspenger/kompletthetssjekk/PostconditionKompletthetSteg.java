@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.kompletthetssjekk;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.POSTCONDITION_KOMPLETTHET;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -22,7 +23,7 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @BehandlingStegRef(stegtype = POSTCONDITION_KOMPLETTHET)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 @ApplicationScoped
 public class PostconditionKompletthetSteg implements BehandlingSteg {
 
@@ -35,7 +36,7 @@ public class PostconditionKompletthetSteg implements BehandlingSteg {
     }
 
     @Inject
-    public PostconditionKompletthetSteg(@FagsakYtelseTypeRef("OMP") OmsorgspengerKompletthetsjekker kompletthetsjekker,
+    public PostconditionKompletthetSteg(@FagsakYtelseTypeRef(OMSORGSPENGER) OmsorgspengerKompletthetsjekker kompletthetsjekker,
                                         BehandlingRepositoryProvider provider,
                                         SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                         HenleggBehandlingTjeneste henleggBehandlingTjeneste) {

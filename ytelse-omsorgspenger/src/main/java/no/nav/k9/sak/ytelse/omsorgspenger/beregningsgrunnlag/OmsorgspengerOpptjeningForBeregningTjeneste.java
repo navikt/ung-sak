@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +29,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
     private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();

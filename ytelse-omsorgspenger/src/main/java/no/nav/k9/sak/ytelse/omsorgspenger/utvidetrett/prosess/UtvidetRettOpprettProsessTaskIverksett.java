@@ -1,5 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,9 +22,9 @@ import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP_KS")
-@FagsakYtelseTypeRef("OMP_MA")
-@FagsakYtelseTypeRef("OMP_AO")
+@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
+@FagsakYtelseTypeRef(OMSORGSPENGER_MA)
+@FagsakYtelseTypeRef(OMSORGSPENGER_AO)
 public class UtvidetRettOpprettProsessTaskIverksett implements OpprettProsessTaskIverksett {
 
     protected FagsakProsessTaskRepository fagsakProsessTaskRepository;

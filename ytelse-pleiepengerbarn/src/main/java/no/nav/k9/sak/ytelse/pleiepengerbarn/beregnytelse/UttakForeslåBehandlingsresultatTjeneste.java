@@ -1,5 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,8 +28,8 @@ import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlings
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @ApplicationScoped
 public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandlingsresultatTjeneste {
 

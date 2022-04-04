@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse.mapping;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
@@ -54,7 +56,7 @@ import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
 
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;

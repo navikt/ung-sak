@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -58,7 +60,7 @@ public class TrekkUtFraværTjeneste {
                                  BehandlingRepository behandlingRepository,
                                  MottatteDokumentRepository mottatteDokumentRepository,
                                  InntektArbeidYtelseTjeneste iayTjeneste,
-                                 @FagsakYtelseTypeRef("OMP") VurderSøknadsfristTjeneste<OppgittFraværPeriode> søknadsfristTjeneste,
+                                 @FagsakYtelseTypeRef(OMSORGSPENGER) VurderSøknadsfristTjeneste<OppgittFraværPeriode> søknadsfristTjeneste,
                                  SøknadPerioderTjeneste søknadPerioderTjeneste,
                                  InntektsmeldingSøktePerioderMapper inntektsmeldingMapper) {
         this.grunnlagRepository = grunnlagRepository;

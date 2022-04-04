@@ -1,5 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
@@ -30,8 +33,8 @@ import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class PSBVurderSøknadsfristTjeneste implements SøknadsfristTjeneste {
 
     private PSBVurdererSøknadsfristTjeneste vurderSøknadsfristTjeneste;

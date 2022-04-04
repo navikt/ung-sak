@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.prosess;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 
@@ -15,10 +17,9 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 @ApplicationScoped
 public class ProsessModell {
 
-    private static final String YTELSE = "FRISINN";
-    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.FRISINN;
+    private static final FagsakYtelseType YTELSE_TYPE = FRISINN;
 
-    @FagsakYtelseTypeRef(YTELSE)
+    @FagsakYtelseTypeRef(FRISINN)
     @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
     @ApplicationScoped
@@ -46,7 +47,7 @@ public class ProsessModell {
         return modellBuilder.build();
     }
 
-    @FagsakYtelseTypeRef(YTELSE)
+    @FagsakYtelseTypeRef(FRISINN)
     @BehandlingTypeRef(BehandlingType.REVURDERING)
     @Produces
     @ApplicationScoped

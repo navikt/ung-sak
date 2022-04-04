@@ -50,7 +50,7 @@ public class BehandlingModellTest {
 
     public static Stream<Arguments> provideArguments(){
         List<Arguments> params = new ArrayList<>();
-        List<FagsakYtelseType> ytelseTyper = List.of(FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.FRISINN, FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
+        List<FagsakYtelseType> ytelseTyper = List.of(FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.FRISINN);
         List<BehandlingType> behandlingTyper = List.of(BehandlingType.UNNTAKSBEHANDLING);
         for (FagsakYtelseType a : ytelseTyper) {
             for (BehandlingType b : behandlingTyper) {

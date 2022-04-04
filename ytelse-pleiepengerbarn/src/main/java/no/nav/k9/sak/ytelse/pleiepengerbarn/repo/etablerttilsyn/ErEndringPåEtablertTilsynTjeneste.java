@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
@@ -21,7 +23,7 @@ public class ErEndringPåEtablertTilsynTjeneste {
     @Inject
     public ErEndringPåEtablertTilsynTjeneste(EtablertTilsynTjeneste etablertTilsynTjeneste,
                                              SykdomGrunnlagService sykdomGrunnlagService,
-                                             @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+                                             @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;

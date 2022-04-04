@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
@@ -66,7 +68,7 @@ public class InfotrygdMigreringTjeneste {
 
     @Inject
     public InfotrygdMigreringTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                      @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                      @BehandlingTypeRef @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                       FagsakRepository fagsakRepository,
                                       BehandlingRepository behandlingRepository, InfotrygdService infotrygdService) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;

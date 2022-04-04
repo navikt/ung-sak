@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -22,7 +24,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnn
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
 
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @BehandlingTypeRef
 @ApplicationScoped
 public class PSBVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårsPerioderTilVurderingTjeneste {
@@ -34,7 +36,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
     }
 
     @Inject
-    public PSBVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("PSB") VilkårUtleder vilkårUtleder,
+    public PSBVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) VilkårUtleder vilkårUtleder,
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   BehandlingRepository behandlingRepository,
                                                   SykdomGrunnlagService sykdomGrunnlagService,

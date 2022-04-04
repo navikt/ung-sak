@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -32,7 +34,7 @@ public class PerioderMedSykdomInnvilgetUtleder {
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
 
     @Inject
-    public PerioderMedSykdomInnvilgetUtleder(@FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+    public PerioderMedSykdomInnvilgetUtleder(@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                              VilkårResultatRepository vilkårResultatRepository) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;

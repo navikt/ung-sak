@@ -1,6 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingType.REVURDERING;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -27,8 +29,8 @@ import no.nav.k9.sak.perioder.EndringPåForlengelsePeriodeVurderer;
 import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @BehandlingTypeRef(REVURDERING)
 @ApplicationScoped
 public class PleiepengerForlengelseTjeneste implements ForlengelseTjeneste {

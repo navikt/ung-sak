@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.uttak;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_UTTAK;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurde
 @ApplicationScoped
 @BehandlingStegRef(stegtype = KONTROLLER_FAKTA_UTTAK)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class FaktaOmUttakSteg implements BehandlingSteg {
 
     private BehandlingRepository behandlingRepository;

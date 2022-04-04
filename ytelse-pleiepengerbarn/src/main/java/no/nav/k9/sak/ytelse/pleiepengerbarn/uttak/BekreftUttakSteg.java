@@ -1,6 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.BEKREFT_UTTAK;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -14,8 +16,8 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 @ApplicationScoped
 @BehandlingStegRef(stegtype = BEKREFT_UTTAK)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class BekreftUttakSteg implements BehandlingSteg {
 
 

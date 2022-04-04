@@ -7,16 +7,13 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
 public class UnntaksbehandlingVilkårsPerioderTilVurderingTjenesteProvider {
-
-    private static final String YTELSE_OMS = "OMP";
-    private static final String YTELSE_PLEIEPENGER = "PSB";
-    private static final String YTELSE_FRISINN = "FRISINN";
 
     private UnntaksbehandlingVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
@@ -29,7 +26,7 @@ public class UnntaksbehandlingVilkårsPerioderTilVurderingTjenesteProvider {
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
-    @FagsakYtelseTypeRef(YTELSE_OMS)
+    @FagsakYtelseTypeRef(FagsakYtelseType.OMSORGSPENGER)
     @BehandlingTypeRef(UNNTAKSBEHANDLING)
     @Produces
     @ApplicationScoped
@@ -37,7 +34,7 @@ public class UnntaksbehandlingVilkårsPerioderTilVurderingTjenesteProvider {
         return vilkårsPerioderTilVurderingTjeneste;
     }
 
-    @FagsakYtelseTypeRef(YTELSE_PLEIEPENGER)
+    @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
     @BehandlingTypeRef(UNNTAKSBEHANDLING)
     @Produces
     @ApplicationScoped
@@ -45,7 +42,7 @@ public class UnntaksbehandlingVilkårsPerioderTilVurderingTjenesteProvider {
         return vilkårsPerioderTilVurderingTjeneste;
     }
 
-    @FagsakYtelseTypeRef(YTELSE_FRISINN)
+    @FagsakYtelseTypeRef(FagsakYtelseType.FRISINN)
     @BehandlingTypeRef(UNNTAKSBEHANDLING)
     @Produces
     @ApplicationScoped

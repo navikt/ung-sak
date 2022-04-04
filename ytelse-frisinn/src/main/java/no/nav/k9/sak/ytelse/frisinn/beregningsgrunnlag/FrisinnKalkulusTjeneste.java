@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,7 +48,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
  * (https://github.com/navikt/ft-kalkulus/)
  */
 @ApplicationScoped
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
 
@@ -58,7 +60,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    VilkårResultatRepository vilkårResultatRepository,
                                    LagBeregnRequestTjeneste beregnRequestTjeneste,
-                                   @FagsakYtelseTypeRef("FRISINN") Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper) {
+                                   @FagsakYtelseTypeRef(FRISINN) Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper) {
         super(restTjeneste, vilkårResultatRepository,
             inntektArbeidYtelseTjeneste, ytelseGrunnlagMapper, beregnRequestTjeneste, false);
     }
@@ -72,7 +74,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
         Collection<BgRef> bgReferanser = beregnInput.stream().map(input -> new BgRef(input.getBgReferanse(), input.getSkjæringstidspunkt()))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        var ytelseGrunnlagMapper = getYtelsesspesifikkMapper(FagsakYtelseType.FRISINN);
+        var ytelseGrunnlagMapper = getYtelsesspesifikkMapper(FRISINN);
 
         for (var input : sortertInput) {
             var ytelseGrunnlag = ytelseGrunnlagMapper.lagYtelsespesifiktGrunnlag(ref, input.getVilkårsperiode());

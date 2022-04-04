@@ -1,6 +1,9 @@
 package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -38,9 +41,9 @@ import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
 
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 @BehandlingStegRef(stegtype = VURDER_KOMPLETTHET_BEREGNING)
 @BehandlingTypeRef
 @ApplicationScoped
@@ -75,7 +78,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var ref = BehandlingReferanse.fra(behandling);
-        if (ref.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER && !kompletthetBeregningOMP) {
+        if (ref.getFagsakYtelseType() == OMSORGSPENGER && !kompletthetBeregningOMP) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 

@@ -1,6 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.INIT_PERIODER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.List;
 import java.util.Map;
@@ -41,8 +43,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 @ApplicationScoped
 @BehandlingStegRef(stegtype = INIT_PERIODER)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class InitierPerioderSteg implements BehandlingSteg {
 
     private final Logger log = LoggerFactory.getLogger(InitierPerioderSteg.class);

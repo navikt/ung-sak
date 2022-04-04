@@ -18,7 +18,7 @@ public class DummyProsessModell {
     private static final String YTELSE = "SVP";
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.SVANGERSKAPSPENGER;
 
-    @FagsakYtelseTypeRef(YTELSE)
+    @FagsakYtelseTypeRef(FagsakYtelseType.SVANGERSKAPSPENGER)
     @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
     @ApplicationScoped

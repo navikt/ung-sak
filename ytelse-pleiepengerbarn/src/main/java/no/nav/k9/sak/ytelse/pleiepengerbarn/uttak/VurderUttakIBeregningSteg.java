@@ -1,6 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_UTTAK_V2;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.List;
 
@@ -30,8 +32,8 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 @ApplicationScoped
 @BehandlingStegRef(stegtype = VURDER_UTTAK_V2)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
     private static final Logger log = LoggerFactory.getLogger(VurderUttakIBeregningSteg.class);

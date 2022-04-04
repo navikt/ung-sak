@@ -81,26 +81,14 @@ public @interface BehandlingStegRef {
         private Lookup() {
         }
 
-        public static <I> Optional<I> find(Class<I> cls, String ytelseTypeKode, BehandlingType behandlingType, BehandlingStegType behandlingStegRef) {
-            return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType, behandlingStegRef);
-        }
-
         public static <I> Optional<I> find(Class<I> cls, FagsakYtelseType ytelseTypeKode, BehandlingType behandlingType, BehandlingStegType behandlingStegRef) {
             return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType, behandlingStegRef);
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType ytelseTypeKode, BehandlingType behandlingType,
-                                           BehandlingStegType behandlingStegRef) {
-            return find(cls, instances,
-                ytelseTypeKode == null ? null : ytelseTypeKode.getKode(),
-                behandlingType,
-                behandlingStegRef);
-        }
-
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String fagsakYtelseType, BehandlingType behandlingType, BehandlingStegType behandlingStegRef) { // NOSONAR
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType, BehandlingStegType behandlingStegRef) { // NOSONAR
             Objects.requireNonNull(instances, "instances");
 
-            for (var fagsakLiteral : coalesce(fagsakYtelseType, "*")) {
+            for (var fagsakLiteral : coalesce(fagsakYtelseType, FagsakYtelseType.UDEFINERT)) {
                 var inst = select(cls, instances, new FagsakYtelseTypeRefLiteral(fagsakLiteral));
                 if (inst.isUnsatisfied()) {
                     continue;
@@ -140,7 +128,7 @@ public @interface BehandlingStegRef {
             return i;
         }
 
-        private static List<String> coalesce(String... vals) {
+        private static <T> List<T> coalesce(T... vals) {
             return Arrays.stream(vals).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         }
 

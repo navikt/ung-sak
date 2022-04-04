@@ -15,10 +15,9 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 @ApplicationScoped
 public class ProsessModell {
 
-    private static final String YTELSE = "PSB";
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-    @FagsakYtelseTypeRef(YTELSE)
+    @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
     @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
     @ApplicationScoped
@@ -67,7 +66,7 @@ public class ProsessModell {
         return modellBuilder.build();
     }
 
-    @FagsakYtelseTypeRef(YTELSE)
+    @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
     @BehandlingTypeRef(BehandlingType.REVURDERING)
     @Produces
     @ApplicationScoped

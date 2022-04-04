@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.BEREGN_YTELSE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -44,7 +45,7 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 @BehandlingStegRef(stegtype = BEREGN_YTELSE)
 @BehandlingTypeRef
 @ApplicationScoped
@@ -71,7 +72,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                           ÅrskvantumTjeneste årskvantumTjeneste,
                                           FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                           @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                          @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                          @FagsakYtelseTypeRef(OMSORGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                           OmsorgspengerYtelseVerifiserer omsorgspengerYtelseVerifiserer) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();

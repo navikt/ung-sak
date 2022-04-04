@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.PRECONDITION_BEREGNING;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -18,7 +19,7 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.Beregningsgrunnla
  *
  *
  */
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 @BehandlingStegRef(stegtype = PRECONDITION_BEREGNING)
 @BehandlingTypeRef
 @ApplicationScoped

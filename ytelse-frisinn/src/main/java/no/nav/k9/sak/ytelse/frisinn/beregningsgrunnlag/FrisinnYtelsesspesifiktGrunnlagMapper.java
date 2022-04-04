@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+
 import java.util.List;
 import java.util.Optional;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -18,7 +20,7 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnMapper;
 import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnSøknadsperiodeMapper;
 
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 @ApplicationScoped
 public class FrisinnYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<FrisinnGrunnlag> {
 

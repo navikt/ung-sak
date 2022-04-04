@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.henleggelse;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
@@ -9,7 +11,7 @@ import no.nav.k9.sak.domene.behandling.steg.iverksettevedtak.HenleggelsePostopsT
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumDeaktiveringTjeneste;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 class OMPHenleggelsePostopsTjeneste implements HenleggelsePostopsTjeneste {
 
     private ÅrskvantumDeaktiveringTjeneste årskvantumDeaktiveringTjeneste;

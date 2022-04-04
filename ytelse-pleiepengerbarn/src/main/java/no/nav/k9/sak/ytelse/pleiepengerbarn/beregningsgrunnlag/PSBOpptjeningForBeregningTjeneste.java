@@ -1,5 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -29,8 +32,8 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
     private final OpptjeningAktivitetVurderingOpptjeningsvilkår vurderOpptjening = new OpptjeningAktivitetVurderingOpptjeningsvilkår();

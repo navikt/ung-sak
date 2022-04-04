@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.foreslåvedtak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +27,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class PSBYtelsespesifikkForeslåVedtak implements YtelsespesifikkForeslåVedtak {
 
     private SamtidigUttakTjeneste samtidigUttakTjeneste;

@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.BEKREFT_UTTAK;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -14,7 +15,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 @ApplicationScoped
 @BehandlingStegRef(stegtype = BEKREFT_UTTAK)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class BekreftÅrskvantumUttakSteg implements BehandlingSteg {
 
     @Override

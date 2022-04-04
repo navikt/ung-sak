@@ -28,7 +28,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
-@FagsakYtelseTypeRef("*")
+@FagsakYtelseTypeRef
 @BehandlingStegRef(stegtype = VURDER_VILKAR_BERGRUNN)
 @BehandlingTypeRef
 @ApplicationScoped

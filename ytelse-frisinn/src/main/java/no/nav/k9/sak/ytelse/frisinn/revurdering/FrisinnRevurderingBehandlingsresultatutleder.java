@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.revurdering;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingType.REVURDERING;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.GUNST;
 import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.UGUNST;
 
@@ -29,7 +30,7 @@ import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 @BehandlingTypeRef(REVURDERING)
 public class FrisinnRevurderingBehandlingsresultatutleder implements RevurderingBehandlingsresultatutleder {
 

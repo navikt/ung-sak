@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.OVERGANG_FRA_INFOTRYGD;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -18,7 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @BehandlingStegRef(stegtype = OVERGANG_FRA_INFOTRYGD)
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @BehandlingTypeRef
 @ApplicationScoped
 public class OvergangFraInfotrygdSteg implements BehandlingSteg {

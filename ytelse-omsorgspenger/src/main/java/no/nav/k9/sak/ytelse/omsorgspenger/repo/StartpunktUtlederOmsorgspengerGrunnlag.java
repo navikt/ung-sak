@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.repo;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -18,7 +20,7 @@ import no.nav.k9.sak.typer.JournalpostId;
 
 @ApplicationScoped
 @GrunnlagRef("OmsorgspengerGrunnlag")
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class StartpunktUtlederOmsorgspengerGrunnlag implements EndringStartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();

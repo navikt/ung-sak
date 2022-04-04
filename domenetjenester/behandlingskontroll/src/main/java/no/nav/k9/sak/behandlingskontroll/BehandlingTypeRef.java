@@ -80,33 +80,23 @@ public @interface BehandlingTypeRef {
         private Lookup() {
         }
 
-        public static <I> Optional<I> find(Class<I> cls, String ytelseTypeKode, BehandlingType behandlingType) {
-            return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType);
-        }
-
         public static <I> Optional<I> find(Class<I> cls, FagsakYtelseType ytelseTypeKode, BehandlingType behandlingType) {
             return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType);
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType ytelseTypeKode, BehandlingType behandlingType) {
-            return find(cls, instances,
-                ytelseTypeKode == null ? null : ytelseTypeKode.getKode(),
-                behandlingType);
-        }
-
         public static <I> I get(Class<I> cls, Instance<I> instances, FagsakYtelseType ytelseType, BehandlingType behandlingType) {
             var result = find(cls, instances,
-                ytelseType == null ? null : ytelseType.getKode(),
+                ytelseType,
                 behandlingType);
 
             return result.orElseThrow(
                 () -> new UnsupportedOperationException("Har ikke " + cls.getSimpleName() + " for ytelseType=" + ytelseType + ", behandlingType=" + behandlingType + ", blant:" + instances));
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String fagsakYtelseType, BehandlingType behandlingType) { // NOSONAR
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType) { // NOSONAR
             Objects.requireNonNull(instances, "instances");
 
-            for (var fagsakLiteral : coalesce(fagsakYtelseType, "*")) {
+            for (var fagsakLiteral : coalesce(fagsakYtelseType, FagsakYtelseType.UDEFINERT)) {
                 var inst = select(cls, instances, new FagsakYtelseTypeRefLiteral(fagsakLiteral));
 
                 if (inst.isUnsatisfied()) {

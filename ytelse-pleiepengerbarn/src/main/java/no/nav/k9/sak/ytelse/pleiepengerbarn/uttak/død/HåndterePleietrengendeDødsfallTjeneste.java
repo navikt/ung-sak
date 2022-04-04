@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode.ALDER_FOR_STRENGERE_PSB_VURDERING;
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode.MAKSÅR;
 
@@ -52,7 +53,7 @@ public class HåndterePleietrengendeDødsfallTjeneste {
     public HåndterePleietrengendeDødsfallTjeneste(RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
                                                   PersonopplysningTjeneste personopplysningTjeneste,
                                                   VilkårResultatRepository vilkårResultatRepository,
-                                                  @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef PSBVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                                  @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef PSBVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                   @KonfigVerdi(value = "PSB_UTVIDE_VED_DODSFALL", defaultVerdi = "false") Boolean utvidVedDødsfall) {
 
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;

@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.BEREGN_YTELSE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +36,7 @@ import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnSøknadsperiodeMapper;
 
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 @BehandlingStegRef(stegtype = BEREGN_YTELSE)
 @BehandlingTypeRef
 @ApplicationScoped

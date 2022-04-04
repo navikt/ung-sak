@@ -1,5 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.endring;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,8 +35,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnn
 
 @ApplicationScoped
 @GrunnlagRef("SykdomGrunnlag")
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
 
     private BehandlingRepository behandlingRepository;

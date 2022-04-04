@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -59,8 +61,8 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
 
     @Inject
     public ArbeidBrukerBurdeSøktOmUtleder(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                          @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                          @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
+                                          @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                          @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                           PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
                                           PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
                                           OpptjeningRepository opptjeningRepository,

@@ -17,7 +17,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
-@FagsakYtelseTypeRef("*")
+@FagsakYtelseTypeRef
 @BehandlingStegRef(stegtype = KONTROLLER_FAKTA_BEREGNING)
 @BehandlingTypeRef
 @ApplicationScoped

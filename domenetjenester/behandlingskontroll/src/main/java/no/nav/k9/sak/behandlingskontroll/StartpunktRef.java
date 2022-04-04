@@ -76,26 +76,14 @@ public @interface StartpunktRef {
         private Lookup() {
         }
 
-        public static <I> Optional<I> find(Class<I> cls, String ytelseTypeKode, BehandlingType behandlingType, String startpunktRef) {
-            return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType, startpunktRef);
-        }
-
         public static <I> Optional<I> find(Class<I> cls, FagsakYtelseType ytelseTypeKode, BehandlingType behandlingType, String startpunktRef) {
             return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType, startpunktRef);
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType ytelseTypeKode, BehandlingType behandlingType,
-                                           String startpunktRef) {
-            return find(cls, instances,
-                ytelseTypeKode == null ? null : ytelseTypeKode.getKode(),
-                behandlingType,
-                startpunktRef);
-        }
-
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String fagsakYtelseType, BehandlingType behandlingType, String startpunktRef) { // NOSONAR
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType, String startpunktRef) { // NOSONAR
             Objects.requireNonNull(instances, "instances");
 
-            for (var fagsakLiteral : coalesce(fagsakYtelseType, "*")) {
+            for (var fagsakLiteral : coalesce(fagsakYtelseType, FagsakYtelseType.UDEFINERT)) {
                 var inst = select(cls, instances, new FagsakYtelseTypeRefLiteral(fagsakLiteral));
                 if (inst.isUnsatisfied()) {
                     continue;
@@ -136,7 +124,7 @@ public @interface StartpunktRef {
             return i;
         }
 
-        private static List<String> coalesce(String... vals) {
+        private static <T> List<T> coalesce(T... vals) {
             return Arrays.stream(vals).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         }
 

@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.vilkår;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -41,7 +43,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 @BehandlingTypeRef
 @ApplicationScoped
 public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
@@ -62,7 +64,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     @Inject
-    public OMPVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("OMP") VilkårUtleder vilkårUtleder,
+    public OMPVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef(OMSORGSPENGER) VilkårUtleder vilkårUtleder,
                                                   OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
                                                   BehandlingRepository behandlingRepository,
                                                   TrekkUtFraværTjeneste trekkUtFraværTjeneste,

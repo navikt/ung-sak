@@ -1,5 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.uttak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import com.fasterxml.jackson.databind.ObjectWriter;
 import no.nav.k9.felles.integrasjon.rest.DefaultJsonMapper;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -19,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpFagsak {
 
     private UttakRestKlient restKlient;

@@ -23,7 +23,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 
 @BehandlingStegRef(stegtype = INNHENT_REGISTEROPP)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("*")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class InnhentRegisteropplysningerStegImpl implements InnhentRegisteropplysningerSteg {
 

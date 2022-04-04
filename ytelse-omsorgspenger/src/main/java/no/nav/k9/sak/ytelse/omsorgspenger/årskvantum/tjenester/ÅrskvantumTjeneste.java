@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -114,7 +116,7 @@ public class ÅrskvantumTjeneste {
                               InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                               ÅrskvantumRestKlient årskvantumRestKlient,
                               TpsTjeneste tpsTjeneste,
-                              @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                              @FagsakYtelseTypeRef(OMSORGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                               TrekkUtFraværTjeneste trekkUtFraværTjeneste,
                               OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste,
                               MottatteDokumentRepository mottatteDokumentRepository,

@@ -1,5 +1,10 @@
 package no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -23,10 +28,10 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
 @GrunnlagRef("MedlemskapAggregat")
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
-@FagsakYtelseTypeRef("OMP")
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OMSORGSPENGER)
+@FagsakYtelseTypeRef(FRISINN)
 class StartpunktUtlederMedlemskap implements EndringStartpunktUtleder {
 
     private MedlemskapRepository medlemskapRepository;
@@ -45,7 +50,7 @@ class StartpunktUtlederMedlemskap implements EndringStartpunktUtleder {
         final MedlemskapAggregat grunnlag1 = medlemskapRepository.hentMedlemskapPåId((Long) grunnlagId1);
         final MedlemskapAggregat grunnlag2 = medlemskapRepository.hentMedlemskapPåId((Long) grunnlagId2);
 
-        if (Objects.equals(ref.getFagsakYtelseType(), FagsakYtelseType.FRISINN)) {
+        if (Objects.equals(ref.getFagsakYtelseType(), FRISINN)) {
             LocalDate skjæringstidspunkt = ref.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt();
             final boolean erEndretFørSkjæringstidspunkt = endringIdentifiserer.erEndretFørSkjæringstidspunkt(grunnlag1, grunnlag2, skjæringstidspunkt);
             if (erEndretFørSkjæringstidspunkt) {

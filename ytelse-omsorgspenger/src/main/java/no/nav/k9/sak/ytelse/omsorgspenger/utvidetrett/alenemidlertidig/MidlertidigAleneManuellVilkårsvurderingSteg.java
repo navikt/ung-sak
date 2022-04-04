@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alenemidlertidig;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.MANUELL_VILKÅRSVURDERING;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
 
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
-@FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef(OMSORGSPENGER_MA)
 @BehandlingStegRef(stegtype = MANUELL_VILKÅRSVURDERING)
 @BehandlingTypeRef
 @ApplicationScoped

@@ -1,6 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess.steg;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -13,9 +16,9 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 @BehandlingStegRef(stegtype = KONTROLLER_FAKTA)
-@FagsakYtelseTypeRef("OMP_KS")
-@FagsakYtelseTypeRef("OMP_MA")
-@FagsakYtelseTypeRef("OMP_AO")
+@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
+@FagsakYtelseTypeRef(OMSORGSPENGER_MA)
+@FagsakYtelseTypeRef(OMSORGSPENGER_AO)
 @BehandlingTypeRef()
 @ApplicationScoped
 public class UtvidetRettKontrollerFaktaSteg implements BehandlingSteg {

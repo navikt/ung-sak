@@ -1,6 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
 import static java.util.Arrays.asList;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
 
 import java.util.List;
 
@@ -13,9 +16,9 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 
-@FagsakYtelseTypeRef("OMP_KS")
-@FagsakYtelseTypeRef("OMP_MA")
-@FagsakYtelseTypeRef("OMP_AO")
+@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
+@FagsakYtelseTypeRef(OMSORGSPENGER_MA)
+@FagsakYtelseTypeRef(OMSORGSPENGER_AO)
 @BehandlingTypeRef
 @ApplicationScoped
 class UtvidetRettInngangsvilkårUtleder implements VilkårUtleder {

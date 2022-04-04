@@ -1,5 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.kalkulus;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -18,9 +22,9 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(FRISINN)
 public class KalkulusDump implements DebugDumpBehandling {
 
 

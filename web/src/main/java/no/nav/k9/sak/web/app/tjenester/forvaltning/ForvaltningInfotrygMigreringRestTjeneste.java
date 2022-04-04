@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning;
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,7 +54,7 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
     @Inject
     public ForvaltningInfotrygMigreringRestTjeneste(FagsakRepository fagsakRepository,
                                                     BehandlingRepository behandlingRepository,
-                                                    @FagsakYtelseTypeRef("PSB") PSBVilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, ProsessTaskRepository prosessTaskRepository) {
+                                                    @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PSBVilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, ProsessTaskRepository prosessTaskRepository) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;

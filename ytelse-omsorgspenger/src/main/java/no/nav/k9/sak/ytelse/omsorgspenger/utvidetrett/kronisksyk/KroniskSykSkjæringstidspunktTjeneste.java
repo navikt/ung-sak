@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
+
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Optional;
@@ -17,7 +19,7 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP_KS")
+@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
 public class KroniskSykSkjæringstidspunktTjeneste implements SkjæringstidspunktTjeneste {
 
     private BehandlingRepository behandlingRepository;

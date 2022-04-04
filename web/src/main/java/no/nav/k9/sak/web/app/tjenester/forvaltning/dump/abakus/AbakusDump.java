@@ -1,5 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.abakus;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -19,9 +23,9 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(FRISINN)
 public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
 
     private final ObjectWriter iayMapper = IayGrunnlagJsonMapper.getMapper().writerWithDefaultPrettyPrinter();

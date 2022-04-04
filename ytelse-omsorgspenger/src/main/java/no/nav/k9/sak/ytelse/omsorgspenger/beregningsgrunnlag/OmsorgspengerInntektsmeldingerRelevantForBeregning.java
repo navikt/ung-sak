@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Period;
@@ -26,7 +28,7 @@ import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class OmsorgspengerInntektsmeldingerRelevantForBeregning implements InntektsmeldingerRelevantForBeregning {
 
     private boolean lansertSjekkFørsteFraværsdag;

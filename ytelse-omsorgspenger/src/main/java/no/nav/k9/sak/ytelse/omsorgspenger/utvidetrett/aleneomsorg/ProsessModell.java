@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 
@@ -15,10 +17,9 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 @ApplicationScoped
 public class ProsessModell {
 
-    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.OMSORGSPENGER_AO;
-    private static final String YTELSE = "OMP_AO";
+    private static final FagsakYtelseType YTELSE_TYPE = OMSORGSPENGER_AO;
 
-    @FagsakYtelseTypeRef(YTELSE)
+    @FagsakYtelseTypeRef(OMSORGSPENGER_AO)
     @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
     @ApplicationScoped
@@ -40,7 +41,7 @@ public class ProsessModell {
         return modellBuilder.build();
     }
 
-    @FagsakYtelseTypeRef(YTELSE)
+    @FagsakYtelseTypeRef(OMSORGSPENGER_AO)
     @BehandlingTypeRef(BehandlingType.REVURDERING)
     @Produces
     @ApplicationScoped

@@ -1,5 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
+
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -20,9 +24,9 @@ import no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt.FellesStartpunktU
 
 @ApplicationScoped
 @GrunnlagRef("PersonInformasjon")
-@FagsakYtelseTypeRef("OMP_KS")
-@FagsakYtelseTypeRef("OMP_MA")
-@FagsakYtelseTypeRef("OMP_AO")
+@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
+@FagsakYtelseTypeRef(OMSORGSPENGER_MA)
+@FagsakYtelseTypeRef(OMSORGSPENGER_AO)
 class StartpunktUtlederUtvidetRettPersonopplysning implements EndringStartpunktUtleder {
 
     private static final StartpunktType DEFAULT_STARTPUNKT = StartpunktType.INIT_PERIODER;

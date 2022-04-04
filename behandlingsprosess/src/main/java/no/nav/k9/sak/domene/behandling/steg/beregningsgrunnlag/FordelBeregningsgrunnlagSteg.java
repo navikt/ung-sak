@@ -22,7 +22,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningStegTjeneste.FortsettBeregningResultatCallback;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-@FagsakYtelseTypeRef("*")
+@FagsakYtelseTypeRef
 @BehandlingStegRef(stegtype = FORDEL_BEREGNINGSGRUNNLAG)
 @BehandlingTypeRef
 @ApplicationScoped

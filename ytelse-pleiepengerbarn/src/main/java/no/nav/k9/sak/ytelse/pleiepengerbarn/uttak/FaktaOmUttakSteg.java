@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_UTTAK;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -34,7 +35,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurde
 @ApplicationScoped
 @BehandlingStegRef(stegtype = KONTROLLER_FAKTA_UTTAK)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class FaktaOmUttakSteg implements BehandlingSteg {
 
     private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;

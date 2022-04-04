@@ -6,6 +6,7 @@ import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_PENSJON
 import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_SAMMENLIGNINGSGRUNNLAG;
 import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.LIGNET_NÆRING;
 import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.YTELSE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +20,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
 @BehandlingTypeRef(BehandlingType.REVURDERING)
 class OMPInformasjonselementerUtleder implements InformasjonselementerUtleder {

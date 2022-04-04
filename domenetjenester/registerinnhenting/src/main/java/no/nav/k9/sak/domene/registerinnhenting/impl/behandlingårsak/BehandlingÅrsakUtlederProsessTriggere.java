@@ -17,7 +17,7 @@ import no.nav.k9.sak.trigger.Trigger;
 
 @ApplicationScoped
 @GrunnlagRef("ProsessTriggere")
-@FagsakYtelseTypeRef("*")
+@FagsakYtelseTypeRef
 public class BehandlingÅrsakUtlederProsessTriggere implements BehandlingÅrsakUtleder {
 
     private ProsessTriggereRepository prosessTriggereRepository;

@@ -24,7 +24,7 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningStegTjen
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
-@FagsakYtelseTypeRef("*")
+@FagsakYtelseTypeRef
 @BehandlingStegRef(stegtype = VURDER_REF_BERGRUNN)
 @BehandlingTypeRef
 @ApplicationScoped

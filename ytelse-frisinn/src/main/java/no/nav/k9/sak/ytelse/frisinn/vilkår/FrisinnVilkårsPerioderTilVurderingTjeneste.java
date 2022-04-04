@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.vilkår;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -20,7 +22,7 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 @BehandlingTypeRef
 @ApplicationScoped
 public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
@@ -34,7 +36,7 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
     }
 
     @Inject
-    public FrisinnVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("FRISINN") VilkårUtleder vilkårUtleder,
+    public FrisinnVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef(FRISINN) VilkårUtleder vilkårUtleder,
                                                       UttakRepository uttakRepository,
                                                       @KonfigVerdi(value = "FRISINN_NYTT_STP_TOGGLE", defaultVerdi = "false", required = false) boolean nyttStpToggle) {
         this.maksSøktePeriode = new MaksSøktePeriode(uttakRepository);

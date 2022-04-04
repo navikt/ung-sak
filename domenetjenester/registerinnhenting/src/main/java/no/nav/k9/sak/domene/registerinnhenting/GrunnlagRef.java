@@ -74,7 +74,7 @@ public @interface GrunnlagRef {
             Objects.requireNonNull(aggrNavn);
             Objects.requireNonNull(ytelseType);
 
-            var fagsakInstances = FagsakYtelseTypeRef.Lookup.list(cls, instances, ytelseType.getKode());
+            var fagsakInstances = FagsakYtelseTypeRef.Lookup.list(cls, instances, ytelseType);
 
             for (var inst : fagsakInstances) {
                 for (var navn : coalesce(aggrNavn, "*")) {

@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -55,7 +57,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Årsak;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHendelseBygger {
 
     private static final Logger logger = LoggerFactory.getLogger(PsbStønadstatistikkHendelseBygger.class);
@@ -82,7 +84,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
         this.omsorgenForDtoMapper = omsorgenForDtoMapper;
     }
 
-    
+
     @Override
     public StønadstatistikkHendelse lagHendelse(UUID behandlingUuid) {
         final Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid);
@@ -102,7 +104,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
         final LocalDateTime vedtakstidspunkt = behandlingVedtak.getVedtakstidspunkt();
 
         final OmsorgenForOversiktDto omsorgenFor = omsorgenForDtoMapper.map(behandling.getId(), behandling.getFagsak().getAktørId(), behandling.getFagsak().getPleietrengendeAktørId());
-        
+
         final StønadstatistikkHendelse stønadstatistikkHendelse = new StønadstatistikkHendelse(
                 behandling.getFagsakYtelseType(),
                 søker,
@@ -127,7 +129,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
                     .map(o -> new StønadstatistikkRelasjonPeriode(o.getPeriode().getFom(), o.getPeriode().getTom(), StønadstatistikkRelasjon.FOLKEREGISTRERT_FORELDER))
                     .collect(Collectors.toList());
         }
-        
+
         return omsorgenFor.getOmsorgsperioder()
                 .stream()
                 .filter(o -> o.getRelasjon() != null)
@@ -196,11 +198,11 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
             final Arbeidsforhold arbeidsforholdFraUttaksplan = MapFraUttaksplan.buildArbeidsforhold(toUttakArbeidType(u), u);
             final BigDecimal utbetalingsgrad = u.getUtbetalingsgrad();
 
-            /* 
+            /*
              * Sjekk på om beregningsresultatAndeler != null gjøres grunnet
              * tidligere feil der uttaksgraden ikke ble satt til 0 når det
              * var avslag i beregning.
-             * 
+             *
              * Vi trenger denne sjekken videre for å kunne støtte full eksport.
              */
             if (beregningsresultatAndeler != null && skalFinnesAndeler(utbetalingsgrad)) {
@@ -262,7 +264,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
 
         return kandidater;
     }
-    
+
     private static AktivitetStatus medIkkeYrkesaktivSomArbeidstaker(AktivitetStatus as) {
         if (as == AktivitetStatus.IKKE_YRKESAKTIV) {
             return AktivitetStatus.ARBEIDSTAKER;

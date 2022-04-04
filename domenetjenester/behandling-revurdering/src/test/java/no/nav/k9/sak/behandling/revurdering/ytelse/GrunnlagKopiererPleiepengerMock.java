@@ -1,5 +1,7 @@
 package no.nav.k9.sak.behandling.revurdering.ytelse;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Alternative;
 
@@ -9,7 +11,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 @RequestScoped
 @Alternative
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class GrunnlagKopiererPleiepengerMock implements GrunnlagKopierer {
 
 

@@ -20,7 +20,7 @@ import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 
 @ApplicationScoped
 @GrunnlagRef("PersonInformasjon")
-@FagsakYtelseTypeRef("*")
+@FagsakYtelseTypeRef
 public class BehandlingÅrsakUtlederPersonopplysning implements BehandlingÅrsakUtleder {
     private static final Logger log = LoggerFactory.getLogger(BehandlingÅrsakUtlederPersonopplysning.class);
 

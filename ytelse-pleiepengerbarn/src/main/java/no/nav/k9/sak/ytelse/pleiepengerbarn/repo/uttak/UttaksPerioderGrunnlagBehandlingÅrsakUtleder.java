@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -12,7 +14,7 @@ import no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak.Behandling�
 
 @ApplicationScoped
 @GrunnlagRef("UttakPerioderGrunnlag")
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class UttaksPerioderGrunnlagBehandlingÅrsakUtleder implements BehandlingÅrsakUtleder {
 
     @Override

@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_UTTAK;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +31,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjene
 @ApplicationScoped
 @BehandlingStegRef(stegtype = VURDER_UTTAK)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
     private static final Logger log = LoggerFactory.getLogger(VurderÅrskvantumUttakSteg.class);

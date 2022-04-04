@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_MEDISINSKVILKÅR;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -63,7 +64,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 
 @BehandlingStegRef(stegtype = VURDER_MEDISINSKVILKÅR)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @ApplicationScoped
 public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
@@ -84,7 +85,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     @Inject
     public VurderSykdomOgKontinuerligTilsynSteg(BehandlingRepositoryProvider repositoryProvider,
                                                 PleiebehovResultatRepository resultatRepository,
-                                                @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                                @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                 SykdomVurderingService sykdomVurderingService,
                                                 SykdomGrunnlagRepository sykdomGrunnlagRepository,
                                                 SøknadsperiodeTjeneste søknadsperiodeTjeneste) {

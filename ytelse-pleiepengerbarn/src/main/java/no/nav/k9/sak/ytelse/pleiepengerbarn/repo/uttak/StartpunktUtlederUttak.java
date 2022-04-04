@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -18,7 +20,7 @@ import no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt.FellesStartpunktU
 
 @ApplicationScoped
 @GrunnlagRef("UttakPerioderGrunnlag")
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class StartpunktUtlederUttak implements EndringStartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();

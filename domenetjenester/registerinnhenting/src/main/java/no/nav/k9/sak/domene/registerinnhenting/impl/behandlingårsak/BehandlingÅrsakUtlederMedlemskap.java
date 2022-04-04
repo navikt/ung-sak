@@ -1,5 +1,10 @@
 package no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,10 +22,10 @@ import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 
 @ApplicationScoped
 @GrunnlagRef("MedlemskapAggregat")
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
-@FagsakYtelseTypeRef("OMP")
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OMSORGSPENGER)
+@FagsakYtelseTypeRef(FRISINN)
 class BehandlingÅrsakUtlederMedlemskap implements BehandlingÅrsakUtleder {
     private static final Logger log = LoggerFactory.getLogger(BehandlingÅrsakUtlederMedlemskap.class);
 

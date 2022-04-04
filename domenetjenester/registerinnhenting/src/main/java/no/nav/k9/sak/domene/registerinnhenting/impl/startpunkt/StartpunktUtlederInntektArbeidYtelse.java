@@ -1,5 +1,10 @@
 package no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,10 +37,10 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 @GrunnlagRef("InntektArbeidYtelseGrunnlag")
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
-@FagsakYtelseTypeRef("OMP")
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OMSORGSPENGER)
+@FagsakYtelseTypeRef(FRISINN)
 class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();
