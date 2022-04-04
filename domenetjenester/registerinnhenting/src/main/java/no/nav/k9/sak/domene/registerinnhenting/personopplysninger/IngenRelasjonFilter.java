@@ -4,11 +4,14 @@ import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 public class IngenRelasjonFilter implements YtelsesspesifikkRelasjonsFilter {
-    public IngenRelasjonFilter() {
+
+    @Override
+    public boolean relasjonsFiltreringBarn(Behandling behandling, Personinfo barn) {
+        return false;
     }
 
     @Override
-    public boolean relasjonsFiltrering(Behandling behandling, Personinfo it) {
+    public boolean hentHistorikkForRelatertePersoner() {
         return false;
     }
 }

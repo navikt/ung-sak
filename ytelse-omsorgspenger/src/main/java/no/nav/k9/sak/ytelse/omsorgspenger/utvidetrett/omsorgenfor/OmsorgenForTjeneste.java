@@ -104,7 +104,7 @@ public class OmsorgenForTjeneste {
 
     private List<BostedsAdresse> mapAdresser(List<PersonAdresseEntitet> bostedsadresser) {
         return bostedsadresser.stream()
-            .map(it -> new BostedsAdresse(it.getAktørId().getId(), it.getAdresselinje1(), it.getAdresselinje2(), it.getAdresselinje3(), it.getPostnummer(), it.getLand()))
+            .map(it -> new BostedsAdresse(it.getPeriode().tilPeriode(), it.getAktørId().getId(), it.getAdresselinje1(), it.getAdresselinje2(), it.getAdresselinje3(), it.getPostnummer(), it.getLand()))
             .toList();
     }
 

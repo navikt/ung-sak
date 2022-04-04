@@ -70,8 +70,8 @@ public class Personinfo {
         return fødselsdato;
     }
 
-    public int getAlder() {
-        return (int) ChronoUnit.YEARS.between(fødselsdato, LocalDate.now());
+    public int getAlder(LocalDate dato) {
+        return (int) ChronoUnit.YEARS.between(fødselsdato, dato);
     }
 
     public Set<Familierelasjon> getFamilierelasjoner() {
@@ -159,7 +159,9 @@ public class Personinfo {
             return this;
         }
 
-        /** @deprecated Bruk {@link #medPersonIdent(PersonIdent)} i stedet! */
+        /**
+         * @deprecated Bruk {@link #medPersonIdent(PersonIdent)} i stedet!
+         */
         @Deprecated
         public Builder medFnr(String fnr) {
             personinfoMal.personIdent = PersonIdent.fra(fnr);

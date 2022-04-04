@@ -4,5 +4,7 @@ import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 public interface YtelsesspesifikkRelasjonsFilter {
-    boolean relasjonsFiltrering(Behandling behandling, Personinfo it);
+    boolean relasjonsFiltreringBarn(Behandling behandling, Personinfo barn);
+
+    boolean hentHistorikkForRelatertePersoner();
 }

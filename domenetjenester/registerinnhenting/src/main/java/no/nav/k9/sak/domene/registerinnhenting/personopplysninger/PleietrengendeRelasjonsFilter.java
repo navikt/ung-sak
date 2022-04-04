@@ -6,15 +6,18 @@ import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 public class PleietrengendeRelasjonsFilter implements YtelsesspesifikkRelasjonsFilter {
-    public PleietrengendeRelasjonsFilter() {
-    }
 
     @Override
-    public boolean relasjonsFiltrering(Behandling behandling, Personinfo it) {
+    public boolean relasjonsFiltreringBarn(Behandling behandling, Personinfo barn) {
         final var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
         if (pleietrengende.isEmpty()) {
             return false;
         }
-        return it.getAktørId().equals(pleietrengende.orElse(null));
+        return barn.getAktørId().equals(pleietrengende.orElse(null));
+    }
+
+    @Override
+    public boolean hentHistorikkForRelatertePersoner() {
+        return false;
     }
 }
