@@ -36,7 +36,8 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.FosterbarnRepository;
 @ApplicationScoped
 public class FosterbarnRestTjeneste {
 
-    static final String BASE_PATH = "/behandling/fosterbarn";
+    public static final String BASE_PATH = "/behandling/fosterbarn";
+    public static final String FOSTERBARN_PATH = BASE_PATH;
 
     private FosterbarnRepository fosterbarnRepository;
     private BehandlingRepository behandlingRepository;

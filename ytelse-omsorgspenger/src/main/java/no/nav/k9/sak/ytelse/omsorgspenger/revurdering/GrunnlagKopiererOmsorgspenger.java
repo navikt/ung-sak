@@ -4,7 +4,6 @@ import java.util.EnumSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -14,6 +13,7 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.FosterbarnRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 
 @ApplicationScoped
@@ -23,6 +23,7 @@ public class GrunnlagKopiererOmsorgspenger implements GrunnlagKopierer {
     private PersonopplysningRepository personopplysningRepository;
     private MedlemskapRepository medlemskapRepository;
     private OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository;
+    private FosterbarnRepository fosterbarnRepository;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
@@ -33,9 +34,10 @@ public class GrunnlagKopiererOmsorgspenger implements GrunnlagKopierer {
     @Inject
     public GrunnlagKopiererOmsorgspenger(BehandlingRepositoryProvider repositoryProvider,
                                          OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
-                                         BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
+                                         FosterbarnRepository fosterbarnRepository, BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                          InntektArbeidYtelseTjeneste iayTjeneste) {
         this.omsorgspengerGrunnlagRepository = omsorgspengerGrunnlagRepository;
+        this.fosterbarnRepository = fosterbarnRepository;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
 
         this.iayTjeneste = iayTjeneste;
@@ -52,6 +54,7 @@ public class GrunnlagKopiererOmsorgspenger implements GrunnlagKopierer {
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
 
         omsorgspengerGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        fosterbarnRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         beregningPerioderGrunnlagRepository.kopier(originalBehandlingId, nyBehandlingId, true);
 
         // gjør til slutt, innebærer kall til abakus
