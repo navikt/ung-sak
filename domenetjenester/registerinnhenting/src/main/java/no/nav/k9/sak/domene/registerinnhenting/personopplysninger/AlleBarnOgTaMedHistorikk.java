@@ -4,7 +4,7 @@ import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.typer.Periode;
 
-public class OmsorgspengerRammevedtakRelasjonFilter implements YtelsesspesifikkRelasjonsFilter {
+public class AlleBarnOgTaMedHistorikk implements YtelsesspesifikkRelasjonsFilter {
 
     @Override
     public boolean relasjonsFiltreringBarn(Behandling behandling, Personinfo barn, Periode opplysningsperioden) {
