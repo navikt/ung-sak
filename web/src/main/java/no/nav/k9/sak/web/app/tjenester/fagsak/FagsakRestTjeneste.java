@@ -4,7 +4,6 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.net.URISyntaxException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -301,7 +300,7 @@ public class FagsakRestTjeneste {
 
         PersonDto personDto = new PersonDto(
             brukerInfo.getNavn(),
-            brukerInfo.getAlder(LocalDate.now()),
+            brukerInfo.getAlderIDag(),
             String.valueOf(brukerInfo.getPersonIdent().getIdent()),
             brukerInfo.erKvinne(),
             brukerInfo.getPersonstatus(),

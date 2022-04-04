@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.aktør;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -76,7 +75,7 @@ public class AktørRestTjeneste {
                 Personinfo pi = personinfo.get();
                 PersonDto personDto = new PersonDto(
                     pi.getNavn(),
-                    pi.getAlder(LocalDate.now()),
+                    pi.getAlderIDag(),
                     String.valueOf(pi.getPersonIdent().getIdent()),
                     pi.erKvinne(),
                     pi.getPersonstatus(),

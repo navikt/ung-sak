@@ -74,6 +74,10 @@ public class Personinfo {
         return (int) ChronoUnit.YEARS.between(fødselsdato, dato);
     }
 
+    public int getAlderIDag(){
+        return getAlder(LocalDate.now());
+    }
+
     public Set<Familierelasjon> getFamilierelasjoner() {
         return Collections.unmodifiableSet(familierelasjoner);
     }

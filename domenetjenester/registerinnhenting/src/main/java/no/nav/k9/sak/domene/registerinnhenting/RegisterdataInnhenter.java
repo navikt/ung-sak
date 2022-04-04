@@ -167,7 +167,7 @@ public class RegisterdataInnhenter {
     }
 
     private void leggTilSøkersBarn(Personinfo søkerPersonInfo, Behandling behandling, PersonInformasjonBuilder informasjonBuilder, no.nav.k9.sak.typer.Periode opplysningsperioden) {
-        List<Personinfo> barna = hentBarnRelatertTil(søkerPersonInfo, behandling);
+        List<Personinfo> barna = hentBarnRelatertTil(søkerPersonInfo, behandling, opplysningsperioden);
         barna.forEach(barn -> {
             if (hentHistorikkForRelatertePersoner(behandling)) {
                 Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(barn.getAktørId(), opplysningsperioden);
@@ -421,12 +421,12 @@ public class RegisterdataInnhenter {
         }
     }
 
-    private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling) {
+    private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling, no.nav.k9.sak.typer.Periode opplysningsperioden) {
         List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo);
         var filter = relasjonsFilter.getOrDefault(behandling.getFagsakYtelseType(), new IngenRelasjonFilter());
 
         return relaterteBarn.stream()
-            .filter(barn -> filter.relasjonsFiltreringBarn(behandling, barn))
+            .filter(barn -> filter.relasjonsFiltreringBarn(behandling, barn, opplysningsperioden))
             .toList();
     }
 
