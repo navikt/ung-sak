@@ -49,46 +49,28 @@ public @interface BehandlingTypeRef {
      *
      * @see no.nav.k9.kodeverk.behandling.BehandlingType
      */
-    @Nonbinding
-    BehandlingType[] value() default {};
+    BehandlingType value() default BehandlingType.UDEFINERT;
 
     /** AnnotationLiteral som kan brukes ved CDI søk. */
     public static class BehandlingTypeRefLiteral extends AnnotationLiteral<BehandlingTypeRef> implements BehandlingTypeRef {
 
-        private BehandlingType[] behandlingType;
+        private BehandlingType behandlingType;
 
         public BehandlingTypeRefLiteral() {
-            this.behandlingType = new BehandlingType[0];
+            this.behandlingType = BehandlingType.UDEFINERT;
         }
 
         public BehandlingTypeRefLiteral(BehandlingType behandlingType) {
             if (behandlingType == null ) {
-                this.behandlingType = new BehandlingType[0];
-                return;
+                this.behandlingType = BehandlingType.UDEFINERT;
+            } else {
+                this.behandlingType = behandlingType;
             }
-            this.behandlingType = new BehandlingType[1];
-            this.behandlingType[0] = behandlingType;
         }
 
         @Override
-        public BehandlingType[] value() {
+        public BehandlingType value() {
             return behandlingType;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            if (!super.equals(o)) return false;
-            BehandlingTypeRefLiteral that = (BehandlingTypeRefLiteral) o;
-            return Arrays.equals(behandlingType, that.behandlingType);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = super.hashCode();
-            result = 31 * result + Arrays.hashCode(behandlingType);
-            return result;
         }
     }
 
@@ -130,13 +112,15 @@ public @interface BehandlingTypeRef {
                 if (inst.isUnsatisfied()) {
                     continue;
                 } else {
-                    var binst = select(cls, inst, new BehandlingTypeRefLiteral(behandlingType));
-                    if (binst.isResolvable()) {
-                        return Optional.of(getInstance(binst));
-                    } else {
-                        if (binst.isAmbiguous()) {
-                            throw new IllegalStateException(
-                                "Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType=" + fagsakLiteral + ", behandlingType=" + behandlingType + ", instanser=" + binst);
+                    for (var behandlingtypeLiteral : coalesce(behandlingType, BehandlingType.UDEFINERT)) {
+                        var binst = select(cls, inst, new BehandlingTypeRefLiteral(behandlingtypeLiteral));
+                        if (binst.isResolvable()) {
+                            return Optional.of(getInstance(binst));
+                        } else {
+                            if (binst.isAmbiguous()) {
+                                throw new IllegalStateException(
+                                    "Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType=" + fagsakLiteral + ", behandlingType=" + behandlingType + ", instanser=" + binst);
+                            }
                         }
                     }
                 }
@@ -153,7 +137,7 @@ public @interface BehandlingTypeRef {
             return i;
         }
 
-        private static List<String> coalesce(String... vals) {
+        private static <T> List<T> coalesce(T... vals) {
             return Arrays.stream(vals).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         }
 

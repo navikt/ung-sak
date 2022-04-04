@@ -36,7 +36,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef.FagsakYtelseTypeRef
 @Stereotype
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
 @Documented
 public @interface BehandlingStegRef {
 
@@ -56,7 +56,7 @@ public @interface BehandlingStegRef {
      * Eks. for bruk i:<br>
      * {@link CDI#current#select(jakarta.enterprise.util.TypeLiteral, java.lang.annotation.Annotation...)}.
      */
-   public static class BehandlingStegRefLiteral extends AnnotationLiteral<BehandlingStegRef> implements BehandlingStegRef {
+    public static class BehandlingStegRefLiteral extends AnnotationLiteral<BehandlingStegRef> implements BehandlingStegRef {
 
         private BehandlingStegType stegtype;
 
@@ -65,10 +65,7 @@ public @interface BehandlingStegRef {
         }
 
         public BehandlingStegRefLiteral(BehandlingStegType stegtype) {
-        if (stegtype == null) {
-            throw new IllegalArgumentException("Type er obligatorisk");
-        }
-            this.stegtype = stegtype;
+            this.stegtype = Objects.requireNonNull(stegtype, "stegtype");
         }
 
         @Override
@@ -156,7 +153,7 @@ public @interface BehandlingStegRef {
      */
     @Inherited
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.TYPE })
+    @Target({ElementType.TYPE})
     @Documented
     public @interface ContainerOfBehandlingStegRef {
         BehandlingStegRef[] value();
