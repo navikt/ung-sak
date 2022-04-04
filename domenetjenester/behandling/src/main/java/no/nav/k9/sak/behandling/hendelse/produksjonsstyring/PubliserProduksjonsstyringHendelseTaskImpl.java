@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
@@ -17,7 +16,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 @ApplicationScoped
 @ProsessTask(PubliserProduksjonsstyringHendelseTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
-class PubliserProduksjonsstyringHendelseTaskImpl implements PubliserProduksjonsstyringHendelseTask {
+public class PubliserProduksjonsstyringHendelseTaskImpl implements PubliserProduksjonsstyringHendelseTask {
     private static final Logger log = LoggerFactory.getLogger(PubliserProduksjonsstyringHendelseTaskImpl.class);
 
     private PubliserProduksjonsstyringHendelseProducer kafkaProducer;

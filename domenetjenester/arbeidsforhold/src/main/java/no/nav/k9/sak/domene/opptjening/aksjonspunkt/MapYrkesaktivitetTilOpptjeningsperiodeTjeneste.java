@@ -22,7 +22,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.k9.sak.domene.opptjening.MellomliggendePeriodeUtleder;
+import no.nav.k9.sak.domene.opptjening.MellomliggendeHelgUtleder;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -31,7 +31,7 @@ import no.nav.k9.sak.typer.Stillingsprosent;
 
 public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
 
-    private static final MellomliggendePeriodeUtleder mellomliggendePeriodeUtleder = new MellomliggendePeriodeUtleder();
+    private static final MellomliggendeHelgUtleder MELLOMLIGGENDE_HELG_UTLEDER = new MellomliggendeHelgUtleder();
 
     private MapYrkesaktivitetTilOpptjeningsperiodeTjeneste() {
     }
@@ -97,7 +97,7 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
         tidslinjeTilVurdering = tidslinjeTilVurdering.intersection(aktivPermisjonTidslinje.compress());
 
         // Legg til mellomliggende periode dersom helg mellom permisjonsperioder
-        LocalDateTimeline<Boolean> mellomliggendePerioder = mellomliggendePeriodeUtleder.beregnMellomliggendePeriode(tidslinjeTilVurdering.compress());
+        LocalDateTimeline<Boolean> mellomliggendePerioder = MELLOMLIGGENDE_HELG_UTLEDER.beregnMellomliggendeHelg(tidslinjeTilVurdering);
         for (LocalDateSegment<Boolean> mellomliggendePeriode : mellomliggendePerioder) {
             tidslinjeTilVurdering = tidslinjeTilVurdering.combine(mellomliggendePeriode, MapYrkesaktivitetTilOpptjeningsperiodeTjeneste::mergePerioder, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }

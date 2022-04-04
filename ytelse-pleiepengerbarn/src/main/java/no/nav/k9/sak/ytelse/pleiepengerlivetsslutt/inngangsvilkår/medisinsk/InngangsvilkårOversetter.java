@@ -30,7 +30,7 @@ public class InngangsvilkårOversetter {
     private LocalDateTimeline<Void> mapRelevanteInnleggelsesperioder(SykdomGrunnlag sykdomGrunnlagBehandling) {
         var innleggelser = sykdomGrunnlagBehandling.getInnleggelser();
         if (innleggelser == null) {
-            return LocalDateTimeline.EMPTY_TIMELINE;
+            return LocalDateTimeline.empty();
         }
         return new LocalDateTimeline<>(innleggelser.getPerioder().stream()
             .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), (Void) null))

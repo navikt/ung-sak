@@ -2,13 +2,12 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.k9.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -16,14 +15,12 @@ import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.typer.JournalpostId;
 
 @Dependent
 public class DokumentmottakerFelles {
 
-    private ProsessTaskRepository prosessTaskRepository;
-    private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
+    private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
 
@@ -34,11 +31,9 @@ public class DokumentmottakerFelles {
 
     @Inject
     public DokumentmottakerFelles(BehandlingRepositoryProvider repositoryProvider,
-                                  ProsessTaskRepository prosessTaskRepository,
-                                  BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
+                                  ProsessTaskTjeneste prosessTaskRepository,
                                   HistorikkinnslagTjeneste historikkinnslagTjeneste) {
         this.prosessTaskRepository = prosessTaskRepository;
-        this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.historikkinnslagTjeneste = historikkinnslagTjeneste;
     }
@@ -52,7 +47,7 @@ public class DokumentmottakerFelles {
     }
 
     public void opprettTaskForÅStarteBehandlingMedNySøknad(Behandling behandling, JournalpostId journalpostId) {
-        ProsessTaskData prosessTaskData = new ProsessTaskData(StartBehandlingTask.TASKTYPE);
+        ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(StartBehandlingTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
@@ -69,14 +64,14 @@ public class DokumentmottakerFelles {
     }
 
     public ProsessTaskData opprettTaskForÅStarteBehandling(Behandling behandling) {
-        ProsessTaskData prosessTaskData = new ProsessTaskData(StartBehandlingTask.TASKTYPE);
+        ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(StartBehandlingTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setCallIdFraEksisterende();
         return prosessTaskData;
     }
 
     public ProsessTaskData opprettTaskForÅSpoleTilbakeTilStartOgStartePåNytt(Behandling behandling) {
-        ProsessTaskData prosessTaskData = new ProsessTaskData(TilbakeTilStartBehandlingTask.TASKTYPE);
+        ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(TilbakeTilStartBehandlingTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setProperty(TilbakeTilStartBehandlingTask.PROPERTY_START_STEG, BehandlingStegType.START_STEG.getKode());
         prosessTaskData.setCallIdFraEksisterende();

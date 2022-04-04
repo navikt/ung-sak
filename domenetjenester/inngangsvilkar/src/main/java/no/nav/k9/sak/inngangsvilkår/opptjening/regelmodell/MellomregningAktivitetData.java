@@ -8,8 +8,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
  */
 class MellomregningAktivitetData {
 
-    @SuppressWarnings("unchecked")
-    static final LocalDateTimeline<Boolean> EMPTY = LocalDateTimeline.EMPTY_TIMELINE;
+    static final LocalDateTimeline<Boolean> EMPTY = LocalDateTimeline.empty();
     private final Aktivitet aktivitet;
     /**
      * Forbered tidslinjer for mellomregning av aktiviteter.
@@ -39,8 +38,7 @@ class MellomregningAktivitetData {
     /**
      * Inntekt per aktivitet.
      */
-    @SuppressWarnings("unchecked")
-    private LocalDateTimeline<Long> inntektTidslinjer = LocalDateTimeline.EMPTY_TIMELINE;
+    private LocalDateTimeline<Long> inntektTidslinjer = LocalDateTimeline.empty();
 
     MellomregningAktivitetData(Aktivitet a) {
         this(a, EMPTY);

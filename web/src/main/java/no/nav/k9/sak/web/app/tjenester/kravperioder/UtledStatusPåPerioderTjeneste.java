@@ -1,6 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.kravperioder;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -21,6 +24,7 @@ import no.nav.k9.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
 import no.nav.k9.sak.kontrakt.krav.KravDokumentType;
 import no.nav.k9.sak.kontrakt.krav.PeriodeMedÅrsaker;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
+import no.nav.k9.sak.kontrakt.krav.ÅrsakMedPerioder;
 import no.nav.k9.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
@@ -85,7 +89,37 @@ public class UtledStatusPåPerioderTjeneste {
             .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
             .collect(Collectors.toCollection(TreeSet::new));
 
-        return new StatusForPerioderPåBehandling(perioderTilVurderingKombinert.stream().map(DatoIntervallEntitet::tilPeriode).collect(Collectors.toSet()), perioder, mapKravTilDto(relevanteDokumenterMedPeriode));
+        var årsakMedPerioder = utledÅrsakMedPerioder(perioder);
+
+        return new StatusForPerioderPåBehandling(perioderTilVurderingKombinert.stream().map(DatoIntervallEntitet::tilPeriode).collect(Collectors.toSet()), perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode));
+    }
+
+    private List<ÅrsakMedPerioder> utledÅrsakMedPerioder(List<PeriodeMedÅrsaker> perioder) {
+        var result = new HashMap<ÅrsakTilVurdering, LocalDateTimeline<Boolean>>();
+        var årsakTilVurderingMap = perioder.stream().flatMap(this::tilÅrsakMedPerioder).collect(Collectors.groupingBy(ÅrsakMedPerioder::getÅrsak,
+            Collectors.flatMapping(it -> Stream.of(it.getPerioder()).flatMap(Collection::stream), Collectors.toCollection(TreeSet::new))));
+
+
+        for (Map.Entry<ÅrsakTilVurdering, TreeSet<Periode>> entry : årsakTilVurderingMap.entrySet()) {
+            var key = entry.getKey();
+            var timeline = result.getOrDefault(key, LocalDateTimeline.empty());
+
+            timeline = timeline.combine(new LocalDateTimeline<>(entry.getValue().stream().map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), true)).collect(Collectors.toSet())), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            result.put(key, timeline.compress());
+        }
+
+        return result.entrySet()
+            .stream()
+            .map(it -> new ÅrsakMedPerioder(it.getKey(), it.getValue()
+                .toSegments()
+                .stream()
+                .map(at -> new Periode(at.getFom(), at.getTom()))
+                .collect(Collectors.toSet())))
+            .collect(Collectors.toList());
+    }
+
+    private Stream<ÅrsakMedPerioder> tilÅrsakMedPerioder(PeriodeMedÅrsaker it) {
+        return it.getÅrsaker().stream().map(at -> new ÅrsakMedPerioder(at, new TreeSet<>(Set.of(it.getPeriode()))));
     }
 
     private Set<ÅrsakTilVurdering> transformerÅrsaker(LocalDateSegment<ÅrsakerTilVurdering> segment) {

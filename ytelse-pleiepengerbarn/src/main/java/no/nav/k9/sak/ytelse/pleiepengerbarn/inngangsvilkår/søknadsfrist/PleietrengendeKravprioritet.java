@@ -51,12 +51,11 @@ public class PleietrengendeKravprioritet {
         return vurderKravprioritet(fagsakId, pleietrengende, false);
     }
 
-    @SuppressWarnings("unchecked")
     public LocalDateTimeline<List<Kravprioritet>> vurderKravprioritet(Long fagsakId, AktørId pleietrengende, boolean brukUbesluttedeData) {
         Fagsak aktuellFagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
         final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(aktuellFagsak.getYtelseType(), pleietrengende, null, null, null);
 
-        LocalDateTimeline<List<Kravprioritet>> kravprioritetstidslinje = LocalDateTimeline.EMPTY_TIMELINE;
+        LocalDateTimeline<List<Kravprioritet>> kravprioritetstidslinje = LocalDateTimeline.empty();
         for (Fagsak fagsak : fagsaker) {
             final boolean brukAvsluttetBehandling = !brukUbesluttedeData && !fagsak.getId().equals(fagsakId);
             final LocalDateTimeline<Kravprioritet> fagsakTidslinje = finnEldsteKravTidslinjeForFagsak(fagsak, brukAvsluttetBehandling);
@@ -68,8 +67,7 @@ public class PleietrengendeKravprioritet {
 
 
     private LocalDateTimeline<Kravprioritet> finnEldsteKravTidslinjeForFagsak(Fagsak fagsak, boolean brukAvsluttetBehandling) {
-        @SuppressWarnings("unchecked")
-        LocalDateTimeline<Kravprioritet> fagsakTidslinje = LocalDateTimeline.EMPTY_TIMELINE;
+        LocalDateTimeline<Kravprioritet> fagsakTidslinje = LocalDateTimeline.empty();
         final Optional<Behandling> behandlingOpt;
         if (brukAvsluttetBehandling) {
             behandlingOpt = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId());

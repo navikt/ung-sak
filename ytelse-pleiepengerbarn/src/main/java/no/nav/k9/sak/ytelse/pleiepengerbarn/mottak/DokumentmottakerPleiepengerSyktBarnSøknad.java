@@ -21,7 +21,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -53,7 +53,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SøknadParser søknadParser;
     private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private BrukerdialoginnsynService brukerdialoginnsynService;
@@ -69,7 +69,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                                               SøknadParser søknadParser,
                                               SøknadOversetter pleiepengerBarnSoknadOversetter,
                                               SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
-                                              ProsessTaskRepository prosessTaskRepository,
+                                              ProsessTaskTjeneste taskTjeneste,
                                               OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
                                               SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                               BrukerdialoginnsynService brukerdialoginnsynService,
@@ -79,7 +79,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
         this.søknadParser = søknadParser;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
         this.pleiepengerBarnSoknadOversetter = pleiepengerBarnSoknadOversetter;
-        this.prosessTaskRepository = prosessTaskRepository;
+        this.taskTjeneste = taskTjeneste;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.brukerdialoginnsynService = brukerdialoginnsynService;
@@ -125,7 +125,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                 mottatteDokumentRepository.oppdaterStatus(List.of(dokument), DokumentStatus.GYLDIG);
                 return;
             }
-            var enkeltTask = new ProsessTaskData(AsyncAbakusLagreOpptjeningTask.TASKTYPE);
+            var enkeltTask = ProsessTaskData.forProsessTask(AsyncAbakusLagreOpptjeningTask.class);
             var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
             enkeltTask.setPayload(payload);
 
@@ -136,7 +136,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             enkeltTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
             enkeltTask.setCallIdFraEksisterende();
 
-            prosessTaskRepository.lagre(enkeltTask);
+            taskTjeneste.lagre(enkeltTask);
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Opprettelse av task for lagring av oppgitt opptjening i abakus feiler.", e).toException();
         }

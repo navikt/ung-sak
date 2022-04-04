@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
@@ -53,19 +54,19 @@ public class UtvidetRettOpprettProsessTaskIverksett implements OpprettProsessTas
 
         Optional<ProsessTaskData> initiellTask = Optional.empty();
         if (initiellTaskNavn.isPresent()) {
-            initiellTask = Optional.of(new ProsessTaskData(initiellTaskNavn.get()));
+            initiellTask = Optional.of(ProsessTaskData.forTaskType(new TaskType(initiellTaskNavn.get())));
         }
         ProsessTaskGruppe taskData = new ProsessTaskGruppe();
         initiellTask.ifPresent(taskData::addNesteSekvensiell);
 
         List<ProsessTaskData> parallelle = new ArrayList<>();
-        parallelle.add(new ProsessTaskData(SendVedtaksbrevTask.TASKTYPE));
-        parallelle.add(new ProsessTaskData(UtvidetRettIverksettTask.TASKTYPE));
+        parallelle.add( ProsessTaskData.forProsessTask(SendVedtaksbrevTask.class));
+        parallelle.add( ProsessTaskData.forProsessTask(UtvidetRettIverksettTask.class));
         avsluttOppgave.ifPresent(parallelle::add);
 
         taskData.addNesteParallell(parallelle);
 
-        taskData.addNesteSekvensiell(new ProsessTaskData(AvsluttBehandlingTask.TASKTYPE));
+        taskData.addNesteSekvensiell( ProsessTaskData.forProsessTask(AvsluttBehandlingTask.class));
 
         opprettYtelsesSpesifikkeTasks(behandling).ifPresent(taskData::addNesteSekvensiell);
 

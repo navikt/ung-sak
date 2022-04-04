@@ -118,8 +118,7 @@ class OpptjeningsgrunnlagAdapter {
                     .map(s -> new LocalDateTimeline<>(List.of(s)))
                     .collect(Collectors.toList());
 
-                @SuppressWarnings("unchecked")
-                LocalDateTimeline<OpptjeningAktivitetPeriode> tidsserie = LocalDateTimeline.EMPTY_TIMELINE;
+                LocalDateTimeline<OpptjeningAktivitetPeriode> tidsserie = LocalDateTimeline.empty();
 
                 for (LocalDateTimeline<OpptjeningAktivitetPeriode> tidsserieInput : tidsserier) {
                     tidsserie = tidsserie.combine(tidsserieInput, this::sjekkVurdering, LocalDateTimeline.JoinStyle.CROSS_JOIN);

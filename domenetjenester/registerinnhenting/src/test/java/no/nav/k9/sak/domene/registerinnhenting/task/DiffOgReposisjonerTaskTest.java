@@ -7,10 +7,10 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 public class DiffOgReposisjonerTaskTest {
 
@@ -18,7 +18,7 @@ public class DiffOgReposisjonerTaskTest {
 
     @Test
     public void skal_få_ut_snapshot_fra_json() throws IOException {
-        var data = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
+        var data =  ProsessTaskData.forProsessTask(DiffOgReposisjonerTask.class);
         var preSnapshot = EndringsresultatSnapshot.medSnapshot(PersonopplysningGrunnlagEntitet.class, 1L);
         data.setPayload(JsonObjectMapper.getJson(preSnapshot));
 
@@ -29,7 +29,7 @@ public class DiffOgReposisjonerTaskTest {
 
     @Test
     public void skal_få_ut_snapshot_fra_json_1() {
-        var data = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
+        var data =  ProsessTaskData.forProsessTask(DiffOgReposisjonerTask.class);
 
         var endringsresultatSnapshot = task.hentUtSnapshotFraPayload(data);
 

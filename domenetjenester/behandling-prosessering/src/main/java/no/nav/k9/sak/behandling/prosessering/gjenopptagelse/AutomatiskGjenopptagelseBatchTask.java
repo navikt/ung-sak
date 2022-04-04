@@ -1,8 +1,7 @@
-package no.nav.k9.sak.behandling.prosessering.batch;
+package no.nav.k9.sak.behandling.prosessering.gjenopptagelse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -13,7 +12,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
  * har en frist som er passert.
  */
 @ApplicationScoped
-@ProsessTask(AutomatiskGjenopptagelseBatchTask.TASKTYPE)
+@ProsessTask(value = AutomatiskGjenopptagelseBatchTask.TASKTYPE, cronExpression = "0 0 7 * * *")
 public class AutomatiskGjenopptagelseBatchTask implements ProsessTaskHandler {
 
     public static final String TASKTYPE = "batch.automatiskGjenopptaglese";
