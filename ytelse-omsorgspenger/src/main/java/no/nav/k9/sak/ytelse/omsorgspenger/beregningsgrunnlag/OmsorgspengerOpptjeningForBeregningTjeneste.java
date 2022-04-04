@@ -37,7 +37,10 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
     private OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
         OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD,
-        OpptjeningAktivitetType.ARBEIDSAVKLARING));
+        OpptjeningAktivitetType.ARBEIDSAVKLARING,
+        OpptjeningAktivitetType.DAGPENGER,
+        OpptjeningAktivitetType.ETTERLØNN_SLUTTPAKKE,
+        OpptjeningAktivitetType.VENTELØNN_VARTPENGER));
 
     protected OmsorgspengerOpptjeningForBeregningTjeneste() {
         // For proxy
