@@ -10,16 +10,15 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
-import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
+import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt.FellesStartpunktUtlederLogger;
 
 @ApplicationScoped
-@GrunnlagRef("UttakPerioderGrunnlag")
+@GrunnlagRef(UttaksPerioderGrunnlag.class)
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class StartpunktUtlederUttak implements EndringStartpunktUtleder {
 

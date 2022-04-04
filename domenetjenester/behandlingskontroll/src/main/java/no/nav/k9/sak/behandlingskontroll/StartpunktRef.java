@@ -20,12 +20,12 @@ import jakarta.enterprise.inject.Stereotype;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Qualifier;
-
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef.BehandlingTypeRefLiteral;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral;
 import no.nav.k9.sak.behandlingskontroll.StartpunktRef.ContainerOfStartpunktRef;
+import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 
 /**
  * Marker type som implementerer interface {@link BehandlingSteg} for å skille ulike implementasjoner av samme steg for ulike
@@ -49,23 +49,23 @@ public @interface StartpunktRef {
      *
      * @see no.nav.k9.kodeverk.behandling.BehandlingType
      */
-    String value() default "*";
+    StartpunktType value() default StartpunktType.UDEFINERT;
 
     /** AnnotationLiteral som kan brukes ved CDI søk. */
     public static class StartpunktRefLiteral extends AnnotationLiteral<StartpunktRef> implements StartpunktRef {
 
-        private String navn;
+        private StartpunktType navn;
 
         public StartpunktRefLiteral() {
-            this.navn = "*";
+            this.navn = StartpunktType.UDEFINERT;
         }
 
-        public StartpunktRefLiteral(String navn) {
-            this.navn = (navn == null ? "*" : navn);
+        public StartpunktRefLiteral(StartpunktType navn) {
+            this.navn = (navn == null ? StartpunktType.UDEFINERT : navn);
         }
 
         @Override
-        public String value() {
+        public StartpunktType value() {
             return navn;
         }
     }
@@ -76,11 +76,11 @@ public @interface StartpunktRef {
         private Lookup() {
         }
 
-        public static <I> Optional<I> find(Class<I> cls, FagsakYtelseType ytelseTypeKode, BehandlingType behandlingType, String startpunktRef) {
+        public static <I> Optional<I> find(Class<I> cls, FagsakYtelseType ytelseTypeKode, BehandlingType behandlingType, StartpunktType startpunktRef) {
             return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType, startpunktRef);
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType, String startpunktRef) { // NOSONAR
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType, StartpunktType startpunktRef) { // NOSONAR
             Objects.requireNonNull(instances, "instances");
 
             for (var fagsakLiteral : coalesce(fagsakYtelseType, FagsakYtelseType.UDEFINERT)) {
@@ -88,18 +88,20 @@ public @interface StartpunktRef {
                 if (inst.isUnsatisfied()) {
                     continue;
                 } else {
-                    var binst = select(cls, inst, new BehandlingTypeRefLiteral(behandlingType));
-                    if (binst.isUnsatisfied()) {
-                        continue;
-                    }
-                    for (var start : coalesce(startpunktRef, "*")) {
-                        var sinst = select(cls, binst, new StartpunktRefLiteral(start));
-                        if (sinst.isResolvable()) {
-                            return Optional.of(getInstance(sinst));
-                        } else {
-                            if (sinst.isAmbiguous()) {
-                                throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType="
-                                    + fagsakLiteral + ", behandlingType=" + behandlingType + ", startpunktRef=" + start);
+                    for (var behandlingLiteral : coalesce(behandlingType, BehandlingType.UDEFINERT)) {
+                        var binst = select(cls, inst, new BehandlingTypeRefLiteral(behandlingLiteral));
+                        if (binst.isUnsatisfied()) {
+                            continue;
+                        }
+                        for (var start : coalesce(startpunktRef, StartpunktType.UDEFINERT)) {
+                            var sinst = select(cls, binst, new StartpunktRefLiteral(start));
+                            if (sinst.isResolvable()) {
+                                return Optional.of(getInstance(sinst));
+                            } else {
+                                if (sinst.isAmbiguous()) {
+                                    throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType="
+                                        + fagsakLiteral + ", behandlingType=" + behandlingType + ", startpunktRef=" + start);
+                                }
                             }
                         }
                     }

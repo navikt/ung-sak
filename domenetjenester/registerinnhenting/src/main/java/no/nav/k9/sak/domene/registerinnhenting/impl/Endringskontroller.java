@@ -3,14 +3,13 @@ package no.nav.k9.sak.domene.registerinnhenting.impl;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -147,7 +146,7 @@ public class Endringskontroller {
     // Dersom ingen spesifikk KontrollerFaktaTjeneste er angitt for startpunktet, så utføres generell kontroll av fakta
     // (Det er forventet at protokoll for KontrollerFaktaTjeneste vil evolvere i senere leveranser)
     private List<AksjonspunktResultat> utledAksjonspunkterTilHøyreForStartpunkt(BehandlingReferanse ref, StartpunktType startpunkt) {
-        List<AksjonspunktResultat> startpunktSpesfikkeApForKontrollAvFakta = StartpunktRef.Lookup.find(KontrollerFaktaAksjonspunktUtleder.class, kontrollerFaktaTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType(), startpunkt.getKode())
+        List<AksjonspunktResultat> startpunktSpesfikkeApForKontrollAvFakta = StartpunktRef.Lookup.find(KontrollerFaktaAksjonspunktUtleder.class, kontrollerFaktaTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType(), startpunkt)
             .map(tjeneste -> tjeneste.utledAksjonspunkterTilHøyreForStartpunkt(ref, startpunkt))
             .orElse(Collections.emptyList());
         if (!startpunktSpesfikkeApForKontrollAvFakta.isEmpty()) {

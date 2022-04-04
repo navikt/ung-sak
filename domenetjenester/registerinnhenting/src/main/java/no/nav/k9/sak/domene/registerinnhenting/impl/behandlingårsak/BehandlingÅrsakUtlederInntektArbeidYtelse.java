@@ -26,7 +26,7 @@ import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
-@GrunnlagRef("InntektArbeidYtelseGrunnlag")
+@GrunnlagRef(InntektArbeidYtelseGrunnlag.class)
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OMSORGSPENGER)

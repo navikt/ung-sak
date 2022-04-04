@@ -5,12 +5,11 @@ import static java.util.stream.Collectors.toList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
@@ -24,7 +23,7 @@ import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtlede
 
 @FagsakYtelseTypeRef
 @BehandlingTypeRef
-@StartpunktRef("KONTROLLER_ARBEIDSFORHOLD")
+@StartpunktRef(StartpunktType.KONTROLLER_ARBEIDSFORHOLD)
 @ApplicationScoped
 public class KontrollerArbeidsforholdTjenesteImpl implements KontrollerFaktaAksjonspunktUtleder {
 

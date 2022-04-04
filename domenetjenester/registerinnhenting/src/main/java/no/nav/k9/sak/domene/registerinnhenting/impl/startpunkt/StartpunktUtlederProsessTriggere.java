@@ -24,7 +24,7 @@ import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.trigger.Trigger;
 
 @ApplicationScoped
-@GrunnlagRef("ProsessTriggere")
+@GrunnlagRef(ProsessTriggere.class)
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OMSORGSPENGER)

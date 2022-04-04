@@ -29,6 +29,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.AktørYtelseEndring;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYGrunnlagDiff;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -36,7 +37,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
-@GrunnlagRef("InntektArbeidYtelseGrunnlag")
+@GrunnlagRef(InntektArbeidYtelseGrunnlag.class)
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OMSORGSPENGER)
