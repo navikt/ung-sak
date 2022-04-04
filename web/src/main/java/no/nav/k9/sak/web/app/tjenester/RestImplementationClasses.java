@@ -22,6 +22,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjenest
 import no.nav.k9.sak.web.app.tjenester.behandling.kompletthet.KompletthetForBeregningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.FosterbarnRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.RammevedtakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.ÅrskvantumRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
@@ -44,10 +45,10 @@ import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningInfotrygMigreringRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelHendelseRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DiagnostikkRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningInfotrygMigreringRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningOppdragRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering.RapporteringRestTjeneste;
@@ -86,6 +87,7 @@ public class RestImplementationClasses {
         classes.add(PerioderTilBehandlingMedKildeRestTjeneste.class);
         classes.add(ÅrskvantumRestTjeneste.class);
         classes.add(RammevedtakRestTjeneste.class);
+        classes.add(FosterbarnRestTjeneste.class);
         classes.add(PersonRestTjeneste.class);
         classes.add(SøknadRestTjeneste.class);
         classes.add(OpptjeningRestTjeneste.class);
