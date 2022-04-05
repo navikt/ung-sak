@@ -7,6 +7,7 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Objects;
 
 import jakarta.enterprise.inject.Stereotype;
 import jakarta.enterprise.util.AnnotationLiteral;
@@ -52,8 +53,8 @@ public @interface VilkårTypeRef {
             this(VilkårType.UDEFINERT);
         }
 
-        public VilkårTypeRefLiteral(VilkårType navn) {
-            this.navn = navn;
+        public VilkårTypeRefLiteral(VilkårType vilkårType) {
+            this.navn = Objects.requireNonNull(vilkårType);
         }
 
         @Override
