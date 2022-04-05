@@ -63,7 +63,7 @@ public class StatistikkRepository {
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
         .stream().map(k -> k.getKode()).collect(Collectors.toList());
 
-    static final List<String> PROSESS_TASK_STATUSER = List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.FEILET, ProsessTaskStatus.VENTER_SVAR)
+    static final List<String> PROSESS_TASK_STATUSER = List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.FEILET, ProsessTaskStatus.VENTER_SVAR, ProsessTaskStatus.SUSPENDERT)
         .stream().map(k -> k.getDbKode()).collect(Collectors.toList());
     static final List<String> AKSJONSPUNKTER = AksjonspunktDefinisjon.kodeMap().values().stream()
         .filter(p -> !AksjonspunktDefinisjon.UNDEFINED.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
