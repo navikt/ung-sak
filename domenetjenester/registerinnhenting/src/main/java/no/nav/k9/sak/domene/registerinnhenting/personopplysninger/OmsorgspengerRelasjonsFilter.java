@@ -2,13 +2,17 @@ package no.nav.k9.sak.domene.registerinnhenting.personopplysninger;
 
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.typer.Periode;
 
 public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFilter {
-    public OmsorgspengerRelasjonsFilter() {
+
+    @Override
+    public boolean relasjonsFiltreringBarn(Behandling behandling, Personinfo barn, Periode opplysningsperioden) {
+        return barn.getAlder(opplysningsperioden.getFom()) <= 13;
     }
 
     @Override
-    public boolean relasjonsFiltrering(Behandling behandling, Personinfo it) {
-        return it.getAlder() <= 13;
+    public boolean hentHistorikkForRelatertePersoner() {
+        return true;
     }
 }

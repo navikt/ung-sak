@@ -32,12 +32,12 @@ public class HarSøkerOmsorgenForEgetBarn extends LeafSpecification<OmsorgenForV
         final var søkersAdresser = grunnlag.getSøkersAdresser();
         return grunnlag.getPerioderMedDeltBosted().values().stream()
             .flatMap(Collection::stream)
-            .anyMatch(it -> søkersAdresser.stream().anyMatch(it::erSammeAdresse));
+            .anyMatch(it -> søkersAdresser.stream().anyMatch(it::erSammeAdresseOgOverlapperTidsmessig));
     }
 
     private boolean harSammeAdresse(OmsorgenForVilkårGrunnlag grunnlag) {
         final var søkersAdresser = grunnlag.getSøkersAdresser();
-        return grunnlag.getBarnsAdresser().stream().anyMatch(it -> søkersAdresser.stream().anyMatch(it::erSammeAdresse));
+        return grunnlag.getBarnsAdresser().stream().anyMatch(it -> søkersAdresser.stream().anyMatch(it::erSammeAdresseOgOverlapperTidsmessig));
     }
 
     private boolean erForelderTilBarnet(Relasjon relasjon) {

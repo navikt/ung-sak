@@ -14,11 +14,6 @@ public class AdressePeriode {
         this.adresse = adresse;
     }
 
-    public static boolean fuzzyEquals(AdressePeriode a1, AdressePeriode a2) {
-        return Gyldighetsperiode.fuzzyEquals(a1.gyldighetsperiode, a2.gyldighetsperiode) &&
-            Adresse.passeLik(a1.adresse, a2.adresse);
-    }
-
     public Gyldighetsperiode getGyldighetsperiode() {
         return gyldighetsperiode;
     }
@@ -66,15 +61,6 @@ public class AdressePeriode {
         private Adresse() {
         }
 
-        public static boolean passeLik(Adresse a, Adresse adresse) {
-            if (a == null && adresse == null) return true;
-            if (a == null || adresse == null) return false;
-            if (a == adresse) return true;
-            return Objects.equals(a.adresseType, adresse.adresseType) &&
-                // TODO: enable når slutt sammenligning Objects.equals(matrikkelId, adresse.matrikkelId) &&
-                Objects.equals(a.postnummer, adresse.postnummer) &&
-                (Objects.equals(a.land, adresse.land) || a.land == null || adresse.land == null);
-        }
 
         public AdresseType getAdresseType() {
             return adresseType;
