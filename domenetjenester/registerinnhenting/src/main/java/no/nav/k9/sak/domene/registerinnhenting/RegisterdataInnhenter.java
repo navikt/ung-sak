@@ -57,6 +57,7 @@ import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.registerinnhenting.impl.SaksopplysningerFeil;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.AlleBarnOgTaMedHistorikk;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.IngenRelasjonFilter;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.OmsorgspengerRelasjonsFilter;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.PleietrengendeRelasjonsFilter;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.YtelsesspesifikkRelasjonsFilter;
@@ -75,7 +76,8 @@ public class RegisterdataInnhenter {
         FagsakYtelseType.OMSORGSPENGER_AO, new AlleBarnOgTaMedHistorikk(),
         FagsakYtelseType.PSB, new PleietrengendeRelasjonsFilter(),
         FagsakYtelseType.PPN, new PleietrengendeRelasjonsFilter(),
-        FagsakYtelseType.OMP, new OmsorgspengerRelasjonsFilter());
+        FagsakYtelseType.OMP, new OmsorgspengerRelasjonsFilter(),
+        FagsakYtelseType.FRISINN, new IngenRelasjonFilter());
 
     private PersoninfoAdapter personinfoAdapter;
     private MedlemTjeneste medlemTjeneste;
