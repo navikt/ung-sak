@@ -4,7 +4,6 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.PRECONDITION_BERE
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 
 import jakarta.enterprise.context.ApplicationScoped;
-
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -20,7 +19,7 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.Beregningsgrunnla
  *
  */
 @FagsakYtelseTypeRef(FRISINN)
-@BehandlingStegRef(stegtype = PRECONDITION_BEREGNING)
+@BehandlingStegRef(value = PRECONDITION_BEREGNING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class FrisinnVurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {

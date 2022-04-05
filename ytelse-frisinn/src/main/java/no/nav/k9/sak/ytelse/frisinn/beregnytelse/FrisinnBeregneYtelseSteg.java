@@ -8,7 +8,6 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -37,7 +36,7 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnSøknadsperiodeMapper;
 
 @FagsakYtelseTypeRef(FRISINN)
-@BehandlingStegRef(stegtype = BEREGN_YTELSE)
+@BehandlingStegRef(value = BEREGN_YTELSE)
 @BehandlingTypeRef
 @ApplicationScoped
 public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {

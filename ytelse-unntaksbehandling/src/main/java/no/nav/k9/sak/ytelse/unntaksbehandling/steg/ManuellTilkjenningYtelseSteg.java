@@ -4,7 +4,6 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.MANUELL_TILKJENNI
 import static no.nav.k9.kodeverk.behandling.BehandlingType.UNNTAKSBEHANDLING;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -13,7 +12,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(stegtype = MANUELL_TILKJENNING_YTELSE)
+@BehandlingStegRef(value = MANUELL_TILKJENNING_YTELSE)
 @BehandlingTypeRef(UNNTAKSBEHANDLING)
 @ApplicationScoped
 public class ManuellTilkjenningYtelseSteg implements BehandlingSteg {

@@ -6,7 +6,6 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
@@ -24,7 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@BehandlingStegRef(stegtype = KONTROLLER_FAKTA)
+@BehandlingStegRef(value = KONTROLLER_FAKTA)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @StartpunktRef

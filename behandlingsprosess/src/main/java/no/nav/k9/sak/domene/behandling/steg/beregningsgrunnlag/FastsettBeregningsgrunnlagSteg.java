@@ -4,7 +4,6 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FASTSETT_BEREGNIN
 
 import java.util.Collections;
 
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
@@ -20,7 +19,7 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningStegTjen
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(stegtype = FASTSETT_BEREGNINGSGRUNNLAG)
+@BehandlingStegRef(value = FASTSETT_BEREGNINGSGRUNNLAG)
 @BehandlingTypeRef
 @ApplicationScoped
 public class FastsettBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {

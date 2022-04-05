@@ -6,7 +6,6 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -18,7 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(stegtype = KONTROLLER_FAKTA_BEREGNING)
+@BehandlingStegRef(value = KONTROLLER_FAKTA_BEREGNING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class KontrollerFaktaBeregningSteg implements BeregningsgrunnlagSteg {

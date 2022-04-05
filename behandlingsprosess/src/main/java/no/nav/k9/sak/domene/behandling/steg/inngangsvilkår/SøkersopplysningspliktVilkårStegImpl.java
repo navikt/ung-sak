@@ -7,15 +7,13 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 
-@BehandlingStegRef(stegtype = KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT)
+@BehandlingStegRef(value = KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

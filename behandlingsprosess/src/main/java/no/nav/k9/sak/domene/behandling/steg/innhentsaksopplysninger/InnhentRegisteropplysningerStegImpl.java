@@ -21,7 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 
-@BehandlingStegRef(stegtype = INNHENT_REGISTEROPP)
+@BehandlingStegRef(value = INNHENT_REGISTEROPP)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

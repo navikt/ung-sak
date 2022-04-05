@@ -16,7 +16,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -41,7 +40,7 @@ import no.nav.k9.sak.inngangsvilkår.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.k9.sak.inngangsvilkår.medlemskap.VurdertMedlemskapOgForlengelser;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
-@BehandlingStegRef(stegtype = VURDER_MEDLEMSKAPVILKÅR)
+@BehandlingStegRef(value = VURDER_MEDLEMSKAPVILKÅR)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

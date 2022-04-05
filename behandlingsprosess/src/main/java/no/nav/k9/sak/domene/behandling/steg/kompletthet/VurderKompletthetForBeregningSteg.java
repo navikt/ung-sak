@@ -18,7 +18,6 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
 import no.nav.k9.formidling.kontrakt.kodeverk.Mottaker;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
@@ -44,7 +43,7 @@ import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OMSORGSPENGER)
-@BehandlingStegRef(stegtype = VURDER_KOMPLETTHET_BEREGNING)
+@BehandlingStegRef(value = VURDER_KOMPLETTHET_BEREGNING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg {

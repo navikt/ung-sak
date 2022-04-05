@@ -18,7 +18,7 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@BehandlingStegRef(stegtype = KONTROLLER_FAKTA_ARBEIDSFORHOLD)
+@BehandlingStegRef(value = KONTROLLER_FAKTA_ARBEIDSFORHOLD)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

@@ -13,7 +13,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -34,7 +33,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.dokument.bestill.tjenester.FormidlingDokumentdataTjeneste;
 
-@BehandlingStegRef(stegtype = FORESLÅ_VEDTAK)
+@BehandlingStegRef(value = FORESLÅ_VEDTAK)
 @BehandlingTypeRef(BehandlingType.REVURDERING) //Revurdering
 @FagsakYtelseTypeRef
 @ApplicationScoped

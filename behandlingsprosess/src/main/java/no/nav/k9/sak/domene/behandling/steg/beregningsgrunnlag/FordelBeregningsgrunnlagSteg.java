@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
@@ -23,7 +22,7 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningStegTjen
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(stegtype = FORDEL_BEREGNINGSGRUNNLAG)
+@BehandlingStegRef(value = FORDEL_BEREGNINGSGRUNNLAG)
 @BehandlingTypeRef
 @ApplicationScoped
 public class FordelBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {

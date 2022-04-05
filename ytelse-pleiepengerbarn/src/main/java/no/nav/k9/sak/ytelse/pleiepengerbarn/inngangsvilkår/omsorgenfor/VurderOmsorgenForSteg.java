@@ -44,7 +44,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.OmsorgenForVilkårGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.RelasjonsRolle;
 
-@BehandlingStegRef(stegtype = VURDER_OMSORG_FOR)
+@BehandlingStegRef(value = VURDER_OMSORG_FOR)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @ApplicationScoped

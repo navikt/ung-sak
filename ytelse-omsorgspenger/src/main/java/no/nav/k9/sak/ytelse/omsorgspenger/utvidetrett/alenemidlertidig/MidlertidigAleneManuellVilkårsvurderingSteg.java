@@ -26,7 +26,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
 @FagsakYtelseTypeRef(OMSORGSPENGER_MA)
-@BehandlingStegRef(stegtype = MANUELL_VILKÅRSVURDERING)
+@BehandlingStegRef(value = MANUELL_VILKÅRSVURDERING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class MidlertidigAleneManuellVilkårsvurderingSteg implements BehandlingSteg {

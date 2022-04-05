@@ -9,7 +9,6 @@ import java.util.TreeSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -26,7 +25,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
 @FagsakYtelseTypeRef(OMSORGSPENGER_KS)
-@BehandlingStegRef(stegtype = MANUELL_VILKÅRSVURDERING)
+@BehandlingStegRef(value = MANUELL_VILKÅRSVURDERING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class KroniskSykManuellVilkårsvurderingSteg implements BehandlingSteg {

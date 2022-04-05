@@ -8,7 +8,6 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
@@ -27,7 +26,7 @@ import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.InngangsvilkårFelle
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 
-@BehandlingStegRef(stegtype = FASTSETT_OPPTJENINGSPERIODE)
+@BehandlingStegRef(value = FASTSETT_OPPTJENINGSPERIODE)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

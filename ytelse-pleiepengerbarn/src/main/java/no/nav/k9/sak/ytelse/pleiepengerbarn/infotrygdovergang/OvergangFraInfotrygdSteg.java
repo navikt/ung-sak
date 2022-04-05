@@ -18,7 +18,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@BehandlingStegRef(stegtype = OVERGANG_FRA_INFOTRYGD)
+@BehandlingStegRef(value = OVERGANG_FRA_INFOTRYGD)
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @BehandlingTypeRef
 @ApplicationScoped

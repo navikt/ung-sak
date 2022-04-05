@@ -33,7 +33,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeD�
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
 
 @ApplicationScoped
-@BehandlingStegRef(stegtype = KONTROLLER_FAKTA_UTTAK)
+@BehandlingStegRef(value = KONTROLLER_FAKTA_UTTAK)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class FaktaOmUttakSteg implements BehandlingSteg {

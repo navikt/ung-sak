@@ -27,7 +27,7 @@ import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.kompletthet.KompletthetModell;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 
-@BehandlingStegRef(stegtype = INREG_AVSL)
+@BehandlingStegRef(value = INREG_AVSL)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

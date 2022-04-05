@@ -5,7 +5,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
@@ -21,7 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@BehandlingStegRef(stegtype = POSTCONDITION_KOMPLETTHET)
+@BehandlingStegRef(value = POSTCONDITION_KOMPLETTHET)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(OMSORGSPENGER)
 @ApplicationScoped

@@ -20,7 +20,6 @@ import jakarta.enterprise.inject.Stereotype;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Qualifier;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -47,7 +46,7 @@ public @interface BehandlingStegRef {
      *
      * @see no.nav.k9.kodeverk.behandling.BehandlingStegType
      */
-    BehandlingStegType stegtype();
+    BehandlingStegType value();
 
 
     /**
@@ -69,7 +68,7 @@ public @interface BehandlingStegRef {
         }
 
         @Override
-        public BehandlingStegType stegtype() {
+        public BehandlingStegType value() {
             return stegtype;
         }
 
@@ -93,18 +92,20 @@ public @interface BehandlingStegRef {
                 if (inst.isUnsatisfied()) {
                     continue;
                 } else {
-                    var binst = select(cls, inst, new BehandlingTypeRefLiteral(behandlingType));
-                    if (binst.isUnsatisfied()) {
-                        continue;
-                    }
+                    for (var behandlingLiteral : coalesce(behandlingType, BehandlingType.UDEFINERT)) {
+                        var binst = select(cls, inst, new BehandlingTypeRefLiteral(behandlingLiteral));
+                        if (binst.isUnsatisfied()) {
+                            continue;
+                        }
 
-                    var cinst = select(cls, binst, new BehandlingStegRefLiteral(behandlingStegRef));
-                    if (cinst.isResolvable()) {
-                        return Optional.of(getInstance(cinst));
-                    } else {
-                        if (cinst.isAmbiguous()) {
-                            throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType="
-                                + fagsakLiteral + ", behandlingType=" + behandlingType + ", behandlingStegRef=" + behandlingStegRef);
+                        var cinst = select(cls, binst, new BehandlingStegRefLiteral(behandlingStegRef));
+                        if (cinst.isResolvable()) {
+                            return Optional.of(getInstance(cinst));
+                        } else {
+                            if (cinst.isAmbiguous()) {
+                                throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType="
+                                    + fagsakLiteral + ", behandlingType=" + behandlingType + ", behandlingStegRef=" + behandlingStegRef);
+                            }
                         }
                     }
                 }

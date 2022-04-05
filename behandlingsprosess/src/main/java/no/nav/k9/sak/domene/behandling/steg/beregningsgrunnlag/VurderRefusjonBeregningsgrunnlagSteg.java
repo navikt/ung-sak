@@ -25,7 +25,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(stegtype = VURDER_REF_BERGRUNN)
+@BehandlingStegRef(value = VURDER_REF_BERGRUNN)
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {

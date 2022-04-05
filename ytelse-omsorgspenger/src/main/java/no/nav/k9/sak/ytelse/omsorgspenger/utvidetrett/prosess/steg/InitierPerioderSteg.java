@@ -7,7 +7,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -19,7 +18,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
  * Samle sammen fakta for fravær.
  */
 @ApplicationScoped
-@BehandlingStegRef(stegtype = INIT_PERIODER)
+@BehandlingStegRef(value = INIT_PERIODER)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(OMSORGSPENGER_KS)
 @FagsakYtelseTypeRef(OMSORGSPENGER_MA)

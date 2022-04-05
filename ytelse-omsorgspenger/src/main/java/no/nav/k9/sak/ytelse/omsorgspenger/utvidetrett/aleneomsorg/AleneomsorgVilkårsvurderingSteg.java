@@ -37,7 +37,7 @@ import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg.regelmodell.AleneomsorgVilkårGrunnlag;
 
 @FagsakYtelseTypeRef(OMSORGSPENGER_AO)
-@BehandlingStegRef(stegtype = MANUELL_VILKÅRSVURDERING)
+@BehandlingStegRef(value = MANUELL_VILKÅRSVURDERING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class AleneomsorgVilkårsvurderingSteg implements BehandlingSteg {

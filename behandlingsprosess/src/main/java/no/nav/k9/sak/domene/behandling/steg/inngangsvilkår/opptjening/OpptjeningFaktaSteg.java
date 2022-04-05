@@ -4,7 +4,6 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_OPPTJENING
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -15,7 +14,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 /**
  * Steg 81 - Kontroller fakta for opptjening
  */
-@BehandlingStegRef(stegtype = VURDER_OPPTJENING_FAKTA)
+@BehandlingStegRef(value = VURDER_OPPTJENING_FAKTA)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

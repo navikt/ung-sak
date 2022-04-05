@@ -37,7 +37,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(stegtype = PRECONDITION_BEREGNING)
+@BehandlingStegRef(value = PRECONDITION_BEREGNING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {

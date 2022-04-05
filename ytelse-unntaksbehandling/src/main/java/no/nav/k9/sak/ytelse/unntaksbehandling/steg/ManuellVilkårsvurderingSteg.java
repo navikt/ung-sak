@@ -7,9 +7,7 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -20,7 +18,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(stegtype = MANUELL_VILKÅRSVURDERING)
+@BehandlingStegRef(value = MANUELL_VILKÅRSVURDERING)
 @BehandlingTypeRef(UNNTAKSBEHANDLING)
 @ApplicationScoped
 public class ManuellVilkårsvurderingSteg implements BehandlingSteg {

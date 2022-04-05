@@ -32,7 +32,7 @@ import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 
-@BehandlingStegRef(stegtype = IVERKSETT_VEDTAK)
+@BehandlingStegRef(value = IVERKSETT_VEDTAK)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

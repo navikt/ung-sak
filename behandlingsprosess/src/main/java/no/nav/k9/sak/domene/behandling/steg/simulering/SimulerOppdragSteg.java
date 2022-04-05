@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
+import no.nav.k9.felles.exception.IntegrasjonException;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
@@ -29,9 +29,8 @@ import no.nav.k9.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
-import no.nav.k9.felles.exception.IntegrasjonException;
 
-@BehandlingStegRef(stegtype = SIMULER_OPPDRAG)
+@BehandlingStegRef(value = SIMULER_OPPDRAG)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

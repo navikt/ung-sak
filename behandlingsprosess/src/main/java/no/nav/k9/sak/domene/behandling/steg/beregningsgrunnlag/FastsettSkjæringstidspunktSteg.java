@@ -33,7 +33,7 @@ import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(stegtype = FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING)
+@BehandlingStegRef(value = FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {

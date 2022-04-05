@@ -3,9 +3,9 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;
 
 import java.util.List;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -17,7 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(stegtype = FORESLÅ_BEREGNINGSGRUNNLAG)
+@BehandlingStegRef(value = FORESLÅ_BEREGNINGSGRUNNLAG)
 @BehandlingTypeRef
 @ApplicationScoped
 public class ForeslåBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {

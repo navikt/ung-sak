@@ -46,7 +46,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjene
 
 
 @FagsakYtelseTypeRef(OMSORGSPENGER)
-@BehandlingStegRef(stegtype = BEREGN_YTELSE)
+@BehandlingStegRef(value = BEREGN_YTELSE)
 @BehandlingTypeRef
 @ApplicationScoped
 public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {

@@ -34,7 +34,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.omsorgenfor.OmsorgenForTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.omsorgenfor.regelmodell.OmsorgenForVilkårGrunnlag;
 
-@BehandlingStegRef(stegtype = VURDER_OMSORG_FOR)
+@BehandlingStegRef(value = VURDER_OMSORG_FOR)
 @FagsakYtelseTypeRef(OMSORGSPENGER_KS)
 @FagsakYtelseTypeRef(OMSORGSPENGER_MA)
 @FagsakYtelseTypeRef(OMSORGSPENGER_AO)

@@ -4,7 +4,6 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_MANUELT_BR
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
@@ -16,7 +15,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 
-@BehandlingStegRef(stegtype = VURDER_MANUELT_BREV)
+@BehandlingStegRef(value = VURDER_MANUELT_BREV)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

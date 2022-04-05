@@ -22,7 +22,7 @@ import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjenest
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
-@BehandlingStegRef(stegtype = ALDERSVILKÅRET)
+@BehandlingStegRef(value = ALDERSVILKÅRET)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 public class VurderAldersvilkåretSteg implements BehandlingSteg {
