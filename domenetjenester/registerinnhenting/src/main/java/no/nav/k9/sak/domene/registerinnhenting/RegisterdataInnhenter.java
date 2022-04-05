@@ -75,6 +75,7 @@ public class RegisterdataInnhenter {
         FagsakYtelseType.OMSORGSPENGER_MA, new AlleBarnOgTaMedHistorikk(),
         FagsakYtelseType.OMSORGSPENGER_AO, new AlleBarnOgTaMedHistorikk(),
         FagsakYtelseType.PSB, new PleietrengendeRelasjonsFilter(),
+        FagsakYtelseType.PPN, new IngenRelasjonFilter(),
         FagsakYtelseType.OMP, new OmsorgspengerRelasjonsFilter());
 
     private PersoninfoAdapter personinfoAdapter;
@@ -513,6 +514,6 @@ public class RegisterdataInnhenter {
     }
 
     private boolean hentHistorikkForRelatertePersoner(Behandling behandling) {
-        return relasjonsFilter.get(behandling.getFagsakYtelseType()).hentHistorikkForRelatertePersoner();
+        return relasjonsFilter.getOrDefault(behandling.getFagsakYtelseType(), new IngenRelasjonFilter()).hentHistorikkForRelatertePersoner();
     }
 }
