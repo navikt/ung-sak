@@ -221,7 +221,8 @@ public class SykdomVurderingService {
         final LocalDateTimeline<Boolean> innleggelseUnder18årTidslinje = hentInnleggelseUnder18årTidslinje(behandling);
 
         LocalDateTimeline<Boolean> skalIkkeVurderes = utledSkalIkkeVurderes(sykdomVurderingType, behandling);
-        LocalDateTimeline<Boolean> resterendeVurderingsperioder = kunPerioderSomIkkeFinnesI(perioderSomKanVurderesTimeline, skalIkkeVurderes);
+        final LocalDateTimeline<VilkårPeriode> utenOmsorgenForTidslinje = sykdomGrunnlagService.hentOmsorgenForTidslinje(behandling.getId()).filterValue(vp -> vp.getUtfall() == Utfall.IKKE_OPPFYLT);
+        LocalDateTimeline<Boolean> resterendeVurderingsperioder = kunPerioderSomIkkeFinnesI(kunPerioderSomIkkeFinnesI(perioderSomKanVurderesTimeline, utenOmsorgenForTidslinje), skalIkkeVurderes);
         LocalDateTimeline<Set<Saksnummer>> resterendeValgfrieVurderingsperioder =
             kunPerioderSomIkkeFinnesI(søknadsperioderPåPleietrengende, unionTilBoolean(resterendeVurderingsperioder, skalIkkeVurderes));
         
