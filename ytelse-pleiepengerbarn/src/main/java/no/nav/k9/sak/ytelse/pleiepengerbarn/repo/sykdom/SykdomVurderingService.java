@@ -216,14 +216,12 @@ public class SykdomVurderingService {
         final LocalDateTimeline<Boolean> manglerGodkjentLegeerklæringTidslinje = utledManglerGodkjentLegeerklæringTidslinje(behandling.getFagsak().getPleietrengendeAktørId());
         final LocalDateTimeline<VilkårPeriode> utenOmsorgenForTidslinje = sykdomGrunnlagService.hentManglendeOmsorgenForTidslinje(behandling.getId());
         
-        final LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = SykdomUtils.toBooleanTimeline(søknadsperioderPåPleietrengende)
+        LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = SykdomUtils.toBooleanTimeline(søknadsperioderPåPleietrengende)
                 .disjoint(eksisterendeVurderinger)
                 .disjoint(innleggelseUnder18årTidslinje)
                 .disjoint(manglerGodkjentLegeerklæringTidslinje);
         
-        LocalDateTimeline<Boolean> resterendeVurderingsperioder = alleResterendeVurderingsperioder.disjoint(utenOmsorgenForTidslinje);
-        LocalDateTimeline<Boolean> resterendeValgfrieVurderingsperioder = alleResterendeVurderingsperioder.disjoint(resterendeVurderingsperioder);
-        
+        LocalDateTimeline<Boolean> resterendeVurderingsperioder;
         if (sykdomVurderingType.equals(SykdomVurderingType.TO_OMSORGSPERSONER)) {
             /*
              * To omsorgspersoner skal kun vurderes for oppfylte periode med kontinuerlig tilsyn og pleie.
@@ -232,9 +230,13 @@ public class SykdomVurderingService {
              */
             LocalDateTimeline<Boolean> ktpPerioder = toLocalDateTimeline(hentKontinuerligTilsynOgPleiePerioder(behandling));
             final LocalDateTimeline<?> flereOmsorgspersoner = harAndreSakerEnn(behandling.getFagsak().getSaksnummer(), søknadsperioderPåPleietrengende);
-            resterendeVurderingsperioder = resterendeVurderingsperioder.intersection(ktpPerioder).intersection(flereOmsorgspersoner);
-            resterendeValgfrieVurderingsperioder = resterendeValgfrieVurderingsperioder.intersection(ktpPerioder);
+            alleResterendeVurderingsperioder = alleResterendeVurderingsperioder.intersection(ktpPerioder);
+            resterendeVurderingsperioder = alleResterendeVurderingsperioder.disjoint(utenOmsorgenForTidslinje).intersection(flereOmsorgspersoner);
+        } else {
+            resterendeVurderingsperioder = alleResterendeVurderingsperioder.disjoint(utenOmsorgenForTidslinje);
         }
+        
+        final LocalDateTimeline<Boolean> resterendeValgfrieVurderingsperioder = alleResterendeVurderingsperioder.disjoint(resterendeVurderingsperioder);
 
         /*
          * Denne er ikke satt siden brukerdialog ikke lenger benytter denne verdien. Hvis den
