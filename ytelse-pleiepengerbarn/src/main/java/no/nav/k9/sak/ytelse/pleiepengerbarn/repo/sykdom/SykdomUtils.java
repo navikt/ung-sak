@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.stream.Collectors;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -85,5 +83,9 @@ public final class SykdomUtils {
         });
 
         return tidslinje.compress();
+    }
+
+    public static LocalDateTimeline<Boolean> toBooleanTimeline(LocalDateTimeline<?> tidslinje) {
+        return new LocalDateTimeline<Boolean>(tidslinje.stream().map(s -> new LocalDateSegment<Boolean>(s.getLocalDateInterval(), Boolean.TRUE)).toList());
     }
 }

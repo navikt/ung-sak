@@ -213,26 +213,41 @@ public class SykdomVurderingService {
     public SykdomVurderingerOgPerioder utledPerioder(SykdomVurderingType sykdomVurderingType, Behandling behandling) {
         final LocalDateTimeline<SykdomVurderingVersjon> eksisterendeVurderinger = hentVurderinger(sykdomVurderingType, behandling);
         final LocalDateTimeline<Set<Saksnummer>> søknadsperioderPåPleietrengende = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
-
-        final LocalDateTimeline<Boolean> perioderTilVurderingPåBehandling = utledPerioderTilVurderingMedOmsorgenFor(behandling);
-        final List<Periode> nyeSøknadsperioder = Collections.emptyList(); //TODO:ikke i bruk lenger? fjerne?
-        final List<Periode> perioderSomKanVurderes = søknadsperioderPåPleietrengende.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
-        LocalDateTimeline<Boolean> perioderSomKanVurderesTimeline = toLocalDateTimeline(perioderSomKanVurderes);
         final LocalDateTimeline<Boolean> innleggelseUnder18årTidslinje = hentInnleggelseUnder18årTidslinje(behandling);
 
-        LocalDateTimeline<Boolean> skalIkkeVurderes = utledSkalIkkeVurderes(sykdomVurderingType, behandling);
-        final LocalDateTimeline<VilkårPeriode> utenOmsorgenForTidslinje = sykdomGrunnlagService.hentOmsorgenForTidslinje(behandling.getId()).filterValue(vp -> vp.getUtfall() == Utfall.IKKE_OPPFYLT);
-        LocalDateTimeline<Boolean> resterendeVurderingsperioder = kunPerioderSomIkkeFinnesI(kunPerioderSomIkkeFinnesI(perioderSomKanVurderesTimeline, utenOmsorgenForTidslinje), skalIkkeVurderes);
+        LocalDateTimeline<Boolean> perioderSomAlleredeHarBlittHåndtert = utledPerioderSomAlleredeHarBlittHåndtert(sykdomVurderingType,
+                behandling.getFagsak().getPleietrengendeAktørId(),
+                eksisterendeVurderinger,
+                innleggelseUnder18årTidslinje);
+        
+        final LocalDateTimeline<VilkårPeriode> utenOmsorgenForTidslinje = sykdomGrunnlagService.hentManglendeOmsorgenForTidslinje(behandling.getId());
+        
+        LocalDateTimeline<Boolean> resterendeVurderingsperioder = SykdomUtils.toBooleanTimeline(søknadsperioderPåPleietrengende)
+                .disjoint(utenOmsorgenForTidslinje)
+                .disjoint(perioderSomAlleredeHarBlittHåndtert);
+        
         LocalDateTimeline<Set<Saksnummer>> resterendeValgfrieVurderingsperioder =
-            kunPerioderSomIkkeFinnesI(søknadsperioderPåPleietrengende, unionTilBoolean(resterendeVurderingsperioder, skalIkkeVurderes));
+            kunPerioderSomIkkeFinnesI(søknadsperioderPåPleietrengende, unionTilBoolean(resterendeVurderingsperioder, perioderSomAlleredeHarBlittHåndtert));
         
         if (sykdomVurderingType.equals(SykdomVurderingType.TO_OMSORGSPERSONER)) {
+            /*
+             * To omsorgspersoner skal kun vurderes for oppfylte periode med kontinuerlig tilsyn og pleie.
+             * 
+             * I tillegg er to omsorgspersoner kun obligatorisk å vurdere for perioder med flere søkere.
+             */
             LocalDateTimeline<Boolean> ktpPerioder = toLocalDateTimeline(hentKontinuerligTilsynOgPleiePerioder(behandling));
             final LocalDateTimeline<?> flereOmsorgspersoner = harAndreSakerEnn(behandling.getFagsak().getSaksnummer(), søknadsperioderPåPleietrengende);
             resterendeVurderingsperioder = resterendeVurderingsperioder.intersection(ktpPerioder).intersection(flereOmsorgspersoner);
             resterendeValgfrieVurderingsperioder = resterendeValgfrieVurderingsperioder.intersection(ktpPerioder);
         }
 
+        /*
+         * Denne er ikke satt siden brukerdialog ikke lenger benytter denne verdien. Hvis den
+         * skal benyttes må feltet utledes. Hvis den over lengre tid ikke er interessant bør
+         * den fjernes fra kontrakten. 2022-04-05
+         */
+        final List<Periode> nyeSøknadsperioder = Collections.emptyList();
+        final List<Periode> perioderSomKanVurderes = søknadsperioderPåPleietrengende.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
         return new SykdomVurderingerOgPerioder(
             eksisterendeVurderinger,
             søknadsperioderPåPleietrengende,
@@ -244,15 +259,16 @@ public class SykdomVurderingService {
         );
     }
 
-    private LocalDateTimeline<Boolean> utledSkalIkkeVurderes(final SykdomVurderingType sykdomVurderingType, final Behandling behandling) {
-        if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
+    private LocalDateTimeline<Boolean> utledPerioderSomAlleredeHarBlittHåndtert(SykdomVurderingType sykdomVurderingType,
+            AktørId pleietrengende, LocalDateTimeline<SykdomVurderingVersjon> eksisterendeVurderinger, LocalDateTimeline<Boolean> innleggelseUnder18årTidslinje) {
+        if (manglerGodkjentLegeerklæring(pleietrengende)) {
             return new LocalDateTimeline<Boolean>(LocalDate.MIN, LocalDate.MAX, true);
         }
 
         LocalDateTimeline<Boolean> skalIkkeVurderes = LocalDateTimeline.empty();
 
-        skalIkkeVurderes = SykdomUtils.unionTilBoolean(skalIkkeVurderes, hentVurderinger(sykdomVurderingType, behandling));
-        skalIkkeVurderes = SykdomUtils.unionTilBoolean(skalIkkeVurderes, hentInnleggelseUnder18årTidslinje(behandling));
+        skalIkkeVurderes = SykdomUtils.unionTilBoolean(skalIkkeVurderes, eksisterendeVurderinger);
+        skalIkkeVurderes = SykdomUtils.unionTilBoolean(skalIkkeVurderes, innleggelseUnder18årTidslinje);
 
         return skalIkkeVurderes;
     }
@@ -323,12 +339,41 @@ public class SykdomVurderingService {
     }
 
     public static class SykdomVurderingerOgPerioder {
+        /**
+         * Alle gjeldende vurderinger i en tidslinje.
+         */
         private final LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje;
+        
+        /**
+         * Tidslinje over periodene til alle sakene som er tilknyttet den pleietrengende.
+         */
         private final LocalDateTimeline<Set<Saksnummer>> saksnummerForPerioder;
+        
+        /**
+         * Perioder som saksbehandler skal få lov til å gjøre vurderinger innenfor. Dette
+         * er nå satt til alle søknadsperioder som finnes på barnet (på tvers av søkere).
+         */
         private final List<Periode> perioderSomKanVurderes;
+        
+        /**
+         * Nye søknadsperioder på søker som skal håndteres av saksbehandler i denne behandlingen.
+         */
         private final List<Periode> nyeSøknadsperioder;
+        
+        /**
+         * Alle perioder på pleietrengende med innleggelse.
+         */
         private List<Periode> innleggelsesperioder;
+        
+        /**
+         * Perioder som er obligatoriske å vurdere før behandlingen kommer videre.
+         */
         private List<Periode> resterendeVurderingsperioder;
+        
+        /**
+         * Perioder som vises som forslag til saksbehandler for vurdering, men som ikke
+         * er påkrevd å utføre.
+         */
         private List<Periode> resterendeValgfrieVurderingsperioder;
 
 

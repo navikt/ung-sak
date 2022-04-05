@@ -52,8 +52,12 @@ public class SykdomGrunnlagService {
         return vilkåreneOpt.map(v -> v.getVilkårTimeline(VilkårType.OMSORGEN_FOR)).orElse(LocalDateTimeline.empty());
     }
 
+    LocalDateTimeline<VilkårPeriode> hentManglendeOmsorgenForTidslinje(Long behandlingId) {
+        return hentOmsorgenForTidslinje(behandlingId).filterValue(v -> v.getUtfall() == Utfall.IKKE_OPPFYLT);
+    }
+    
     public List<Periode> hentManglendeOmsorgenForPerioder(Long behandlingId) {
-        return SykdomUtils.toPeriodeList(hentOmsorgenForTidslinje(behandlingId).filterValue(v -> v.getUtfall() == Utfall.IKKE_OPPFYLT));
+        return SykdomUtils.toPeriodeList(hentManglendeOmsorgenForTidslinje(behandlingId));
     }
 
     public SykdomGrunnlagSammenlikningsresultat utledRelevanteEndringerSidenForrigeGrunnlag(Behandling behandling) {
