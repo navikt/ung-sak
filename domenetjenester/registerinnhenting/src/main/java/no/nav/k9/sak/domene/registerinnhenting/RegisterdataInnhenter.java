@@ -57,7 +57,6 @@ import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.registerinnhenting.impl.SaksopplysningerFeil;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.AlleBarnOgTaMedHistorikk;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.IngenRelasjonFilter;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.OmsorgspengerRelasjonsFilter;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.PleietrengendeRelasjonsFilter;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.YtelsesspesifikkRelasjonsFilter;
@@ -75,6 +74,7 @@ public class RegisterdataInnhenter {
         FagsakYtelseType.OMSORGSPENGER_MA, new AlleBarnOgTaMedHistorikk(),
         FagsakYtelseType.OMSORGSPENGER_AO, new AlleBarnOgTaMedHistorikk(),
         FagsakYtelseType.PSB, new PleietrengendeRelasjonsFilter(),
+        FagsakYtelseType.PPN, new PleietrengendeRelasjonsFilter(),
         FagsakYtelseType.OMP, new OmsorgspengerRelasjonsFilter());
 
     private PersoninfoAdapter personinfoAdapter;
@@ -423,7 +423,7 @@ public class RegisterdataInnhenter {
 
     private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling, no.nav.k9.sak.typer.Periode opplysningsperioden) {
         List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo);
-        var filter = relasjonsFilter.getOrDefault(behandling.getFagsakYtelseType(), new IngenRelasjonFilter());
+        var filter = relasjonsFilter.get(behandling.getFagsakYtelseType());
 
         return relaterteBarn.stream()
             .filter(barn -> filter.relasjonsFiltreringBarn(behandling, barn, opplysningsperioden))
