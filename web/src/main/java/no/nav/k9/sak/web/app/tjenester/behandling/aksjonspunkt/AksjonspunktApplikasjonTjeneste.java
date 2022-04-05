@@ -181,6 +181,12 @@ public class AksjonspunktApplikasjonTjeneste {
 
         behandlingskontrollTjeneste.aksjonspunkterEndretStatus(kontekst, behandling.getAktivtBehandlingSteg(), utførteAksjonspunkter);
 
+        overstyrteAksjonspunkter.forEach(dto ->
+            behandling.getAksjonspunktFor(dto.getKode()).ifPresent(aksjonspunkt ->
+                aksjonspunkt.setAnsvarligSaksbehandler(getCurrentUserId())
+            )
+        );
+
         // Fremoverhopp hvis vilkår settes til AVSLÅTT
         håndterOverhopp(overhoppForOverstyring, kontekst);
 
