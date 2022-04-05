@@ -250,10 +250,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         utvidedePerioder = utvidedePerioder.union(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId()), StandardCombinators::alwaysTrueForMatch);
         utvidedePerioder = utvidedePerioder.union(uttaksendringerSidenForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
 
-        return utvidedePerioder.toSegments()
-            .stream()
-            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new));
+        return DatoIntervallEntitet.fraTimeline(utvidedePerioder);
     }
 
     private LocalDateTimeline<Boolean> uttaksendringerSidenForrigeBehandling(BehandlingReferanse referanse) {
