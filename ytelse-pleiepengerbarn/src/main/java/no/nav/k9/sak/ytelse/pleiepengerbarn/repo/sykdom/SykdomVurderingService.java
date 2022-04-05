@@ -248,7 +248,7 @@ public class SykdomVurderingService {
 
         LocalDateTimeline<Boolean> skalIkkeVurderes = LocalDateTimeline.empty();
 
-        skalIkkeVurderes = SykdomUtils.unionTilBoolean(skalIkkeVurderes, hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling));
+        skalIkkeVurderes = SykdomUtils.unionTilBoolean(skalIkkeVurderes, hentVurderinger(sykdomVurderingType, behandling));
         skalIkkeVurderes = SykdomUtils.unionTilBoolean(skalIkkeVurderes, hentInnleggelseUnder18årTidslinje(behandling));
 
         if (sykdomVurderingType.equals(SykdomVurderingType.TO_OMSORGSPERSONER)) {
