@@ -12,7 +12,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 
 @ApplicationScoped
-@ProsessTask(value = "batch.finnFagsakerForAvsluttning", cronExpression = "0 30 17 * * *", maxFailedRuns = 1)
+@ProsessTask(value = "batch.finnFagsakerForAvsluttning", cronExpression = "0 30 21 * * *", maxFailedRuns = 1)
 public class FinnFagsakerForAvsluttningBatchTask implements ProsessTaskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(FinnFagsakerForAvsluttningBatchTask.class);
