@@ -8,7 +8,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
 /**
  * Lagring av Fosterbarn for Omsorgspenger
@@ -18,16 +17,10 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 public class FosterbarnRepository {
 
     private EntityManager entityManager;
-    private BehandlingRepository behandlingRepository;
-
-    protected FosterbarnRepository() {
-        // CDI
-    }
 
     @Inject
     public FosterbarnRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
-        this.behandlingRepository = new BehandlingRepository(entityManager);
     }
 
     public Optional<FosterbarnGrunnlag> hentHvisEksisterer(Long behandlingId) {
