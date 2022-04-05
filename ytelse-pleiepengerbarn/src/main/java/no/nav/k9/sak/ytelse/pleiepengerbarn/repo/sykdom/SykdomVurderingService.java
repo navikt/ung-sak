@@ -220,15 +220,17 @@ public class SykdomVurderingService {
         LocalDateTimeline<Boolean> perioderSomKanVurderesTimeline = toLocalDateTimeline(perioderSomKanVurderes);
         final LocalDateTimeline<Boolean> innleggelseUnder18årTidslinje = hentInnleggelseUnder18årTidslinje(behandling);
 
-        //skalIkkeVurderes = manglerLegeerkl ? universetsLevetid : eksisterendeVurderinger + innleggelse + (toop ? eksisterendeKTP : ingenting);
         LocalDateTimeline<Boolean> skalIkkeVurderes = utledSkalIkkeVurderes(sykdomVurderingType, behandling);
-
-        //resterendeVurderingsperioder = perioderSomKanVurderes - skalIkkeVurderes;
         LocalDateTimeline<Boolean> resterendeVurderingsperioder = kunPerioderSomIkkeFinnesI(perioderSomKanVurderesTimeline, skalIkkeVurderes);
-
-        //valgfrie = søknadsperioderPåPleietrengende - resterendeVurderingsperioder - skalIkkeVurderes;
         LocalDateTimeline<Set<Saksnummer>> resterendeValgfrieVurderingsperioder =
             kunPerioderSomIkkeFinnesI(søknadsperioderPåPleietrengende, unionTilBoolean(resterendeVurderingsperioder, skalIkkeVurderes));
+        
+        if (sykdomVurderingType.equals(SykdomVurderingType.TO_OMSORGSPERSONER)) {
+            LocalDateTimeline<Boolean> ktpPerioder = toLocalDateTimeline(hentKontinuerligTilsynOgPleiePerioder(behandling));
+            final LocalDateTimeline<?> flereOmsorgspersoner = harAndreSakerEnn(behandling.getFagsak().getSaksnummer(), søknadsperioderPåPleietrengende);
+            resterendeVurderingsperioder = resterendeVurderingsperioder.intersection(ktpPerioder).intersection(flereOmsorgspersoner);
+            resterendeValgfrieVurderingsperioder = resterendeValgfrieVurderingsperioder.intersection(ktpPerioder);
+        }
 
         return new SykdomVurderingerOgPerioder(
             eksisterendeVurderinger,
@@ -250,10 +252,6 @@ public class SykdomVurderingService {
 
         skalIkkeVurderes = SykdomUtils.unionTilBoolean(skalIkkeVurderes, hentVurderinger(sykdomVurderingType, behandling));
         skalIkkeVurderes = SykdomUtils.unionTilBoolean(skalIkkeVurderes, hentInnleggelseUnder18årTidslinje(behandling));
-
-        if (sykdomVurderingType.equals(SykdomVurderingType.TO_OMSORGSPERSONER)) {
-            skalIkkeVurderes = SykdomUtils.unionTilBoolean(skalIkkeVurderes, toLocalDateTimeline(hentKontinuerligTilsynOgPleiePerioder(behandling)));
-        }
 
         return skalIkkeVurderes;
     }
