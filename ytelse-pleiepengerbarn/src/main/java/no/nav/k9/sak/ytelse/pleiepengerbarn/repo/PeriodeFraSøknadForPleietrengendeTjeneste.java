@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +41,7 @@ public class PeriodeFraSøknadForPleietrengendeTjeneste {
     public PeriodeFraSøknadForPleietrengendeTjeneste(FagsakRepository fagsakRepository,
                                                      BehandlingRepository behandlingRepository,
                                                      UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
-                                                     @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjenester) {
+                                                     @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjenester) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
@@ -48,7 +50,7 @@ public class PeriodeFraSøknadForPleietrengendeTjeneste {
 
 
     public List<FagsakKravDokument> hentAllePerioderTilVurdering(AktørId pleietrengende, DatoIntervallEntitet fagsakPeriode) {
-        final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, pleietrengende, null, fagsakPeriode.getFomDato().minusWeeks(25), fagsakPeriode.getTomDato().plusWeeks(25));
+        final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(PLEIEPENGER_SYKT_BARN, pleietrengende, null, fagsakPeriode.getFomDato().minusWeeks(25), fagsakPeriode.getTomDato().plusWeeks(25));
 
         final List<FagsakKravDokument> kravdokumenter = new ArrayList<>();
         for (Fagsak f : fagsaker) {

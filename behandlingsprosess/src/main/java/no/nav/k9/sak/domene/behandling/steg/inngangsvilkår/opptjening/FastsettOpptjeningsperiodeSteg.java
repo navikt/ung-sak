@@ -1,12 +1,13 @@
 package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
@@ -25,7 +26,7 @@ import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.InngangsvilkårFelle
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 
-@BehandlingStegRef(kode = "VURDER_OPPTJ_PERIODE")
+@BehandlingStegRef(value = FASTSETT_OPPTJENINGSPERIODE)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped
@@ -42,7 +43,7 @@ public class FastsettOpptjeningsperiodeSteg extends FastsettOpptjeningsperiodeSt
     public FastsettOpptjeningsperiodeSteg(BehandlingRepositoryProvider repositoryProvider,
                                           OpptjeningRepository opptjeningRepository,
                                           InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste) {
-        super(repositoryProvider, inngangsvilkårFellesTjeneste, BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE);
+        super(repositoryProvider, inngangsvilkårFellesTjeneste, FASTSETT_OPPTJENINGSPERIODE);
         this.opptjeningRepository = opptjeningRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();

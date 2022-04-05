@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
@@ -45,7 +47,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PSBVilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVedtakPåvirkerSakerTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(VurderOmPSBVedtakPåvirkerAndreSakerTjeneste.class);
@@ -73,7 +75,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
                                                        SykdomGrunnlagService sykdomGrunnlagService,
                                                        ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
                                                        EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
-                                                       @FagsakYtelseTypeRef("PSB") PSBVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                                       @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PSBVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                        SamtidigUttakTjeneste samtidigUttakTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;

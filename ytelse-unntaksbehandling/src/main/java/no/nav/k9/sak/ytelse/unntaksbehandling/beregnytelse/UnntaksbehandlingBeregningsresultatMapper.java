@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.beregnytelse;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingType.UNNTAKSBEHANDLING;
+
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -16,6 +18,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -44,7 +47,7 @@ import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
-@BehandlingTypeRef("BT-010")
+@BehandlingTypeRef(UNNTAKSBEHANDLING)
 public class UnntaksbehandlingBeregningsresultatMapper implements BeregningsresultatMapper {
 
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;

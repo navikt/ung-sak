@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.iverksettevedtak;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.IVERKSETT_VEDTAK;
+
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -30,7 +32,7 @@ import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 
-@BehandlingStegRef(kode = "IVEDSTEG")
+@BehandlingStegRef(value = IVERKSETT_VEDTAK)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

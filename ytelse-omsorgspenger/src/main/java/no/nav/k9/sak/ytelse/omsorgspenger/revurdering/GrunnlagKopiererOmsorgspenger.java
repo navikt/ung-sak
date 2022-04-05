@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.revurdering;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.util.EnumSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -17,7 +19,7 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagReposito
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class GrunnlagKopiererOmsorgspenger implements GrunnlagKopierer {
 
     private PersonopplysningRepository personopplysningRepository;

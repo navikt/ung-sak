@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.time.LocalDate;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -15,14 +17,14 @@ import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @ApplicationScoped
 public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<PleiepengerBarnSøknadInnsending> {
 
     private SaksnummerRepository saksnummerRepository;
     private FagsakTjeneste fagsakTjeneste;
 
-    
+
     protected PleiepengerBarnSøknadMottaker() {
         // for proxy
     }
@@ -40,12 +42,12 @@ public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<Ple
         if (sluttDato == null) {
             sluttDato = startDato;
         }
-        
+
         if (sluttDato.isAfter(LocalDate.now().plusYears(5))) {
             // Hvis dette skulle bli nødvendig i fremtiden kan denne sjekken fjernes.
             throw new IllegalArgumentException("Fagsak kan ikke være mer enn 5 år inn i fremtiden.");
         }
-        
+
         /*
          * Flere fagsaker kommer trolig til å komme tilbake igjen etter at alle sakene har blitt flyttet fra Infotrygd. Merk at sjekken
          * da må gjøres på tvers av alle søkere på den samme pleietrengende for at bruddet i tidslinjen skal gi mening.
@@ -57,8 +59,8 @@ public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<Ple
         final Saksnummer saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
         return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
     }
-    
-    
+
+
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate startDato, LocalDate sluttDato) {
         final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, null, saksnummer, startDato, sluttDato);
         fagsakTjeneste.opprettFagsak(fagsak);

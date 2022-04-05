@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.mottak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Comparator;
@@ -37,7 +39,7 @@ import no.nav.k9.søknad.felles.type.Journalpost;
 import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @DokumentGruppeRef(Brevkode.SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE_KODE)
 class DokumentmottakerSøknadPPN implements Dokumentmottaker {
 

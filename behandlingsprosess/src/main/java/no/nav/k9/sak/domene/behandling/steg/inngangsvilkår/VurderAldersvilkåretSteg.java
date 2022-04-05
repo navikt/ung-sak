@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.ALDERSVILKÅRET;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -20,7 +22,7 @@ import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjenest
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
-@BehandlingStegRef(kode = "VURDER_ALDER")
+@BehandlingStegRef(value = ALDERSVILKÅRET)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 public class VurderAldersvilkåretSteg implements BehandlingSteg {

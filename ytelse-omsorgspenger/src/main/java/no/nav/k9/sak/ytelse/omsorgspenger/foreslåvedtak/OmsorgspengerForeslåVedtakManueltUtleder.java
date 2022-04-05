@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.foreslåvedtak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -22,7 +24,7 @@ import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.K9FormidlingKlient
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 
 
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 @ApplicationScoped
 public class OmsorgspengerForeslåVedtakManueltUtleder implements ForeslåVedtakManueltUtleder {
 

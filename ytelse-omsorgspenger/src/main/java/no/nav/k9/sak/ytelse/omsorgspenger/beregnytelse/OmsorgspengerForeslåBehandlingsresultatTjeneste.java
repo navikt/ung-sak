@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -38,7 +40,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.vilkår.OMPVilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 @ApplicationScoped
 public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBehandlingsresultatTjeneste {
 
@@ -60,9 +62,9 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
                                                            VedtakVarselRepository vedtakVarselRepository,
                                                            OmsorgspengerGrunnlagRepository grunnlagRepository,
                                                            ÅrskvantumTjeneste årskvantumTjeneste,
-                                                           @FagsakYtelseTypeRef("OMP") VurderSøknadsfristTjeneste<OppgittFraværPeriode> vurderSøknadsfristTjeneste,
+                                                           @FagsakYtelseTypeRef(OMSORGSPENGER) VurderSøknadsfristTjeneste<OppgittFraværPeriode> vurderSøknadsfristTjeneste,
                                                            @FagsakYtelseTypeRef RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder,
-                                                           @FagsakYtelseTypeRef("OMP") OMPVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                                           @FagsakYtelseTypeRef(OMSORGSPENGER) OMPVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                            BeregningsresultatRepository beregningsresultatRepository) {
         super(repositoryProvider, vedtakVarselRepository, revurderingBehandlingsresultatutleder);
         this.grunnlagRepository = grunnlagRepository;

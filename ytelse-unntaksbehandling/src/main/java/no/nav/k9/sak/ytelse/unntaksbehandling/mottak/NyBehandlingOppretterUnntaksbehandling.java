@@ -1,8 +1,11 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.mottak;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingType.UNNTAKSBEHANDLING;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretter;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -12,7 +15,7 @@ import no.nav.k9.sak.mottak.NyBehandlingOppretter;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 
 @FagsakYtelseTypeRef
-@BehandlingTypeRef("BT-010")
+@BehandlingTypeRef(UNNTAKSBEHANDLING)
 @ApplicationScoped
 public class NyBehandlingOppretterUnntaksbehandling implements NyBehandlingOppretter {
 
@@ -21,7 +24,7 @@ public class NyBehandlingOppretterUnntaksbehandling implements NyBehandlingOppre
 
     @Inject
     public NyBehandlingOppretterUnntaksbehandling(BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
-                                                  @FagsakYtelseTypeRef @BehandlingTypeRef("BT-010") UnntaksbehandlingOppretter unntaksbehandlingOppretter) {
+                                                  @FagsakYtelseTypeRef @BehandlingTypeRef(UNNTAKSBEHANDLING) UnntaksbehandlingOppretter unntaksbehandlingOppretter) {
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.unntaksbehandlingOppretter = unntaksbehandlingOppretter;
     }

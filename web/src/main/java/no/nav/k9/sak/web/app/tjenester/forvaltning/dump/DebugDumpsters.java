@@ -46,7 +46,7 @@ public class DebugDumpsters {
     }
 
     private List<Instance<DebugDumpFagsak>> findDumpsters(FagsakYtelseType ytelseType) {
-        return FagsakYtelseTypeRef.Lookup.list(DebugDumpFagsak.class, dumpere, ytelseType.getKode());
+        return FagsakYtelseTypeRef.Lookup.list(DebugDumpFagsak.class, dumpere, ytelseType);
     }
 
     private List<DumpOutput> dumpOutput(Fagsak fagsak, List<Instance<DebugDumpFagsak>> dumpsters) {

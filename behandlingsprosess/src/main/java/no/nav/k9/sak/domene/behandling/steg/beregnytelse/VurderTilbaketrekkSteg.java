@@ -1,5 +1,8 @@
 package no.nav.k9.sak.domene.behandling.steg.beregnytelse;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_TILBAKETREKK;
+import static no.nav.k9.kodeverk.behandling.BehandlingType.REVURDERING;
+
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -20,8 +23,8 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRep
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.AksjonspunktutlederTilbaketrekk;
 
-@BehandlingStegRef(kode = "VURDER_TILBAKETREKK")
-@BehandlingTypeRef("BT-004")
+@BehandlingStegRef(value = VURDER_TILBAKETREKK)
+@BehandlingTypeRef(REVURDERING)
 @FagsakYtelseTypeRef
 
 @ApplicationScoped

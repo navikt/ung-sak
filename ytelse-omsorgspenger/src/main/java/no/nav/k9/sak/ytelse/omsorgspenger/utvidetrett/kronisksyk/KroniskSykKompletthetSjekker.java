@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
+
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -11,7 +13,7 @@ import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 
-@FagsakYtelseTypeRef("OMP_KS")
+@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
 @BehandlingTypeRef
 @ApplicationScoped
 public class KroniskSykKompletthetSjekker implements Kompletthetsjekker {

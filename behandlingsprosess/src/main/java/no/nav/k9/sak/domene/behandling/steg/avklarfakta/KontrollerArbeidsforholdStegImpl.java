@@ -1,8 +1,9 @@
 package no.nav.k9.sak.domene.behandling.steg.avklarfakta;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -13,13 +14,13 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.StartpunktRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@BehandlingStegRef(kode = "KOARB")
+@BehandlingStegRef(value = KONTROLLER_FAKTA_ARBEIDSFORHOLD)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
-@StartpunktRef("KONTROLLER_ARBEIDSFORHOLD")
 @ApplicationScoped
 class KontrollerArbeidsforholdStegImpl implements KontrollerArbeidsforholdSteg {
 
@@ -35,7 +36,7 @@ class KontrollerArbeidsforholdStegImpl implements KontrollerArbeidsforholdSteg {
     @Inject
     KontrollerArbeidsforholdStegImpl(BehandlingRepository behandlingRepository,
                                      SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                     @StartpunktRef("KONTROLLER_ARBEIDSFORHOLD") KontrollerArbeidsforholdTjenesteImpl tjeneste) {
+                                     @StartpunktRef(StartpunktType.KONTROLLER_ARBEIDSFORHOLD) KontrollerArbeidsforholdTjenesteImpl tjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.tjeneste = tjeneste;

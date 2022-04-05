@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -28,8 +27,8 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
-@FagsakYtelseTypeRef("*")
-@BehandlingStegRef(kode = "VURDER_VILKAR_BERGRUNN")
+@FagsakYtelseTypeRef
+@BehandlingStegRef(value = VURDER_VILKAR_BERGRUNN)
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderBeregningsgrunnlagVilkårSteg implements BeregningsgrunnlagSteg {

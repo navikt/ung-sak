@@ -1,5 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.beregningsresultat;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -14,9 +18,9 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(FRISINN)
 public class BeregningsresultatDump implements DebugDumpFagsak {
 
     private EntityManager entityManager;

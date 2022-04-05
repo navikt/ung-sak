@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -38,7 +40,7 @@ import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.opptjening.PSBOppgittOpptjeningFilter;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class PSBPreconditionBeregningAksjonspunktUtleder implements PreconditionBeregningAksjonspunktUtleder {
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
@@ -59,9 +61,9 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
 
     @Inject
     public PSBPreconditionBeregningAksjonspunktUtleder(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                                       @FagsakYtelseTypeRef("PSB") PSBOpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste,
+                                                       @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PSBOpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste,
                                                        FagsakRepository fagsakRepository,
-                                                       @FagsakYtelseTypeRef("PSB") PSBOppgittOpptjeningFilter oppgittOpptjeningFilter,
+                                                       @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PSBOppgittOpptjeningFilter oppgittOpptjeningFilter,
                                                        BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                                        VilkårPeriodeFilterProvider periodeFilterProvider,
                                                        @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering,

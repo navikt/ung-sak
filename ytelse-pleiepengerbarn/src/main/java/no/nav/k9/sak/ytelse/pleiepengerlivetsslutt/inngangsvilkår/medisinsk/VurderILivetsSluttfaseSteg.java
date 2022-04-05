@@ -1,5 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_MEDISINSKVILKÅR;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -54,9 +57,9 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepositor
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.LivetsSluttfaseDokumentasjon;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 
-@BehandlingStegRef(kode = "VURDER_MEDISINSK")
+@BehandlingStegRef(value = VURDER_MEDISINSKVILKÅR)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @ApplicationScoped
 public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
 
@@ -77,7 +80,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
     @Inject
     public VurderILivetsSluttfaseSteg(BehandlingRepositoryProvider repositoryProvider,
                                       PleiebehovResultatRepository resultatRepository,
-                                      @FagsakYtelseTypeRef("PPN") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                      @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                       SykdomGrunnlagRepository sykdomGrunnlagRepository,
                                       SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingRepository sykdomVurderingRepository) {
         this.resultatRepository = resultatRepository;

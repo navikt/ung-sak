@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.PRECONDITION_BEREGNING;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +37,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(kode = "PRECONDITION_BERGRUNN")
+@BehandlingStegRef(value = PRECONDITION_BEREGNING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {

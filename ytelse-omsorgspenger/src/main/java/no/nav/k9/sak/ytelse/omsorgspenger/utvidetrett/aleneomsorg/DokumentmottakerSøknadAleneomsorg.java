@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
+
 import java.util.Collection;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -29,7 +31,7 @@ import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerAleneOmsorg;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP_AO")
+@FagsakYtelseTypeRef(OMSORGSPENGER_AO)
 @DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_AO_KODE)
 public class DokumentmottakerSøknadAleneomsorg implements Dokumentmottaker {
 

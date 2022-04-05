@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.repo;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -11,7 +13,7 @@ import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.domene.registerinnhenting.SøknadDokumentTjeneste;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class OMPSøknadDokumentTjeneste implements SøknadDokumentTjeneste {
 
     private OmsorgspengerGrunnlagRepository repository;

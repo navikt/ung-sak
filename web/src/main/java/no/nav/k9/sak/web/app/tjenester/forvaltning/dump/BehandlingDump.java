@@ -113,7 +113,7 @@ public class BehandlingDump implements DebugDumpFagsak {
 
             resultat.add(CsvOutput.dumpAsCsvSingleInput(true, b, path + "/behandling.csv", toCsv));
 
-            var dumpstere = FagsakYtelseTypeRef.Lookup.list(DebugDumpBehandling.class, behandlingDumpere, ytelseType.getKode());
+            var dumpstere = FagsakYtelseTypeRef.Lookup.list(DebugDumpBehandling.class, behandlingDumpere, ytelseType);
             for (var inst : dumpstere) {
                 for (var dumper : inst) {
                     dumper.dump(b)

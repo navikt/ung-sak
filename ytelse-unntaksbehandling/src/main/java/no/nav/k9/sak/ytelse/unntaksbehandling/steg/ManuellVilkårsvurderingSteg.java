@@ -1,10 +1,12 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.steg;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.MANUELL_VILKÅRSVURDERING;
+import static no.nav.k9.kodeverk.behandling.BehandlingType.UNNTAKSBEHANDLING;
+
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -16,8 +18,8 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(kode = "MANUELL_VILKÅRSVURDERING")
-@BehandlingTypeRef("BT-010")
+@BehandlingStegRef(value = MANUELL_VILKÅRSVURDERING)
+@BehandlingTypeRef(UNNTAKSBEHANDLING)
 @ApplicationScoped
 public class ManuellVilkårsvurderingSteg implements BehandlingSteg {
 

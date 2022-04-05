@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.kompletthetssjekk;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.util.Map;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -18,7 +20,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.OppgittFraværHolder;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class OMPKompletthetFraværFilter implements KompletthetFraværFilter {
 
     private BehandlingRepository behandlingRepository;

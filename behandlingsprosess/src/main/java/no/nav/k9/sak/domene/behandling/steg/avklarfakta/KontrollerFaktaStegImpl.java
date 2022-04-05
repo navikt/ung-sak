@@ -1,10 +1,11 @@
 package no.nav.k9.sak.domene.behandling.steg.avklarfakta;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA;
+
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
@@ -22,7 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@BehandlingStegRef(kode = "KOFAK")
+@BehandlingStegRef(value = KONTROLLER_FAKTA)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @StartpunktRef
@@ -61,7 +62,7 @@ class KontrollerFaktaStegImpl implements KontrollerFaktaSteg {
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (!BehandlingStegType.KONTROLLER_FAKTA.equals(fraSteg)) {
+        if (!KONTROLLER_FAKTA.equals(fraSteg)) {
             RyddRegisterData rydder = new RyddRegisterData(repositoryProvider, kontekst);
             rydder.ryddRegisterdata();
         }

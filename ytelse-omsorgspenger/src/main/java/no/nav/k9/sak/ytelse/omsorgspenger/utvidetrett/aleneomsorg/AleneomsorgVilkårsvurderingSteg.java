@@ -1,5 +1,8 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.MANUELL_VILKÅRSVURDERING;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
+
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -33,8 +36,8 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg.regelmodell.AleneomsorgVilkårGrunnlag;
 
-@FagsakYtelseTypeRef("OMP_AO")
-@BehandlingStegRef(kode = "MANUELL_VILKÅRSVURDERING")
+@FagsakYtelseTypeRef(OMSORGSPENGER_AO)
+@BehandlingStegRef(value = MANUELL_VILKÅRSVURDERING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class AleneomsorgVilkårsvurderingSteg implements BehandlingSteg {
@@ -59,7 +62,7 @@ public class AleneomsorgVilkårsvurderingSteg implements BehandlingSteg {
                                            SøknadRepository søknadRepository,
                                            VilkårTjeneste vilkårTjeneste,
                                            VilkårResultatRepository vilkårResultatRepository,
-                                           @FagsakYtelseTypeRef("OMP_AO") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                           @FagsakYtelseTypeRef(OMSORGSPENGER_AO) VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                            AleneomsorgTjeneste aleneomsorgTjeneste,
                                            @KonfigVerdi(value = "OMP_DELT_BOSTED_RAMMEVEDTAK", defaultVerdi = "true") boolean automatiserVedtak) {
         this.behandlingRepository = behandlingRepository;

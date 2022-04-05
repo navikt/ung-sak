@@ -1,11 +1,12 @@
 package no.nav.k9.sak.domene.behandling.steg.beregnytelse;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.HINDRE_TILBAKETREKK;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -26,7 +27,7 @@ import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.BeregningsresultatTidslinjetj
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.HindreTilbaketrekkNårAlleredeUtbetalt;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.KopierFeriepenger;
 
-@BehandlingStegRef(kode = "BERYT_OPPDRAG")
+@BehandlingStegRef(value = HINDRE_TILBAKETREKK)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

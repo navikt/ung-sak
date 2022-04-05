@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.frisinn.beregninsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.enterprise.inject.Any;
@@ -26,7 +27,7 @@ public class FastsettSkjæringstidspunktStegTest {
     private @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper> instances;
 
     @Inject
-    @FagsakYtelseTypeRef("FRISINN")
+    @FagsakYtelseTypeRef(FRISINN)
     private KalkulusTjeneste tjeneste;
 
     @Disabled("venter på kalkulus ytelsespesifikt grunnlag")
@@ -34,9 +35,9 @@ public class FastsettSkjæringstidspunktStegTest {
     public void skal_få_injected_steg() throws Exception {
         assertThat(tjeneste).isNotNull();
         assertThat(instances).isNotEmpty();
-        var mapper = FagsakYtelseTypeRef.Lookup.find(instances, FagsakYtelseType.FRISINN);
+        var mapper = FagsakYtelseTypeRef.Lookup.find(instances, FRISINN);
         assertThat(mapper).isNotNull();
 
-        assertThat(tjeneste.getYtelsesspesifikkMapper(FagsakYtelseType.FRISINN)).isNotNull();
+        assertThat(tjeneste.getYtelsesspesifikkMapper(FRISINN)).isNotNull();
     }
 }
