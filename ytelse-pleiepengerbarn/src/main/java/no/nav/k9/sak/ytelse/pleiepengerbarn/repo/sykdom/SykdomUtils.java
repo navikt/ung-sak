@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
-import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
@@ -16,23 +14,24 @@ import no.nav.k9.sak.typer.Periode;
 
 public final class SykdomUtils {
 
-    private SykdomUtils() {}
+    private SykdomUtils() {
+    }
 
 
     public static List<Periode> toPeriodeList(LocalDateTimeline<?> t) {
-        return t.stream().map(l -> new Periode(l.getFom(), l.getTom())).collect(Collectors.toList());
+        return t.stream().map(l -> new Periode(l.getFom(), l.getTom())).toList();
     }
 
     public static List<Periode> toPeriodeList(NavigableSet<DatoIntervallEntitet> datoer) {
-        return datoer.stream().map(i -> new Periode(i.getFomDato(), i.getTomDato())).collect(Collectors.toList());
+        return datoer.stream().map(i -> new Periode(i.getFomDato(), i.getTomDato())).toList();
     }
 
     public static LocalDateTimeline<Boolean> toLocalDateTimeline(List<Periode> perioder) {
-        return new LocalDateTimeline<Boolean>(perioder.stream().map(p -> new LocalDateSegment<Boolean>(p.getFom(), p.getTom(), true)).collect(Collectors.toList())).compress();
+        return new LocalDateTimeline<Boolean>(perioder.stream().map(p -> new LocalDateSegment<Boolean>(p.getFom(), p.getTom(), true)).toList()).compress();
     }
 
     public static LocalDateTimeline<Boolean> toLocalDateTimeline(NavigableSet<DatoIntervallEntitet> datoer) {
-        return new LocalDateTimeline<Boolean>(datoer.stream().map(p -> new LocalDateSegment<Boolean>(p.getFomDato(), p.getTomDato(), true)).collect(Collectors.toList())).compress();
+        return new LocalDateTimeline<Boolean>(datoer.stream().map(p -> new LocalDateSegment<Boolean>(p.getFomDato(), p.getTomDato(), true)).toList()).compress();
     }
 
     public static <T> LocalDateTimeline<Boolean> unionTilBoolean(LocalDateTimeline<Boolean> timeline, LocalDateTimeline<T> other) {
@@ -40,20 +39,15 @@ public final class SykdomUtils {
     }
 
     public static <E> List<E> values(LocalDateTimeline<E> elements) {
-        return elements.compress().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
+        return elements.compress().stream().map(LocalDateSegment::getValue).toList();
     }
 
     public static <T> LocalDateTimeline<T> kunPerioderSomIkkeFinnesI(LocalDateTimeline<T> perioder, LocalDateTimeline<?> perioderSomSkalTrekkesFra) {
-        return perioder.combine(perioderSomSkalTrekkesFra, (datoInterval, datoSegment, datoSegment2) -> {
-            if (datoSegment2 == null) {
-                return new LocalDateSegment<>(datoInterval, datoSegment.getValue());
-            }
-            return null;
-        }, JoinStyle.LEFT_JOIN).compress();
+        return perioder.disjoint(perioderSomSkalTrekkesFra).compress();
     }
 
     public static LocalDateTimeline<SykdomVurderingVersjon> tilTidslinjeForType(Collection<SykdomVurderingVersjon> vurderinger, SykdomVurderingType type) {
-        return SykdomUtils.tilTidslinje(vurderinger.stream().filter(v -> v.getSykdomVurdering().getType() == type).collect(Collectors.toList()));
+        return SykdomUtils.tilTidslinje(vurderinger.stream().filter(v -> v.getSykdomVurdering().getType() == type).toList());
     }
 
     public static LocalDateTimeline<SykdomVurderingVersjon> tilTidslinje(Collection<SykdomVurderingVersjon> vurderinger) {
@@ -86,6 +80,6 @@ public final class SykdomUtils {
     }
 
     public static LocalDateTimeline<Boolean> toBooleanTimeline(LocalDateTimeline<?> tidslinje) {
-        return new LocalDateTimeline<Boolean>(tidslinje.stream().map(s -> new LocalDateSegment<Boolean>(s.getLocalDateInterval(), Boolean.TRUE)).toList());
+        return tidslinje.mapValue(v -> Boolean.TRUE);
     }
 }
