@@ -76,7 +76,6 @@ public class SjekkProsessering {
 
     /** Hvorvidt betingelser for å hente inn registeropplysninger på nytt er oppfylt. */
     private boolean skalInnhenteRegisteropplysningerPåNytt(Behandling behandling) {
-        BehandlingStatus behandlingStatus = behandling.getStatus();
         return erGyldigBehandlingStatus(behandling)
             && !behandling.isBehandlingPåVent()
             // XXX: Finne en bedre måte å bestemme når vi skal oppfriske data og ikke. Skal det være konfigurasjon per ytelse? ...eller eget interface per ytelse?

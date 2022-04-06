@@ -90,18 +90,15 @@ public class EndringsresultatSjekker {
         EndringsresultatSnapshot snapshot = EndringsresultatSnapshot.opprett();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
+        snapshot.leggTil(personopplysningTjeneste.finnAktivGrunnlagId(behandlingId));
+        snapshot.leggTil(medlemTjeneste.finnAktivGrunnlagId(behandlingId));
         snapshot.leggTil(prosessTriggereRepository.finnAktivGrunnlagId(behandlingId)); // annen part etc
 
-        if (harStatusOpprettetEllerUtredes(behandling)) {
-            snapshot.leggTil(personopplysningTjeneste.finnAktivGrunnlagId(behandlingId));
-            snapshot.leggTil(medlemTjeneste.finnAktivGrunnlagId(behandlingId));
-
-            if (inkludererBeregning(behandling)) {
-                EndringsresultatSnapshot iaySnapshot = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId)
-                    .map(iayg -> EndringsresultatSnapshot.medSnapshot(InntektArbeidYtelseGrunnlag.class, iayg.getEksternReferanse()))
-                    .orElse(EndringsresultatSnapshot.utenSnapshot(InntektArbeidYtelseGrunnlag.class));
-                snapshot.leggTil(iaySnapshot);
-            }
+        if (inkludererBeregning(behandling)) {
+            EndringsresultatSnapshot iaySnapshot = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId)
+                .map(iayg -> EndringsresultatSnapshot.medSnapshot(InntektArbeidYtelseGrunnlag.class, iayg.getEksternReferanse()))
+                .orElse(EndringsresultatSnapshot.utenSnapshot(InntektArbeidYtelseGrunnlag.class));
+            snapshot.leggTil(iaySnapshot);
         }
 
         var søknadDokumentTjeneste = SøknadDokumentTjeneste.finnTjeneste(søknadsDokumentTjenester, behandling.getFagsakYtelseType());
@@ -120,7 +117,7 @@ public class EndringsresultatSjekker {
         return snapshot;
     }
 
-    private boolean harStatusOpprettetEllerUtredes(Behandling behandling) {
+    public boolean harStatusOpprettetEllerUtredes(Behandling behandling) {
         return Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES).contains(behandling.getStatus());
     }
 
