@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +71,7 @@ import no.nav.k9.sak.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -79,6 +81,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetTypeArbeidsgiver;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.OppgittFraværHolder;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.SamtidigKravStatus;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.FosterbarnRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
@@ -97,6 +100,7 @@ public class ÅrskvantumTjeneste {
     private BehandlingRepository behandlingRepository;
     private ÅrskvantumKlient årskvantumKlient;
     private TpsTjeneste tpsTjeneste;
+    private FosterbarnRepository fosterbarnRepository;
     private TrekkUtFraværTjeneste trekkUtFraværTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
@@ -116,6 +120,7 @@ public class ÅrskvantumTjeneste {
                               InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                               ÅrskvantumRestKlient årskvantumRestKlient,
                               TpsTjeneste tpsTjeneste,
+                              FosterbarnRepository fosterbarnRepository,
                               @FagsakYtelseTypeRef(OMSORGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                               TrekkUtFraværTjeneste trekkUtFraværTjeneste,
                               OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste,
@@ -128,6 +133,7 @@ public class ÅrskvantumTjeneste {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.årskvantumKlient = årskvantumRestKlient;
         this.tpsTjeneste = tpsTjeneste;
+        this.fosterbarnRepository = fosterbarnRepository;
         this.trekkUtFraværTjeneste = trekkUtFraværTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.opptjeningTjeneste = opptjeningTjeneste;
@@ -184,9 +190,16 @@ public class ÅrskvantumTjeneste {
             .stream()
             .filter(it -> it.getRelasjonsrolle().equals(RelasjonsRolleType.BARN))
             .filter(it -> !it.getPersonIdent().erFdatNummer())
-            .map(this::innhentPersonopplysningForBarn)
+            .map(this::innhentFamilierelasjonForBarn)
             .map((Tuple<Familierelasjon, Optional<Personinfo>> relasjonBarn) -> mapBarn(personMedRelasjoner, relasjonBarn))
             .toList();
+        var fosterbarna = fosterbarnRepository.hentHvisEksisterer(behandling.getId())
+            .map(grunnlag -> grunnlag.getFosterbarna().getFosterbarn().stream()
+                .map(fosterbarn -> innhentPersonopplysningForBarn(fosterbarn.getAktørId()))
+                .map(personinfo -> mapFosterbarn(personinfo))
+                .collect(Collectors.toSet())
+            ).orElse(Set.of());
+        var alleBarna = Stream.concat(barna.stream(), fosterbarna.stream()).collect(Collectors.toSet());
 
         return new ÅrskvantumGrunnlag(ref.getSaksnummer().getVerdi(),
             ref.getBehandlingUuid().toString(),
@@ -194,7 +207,7 @@ public class ÅrskvantumTjeneste {
             personMedRelasjoner.getPersonIdent().getIdent(),
             personMedRelasjoner.getFødselsdato(),
             personMedRelasjoner.getDødsdato(),
-            barna);
+            new ArrayList<>(alleBarna));
     }
 
     Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> utledPerioder(NavigableSet<DatoIntervallEntitet> vilkårsperioder,
@@ -374,8 +387,12 @@ public class ÅrskvantumTjeneste {
         return ArbeidsforholdStatus.AKTIVT;
     }
 
-    private Tuple<Familierelasjon, Optional<Personinfo>> innhentPersonopplysningForBarn(Familierelasjon it) {
-        return new Tuple<>(it, tpsTjeneste.hentBrukerForFnr(it.getPersonIdent()));
+    private Tuple<Familierelasjon, Optional<Personinfo>> innhentFamilierelasjonForBarn(Familierelasjon familierelasjon) {
+        return new Tuple<>(familierelasjon, tpsTjeneste.hentBrukerForFnr(familierelasjon.getPersonIdent()));
+    }
+
+    private Personinfo innhentPersonopplysningForBarn(AktørId aktørId) {
+        return tpsTjeneste.hentBrukerForAktør(aktørId).orElseThrow(() -> new IllegalStateException("Finner ikke ident for aktørid"));
     }
 
     private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(Personinfo personinfoSøker, Tuple<Familierelasjon, Optional<Personinfo>> relasjonMedBarn) {
@@ -384,6 +401,10 @@ public class ÅrskvantumTjeneste {
         var perioderMedDeltBosted = relasjonMedBarn.getElement1().getPerioderMedDeltBosted(personinfoSøker, personinfoBarn);
         var lukketPeriodeMedDeltBosted = perioderMedDeltBosted.stream().map(p -> new LukketPeriode(p.getFom(), p.getTom())).collect(Collectors.toList());
         return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBosted, lukketPeriodeMedDeltBosted, BarnType.VANLIG);
+    }
+
+    private Barn mapFosterbarn(Personinfo personinfo) {
+        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), true, List.of(), BarnType.FOSTERBARN);
     }
 
     private boolean kreverArbeidsgiverRefusjon(Set<Inntektsmelding> sakInntektsmeldinger,
