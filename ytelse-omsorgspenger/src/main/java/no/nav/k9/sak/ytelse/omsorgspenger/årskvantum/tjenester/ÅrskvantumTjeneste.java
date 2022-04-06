@@ -404,7 +404,7 @@ public class ÅrskvantumTjeneste {
     }
 
     private Barn mapFosterbarn(Personinfo personinfo) {
-        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), false, List.of(), BarnType.FOSTERBARN);
+        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), true, List.of(), BarnType.FOSTERBARN);
     }
 
     private boolean kreverArbeidsgiverRefusjon(Set<Inntektsmelding> sakInntektsmeldinger,
