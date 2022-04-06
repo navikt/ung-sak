@@ -6,11 +6,12 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -18,6 +19,7 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
@@ -32,7 +34,9 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder
 public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private BehandlingRepository behandlingRepository;
+    private SøknadRepository søknadRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+
 
     private PersoninfoAdapter personinfoAdapter;
 
@@ -50,6 +54,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personinfoAdapter = personinfoAdapter;
+        this.søknadRepository = søknadRepository;
         this.søktePerioder = new UtvidetRettSøknadPerioder(søknadRepository);
     }
 
@@ -76,8 +81,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
             if (vilkårTidslinje.isEmpty()) {
                 return Collections.emptyNavigableSet();
             }
-            var utlededePerioder = vilkårTidslinje.getLocalDateIntervals().stream().map(p -> DatoIntervallEntitet.fra(p)).collect(Collectors.toCollection(TreeSet::new));
-            return Collections.unmodifiableNavigableSet(utlededePerioder);
+            return DatoIntervallEntitet.fraTimeline(vilkårTidslinje);
         } else {
             // default til 'fullstedige' perioder hvis vilkår ikke angitt.
             return utledFullstendigePerioder(behandlingId);
@@ -87,8 +91,23 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
     @Override
     public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
         return Map.of(
-            VilkårType.UTVIDETRETT, justerTilDefaultAlder(behandlingId, utled(behandlingId, VilkårType.UTVIDETRETT)),
+            VilkårType.UTVIDETRETT, utledUtvidetRettAleneomsorg(behandlingId),
             VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR));
+    }
+
+    private NavigableSet<DatoIntervallEntitet> utledUtvidetRettAleneomsorg(Long behandlingId){
+        NavigableSet<DatoIntervallEntitet> søknadsperioder = utled(behandlingId, VilkårType.UTVIDETRETT);
+        return justerForMottattTidspunkt(behandlingId, justerTilDefaultAlder(behandlingId, søknadsperioder));
+    }
+
+    private NavigableSet<DatoIntervallEntitet> justerForMottattTidspunkt(Long behandlingId, NavigableSet<DatoIntervallEntitet> søknadsperiode) {
+        LocalDateTimeline<?> søknadstidslinje = new LocalDateTimeline<>(søknadsperiode.stream().map(sp -> new LocalDateSegment<>(sp.getFomDato(), sp.getTomDato(), true)).toList());
+
+        SøknadEntitet søknad = søknadRepository.hentSøknad(behandlingId);
+        LocalDate søknadsdato = søknad.getSøknadsdato();
+        LocalDate tremånedersregelDato = søknadsdato.withDayOfMonth(1).minusMonths(3);
+        LocalDateTimeline<?> justert = søknadstidslinje.intersection(new LocalDateTimeline<>(tremånedersregelDato, søknadstidslinje.getMaxLocalDate(), null));
+        return DatoIntervallEntitet.fraTimeline(justert);
     }
 
     private NavigableSet<DatoIntervallEntitet> justerTilDefaultAlder(Long behandlingId, NavigableSet<DatoIntervallEntitet> vilårsperiodeUtvidetRett) {
@@ -100,8 +119,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         // sett 'tom' for utvidet rett til barnet fyller 18 år by default
         var _18år = new LocalDateTimeline<>(barninfo.getFødselsdato(), barninfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31), Boolean.TRUE);
         var sammenstiltUtvidetRettTimeline = _18år.intersection(new LocalDateInterval(vilårsperiodeUtvidetRett.first().getFomDato(), vilårsperiodeUtvidetRett.last().getTomDato()));
-        var utvidetRettPerioder = DatoIntervallEntitet.fraTimeline(sammenstiltUtvidetRettTimeline);
-        return utvidetRettPerioder;
+        return DatoIntervallEntitet.fraTimeline(sammenstiltUtvidetRettTimeline);
     }
 
     DatoIntervallEntitet utledMaksPeriode(NavigableSet<DatoIntervallEntitet> søktePerioder, AktørId barnAktørId) {
@@ -113,7 +131,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         var førsteSøktePeriode = søktePerioder.first();
         var fristFørSøknadsdato = førsteSøktePeriode.getFomDato().minusYears(3).withMonth(1).withDayOfMonth(1);
 
-        var mindato = Set.of(fødselsdato, fristFørSøknadsdato).stream().max(LocalDate::compareTo).get();
+        var mindato = Stream.of(fødselsdato, fristFørSøknadsdato).max(LocalDate::compareTo).orElseThrow();
         var maksdato = Tid.TIDENES_ENDE;
         return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato);
     }
