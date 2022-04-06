@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.sykdom;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -48,16 +49,16 @@ public class SykdomAksjonspunktDto {
     @Valid
     private final boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
 
-
-    public SykdomAksjonspunktDto(boolean kanLøseAksjonspunkt,
-                                 boolean harUklassifiserteDokumenter,
-                                 boolean manglerDiagnosekode,
-                                 boolean manglerGodkjentLegeerklæring,
-                                 boolean manglerVurderingAvKontinuerligTilsynOgPleie,
-                                 boolean manglerVurderingAvToOmsorgspersoner,
-                                 boolean manglerVurderingAvILivetsSluttfase,
-                                 boolean harDataSomIkkeHarBlittTattMedIBehandling,
-                                 boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger) {
+    @JsonCreator
+    public SykdomAksjonspunktDto(@JsonProperty(value = "kanLøseAksjonspunkt") boolean kanLøseAksjonspunkt,
+                                 @JsonProperty(value = "harUklassifiserteDokumenter") boolean harUklassifiserteDokumenter,
+                                 @JsonProperty(value = "manglerDiagnosekode") boolean manglerDiagnosekode,
+                                 @JsonProperty(value = "manglerGodkjentLegeerklæring") boolean manglerGodkjentLegeerklæring,
+                                 @JsonProperty(value = "manglerVurderingAvKontinuerligTilsynOgPleie") boolean manglerVurderingAvKontinuerligTilsynOgPleie,
+                                 @JsonProperty(value = "manglerVurderingAvToOmsorgspersoner") boolean manglerVurderingAvToOmsorgspersoner,
+                                 @JsonProperty(value = "manglerVurderingAvILivetsSluttfase") boolean manglerVurderingAvILivetsSluttfase,
+                                 @JsonProperty(value = "harDataSomIkkeHarBlittTattMedIBehandling") boolean harDataSomIkkeHarBlittTattMedIBehandling,
+                                 @JsonProperty(value = "nyttDokumentHarIkkekontrollertEksisterendeVurderinger") boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger) {
         this.kanLøseAksjonspunkt = kanLøseAksjonspunkt;
         this.harUklassifiserteDokumenter = harUklassifiserteDokumenter;
         this.manglerDiagnosekode = manglerDiagnosekode;
