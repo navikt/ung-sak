@@ -126,7 +126,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
 
         final OppdateringResultat resultat = OppdateringResultat.utenTransisjon().medTotrinnHvis(skalHaToTrinn).build();
         resultat.skalRekjøreSteg();
-        resultat.setSteg(BehandlingStegType.VURDER_MEDISINSKVILKÅR);
+        resultat.setSteg(BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
 
         return resultat;
     }

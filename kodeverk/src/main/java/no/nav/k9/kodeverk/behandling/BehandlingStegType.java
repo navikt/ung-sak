@@ -66,7 +66,7 @@ public enum BehandlingStegType implements Kodeverdi {
     VURDER_KOMPLETTHET("VURDERKOMPLETT", "Vurder kompletthet", UTREDES),
     POSTCONDITION_KOMPLETTHET("POSTCONDITION_KOMPLETTHET", "Sjekker om det er mulig å fortsette etter kompletthetssjekk", UTREDES),
     VARIANT_FILTER("VARIANT_FILTER", "Filtrer ut varianter", UTREDES),
-    VURDER_MEDISINSKVILKÅR("VURDER_MEDISINSK", "Vurder medisinskvilkår", UTREDES),
+    VURDER_MEDISINSKE_VILKÅR("VURDER_MEDISINSK", "Vurder medisinske vilkår", UTREDES),
     POST_VURDER_MEDISINSKVILKÅR("POST_MEDISINSK", "Post vurder medisinskvilkår", UTREDES),
     VURDER_MEDLEMSKAPVILKÅR("VURDERMV", "Vurder medlemskapvilkår", UTREDES),
     VURDER_OMSORG_FOR("VURDER_OMSORG_FOR", "Vurder omsorgen for", UTREDES),
