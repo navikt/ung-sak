@@ -52,6 +52,7 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
         var vedtakHendelse = JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), Ytelse.class);
         var fagsakYtelseType = VedtaksHendelseHåndterer.mapYtelse(vedtakHendelse);
         LOG_CONTEXT.add("ytelseType", fagsakYtelseType);
+        LOG_CONTEXT.add("saksnummer", vedtakHendelse.getSaksnummer());
 
         var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste
             .finnTjeneste(fagsakYtelseType);
