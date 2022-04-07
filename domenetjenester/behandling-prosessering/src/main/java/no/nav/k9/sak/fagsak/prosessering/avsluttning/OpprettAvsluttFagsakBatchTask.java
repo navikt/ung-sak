@@ -13,7 +13,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
-@ProsessTask(value = "batch.finnFagsakerForAvsluttning", maxFailedRuns = 1)
+@ProsessTask(value = "batch.opprettTasksForAvsluttning", maxFailedRuns = 1)
 public class OpprettAvsluttFagsakBatchTask implements ProsessTaskHandler {
 
     private FagsakAvsluttningTjeneste tjeneste;
