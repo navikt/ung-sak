@@ -41,6 +41,10 @@ public class SykdomGrunnlagService {
     public SykdomGrunnlagBehandling hentGrunnlag(UUID behandlingUuid) {
         return sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandlingUuid).orElseThrow();
     }
+    
+    public Optional<SykdomGrunnlagBehandling> hentGrunnlagHvisEksisterer(UUID behandlingUuid) {
+        return sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandlingUuid);
+    }
 
     boolean harDataSomIkkeHarBlittTattMedIBehandling(Behandling behandling) {
         final var resultat = utledRelevanteEndringerSidenForrigeGrunnlag(behandling);
