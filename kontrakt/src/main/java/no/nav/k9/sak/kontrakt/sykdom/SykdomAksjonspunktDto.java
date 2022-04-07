@@ -14,40 +14,42 @@ public class SykdomAksjonspunktDto {
 
     @JsonProperty(value = "kanLøseAksjonspunkt")
     @Valid
-    private final boolean kanLøseAksjonspunkt;
+    private boolean kanLøseAksjonspunkt;
 
     @JsonProperty(value = "harUklassifiserteDokumenter")
     @Valid
-    private final boolean harUklassifiserteDokumenter;
+    private boolean harUklassifiserteDokumenter;
 
     @JsonProperty(value = "manglerDiagnosekode")
     @Valid
-    private final boolean manglerDiagnosekode;
+    private boolean manglerDiagnosekode;
 
     @JsonProperty(value = "manglerGodkjentLegeerklæring")
     @Valid
-    private final boolean manglerGodkjentLegeerklæring;
+    private boolean manglerGodkjentLegeerklæring;
 
     @JsonProperty(value = "manglerVurderingAvKontinuerligTilsynOgPleie")
     @Valid
-    private final boolean manglerVurderingAvKontinuerligTilsynOgPleie;
+    private boolean manglerVurderingAvKontinuerligTilsynOgPleie;
 
     @JsonProperty(value = "manglerVurderingAvToOmsorgspersoner")
     @Valid
-    private final boolean manglerVurderingAvToOmsorgspersoner;
+    private boolean manglerVurderingAvToOmsorgspersoner;
 
     @JsonProperty(value = "manglerVurderingAvILivetsSluttfase")
     @Valid
-    private final boolean manglerVurderingAvILivetsSluttfase;
+    private boolean manglerVurderingAvILivetsSluttfase;
 
     @JsonProperty(value = "harDataSomIkkeHarBlittTattMedIBehandling")
     @Valid
-    private final boolean harDataSomIkkeHarBlittTattMedIBehandling;
+    private boolean harDataSomIkkeHarBlittTattMedIBehandling;
 
     @JsonProperty(value = "nyttDokumentHarIkkekontrollertEksisterendeVurderinger")
     @Valid
-    private final boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
+    private boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
 
+    public SykdomAksjonspunktDto() {
+    }
 
     public SykdomAksjonspunktDto(boolean kanLøseAksjonspunkt,
                                  boolean harUklassifiserteDokumenter,
