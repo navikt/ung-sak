@@ -106,7 +106,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public boolean ingenSøknadsperioder(BehandlingReferanse ref) {
-        return harIngenRefusjonskravFraMottatteInntektsmeldinger(ref) && harIkkeSøknadsperiode(ref);
+        return harIngenRefusjonskravFraMottatteInntektsmeldinger(ref) && harIkkeSøknadsperiode(ref) && harIkkeFraværskorrigering(ref);
     }
 
     private boolean harSøknadSomArbeidstaker(BehandlingReferanse ref) {
@@ -118,6 +118,10 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     private boolean harIkkeSøknadsperiode(BehandlingReferanse ref) {
         return grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(ref.getBehandlingId()).isEmpty();
+    }
+
+    private boolean harIkkeFraværskorrigering(BehandlingReferanse ref) {
+        return grunnlagRepository.hentOppgittFraværFraFraværskorrigeringerHvisEksisterer(ref.getBehandlingId()).isEmpty();
     }
 
     private KompletthetResultat settPåVent(BehandlingReferanse ref, Venteårsak venteårsak, int antallVentedager) {
