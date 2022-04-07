@@ -14,8 +14,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public enum KravDokumentType {
     INNTEKTSMELDING("INNTEKTSMELDING"),
-    SØKNAD("SØKNAD"),
-    INNTEKTSMELDING_UTEN_REFUSJONSKRAV("INNTEKTSMELDING_UTEN_REFUSJONSKRAV");
+    SØKNAD("SØKNAD");
 
     private static final Map<String, KravDokumentType> KODER = new LinkedHashMap<>();
 

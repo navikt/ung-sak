@@ -158,12 +158,18 @@ public class UtledStatusPåPerioderTjeneste {
     }
 
     private List<KravDokumentMedSøktePerioder> mapKravTilDto(Set<Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>>> relevanteDokumenterMedPeriode) {
-        return relevanteDokumenterMedPeriode.stream().map(it -> new KravDokumentMedSøktePerioder(it.getKey().getJournalpostId(),
+        return relevanteDokumenterMedPeriode.stream()
+            .filter(it -> kravDokumentTypeBrukesAvFormidling(it.getKey().getType()))
+            .map(it -> new KravDokumentMedSøktePerioder(it.getKey().getJournalpostId(),
                 it.getKey().getInnsendingsTidspunkt(),
                 KravDokumentType.fraKode(it.getKey().getType().name()),
                 it.getValue().stream().map(at -> new no.nav.k9.sak.kontrakt.krav.SøktPeriode(at.getPeriode().tilPeriode(), at.getType(), at.getArbeidsgiver(), at.getArbeidsforholdRef())).collect(Collectors.toList())))
-            .collect(Collectors.toList());
+            .toList();
 
+    }
+
+    private boolean kravDokumentTypeBrukesAvFormidling(no.nav.k9.sak.perioder.KravDokumentType kravDokumentType) {
+        return KravDokumentType.fraKode(kravDokumentType.name()) != null;
     }
 
     private LocalDateSegment<ÅrsakerTilVurdering> mergeAndreBerørtSaker(LocalDateInterval interval, LocalDateSegment<ÅrsakerTilVurdering> første, LocalDateSegment<ÅrsakerTilVurdering> siste) {
