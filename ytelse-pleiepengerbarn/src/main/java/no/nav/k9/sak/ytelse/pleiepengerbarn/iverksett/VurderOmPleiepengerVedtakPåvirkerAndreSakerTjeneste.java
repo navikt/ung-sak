@@ -22,9 +22,12 @@ import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
@@ -64,6 +67,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
+    private BehandlingModellRepository behandlingModellRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
     VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste() {
@@ -80,6 +84,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                                                                EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                                                SamtidigUttakTjeneste samtidigUttakTjeneste,
                                                                SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+                                                               BehandlingModellRepository behandlingModellRepository,
                                                                @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
@@ -91,6 +96,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
+        this.behandlingModellRepository = behandlingModellRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
@@ -251,6 +257,9 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         if (søknadsperiodeTjeneste.utledFullstendigPeriode(sisteBehandlingPåKandidat.getId()).isEmpty()) {
             return new TreeSet<>();
         }
+        if (erUnderBehandlingOgIkkeKommetTilSykdom(sisteBehandlingPåKandidat)) {
+            return new TreeSet<>();
+        }
         var kandidatSykdomBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(sisteBehandlingPåKandidat.getUuid()).orElseThrow();
         var behandling = behandlingRepository.hentBehandlingHvisFinnes(kandidatSykdomBehandling.getBehandlingUuid()).orElseThrow();
         var vurderingsperioder = utledVurderingsperiode(behandling);
@@ -264,6 +273,16 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
             .filter(it -> Objects.nonNull(it.getValue()))
             .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private boolean erUnderBehandlingOgIkkeKommetTilSykdom(Behandling sisteBehandlingPåKandidat) {
+        return !sisteBehandlingPåKandidat.erSaksbehandlingAvsluttet() && harIkkeKommetTilSykdom(sisteBehandlingPåKandidat);
+    }
+
+    private boolean harIkkeKommetTilSykdom(Behandling sisteBehandlingPåKandidat) {
+        final BehandlingStegType steg = sisteBehandlingPåKandidat.getAktivtBehandlingSteg();
+        final BehandlingModell modell = behandlingModellRepository.getModell(sisteBehandlingPåKandidat.getType(), sisteBehandlingPåKandidat.getFagsakYtelseType());
+        return modell.erStegAFørStegB(steg, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
     }
 
     private List<Periode> utledVurderingsperiode(Behandling behandling) {
