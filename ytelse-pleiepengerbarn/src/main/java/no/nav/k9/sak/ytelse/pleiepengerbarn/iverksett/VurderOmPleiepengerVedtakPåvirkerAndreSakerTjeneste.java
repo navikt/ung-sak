@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -44,7 +46,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PSBVilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
@@ -62,7 +63,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
-    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
     VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste() {
     }
@@ -76,8 +77,8 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                                                                SykdomGrunnlagService sykdomGrunnlagService,
                                                                ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
                                                                EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
-                                                               @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PSBVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                                               SamtidigUttakTjeneste samtidigUttakTjeneste) {
+                                                               SamtidigUttakTjeneste samtidigUttakTjeneste,
+                                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -87,7 +88,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
-        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
     @Override
@@ -131,6 +132,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
             if (!kandidatsaksnummer.equals(fagsak.getSaksnummer())) {
                 var kandidatFagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
                 var sisteBehandlingPåKandidat = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(kandidatFagsak.getId()).orElseThrow();
+                var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, sisteBehandlingPåKandidat.getFagsakYtelseType(), sisteBehandlingPåKandidat.getType());
                 var skalRevurderesPgaSykdom = perioderMedRevurderingSykdom(pleietrengende, kandidatsaksnummer, sisteBehandlingPåKandidat);
                 var referanse = BehandlingReferanse.fra(sisteBehandlingPåKandidat);
                 var skalRevurderesPgaEtablertTilsyn = perioderMedRevurderingPgaEtablertTilsyn(referanse);
@@ -138,7 +140,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                 var skalRevurderesPgaEndretUttak = perioderMedRevurderingPgaUttak(sisteBehandlingPåKandidat, referanse);
 
                 if (!skalRevurderesPgaSykdom.isEmpty() || !skalRevurderesPgaEtablertTilsyn.isEmpty() || !skalRevurderesPgaNattevåkOgBeredskap.isEmpty() || !skalRevurderesPgaEndretUttak.isEmpty()) {
-                    TreeSet<DatoIntervallEntitet> perioderMedEndring = utledPerioder(skalRevurderesPgaSykdom, skalRevurderesPgaEtablertTilsyn, skalRevurderesPgaNattevåkOgBeredskap, skalRevurderesPgaEndretUttak);
+                    TreeSet<DatoIntervallEntitet> perioderMedEndring = utledPerioder(perioderTilVurderingTjeneste, skalRevurderesPgaSykdom, skalRevurderesPgaEtablertTilsyn, skalRevurderesPgaNattevåkOgBeredskap, skalRevurderesPgaEndretUttak);
                     result.add(new SakMedPeriode(kandidatsaksnummer, perioderMedEndring));
                     log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty());
                 }
@@ -148,7 +150,11 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         return result;
     }
 
-    private TreeSet<DatoIntervallEntitet> utledPerioder(NavigableSet<DatoIntervallEntitet> skalRevurderesPgaSykdom, NavigableSet<DatoIntervallEntitet> skalRevurderesPgaEtablertTilsyn, NavigableSet<DatoIntervallEntitet> skalRevurderesPgaNattevåkOgBeredskap, NavigableSet<DatoIntervallEntitet> skalRevurderesPgaEndretUttak) {
+    private TreeSet<DatoIntervallEntitet> utledPerioder(VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                                        NavigableSet<DatoIntervallEntitet> skalRevurderesPgaSykdom,
+                                                        NavigableSet<DatoIntervallEntitet> skalRevurderesPgaEtablertTilsyn,
+                                                        NavigableSet<DatoIntervallEntitet> skalRevurderesPgaNattevåkOgBeredskap,
+                                                        NavigableSet<DatoIntervallEntitet> skalRevurderesPgaEndretUttak) {
         var perioderMedEndring = new TreeSet<>(skalRevurderesPgaEtablertTilsyn);
         perioderMedEndring.addAll(skalRevurderesPgaNattevåkOgBeredskap);
         perioderMedEndring.addAll(skalRevurderesPgaSykdom);
@@ -161,7 +167,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         }
 
         // tett hull
-        var kantIKantVurderer = vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer();
+        var kantIKantVurderer = perioderTilVurderingTjeneste.getKantIKantVurderer();
         var segmenterSomMangler = utledHullSomMåTettes(tidslinje, kantIKantVurderer);
         for (LocalDateSegment<Boolean> segment : segmenterSomMangler) {
             tidslinje = tidslinje.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
