@@ -1,5 +1,10 @@
 package no.nav.k9.sak.fagsak.prosessering.avsluttning;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +15,7 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 
 @ApplicationScoped
 @ProsessTask(value = "batch.finnFagsakerForAvsluttning", cronExpression = "0 30 21 * * *", maxFailedRuns = 1)
@@ -32,9 +38,17 @@ public class FinnFagsakerForAvsluttningBatchTask implements ProsessTaskHandler {
         this.enableFagsakAvslutting = enableFagsakAvslutting;
     }
 
+    static <T> Collection<List<T>> partitionBasedOnSize(Collection<T> inputList, int size) {
+        final AtomicInteger counter = new AtomicInteger(0);
+        return inputList.stream()
+            .collect(Collectors.groupingBy(s -> counter.getAndIncrement() / size))
+            .values();
+    }
+
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        var fagsakerSomKanAvsluttes = tjeneste.finnFagsakerSomSkalAvsluttes();
+        var fagsakerSomKanAvsluttes = tjeneste.finnFagsakerSomSkalAvsluttes()
+            .stream().map(Fagsak::getSaksnummer).collect(Collectors.toSet());
 
         log.info("Fant {} saker som kan avsluttes", fagsakerSomKanAvsluttes.size());
 
@@ -43,8 +57,8 @@ public class FinnFagsakerForAvsluttningBatchTask implements ProsessTaskHandler {
             return;
         }
 
-        fagsakerSomKanAvsluttes.stream()
-            .map(AvsluttFagsakTask::opprettTask)
+        partitionBasedOnSize(fagsakerSomKanAvsluttes, 500).stream()
+            .map(OpprettAvsluttFagsakBatchTask::opprettTask)
             .forEach(taskdata -> prosessTaskRepository.lagre(taskdata));
     }
 }

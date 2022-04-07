@@ -14,6 +14,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.fagsak.hendelse.OppdaterFagsakStatusFelles;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class FagsakAvsluttningTjeneste {
@@ -41,7 +42,6 @@ public class FagsakAvsluttningTjeneste {
     }
 
     public Set<Fagsak> finnFagsakerSomSkalAvsluttes() {
-
         return fagsakAvsluttningRepository.finnKandidaterFagsakerSomKanAvsluttes();
     }
 
@@ -63,5 +63,9 @@ public class FagsakAvsluttningTjeneste {
     private boolean valider(Fagsak fagsak, List<Behandling> behandlinger) {
         return fagsakAvsluttningRepository.fagsaksPeriodeHarUtløptMedToMåneder(fagsak)
             && behandlinger.stream().allMatch(Behandling::erAvsluttet);
+    }
+
+    public Fagsak finnFagsakForSaksnummer(Saksnummer it) {
+        return fagsakRepository.hentSakGittSaksnummer(it).orElseThrow();
     }
 }
