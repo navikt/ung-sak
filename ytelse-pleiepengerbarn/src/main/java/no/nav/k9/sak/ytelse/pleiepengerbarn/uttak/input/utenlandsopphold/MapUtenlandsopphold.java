@@ -28,7 +28,6 @@ public class MapUtenlandsopphold {
         var utenlandsperioder = new HashMap<LukketPeriode, UtenlandsoppholdInfo>();
         resultatTimeline.compress()
             .intersection(tidslinjeTilVurdering)
-            .toSegments()
             .forEach(it -> utenlandsperioder.put(new LukketPeriode(it.getFom(), it.getTom()), it.getValue()));
         return utenlandsperioder;
     }
