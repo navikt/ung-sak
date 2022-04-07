@@ -1,5 +1,7 @@
 package no.nav.k9.sak.hendelse.vedtak;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,6 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -32,7 +35,8 @@ public class VedtaksHendelseHåndterer {
 
     static FagsakYtelseType mapYtelse(Ytelse vedtak) {
         if (vedtak.getYtelse() == null) {
-            return FagsakYtelseType.UDEFINERT;
+            return Optional.ofNullable(vedtak.getType()).map(YtelseType::getKode)
+                .map(FagsakYtelseType::fromString).orElse(FagsakYtelseType.UDEFINERT);
         }
         return switch (vedtak.getYtelse()) {
             case PLEIEPENGER_NÆRSTÅENDE -> FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
