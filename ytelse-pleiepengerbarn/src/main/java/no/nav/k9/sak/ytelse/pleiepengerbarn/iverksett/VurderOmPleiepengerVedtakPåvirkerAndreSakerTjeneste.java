@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.ArrayList;
@@ -10,12 +11,11 @@ import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -48,9 +48,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PSBVilkårsPerioderTilVurder
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
-public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVedtakPåvirkerSakerTjeneste {
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements VurderOmVedtakPåvirkerSakerTjeneste {
 
-    private static final Logger log = LoggerFactory.getLogger(VurderOmPSBVedtakPåvirkerAndreSakerTjeneste.class);
+    private static final Logger log = LoggerFactory.getLogger(VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
@@ -63,20 +64,20 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
-    VurderOmPSBVedtakPåvirkerAndreSakerTjeneste() {
+    VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste() {
     }
 
     @Inject
-    public VurderOmPSBVedtakPåvirkerAndreSakerTjeneste(BehandlingRepository behandlingRepository,
-                                                       FagsakRepository fagsakRepository,
-                                                       VilkårResultatRepository vilkårResultatRepository,
-                                                       SykdomGrunnlagRepository sykdomGrunnlagRepository,
-                                                       SykdomVurderingRepository sykdomVurderingRepository,
-                                                       SykdomGrunnlagService sykdomGrunnlagService,
-                                                       ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
-                                                       EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
-                                                       @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PSBVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                                       SamtidigUttakTjeneste samtidigUttakTjeneste) {
+    public VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste(BehandlingRepository behandlingRepository,
+                                                               FagsakRepository fagsakRepository,
+                                                               VilkårResultatRepository vilkårResultatRepository,
+                                                               SykdomGrunnlagRepository sykdomGrunnlagRepository,
+                                                               SykdomVurderingRepository sykdomVurderingRepository,
+                                                               SykdomGrunnlagService sykdomGrunnlagService,
+                                                               ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
+                                                               EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
+                                                               @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PSBVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                                               SamtidigUttakTjeneste samtidigUttakTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
