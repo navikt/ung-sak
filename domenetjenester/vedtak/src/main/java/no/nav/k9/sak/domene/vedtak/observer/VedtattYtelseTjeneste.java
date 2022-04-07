@@ -12,6 +12,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem;
+import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
+import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.vedtak.ytelse.Aktør;
 import no.nav.abakus.vedtak.ytelse.Kildesystem;
 import no.nav.abakus.vedtak.ytelse.Periode;
@@ -65,12 +68,15 @@ public class VedtattYtelseTjeneste {
         final Aktør aktør = new Aktør();
         aktør.setVerdi(behandling.getAktørId().getId());
         final YtelseV1 ytelse = new YtelseV1();
+        ytelse.setFagsystem(Fagsystem.K9SAK);
         ytelse.setKildesystem(Kildesystem.K9SAK);
         ytelse.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
         ytelse.setVedtattTidspunkt(vedtak.getVedtakstidspunkt());
         ytelse.setVedtakReferanse(behandling.getUuid().toString());
         ytelse.setAktør(aktør);
+        ytelse.setType(map(behandling.getFagsakYtelseType()));
         ytelse.setYtelse(mapYtelser(behandling.getFagsakYtelseType()));
+        ytelse.setStatus(map(behandling.getFagsak().getStatus()));
         ytelse.setYtelseStatus(mapStatus(behandling.getFagsak().getStatus()));
         finnTjeneste(behandling.getFagsakYtelseType())
             .ifPresent(it -> ytelse.setTilleggsopplysninger(JacksonJsonConfig.toJson(it.generer(behandling),
@@ -111,6 +117,27 @@ public class VedtattYtelseTjeneste {
         return periode;
     }
 
+
+    private YtelseType map(FagsakYtelseType type) {
+        // bruker samme kodeverk i YtelseType og FagsakYtelseType for relevante ytelser.
+        return YtelseType.fraKode(type.getKode());
+    }
+
+    private YtelseStatus map(FagsakStatus kode) {
+        YtelseStatus typeKode;
+        if (FagsakStatus.OPPRETTET.equals(kode)) {
+            typeKode = YtelseStatus.OPPRETTET;
+        } else if (FagsakStatus.UNDER_BEHANDLING.equals(kode)) {
+            typeKode = YtelseStatus.UNDER_BEHANDLING;
+        } else if (FagsakStatus.LØPENDE.equals(kode)) {
+            typeKode = YtelseStatus.LØPENDE;
+        } else if (FagsakStatus.AVSLUTTET.equals(kode)) {
+            typeKode = YtelseStatus.AVSLUTTET;
+        } else {
+            typeKode = YtelseStatus.OPPRETTET;
+        }
+        return typeKode;
+    }
 
     private Ytelser mapYtelser(FagsakYtelseType type) {
         return switch (type) {
