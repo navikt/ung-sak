@@ -106,7 +106,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         SøknadEntitet søknad = søknadRepository.hentSøknad(behandlingId);
         LocalDate søknadsdato = søknad.getSøknadsdato();
         LocalDate tremånedersregelDato = søknadsdato.withDayOfMonth(1).minusMonths(3);
-        LocalDateTimeline<?> justert = søknadstidslinje.intersection(new LocalDateTimeline<>(tremånedersregelDato, søknadstidslinje.getMaxLocalDate(), null));
+        LocalDateTimeline<?> justert = søknadstidslinje.intersection(new LocalDateTimeline<>(tremånedersregelDato, LocalDate.MAX, null));
         return DatoIntervallEntitet.fraTimeline(justert);
     }
 
