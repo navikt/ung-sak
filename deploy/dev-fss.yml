@@ -252,7 +252,7 @@ spec:
 
     # Pleiepenger infotrygd migrering
     - name: INFOTRYGD_MIGRERING_TILLATELSER
-      value: "Z990404,Z990422,Z994004,Z994337"
+      value: "Z990404,Z990422,Z994004,Z994337,Z994185"
 
 
     # FRISINN NYE REGLER 2022
