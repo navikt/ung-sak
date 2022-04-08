@@ -78,9 +78,6 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         var optVilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (optVilkårene.isPresent()) {
             var vilkårTidslinje = optVilkårene.get().getVilkårTimeline(vilkårType);
-            if (vilkårTidslinje.isEmpty()) {
-                return Collections.emptyNavigableSet();
-            }
             return DatoIntervallEntitet.fraTimeline(vilkårTidslinje);
         } else {
             // default til 'fullstedige' perioder hvis vilkår ikke angitt.
