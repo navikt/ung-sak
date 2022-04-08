@@ -50,7 +50,6 @@ import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -94,7 +93,7 @@ public class ÅrskvantumTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(ÅrskvantumTjeneste.class);
 
-    private final MapOppgittFraværOgVilkårsResultat mapOppgittFraværOgVilkårsResultat = new MapOppgittFraværOgVilkårsResultat();
+    private MapOppgittFraværOgVilkårsResultat mapOppgittFraværOgVilkårsResultat;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private BehandlingRepository behandlingRepository;
@@ -106,7 +105,6 @@ public class ÅrskvantumTjeneste {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private Boolean skruPåAvslagSøknadManglerIm;
     private Boolean brukFerdigutledetFlaggRefusjon;
 
     ÅrskvantumTjeneste() {
@@ -138,8 +136,8 @@ public class ÅrskvantumTjeneste {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.opptjeningTjeneste = opptjeningTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.skruPåAvslagSøknadManglerIm = skruPåAvslagSøknadManglerIm;
         this.brukFerdigutledetFlaggRefusjon = brukFerdigutledetFlaggRefusjon;
+        this.mapOppgittFraværOgVilkårsResultat = new MapOppgittFraværOgVilkårsResultat(skruPåAvslagSøknadManglerIm);
     }
 
     public void bekreftUttaksplan(Long behandlingId) {
@@ -256,6 +254,8 @@ public class ÅrskvantumTjeneste {
                                                   NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktiveter,
                                                   Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> perioder,
                                                   Behandling behandling) {
+
+
         var fraværPerioder = new ArrayList<FraværPeriode>();
         var fagsakPeriode = behandling.getFagsak().getPeriode();
         var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfall(ref, iayGrunnlag, opptjeningAktiveter, vilkårene, fagsakPeriode, perioder)
@@ -312,26 +312,27 @@ public class ÅrskvantumTjeneste {
                 utledSøknadÅrsak(fraværPeriode),
                 opprinneligBehandlingUuid.map(UUID::toString).orElse(null),
                 avvikImSøknad,
-                utledVurderteVilkår(arbeidforholdStatus, utfallInngangsvilkår, avvikImSøknad, fraværPeriode));
+                utledVurderteVilkår(arbeidforholdStatus, utfallInngangsvilkår, wrappedOppgittFraværPeriode));
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
     }
 
-    private VurderteVilkår utledVurderteVilkår(ArbeidsforholdStatus arbeidsforholdStatus, Utfall utfallInngangsvilkår, AvvikImSøknad avvikImSøknad, OppgittFraværPeriode fraværPeriode) {
+    private VurderteVilkår utledVurderteVilkår(ArbeidsforholdStatus arbeidsforholdStatus, Utfall utfallInngangsvilkår, WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode) {
+
         NavigableMap<Vilkår, Utfall> vilkårMap = new TreeMap<>();
         vilkårMap.put(Vilkår.ARBEIDSFORHOLD, arbeidsforholdStatus == ArbeidsforholdStatus.AKTIVT ? Utfall.INNVILGET : Utfall.AVSLÅTT);
         vilkårMap.put(Vilkår.INNGANGSVILKÅR, utfallInngangsvilkår);
-        vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, skruPåAvslagSøknadManglerIm && avslåFraværFraArbeidPgaManglendeIm(avvikImSøknad, fraværPeriode.getAktivitetType(), fraværPeriode.getSøknadÅrsak()) ? Utfall.AVSLÅTT : Utfall.INNVILGET);
+        vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, Utfall.INNVILGET);
+
+        if (wrappedOppgittFraværPeriode.getUtfallNyoppstartetVilkår() != null) {
+            //TODO sett inn nytt vilkår her
+            //             ↓
+            vilkårMap.put(null, wrappedOppgittFraværPeriode.getUtfallNyoppstartetVilkår());
+        }
         return new VurderteVilkår(vilkårMap);
     }
 
-    private boolean avslåFraværFraArbeidPgaManglendeIm(AvvikImSøknad avvikImSøknad, UttakArbeidType aktivitetType, no.nav.k9.kodeverk.uttak.SøknadÅrsak søknadÅrsak) {
-        return aktivitetType == UttakArbeidType.ARBEIDSTAKER
-            && avvikImSøknad == AvvikImSøknad.SØKNAD_UTEN_MATCHENDE_IM
-            && søknadÅrsak != no.nav.k9.kodeverk.uttak.SøknadÅrsak.ARBEIDSGIVER_KONKURS
-            && søknadÅrsak != no.nav.k9.kodeverk.uttak.SøknadÅrsak.KONFLIKT_MED_ARBEIDSGIVER;
-    }
 
     private AvvikImSøknad utedAvvikImSøknad(WrappedOppgittFraværPeriode oppgittFraværPeriode) {
         var kravStatus = oppgittFraværPeriode.getSamtidigeKrav();
