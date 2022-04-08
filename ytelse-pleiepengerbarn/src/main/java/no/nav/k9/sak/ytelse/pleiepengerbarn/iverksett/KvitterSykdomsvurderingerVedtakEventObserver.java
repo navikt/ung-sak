@@ -9,8 +9,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -21,6 +19,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjonBesluttet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
 @ApplicationScoped
 public class KvitterSykdomsvurderingerVedtakEventObserver {
@@ -33,16 +32,19 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
     private SykdomGrunnlagService sykdomGrunnlagService;
     private SykdomVurderingRepository sykdomVurderingRepository;
 
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
+
     KvitterSykdomsvurderingerVedtakEventObserver() {
         // for CDI proxy
     }
 
     @Inject
-    public KvitterSykdomsvurderingerVedtakEventObserver(BehandlingRepositoryProvider repositoryProvider, FagsakRepository fagsakRepository, SykdomGrunnlagService sykdomGrunnlagService, SykdomVurderingRepository sykdomVurderingRepository) {
+    public KvitterSykdomsvurderingerVedtakEventObserver(BehandlingRepositoryProvider repositoryProvider, FagsakRepository fagsakRepository, SykdomGrunnlagService sykdomGrunnlagService, SykdomVurderingRepository sykdomVurderingRepository, SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.fagsakRepository = fagsakRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
 
     public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
@@ -54,12 +56,17 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
             return;
         }
         var behandlingId = event.getBehandlingId();
+
+        if (søknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId).isEmpty()) {
+            return;
+        }
+
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(behandling.getUuid());
 
         if (!behandling.isToTrinnsBehandling()) {
-            if(harUbesluttet(sykdomGrunnlagBehandling)) {
+            if (harUbesluttet(sykdomGrunnlagBehandling)) {
                 log.warn("Har ubesluttede sykdomsvurderinger uten at AP9001 har blitt generert");
             }
             return;
@@ -72,11 +79,11 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
             .stream()
             .filter(v -> !v.isBesluttet())
             .forEach(v -> {
-                    sykdomVurderingRepository.lagre(
-                        new SykdomVurderingVersjonBesluttet(
-                            endretAv,
-                            nå,
-                            v)); //On conflict do nothing
+                sykdomVurderingRepository.lagre(
+                    new SykdomVurderingVersjonBesluttet(
+                        endretAv,
+                        nå,
+                        v)); //On conflict do nothing
             });
 
         log.info("Utført for behandling: {}", behandlingId);
