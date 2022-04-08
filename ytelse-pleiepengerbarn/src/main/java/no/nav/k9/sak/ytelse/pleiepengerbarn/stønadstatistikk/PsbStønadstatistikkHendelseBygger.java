@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,6 +31,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkHendelseBygger;
 import no.nav.k9.sak.kontrakt.omsorg.OmsorgenForOversiktDto;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkArbeidsforhold;
@@ -48,7 +51,9 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.MapFraUttaksplan;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.OmsorgenForDtoMapper;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk.StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse;
 import no.nav.pleiepengerbarn.uttak.kontrakter.GraderingMotTilsyn;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
@@ -67,6 +72,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     private SykdomGrunnlagService sykdomGrunnlagService;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private OmsorgenForDtoMapper omsorgenForDtoMapper;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
 
     @Inject
@@ -75,13 +81,15 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
             AktørTjeneste aktørTjeneste,
             SykdomGrunnlagService sykdomGrunnlagService,
             BehandlingVedtakRepository behandlingVedtakRepository,
-            OmsorgenForDtoMapper omsorgenForDtoMapper) {
+            OmsorgenForDtoMapper omsorgenForDtoMapper,
+            SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.stønadstatistikkPeriodetidslinjebygger = stønadstatistikkPeriodetidslinjebygger;
         this.behandlingRepository = behandlingRepository;
         this.aktørTjeneste = aktørTjeneste;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.omsorgenForDtoMapper = omsorgenForDtoMapper;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
 
 
@@ -96,7 +104,17 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
 
         final PersonIdent søker = aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getAktørId()).get();
         final PersonIdent pleietrengende= aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getPleietrengendeAktørId()).get();
-        final List<SykdomDiagnosekode> diagnosekoder = hentDiagnosekoder(behandlingUuid);
+        final Optional<SykdomGrunnlagBehandling> grunnlagOpt = sykdomGrunnlagService.hentGrunnlagHvisEksisterer(behandlingUuid);
+        if (grunnlagOpt.isEmpty()) {
+            final NavigableSet<DatoIntervallEntitet> søknadsperioder = søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId());
+            if (!søknadsperioder.isEmpty()) {
+                throw new IllegalStateException("Mangler sykdomsgrunnlag selv om det finnes perioder på behandlingen.");
+            }
+            logger.info("Lager ikke StønadstatistikkHendelse siden behandingen mangler søknadsperioder: " + behandlingUuid.toString());
+            return null;
+        }
+        
+        final List<SykdomDiagnosekode> diagnosekoder = hentDiagnosekoder(grunnlagOpt.get());
         final LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> periodetidslinje = stønadstatistikkPeriodetidslinjebygger.lagTidslinjeFor(behandling);
 
         final UUID forrigeBehandlingUuid = finnForrigeBehandlingUuid(behandling);
@@ -137,8 +155,8 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
                 .collect(Collectors.toList());
     }
 
-    private List<SykdomDiagnosekode> hentDiagnosekoder(UUID behandlingUuid) {
-        final SykdomGrunnlag sykdomGrunnlag = sykdomGrunnlagService.hentGrunnlag(behandlingUuid).getGrunnlag();
+    private List<SykdomDiagnosekode> hentDiagnosekoder(SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
+        final SykdomGrunnlag sykdomGrunnlag = sykdomGrunnlagBehandling.getGrunnlag();
         if (sykdomGrunnlag.getDiagnosekoder() == null || sykdomGrunnlag.getDiagnosekoder().getDiagnosekoder() == null) {
             return List.of();
         }
