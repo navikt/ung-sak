@@ -15,7 +15,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
-import no.nav.k9.sak.domene.iay.modell.Permisjon;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Stillingsprosent;
@@ -87,36 +86,31 @@ public class PerioderMedInaktivitetUtleder {
 
     private void mapYrkesAktivitet(HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>> resultat, Yrkesaktivitet yrkesaktivitet) {
         var key = utledIdentifikator(yrkesaktivitet);
-        var arbeidsAktivTidslinje = resultat.getOrDefault(key, new LocalDateTimeline<>(List.of()));
 
         var segmenter = yrkesaktivitet.getAnsettelsesPeriode()
             .stream()
             .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), true))
             .toList();
-        // Har ikke helt kontroll på aa-reg mtp overlapp her så better safe than sorry
-        for (LocalDateSegment<Boolean> segment : segmenter) {
-            var arbeidsforholdTidslinje = new LocalDateTimeline<>(List.of(segment));
-            arbeidsAktivTidslinje = arbeidsAktivTidslinje.combine(arbeidsforholdTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
+
+        LocalDateTimeline<Boolean> aktivtsArbeidsforholdTidslinje = new LocalDateTimeline<>(segmenter, StandardCombinators::alwaysTrueForMatch);
+
         // Ta bort permisjoner
         var permitteringsTidslinje = mapPermittering(yrkesaktivitet);
-        arbeidsAktivTidslinje = arbeidsAktivTidslinje.disjoint(permitteringsTidslinje);
+        aktivtsArbeidsforholdTidslinje = aktivtsArbeidsforholdTidslinje.disjoint(permitteringsTidslinje);
 
+        var arbeidsAktivTidslinje = resultat.getOrDefault(key, LocalDateTimeline.empty());
+        arbeidsAktivTidslinje = arbeidsAktivTidslinje.combine(aktivtsArbeidsforholdTidslinje, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         resultat.put(key, arbeidsAktivTidslinje.compress());
     }
 
     private LocalDateTimeline<Boolean> mapPermittering(Yrkesaktivitet yrkesaktivitet) {
-        var timeline = new LocalDateTimeline<Boolean>(List.of());
-
         var relevantePermitteringer = yrkesaktivitet.getPermisjon().stream()
             .filter(it -> Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.PERMITTERING))
             .filter(it -> erStørreEllerLik100Prosent(it.getProsentsats()))
+            .map(permisjon -> new LocalDateSegment<>(permisjon.getFraOgMed(), permisjon.getTilOgMed(), true))
             .toList();
 
-        for (Permisjon permisjon : relevantePermitteringer) {
-            var permittert = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(permisjon.getFraOgMed(), permisjon.getTilOgMed(), true)));
-            timeline = timeline.combine(permittert, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
+        LocalDateTimeline<Boolean> timeline = new LocalDateTimeline<>(relevantePermitteringer, StandardCombinators::alwaysTrueForMatch);
 
         return timeline.compress();
     }
