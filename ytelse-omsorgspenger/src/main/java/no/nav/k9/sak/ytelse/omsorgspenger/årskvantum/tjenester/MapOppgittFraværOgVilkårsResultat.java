@@ -51,7 +51,7 @@ public class MapOppgittFraværOgVilkårsResultat {
 
     private static final Logger log = LoggerFactory.getLogger(MapOppgittFraværOgVilkårsResultat.class);
 
-    boolean brukVurderingAvNyoppstartet;
+    private boolean brukVurderingAvNyoppstartet;
 
     public MapOppgittFraværOgVilkårsResultat(boolean brukVurderingAvNyoppstartet) {
         this.brukVurderingAvNyoppstartet = brukVurderingAvNyoppstartet;
@@ -86,7 +86,7 @@ public class MapOppgittFraværOgVilkårsResultat {
                 .stream()
                 .filter(it -> it.matcher(aktivitet))
                 .map(arbeidsforholdOgPermitertTidslinje::get)
-                .collect(Collectors.toList());
+                .toList();
             result.put(aktivitet, mergeTidslinjer(fraværsTidslinje.get(aktivitet), arbeidsforholdSomMatcher));
         }
         // Arbeidsforhold som har fravær, men ikke finnes i arbeidsforhold
@@ -104,7 +104,7 @@ public class MapOppgittFraværOgVilkårsResultat {
         boolean vilkåretErAktuelt = fraværsTidslinje.values().stream().anyMatch(fraværTidslinje -> fraværTidslinje.stream().anyMatch(segment -> segment.getValue().getPeriode() != null && segment.getValue().getPeriode().getSøknadÅrsak() == SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER));
         if (!vilkåretErAktuelt) {
             //ikke vits å lage strukturer for å utlede noe
-            //   return fraværsTidslinje;
+            return fraværsTidslinje;
         }
 
         Map<Arbeidsgiver, LocalDateTimeline<Boolean>> perioderNyoppstartet = new NyoppstartetUtleder().utledPerioderMedNyoppstartetArbeidsforhold(iayGrunnlag, aktørId);
