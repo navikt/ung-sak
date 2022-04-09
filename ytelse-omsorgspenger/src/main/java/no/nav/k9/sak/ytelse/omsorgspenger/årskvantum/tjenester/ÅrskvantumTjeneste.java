@@ -275,8 +275,9 @@ public class ÅrskvantumTjeneste {
 
             Arbeidsforhold arbeidsforhold;
 
-            boolean kreverRefusjonFerdigutledet = wrappedOppgittFraværPeriode.getSamtidigeKrav().inntektsmeldingMedRefusjonskrav() == SamtidigKravStatus.KravStatus.FINNES;
-            boolean refusjonskravTrekt = wrappedOppgittFraværPeriode.getSamtidigeKrav().inntektsmeldingMedRefusjonskrav() == SamtidigKravStatus.KravStatus.TREKT;
+            SamtidigKravStatus.KravStatus refusjonskravStatusForArbeidsforholdet = wrappedOppgittFraværPeriode.getSamtidigeKrav().inntektsmeldingMedRefusjonskrav(fraværPeriode.getArbeidsforholdRef());
+            boolean kreverRefusjonFerdigutledet = refusjonskravStatusForArbeidsforholdet == SamtidigKravStatus.KravStatus.FINNES;
+            boolean refusjonskravTrekt = refusjonskravStatusForArbeidsforholdet == SamtidigKravStatus.KravStatus.TREKT;
             boolean kreverRefusjon = false;
             if (arb == null) {
                 arbeidsforhold = new Arbeidsforhold(fraværPeriode.getAktivitetType().getKode(), null, null, null);
@@ -326,9 +327,9 @@ public class ÅrskvantumTjeneste {
         vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, Utfall.INNVILGET);
 
         if (wrappedOppgittFraværPeriode.getUtfallNyoppstartetVilkår() != null) {
-            //TODO sett inn nytt vilkår her
-            //             ↓
-            vilkårMap.put(null, wrappedOppgittFraværPeriode.getUtfallNyoppstartetVilkår());
+            //FIXME sett inn nytt vilkår her, når klart i k9-aarskvantum
+            //                   ↓
+            vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, wrappedOppgittFraværPeriode.getUtfallNyoppstartetVilkår());
         }
         return new VurderteVilkår(vilkårMap);
     }
