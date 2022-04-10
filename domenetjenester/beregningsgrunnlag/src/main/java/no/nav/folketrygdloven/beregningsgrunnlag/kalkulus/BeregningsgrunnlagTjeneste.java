@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -331,8 +332,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             .collect(Collectors.toList());
     }
 
-    @Override
-    public void deaktiverBeregningsgrunnlagUtenTilknytningTilVilkår(BehandlingReferanse ref) {
+    public void deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(BehandlingReferanse ref) {
         var vilkårOptional = vilkårTjeneste.hentHvisEksisterer(ref.getBehandlingId())
             .flatMap(v -> v.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
 
@@ -340,16 +340,20 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             var vilkår = vilkårOptional.get();
             var vilkårsSkjæringspunkter = vilkår.getPerioder().stream().map(VilkårPeriode::getSkjæringstidspunkt).collect(Collectors.toSet());
             var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
-
-            var referanserUtenKnytningTilVilkårsPerioder = grunnlagOpt.stream().flatMap(g -> g.getGrunnlagPerioder()
+            var avslåtteSkjæringstidspunkt = vilkår.getPerioder().stream()
+                .filter(vp -> vp.getUtfall().equals(Utfall.IKKE_OPPFYLT))
+                .map(VilkårPeriode::getSkjæringstidspunkt)
+                .collect(Collectors.toSet());
+            var referanserSomSkalDeaktiveres = grunnlagOpt.stream().flatMap(g -> g.getGrunnlagPerioder()
                     .stream())
                 .map(p -> new BgRef(p.getEksternReferanse(), p.getSkjæringstidspunkt()))
-                .filter(it -> vilkårsSkjæringspunkter.stream().noneMatch(vstp -> it.getStp().equals(vstp)))
+                .filter(it -> erAvslått(avslåtteSkjæringstidspunkt, it) ||
+                    harFjernetSkjæringstidspunkt(vilkårsSkjæringspunkter, it))
                 .collect(Collectors.toList());
 
-            if (!referanserUtenKnytningTilVilkårsPerioder.isEmpty()) {
+            if (!referanserSomSkalDeaktiveres.isEmpty()) {
                 Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = Objects.equals(ref.getBehandlingType(), BehandlingType.REVURDERING) ? grunnlagRepository.getInitiellVersjon(ref.getBehandlingId()) : Optional.empty();
-                var bgReferanser = referanserUtenKnytningTilVilkårsPerioder.stream()
+                var bgReferanser = referanserSomSkalDeaktiveres.stream()
                     .filter(it -> erIkkeInitiellVersjon(initiellVersjon, it))
                     .map(BgRef::getRef)
                     .collect(Collectors.toList());
@@ -357,6 +361,14 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             }
         }
 
+    }
+
+    private boolean harFjernetSkjæringstidspunkt(Set<LocalDate> vilkårsSkjæringspunkter, BgRef it) {
+        return vilkårsSkjæringspunkter.stream().noneMatch(vstp -> it.getStp().equals(vstp));
+    }
+
+    private boolean erAvslått(Set<LocalDate> avslåtteSkjæringstidspunkt, BgRef it) {
+        return avslåtteSkjæringstidspunkt.stream().anyMatch(stp -> it.getStp().equals(stp));
     }
 
     @Override
