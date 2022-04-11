@@ -437,7 +437,7 @@ public class MapArbeid {
                 .map(AktørArbeid::hentAlleYrkesaktiviteter).orElse(List.of());
 
             var yrkesaktiviteter = aktørArbeid.stream()
-                .filter(it -> Set.of(ArbeidType.MARITIMT_ARBEIDSFORHOLD, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).contains(it.getArbeidType()))
+                .filter(it -> Set.of(ArbeidType.MARITIMT_ARBEIDSFORHOLD, ArbeidType.FORENKLET_OPPGJØRSORDNING, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).contains(it.getArbeidType()))
                 .filter(it -> it.getArbeidsgiver().equals(key.getArbeidsgiver()))
                 .collect(Collectors.toList());
 
