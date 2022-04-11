@@ -93,7 +93,7 @@ public interface BeregningTjeneste {
      *  @param ref Behandlingreferanse
      *
      */
-    public void deaktiverBeregningsgrunnlagUtenTilknytningTilVilkår(BehandlingReferanse ref);
+    void deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(BehandlingReferanse ref);
 
     /** Gjenoppretter det første beregningsgrunnlaget som var opprettet for behandlingen
      *
