@@ -5,8 +5,6 @@ import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -41,7 +39,7 @@ public class HentPerioderTilVurderingTjeneste {
         BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
         var søknadsperioder = TidslinjeUtil.tilTidslinjeKomprimert(finnSykdomsperioder(referanse));
 
-        return fjernTrukkedePerioder(referanse, behandling, søknadsperioder);
+        return fjernTrukkedePerioder(referanse);
     }
 
     public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingMedUbesluttet(Behandling behandling, Optional<DatoIntervallEntitet> utvidetPeriodeSomFølgeAvDødsfall) {
@@ -53,21 +51,20 @@ public class HentPerioderTilVurderingTjeneste {
             søknadsperioder = søknadsperioder.combine(new LocalDateSegment<>(utvidetPeriodeSomFølgeAvDødsfall.get().toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        return fjernTrukkedePerioder(referanse, behandling, søknadsperioder);
+        return fjernTrukkedePerioder(referanse);
     }
 
-    @NotNull
-    private TreeSet<DatoIntervallEntitet> fjernTrukkedePerioder(BehandlingReferanse referanse, Behandling behandling, LocalDateTimeline<Boolean> søknadsperioder) {
-        final LocalDateTimeline<Boolean> trukkedeKrav = hentTrukkedeKravTidslinje(referanse, behandling);
+    private TreeSet<DatoIntervallEntitet> fjernTrukkedePerioder(BehandlingReferanse referanse, LocalDateTimeline<Boolean> søknadsperioder) {
+        final LocalDateTimeline<Boolean> trukkedeKrav = hentTrukkedeKravTidslinje(referanse);
         return TidslinjeUtil.kunPerioderSomIkkeFinnesI(søknadsperioder, trukkedeKrav).stream()
             .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private LocalDateTimeline<Boolean> hentTrukkedeKravTidslinje(BehandlingReferanse referanse, Behandling behandling) {
-        return TidslinjeUtil.tilTidslinjeKomprimert(søknadsperiodeTjeneste.hentKravperioder(behandling.getFagsakId(), referanse.getBehandlingId())
+    private LocalDateTimeline<Boolean> hentTrukkedeKravTidslinje(BehandlingReferanse referanse) {
+        return TidslinjeUtil.toLocalDateTimeline(søknadsperiodeTjeneste.hentKravperioder(referanse.getFagsakId(), referanse.getBehandlingId())
             .stream()
-            .filter(kp -> kp.isHarTrukketKrav())
+            .filter(SøknadsperiodeTjeneste.Kravperiode::isHarTrukketKrav)
             .map(SøknadsperiodeTjeneste.Kravperiode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new)));
     }
