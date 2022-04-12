@@ -35,6 +35,14 @@ public class AktivitetIdentifikator {
         }
     }
 
+    public static AktivitetIdentifikator lagAktivitetIdentifikator(OppgittFraværPeriode oppgittFraværPeriode) {
+        if (oppgittFraværPeriode.getArbeidsgiver() != null) {
+            return new AktivitetIdentifikator(oppgittFraværPeriode.getAktivitetType(), new ArbeidsgiverArbeidsforhold(oppgittFraværPeriode.getArbeidsgiver(), oppgittFraværPeriode.getArbeidsforholdRef()));
+        } else {
+            return new AktivitetIdentifikator(oppgittFraværPeriode.getAktivitetType());
+        }
+    }
+
     public static AktivitetIdentifikator lagAktivitetIdentifikator(VurdertSøktPeriode<OppgittFraværPeriode> vurdertSøktPeriode) {
         if (vurdertSøktPeriode.getArbeidsgiver() != null) {
             return new AktivitetIdentifikator(vurdertSøktPeriode.getType(), new ArbeidsgiverArbeidsforhold(vurdertSøktPeriode.getArbeidsgiver(), vurdertSøktPeriode.getArbeidsforholdRef()));

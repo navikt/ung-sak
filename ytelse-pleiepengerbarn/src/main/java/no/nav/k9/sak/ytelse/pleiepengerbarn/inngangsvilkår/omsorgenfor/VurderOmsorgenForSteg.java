@@ -1,20 +1,23 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_OMSORG_FOR;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -35,14 +38,15 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.hendelse.brukerdialoginnsyn.BrukerdialoginnsynService;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.OmsorgenForVilkårGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.RelasjonsRolle;
 
-@BehandlingStegRef(kode = "VURDER_OMSORG_FOR")
+@BehandlingStegRef(value = VURDER_OMSORG_FOR)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @ApplicationScoped
 public class VurderOmsorgenForSteg implements BehandlingSteg {
 
@@ -53,6 +57,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     private OmsorgenForTjeneste omsorgenForTjeneste;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private BrukerdialoginnsynService brukerdialoginnsynService;
 
     VurderOmsorgenForSteg() {
         // CDI
@@ -60,13 +65,15 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
 
     @Inject
     public VurderOmsorgenForSteg(BehandlingRepositoryProvider repositoryProvider,
-                                 @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                 OmsorgenForTjeneste omsorgenForTjeneste) {
+                                 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                 OmsorgenForTjeneste omsorgenForTjeneste,
+                                 BrukerdialoginnsynService brukerdialoginnsynService) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.omsorgenForTjeneste = omsorgenForTjeneste;
+        this.brukerdialoginnsynService = brukerdialoginnsynService;
     }
 
     @Override
@@ -85,13 +92,30 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
             behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         }
 
+        final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
+        final boolean haddeOmsorgenForISistePeriode = harOmsorgenForISistePeriode(vilkårene);
         final List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(kontekst, samletOmsorgenForTidslinje);
 
-        final Vilkårene oppdaterteVilkår = oppdaterVilkårene(kontekst, vilkårData);
+        final Vilkårene oppdaterteVilkår = oppdaterVilkårene(kontekst, vilkårene, vilkårData);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
+
+        final boolean harOmsorgenForISistePeriode = harOmsorgenForISistePeriode(oppdaterteVilkår);
+        if (haddeOmsorgenForISistePeriode != harOmsorgenForISistePeriode) {
+            brukerdialoginnsynService.publiserOmsorgenForHendelse(behandling, harOmsorgenForISistePeriode);
+        }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
+
+    private boolean harOmsorgenForISistePeriode(Vilkårene vilkårene) {
+        final Vilkår vilkår = vilkårene.getVilkår(VILKÅRET).orElseThrow();
+        if (vilkår.getPerioder().isEmpty()) {
+            return false;
+        }
+        final VilkårPeriode vilkårPeriode = vilkår.getPerioder().get(vilkår.getPerioder().size() - 1);
+        return (vilkårPeriode.getUtfall() == Utfall.OPPFYLT);
+    }
+
 
     private boolean harIkkeLengerAksjonspunkt(Behandling behandling, LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje) {
         return !harAksjonspunkt(samletOmsorgenForTidslinje, behandling.erManueltOpprettet());
@@ -116,8 +140,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         return false;
     }
 
-    private Vilkårene oppdaterVilkårene(BehandlingskontrollKontekst kontekst, final List<VilkårData> vilkårData) {
-        final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
+    private Vilkårene oppdaterVilkårene(BehandlingskontrollKontekst kontekst, Vilkårene vilkårene, final List<VilkårData> vilkårData) {
         final VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());

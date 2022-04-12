@@ -1,10 +1,11 @@
 package no.nav.k9.sak.domene.behandling.steg.vedtak;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FATTE_VEDTAK;
+
 import java.util.Objects;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -20,7 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.økonomi.simulering.tjeneste.SimulerInntrekkSjekkeTjeneste;
 
-@BehandlingStegRef(kode = "FVEDSTEG")
+@BehandlingStegRef(value = FATTE_VEDTAK)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

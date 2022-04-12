@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -16,8 +15,8 @@ import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.trigger.Trigger;
 
 @ApplicationScoped
-@GrunnlagRef("ProsessTriggere")
-@FagsakYtelseTypeRef("*")
+@GrunnlagRef(ProsessTriggere.class)
+@FagsakYtelseTypeRef
 public class BehandlingÅrsakUtlederProsessTriggere implements BehandlingÅrsakUtleder {
 
     private ProsessTriggereRepository prosessTriggereRepository;

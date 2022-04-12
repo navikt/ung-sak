@@ -1,6 +1,7 @@
 package no.nav.k9.sak.behandling.prosessering;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -58,6 +59,8 @@ public interface BehandlingProsesseringTjeneste {
     ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker);
 
     void opprettTasksForInitiellRegisterInnhenting(Behandling behandling);
+
+    List<String> utledRegisterinnhentingTaskTyper(Behandling behandling);
 
     void feilPågåendeTaskHvisFremtidigTaskEksisterer(Behandling behandling, Long kjørendeTaskId, Set<String> set);
 

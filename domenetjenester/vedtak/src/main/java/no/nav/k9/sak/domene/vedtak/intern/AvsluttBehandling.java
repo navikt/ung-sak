@@ -2,14 +2,15 @@ package no.nav.k9.sak.domene.vedtak.intern;
 
 import java.util.Optional;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
@@ -22,8 +23,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.vedtak.impl.BehandlingVedtakEventPubliserer;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
 @ApplicationScoped
 public class AvsluttBehandling {
@@ -34,7 +33,7 @@ public class AvsluttBehandling {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private BehandlingVedtakEventPubliserer behandlingVedtakEventPubliserer;
     private BehandlingVedtakRepository behandlingVedtakRepository;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
     private VurderBehandlingerUnderIverksettelse vurderBehandlingerUnderIverksettelse;
 
     public AvsluttBehandling() {
@@ -46,13 +45,13 @@ public class AvsluttBehandling {
                              BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                              BehandlingVedtakEventPubliserer behandlingVedtakEventPubliserer,
                              VurderBehandlingerUnderIverksettelse vurderBehandlingerUnderIverksettelse,
-                             ProsessTaskRepository prosessTaskRepository) {
+                             ProsessTaskTjeneste taskTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         this.behandlingVedtakEventPubliserer = behandlingVedtakEventPubliserer;
         this.vurderBehandlingerUnderIverksettelse = vurderBehandlingerUnderIverksettelse;
-        this.prosessTaskRepository = prosessTaskRepository;
+        this.taskTjeneste = taskTjeneste;
     }
 
     void avsluttBehandling(String behandlingId) {
@@ -89,9 +88,9 @@ public class AvsluttBehandling {
     }
 
     private void opprettTaskForProsesserBehandling(Behandling behandling) {
-        ProsessTaskData prosessTaskData = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
+        ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setCallIdFraEksisterende();
-        prosessTaskRepository.lagre(prosessTaskData);
+        taskTjeneste.lagre(prosessTaskData);
     }
 }

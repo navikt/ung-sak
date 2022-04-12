@@ -1,11 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 
-import java.util.Set;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -17,7 +14,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
@@ -47,13 +43,10 @@ public class VedtaksbrevHåndterer {
         this.vedtakTjeneste = vedtakTjeneste;
     }
 
-    void oppdaterVedtaksbrev(VedtaksbrevOverstyringDto dto, AksjonspunktOppdaterParameter param, OppdateringResultat.Builder builder) {
+    void håndterTotrinnOgHistorikkinnslag(VedtaksbrevOverstyringDto dto, AksjonspunktOppdaterParameter param, OppdateringResultat.Builder builder) {
         AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.fraKode(dto.getKode());
         Behandling behandling = param.getBehandling();
 
-        if (dto.isSkalBrukeOverstyrendeFritekstBrev()) {
-            settFritekstBrev(param.getBehandlingId(), dto.getOverskrift(), dto.getFritekstBrev());
-        }
         if (AksjonspunktDefinisjon.FORESLÅ_VEDTAK.equals(aksjonspunktDefinisjon)) {
             opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
             opprettAksjonspunktForFatterVedtak(builder);
@@ -61,7 +54,9 @@ public class VedtaksbrevHåndterer {
         opprettHistorikkinnslag(behandling);
     }
 
-    void oppdaterVedtaksvarsel(VedtaksbrevOverstyringDto dto, Long behandlingId) {
+    void oppdaterVedtaksvarsel(VedtaksbrevOverstyringDto dto, Long behandlingId, FagsakYtelseType fagsakYtelseType) {
+        if (fagsakYtelseType != FagsakYtelseType.FRISINN) return;
+
         vedtakVarselRepository.hentHvisEksisterer(behandlingId).ifPresent(v -> {
             v.setRedusertUtbetalingÅrsaker(dto.getRedusertUtbetalingÅrsaker());
             if (dto.isSkalUndertrykkeBrev()) {
@@ -71,33 +66,12 @@ public class VedtaksbrevHåndterer {
         });
     }
 
-    void oppdaterBegrunnelse(Behandling behandling, String begrunnelse) {
-        vedtakVarselRepository.hentHvisEksisterer(behandling.getId()).ifPresent(behandlingsresultat -> {
-            if (kreverFritekstbrev(behandling.getBehandlingResultatType())
-                || begrunnelse != null
-                || skalNullstilleFritekstfelt(behandling, behandlingsresultat)) {
-                behandlingsresultat.setAvslagarsakFritekst(begrunnelse);
-            }
-        });
+    void oppdaterBegrunnelse(Behandling behandling) {
         behandling.setAnsvarligSaksbehandler(getCurrentUserId());
-    }
-
-    private void settFritekstBrev(Long behandlingId, String overskrift, String fritekst) {
-        vedtakVarselRepository.hentHvisEksisterer(behandlingId).ifPresent(vedtakVarsel -> {
-            vedtakVarsel.setOverskrift(overskrift);
-            vedtakVarsel.setFritekstbrev(fritekst);
-            vedtakVarsel.setVedtaksbrev(Vedtaksbrev.FRITEKST);
-            vedtakVarselRepository.lagre(behandlingId, vedtakVarsel);
-        });
     }
 
     private void opprettAksjonspunktForFatterVedtak(OppdateringResultat.Builder builder) {
         builder.medEkstraAksjonspunktResultat(AksjonspunktDefinisjon.FATTER_VEDTAK, AksjonspunktStatus.OPPRETTET);
-    }
-
-    private boolean skalNullstilleFritekstfelt(Behandling behandling, VedtakVarsel behandlingsresultat) {
-        return !kreverFritekstbrev(behandling.getBehandlingResultatType())
-            && behandlingsresultat.getAvslagarsakFritekst() != null;
     }
 
     private void opprettHistorikkinnslag(Behandling behandling) {
@@ -118,10 +92,6 @@ public class VedtaksbrevHåndterer {
 
     protected String getCurrentUserId() {
         return SubjectHandler.getSubjectHandler().getUid();
-    }
-
-    private boolean kreverFritekstbrev(BehandlingResultatType behandlingResultatType) {
-        return Set.of(BehandlingResultatType.AVSLÅTT, BehandlingResultatType.OPPHØR, BehandlingResultatType.DELVIS_INNVILGET).contains(behandlingResultatType);
     }
 
 }

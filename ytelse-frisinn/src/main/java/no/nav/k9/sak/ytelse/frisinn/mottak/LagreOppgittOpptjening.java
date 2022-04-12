@@ -11,12 +11,11 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
@@ -43,7 +42,7 @@ class LagreOppgittOpptjening {
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private BehandlingRepository behandlingRepository;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
 
     LagreOppgittOpptjening() {
         // for proxy
@@ -53,7 +52,7 @@ class LagreOppgittOpptjening {
     LagreOppgittOpptjening(BehandlingRepository behandlingRepository,
                            InntektArbeidYtelseTjeneste iayTjeneste,
                            OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
-                           ProsessTaskRepository prosessTaskRepository) {
+                           ProsessTaskTjeneste prosessTaskRepository) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
@@ -106,7 +105,7 @@ class LagreOppgittOpptjening {
 
         if (erNyeOpplysninger) {
             try {
-                var enkeltTask = new ProsessTaskData(AsyncAbakusLagreOpptjeningTask.TASKTYPE);
+                var enkeltTask = ProsessTaskData.forProsessTask(AsyncAbakusLagreOpptjeningTask.class);
                 enkeltTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getAktørId());
                 enkeltTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
                 enkeltTask.setCallIdFraEksisterende();

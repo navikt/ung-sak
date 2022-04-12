@@ -2,6 +2,7 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING;
 
@@ -26,6 +27,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -47,12 +53,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
@@ -66,7 +66,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -114,14 +114,14 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private TpsTjeneste tpsTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
     private FagsakTjeneste fagsakTjeneste;
     private EntityManager entityManager;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRepository behandlingRepository;
 
     private SjekkProsessering sjekkProsessering;
-    
+
     private Pep pep;
     private BrukerTokenProvider tokenProvider;
     private StønadstatistikkService stønadstatistikkService;
@@ -131,11 +131,11 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
 
     @Inject
-    public ForvaltningMidlertidigDriftRestTjeneste(@FagsakYtelseTypeRef("FRISINN") FrisinnSøknadMottaker frisinnSøknadMottaker,
+    public ForvaltningMidlertidigDriftRestTjeneste(@FagsakYtelseTypeRef(FRISINN) FrisinnSøknadMottaker frisinnSøknadMottaker,
                                                    TpsTjeneste tpsTjeneste,
                                                    BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                                    FagsakTjeneste fagsakTjeneste,
-                                                   ProsessTaskRepository prosessTaskRepository,
+                                                   ProsessTaskTjeneste prosessTaskRepository,
                                                    MottatteDokumentRepository mottatteDokumentRepository,
                                                    BehandlingRepository behandlingRepository,
                                                    SjekkProsessering sjekkProsessering,
@@ -181,7 +181,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         LocalDate fom = LocalDate.of(2020, 3, 1);
         LocalDate tom = manuellSøknadDto.getPeriode().getTilOgMed();
 
-        Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.FRISINN, aktørId, null, null, fom, tom);
+        Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FRISINN, aktørId, null, null, fom, tom);
 
         loggForvaltningTjeneste(fagsak, "/frisinn/opprett-manuell-frisinn/", "kjører manuell frisinn søknad");
 
@@ -217,16 +217,16 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
     public Response hentUtStønadstatistikk(
             @Parameter(description = "Behandling-UUID")
-            @NotNull 
-            @Valid 
+            @NotNull
+            @Valid
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             BehandlingIdDto behandlingIdDto) {
-        
+
         final var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
         final String json = StønadstatistikkSerializer.toJson(stønadstatistikkService.lagHendelse(behandling.getId()));
         return Response.ok(json).build();
     }
-    
+
     @POST
     @Path("/manuell-revurdering")
     @Consumes(MediaType.TEXT_PLAIN)
@@ -241,16 +241,16 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(s), false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + s));
             loggForvaltningTjeneste(fagsak, "/manuell-revurdering", "kjører manuell revurdering/tilbakehopp");
 
-            var taskData = new ProsessTaskData(OpprettManuellRevurderingTask.TASKTYPE);
+            var taskData = ProsessTaskData.forProsessTask(OpprettManuellRevurderingTask.class);
             taskData.setSaksnummer(fagsak.getSaksnummer().getVerdi());
             taskData.setNesteKjøringEtter(LocalDateTime.now().plus(500L * idx, ChronoUnit.MILLIS)); // sprer utover hvert 1/2 sek.
-            // lagrer direkte til prosessTaskRepository så vi ikke går via FagsakProsessTask (siden den bestemmer rekkefølge). Får unik callId per task
+            // lagrer direkte til ProsessTaskTjeneste så vi ikke går via FagsakProsessTask (siden den bestemmer rekkefølge). Får unik callId per task
             prosessTaskRepository.lagre(taskData);
             idx++;
         }
 
     }
-    
+
     @GET
     @Path("/saker-med-feil")
     @Produces(MediaType.TEXT_PLAIN)
@@ -278,11 +278,11 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 + "    F.id = b.fagsak_id"
                 + "  )"
                 + ")) u");
-        
+
         @SuppressWarnings("unchecked")
         final List<String> result = q.getResultList();
         final String saksnummerliste = result.stream().reduce((a, b) -> a + ", " + b).orElse("");
-        
+
         return Response.ok(saksnummerliste).build();
     }
 
@@ -320,7 +320,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return Response.ok(resultatString).build();
     }
-    
+
     @GET
     @Path("/aapne-psb-med-soknad")
     @Produces(MediaType.TEXT_PLAIN)
@@ -352,7 +352,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 .orElse("");
         return Response.ok(resultatString).build();
     }
-    
+
     @GET
     @Path("/frisinn/uttrekk-antall")
     @Produces(MediaType.TEXT_PLAIN)

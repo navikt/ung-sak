@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 
@@ -15,11 +17,10 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 @ApplicationScoped
 public class ProsessModell {
 
-    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.OMSORGSPENGER_KS;
-    private static final String YTELSE = "OMP_KS";
+    private static final FagsakYtelseType YTELSE_TYPE = OMSORGSPENGER_KS;
 
-    @FagsakYtelseTypeRef(YTELSE)
-    @BehandlingTypeRef("BT-002")
+    @FagsakYtelseTypeRef(OMSORGSPENGER_KS)
+    @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
     @ApplicationScoped
     public BehandlingModell førstegangsbehandling() {
@@ -40,8 +41,8 @@ public class ProsessModell {
         return modellBuilder.build();
     }
 
-    @FagsakYtelseTypeRef(YTELSE)
-    @BehandlingTypeRef("BT-004")
+    @FagsakYtelseTypeRef(OMSORGSPENGER_KS)
+    @BehandlingTypeRef(BehandlingType.REVURDERING)
     @Produces
     @ApplicationScoped
     public BehandlingModell revurdering() {

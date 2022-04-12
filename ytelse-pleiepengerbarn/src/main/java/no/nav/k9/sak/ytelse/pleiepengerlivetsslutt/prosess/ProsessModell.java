@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.prosess;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -15,11 +14,10 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 @ApplicationScoped
 public class ProsessModell {
 
-    private static final String YTELSE = "PPN";
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 
-    @FagsakYtelseTypeRef(YTELSE)
-    @BehandlingTypeRef("BT-002")
+    @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
+    @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
     @ApplicationScoped
     public BehandlingModell førstegangsbehandling() {
@@ -36,7 +34,8 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, StartpunktType.KONTROLLER_ARBEIDSFORHOLD)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
-            .medSteg(BehandlingStegType.VURDER_MEDISINSKVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDISINSK)
+            .medSteg(BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, StartpunktType.INNGANGSVILKÅR_MEDISINSK)
+            .medSteg(BehandlingStegType.POST_VURDER_MEDISINSKVILKÅR)
             .medSteg(BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP)
             .medSteg(BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE, StartpunktType.OPPTJENING)
             .medSteg(BehandlingStegType.VURDER_OPPTJENING_FAKTA)
@@ -63,8 +62,8 @@ public class ProsessModell {
         return modellBuilder.build();
     }
 
-    @FagsakYtelseTypeRef(YTELSE)
-    @BehandlingTypeRef("BT-004")
+    @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
+    @BehandlingTypeRef(BehandlingType.REVURDERING)
     @Produces
     @ApplicationScoped
     public BehandlingModell revurdering() {
@@ -82,7 +81,8 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, StartpunktType.KONTROLLER_ARBEIDSFORHOLD)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
-            .medSteg(BehandlingStegType.VURDER_MEDISINSKVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDISINSK, StartpunktType.INNGANGSVILKÅR_OMSORGENFOR)
+            .medSteg(BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, StartpunktType.INNGANGSVILKÅR_MEDISINSK, StartpunktType.INNGANGSVILKÅR_OMSORGENFOR)
+            .medSteg(BehandlingStegType.POST_VURDER_MEDISINSKVILKÅR)
             .medSteg(BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP)
             .medSteg(BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE, StartpunktType.OPPTJENING)
             .medSteg(BehandlingStegType.VURDER_OPPTJENING_FAKTA)

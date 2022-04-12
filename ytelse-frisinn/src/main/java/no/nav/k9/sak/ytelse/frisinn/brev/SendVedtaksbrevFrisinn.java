@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.brev;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -17,7 +19,7 @@ import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrev;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 @ApplicationScoped
 public class SendVedtaksbrevFrisinn extends SendVedtaksbrev {
 
@@ -65,6 +67,6 @@ public class SendVedtaksbrevFrisinn extends SendVedtaksbrev {
             .map(Vedtaksbrev.INGEN::equals)
             .orElse(false);
 
-        return ref.getFagsakYtelseType() == FagsakYtelseType.FRISINN && ingenVedtaksbrev;
+        return ref.getFagsakYtelseType() == FRISINN && ingenVedtaksbrev;
     }
 }

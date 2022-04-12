@@ -205,11 +205,11 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             SkjermlenkeType.SOEKNADSFRIST, TOTRINN, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_MEDISINSKESVILKÅRET_UNDER_18(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_MEDISINSKVILKÅR_UNDER_18_KODE, AksjonspunktType.OVERSTYRING,
             "Overstyring av medisinskvilkår for pleietrengende under 18 år",
-            BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKVILKÅR, VurderingspunktType.UT, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR,
+            BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, VurderingspunktType.UT, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR,
             SkjermlenkeType.PUNKT_FOR_MEDISINSK, TOTRINN, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_MEDISINSKESVILKÅRET_OVER_18(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_MEDISINSKVILKÅR_OVER_18_KODE, AksjonspunktType.OVERSTYRING,
             "Overstyring av medisinskvilkår for pleietrengende 18 år",
-            BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKVILKÅR, VurderingspunktType.UT, VilkårType.MEDISINSKEVILKÅR_18_ÅR,
+            BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, VurderingspunktType.UT, VilkårType.MEDISINSKEVILKÅR_18_ÅR,
             SkjermlenkeType.PUNKT_FOR_MEDISINSK, TOTRINN, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_OMSORGENFOR_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av OMPorgen for",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT, VilkårType.OMSORGEN_FOR,
@@ -291,7 +291,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     // Gruppe : 90xx
 
     KONTROLLER_LEGEERKLÆRING(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE,
-            AksjonspunktType.MANUELL, "Kontroller legeerklæring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKVILKÅR, VurderingspunktType.UT,
+            AksjonspunktType.MANUELL, "Kontroller legeerklæring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, VurderingspunktType.UT,
             VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, SkjermlenkeType.FAKTA_OM_MEDISINSK, ENTRINN, FORBLI, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
     VURDER_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE,
             AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT,

@@ -8,9 +8,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 
@@ -18,10 +17,10 @@ import no.nav.k9.sak.typer.PersonIdent;
 public class TmpAktoerIdRepository {
 
     private EntityManager entityManager;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
 
     @Inject
-    public TmpAktoerIdRepository(EntityManager entityManager, ProsessTaskRepository prosessTaskRepository) {
+    public TmpAktoerIdRepository(EntityManager entityManager, ProsessTaskTjeneste prosessTaskRepository) {
         this.entityManager = entityManager;
         this.prosessTaskRepository = prosessTaskRepository;
     }
@@ -61,7 +60,7 @@ public class TmpAktoerIdRepository {
     }
 
     public void startInnhenting() {
-        var cacheFnrTask = new ProsessTaskData(TmpAktørIdTask.TASKTYPE);
+        var cacheFnrTask = ProsessTaskData.forProsessTask(TmpAktørIdTask.class);
         prosessTaskRepository.lagre(cacheFnrTask);
     }
 }

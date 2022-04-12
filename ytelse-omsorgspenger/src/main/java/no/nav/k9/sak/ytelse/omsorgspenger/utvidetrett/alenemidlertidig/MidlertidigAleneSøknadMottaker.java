@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alenemidlertidig;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -18,7 +20,7 @@ import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
-@FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef(OMSORGSPENGER_MA)
 @ApplicationScoped
 public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<InnsendingInnhold> {
 

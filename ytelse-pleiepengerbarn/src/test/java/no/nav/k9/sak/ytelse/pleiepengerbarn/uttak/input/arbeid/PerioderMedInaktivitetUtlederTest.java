@@ -24,6 +24,7 @@ import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 class PerioderMedInaktivitetUtlederTest {
 
@@ -38,7 +39,7 @@ class PerioderMedInaktivitetUtlederTest {
 
     @Test
     void skal_utlede_tom_tidslinje_hvis_ingen_perioder_er_til_vurdering() {
-        var input = new InaktivitetUtlederInput(AktørId.dummy(), LocalDateTimeline.EMPTY_TIMELINE, null);
+        var input = new InaktivitetUtlederInput(AktørId.dummy(), LocalDateTimeline.empty(), null);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).isEmpty();
@@ -166,6 +167,75 @@ class PerioderMedInaktivitetUtlederTest {
         iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
             .leggTilYrkesaktivitet(yrkesaktivitetBuilder
                 .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilPermisjon(yrkesaktivitetBuilder.getPermisjonBuilder()
+                    .medPermisjonsbeskrivelseType(PermisjonsbeskrivelseType.PERMITTERING)
+                    .medProsentsats(BigDecimal.valueOf(100))
+                    .medPeriode(fom, fom)
+                    .build())
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(3)))))));
+        var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
+
+        var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom.minusDays(90), tom.minusDays(50), true), new LocalDateSegment<>(fom, tom, true)));
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag);
+        var utledetTidslinje = utleder.utled(input);
+
+        assertThat(utledetTidslinje).hasSize(0);
+    }
+
+    @Test
+    void skal_utlede_aktivitet_hvis_permittert_på_stp_2() {
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(14);
+        var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var brukerAktørId = AktørId.dummy();
+        var yrkesaktivitetBuilder1 = YrkesaktivitetBuilder.oppdatere(Optional.empty());
+        var yrkesaktivitetBuilder = YrkesaktivitetBuilder.oppdatere(Optional.empty());
+        iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
+            .leggTilYrkesaktivitet(yrkesaktivitetBuilder1
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilPermisjon(yrkesaktivitetBuilder1.getPermisjonBuilder()
+                    .medPermisjonsbeskrivelseType(PermisjonsbeskrivelseType.PERMITTERING)
+                    .medProsentsats(BigDecimal.valueOf(100))
+                    .medPeriode(fom, fom)
+                    .build())
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(3)))))
+            .leggTilYrkesaktivitet(yrkesaktivitetBuilder
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(3)))))));
+        var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
+
+        var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom.minusDays(90), tom.minusDays(50), true), new LocalDateSegment<>(fom, tom, true)));
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag);
+        var utledetTidslinje = utleder.utled(input);
+
+        assertThat(utledetTidslinje).hasSize(0);
+    }
+
+    @Test
+    void skal_utlede_aktivitet_hvis_permittert_på_stp_3() {
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(14);
+        var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var brukerAktørId = AktørId.dummy();
+        var yrkesaktivitetBuilder = YrkesaktivitetBuilder.oppdatere(Optional.empty());
+        iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
+            .leggTilYrkesaktivitet(yrkesaktivitetBuilder
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(3)))))
+            .leggTilYrkesaktivitet(yrkesaktivitetBuilder
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
                 .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
                 .leggTilPermisjon(yrkesaktivitetBuilder.getPermisjonBuilder()
                     .medPermisjonsbeskrivelseType(PermisjonsbeskrivelseType.PERMITTERING)

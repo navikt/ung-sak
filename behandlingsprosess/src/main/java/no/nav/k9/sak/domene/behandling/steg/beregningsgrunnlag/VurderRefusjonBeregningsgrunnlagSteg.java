@@ -24,8 +24,8 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningStegTjen
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
-@FagsakYtelseTypeRef("*")
-@BehandlingStegRef(kode = "VURDER_REF_BERGRUNN")
+@FagsakYtelseTypeRef
+@BehandlingStegRef(value = VURDER_REF_BERGRUNN)
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {

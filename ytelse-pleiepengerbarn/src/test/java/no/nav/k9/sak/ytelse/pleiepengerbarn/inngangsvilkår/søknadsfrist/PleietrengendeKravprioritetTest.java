@@ -147,10 +147,11 @@ public class PleietrengendeKravprioritetTest {
 
 
     private LocalDateTimeline<List<Kravprioritet>> kallVurderKallPrioritetMedMocker(Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>>... fagsakKravdokumenter) {
-        final FagsakRepository fagsakRepository = createFagsakRepositoryMock(fagsakKravdokumenter.length);
+        final FagsakRepository fagsakRepository = createFagsakRepositoryMock(fagsakKravdokumenter.length + 1);
         final BehandlingRepository behandlingRepository = createBehandlingRepositoryMock();
         final Map<Long, Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>>> inputData = new HashMap<>();
-        for (int fagsakId=0; fagsakId<fagsakKravdokumenter.length; fagsakId++) {
+
+        for (int fagsakId = 0; fagsakId < fagsakKravdokumenter.length; fagsakId++) {
             inputData.put((long) fagsakId, fagsakKravdokumenter[fagsakId]);
         }
 
@@ -160,19 +161,21 @@ public class PleietrengendeKravprioritetTest {
         });
 
         final PleietrengendeKravprioritet pleietrengendeKravprioritet = new PleietrengendeKravprioritet(fagsakRepository, behandlingRepository, søknadsfristTjeneste);
-        return pleietrengendeKravprioritet.vurderKravprioritet(1337L, new AktørId("utmocket"));
+
+        long fagsakIdUtenKravdokumenter = fagsakKravdokumenter.length;
+        return pleietrengendeKravprioritet.vurderKravprioritet(fagsakIdUtenKravdokumenter, new AktørId("utmocket"));
     }
 
     private FagsakRepository createFagsakRepositoryMock(int antall) {
         final FagsakRepository fagsakRepository = mock(FagsakRepository.class);
 
         final List<Fagsak> fagsaker = new ArrayList<>();
-        for (int fagsakId=0; fagsakId<antall; fagsakId++) {
+        for (int fagsakId = 0; fagsakId < antall; fagsakId++) {
             final Fagsak fagsak = mock(Fagsak.class);
             when(fagsak.getId()).thenReturn((long) fagsakId);
             when(fagsak.getSaksnummer()).thenReturn(new Saksnummer("s" + fagsakId));
             fagsaker.add(fagsak);
-
+            when(fagsakRepository.finnEksaktFagsak(fagsak.getId())).thenReturn(fagsak);
         }
 
         when(fagsakRepository.finnFagsakRelatertTil(any(), any(), any(), any(), any())).thenReturn(fagsaker);

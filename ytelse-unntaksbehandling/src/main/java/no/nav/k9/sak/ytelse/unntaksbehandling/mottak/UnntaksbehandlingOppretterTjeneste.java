@@ -33,7 +33,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 
 @FagsakYtelseTypeRef
-@BehandlingTypeRef("BT-010")
+@BehandlingTypeRef(BehandlingType.UNNTAKSBEHANDLING)
 @ApplicationScoped
 public class UnntaksbehandlingOppretterTjeneste implements UnntaksbehandlingOppretter {
 

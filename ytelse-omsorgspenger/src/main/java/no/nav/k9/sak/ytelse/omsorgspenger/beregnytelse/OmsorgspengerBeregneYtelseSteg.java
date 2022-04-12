@@ -1,5 +1,8 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.BEREGN_YTELSE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,14 +11,13 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
@@ -38,14 +40,13 @@ import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
-import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 
-@FagsakYtelseTypeRef("OMP")
-@BehandlingStegRef(kode = "BERYT")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
+@BehandlingStegRef(value = BEREGN_YTELSE)
 @BehandlingTypeRef
 @ApplicationScoped
 public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
@@ -59,6 +60,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
+    private OmsorgspengerYtelseVerifiserer omsorgspengerYtelseVerifiserer;
 
     protected OmsorgspengerBeregneYtelseSteg() {
         // for proxy
@@ -70,7 +72,8 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                           ÅrskvantumTjeneste årskvantumTjeneste,
                                           FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                           @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                          @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
+                                          @FagsakYtelseTypeRef(OMSORGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                          OmsorgspengerYtelseVerifiserer omsorgspengerYtelseVerifiserer) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
@@ -78,6 +81,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+        this.omsorgspengerYtelseVerifiserer = omsorgspengerYtelseVerifiserer;
     }
 
     @Override
@@ -99,16 +103,15 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         // Kalle regeltjeneste
         var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttaksresultat);
 
-        // Verifiser beregningsresultat
-        BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
-
-        if (harUtbetalingTilBruker(beregningsresultat, vurdertePerioder)) {
-            log.info("Har utbetaling til bruker: {}", beregningsresultat);
-        }
-
         // Beregn feriepenger
         var feriepengerTjeneste = FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, ref.getFagsakYtelseType()).orElseThrow();
         feriepengerTjeneste.beregnFeriepenger(beregningsresultat);
+
+        // Verifiser beregningsresultat
+        omsorgspengerYtelseVerifiserer.verifiser(behandling, beregningsresultat);
+        if (harUtbetalingTilBruker(beregningsresultat, vurdertePerioder)) {
+            log.info("Har utbetaling til bruker: {}", beregningsresultat);
+        }
 
         // Lagre beregningsresultat
         beregningsresultatRepository.lagre(behandling, beregningsresultat);

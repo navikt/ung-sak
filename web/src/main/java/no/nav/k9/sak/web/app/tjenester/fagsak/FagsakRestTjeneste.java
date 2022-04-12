@@ -12,6 +12,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,13 +35,6 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.headers.Header;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
@@ -74,6 +73,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbPbSakRepository;
 
 @Path("")
 @ApplicationScoped
@@ -96,19 +96,21 @@ public class FagsakRestTjeneste {
     private PersoninfoAdapter personinfoAdapter;
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
+    private PsbPbSakRepository psbPbSakRepository;
 
     public FagsakRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste, FagsakTjeneste fagsakTjeneste, BehandlingsoppretterTjeneste behandlingsoppretterTjeneste, PersoninfoAdapter personinfoAdapter, BehandlingRepository behandlingRepository, FagsakRepository fagsakRepository) {
+    public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste, FagsakTjeneste fagsakTjeneste, BehandlingsoppretterTjeneste behandlingsoppretterTjeneste, PersoninfoAdapter personinfoAdapter, BehandlingRepository behandlingRepository, FagsakRepository fagsakRepository, PsbPbSakRepository psbPbSakRepository) {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
         this.personinfoAdapter = personinfoAdapter;
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
+        this.psbPbSakRepository = psbPbSakRepository;
     }
 
     @GET
@@ -298,7 +300,7 @@ public class FagsakRestTjeneste {
 
         PersonDto personDto = new PersonDto(
             brukerInfo.getNavn(),
-            brukerInfo.getAlder(),
+            brukerInfo.getAlderIDag(),
             String.valueOf(brukerInfo.getPersonIdent().getIdent()),
             brukerInfo.erKvinne(),
             brukerInfo.getPersonstatus(),
@@ -328,7 +330,8 @@ public class FagsakRestTjeneste {
             kanRevurderingOpprettes,
             fagsak.getSkalTilInfotrygd(),
             fagsak.getOpprettetTidspunkt(),
-            fagsak.getEndretTidspunkt());
+            fagsak.getEndretTidspunkt(),
+            psbPbSakRepository.finnes(fagsak.getId()));
     }
 
     private PersonDto mapFraPersoninfoBasis(PersoninfoBasis pi) {

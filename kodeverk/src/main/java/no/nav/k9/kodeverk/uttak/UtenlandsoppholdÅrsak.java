@@ -1,27 +1,32 @@
 package no.nav.k9.kodeverk.uttak;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public enum UtenlandsoppholdÅrsak implements Kodeverdi {
     BARNET_INNLAGT_I_HELSEINSTITUSJON_FOR_NORSK_OFFENTLIG_REGNING(
         "BARNET_INNLAGT_I_HELSEINSTITUSJON_FOR_NORSK_OFFENTLIG_REGNING",
-        "Barnet innlagt i helseinstitusjon for norsk offentlig regning"),
+        "Barnet/den pleietrengende er innlagt i helseinstitusjon for norsk offentlig regning (mottar ytelse som i Norge, telles ikke i 8 uker)"),
     BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD(
         "BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD",
-        "Barnet innlagt i helseinstitusjon dekket etter avtale med et annet land om trygd"),
+        "Barnet/den pleietrengende er innlagt i helseinstitusjon dekket etter avtale med annet land om trygd (mottar ytelse som i Norge, telles ikke i 8 uker)"),
     INGEN(
         "INGEN",
-        "Ingen");
+        "Ingen årsak til utenlandsoppholdet er oppgitt, perioden telles i 8 uker");
 
+    @JsonValue
     private final String kode;
     private final String navn;
 
@@ -55,6 +60,10 @@ public enum UtenlandsoppholdÅrsak implements Kodeverdi {
         return ad;
     }
 
+    public static Map<String, UtenlandsoppholdÅrsak> kodeMap() {
+        return Collections.unmodifiableMap(KODER);
+    }
+
     @Override
     public String getKode() {
         return kode;
@@ -71,6 +80,7 @@ public enum UtenlandsoppholdÅrsak implements Kodeverdi {
     }
 
     @Override
+    @JsonProperty
     public String getKodeverk() {
         return KODEVERK;
     }

@@ -2,6 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -84,34 +85,51 @@ public class OverstyrInputBeregningTjeneste {
         }).collect(Collectors.toList());
     }
 
-    private boolean harNæring(YtelseGrunnlag ytelseGrunnlag) {
-        return ytelseGrunnlag.getArbeidskategori().stream().anyMatch(ak -> ak.equals(Arbeidskategori.SELVSTENDIG_NÆRINGSDRIVENDE)
+    private boolean harNæring(Optional<YtelseGrunnlag> ytelseGrunnlag) {
+        return ytelseGrunnlag.map(yg -> yg.getArbeidskategori().stream().anyMatch(ak -> ak.equals(Arbeidskategori.SELVSTENDIG_NÆRINGSDRIVENDE)
             || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_FISKER)
             || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER)
-            || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE));
+            || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE))).orElse(false);
     }
 
 
-    private boolean harFrilans(YtelseGrunnlag ytelseGrunnlag) {
-        return ytelseGrunnlag.getArbeidskategori().stream().anyMatch(ak -> ak.equals(Arbeidskategori.FRILANSER)
-            || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER));
+    private boolean harFrilans(Optional<YtelseGrunnlag> ytelseGrunnlag) {
+        return ytelseGrunnlag.map(yg -> yg.getArbeidskategori().stream().anyMatch(ak -> ak.equals(Arbeidskategori.FRILANSER)
+            || ak.equals(Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER))).orElse(false);
     }
 
 
-    private YtelseGrunnlag finnYtelseGrunnlagForMigrering(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        var ytelseGrunnlagListe = new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandling.getAktørId()))
+    private Optional<YtelseGrunnlag> finnYtelseGrunnlagForMigrering(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
+        var overlappGrunnlagListe = finnOverlappendeGrunnlag(behandling, migrertStp, iayGrunnlag);
+        // Sjekker overlapp og deretter kant i kant
+        if (overlappGrunnlagListe.isPresent()) {
+            return overlappGrunnlagListe;
+        }
+        return finnKantIKantGrunnlagsliste(behandling, migrertStp, iayGrunnlag);
+    }
+
+    private Optional<YtelseGrunnlag> finnKantIKantGrunnlagsliste(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
+        return new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandling.getAktørId()))
+            .filter(y -> y.getYtelseType().equals(FagsakYtelseType.PSB) && y.getKilde().equals(Fagsystem.INFOTRYGD))
+            .filter(y -> y.getYtelseAnvist().stream().anyMatch(ya -> {
+                var stpIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(migrertStp, migrertStp);
+                var anvistIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(ya.getAnvistFOM(), ya.getAnvistTOM());
+                return kantIKantVurderer.erKantIKant(anvistIntervall, stpIntervall);
+            })).getFiltrertYtelser().stream()
+            .min(Comparator.comparing(y -> y.getPeriode().getTomDato()))
+            .flatMap(Ytelse::getYtelseGrunnlag);
+    }
+
+    private Optional<YtelseGrunnlag> finnOverlappendeGrunnlag(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
+        return new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandling.getAktørId()))
             .filter(y -> y.getYtelseType().equals(FagsakYtelseType.PSB) && y.getKilde().equals(Fagsystem.INFOTRYGD))
             .filter(y -> y.getYtelseAnvist().stream().anyMatch(ya -> {
                 var stpIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(migrertStp, migrertStp);
                 var anvistIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(ya.getAnvistFOM(), ya.getAnvistTOM());
                 return anvistIntervall.inkluderer(migrertStp) || kantIKantVurderer.erKantIKant(anvistIntervall, stpIntervall);
             })).getFiltrertYtelser().stream()
-            .flatMap(y -> y.getYtelseGrunnlag().stream())
-            .collect(Collectors.toList());
-        if (ytelseGrunnlagListe.size() != 1) {
-            throw new IllegalStateException("Fant mer enn ett ytelsegrunnlag fra infotrygd for PSB. Fant " + ytelseGrunnlagListe.size());
-        }
-        return ytelseGrunnlagListe.get(0);
+            .min(Comparator.comparing(y -> y.getPeriode().getTomDato()))
+            .flatMap(Ytelse::getYtelseGrunnlag);
     }
 
     private Optional<InputOverstyringPeriode> finnEksisterendeOverstyring(Behandling behandling, LocalDate migrertStp) {
@@ -135,7 +153,7 @@ public class OverstyrInputBeregningTjeneste {
 
         return opptjeningAktiviteter.stream()
             .flatMap(a -> a.getOpptjeningPerioder().stream())
-            .filter(a -> !a.getPeriode().getTom().isBefore(migrertStp))
+            .filter(a -> !a.getPeriode().getTom().isBefore(migrertStp.minusDays(1)))
             .filter(a -> a.getType().equals(OpptjeningAktivitetType.ARBEID))
             .collect(Collectors.groupingBy(a -> a.getArbeidsgiverOrgNummer() != null ? a.getArbeidsgiverOrgNummer() : a.getArbeidsgiverAktørId()))
             .entrySet().stream()

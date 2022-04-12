@@ -1,19 +1,23 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
@@ -27,22 +31,29 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkHendelseBygger;
+import no.nav.k9.sak.kontrakt.omsorg.OmsorgenForOversiktDto;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkArbeidsforhold;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkDiagnosekode;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkGraderingMotTilsyn;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkHendelse;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkInngangsvilkår;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkPeriode;
+import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkRelasjon;
+import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkRelasjonPeriode;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkUtbetalingsgrad;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkUtfall;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold.Builder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.MapFraUttaksplan;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.OmsorgenForDtoMapper;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk.StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse;
 import no.nav.pleiepengerbarn.uttak.kontrakter.GraderingMotTilsyn;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
@@ -51,7 +62,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Årsak;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHendelseBygger {
 
     private static final Logger logger = LoggerFactory.getLogger(PsbStønadstatistikkHendelseBygger.class);
@@ -60,6 +71,8 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     private AktørTjeneste aktørTjeneste;
     private SykdomGrunnlagService sykdomGrunnlagService;
     private BehandlingVedtakRepository behandlingVedtakRepository;
+    private OmsorgenForDtoMapper omsorgenForDtoMapper;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
 
     @Inject
@@ -67,13 +80,18 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
             BehandlingRepository behandlingRepository,
             AktørTjeneste aktørTjeneste,
             SykdomGrunnlagService sykdomGrunnlagService,
-            BehandlingVedtakRepository behandlingVedtakRepository) {
+            BehandlingVedtakRepository behandlingVedtakRepository,
+            OmsorgenForDtoMapper omsorgenForDtoMapper,
+            SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.stønadstatistikkPeriodetidslinjebygger = stønadstatistikkPeriodetidslinjebygger;
         this.behandlingRepository = behandlingRepository;
         this.aktørTjeneste = aktørTjeneste;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
+        this.omsorgenForDtoMapper = omsorgenForDtoMapper;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
+
 
     @Override
     public StønadstatistikkHendelse lagHendelse(UUID behandlingUuid) {
@@ -86,13 +104,24 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
 
         final PersonIdent søker = aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getAktørId()).get();
         final PersonIdent pleietrengende= aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getPleietrengendeAktørId()).get();
-        final List<SykdomDiagnosekode> diagnosekoder = hentDiagnosekoder(behandlingUuid);
+        final Optional<SykdomGrunnlagBehandling> grunnlagOpt = sykdomGrunnlagService.hentGrunnlagHvisEksisterer(behandlingUuid);
+        if (grunnlagOpt.isEmpty()) {
+            final NavigableSet<DatoIntervallEntitet> søknadsperioder = søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId());
+            if (!søknadsperioder.isEmpty()) {
+                throw new IllegalStateException("Mangler sykdomsgrunnlag selv om det finnes perioder på behandlingen.");
+            }
+            logger.info("Lager ikke StønadstatistikkHendelse siden behandingen mangler søknadsperioder: " + behandlingUuid.toString());
+            return null;
+        }
+        
+        final List<SykdomDiagnosekode> diagnosekoder = hentDiagnosekoder(grunnlagOpt.get());
         final LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> periodetidslinje = stønadstatistikkPeriodetidslinjebygger.lagTidslinjeFor(behandling);
 
         final UUID forrigeBehandlingUuid = finnForrigeBehandlingUuid(behandling);
         final BehandlingVedtak behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
         final LocalDateTime vedtakstidspunkt = behandlingVedtak.getVedtakstidspunkt();
 
+        final OmsorgenForOversiktDto omsorgenFor = omsorgenForDtoMapper.map(behandling.getId(), behandling.getFagsak().getAktørId(), behandling.getFagsak().getPleietrengendeAktørId());
 
         final StønadstatistikkHendelse stønadstatistikkHendelse = new StønadstatistikkHendelse(
                 behandling.getFagsakYtelseType(),
@@ -104,14 +133,30 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
                 behandlingUuid,
                 forrigeBehandlingUuid,
                 vedtakstidspunkt,
-                mapPerioder(periodetidslinje)
+                mapPerioder(periodetidslinje),
+                mapRelasjon(omsorgenFor)
                 );
 
         return stønadstatistikkHendelse;
     }
 
-    private List<SykdomDiagnosekode> hentDiagnosekoder(UUID behandlingUuid) {
-        final SykdomGrunnlag sykdomGrunnlag = sykdomGrunnlagService.hentGrunnlag(behandlingUuid).getGrunnlag();
+    private List<StønadstatistikkRelasjonPeriode> mapRelasjon(OmsorgenForOversiktDto omsorgenFor) {
+        if (omsorgenFor.isRegistrertForeldrerelasjon()) {
+            return omsorgenFor.getOmsorgsperioder()
+                    .stream()
+                    .map(o -> new StønadstatistikkRelasjonPeriode(o.getPeriode().getFom(), o.getPeriode().getTom(), StønadstatistikkRelasjon.FOLKEREGISTRERT_FORELDER))
+                    .collect(Collectors.toList());
+        }
+
+        return omsorgenFor.getOmsorgsperioder()
+                .stream()
+                .filter(o -> o.getRelasjon() != null)
+                .map(o -> new StønadstatistikkRelasjonPeriode(o.getPeriode().getFom(), o.getPeriode().getTom(), StønadstatistikkRelasjon.fromBarnRelasjon(o.getRelasjon())))
+                .collect(Collectors.toList());
+    }
+
+    private List<SykdomDiagnosekode> hentDiagnosekoder(SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
+        final SykdomGrunnlag sykdomGrunnlag = sykdomGrunnlagBehandling.getGrunnlag();
         if (sykdomGrunnlag.getDiagnosekoder() == null || sykdomGrunnlag.getDiagnosekoder().getDiagnosekoder() == null) {
             return List.of();
         }
@@ -171,11 +216,11 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
             final Arbeidsforhold arbeidsforholdFraUttaksplan = MapFraUttaksplan.buildArbeidsforhold(toUttakArbeidType(u), u);
             final BigDecimal utbetalingsgrad = u.getUtbetalingsgrad();
 
-            /* 
+            /*
              * Sjekk på om beregningsresultatAndeler != null gjøres grunnet
              * tidligere feil der uttaksgraden ikke ble satt til 0 når det
              * var avslag i beregning.
-             * 
+             *
              * Vi trenger denne sjekken videre for å kunne støtte full eksport.
              */
             if (beregningsresultatAndeler != null && skalFinnesAndeler(utbetalingsgrad)) {
@@ -223,18 +268,26 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     }
 
     private List<BeregningsresultatAndel> finnAndeler(AktivitetStatus aktivitetFraUttaksplan, Arbeidsforhold arbeidsforholdFraUttaksplan, List<BeregningsresultatAndel> beregningsresultatAndeler) {
+        final AktivitetStatus as = medIkkeYrkesaktivSomArbeidstaker(aktivitetFraUttaksplan);
         final List<BeregningsresultatAndel> kandidater = beregningsresultatAndeler.stream()
                 .filter(a -> {
                     if (a.getAktivitetStatus().erArbeidstaker() || a.getAktivitetStatus().erFrilanser()) {
                         final Arbeidsforhold beregningsarbeidsforhold = toArbeidsforhold(a);
-                        return aktivitetFraUttaksplan == a.getAktivitetStatus() && arbeidsforholdFraUttaksplan.gjelderFor(beregningsarbeidsforhold);
+                        return as == a.getAktivitetStatus() && arbeidsforholdFraUttaksplan.gjelderFor(beregningsarbeidsforhold);
                     } else {
-                        return aktivitetFraUttaksplan == a.getAktivitetStatus();
+                        return as == a.getAktivitetStatus();
                     }
                 })
                 .toList();
 
         return kandidater;
+    }
+
+    private static AktivitetStatus medIkkeYrkesaktivSomArbeidstaker(AktivitetStatus as) {
+        if (as == AktivitetStatus.IKKE_YRKESAKTIV) {
+            return AktivitetStatus.ARBEIDSTAKER;
+        }
+        return as;
     }
 
     private Arbeidsforhold toArbeidsforhold(BeregningsresultatAndel andel) {

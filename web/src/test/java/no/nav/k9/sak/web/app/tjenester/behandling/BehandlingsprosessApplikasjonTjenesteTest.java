@@ -10,19 +10,20 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus.Status;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 
 public class BehandlingsprosessApplikasjonTjenesteTest {
 
     private static final String GRUPPE_1 = "gruppe1";
 
-    private final ProsessTaskData taskData = new ProsessTaskData("taskType1");
+    private final ProsessTaskData taskData =  ProsessTaskData.forTaskType(new TaskType("taskType1"));
     private Behandling behandling;
 
     public BehandlingsprosessApplikasjonTjenesteTest() {

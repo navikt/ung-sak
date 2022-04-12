@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.opptjening;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -37,7 +39,7 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
     private VilkårTjeneste vilkårTjeneste;

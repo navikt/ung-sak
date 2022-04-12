@@ -6,26 +6,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
@@ -33,45 +29,31 @@ import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.VurderStatusInput;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
-@ExtendWith(CdiAwareExtension.class)
-@ExtendWith(JpaExtension.class)
 public class OpptjeningAktivitetArbeidVurdererTest {
 
-    @Inject
-    private EntityManager entityManager;
-    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-    private TestScenarioBuilder scenario;
-    private BehandlingRepositoryProvider repositoryProvider;
-
-    private Behandling behandling;
     private final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("974760673");
     private final InternArbeidsforholdRef arbeidsforholdId = InternArbeidsforholdRef.nyRef();
-
+    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
     private LocalDate skjæringstidspunkt = LocalDate.now();
     private DatoIntervallEntitet inntektsperiodeEttÅr = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusYears(1), skjæringstidspunkt);
     private DatoIntervallEntitet opptjeningPeriode28Dager = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(28), skjæringstidspunkt);
 
     private OpptjeningAktivitetArbeidVurderer vurderer = new OpptjeningAktivitetArbeidVurderer();
-
-    @BeforeEach
-    public void setUp() {
-        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OMSORGSPENGER);
-        behandling = scenario.lagre(repositoryProvider);
-    }
+    private AktørId dummy = AktørId.dummy();
+    ;
 
     @Test
     public void skal_godkjenne_permisjon_inntil_14_dager() {
         var permisjonPeriode14Dager = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(13), skjæringstidspunkt);
-        var iayBuilder = opprettIAYMedYrkesaktivitet(behandling);
-        leggTilPermisjon(iayBuilder, permisjonPeriode14Dager);
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode14Dager, PermisjonsbeskrivelseType.PERMITTERING);
         InntektArbeidYtelseGrunnlag iayGrunnlag = lagreIayGrunnlag(iayBuilder);
 
-        VurderStatusInput input = byggInput(behandling, iayGrunnlag, opptjeningPeriode28Dager);
+        VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
 
         assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.TIL_VURDERING);
     }
@@ -80,11 +62,11 @@ public class OpptjeningAktivitetArbeidVurdererTest {
     public void skal_underkjenne_permisjon_over_14_dager() {
         var permisjonPeriode15Dager = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(14), skjæringstidspunkt);
 
-        var iayBuilder = opprettIAYMedYrkesaktivitet(behandling);
-        leggTilPermisjon(iayBuilder, permisjonPeriode15Dager);
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode15Dager, PermisjonsbeskrivelseType.PERMITTERING);
         var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
 
-        VurderStatusInput input = byggInput(behandling, iayGrunnlag, opptjeningPeriode28Dager);
+        VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
 
         assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.UNDERKJENT);
     }
@@ -94,16 +76,32 @@ public class OpptjeningAktivitetArbeidVurdererTest {
         var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(15), skjæringstidspunkt.minusDays(10));
         var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(10), skjæringstidspunkt);
 
-        var iayBuilder = opprettIAYMedYrkesaktivitet(behandling);
-        leggTilPermisjon(iayBuilder, permisjonPeriode1);
-        leggTilPermisjon(iayBuilder, permisjonPeriode2);
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.PERMITTERING);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.PERMITTERING);
         var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
 
-        VurderStatusInput input = byggInput(behandling, iayGrunnlag, opptjeningPeriode28Dager);
+        VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
 
         assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.UNDERKJENT);
     }
 
+
+    @Test
+    public void skal_ikke_underkjenne_sammenhengende_permisjoner_som_overstiger_14_dager_hvis_migrert_stp_og_velferdspermisjon() {
+        var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(15), skjæringstidspunkt.minusDays(10));
+        var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(10), skjæringstidspunkt);
+
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
+        var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
+
+        VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
+        input.setErMigrertSkjæringstidspunkt(true);
+
+        assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.TIL_VURDERING);
+    }
 
     @Test
     public void skal_underkjenne_permisjoner_som_skjøtes_sammen_over_helg_til_14_dager() {
@@ -111,14 +109,82 @@ public class OpptjeningAktivitetArbeidVurdererTest {
         var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode28Dager.getFomDato(), førsteLørdagIPeriode); // 1-7 dager
         var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(førsteLørdagIPeriode.plusDays(2), førsteLørdagIPeriode.plusDays(15)); // 14 dager
 
-        var iayBuilder = opprettIAYMedYrkesaktivitet(behandling);
-        leggTilPermisjon(iayBuilder, permisjonPeriode1);
-        leggTilPermisjon(iayBuilder, permisjonPeriode2);
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.PERMITTERING);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.PERMITTERING);
         var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
 
-        VurderStatusInput input = byggInput(behandling, iayGrunnlag, opptjeningPeriode28Dager);
+        VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
 
         assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.UNDERKJENT);
+    }
+
+    @Test
+    public void skal_ikke_underkjenne_velferdspermisjon_som_skjøtes_sammen_over_helg_til_14_dager_med_underliggende_ytelse() {
+        var førsteLørdagIPeriode = hentFørsteLørdagIPeriode(opptjeningPeriode28Dager.getFomDato(), opptjeningPeriode28Dager.getTomDato());
+        var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode28Dager.getFomDato(), førsteLørdagIPeriode); // 1-7 dager
+        var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(førsteLørdagIPeriode.plusDays(2), førsteLørdagIPeriode.plusDays(15)); // 14 dager
+
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
+        var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
+
+        VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
+        input.setTidslinjePerYtelse(Map.of(OpptjeningAktivitetType.PLEIEPENGER, new LocalDateTimeline<>(List.of(new LocalDateSegment<>(permisjonPeriode1.getFomDato(), permisjonPeriode2.getTomDato(), true)))));
+
+        assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.TIL_VURDERING);
+    }
+
+    @Test
+    public void skal_ikke_underkjenne_velferdspermisjon_som_skjøtes_sammen_over_helg_til_14_dager_med_underliggende_OPL_ytelse() {
+        var førsteLørdagIPeriode = hentFørsteLørdagIPeriode(opptjeningPeriode28Dager.getFomDato(), opptjeningPeriode28Dager.getTomDato());
+        var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode28Dager.getFomDato(), førsteLørdagIPeriode); // 1-7 dager
+        var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(førsteLørdagIPeriode.plusDays(2), førsteLørdagIPeriode.plusDays(15)); // 14 dager
+
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
+        var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
+
+        VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
+        input.setTidslinjePerYtelse(Map.of(OpptjeningAktivitetType.OPPLÆRINGSPENGER, new LocalDateTimeline<>(List.of(new LocalDateSegment<>(permisjonPeriode1.getFomDato(), permisjonPeriode2.getTomDato(), true)))));
+
+        assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.TIL_VURDERING);
+    }
+
+    @Test
+    public void skal_underkjenne_velferdspermisjoner_som_skjøtes_sammen_over_helg_til_14_dager_med_foreldrepenger_underliggende_ytelse() {
+        var førsteLørdagIPeriode = hentFørsteLørdagIPeriode(opptjeningPeriode28Dager.getFomDato(), opptjeningPeriode28Dager.getTomDato());
+        var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode28Dager.getFomDato(), førsteLørdagIPeriode); // 1-7 dager
+        var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(førsteLørdagIPeriode.plusDays(2), førsteLørdagIPeriode.plusDays(15)); // 14 dager
+
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
+        var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
+
+        VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
+        input.setTidslinjePerYtelse(Map.of(OpptjeningAktivitetType.FORELDREPENGER, new LocalDateTimeline<>(List.of(new LocalDateSegment<>(permisjonPeriode1.getFomDato(), permisjonPeriode2.getTomDato(), true)))));
+
+        assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.UNDERKJENT);
+    }
+
+    @Test
+    public void skal_ikke_underkjenne_foreldrespermisjoner_som_skjøtes_sammen_over_helg_til_14_dager_med_foreldrepenger_underliggende_ytelse() {
+        var førsteLørdagIPeriode = hentFørsteLørdagIPeriode(opptjeningPeriode28Dager.getFomDato(), opptjeningPeriode28Dager.getTomDato());
+        var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode28Dager.getFomDato(), førsteLørdagIPeriode); // 1-7 dager
+        var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(førsteLørdagIPeriode.plusDays(2), førsteLørdagIPeriode.plusDays(15)); // 14 dager
+
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.PERMISJON_MED_FORELDREPENGER);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.PERMISJON_MED_FORELDREPENGER);
+        var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
+
+        VurderStatusInput input = byggInput(iayGrunnlag, opptjeningPeriode28Dager);
+        input.setTidslinjePerYtelse(Map.of(OpptjeningAktivitetType.FORELDREPENGER, new LocalDateTimeline<>(List.of(new LocalDateSegment<>(permisjonPeriode1.getFomDato(), permisjonPeriode2.getTomDato(), true)))));
+
+        assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.TIL_VURDERING);
     }
 
     private LocalDate hentFørsteLørdagIPeriode(LocalDate min, LocalDate max) {
@@ -132,21 +198,21 @@ public class OpptjeningAktivitetArbeidVurdererTest {
         return neste;
     }
 
-    private void leggTilPermisjon(InntektArbeidYtelseAggregatBuilder iayBuilder, DatoIntervallEntitet permisjonPeriode14Dager) {
-        var aktørArbeidBuilder = iayBuilder.getAktørArbeidBuilder(behandling.getAktørId());
+    private void leggTilPermisjon(InntektArbeidYtelseAggregatBuilder iayBuilder, DatoIntervallEntitet permisjonPeriode14Dager, PermisjonsbeskrivelseType permittering) {
+        var aktørArbeidBuilder = iayBuilder.getAktørArbeidBuilder(dummy);
         YrkesaktivitetBuilder yrkesaktivitetBuilder = aktørArbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(
             new Opptjeningsnøkkel(arbeidsforholdId, virksomhet.getIdentifikator(), null), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         yrkesaktivitetBuilder
             .leggTilPermisjon(YrkesaktivitetBuilder.nyPermisjonBuilder()
                 .medPeriode(permisjonPeriode14Dager.getFomDato(), permisjonPeriode14Dager.getTomDato())
                 .medProsentsats(BigDecimal.valueOf(100))
-                .medPermisjonsbeskrivelseType(PermisjonsbeskrivelseType.PERMITTERING)
+                .medPermisjonsbeskrivelseType(permittering)
                 .build());
     }
 
-    private InntektArbeidYtelseAggregatBuilder opprettIAYMedYrkesaktivitet(Behandling behandling) {
+    private InntektArbeidYtelseAggregatBuilder opprettIAYMedYrkesaktivitet() {
         InntektArbeidYtelseAggregatBuilder builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
-        var aktørArbeidBuilder = builder.getAktørArbeidBuilder(behandling.getAktørId());
+        var aktørArbeidBuilder = builder.getAktørArbeidBuilder(dummy);
         YrkesaktivitetBuilder yrkesaktivitetBuilder = aktørArbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(
             new Opptjeningsnøkkel(arbeidsforholdId, virksomhet.getIdentifikator(), null), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
 
@@ -165,18 +231,23 @@ public class OpptjeningAktivitetArbeidVurdererTest {
     }
 
     private InntektArbeidYtelseGrunnlag lagreIayGrunnlag(InntektArbeidYtelseAggregatBuilder iayBuilder) {
-        iayTjeneste.lagreIayAggregat(behandling.getId(), iayBuilder);
-        return iayTjeneste.finnGrunnlag(behandling.getId()).orElseThrow();
+        iayTjeneste.lagreIayAggregat(1L, iayBuilder);
+        return iayTjeneste.finnGrunnlag(1L).orElseThrow();
     }
 
-    private VurderStatusInput byggInput(Behandling behandling, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet opptjeningsperiode) {
-        var input = new VurderStatusInput(OpptjeningAktivitetType.ARBEID, BehandlingReferanse.fra(behandling));
+    private VurderStatusInput byggInput(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet opptjeningsperiode) {
+        var input = new VurderStatusInput(OpptjeningAktivitetType.ARBEID, opprettDummyReferanse());
         input.setOpptjeningsperiode(opptjeningsperiode);
-        var yrkesaktiviteter = iayGrunnlag.getAktørArbeidFraRegister(behandling.getAktørId()).get().hentAlleYrkesaktiviteter();
+        var yrkesaktiviteter = iayGrunnlag.getAktørArbeidFraRegister(dummy).get().hentAlleYrkesaktiviteter();
         assertThat(yrkesaktiviteter).as("Forventer testcase med bare én yrkesaktivitet").hasSize(1);
 
         var yrkesaktivitet = yrkesaktiviteter.iterator().next();
         input.setRegisterAktivitet(yrkesaktivitet);
+        input.setAktivitetPeriode(yrkesaktivitet.getAnsettelsesPeriode().stream().findFirst().map(AktivitetsAvtale::getPeriode).orElseThrow());
         return input;
+    }
+
+    private BehandlingReferanse opprettDummyReferanse() {
+        return BehandlingReferanse.fra(FagsakYtelseType.OMP, null, null, dummy, null, null, null, null, null, null, java.util.Optional.empty(), null, null, null);
     }
 }

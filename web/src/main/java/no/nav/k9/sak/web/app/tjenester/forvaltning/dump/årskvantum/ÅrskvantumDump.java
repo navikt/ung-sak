@@ -1,5 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.årskvantum;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -19,7 +21,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
 
     private ÅrskvantumRestKlient restKlient;

@@ -9,11 +9,12 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.MergeOverlappendePeriodeHjelp;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.FinnNavnForManueltLagtTilArbeidsforholdTjeneste;
@@ -40,20 +41,23 @@ class MapOpptjening {
     private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
     private OpptjeningAktivitetVurderingOpptjeningsvilkår vurderForOpptjeningsvilkår;
 
     @Inject
     MapOpptjening(OpptjeningsperioderTjeneste opptjeningsperioderTjeneste,
                   ArbeidsgiverTjeneste arbeidsgiverTjeneste,
-                  InntektArbeidYtelseTjeneste iayTjeneste) {
+                  InntektArbeidYtelseTjeneste iayTjeneste,
+                  VilkårResultatRepository vilkårResultatRepository) {
         this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.iayTjeneste = iayTjeneste;
+        this.vilkårResultatRepository = vilkårResultatRepository;
         this.vurderForOpptjeningsvilkår = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
     }
 
-    private List<OpptjeningDto> mapOpptjeninger(BehandlingReferanse ref, Long behandlingId, OpptjeningResultat opptjeningResultat) {
-        Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlagOpt = iayTjeneste.finnGrunnlag(behandlingId);
+    private List<OpptjeningDto> mapOpptjeninger(BehandlingReferanse ref, OpptjeningResultat opptjeningResultat) {
+        Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlagOpt = iayTjeneste.finnGrunnlag(ref.getBehandlingId());
 
         if (inntektArbeidYtelseGrunnlagOpt.isEmpty()) {
             return Collections.emptyList();
@@ -62,9 +66,14 @@ class MapOpptjening {
 
         var iayGrunnlag = inntektArbeidYtelseGrunnlagOpt.get();
 
+        var vilkåret = vilkårResultatRepository.hent(ref.getBehandlingId())
+            .getVilkår(VilkårType.OPPTJENINGSVILKÅRET)
+            .orElseThrow();
+
         for (var opptjening : opptjeningResultat.getOpptjeningPerioder()) {
             OpptjeningDto resultat = new OpptjeningDto();
-            var relevanteOpptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjening.getOpptjeningPeriode());
+            var vilkårsperiode = vilkåret.finnPeriodeForSkjæringstidspunkt(opptjening.getSkjæringstidspunkt()).getPeriode();
+            var relevanteOpptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjening.getOpptjeningPeriode(), vilkårsperiode);
             List<OpptjeningAktivitet> opptjeningAktivitet = opptjening.getOpptjeningAktivitet();
             resultat.setFastsattOpptjening(new FastsattOpptjeningDto(opptjening.getFom(),
                 opptjening.getTom(), mapFastsattOpptjening(opptjening),
@@ -87,7 +96,7 @@ class MapOpptjening {
         var opptjeningResultat = opptjeningsperioderTjeneste.hentOpptjeningHvisFinnes(behandlingId);
         if (opptjeningResultat.isPresent()) {
             var opptjeninger = new ArrayList<OpptjeningDto>();
-            List<OpptjeningDto> opptjeningDtoer = mapOpptjeninger(ref, behandlingId, opptjeningResultat.get());
+            List<OpptjeningDto> opptjeningDtoer = mapOpptjeninger(ref, opptjeningResultat.get());
 
             for (var resultat : opptjeningDtoer) {
                 if (resultat.getFastsattOpptjening() != null || !resultat.getOpptjeningAktivitetList().isEmpty()) {

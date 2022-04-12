@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.skjæringstidspunkt;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.TemporalAdjusters;
@@ -19,7 +21,7 @@ import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Periode;
 
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 @ApplicationScoped
 public class FrisinnSkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
 

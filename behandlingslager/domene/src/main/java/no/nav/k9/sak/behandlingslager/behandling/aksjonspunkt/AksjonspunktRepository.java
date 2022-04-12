@@ -166,7 +166,7 @@ public class AksjonspunktRepository {
         String sql = "select distinct b.* from behandling b"
             + " inner join aksjonspunkt a on a.behandling_id=b.id"
             + " where a.aksjonspunkt_def = :def and a.opprettet_tid between :fom and :tom"
-            + " and a.vent_aarsak is null"
+            + " and (a.vent_aarsak is null or a.vent_aarsak = '-')"
             + " and a.aksjonspunkt_status in (:statuser)";
         List<Behandling> list = em
             .createNativeQuery(sql, Behandling.class)

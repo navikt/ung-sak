@@ -2,7 +2,6 @@ package no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -29,10 +28,10 @@ class ForeslåVedtakManueltAksjonspunktOppdaterer implements AksjonspunktOppdate
     public OppdateringResultat oppdater(ForeslaVedtakManueltAksjonspuntDto dto, AksjonspunktOppdaterParameter param) {
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         if (dto.isSkalBrukeOverstyrendeFritekstBrev()) {
-            vedtaksbrevHåndterer.oppdaterVedtaksbrev(dto, param, builder);
+            vedtaksbrevHåndterer.håndterTotrinnOgHistorikkinnslag(dto, param, builder);
             builder.medFremoverHopp(FellesTransisjoner.FREMHOPP_TIL_FATTE_VEDTAK);
         }
-        vedtaksbrevHåndterer.oppdaterVedtaksvarsel(dto, param.getBehandlingId());
+        vedtaksbrevHåndterer.oppdaterVedtaksvarsel(dto, param.getBehandlingId(), param.getRef().getFagsakYtelseType());
         return builder.build();
     }
 }

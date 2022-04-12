@@ -1,5 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,12 +12,11 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.AktivitetDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedUtbetalingsgradDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerNærståendeGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerSyktBarnGrunnlag;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradArbeidsforholdDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradPrAktivitetDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
@@ -31,8 +33,8 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @ApplicationScoped
 public class PleiepengerGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<YtelsespesifiktGrunnlagDto> {
 
@@ -76,12 +78,12 @@ public class PleiepengerGrunnlagMapper implements BeregningsgrunnlagYtelsespesif
         };
     }
 
-    private Map<UtbetalingsgradArbeidsforholdDto, PeriodeMedUtbetalingsgradDto> lagUtbetalingsgrad(LukketPeriode periode, UttaksperiodeInfo plan) {
+    private Map<AktivitetDto, PeriodeMedUtbetalingsgradDto> lagUtbetalingsgrad(LukketPeriode periode, UttaksperiodeInfo plan) {
         var perArbeidsforhold = plan.getUtbetalingsgrader()
             .stream()
             .collect(Collectors.toMap(this::mapUtbetalingsgradArbeidsforhold, Utbetalingsgrader::getUtbetalingsgrad));
 
-        Map<UtbetalingsgradArbeidsforholdDto, PeriodeMedUtbetalingsgradDto> res = new HashMap<>();
+        Map<AktivitetDto, PeriodeMedUtbetalingsgradDto> res = new HashMap<>();
         for (var entry : perArbeidsforhold.entrySet()) {
             var utbetalingsgradPeriode = lagPeriode(periode, entry.getValue());
             res.put(entry.getKey(), utbetalingsgradPeriode);
@@ -89,12 +91,12 @@ public class PleiepengerGrunnlagMapper implements BeregningsgrunnlagYtelsespesif
         return res;
     }
 
-    private UtbetalingsgradArbeidsforholdDto mapUtbetalingsgradArbeidsforhold(Utbetalingsgrader utbGrad) {
+    private AktivitetDto mapUtbetalingsgradArbeidsforhold(Utbetalingsgrader utbGrad) {
         Arbeidsforhold arbeidsforhold = utbGrad.getArbeidsforhold();
         if (erTypeMedArbeidsforhold(arbeidsforhold)) {
             return lagArbeidsforhold(arbeidsforhold);
         } else {
-            return new UtbetalingsgradArbeidsforholdDto(null, null, mapUttakArbeidType(arbeidsforhold));
+            return new AktivitetDto(null, null, mapUttakArbeidType(arbeidsforhold));
         }
     }
 
@@ -108,8 +110,8 @@ public class PleiepengerGrunnlagMapper implements BeregningsgrunnlagYtelsespesif
         return new PeriodeMedUtbetalingsgradDto(kalkulusPeriode, utbetalingsgrad);
     }
 
-    private UtbetalingsgradArbeidsforholdDto lagArbeidsforhold(Arbeidsforhold arb) {
-        return new UtbetalingsgradArbeidsforholdDto(lagAktør(arb),
+    private AktivitetDto lagArbeidsforhold(Arbeidsforhold arb) {
+        return new AktivitetDto(lagAktør(arb),
             arb.getArbeidsforholdId() != null ? new InternArbeidsforholdRefDto(arb.getArbeidsforholdId()) : null,
             mapUttakArbeidType(arb));
     }

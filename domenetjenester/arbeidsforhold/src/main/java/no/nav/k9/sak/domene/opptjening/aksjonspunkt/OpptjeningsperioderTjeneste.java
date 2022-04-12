@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,16 +17,19 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.Inntektspost;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
@@ -48,11 +52,13 @@ public class OpptjeningsperioderTjeneste {
 
     protected OpptjeningRepository opptjeningRepository;
     protected OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
+    private FagsakRepository fagsakRepository;
     private MapYtelseperioderTjeneste mapYtelseperioderTjeneste;
 
     @Inject
-    public OpptjeningsperioderTjeneste(OpptjeningRepository opptjeningRepository, OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
+    public OpptjeningsperioderTjeneste(OpptjeningRepository opptjeningRepository, FagsakRepository fagsakRepository, OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
         this.opptjeningRepository = opptjeningRepository;
+        this.fagsakRepository = fagsakRepository;
         this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
         this.mapYtelseperioderTjeneste = new MapYtelseperioderTjeneste();
     }
@@ -60,27 +66,51 @@ public class OpptjeningsperioderTjeneste {
     public List<OpptjeningsperiodeForSaksbehandling> mapPerioderForSaksbehandling(BehandlingReferanse ref,
                                                                                   InntektArbeidYtelseGrunnlag grunnlag,
                                                                                   OpptjeningAktivitetVurdering vurderOpptjening,
-                                                                                  DatoIntervallEntitet opptjeningPeriode) {
+                                                                                  DatoIntervallEntitet opptjeningPeriode, DatoIntervallEntitet vilkårsPeriode) {
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
 
         var aktørId = ref.getAktørId();
         var skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
         var oppgittOpptjening = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId())
             .hentOppgittOpptjening(ref.getBehandlingId(), grunnlag, skjæringstidspunkt).orElse(null);
+        var erMigrertSkjæringstidspunkt = fagsakRepository.hentSakInfotrygdMigreringer(ref.getFagsakId())
+            .stream()
+            .map(SakInfotrygdMigrering::getSkjæringstidspunkt)
+            .anyMatch(vilkårsPeriode::inkluderer);
 
+        var ytelsesperioder = mapYtelseperioderTjeneste.mapYtelsePerioder(ref, grunnlag, vurderOpptjening, opptjeningPeriode, false);
+        var tidslinjePerYtelse = utledYtelsesTidslinjer(ytelsesperioder);
         var mapArbeidOpptjening = OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner();
         var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(skjæringstidspunkt);
         for (var yrkesaktivitet : filter.getYrkesaktiviteter()) {
-            var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(ref, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjeningPeriode);
+            var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(ref, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjeningPeriode, tidslinjePerYtelse, erMigrertSkjæringstidspunkt);
             perioder.addAll(opptjeningsperioder);
         }
 
         perioder.addAll(mapOppgittOpptjening(mapArbeidOpptjening, oppgittOpptjening, vurderOpptjening, ref));
-        perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(ref, grunnlag, vurderOpptjening, opptjeningPeriode));
+        perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(ref, grunnlag, vurderOpptjening, opptjeningPeriode, true));
         lagOpptjeningsperiodeForFrilansAktivitet(ref, oppgittOpptjening, vurderOpptjening, grunnlag, perioder, opptjeningPeriode,
             mapArbeidOpptjening).ifPresent(perioder::add);
 
         return perioder.stream().sorted(Comparator.comparing(OpptjeningsperiodeForSaksbehandling::getPeriode)).collect(Collectors.toList());
+    }
+
+    private Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> utledYtelsesTidslinjer(List<OpptjeningsperiodeForSaksbehandling> ytelsesperioder) {
+        var gruppertPåYtelse = ytelsesperioder.stream()
+            .collect(Collectors.groupingBy(OpptjeningsperiodeForSaksbehandling::getOpptjeningAktivitetType));
+        var timelinePerYtelse = new HashMap<OpptjeningAktivitetType, LocalDateTimeline<Boolean>>();
+
+        for (Map.Entry<OpptjeningAktivitetType, List<OpptjeningsperiodeForSaksbehandling>> entry : gruppertPåYtelse.entrySet()) {
+            var segmenter = entry.getValue().stream().map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), true)).collect(Collectors.toSet());
+            var timeline = new LocalDateTimeline<Boolean>(List.of());
+
+            for (LocalDateSegment<Boolean> segment : segmenter) {
+                timeline = timeline.combine(segment, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
+            timelinePerYtelse.put(entry.getKey(), timeline.compress());
+        }
+
+        return timelinePerYtelse;
     }
 
     public Optional<OpptjeningResultat> hentOpptjeningHvisFinnes(Long behandlingId) {
@@ -232,7 +262,4 @@ public class OpptjeningsperioderTjeneste {
         return startDatoFrilans.map(startDato -> DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDatoFrilans));
     }
 
-    private boolean harInntektpostForPeriode(Inntektspost ip, DatoIntervallEntitet opptjeningsPeriode) {
-        return opptjeningsPeriode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(ip.getPeriode().getFomDato(), ip.getPeriode().getTomDato()));
-    }
 }

@@ -16,7 +16,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
-
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -27,9 +26,6 @@ public class PipRepository {
 
     public static final String SAKSNUMMER = "saksnummer";
     private EntityManager entityManager;
-
-    public PipRepository() {
-    }
 
     @Inject
     public PipRepository(EntityManager entityManager) {
@@ -96,38 +92,47 @@ public class PipRepository {
         if (fagsakIder.isEmpty()) {
             return Collections.emptySet();
         }
-        String sql = "SELECT por.AKTOER_ID From Fagsak fag " +
-            " INNER JOIN BEHANDLING beh ON fag.ID = beh.FAGSAK_ID " +
-            " INNER JOIN GR_PERSONOPPLYSNING grp ON grp.behandling_id = beh.ID " +
-            " INNER JOIN PO_INFORMASJON poi ON grp.registrert_informasjon_id = poi.ID " +
-            " INNER JOIN PO_PERSONOPPLYSNING por ON poi.ID = por.po_informasjon_id " +
-            "WHERE fag.id in (:fagsakIder) AND grp.aktiv = TRUE " +
-            " UNION ALL " + // NOSONAR
-            "SELECT fag.bruker_aktoer_id FROM Fagsak fag " +
-            "WHERE fag.id in (:fagsakIder) AND fag.bruker_aktoer_id IS NOT NULL " +
-            " UNION ALL " + // NOSONAR
-            "SELECT fag.pleietrengende_aktoer_id FROM Fagsak fag " +
-            "WHERE fag.id in (:fagsakIder) AND fag.pleietrengende_aktoer_id IS NOT NULL " +
-            " UNION ALL " + // NOSONAR
-            "SELECT fag.relatert_person_aktoer_id FROM Fagsak fag " +
-            "WHERE fag.id in (:fagsakIder) AND fag.relatert_person_aktoer_id IS NOT NULL " +
-            " UNION ALL " + // NOSONAR
-            "SELECT soa.aktoer_id from so_soeknad_angitt_person soa" +
-            " INNER JOIN so_soeknad so on so.id=soa.soeknad_id" +
-            " INNER JOIN gr_soeknad gr on gr.soeknad_id=so.id" +
-            " INNER JOIN behandling b on b.id=gr.behandling_id" +
-            " INNER JOIN fagsak fag on fag.id=b.fagsak_id " +
-            "WHERE fag.id in (:fagsakIder) and soa.aktoer_id is not null " +
-            " UNION ALL " +  // NOSONAR
-            "SELECT fag2.bruker_aktoer_id" +
-            " FROM Fagsak fag INNER JOIN Fagsak fag2 ON (" +
-            "  fag.pleietrengende_aktoer_id IS NOT NULL AND fag.pleietrengende_aktoer_id = fag2.pleietrengende_aktoer_id" +
-            "  OR fag.relatert_person_aktoer_id IS NOT NULL AND fag.relatert_person_aktoer_id = fag2.relatert_person_aktoer_id" +  
-            " )" +
-            " WHERE fag.id in (:fagsakIder) "
+        String sql = """
+            SELECT por.AKTOER_ID From Fagsak fag
+             INNER JOIN BEHANDLING beh ON fag.ID = beh.FAGSAK_ID
+             INNER JOIN GR_PERSONOPPLYSNING grp ON grp.behandling_id = beh.ID
+             INNER JOIN PO_INFORMASJON poi ON grp.registrert_informasjon_id = poi.ID
+             INNER JOIN PO_PERSONOPPLYSNING por ON poi.ID = por.po_informasjon_id
+             WHERE fag.id in (:fagsakIder) AND grp.aktiv = TRUE
+             UNION ALL
+             SELECT fag.bruker_aktoer_id FROM Fagsak fag
+             WHERE fag.id in (:fagsakIder) AND fag.bruker_aktoer_id IS NOT NULL
+             UNION ALL
+             SELECT fag.pleietrengende_aktoer_id FROM Fagsak fag
+             WHERE fag.id in (:fagsakIder) AND fag.pleietrengende_aktoer_id IS NOT NULL
+             UNION ALL
+             SELECT fag.relatert_person_aktoer_id FROM Fagsak fag
+             WHERE fag.id in (:fagsakIder) AND fag.relatert_person_aktoer_id IS NOT NULL
+             UNION ALL
+             SELECT soa.aktoer_id from so_soeknad_angitt_person soa
+             INNER JOIN so_soeknad so on so.id=soa.soeknad_id
+             INNER JOIN gr_soeknad gr on gr.soeknad_id=so.id
+             INNER JOIN behandling b on b.id=gr.behandling_id
+             INNER JOIN fagsak fag on fag.id=b.fagsak_id
+             WHERE fag.id in (:fagsakIder) and soa.aktoer_id is not null
+             UNION ALL
+             SELECT fosterbarn.aktoer_id FROM omp_fosterbarn fosterbarn
+             INNER JOIN omp_fosterbarna fosterbarna on fosterbarna.id=fosterbarn.fosterbarna_id
+             INNER JOIN omp_gr_fosterbarn gr_fosterbarn on gr_fosterbarn.omp_fosterbarna_id=fosterbarna.id
+             INNER JOIN behandling b on b.id=gr_fosterbarn.behandling_id
+             INNER JOIN fagsak fag on fag.id=b.fagsak_id
+             WHERE fag.id in (:fagsakIder) AND gr_fosterbarn.aktiv = TRUE
+             UNION ALL
+             SELECT fag2.bruker_aktoer_id
+             FROM Fagsak fag INNER JOIN Fagsak fag2 ON (
+              fag.pleietrengende_aktoer_id IS NOT NULL AND fag.pleietrengende_aktoer_id = fag2.pleietrengende_aktoer_id
+              OR fag.relatert_person_aktoer_id IS NOT NULL AND fag.relatert_person_aktoer_id = fag2.relatert_person_aktoer_id
+             )
+             WHERE fag.id in (:fagsakIder)
+             """
             ;
 
-        Query query = entityManager.createNativeQuery(sql); // NOSONAR
+        Query query = entityManager.createNativeQuery(sql);
         query.setParameter("fagsakIder", fagsakIder);
 
         @SuppressWarnings("unchecked")
@@ -138,35 +143,44 @@ public class PipRepository {
     public Set<AktørId> hentAktørIdKnyttetTilSaksnummer(Saksnummer saksnummer) {
         Objects.requireNonNull(saksnummer, SAKSNUMMER);
 
-        String sql = "SELECT por.AKTOER_ID From Fagsak fag " +
-            " INNER JOIN BEHANDLING beh ON fag.ID = beh.FAGSAK_ID " +
-            " INNER JOIN GR_PERSONOPPLYSNING grp ON grp.behandling_id = beh.ID " +
-            " INNER JOIN PO_INFORMASJON poi ON grp.registrert_informasjon_id = poi.ID " +
-            " INNER JOIN PO_PERSONOPPLYSNING por ON poi.ID = por.po_informasjon_id " +
-            "WHERE fag.SAKSNUMMER = (:saksnummer) AND grp.aktiv = TRUE " +
-            " UNION ALL " + // NOSONAR
-            "SELECT fag.bruker_aktoer_id FROM Fagsak fag " +
-            "WHERE fag.SAKSNUMMER = (:saksnummer) AND fag.bruker_aktoer_id IS NOT NULL " +
-            " UNION ALL " + // NOSONAR
-            "SELECT fag.pleietrengende_aktoer_id FROM Fagsak fag " +
-            "WHERE fag.SAKSNUMMER = (:saksnummer) AND fag.pleietrengende_aktoer_id IS NOT NULL " +
-            " UNION ALL " + // NOSONAR
-            "SELECT fag.relatert_person_aktoer_id FROM Fagsak fag " +
-            "WHERE fag.SAKSNUMMER = (:saksnummer) AND fag.relatert_person_aktoer_id IS NOT NULL " +
-            " UNION ALL " + // NOSONAR
-            "SELECT soa.aktoer_id from so_soeknad_angitt_person soa" +
-            " INNER JOIN so_soeknad so on so.id=soa.soeknad_id" +
-            " INNER JOIN gr_soeknad gr on gr.soeknad_id=so.id" +
-            " INNER JOIN behandling b on b.id=gr.behandling_id" +
-            " INNER JOIN fagsak fag on fag.id=b.fagsak_id " +
-            "WHERE fag.SAKSNUMMER = (:saksnummer) and soa.aktoer_id is not null" +
-            " UNION ALL " +  // NOSONAR
-            "SELECT fag2.bruker_aktoer_id" +
-            " FROM Fagsak fag INNER JOIN Fagsak fag2 ON (" +
-            "  fag.pleietrengende_aktoer_id IS NOT NULL AND fag.pleietrengende_aktoer_id = fag2.pleietrengende_aktoer_id" +
-            "  OR fag.relatert_person_aktoer_id IS NOT NULL AND fag.relatert_person_aktoer_id = fag2.relatert_person_aktoer_id" +  
-            " )" +
-            " WHERE fag.SAKSNUMMER = (:saksnummer) ";
+        String sql = """
+            SELECT por.AKTOER_ID From Fagsak fag
+             INNER JOIN BEHANDLING beh ON fag.ID = beh.FAGSAK_ID
+             INNER JOIN GR_PERSONOPPLYSNING grp ON grp.behandling_id = beh.ID
+             INNER JOIN PO_INFORMASJON poi ON grp.registrert_informasjon_id = poi.ID
+             INNER JOIN PO_PERSONOPPLYSNING por ON poi.ID = por.po_informasjon_id
+             WHERE fag.SAKSNUMMER = (:saksnummer) AND grp.aktiv = TRUE
+             UNION ALL
+             SELECT fag.bruker_aktoer_id FROM Fagsak fag
+             WHERE fag.SAKSNUMMER = (:saksnummer) AND fag.bruker_aktoer_id IS NOT NULL
+             UNION ALL
+             SELECT fag.pleietrengende_aktoer_id FROM Fagsak fag
+             WHERE fag.SAKSNUMMER = (:saksnummer) AND fag.pleietrengende_aktoer_id IS NOT NULL
+             UNION ALL
+             SELECT fag.relatert_person_aktoer_id FROM Fagsak fag
+             WHERE fag.SAKSNUMMER = (:saksnummer) AND fag.relatert_person_aktoer_id IS NOT NULL
+             UNION ALL
+             SELECT soa.aktoer_id from so_soeknad_angitt_person soa
+             INNER JOIN so_soeknad so on so.id=soa.soeknad_id
+             INNER JOIN gr_soeknad gr on gr.soeknad_id=so.id
+             INNER JOIN behandling b on b.id=gr.behandling_id
+             INNER JOIN fagsak fag on fag.id=b.fagsak_id
+             WHERE fag.SAKSNUMMER = (:saksnummer) and soa.aktoer_id is not null
+             UNION ALL
+             SELECT fosterbarn.aktoer_id FROM omp_fosterbarn fosterbarn
+             INNER JOIN omp_fosterbarna fosterbarna on fosterbarna.id=fosterbarn.fosterbarna_id
+             INNER JOIN omp_gr_fosterbarn gr_fosterbarn on gr_fosterbarn.omp_fosterbarna_id=fosterbarna.id
+             INNER JOIN behandling b on b.id=gr_fosterbarn.behandling_id
+             INNER JOIN fagsak fag on fag.id=b.fagsak_id
+             WHERE fag.SAKSNUMMER = (:saksnummer) AND gr_fosterbarn.aktiv = TRUE
+             UNION ALL
+             SELECT fag2.bruker_aktoer_id
+             FROM Fagsak fag INNER JOIN Fagsak fag2 ON (
+              fag.pleietrengende_aktoer_id IS NOT NULL AND fag.pleietrengende_aktoer_id = fag2.pleietrengende_aktoer_id
+              OR fag.relatert_person_aktoer_id IS NOT NULL AND fag.relatert_person_aktoer_id = fag2.relatert_person_aktoer_id
+             )
+             WHERE fag.SAKSNUMMER = (:saksnummer);
+            """;
 
         Query query = entityManager.createNativeQuery(sql); // NOSONAR
         query.setParameter(SAKSNUMMER, saksnummer.getVerdi());

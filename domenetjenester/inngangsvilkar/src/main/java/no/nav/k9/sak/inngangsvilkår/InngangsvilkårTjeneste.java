@@ -2,15 +2,14 @@ package no.nav.k9.sak.inngangsvilkår;
 
 import java.time.LocalDate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -54,7 +53,7 @@ public class InngangsvilkårTjeneste {
      * Finn {@link Inngangsvilkår} for angitt {@link VilkårType}. Husk at denne må closes når du er ferdig med den.
      */
     public Inngangsvilkår finnVilkår(VilkårType vilkårType, FagsakYtelseType fagsakYtelseType) {
-        Instance<Inngangsvilkår> selected = alleInngangsvilkår.select(new VilkårTypeRefLiteral(vilkårType.getKode()));
+        Instance<Inngangsvilkår> selected = alleInngangsvilkår.select(new VilkårTypeRefLiteral(vilkårType));
         if (selected.isAmbiguous()) {
             return FagsakYtelseTypeRef.Lookup.find(selected, fagsakYtelseType).orElseThrow(() -> new IllegalStateException("Har ikke Inngangsvilkår for " + fagsakYtelseType));
         } else if (selected.isUnsatisfied()) {
@@ -67,17 +66,6 @@ public class InngangsvilkårTjeneste {
                 "Kan ikke ha @Dependent scope bean ved Instance lookup dersom en ikke også håndtere lifecycle selv: " + minInstans.getClass());
         }
         return minInstans;
-    }
-
-    /**
-     * Vurder om et angitt {@link VilkårType} er et {@link Inngangsvilkår}
-     *
-     * @param vilkårType en {@link VilkårType}
-     * @return true hvis {@code vilkårType} er et {@link Inngangsvilkår}
-     */
-    public boolean erInngangsvilkår(VilkårType vilkårType) {
-        Instance<Inngangsvilkår> selected = alleInngangsvilkår.select(new VilkårTypeRefLiteral(vilkårType.getKode()));
-        return !selected.isUnsatisfied();
     }
 
     /**

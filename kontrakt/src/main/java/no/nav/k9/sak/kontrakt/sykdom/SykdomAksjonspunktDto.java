@@ -1,11 +1,11 @@
 package no.nav.k9.sak.kontrakt.sykdom;
 
-import jakarta.validation.Valid;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.validation.Valid;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -14,36 +14,42 @@ public class SykdomAksjonspunktDto {
 
     @JsonProperty(value = "kanLøseAksjonspunkt")
     @Valid
-    private final boolean kanLøseAksjonspunkt;
+    private boolean kanLøseAksjonspunkt;
 
     @JsonProperty(value = "harUklassifiserteDokumenter")
     @Valid
-    private final boolean harUklassifiserteDokumenter;
+    private boolean harUklassifiserteDokumenter;
 
     @JsonProperty(value = "manglerDiagnosekode")
     @Valid
-    private final boolean manglerDiagnosekode;
+    private boolean manglerDiagnosekode;
 
     @JsonProperty(value = "manglerGodkjentLegeerklæring")
     @Valid
-    private final boolean manglerGodkjentLegeerklæring;
+    private boolean manglerGodkjentLegeerklæring;
 
     @JsonProperty(value = "manglerVurderingAvKontinuerligTilsynOgPleie")
     @Valid
-    private final boolean manglerVurderingAvKontinuerligTilsynOgPleie;
+    private boolean manglerVurderingAvKontinuerligTilsynOgPleie;
 
     @JsonProperty(value = "manglerVurderingAvToOmsorgspersoner")
     @Valid
-    private final boolean manglerVurderingAvToOmsorgspersoner;
+    private boolean manglerVurderingAvToOmsorgspersoner;
+
+    @JsonProperty(value = "manglerVurderingAvILivetsSluttfase")
+    @Valid
+    private boolean manglerVurderingAvILivetsSluttfase;
 
     @JsonProperty(value = "harDataSomIkkeHarBlittTattMedIBehandling")
     @Valid
-    private final boolean harDataSomIkkeHarBlittTattMedIBehandling;
+    private boolean harDataSomIkkeHarBlittTattMedIBehandling;
 
     @JsonProperty(value = "nyttDokumentHarIkkekontrollertEksisterendeVurderinger")
     @Valid
-    private final boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
+    private boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
 
+    public SykdomAksjonspunktDto() {
+    }
 
     public SykdomAksjonspunktDto(boolean kanLøseAksjonspunkt,
                                  boolean harUklassifiserteDokumenter,
@@ -51,6 +57,7 @@ public class SykdomAksjonspunktDto {
                                  boolean manglerGodkjentLegeerklæring,
                                  boolean manglerVurderingAvKontinuerligTilsynOgPleie,
                                  boolean manglerVurderingAvToOmsorgspersoner,
+                                 boolean manglerVurderingAvILivetsSluttfase,
                                  boolean harDataSomIkkeHarBlittTattMedIBehandling,
                                  boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger) {
         this.kanLøseAksjonspunkt = kanLøseAksjonspunkt;
@@ -59,10 +66,10 @@ public class SykdomAksjonspunktDto {
         this.manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring;
         this.manglerVurderingAvKontinuerligTilsynOgPleie = manglerVurderingAvKontinuerligTilsynOgPleie;
         this.manglerVurderingAvToOmsorgspersoner = manglerVurderingAvToOmsorgspersoner;
+        this.manglerVurderingAvILivetsSluttfase = manglerVurderingAvILivetsSluttfase;
         this.harDataSomIkkeHarBlittTattMedIBehandling = harDataSomIkkeHarBlittTattMedIBehandling;
         this.nyttDokumentHarIkkekontrollertEksisterendeVurderinger = nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
     }
-
 
     public boolean isKanLøseAksjonspunkt() {
         return kanLøseAksjonspunkt;
@@ -86,6 +93,10 @@ public class SykdomAksjonspunktDto {
 
     public boolean isManglerVurderingAvToOmsorgspersoner() {
         return manglerVurderingAvToOmsorgspersoner;
+    }
+
+    public boolean isManglerVurderingAvILivetsSluttfase() {
+        return manglerVurderingAvILivetsSluttfase;
     }
 
     public boolean isHarDataSomIkkeHarBlittTattMedIBehandling() {

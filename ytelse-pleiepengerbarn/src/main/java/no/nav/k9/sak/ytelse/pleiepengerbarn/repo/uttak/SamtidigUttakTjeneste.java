@@ -6,12 +6,11 @@ import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -23,12 +22,70 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Endringsstatus;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
+/**
+ * Håndtering av krav fra forskjellige søkere på den samme dagen.
+ * 
+ * <h4>Regler for samtidig uttak</h4>
+ * 
+ * <ol>
+ *   <li>Et krav er definert som søknadsdata for en gitt dato.</li>
+ *   <li>Kravet med det tidligste mottattidspunktet prioriteres.</li>
+ *   <li>Et krav betyr at man har prioritet på 100% av gjenværende tid.</li>
+ *   <li>Lavere prioriterte krav kan benytte gjenværende tid.</li>
+ *   <li>Lavere prioriterte krav kan miste tiden hvis høyere prioriterte krav
+ *       øker uttaket (gjennom etterrapportering, tilbakedatering av krav osv)</li>
+ *   <li>Etter at en sak har blitt besluttet starter det automatisk revurdering
+ *       av berørte saker</li>
+ *   <li>Ved vurdering av gjenværende uttak baserer man seg på data fra
+ *       besluttede behandlinger, men med en reberegning basert på gjeldende
+ *       kravprioritet.</li>
+ * </ol>
+ * 
+ * <p>
+ * Det vurderes som juridisk problematisk å tilbakekreve penger fra en lavere prioritert
+ * søker grunnet etterrapportering fra den prioriterte søkeren. En slik tilbakekreving
+ * vurderes likevel å være den beste løsningen ut fra kravet om at vi skal sikre at uttaket
+ * ikke blir høyere enn pleiebehovet. Det jobbes for å sikre en god juridisk forankring av
+ * denne praksisen.
+ * </p>
+ * 
+ * <p>
+ * Merk at en alternativ løsning der en søker kan ha flere, ulikt prioriterte, krav på samme dag
+ * har blitt forkastet som mulig løsning. Dette fordi den første søkeren skal ha mulighet til
+ * etterrapportering uten fare for at man har mistet retten/prioriteten.
+ * </p>
+ *
+ * 
+ * <h4>Om løsningen i denne klassen</h4>
+ * 
+ * <p>
+ * Denne tjenesten forsøker å hindre feilaktige vedtak, ved å kreve at behandlinger
+ * med prioriterte perioder skal håndteres før behandlinger som har lavere prioritet.
+ * </p>
+ * 
+ * <p>
+ * Merk at det kan være tilfeller der to behandlinger gjensidig har perioder som har
+ * prioritet fremfor den andre. Dette håndteres ved at én av disse behandlingene blir
+ * besluttet med for mye utbetalt. Etter at den andre behandlingen har blitt besluttet
+ * vil det automatisk bli opprettet en revurdering som korrigerer dette.
+ * </p>
+ * 
+ * <p>
+ * En bedre løsning ville vært å utsette behandling av perioder der man ikke har prioritet
+ * til en senere behandling, men dette har ikke blitt implementert ennå.
+ * </p>
+ * 
+ * @see PleietrengendeKravprioritet#vurderKravprioritet
+ * @see no.nav.k9.sak.ytelse.pleiepengerbarn.foreslåvedtak.PSBYtelsespesifikkForeslåVedtak
+ * @see no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett.VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste
+ */
 @Dependent
 public class SamtidigUttakTjeneste {
 

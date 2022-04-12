@@ -15,19 +15,24 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.hibernate.QueryTimeoutException;
+import org.hibernate.jpa.QueryHints;
+import org.hibernate.query.NativeQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
-
-import org.hibernate.query.NativeQuery;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import no.nav.k9.felles.integrasjon.sensu.SensuEvent;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -39,12 +44,13 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.felles.integrasjon.sensu.SensuEvent;
 import no.nav.k9.prosesstask.api.ProsessTaskFeil;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 
 @Dependent
 public class StatistikkRepository {
+
+    private static final Logger log = LoggerFactory.getLogger(StatistikkRepository.class);
 
     private static final String UDEFINERT = "-";
 
@@ -57,7 +63,7 @@ public class StatistikkRepository {
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
         .stream().map(k -> k.getKode()).collect(Collectors.toList());
 
-    static final List<String> PROSESS_TASK_STATUSER = List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.FEILET, ProsessTaskStatus.VENTER_SVAR)
+    static final List<String> PROSESS_TASK_STATUSER = List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.FEILET, ProsessTaskStatus.VENTER_SVAR, ProsessTaskStatus.SUSPENDERT)
         .stream().map(k -> k.getDbKode()).collect(Collectors.toList());
     static final List<String> AKSJONSPUNKTER = AksjonspunktDefinisjon.kodeMap().values().stream()
         .filter(p -> !AksjonspunktDefinisjon.UNDEFINED.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
@@ -89,17 +95,35 @@ public class StatistikkRepository {
         LocalDate dag = LocalDate.now();
 
         List<SensuEvent> metrikker = new ArrayList<>();
-        metrikker.addAll(fagsakStatusStatistikk());
-        metrikker.addAll(behandlingStatusStatistikk());
-        metrikker.addAll(behandlingResultatStatistikk());
-        metrikker.addAll(prosessTaskStatistikk());
-        metrikker.addAll(mottattDokumentStatistikk());
-        metrikker.addAll(aksjonspunktStatistikk());
-        metrikker.addAll(aksjonspunktStatistikkDaglig(dag));
-        metrikker.addAll(avslagStatistikk());
-        metrikker.addAll(avslagStatistikkDaglig(dag));
-        metrikker.addAll(prosessTaskFeilStatistikk());
+        metrikker.addAll(timeCall(this::fagsakStatusStatistikk, "fagsakStatusStatistikk"));
+        metrikker.addAll(timeCall(this::behandlingStatusStatistikk, "behandlingStatusStatistikk"));
+        metrikker.addAll(timeCall(this::behandlingResultatStatistikk, "behandlingResultatStatistikk"));
+        metrikker.addAll(timeCall(this::prosessTaskStatistikk, "prosessTaskStatistikk"));
+        metrikker.addAll(timeCall(this::mottattDokumentStatistikk, "mottattDokumentStatistikk"));
+        metrikker.addAll(timeCall(this::aksjonspunktStatistikk, "aksjonspunktStatistikk"));
+        metrikker.addAll(timeCall(() -> aksjonspunktStatistikkDaglig(dag), "aksjonspunktStatistikkDaglig"));
+        try {
+            metrikker.addAll(timeCall(this::avslagStatistikk, "avslagStatistikk"));
+        } catch (QueryTimeoutException e) {
+            log.warn("Uthenting av avslagsStatistikk feiler", e);
+        }
+        try {
+            metrikker.addAll(timeCall(() -> avslagStatistikkDaglig(dag), "avslagStatistikkDaglig"));
+        } catch (QueryTimeoutException e) {
+            log.warn("Uthenting av avslagStatistikkDaglig feiler", e);
+        }
+        metrikker.addAll(timeCall(this::prosessTaskFeilStatistikk, "prosessTaskFeilStatistikk"));
         return metrikker;
+    }
+
+    private Collection<SensuEvent> timeCall(Supplier<Collection<SensuEvent>> collectionSupplier, String function) {
+        var start = System.currentTimeMillis();
+        var sensuEvents = collectionSupplier.get();
+        var slutt = System.currentTimeMillis();
+
+        log.info("{} benyttet {} ms", function, (slutt-start));
+
+        return sensuEvents;
     }
 
     @SuppressWarnings("unchecked")
@@ -242,6 +266,7 @@ public class StatistikkRepository {
             " group by 1, 2, 3, 4, 5";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setHint(QueryHints.JAKARTA_SPEC_HINT_TIMEOUT, 30000)
             .setParameter("behStatuser", Set.of(BehandlingStatus.IVERKSETTER_VEDTAK.getKode(), BehandlingStatus.AVSLUTTET.getKode())); // kun ta med behandlinger som avsluttes (iverksettes, avsluttet)
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
@@ -279,6 +304,7 @@ public class StatistikkRepository {
         String metricName = "avslag_daglig_v2";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setHint(QueryHints.JAKARTA_SPEC_HINT_TIMEOUT, 30000)
             .setParameter("behStatuser", Set.of(BehandlingStatus.IVERKSETTER_VEDTAK.getKode(), BehandlingStatus.AVSLUTTET.getKode()))
             .setParameter("startAvDag", dato.atStartOfDay())
             .setParameter("nesteDag", dato.plusDays(1).atStartOfDay());

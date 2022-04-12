@@ -1,13 +1,16 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
-import java.util.List;
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_UTTAK_V2;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -26,10 +29,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
 @ApplicationScoped
-@BehandlingStegRef(kode = "VURDER_UTTAK_V2")
+@BehandlingStegRef(value = VURDER_UTTAK_V2)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
     private static final Logger log = LoggerFactory.getLogger(VurderUttakIBeregningSteg.class);
@@ -84,7 +87,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (!BehandlingStegType.VURDER_UTTAK_V2.equals(tilSteg)) {
+        if (!VURDER_UTTAK_V2.equals(tilSteg)) {
             var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
             uttakTjeneste.slettUttaksplan(behandling.getUuid());
         }

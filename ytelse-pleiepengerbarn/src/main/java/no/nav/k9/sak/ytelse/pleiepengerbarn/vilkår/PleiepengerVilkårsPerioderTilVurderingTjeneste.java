@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
 import java.time.DayOfWeek;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -44,11 +43,11 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Endringsstatus;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 
-public class PleiepengerVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
+public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private final PåTversAvHelgErKantIKantVurderer erKantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
-    private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
+    private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering;
     private VilkårUtleder vilkårUtleder;
     private SøktePerioder søktePerioder;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -110,7 +109,7 @@ public class PleiepengerVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         }
 
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
-        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse));
+        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId())));
         perioderTilVurdering.addAll(perioderSomSkalTilbakestilles(behandlingId));
 
         return vilkår.getPerioder()
@@ -136,7 +135,7 @@ public class PleiepengerVilkårsPerioderTilVurderingTjeneste implements Vilkårs
                 .filter(it -> perioder.stream().anyMatch(it::overlapper))
                 .map(DatoIntervallEntitet::toLocalDateInterval)
                 .map(it -> new LocalDateSegment<>(it, true))
-                .collect(Collectors.toList()))
+                .toList())
             .compress();
 
         return relevantTidslinje.toSegments()
@@ -146,14 +145,10 @@ public class PleiepengerVilkårsPerioderTilVurderingTjeneste implements Vilkårs
     }
 
     private LocalDateTimeline<Boolean> opprettTidslinje(NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
-
-        var tidslinje = new LocalDateTimeline<Boolean>(List.of());
-
-        for (DatoIntervallEntitet periode : datoIntervallEntitets) {
-            var segmentLinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(justerMotHelg(periode).toLocalDateInterval(), true)));
-            tidslinje = tidslinje.combine(segmentLinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
-
+        List<LocalDateSegment<Boolean>> segmenter = datoIntervallEntitets.stream()
+            .map(periode -> new LocalDateSegment<>(justerMotHelg(periode).toLocalDateInterval(), true))
+            .toList();
+        var tidslinje = new LocalDateTimeline<>(segmenter, StandardCombinators::coalesceRightHandSide);
         return tidslinje.compress();
     }
 
@@ -241,7 +236,7 @@ public class PleiepengerVilkårsPerioderTilVurderingTjeneste implements Vilkårs
             // TODO: Vurder om uttak skal være med inn her
         }
         periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggereMedÅrsak(referanse));
-        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse)
+        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId()))
             .stream()
             .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING))
             .collect(Collectors.toSet()));
@@ -255,17 +250,13 @@ public class PleiepengerVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         utvidedePerioder = utvidedePerioder.union(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId()), StandardCombinators::alwaysTrueForMatch);
         utvidedePerioder = utvidedePerioder.union(uttaksendringerSidenForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
 
-        return utvidedePerioder.toSegments()
-            .stream()
-            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new));
+        return DatoIntervallEntitet.fraTimeline(utvidedePerioder);
     }
 
-    @SuppressWarnings("unchecked")
     private LocalDateTimeline<Boolean> uttaksendringerSidenForrigeBehandling(BehandlingReferanse referanse) {
         final Uttaksplan uttaksplan = uttakTjeneste.hentUttaksplan(referanse.getBehandlingUuid(), false);
         if (uttaksplan == null) {
-            return LocalDateTimeline.EMPTY_TIMELINE;
+            return LocalDateTimeline.empty();
         }
 
         final List<LocalDateSegment<Boolean>> segments = uttaksplan.getPerioder()
@@ -275,7 +266,7 @@ public class PleiepengerVilkårsPerioderTilVurderingTjeneste implements Vilkårs
             .map(entry -> new LocalDateSegment<Boolean>(entry.getKey().getFom(), entry.getKey().getTom(), Boolean.TRUE))
             .toList();
 
-        return new LocalDateTimeline<Boolean>(segments);
+        return new LocalDateTimeline<>(segments);
     }
 
     private LocalDateTimeline<Boolean> utledUtvidetPeriodeForSykdom(BehandlingReferanse referanse) {
@@ -298,11 +289,6 @@ public class PleiepengerVilkårsPerioderTilVurderingTjeneste implements Vilkårs
     @Override
     public KantIKantVurderer getKantIKantVurderer() {
         return erKantIKantVurderer;
-    }
-
-    @Override
-    public Set<VilkårType> definerendeVilkår() {
-        return Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR);
     }
 
     @Override

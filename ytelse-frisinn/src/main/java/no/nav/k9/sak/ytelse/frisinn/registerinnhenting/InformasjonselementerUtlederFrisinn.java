@@ -5,6 +5,7 @@ import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_BEREGNI
 import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_PENSJONSGIVENDE;
 import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_SAMMENLIGNINGSGRUNNLAG;
 import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.YTELSE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 
 import java.util.Map;
 import java.util.Set;
@@ -18,9 +19,9 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("FRISINN")
-@BehandlingTypeRef("BT-002")
-@BehandlingTypeRef("BT-004")
+@FagsakYtelseTypeRef(FRISINN)
+@BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
+@BehandlingTypeRef(BehandlingType.REVURDERING)
 public class InformasjonselementerUtlederFrisinn implements InformasjonselementerUtleder {
 
     private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(

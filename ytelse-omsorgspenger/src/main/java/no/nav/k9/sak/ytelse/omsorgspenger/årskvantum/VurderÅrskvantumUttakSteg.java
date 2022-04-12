@@ -1,16 +1,20 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_UTTAK;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
-import no.nav.k9.aarskvantum.kontrakter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.k9.aarskvantum.kontrakter.Aksjonspunkt;
+import no.nav.k9.aarskvantum.kontrakter.Bekreftet;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -26,9 +30,9 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @ApplicationScoped
-@BehandlingStegRef(kode = "VURDER_UTTAK")
+@BehandlingStegRef(value = VURDER_UTTAK)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
     private static final Logger log = LoggerFactory.getLogger(VurderÅrskvantumUttakSteg.class);

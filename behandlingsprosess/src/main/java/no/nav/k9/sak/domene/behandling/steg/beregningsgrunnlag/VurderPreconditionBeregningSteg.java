@@ -1,5 +1,8 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.PRECONDITION_BEREGNING;
+
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -9,9 +12,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -24,6 +28,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -35,7 +40,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(kode = "PRECONDITION_BERGRUNN")
+@BehandlingStegRef(value = PRECONDITION_BEREGNING)
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
@@ -46,6 +51,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
     private Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere;
+    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
+    private BeregningsgrunnlagTjeneste kalkulusTjeneste;
 
 
     protected VurderPreconditionBeregningSteg() {
@@ -58,25 +65,57 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                            @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                            @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
-                                           @Any Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere) {
+                                           @Any Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere,
+                                           BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
+                                           BeregningsgrunnlagTjeneste kalkulusTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.aksjonspunktUtledere = aksjonspunktUtledere;
+        this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
+        this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var referanse = BehandlingReferanse.fra(behandling);
+
+        // 1. Setter alle perioder til vurdering
+        ryddVedtaksresultatForPerioderTilVurdering(kontekst, referanse);
+
+        // 2. Avslår perioder der vi har avslag før beregning eller ingen aktiviteter (ingen grunnlag for beregning)
+        avslåBeregningVedBehov(kontekst, behandling, referanse);
+
+        // 3. deaktiverer grunnlag for referanser som er avslått eller inaktive (fjernet skjæringstidspunkt)
+        kalkulusTjeneste.deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(referanse);
+
+        // 4. avbryter alle aksjonspunkt i beregning som er åpne (aksjonspunkt reutledes på nytt ved behov)
+        abrytÅpneBeregningaksjonspunkter(kontekst, behandling);
+
+        return BehandleStegResultat.utførtMedAksjonspunktResultater(finnAksjonspunkter(behandling));
+    }
+
+    private void abrytÅpneBeregningaksjonspunkter(BehandlingskontrollKontekst kontekst, Behandling behandling) {
+        behandling.getAksjonspunkter().stream()
+            .filter(this::erÅpentBeregningAksjonspunkt)
+            .forEach(Aksjonspunkt::avbryt);
+        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+    }
+
+    private boolean erÅpentBeregningAksjonspunkt(Aksjonspunkt a) {
+        return a.getStatus().erÅpentAksjonspunkt() && Arrays.stream(BeregningAvklaringsbehovDefinisjon.values()).anyMatch(ab -> ab.getKode().equals(a.getAksjonspunktDefinisjon().getKode()));
+    }
+
+    private void avslåBeregningVedBehov(BehandlingskontrollKontekst kontekst, Behandling behandling, BehandlingReferanse referanse) {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         var vilkåret = vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET)
             .orElseThrow();
-        var vurdertePerioder = vurdertePerioder(VilkårType.OPPTJENINGSVILKÅRET, behandling);
+        var vurdertePerioder = vurdertePerioder(VilkårType.OPPTJENINGSVILKÅRET, referanse);
         var opptjeningForBeregningTjeneste = finnOpptjeningForBeregningTjeneste(behandling);
         var grunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
-        var referanse = BehandlingReferanse.fra(behandling);
 
         var avslåttePerioder = vilkåret.getPerioder()
             .stream()
@@ -89,10 +128,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         if (noeAvslått) {
             avslåBerregningsperioderDerHvorOpptjeningErAvslått(referanse, vilkårene, avslåttePerioder);
         }
-
-        return BehandleStegResultat.utførtMedAksjonspunktResultater(finnAksjonspunkter(behandling));
     }
-
 
     private boolean ingenBeregningsAktiviteter(OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste, VilkårPeriode it, InntektArbeidYtelseGrunnlag grunnlag, BehandlingReferanse referanse) {
         var opptjeningAktiviteter = opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(referanse, grunnlag, it.getPeriode());
@@ -113,21 +149,20 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), builder.build());
     }
 
-    public Set<DatoIntervallEntitet> vurdertePerioder(VilkårType vilkårType, Behandling behandling) {
-        var tjeneste = getPerioderTilVurderingTjeneste(behandling);
-        return tjeneste.utled(behandling.getId(), vilkårType);
+    public Set<DatoIntervallEntitet> vurdertePerioder(VilkårType vilkårType, BehandlingReferanse ref) {
+        var tjeneste = getPerioderTilVurderingTjeneste(ref);
+        return tjeneste.utled(ref.getId(), vilkårType);
     }
 
-    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
-        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, perioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType())
-            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
+    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(BehandlingReferanse ref) {
+        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, perioderTilVurderingTjeneste, ref.getFagsakYtelseType(), ref.getBehandlingType())
+            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + ref.getFagsakYtelseType() + "], behandlingtype [" + ref.getBehandlingType() + "]"));
     }
 
     private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(Behandling behandling) {
         FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
-        var tjeneste = FagsakYtelseTypeRef.Lookup.find(opptjeningForBeregningTjeneste, ytelseType)
+        return FagsakYtelseTypeRef.Lookup.find(opptjeningForBeregningTjeneste, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningForBeregningTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
-        return tjeneste;
     }
 
     private List<AksjonspunktResultat> finnAksjonspunkter(Behandling behandling) {
@@ -136,5 +171,12 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         return tjeneste.map(utleder -> utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling))))
             .orElse(Collections.emptyList());
     }
+
+    private void ryddVedtaksresultatForPerioderTilVurdering(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+        var tjeneste = getPerioderTilVurderingTjeneste(ref);
+        var perioderTilVurdering = tjeneste.utled(ref.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, perioderTilVurdering);
+    }
+
 
 }

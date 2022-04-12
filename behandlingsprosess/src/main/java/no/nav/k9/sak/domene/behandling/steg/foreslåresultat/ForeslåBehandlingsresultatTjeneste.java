@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.foreslåresultat;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -50,9 +52,13 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
 
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
 
-        // kun for å sette vedtaksbrev og redusertUtbetalingÅrsak. Må settes frem til feltene er flyttet til formidling
-        var vedtakVarsel = vedtakVarselRepository.hentHvisEksisterer(behandlingId).orElse(new VedtakVarsel());
-        vedtakVarselRepository.lagre(behandlingId, vedtakVarsel);
+
+        if (ref.getFagsakYtelseType() == FagsakYtelseType.FRISINN) {
+            // kun for å sette vedtaksbrev og redusertUtbetalingÅrsak for FRISINN. Ellers er det flyttet til formidling
+            var vedtakVarsel = vedtakVarselRepository.hentHvisEksisterer(behandlingId).orElse(new VedtakVarsel());
+            vedtakVarselRepository.lagre(behandlingId, vedtakVarsel);
+
+        }
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         log.info("Foreslår Vedtak. Behandling {}. BehandlingResultatType={} (før)", ref.getBehandlingId(), behandling.getBehandlingResultatType());
@@ -99,7 +105,7 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
 
         return vilkårTidslinjer.entrySet().stream()
             .filter(e -> harAvslåtteVilkårsPerioder(e.getValue()) && harIngenOppfylteVilkårsPerioder(e.getValue()))
-            .findFirst().map(e -> e.getKey());
+            .findFirst().map(Map.Entry::getKey);
     }
 
     protected boolean skalAvslåsBasertPåAndreForhold(@SuppressWarnings("unused") BehandlingReferanse ref) {

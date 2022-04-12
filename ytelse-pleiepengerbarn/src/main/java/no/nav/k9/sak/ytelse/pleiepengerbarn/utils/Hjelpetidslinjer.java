@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.utils;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -10,32 +11,33 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 
 public final class Hjelpetidslinjer {
-    
+
     private Hjelpetidslinjer() {}
 
     public static LocalDateTimeline<Boolean> lagTidslinjeMedKunHelger(LocalDateTimeline<?> tidslinje) {
-        var timeline = new LocalDateTimeline<Boolean>(List.of());
+        List<LocalDateSegment<Boolean>> helgesegmenter = new ArrayList<>();
+
         for (LocalDateSegment<?> segment : tidslinje.toSegments()) {
             var min = segment.getFom();
-            var max = segment.getTom();
+            var max = finnNærmeste(DayOfWeek.MONDAY, segment.getTom());
             LocalDate next = min;
 
             while (next.isBefore(max)) {
                 if (Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).contains(next.getDayOfWeek()) && min.isEqual(next)) {
                     next = finnNeste(max, next);
-                    timeline = timeline.combine(new LocalDateSegment<>(min, next, true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                    helgesegmenter.add(new LocalDateSegment<>(min, next, true));
                 }
                 var start = finnNærmeste(DayOfWeek.SATURDAY, next);
                 next = finnNeste(max, start);
                 if (start.isBefore(max)) {
-                    timeline = timeline.combine(new LocalDateSegment<>(start, next, true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                    helgesegmenter.add(new LocalDateSegment<>(start, next, true));
                 }
             }
 
         }
-        return timeline;
+        return new LocalDateTimeline<>(helgesegmenter, StandardCombinators::coalesceRightHandSide);
     }
-    
+
     private static LocalDate finnNeste(LocalDate max, LocalDate start) {
         LocalDate next;
         next = finnNærmeste(DayOfWeek.SUNDAY, start);

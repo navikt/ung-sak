@@ -10,13 +10,12 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -253,15 +252,14 @@ public class VilkårTjeneste {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
     public LocalDateTimeline<VilkårUtfallSamlet> samletVilkårsresultat(Long behandlingId) {
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (vilkårene.isEmpty()) {
-            return LocalDateTimeline.EMPTY_TIMELINE;
+            return LocalDateTimeline.empty();
         }
         LocalDateTimeline<Boolean> allePerioder = vilkårene.get().getAlleIntervaller();
         if (allePerioder.isEmpty()) {
-            return LocalDateTimeline.EMPTY_TIMELINE;
+            return LocalDateTimeline.empty();
         }
         var maksPeriode = DatoIntervallEntitet.fra(allePerioder.getMinLocalDate(), allePerioder.getMaxLocalDate());
         return samleVilkårUtfall(vilkårene.get(), maksPeriode);

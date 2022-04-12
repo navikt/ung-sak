@@ -23,4 +23,9 @@ public class SakMedPeriode {
     public NavigableSet<DatoIntervallEntitet> getPerioder() {
         return perioder;
     }
+
+    @Override
+    public String toString() {
+        return saksnummer.toString();
+    }
 }

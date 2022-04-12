@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -18,11 +22,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -35,8 +36,7 @@ import no.nav.k9.sak.kontrakt.person.AktørInfoDto;
 import no.nav.k9.sak.kontrakt.person.PersonDto;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbPbSakRepository;
 
 @ApplicationScoped
 @Transactional
@@ -46,20 +46,22 @@ public class AktørRestTjeneste {
 
     private FagsakRepository fagsakRepository;
     private TpsTjeneste tpsTjeneste;
+    private PsbPbSakRepository psbPbSakRepository;
 
     public AktørRestTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public AktørRestTjeneste(FagsakRepository fagsakRepository, TpsTjeneste tpsTjeneste) {
+    public AktørRestTjeneste(FagsakRepository fagsakRepository, TpsTjeneste tpsTjeneste, PsbPbSakRepository psbPbSakRepository) {
         this.fagsakRepository = fagsakRepository;
         this.tpsTjeneste = tpsTjeneste;
+        this.psbPbSakRepository = psbPbSakRepository;
     }
 
     @GET
     @Operation(description = "Henter informasjon om en aktøer", tags = "aktoer", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i fpsak.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktørInfoDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i k9-sak.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktørInfoDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path("/aktoer-info")
@@ -73,7 +75,7 @@ public class AktørRestTjeneste {
                 Personinfo pi = personinfo.get();
                 PersonDto personDto = new PersonDto(
                     pi.getNavn(),
-                    pi.getAlder(),
+                    pi.getAlderIDag(),
                     String.valueOf(pi.getPersonIdent().getIdent()),
                     pi.erKvinne(),
                     pi.getPersonstatus(),
@@ -98,7 +100,8 @@ public class AktørRestTjeneste {
                         null,
                         f.getSkalTilInfotrygd(),
                         f.getOpprettetTidspunkt(),
-                        f.getEndretTidspunkt()
+                        f.getEndretTidspunkt(),
+                        psbPbSakRepository.finnes(f.getId())
                     ));
                 }
                 aktoerInfoDto.setFagsaker(fagsakDtoer);

@@ -61,23 +61,10 @@ class OpptjeningsgrunnlagAdapter {
             ReferanseType refType = getAktivtetReferanseType(opptjeningsnøkkel.getType());
 
             if (refType != null) {
-                if (opptjeningsnøkkel.harType(Opptjeningsnøkkel.Type.ARBEIDSFORHOLD_ID)) {
-                    Aktivitet aktivitet = new Aktivitet(Opptjeningsvilkår.ARBEID, getAktivitetReferanseFraNøkkel(opptjeningsnøkkel), refType);
-                    opptjeningsGrunnlag.leggTilRapportertInntekt(dateInterval, aktivitet, beløpHeltall);
-                } else {
-                    Aktivitet aktivitet = new Aktivitet(Opptjeningsvilkår.ARBEID, opptjeningsnøkkel.getVerdi(), refType);
-                    opptjeningsGrunnlag.leggTilRapportertInntekt(dateInterval, aktivitet, beløpHeltall);
-                }
+                Aktivitet aktivitet = new Aktivitet(Opptjeningsvilkår.ARBEID, opptjeningsnøkkel.getAktivitetReferanse(), refType);
+                opptjeningsGrunnlag.leggTilRapportertInntekt(dateInterval, aktivitet, beløpHeltall);
             }
         }
-    }
-
-    private String getAktivitetReferanseFraNøkkel(Opptjeningsnøkkel opptjeningsnøkkel) {
-        String nøkkel = opptjeningsnøkkel.getForType(Opptjeningsnøkkel.Type.ORG_NUMMER);
-        if (nøkkel == null) {
-            nøkkel = opptjeningsnøkkel.getForType(Opptjeningsnøkkel.Type.AKTØR_ID);
-        }
-        return nøkkel;
     }
 
     private ReferanseType getAktivtetReferanseType(Opptjeningsnøkkel.Type type) {
@@ -131,8 +118,7 @@ class OpptjeningsgrunnlagAdapter {
                     .map(s -> new LocalDateTimeline<>(List.of(s)))
                     .collect(Collectors.toList());
 
-                @SuppressWarnings("unchecked")
-                LocalDateTimeline<OpptjeningAktivitetPeriode> tidsserie = LocalDateTimeline.EMPTY_TIMELINE;
+                LocalDateTimeline<OpptjeningAktivitetPeriode> tidsserie = LocalDateTimeline.empty();
 
                 for (LocalDateTimeline<OpptjeningAktivitetPeriode> tidsserieInput : tidsserier) {
                     tidsserie = tidsserie.combine(tidsserieInput, this::sjekkVurdering, LocalDateTimeline.JoinStyle.CROSS_JOIN);

@@ -4,17 +4,18 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -87,11 +88,12 @@ public class EndringsresultatSjekker {
 
     public EndringsresultatSnapshot opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(Long behandlingId) {
         EndringsresultatSnapshot snapshot = EndringsresultatSnapshot.opprett();
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+
         snapshot.leggTil(personopplysningTjeneste.finnAktivGrunnlagId(behandlingId));
         snapshot.leggTil(medlemTjeneste.finnAktivGrunnlagId(behandlingId));
-        snapshot.leggTil(prosessTriggereRepository.finnAktivGrunnlagId(behandlingId));
+        snapshot.leggTil(prosessTriggereRepository.finnAktivGrunnlagId(behandlingId)); // annen part etc
 
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
         if (inkludererBeregning(behandling)) {
             EndringsresultatSnapshot iaySnapshot = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId)
                 .map(iayg -> EndringsresultatSnapshot.medSnapshot(InntektArbeidYtelseGrunnlag.class, iayg.getEksternReferanse()))
@@ -113,6 +115,10 @@ public class EndringsresultatSjekker {
         }
 
         return snapshot;
+    }
+
+    public boolean harStatusOpprettetEllerUtredes(Behandling behandling) {
+        return Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES).contains(behandling.getStatus());
     }
 
     private boolean inkludererBeregning(Behandling behandling) {

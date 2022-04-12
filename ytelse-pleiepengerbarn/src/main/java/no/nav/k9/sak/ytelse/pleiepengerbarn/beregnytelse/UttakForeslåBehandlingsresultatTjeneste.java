@@ -1,20 +1,24 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.revurdering.ytelse.RevurderingBehandlingsresultatutleder;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
@@ -24,13 +28,13 @@ import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlings
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @ApplicationScoped
 public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandlingsresultatTjeneste {
 
-    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     private BehandlingRepository behandlingRepository;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     UttakForeslåBehandlingsresultatTjeneste() {
         // for proxy
@@ -39,15 +43,18 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
     @Inject
     public UttakForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                                    VedtakVarselRepository vedtakVarselRepository,
-                                                   @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                                   @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                                    @FagsakYtelseTypeRef RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder) {
         super(repositoryProvider, vedtakVarselRepository, revurderingBehandlingsresultatutleder);
-        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
+        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
 
     @Override
     protected DatoIntervallEntitet getMaksPeriode(Long behandlingId) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = finnVilkårsperioderTilVurderingTjeneste(behandling);
+
         var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
         var timeline = new LocalDateTimeline<Boolean>(List.of());
 
@@ -55,11 +62,11 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
             timeline = timeline.combine(new LocalDateTimeline<>(vilkårsPerioderTilVurderingTjeneste.utled(behandlingId, vilkårType)
                 .stream()
                 .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
-                .collect(Collectors.toList())), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                .toList()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
         timeline.compress();
         if (timeline.isEmpty()) {
-            return behandlingRepository.hentBehandling(behandlingId).getFagsak().getPeriode();
+            return behandling.getFagsak().getPeriode();
         }
         return DatoIntervallEntitet.fraOgMedTilOgMed(timeline.getMinLocalDate(), timeline.getMaxLocalDate());
     }
@@ -69,9 +76,9 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
         if (skalAvslåsBasertPåAndreForhold(ref)) {
             return true;
         }
-
-        var harIngenPerioderForMedisinsk = harIngenPerioderForMedisinsk(vilkårene);
-        if (harIngenPerioderForMedisinsk) {
+        Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
+        var harIngenPerioderForSykdomsvilkår = harIngenPerioderForSykdomsvilkår(behandling, vilkårene);
+        if (harIngenPerioderForSykdomsvilkår) {
             return true;
         }
 
@@ -89,24 +96,31 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
             return false;
         }
 
-        if (avslåtteVilkår.stream().anyMatch(v -> v != VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR && v != VilkårType.MEDISINSKEVILKÅR_18_ÅR)) {
+        Set<VilkårType> sykdomVilkårTyper = sykdomVilkårTyper(behandling);
+        boolean harAvslagForVilkårSomIkkeErSykdomsvilkår = avslåtteVilkår.stream().anyMatch(v -> !sykdomVilkårTyper.contains(v));
+        if (harAvslagForVilkårSomIkkeErSykdomsvilkår) {
             return true;
         }
 
-        final var ingenAvSykdomsvilkåreneErOppfylt = harIngenOppfylteVilkårsPerioder(vilkårTidslinjer.get(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR))
-            && harIngenOppfylteVilkårsPerioder(vilkårTidslinjer.get(VilkårType.MEDISINSKEVILKÅR_18_ÅR));
-
-
-        return ingenAvSykdomsvilkåreneErOppfylt;
+        return sykdomVilkårTyper.stream()
+            .allMatch(vilkårtype -> harIngenOppfylteVilkårsPerioder(vilkårTidslinjer.get(vilkårtype)));
     }
 
-    private boolean harIngenPerioderForMedisinsk(Vilkårene vilkårene) {
-        return vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()
+    private boolean harIngenPerioderForSykdomsvilkår(Behandling behandling, Vilkårene vilkårene) {
+        return sykdomVilkårTyper(behandling)
             .stream()
             .allMatch(it -> harIngenPerioder(it, vilkårene));
     }
 
     private boolean harIngenPerioder(VilkårType vilkårType, Vilkårene vilkårene) {
         return vilkårene.getVilkår(vilkårType).map(Vilkår::getPerioder).orElse(List.of()).isEmpty();
+    }
+
+    private Set<VilkårType> sykdomVilkårTyper(Behandling behandling) {
+        return finnVilkårsperioderTilVurderingTjeneste(behandling).definerendeVilkår();
+    }
+
+    private VilkårsPerioderTilVurderingTjeneste finnVilkårsperioderTilVurderingTjeneste(Behandling behandling) {
+        return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
     }
 }

@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.skjæringstidspunkt;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Optional;
@@ -17,7 +19,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 @ApplicationScoped
 public class OmsorgspengerOpphørtidspunktTjeneste {
 

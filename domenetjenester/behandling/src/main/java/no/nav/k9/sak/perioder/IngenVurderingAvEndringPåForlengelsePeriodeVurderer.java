@@ -5,7 +5,7 @@ import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @FagsakYtelseTypeRef
-@VilkårTypeRef("*")
+@VilkårTypeRef
 public class IngenVurderingAvEndringPåForlengelsePeriodeVurderer implements EndringPåForlengelsePeriodeVurderer{
 
     @Override

@@ -6,14 +6,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -116,7 +115,6 @@ class ForeslåVedtakTjeneste {
         if (totrinn && deaktiverTotrinnSelektivt) {
             var totrinnAks = behandling.getAksjonspunkter().stream()
                 .filter(a -> a.isToTrinnsBehandling())
-                .filter(a -> a.getAksjonspunktDefinisjon() != AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP)
                 .collect(Collectors.toList());
             return !totrinnAks.isEmpty();
         }

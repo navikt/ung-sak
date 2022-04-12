@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -38,8 +37,8 @@ public class SøknadPerioderTjeneste {
         this.grunnlagRepository = grunnlagRepository;
     }
 
-    public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentSøktePerioderMedKravdokumentPåFagsak(BehandlingReferanse ref) {
-        var mottatteDokumenter = hentMottatteDokument(ref.getFagsakId());
+    public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentSøktePerioderMedKravdokumentPåFagsak(Long fagsakId) {
+        var mottatteDokumenter = hentMottatteDokument(fagsakId);
         return tilSøktePerioderMedKravdokument(mottatteDokumenter);
     }
 

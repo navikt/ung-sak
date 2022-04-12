@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.opptjening;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -12,7 +14,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.RegelResultat;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class OmsorgspengerHåndtereAutomatiskAvslag implements HåndtereAutomatiskAvslag {
 
 

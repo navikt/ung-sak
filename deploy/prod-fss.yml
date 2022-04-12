@@ -86,6 +86,8 @@ spec:
       value: k9saksbehandling.aapen-k9-stonadstatistikk-v1
     - name: KAFKA_BRUKERDIALOGINNSYN_TOPIC
       value: dusseldorf.privat-k9-sak-innsyn-v1
+    - name: KAFKA_PRODUKSJONSSTYRING_TOPIC
+      value: k9saksbehandling.privat-k9-produksjonsstyring-sak-v1
 
     # Baseurl
     - name: SCHEMA_REGISTRY_URL
@@ -117,7 +119,7 @@ spec:
     - name: INFOTRYGD_HENDELSER_API_URL
       value: http://infotrygd-hendelser.default/infotrygd/hendelser
     - name: FPABAKUS_URL
-      value: http://fpabakus.default/fpabakus
+      value: http://fpabakus.teamforeldrepenger/fpabakus
     - name: FTKALKULUS_URL
       value: http://ftkalkulus.k9saksbehandling/ftkalkulus
     - name: ABAKUS_CALLBACK_URL
@@ -131,7 +133,7 @@ spec:
     - name: OPPGAVE_RS_URI
       value: https://oppgave.nais.adeo.no/api/v1/oppgaver
     - name: MEDL2_RS_URL
-      value: https://app.adeo.no/medl2/api/v1/medlemskapsunntak
+      value: https://medlemskap-medl-api.intern.nav.no/api/v1/medlemskapsunntak
     - name: PDL_BASE_URL
       value: http://pdl-api.default/graphql
     - name: ORGANISASJON_RS_URL
@@ -169,7 +171,7 @@ spec:
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.adeo.no
     - name: OIDC_OPENAM_HOST_URL
-      value: https://isso.adeo.no:443/isso/oauth2
+      value: https://isso.adeo.no/isso/oauth2
     - name: OIDC_OPENAM_CLIENT_ID
       value: k9-sak-p
 
@@ -186,7 +188,7 @@ spec:
     - name: OMP_IM_SJEKK_FORSTE_FRAVAERSDAG
       value: "false"
     - name: PSB_OPPG_OPPTJENING_PRIORITERING
-      value: "false"
+      value: "true"
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
       value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
@@ -207,26 +209,31 @@ spec:
       value: "AFMX0|2021-03-01"
     - name: MAP_ALLE_KRAV
       value: "true"
-    - name: PSB_ENABLE_BEKREFT_UTTAK
-      value: "true"
     - name: DISABLE_VURDER_TILBAKETREKK
       value: "true"
     - name: PSB_INFOTRYGD_MIGRERING
-      value: "false"
-    - name: FORLENGELSE_OPPTJENING_ENABLET
-      value: "false"
+      value: "true"
     - name: FORLENGELSE_BEREGNING_ENABLET
-      value: "false"
-    - name: BEHANDLINGID_DOKUMENTLIST_ENABLET
-      value: "true"
-    - name: PERIODER_KANT_I_KANT_VURDERER_ENABLET
-      value: "true"
-    - name: VEDTAK_PERSISTER_ENDRET_PERIODE
       value: "true"
     - name: K9_RAPID_AIVEN
-      value: "false"
+      value: "true"
     - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
       value: "true"
+    - name: KOMPLETTHET_SKIP_VED_AVSLAG_SOKNADSFRIST
+      value: "true"
+    - name: KOMPLETTHET_BEREGNING_OMP
+      value: "false"
+    - name: OMP_VERIFISERING_TILKJENT_YTELSE
+      value: "false"
+    - name: OMP_AVSLAG_SOKNAD_MANGLER_IM
+      value: "false"
+    - name: OMP_AARSKVANTUMTJENESTE_BRUK_FERDIGUTLEDET_FLAGG_REFUSJON
+      value: "false"
+    - name: OMP_DELT_BOSTED_RAMMEVEDTAK
+      value: "false"
+    - name: ENABLE_FAGSAK_AVSLUTTING
+      value: "false"
+
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
@@ -241,7 +248,7 @@ spec:
 
     # Pleiepenger infotrygd migrering
     - name: INFOTRYGD_MIGRERING_TILLATELSER
-      value: ""
+      value: "K137924,N106674,H137477,N130802,N140249,A100265,D101758,E151154,A147438,S164910,B100673"
 
     # FRISINN NYE REGLER 2022
     - name: FRISINN_NYTT_STP_TOGGLE

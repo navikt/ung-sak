@@ -1,9 +1,13 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.iverksett;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
+import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
@@ -12,7 +16,7 @@ import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumDeaktiveringTjeneste;
 
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 @ApplicationScoped
 public class OpprettProsessTaskIverksettOMP extends OpprettProsessTaskIverksettTilkjentYtelseFelles {
 
@@ -34,7 +38,7 @@ public class OpprettProsessTaskIverksettOMP extends OpprettProsessTaskIverksettT
     }
 
     @Override
-    public void opprettYtelsesSpesifikkeTasks(Behandling behandling) {
-        årskvantumDeaktiveringTjeneste.meldFraDersomDeaktivering(behandling);
+    public Optional<ProsessTaskData> opprettYtelsesSpesifikkeTasks(Behandling behandling) {
+        return årskvantumDeaktiveringTjeneste.meldFraDersomDeaktivering(behandling);
     }
 }

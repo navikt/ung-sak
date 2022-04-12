@@ -13,14 +13,13 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -82,22 +81,11 @@ public class InntektsmeldingRegisterTjeneste {
     private Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>> utledManglendeInntektsmeldinger(BehandlingReferanse referanse,
                                                                                              Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>> påkrevdeInntektsmeldinger,
                                                                                              boolean erEndringssøknad, LocalDate vurderingsdato) {
-        class FinnEksternReferanse implements BiFunction<Arbeidsgiver, InternArbeidsforholdRef, EksternArbeidsforholdRef> {
-            ArbeidsforholdInformasjon arbInfo;
 
-            @Override
-            public EksternArbeidsforholdRef apply(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef internReferanse) {
-                if (arbInfo == null) {
-                    var grunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
-                    arbInfo = grunnlag.getArbeidsforholdInformasjon().orElseThrow(
-                        () -> new IllegalStateException("Utvikler-feil: mangler IAYG.ArbeidsforholdInformasjon, kan ikke slå opp ekstern referanse"));
-                }
-                return arbInfo.finnEkstern(arbeidsgiver, internReferanse);
-            }
-        }
 
         var kopiPåkrevd = new LinkedHashMap<>(påkrevdeInntektsmeldinger);
-        filtrerUtMottatteInntektsmeldinger(referanse, kopiPåkrevd, erEndringssøknad, new FinnEksternReferanse(), vurderingsdato);
+        var finnEksternReferanse = new FinnEksternReferanse(inntektArbeidYtelseTjeneste, referanse.getBehandlingId());
+        filtrerUtMottatteInntektsmeldinger(referanse, kopiPåkrevd, erEndringssøknad, finnEksternReferanse, vurderingsdato);
 
         return filtrerInntektsmeldingerForYtelse(referanse, Optional.empty(), kopiPåkrevd);
     }

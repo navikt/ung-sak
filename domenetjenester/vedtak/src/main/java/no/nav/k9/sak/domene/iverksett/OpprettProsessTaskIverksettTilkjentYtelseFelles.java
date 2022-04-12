@@ -13,6 +13,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
@@ -36,9 +37,9 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
     }
 
     public OpprettProsessTaskIverksettTilkjentYtelseFelles(FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                             OppgaveTjeneste oppgaveTjeneste,
-                                             InfotrygdFeedService infotrygdFeedService,
-                                             StønadstatistikkService stønadstatistikkService) {
+                                                           OppgaveTjeneste oppgaveTjeneste,
+                                                           InfotrygdFeedService infotrygdFeedService,
+                                                           StønadstatistikkService stønadstatistikkService) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.infotrygdFeedService = infotrygdFeedService;
@@ -56,13 +57,13 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
             behandling.erRevurdering() ? OppgaveÅrsak.REVURDER_VL : OppgaveÅrsak.BEHANDLE_SAK_VL, false);
         Optional<ProsessTaskData> initiellTask = Optional.empty();
         if (initiellTaskNavn.isPresent()) {
-            initiellTask = Optional.of(new ProsessTaskData(initiellTaskNavn.get()));
+            initiellTask = Optional.of(ProsessTaskData.forTaskType(new TaskType(initiellTaskNavn.get())));
         }
         ProsessTaskGruppe taskData = new ProsessTaskGruppe();
         initiellTask.ifPresent(taskData::addNesteSekvensiell);
 
         List<ProsessTaskData> parallelle = new ArrayList<>();
-        parallelle.add(new ProsessTaskData(SendVedtaksbrevTask.TASKTYPE));
+        parallelle.add(ProsessTaskData.forProsessTask(SendVedtaksbrevTask.class));
         parallelle.add(opprettTaskSendTilØkonomi());
         avsluttOppgave.ifPresent(parallelle::add);
 
@@ -70,13 +71,15 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
 
         // FIXME: Antar at denne er dekket av opprettTaskSendTilØkonomi() ?
         // Da denne sender tilkjent ytelse til fp.oppdrag via kafka
-        // taskData.addNesteSekvensiell(new ProsessTaskData(SendTilkjentYtelseTask.TASKTYPE));
+        // taskData.addNesteSekvensiell( ProsessTaskData.forProsessTask(SendTilkjentYtelseTask.TASKTYPE));
 
-        taskData.addNesteSekvensiell(new ProsessTaskData(VurderOverlappendeInfotrygdYtelserTask.TASKTYPE));
+        taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(VurderOverlappendeInfotrygdYtelserTask.class));
         if (skalVurdereOppgaveTilArena(behandling)) {
-            taskData.addNesteSekvensiell(new ProsessTaskData(VurderOppgaveArenaTask.TASKTYPE));
+            taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(VurderOppgaveArenaTask.class));
         }
-        taskData.addNesteSekvensiell(new ProsessTaskData(AvsluttBehandlingTask.TASKTYPE));
+        taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(AvsluttBehandlingTask.class));
+
+        opprettYtelsesSpesifikkeTasks(behandling).ifPresent(taskData::addNesteSekvensiell);
 
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
 
@@ -91,8 +94,6 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
 
         infotrygdFeedService.publiserHendelse(behandling);
         stønadstatistikkService.publiserHendelse(behandling);
-
-        opprettYtelsesSpesifikkeTasks(behandling);
     }
 
     private boolean skalVurdereOppgaveTilArena(Behandling behandling) {
@@ -105,14 +106,14 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
     }
 
     private ProsessTaskData opprettTaskSendTilØkonomi() {
-        ProsessTaskData taskdata = new ProsessTaskData(SendØkonomiOppdragTask.TASKTYPE);
+        ProsessTaskData taskdata = ProsessTaskData.forProsessTask(SendØkonomiOppdragTask.class);
         OffsetDateTime nå = OffsetDateTime.now(ZoneId.of("UTC"));
         taskdata.setProperty("opprinneligIverksettingTidspunkt", nå.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         return taskdata;
     }
 
     private ProsessTaskData opprettTaskVurderOppgaveTilbakekreving(Behandling behandling) {
-        ProsessTaskData vurderOppgaveTilbakekreving = new ProsessTaskData(VurderOppgaveTilbakekrevingTask.TASKTYPE);
+        ProsessTaskData vurderOppgaveTilbakekreving = ProsessTaskData.forProsessTask(VurderOppgaveTilbakekrevingTask.class);
         vurderOppgaveTilbakekreving.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         vurderOppgaveTilbakekreving.setCallIdFraEksisterende();
         return vurderOppgaveTilbakekreving;

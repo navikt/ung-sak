@@ -10,14 +10,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -72,7 +71,7 @@ class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         fagsakRepository = new FagsakRepository(entityManager);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
-        opptjeningsperioderTjeneste = new OpptjeningsperioderTjeneste(repositoryProvider.getOpptjeningRepository(), oppgittOpptjeningFilterProvider);
+        opptjeningsperioderTjeneste = new OpptjeningsperioderTjeneste(repositoryProvider.getOpptjeningRepository(), repositoryProvider.getFagsakRepository(), oppgittOpptjeningFilterProvider);
         opptjeningTjeneste = new OpptjeningInntektArbeidYtelseTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), opptjeningsperioderTjeneste);
 
         when(oppgittOpptjeningFilterProvider.finnOpptjeningFilter(anyLong())).thenReturn(new OppgittOpptjeningFilter() {

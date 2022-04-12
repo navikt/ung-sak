@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alenemidlertidig;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
+
 import java.util.Collection;
 import java.util.Optional;
 
@@ -32,7 +34,7 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.AnnenForelder.Situa
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerMidlertidigAlene;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef(OMSORGSPENGER_MA)
 @DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_MA_KODE)
 public class DokumentmottakerSøknadMidlertidigAlene implements Dokumentmottaker {
 

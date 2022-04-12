@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Comparator;
@@ -8,19 +10,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -30,6 +31,7 @@ import no.nav.k9.sak.hendelse.brukerdialoginnsyn.BrukerdialoginnsynService;
 import no.nav.k9.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.mottak.dokumentmottak.OppgittOpptjeningMapper;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -42,7 +44,7 @@ import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnSøknadValidator;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @DokumentGruppeRef(Brevkode.PLEIEPENGER_BARN_SOKNAD_KODE)
 class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
 
@@ -51,10 +53,11 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SøknadParser søknadParser;
     private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private BrukerdialoginnsynService brukerdialoginnsynService;
+    private DokumentmottakerFelles dokumentMottakerFelles;
     private boolean skalBrukeUtledetEndringsperiode;
 
     DokumentmottakerPleiepengerSyktBarnSøknad() {
@@ -66,19 +69,21 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                                               SøknadParser søknadParser,
                                               SøknadOversetter pleiepengerBarnSoknadOversetter,
                                               SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
-                                              ProsessTaskRepository prosessTaskRepository,
+                                              ProsessTaskTjeneste taskTjeneste,
                                               OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
                                               SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                               BrukerdialoginnsynService brukerdialoginnsynService,
+                                              DokumentmottakerFelles dokumentMottakerFelles,
                                               @KonfigVerdi(value = "ENABLE_UTLEDET_ENDRINGSPERIODE", defaultVerdi = "false") boolean skalBrukeUtledetEndringsperiode) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
         this.pleiepengerBarnSoknadOversetter = pleiepengerBarnSoknadOversetter;
-        this.prosessTaskRepository = prosessTaskRepository;
+        this.taskTjeneste = taskTjeneste;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.brukerdialoginnsynService = brukerdialoginnsynService;
+        this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.skalBrukeUtledetEndringsperiode = skalBrukeUtledetEndringsperiode;
     }
 
@@ -95,6 +100,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
             // Søknadsinnhold som persisteres "lokalt" i k9-sak
             persister(søknad, behandling, dokument.getJournalpostId());
+            dokumentMottakerFelles.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), dokument.getJournalpostId(), dokument.getType());
             // Søknadsinnhold som persisteres eksternt (abakus)
             lagreOppgittOpptjeningFraSøknad(søknad, behandling, dokument);
         }
@@ -119,7 +125,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                 mottatteDokumentRepository.oppdaterStatus(List.of(dokument), DokumentStatus.GYLDIG);
                 return;
             }
-            var enkeltTask = new ProsessTaskData(AsyncAbakusLagreOpptjeningTask.TASKTYPE);
+            var enkeltTask = ProsessTaskData.forProsessTask(AsyncAbakusLagreOpptjeningTask.class);
             var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
             enkeltTask.setPayload(payload);
 
@@ -130,7 +136,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             enkeltTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
             enkeltTask.setCallIdFraEksisterende();
 
-            prosessTaskRepository.lagre(enkeltTask);
+            taskTjeneste.lagre(enkeltTask);
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Opprettelse av task for lagring av oppgitt opptjening i abakus feiler.", e).toException();
         }

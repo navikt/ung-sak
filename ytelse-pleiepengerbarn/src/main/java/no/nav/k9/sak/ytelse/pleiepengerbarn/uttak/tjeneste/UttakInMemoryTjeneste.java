@@ -11,15 +11,14 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Alternative;
-
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
-import no.nav.pleiepengerbarn.uttak.kontrakter.EndrePerioderGrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Simuleringsgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.SøktUttak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utenlandsopphold;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UtenlandsoppholdÅrsak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
@@ -45,11 +44,6 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
     @Override
     public Uttaksplan hentUttaksplan(UUID behandlingUuid, boolean slåSammenLikePerioder) {
         return hentUttaksplaner(behandlingUuid).values().stream().findFirst().orElseThrow();
-    }
-
-    @Override
-    public Simulering simulerUttaksplanV2(Simuleringsgrunnlag request) {
-        throw new UnsupportedOperationException();
     }
 
     private Map<Object, Uttaksplan> hentUttaksplaner(UUID behandlingUuid) {
@@ -88,11 +82,6 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
     }
 
     @Override
-    public Uttaksplan endreUttaksplan(EndrePerioderGrunnlag request) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void slettUttaksplan(UUID behandlingId) {
         uttaksplaner.remove(behandlingId);
     }
@@ -113,7 +102,9 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             null,
             null,
             null,
-            false);
+            false,
+            new Utenlandsopphold(null,
+            UtenlandsoppholdÅrsak.INGEN));
     }
 
     private Map<String, Utfall> mapInngangsvilkår(Map<String, List<Vilkårsperiode>> inngangsvilkår) {

@@ -11,30 +11,29 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
-import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.test.util.Whitebox;
-import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.integrasjon.oppgave.v1.Oppgave;
 import no.nav.k9.felles.integrasjon.oppgave.v1.OppgaveRestKlient;
 import no.nav.k9.felles.integrasjon.oppgave.v1.Oppgavestatus;
 import no.nav.k9.felles.integrasjon.oppgave.v1.OpprettOppgave;
 import no.nav.k9.felles.integrasjon.oppgave.v1.Prioritet;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.test.util.Whitebox;
+import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -49,22 +48,22 @@ public class OppgaveTjenesteTest {
     private EntityManager entityManager;
 
     private OppgaveTjeneste tjeneste;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
     private OppgaveRestKlient oppgaveRestKlient;
 
     private OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository;
 
-    private BehandlingRepositoryProvider repositoryProvider ;
+    private BehandlingRepositoryProvider repositoryProvider;
 
     private Behandling behandling;
 
     @BeforeEach
     public void oppsett() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        prosessTaskRepository = mock(ProsessTaskRepository.class);
+        taskTjeneste = mock(ProsessTaskTjeneste.class);
         oppgaveRestKlient = Mockito.mock(OppgaveRestKlient.class);
         oppgaveBehandlingKoblingRepository = spy(new OppgaveBehandlingKoblingRepository(entityManager));
-        tjeneste = new OppgaveTjeneste(repositoryProvider, oppgaveBehandlingKoblingRepository, oppgaveRestKlient, prosessTaskRepository);
+        tjeneste = new OppgaveTjeneste(repositoryProvider, oppgaveBehandlingKoblingRepository, oppgaveRestKlient, taskTjeneste);
         lagBehandling();
     }
 
@@ -77,14 +76,14 @@ public class OppgaveTjenesteTest {
     @Test
     public void skal_opprette_oppgave_basert_på_fagsakId() {
         // Arrange
-        ArgumentCaptor<OpprettOppgave.Builder> captor = ArgumentCaptor.forClass(OpprettOppgave.Builder.class);
+        ArgumentCaptor<OpprettOppgave> captor = ArgumentCaptor.forClass(OpprettOppgave.class);
         when(oppgaveRestKlient.opprettetOppgave(captor.capture())).thenReturn(OPPGAVE);
 
         // Act
         String oppgaveId = tjeneste.opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(behandling.getFagsakId(), OppgaveÅrsak.VURDER_DOKUMENT, "2010", "bla bla", false);
 
         // Assert
-        OpprettOppgave request = captor.getValue().build();
+        OpprettOppgave request = captor.getValue();
         assertThat((String) Whitebox.getInternalState(request, "saksreferanse")).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
         assertThat((String) Whitebox.getInternalState(request, "oppgavetype")).isEqualTo(OppgaveÅrsak.VURDER_DOKUMENT.getKode());
         assertThat(oppgaveId).isEqualTo(OPPGAVE.getId().toString());
@@ -110,14 +109,14 @@ public class OppgaveTjenesteTest {
     public void skal_opprette_oppgave_vurder_konsekvens_basert_på_fagsakId() {
         // Arrange
 
-        ArgumentCaptor<OpprettOppgave.Builder> captor = ArgumentCaptor.forClass(OpprettOppgave.Builder.class);
+        ArgumentCaptor<OpprettOppgave> captor = ArgumentCaptor.forClass(OpprettOppgave.class);
         when(oppgaveRestKlient.opprettetOppgave(captor.capture())).thenReturn(OPPGAVE);
 
         // Act
         String oppgaveId = tjeneste.opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(behandling.getFagsakId(), OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, "2010", "bla bla", false);
 
         // Assert
-        OpprettOppgave request = captor.getValue().build();
+        OpprettOppgave request = captor.getValue();
         assertThat((String) Whitebox.getInternalState(request, "saksreferanse")).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
         assertThat((String) Whitebox.getInternalState(request, "oppgavetype")).isEqualTo(OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE.getKode());
         assertThat(oppgaveId).isEqualTo(OPPGAVE.getId().toString());
@@ -127,14 +126,14 @@ public class OppgaveTjenesteTest {
     public void skal_lage_request_som_inneholder_verdier_i_forbindelse_med_manglende_regler() {
         // Arrange
 
-        ArgumentCaptor<OpprettOppgave.Builder> captor = ArgumentCaptor.forClass(OpprettOppgave.Builder.class);
+        ArgumentCaptor<OpprettOppgave> captor = ArgumentCaptor.forClass(OpprettOppgave.class);
         when(oppgaveRestKlient.opprettetOppgave(captor.capture())).thenReturn(OPPGAVE);
 
         // Act
         String oppgaveId = tjeneste.opprettOppgaveSakSkalTilInfotrygd(behandling.getId());
 
         // Assert
-        OpprettOppgave request = captor.getValue().build();
+        OpprettOppgave request = captor.getValue();
         assertThat((String) Whitebox.getInternalState(request, "saksreferanse")).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
         assertThat((String) Whitebox.getInternalState(request, "oppgavetype")).isEqualTo(OppgaveÅrsak.BEHANDLE_SAK_IT.getKode());
         assertThat((String) Whitebox.getInternalState(request, "beskrivelse")).isEqualTo("Sak må flyttes til Infotrygd");
@@ -145,7 +144,7 @@ public class OppgaveTjenesteTest {
     public void skal_opprette_oppgave_med_prioritet_og_beskrivelse() {
         // Arrange
         LocalDate forventetFrist = VirkedagUtil.fomVirkedag(LocalDate.now().plusDays(1));
-        ArgumentCaptor<OpprettOppgave.Builder> captor = ArgumentCaptor.forClass(OpprettOppgave.Builder.class);
+        ArgumentCaptor<OpprettOppgave> captor = ArgumentCaptor.forClass(OpprettOppgave.class);
         when(oppgaveRestKlient.opprettetOppgave(captor.capture())).thenReturn(OPPGAVE);
 
         // Act
@@ -153,7 +152,7 @@ public class OppgaveTjenesteTest {
             "4321", "noe tekst", true);
 
         // Assert
-        OpprettOppgave request = captor.getValue().build();
+        OpprettOppgave request = captor.getValue();
         assertThat((String) Whitebox.getInternalState(request, "saksreferanse")).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
         assertThat((String) Whitebox.getInternalState(request, "oppgavetype")).isEqualTo(OppgaveÅrsak.GODKJENN_VEDTAK_VL.getKode());
         assertThat((LocalDate) Whitebox.getInternalState(request, "fristFerdigstillelse")).isEqualTo(forventetFrist);
@@ -166,7 +165,7 @@ public class OppgaveTjenesteTest {
         // Arrange
 
         LocalDate forventetFrist = VirkedagUtil.fomVirkedag(LocalDate.now().plusDays(1));
-        ArgumentCaptor<OpprettOppgave.Builder> captor = ArgumentCaptor.forClass(OpprettOppgave.Builder.class);
+        ArgumentCaptor<OpprettOppgave> captor = ArgumentCaptor.forClass(OpprettOppgave.class);
         when(oppgaveRestKlient.opprettetOppgave(captor.capture())).thenReturn(OPPGAVE);
 
         // Act
@@ -174,7 +173,7 @@ public class OppgaveTjenesteTest {
         String oppgaveId = tjeneste.opprettOppgaveStopUtbetalingAvARENAYtelse(behandling.getId(), førsteAugust);
 
         // Assert
-        OpprettOppgave request = captor.getValue().build();
+        OpprettOppgave request = captor.getValue();
         assertThat((String) Whitebox.getInternalState(request, "saksreferanse")).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
         assertThat((String) Whitebox.getInternalState(request, "oppgavetype")).isEqualTo(OppgaveÅrsak.SETTVENT.getKode());
         assertThat((String) Whitebox.getInternalState(request, "tema")).isEqualTo("STO");

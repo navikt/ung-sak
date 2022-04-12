@@ -12,12 +12,10 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -53,11 +51,11 @@ public class PleietrengendeKravprioritet {
         return vurderKravprioritet(fagsakId, pleietrengende, false);
     }
 
-    @SuppressWarnings("unchecked")
     public LocalDateTimeline<List<Kravprioritet>> vurderKravprioritet(Long fagsakId, AktørId pleietrengende, boolean brukUbesluttedeData) {
-        final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, pleietrengende, null, null, null);
+        Fagsak aktuellFagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
+        final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(aktuellFagsak.getYtelseType(), pleietrengende, null, null, null);
 
-        LocalDateTimeline<List<Kravprioritet>> kravprioritetstidslinje = LocalDateTimeline.EMPTY_TIMELINE;
+        LocalDateTimeline<List<Kravprioritet>> kravprioritetstidslinje = LocalDateTimeline.empty();
         for (Fagsak fagsak : fagsaker) {
             final boolean brukAvsluttetBehandling = !brukUbesluttedeData && !fagsak.getId().equals(fagsakId);
             final LocalDateTimeline<Kravprioritet> fagsakTidslinje = finnEldsteKravTidslinjeForFagsak(fagsak, brukAvsluttetBehandling);
@@ -69,8 +67,7 @@ public class PleietrengendeKravprioritet {
 
 
     private LocalDateTimeline<Kravprioritet> finnEldsteKravTidslinjeForFagsak(Fagsak fagsak, boolean brukAvsluttetBehandling) {
-        @SuppressWarnings("unchecked")
-        LocalDateTimeline<Kravprioritet> fagsakTidslinje = LocalDateTimeline.EMPTY_TIMELINE;
+        LocalDateTimeline<Kravprioritet> fagsakTidslinje = LocalDateTimeline.empty();
         final Optional<Behandling> behandlingOpt;
         if (brukAvsluttetBehandling) {
             behandlingOpt = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId());

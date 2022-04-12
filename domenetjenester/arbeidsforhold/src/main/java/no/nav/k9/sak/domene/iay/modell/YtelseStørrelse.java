@@ -5,13 +5,12 @@ import java.util.Optional;
 
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektPeriodeType;
-import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.OrgNummer;
 
-public class YtelseStørrelse extends BaseEntitet implements IndexKey {
+public class YtelseStørrelse implements IndexKey {
 
     @ChangeTracked
     private InntektPeriodeType hyppighet = InntektPeriodeType.UDEFINERT;

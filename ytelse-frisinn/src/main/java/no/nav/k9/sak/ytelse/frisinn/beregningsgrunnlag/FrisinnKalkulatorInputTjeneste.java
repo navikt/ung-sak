@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+
 import java.time.LocalDate;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -17,7 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 public class FrisinnKalkulatorInputTjeneste extends KalkulatorInputTjeneste {
 
     private boolean nyttStpToggle;

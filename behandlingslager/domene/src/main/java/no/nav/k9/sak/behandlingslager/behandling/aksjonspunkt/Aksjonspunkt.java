@@ -66,6 +66,9 @@ public class Aksjonspunkt extends BaseEntitet {
     @Column(name="vent_aarsak_variant")
     private String venteårsakVariant;
 
+    @Column(name="ansvarlig_saksbehandler")
+    private String ansvarligSaksbehandler;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private Long versjon;
@@ -269,6 +272,14 @@ public class Aksjonspunkt extends BaseEntitet {
         this.venteårsak = venteårsak;
     }
 
+    public String getAnsvarligSaksbehandler() {
+        return ansvarligSaksbehandler;
+    }
+
+    public void setAnsvarligSaksbehandler(String ansvarligSaksbehandler) {
+        this.ansvarligSaksbehandler = ansvarligSaksbehandler;
+    }
+
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }
@@ -355,6 +366,7 @@ public class Aksjonspunkt extends BaseEntitet {
             til.setPeriode(fra.getPeriode());
             til.setVenteårsak(fra.getVenteårsak());
             til.setVenteårsakVariant(fra.getVenteårsakVariant());
+            til.setAnsvarligSaksbehandler(fra.getAnsvarligSaksbehandler());
             til.setFristTid(fra.getFristTid());
             til.setStatus(fra.getStatus(), fra.getBegrunnelse());
         }
@@ -367,6 +379,11 @@ public class Aksjonspunkt extends BaseEntitet {
         Aksjonspunkt.Builder medVenteårsak(Venteårsak venteårsak, String variant) {
             aksjonspunkt.setVenteårsak(venteårsak);
             aksjonspunkt.setVenteårsakVariant(variant);
+            return this;
+        }
+
+        Aksjonspunkt.Builder medAnsvarligSaksbehandler(String ansvarligSaksbehandler) {
+            aksjonspunkt.setAnsvarligSaksbehandler(ansvarligSaksbehandler);
             return this;
         }
 

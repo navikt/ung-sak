@@ -19,12 +19,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.vedtak.midlertidig.PublisereHistoriskeVedtakHendelserTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.domene.vedtak.observer.PubliserVedtakHendelseTask;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,21 +33,21 @@ public class PublisereHistoriskeVedtakHendelserTaskTest {
 
     private BehandlingVedtakRepository vedtakRepository;
 
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
 
     private BehandlingLåsRepository behandlingLåsRepository;
 
-    ProsessTaskData prosessTaskData = new ProsessTaskData(PublisereHistoriskeVedtakHendelserTask.TASKTYPE);
+    ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(PublisereHistoriskeVedtakHendelserTask.class);
 
     PublisereHistoriskeVedtakHendelserTask task;
 
     @BeforeEach
     public void setup() {
         vedtakRepository = mock(BehandlingVedtakRepository.class);
-        prosessTaskRepository = mock(ProsessTaskRepository.class);
+        taskTjeneste = mock(ProsessTaskTjeneste.class);
         behandlingLåsRepository = mock(BehandlingLåsRepository.class);
 
-        task = new PublisereHistoriskeVedtakHendelserTask(vedtakRepository, behandlingLåsRepository, prosessTaskRepository);
+        task = new PublisereHistoriskeVedtakHendelserTask(vedtakRepository, behandlingLåsRepository, taskTjeneste);
     }
 
     @Test
@@ -59,7 +59,7 @@ public class PublisereHistoriskeVedtakHendelserTaskTest {
         task.doTask(prosessTaskData);
 
         ArgumentCaptor<ProsessTaskData> prosessTaskDataCaptor = ArgumentCaptor.forClass(ProsessTaskData.class);
-        verify(prosessTaskRepository, times(2)).lagre(prosessTaskDataCaptor.capture());
+        verify(taskTjeneste, times(2)).lagre(prosessTaskDataCaptor.capture());
         var nyeProsesstasker = prosessTaskDataCaptor.getAllValues();
 
         assertThat(nyeProsesstasker.stream().map(ProsessTaskData::getTaskType))
@@ -75,6 +75,6 @@ public class PublisereHistoriskeVedtakHendelserTaskTest {
 
         task.doTask(prosessTaskData);
 
-        verify(prosessTaskRepository, never()).lagre(any(ProsessTaskData.class));
+        verify(taskTjeneste, never()).lagre(any(ProsessTaskData.class));
     }
 }

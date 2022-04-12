@@ -2,22 +2,21 @@ package no.nav.k9.sak.domene.registerinnhenting.task;
 
 import java.util.Optional;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.domene.registerinnhenting.RegisterdataInnhenter;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 
 @ApplicationScoped
 @ProsessTask(InnhentIAYIAbakusTask.TASKTYPE)
@@ -32,7 +31,7 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InnhentIAYIAbakusTask.class);
     private BehandlingRepository behandlingRepository;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
     private RegisterdataInnhenter registerdataInnhenter;
 
     InnhentIAYIAbakusTask() {
@@ -41,7 +40,7 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
 
     @Inject
     public InnhentIAYIAbakusTask(BehandlingRepository behandlingRepository,
-                                 ProsessTaskRepository prosessTaskRepository,
+                                 ProsessTaskTjeneste prosessTaskRepository,
                                  RegisterdataInnhenter registerdataInnhenter) {
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
