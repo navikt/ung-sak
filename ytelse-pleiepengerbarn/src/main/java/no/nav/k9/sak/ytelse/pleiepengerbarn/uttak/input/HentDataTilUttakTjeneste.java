@@ -35,7 +35,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeDødsfallTjeneste;
@@ -59,7 +58,6 @@ public class HentDataTilUttakTjeneste {
     private EtablertTilsynRepository etablertTilsynRepository;
     private EtablertTilsynTjeneste etablertTilsynTjeneste;
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
-    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
     private HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste;
 
@@ -79,7 +77,6 @@ public class HentDataTilUttakTjeneste {
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                     @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                    SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                     HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste,
                                     HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -97,7 +94,6 @@ public class HentDataTilUttakTjeneste {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.opptjeningRepository = opptjeningRepository;
-        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
         this.hentPerioderTilVurderingTjeneste = hentPerioderTilVurderingTjeneste;
     }
@@ -153,7 +149,7 @@ public class HentDataTilUttakTjeneste {
         var perioderFraSøknad = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(referanse);
 
 
-        var input = new InputParametere()
+        return new InputParametere()
             .medBehandling(behandling)
             .medVilkårene(vilkårene)
             .medDefinerendeVilkår(perioderTilVurderingTjeneste.definerendeVilkår())
@@ -172,8 +168,6 @@ public class HentDataTilUttakTjeneste {
             .medRettPleiepengerVedDødGrunnlag(rettVedDød.orElse(null))
             .medAutomatiskUtvidelseVedDødsfall(utvidetPeriodeSomFølgeAvDødsfall.orElse(null))
             .medUnntakEtablertTilsynForPleietrengende(unntakEtablertTilsynForPleietrengende.orElse(null));
-
-        return input;
     }
 
     private List<EtablertTilsynPeriode> fjernInnleggelsesperioderFra(List<EtablertTilsynPeriode> perioder, Optional<PleiebehovResultat> pleiebehov) {
