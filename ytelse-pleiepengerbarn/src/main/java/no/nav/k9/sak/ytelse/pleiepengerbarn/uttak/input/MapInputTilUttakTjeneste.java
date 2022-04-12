@@ -57,18 +57,14 @@ public class MapInputTilUttakTjeneste {
     private HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private String unntak;
     private Boolean utenlandsperioderMappingEnablet;
-    private Boolean utvidVedDødsfall;
-
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
                                     @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
-                                    @KonfigVerdi(value = "UTENLANDSPERIODER_MAPPING_ENABLET", defaultVerdi = "false") Boolean utenlandsperioderMappingEnablet,
-                                    @KonfigVerdi(value = "PSB_UTVIDE_VED_DODSFALL", defaultVerdi = "false") Boolean utvidVedDødsfall) {
+                                    @KonfigVerdi(value = "UTENLANDSPERIODER_MAPPING_ENABLET", defaultVerdi = "false") Boolean utenlandsperioderMappingEnablet) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
         this.utenlandsperioderMappingEnablet = utenlandsperioderMappingEnablet;
-        this.utvidVedDødsfall = utvidVedDødsfall;
     }
 
 
@@ -121,9 +117,7 @@ public class MapInputTilUttakTjeneste {
             .medBruker(behandling.getAktørId())
             .medSakerSomMåSpesialHåndteres(MapUnntakFraAktivitetGenerering.mapUnntak(unntak));
 
-        if (utvidVedDødsfall) {
-            input.getUtvidetPeriodeSomFølgeAvDødsfall().ifPresent(arbeidstidInput::medAutomatiskUtvidelseVedDødsfall);
-        }
+        input.getUtvidetPeriodeSomFølgeAvDødsfall().ifPresent(arbeidstidInput::medAutomatiskUtvidelseVedDødsfall);
 
         final List<Arbeid> arbeid = new MapArbeid().map(arbeidstidInput);
 
