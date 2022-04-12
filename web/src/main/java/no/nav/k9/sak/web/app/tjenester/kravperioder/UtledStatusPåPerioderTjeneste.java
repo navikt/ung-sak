@@ -47,6 +47,8 @@ public class UtledStatusPåPerioderTjeneste {
 
         var relevanteDokumenterMedPeriode = utledKravdokumenterTilkommetIBehandlingen(kravdokumenter, kravdokumenterMedPeriode);
         var andreRelevanteDokumenterForPeriodenTilVurdering = utledKravdokumenterRelevantForPeriodeTilVurdering(kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering);
+        var perioderTilVurderingKombinert = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()), StandardCombinators::alwaysTrueForMatch)
+            .compress();
 
         var tidslinje = new LocalDateTimeline<ÅrsakerTilVurdering>(List.of());
         var relevanteTidslinjer = relevanteDokumenterMedPeriode.stream()
@@ -72,9 +74,9 @@ public class UtledStatusPåPerioderTjeneste {
 
         for (PeriodeMedÅrsak entry : revurderingPerioderFraAndreParter) {
             var endringFraAndreParter = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(entry.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.mapFra(entry.getÅrsak()))))));
-            tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN)
-                .compress();
+            tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
         }
+        tidslinje = tidslinje.intersection(perioderTilVurderingKombinert);
 
         var perioder = tidslinje.compress()
             .toSegments()
@@ -82,16 +84,17 @@ public class UtledStatusPåPerioderTjeneste {
             .map(it -> new PeriodeMedÅrsaker(new Periode(it.getFom(), it.getTom()), transformerÅrsaker(it)))
             .collect(Collectors.toList());
 
-        var perioderTilVurderingKombinert = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()), StandardCombinators::alwaysTrueForMatch)
-            .compress()
-            .toSegments()
-            .stream()
-            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new));
-
         var årsakMedPerioder = utledÅrsakMedPerioder(perioder);
 
-        return new StatusForPerioderPåBehandling(perioderTilVurderingKombinert.stream().map(DatoIntervallEntitet::tilPeriode).collect(Collectors.toSet()), perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode));
+        var perioderTilVurderingSet = perioderTilVurderingKombinert.toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new))
+            .stream()
+            .map(DatoIntervallEntitet::tilPeriode)
+            .collect(Collectors.toSet());
+
+        return new StatusForPerioderPåBehandling(perioderTilVurderingSet, perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode));
     }
 
     private List<ÅrsakMedPerioder> utledÅrsakMedPerioder(List<PeriodeMedÅrsaker> perioder) {
