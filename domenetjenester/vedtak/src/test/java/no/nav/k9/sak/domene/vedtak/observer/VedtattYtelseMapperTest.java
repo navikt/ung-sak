@@ -97,7 +97,6 @@ class VedtattYtelseMapperTest {
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getErOrganisasjon()).isTrue();
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getIdent()).isEqualTo(arbeidsgiver1.getIdentifikator());
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsforholdId()).isEqualTo(eksternReferanse1);
-        assertThat(anvisninger.get(0).getAndeler().get(0).getInntektskategori()).isEqualTo(no.nav.abakus.iaygrunnlag.kodeverk.Inntektskategori.ARBEIDSTAKER);
         assertThat(anvisninger.get(0).getAndeler().get(0).getInntektklasse()).isEqualTo(Inntektklasse.ARBEIDSTAKER);
         assertThat(anvisninger.get(0).getAndeler().get(0).getUtbetalingsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
         assertThat(anvisninger.get(0).getAndeler().get(0).getDagsats().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(dagsats1));
