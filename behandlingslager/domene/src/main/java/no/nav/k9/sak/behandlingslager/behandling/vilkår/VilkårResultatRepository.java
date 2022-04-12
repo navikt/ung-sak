@@ -1,5 +1,15 @@
 package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NavigableSet;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -14,11 +24,6 @@ import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Periode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.sql.Date;
-import java.util.*;
 
 @Dependent
 public class VilkårResultatRepository {
@@ -128,7 +133,9 @@ public class VilkårResultatRepository {
         hentVilkårsResultat(behandlingId).ifPresent(v -> deaktiverVilkårsResultat(v));
     }
 
-    /** Optimalisert spørring for å hente vilkårsresultater uten regelsporing. */
+    /**
+     * Optimalisert spørring for å hente vilkårsresultater uten regelsporing.
+     */
     public List<VilkårPeriodeResultatDto> hentVilkårResultater(Long behandlingId) {
         String sql = "select vv.vilkar_type, vp.fom, vp.tom, nullif('-', vp.utfall) as utfall, nullif('-', vp.overstyrt_utfall) as overstyrt_utfall, vp.avslag_kode" +
             " from rs_vilkars_resultat rv " +

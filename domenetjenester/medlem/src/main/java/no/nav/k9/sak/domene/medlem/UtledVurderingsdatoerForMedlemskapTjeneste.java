@@ -1,5 +1,20 @@
 package no.nav.k9.sak.domene.medlem;
 
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -27,12 +42,6 @@ import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 @Dependent
 public class UtledVurderingsdatoerForMedlemskapTjeneste {
