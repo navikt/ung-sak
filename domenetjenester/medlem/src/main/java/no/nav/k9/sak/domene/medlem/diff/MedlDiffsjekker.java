@@ -1,6 +1,5 @@
 package no.nav.k9.sak.domene.medlem.diff;
 
-import no.nav.historikk.Saksnummer;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
 import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
@@ -14,6 +13,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
 public class MedlDiffsjekker {
