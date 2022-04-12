@@ -11,7 +11,6 @@ import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -46,7 +45,6 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     private ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder;
     private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
     private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
-    private Boolean utvidVedDødsfall;
 
     protected FaktaOmUttakSteg() {
         // for proxy
@@ -60,8 +58,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
                             PersonopplysningTjeneste personopplysningTjeneste,
                             ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder,
                             HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste,
-                            PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
-                            @KonfigVerdi(value = "PSB_UTVIDE_VED_DODSFALL", defaultVerdi = "false") Boolean utvidVedDødsfall) {
+                            PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder) {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
@@ -70,7 +67,6 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         this.arbeidBrukerBurdeSøktOmUtleder = arbeidBrukerBurdeSøktOmUtleder;
         this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
         this.perioderMedSykdomInnvilgetUtleder = perioderMedSykdomInnvilgetUtleder;
-        this.utvidVedDødsfall = utvidVedDødsfall;
     }
 
     @SuppressWarnings("unused")
@@ -99,9 +95,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         }
 
         if (aksjonspunkter.isEmpty()) {
-            if (utvidVedDødsfall) {
-                håndterePleietrengendeDødsfallTjeneste.utvidPerioderVedDødsfall(referanse);
-            }
+            håndterePleietrengendeDødsfallTjeneste.utvidPerioderVedDødsfall(referanse);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
         return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
