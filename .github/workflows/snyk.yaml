@@ -1,0 +1,40 @@
+name: Snyk
+on:
+  schedule:
+    - cron:  '0 0 * * 1'
+  workflow_dispatch:
+jobs:
+  snyk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+          cache: maven
+      - uses: snyk/actions/setup@master
+
+      - name: Create snyk-settings.xml
+        uses: whelk-io/maven-settings-xml-action@v20
+        with:
+          repositories: '[{ "id": "github", "name": "github", "url": "https://maven.pkg.github.com/${{ github.repository }}", "releases": { "enabled": "true" }, "snapshots": { "enabled": "false" } }]'
+          servers: '[{ "id": "github", "username": "${{ github.actor }}", "password": "${{ secrets.READER_TOKEN }}" }]'
+          output_file: snyk-settings.xml
+
+      - name: Set TAG for mvn revision
+        run: echo "TAG=snyk-$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+
+      - name: Run mvn clean install
+        run: mvn clean install -B -s snyk-settings.xml -DskipTests -Drevision=$TAG
+
+      - name: Run Snyk monitor
+        run: >
+          snyk monitor
+          --org=k9saksbehandling
+          --all-projects
+          --configuration-attributes=usage:java-runtime
+          --remote-repo-url=https://github.com/${{ github.repository }}.git
+          -- -s snyk-settings.xml -Drevision=$TAG
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
