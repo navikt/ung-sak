@@ -28,15 +28,6 @@ public class MapFraÅrskvantumResultatTest {
     public void map_fra_årskvantum_resultat() throws Exception {
 
         var år = new ÅrskvantumForbrukteDager(
-            BigDecimal.TEN,
-            BigDecimal.TEN,
-            BigDecimal.TEN,
-            BigDecimal.TEN,
-            BigDecimal.TEN,
-            Duration.ZERO,
-            BigDecimal.TEN,
-            Duration.ZERO,
-            Duration.ZERO,
             lagUttaksplan(),
             new LinkedList<>(),
             new LinkedList<>()
