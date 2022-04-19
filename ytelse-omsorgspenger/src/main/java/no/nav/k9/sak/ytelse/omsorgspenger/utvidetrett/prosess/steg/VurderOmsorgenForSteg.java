@@ -13,6 +13,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -70,7 +71,9 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        if (automatiserVedtak) {
+        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        FagsakYtelseType fagsakYtelseType = behandling.getFagsakYtelseType();
+        if (automatiserVedtak && fagsakYtelseType == OMSORGSPENGER_AO) {
             return utførStegAutomatisk(kontekst);
         }
         return utførStegManuelt(kontekst);
