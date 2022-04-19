@@ -21,4 +21,9 @@ public class PleietrengendeRelasjonsFilter implements YtelsesspesifikkRelasjonsF
     public boolean hentHistorikkForRelatertePersoner() {
         return false;
     }
+
+    @Override
+    public boolean hentDeltBosted() {
+        return false;
+    }
 }

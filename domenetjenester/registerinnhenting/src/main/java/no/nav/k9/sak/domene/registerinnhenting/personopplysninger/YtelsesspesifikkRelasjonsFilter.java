@@ -8,4 +8,6 @@ public interface YtelsesspesifikkRelasjonsFilter {
     boolean relasjonsFiltreringBarn(Behandling behandling, Personinfo barn, Periode opplysningsperioden);
 
     boolean hentHistorikkForRelatertePersoner();
+
+    boolean hentDeltBosted();
 }

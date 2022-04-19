@@ -15,4 +15,9 @@ public class IngenRelasjonFilter implements YtelsesspesifikkRelasjonsFilter {
     public boolean hentHistorikkForRelatertePersoner() {
         return false;
     }
+
+    @Override
+    public boolean hentDeltBosted() {
+        return false;
+    }
 }

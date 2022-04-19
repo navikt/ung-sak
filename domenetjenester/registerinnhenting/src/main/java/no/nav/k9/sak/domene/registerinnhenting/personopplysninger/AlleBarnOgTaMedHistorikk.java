@@ -15,4 +15,9 @@ public class AlleBarnOgTaMedHistorikk implements YtelsesspesifikkRelasjonsFilter
     public boolean hentHistorikkForRelatertePersoner() {
         return true;
     }
+
+    @Override
+    public boolean hentDeltBosted() {
+        return true;
+    }
 }

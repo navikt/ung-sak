@@ -15,4 +15,9 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
     public boolean hentHistorikkForRelatertePersoner() {
         return true;
     }
+
+    @Override
+    public boolean hentDeltBosted() {
+        return true;
+    }
 }
