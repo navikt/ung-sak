@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -41,6 +42,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
     private PersoninfoAdapter personinfoAdapter;
 
     private UtvidetRettSøknadPerioder søktePerioder;
+    private boolean nyUtledningAvVilkårsperiode;
 
     AleneomsorgVilkårsPerioderTilVurderingTjeneste() {
         // for proxy
@@ -50,12 +52,14 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
     public AleneomsorgVilkårsPerioderTilVurderingTjeneste(BehandlingRepository behandlingRepository,
                                                           VilkårResultatRepository vilkårResultatRepository,
                                                           PersoninfoAdapter personinfoAdapter,
-                                                          SøknadRepository søknadRepository) {
+                                                          SøknadRepository søknadRepository,
+                                                          @KonfigVerdi(value = "OMP_DELT_BOSTED_RAMMEVEDTAK", defaultVerdi = "true") boolean nyUtledningAvVilkårsperiode) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personinfoAdapter = personinfoAdapter;
         this.søknadRepository = søknadRepository;
         this.søktePerioder = new UtvidetRettSøknadPerioder(søknadRepository);
+        this.nyUtledningAvVilkårsperiode = nyUtledningAvVilkårsperiode;
     }
 
     @Override
@@ -80,8 +84,14 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
             var vilkårTidslinje = optVilkårene.get().getVilkårTimeline(vilkårType);
             return DatoIntervallEntitet.fraTimeline(vilkårTidslinje);
         } else {
-            // default til 'fullstedige' perioder hvis vilkår ikke angitt.
-            return utledFullstendigePerioder(behandlingId);
+            if (nyUtledningAvVilkårsperiode) {
+                var søknadsperioder = søktePerioder.utledPeriode(behandlingId);
+                var søknadsperioderEtterBarnetsFødsel = justerTilDefaultAlder(behandlingId, søknadsperioder);
+                return justerForMottattTidspunkt(behandlingId, søknadsperioderEtterBarnetsFødsel);
+            } else {
+                // default til 'fullstedige' perioder hvis vilkår ikke angitt.
+                return utledFullstendigePerioder(behandlingId);
+            }
         }
     }
 
@@ -92,7 +102,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
             VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR));
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledUtvidetRettAleneomsorg(Long behandlingId){
+    private NavigableSet<DatoIntervallEntitet> utledUtvidetRettAleneomsorg(Long behandlingId) {
         NavigableSet<DatoIntervallEntitet> søknadsperioder = utled(behandlingId, VilkårType.UTVIDETRETT);
         return justerForMottattTidspunkt(behandlingId, justerTilDefaultAlder(behandlingId, søknadsperioder));
     }
