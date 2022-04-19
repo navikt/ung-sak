@@ -107,7 +107,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     }
 
     private boolean erÅpentBeregningAksjonspunkt(Aksjonspunkt a) {
-        return a.getStatus().erÅpentAksjonspunkt() && Arrays.stream(BeregningAvklaringsbehovDefinisjon.values()).anyMatch(ab -> ab.getKode().equals(a.getAksjonspunktDefinisjon().getKode()));
+        return a.getStatus().erÅpentAksjonspunkt() && Arrays.stream(BeregningAvklaringsbehovDefinisjon.values()).anyMatch(ab -> a.getAksjonspunktDefinisjon().getKode().equals(ab.getKode()));
     }
 
     private void avslåBeregningVedBehov(BehandlingskontrollKontekst kontekst, Behandling behandling, BehandlingReferanse referanse) {
