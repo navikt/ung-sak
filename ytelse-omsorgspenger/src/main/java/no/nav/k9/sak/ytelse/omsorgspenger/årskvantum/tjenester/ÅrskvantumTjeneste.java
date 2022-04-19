@@ -373,9 +373,7 @@ public class ÅrskvantumTjeneste {
         vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, Utfall.INNVILGET);
 
         if (wrappedOppgittFraværPeriode.getUtfallNyoppstartetVilkår() != null) {
-            //FIXME sett inn nytt vilkår her, når klart i k9-aarskvantum
-            //                   ↓
-            vilkårMap.put(Vilkår.FRAVÆR_FRA_ARBEID, wrappedOppgittFraværPeriode.getUtfallNyoppstartetVilkår());
+            vilkårMap.put(Vilkår.NYOPPSTARTET_HOS_ARBEIDSGIVER, wrappedOppgittFraværPeriode.getUtfallNyoppstartetVilkår());
         }
         return new VurderteVilkår(vilkårMap);
     }
