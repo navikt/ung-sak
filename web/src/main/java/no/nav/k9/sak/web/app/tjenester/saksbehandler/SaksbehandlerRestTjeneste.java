@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -20,10 +22,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
 import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -86,7 +86,7 @@ public class SaksbehandlerRestTjeneste {
         @NotNull
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            BehandlingUuidDto behandlingUuid) {
+        BehandlingUuidDto behandlingUuid) {
 
         Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         List<Historikkinnslag> historikkinnslag = historikkRepository.hentHistorikkForSaksnummer(behandling.getFagsak().getSaksnummer());
@@ -107,12 +107,18 @@ public class SaksbehandlerRestTjeneste {
             if (ident != null) {
                 if (!identTilNavn.containsKey(ident)) {
                     String saksbehandlerCachet = cache.get(ident);
+                    if (saksbehandlerCachet == null) {
+                        try {
+                            LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
+                            String brukernavn = ldapBruker.getDisplayName();
+                            cache.put(ident, brukernavn);
+                            saksbehandlerCachet = brukernavn;
+                        } catch (VLException e) {
+                            // Feil mot LDAP
+                        }
+                    }
                     if (saksbehandlerCachet != null) {
                         identTilNavn.put(ident, saksbehandlerCachet);
-                    } else {
-                        LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
-                        String brukernavn = ldapBruker.getDisplayName();
-                        cache.put(ident, brukernavn);
                     }
                 }
             }
