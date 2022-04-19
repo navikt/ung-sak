@@ -78,7 +78,6 @@ public enum BeregningAvklaringsbehovDefinisjon implements Kodeverdi {
         BeregningAvklaringsbehovKodeDefinition.VURDER_REFUSJON_BERGRUNN,
         "Vurder endring i refusjon refusjon"),
 
-    UNDEFINED,
     ;
 
     static final String KODEVERK = "BEREGNING_AVKLARINGSBEHOV_DEF";
