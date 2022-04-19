@@ -19,6 +19,7 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -120,7 +121,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         var avslåttePerioder = vilkåret.getPerioder()
             .stream()
             .filter(it -> vurdertePerioder.contains(it.getPeriode()))
-            .filter(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()) || ingenBeregningsAktiviteter(opptjeningForBeregningTjeneste, it, grunnlag, referanse))
+            .filter(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()) || (ikkeInnvilgetEtter847(it) && ingenBeregningsAktiviteter(opptjeningForBeregningTjeneste, it, grunnlag, referanse)))
             .collect(Collectors.toList());
 
         var noeAvslått = !vilkåret.getPerioder().isEmpty() && !avslåttePerioder.isEmpty();
@@ -128,6 +129,10 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         if (noeAvslått) {
             avslåBerregningsperioderDerHvorOpptjeningErAvslått(referanse, vilkårene, avslåttePerioder);
         }
+    }
+
+    private boolean ikkeInnvilgetEtter847(VilkårPeriode it) {
+        return !(Utfall.OPPFYLT == it.getGjeldendeUtfall() && Set.of(VilkårUtfallMerknad.VM_7847_A, VilkårUtfallMerknad.VM_7847_B).contains(it.getMerknad()));
     }
 
     private boolean ingenBeregningsAktiviteter(OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste, VilkårPeriode it, InntektArbeidYtelseGrunnlag grunnlag, BehandlingReferanse referanse) {
