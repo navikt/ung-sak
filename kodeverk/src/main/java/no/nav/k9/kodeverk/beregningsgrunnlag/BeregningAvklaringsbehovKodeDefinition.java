@@ -12,6 +12,7 @@ class BeregningAvklaringsbehovKodeDefinition {
     static final String AUTO_VENT_FRISINN_KODE = "8000";
     static final String AUTO_VENT_FRISINN_ATFL_SAMME_ORG_KODE = "8005";
 
+    static final String OVERSTYRING_AV_BEREGNINGSAKTIVITETER_KODE = "6014";
     static final String OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE = "6015";
 
     static final String FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS_KODE = "5038";

@@ -24,6 +24,9 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum BeregningAvklaringsbehovDefinisjon implements Kodeverdi {
 
+    OVERSTYRING_AV_BEREGNINGSAKTIVITETER(
+        BeregningAvklaringsbehovKodeDefinition.OVERSTYRING_AV_BEREGNINGSAKTIVITETER_KODE,
+        "Overstyring av beregningsaktiviteter"),
     OVERSTYRING_AV_BEREGNINGSGRUNNLAG(
             BeregningAvklaringsbehovKodeDefinition.OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE,
             "Overstyring av beregningsgrunnlag"),
