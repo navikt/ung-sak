@@ -1,12 +1,16 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 
+import java.util.Map;
 import java.util.Objects;
+
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class SamtidigKravStatus {
 
     private final KravStatus søknad;
     private final KravStatus imMedRefusjonskrav;
     private final KravStatus imUtenRefusjonskrav;
+    private final Map<InternArbeidsforholdRef, KravStatus> imMedRefusjonskravPrArbeidsforhold;
 
     public enum KravStatus {
         FINNES,
@@ -14,68 +18,35 @@ public class SamtidigKravStatus {
         TREKT;
     }
 
-    public SamtidigKravStatus(KravStatus søknad, KravStatus imMedRefusjonskrav, KravStatus imUtenRefusjonskrav) {
+    public SamtidigKravStatus(KravStatus søknad, KravStatus imMedRefusjonskrav, KravStatus imUtenRefusjonskrav, Map<InternArbeidsforholdRef, KravStatus> imMedRefusjonskravPrArbeidsforhold) {
         this.søknad = søknad;
         this.imMedRefusjonskrav = imMedRefusjonskrav;
         this.imUtenRefusjonskrav = imUtenRefusjonskrav;
-    }
-
-    public static SamtidigKravStatus søknadFinnes() {
-        return new SamtidigKravStatus(KravStatus.FINNES, KravStatus.FINNES_IKKE, KravStatus.FINNES_IKKE);
-    }
-
-    public static SamtidigKravStatus søknadTrekt() {
-        return new SamtidigKravStatus(KravStatus.TREKT, KravStatus.FINNES_IKKE, KravStatus.FINNES_IKKE);
-    }
-
-    public static SamtidigKravStatus refusjonskravOgSøknadFinnes() {
-        return new SamtidigKravStatus(KravStatus.FINNES, KravStatus.FINNES, KravStatus.FINNES_IKKE);
-    }
-
-    public static SamtidigKravStatus refusjonskravFinnes() {
-        return new SamtidigKravStatus(KravStatus.FINNES_IKKE, KravStatus.FINNES, KravStatus.FINNES_IKKE);
-    }
-
-    public static SamtidigKravStatus refusjonskravTrekt() {
-        return new SamtidigKravStatus(KravStatus.FINNES_IKKE, KravStatus.TREKT, KravStatus.FINNES_IKKE);
-    }
-
-    public static SamtidigKravStatus inntektsmeldingUtenRefusjonskravFinnes() {
-        return new SamtidigKravStatus(KravStatus.FINNES_IKKE, KravStatus.FINNES_IKKE, KravStatus.FINNES);
-    }
-
-    public static SamtidigKravStatus inntektsmeldingUtenRefusjonskravTrekt() {
-        return new SamtidigKravStatus(KravStatus.FINNES_IKKE, KravStatus.FINNES_IKKE, KravStatus.TREKT);
-    }
-
-    public SamtidigKravStatus oppdaterRefusjonskravFinnes() {
-        return oppdaterRefusjonskravStatus(KravStatus.FINNES);
-    }
-
-    public SamtidigKravStatus oppdaterRefusjonskravTrekt() {
-        return oppdaterRefusjonskravStatus(KravStatus.TREKT);
-    }
-
-    public SamtidigKravStatus oppdaterRefusjonskravStatus(KravStatus refusjonskrav) {
-        return new SamtidigKravStatus(søknad, refusjonskrav, imUtenRefusjonskrav);
-    }
-
-    public SamtidigKravStatus oppdaterSøknadStatus(KravStatus søknad) {
-        return new SamtidigKravStatus(søknad, imMedRefusjonskrav, imUtenRefusjonskrav);
-    }
-
-    public SamtidigKravStatus oppdaterInntektsmeldingUtenRefusjonskravStatus(KravStatus støttendeInntektsmelding) {
-        return new SamtidigKravStatus(søknad, imMedRefusjonskrav, støttendeInntektsmelding);
+        this.imMedRefusjonskravPrArbeidsforhold = imMedRefusjonskravPrArbeidsforhold;
     }
 
     public KravStatus søknad() {
         return søknad;
     }
 
+    /**
+     * aggregert status på tvers av arbeidsforhold
+     */
     public KravStatus inntektsmeldingMedRefusjonskrav() {
         return imMedRefusjonskrav;
     }
 
+    public KravStatus inntektsmeldingMedRefusjonskrav(InternArbeidsforholdRef arbeidsforholdRef) {
+        KravStatus kravStatus = imMedRefusjonskravPrArbeidsforhold.get(InternArbeidsforholdRef.nullRef());
+        if (kravStatus == null) {
+            kravStatus = imMedRefusjonskravPrArbeidsforhold.get(arbeidsforholdRef);
+        }
+        return kravStatus != null ? kravStatus : KravStatus.FINNES_IKKE;
+    }
+
+    /**
+     * aggregert status på tvers av arbeidsforhold
+     */
     public KravStatus inntektsmeldingUtenRefusjonskrav() {
         return imUtenRefusjonskrav;
     }
@@ -87,12 +58,13 @@ public class SamtidigKravStatus {
         SamtidigKravStatus that = (SamtidigKravStatus) o;
         return søknad == that.søknad
             && imMedRefusjonskrav == that.imMedRefusjonskrav
-            && imUtenRefusjonskrav == that.imUtenRefusjonskrav;
+            && imUtenRefusjonskrav == that.imUtenRefusjonskrav
+            && Objects.equals(imMedRefusjonskravPrArbeidsforhold, that.imMedRefusjonskravPrArbeidsforhold);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(søknad, imMedRefusjonskrav, imUtenRefusjonskrav);
+        return Objects.hash(søknad, imMedRefusjonskrav, imUtenRefusjonskrav, imMedRefusjonskravPrArbeidsforhold);
     }
 
     @Override
@@ -101,6 +73,7 @@ public class SamtidigKravStatus {
             "søknad=" + søknad +
             ", imMedRefusjonskrav=" + imMedRefusjonskrav +
             ", imUtenRefusjonskrav=" + imUtenRefusjonskrav +
+            ", refusjonskravPrArbeidsforhol=" + imMedRefusjonskravPrArbeidsforhold +
             '}';
     }
 }

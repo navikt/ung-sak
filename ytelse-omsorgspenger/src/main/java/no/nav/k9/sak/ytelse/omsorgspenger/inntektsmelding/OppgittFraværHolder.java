@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.SøknadÅrsak;
@@ -62,8 +63,8 @@ public class OppgittFraværHolder {
         return new SamtidigKravStatus(
             finnStatusSøknad(søknad),
             finnStatusIm(refusjonskrav),
-            finnStatusIm(imUtenRefusjonskrav)
-        );
+            finnStatusIm(imUtenRefusjonskrav),
+            finnStatusImPerArbeidsforhold(refusjonskrav));
     }
 
     public SøknadÅrsak søknadÅrsak() {
@@ -105,6 +106,11 @@ public class OppgittFraværHolder {
         return refusjonskrav.values().stream().allMatch(OppgittFraværVerdi::erTrektPeriode)
             ? SamtidigKravStatus.KravStatus.TREKT
             : SamtidigKravStatus.KravStatus.FINNES;
+    }
+
+    private Map<InternArbeidsforholdRef, SamtidigKravStatus.KravStatus> finnStatusImPerArbeidsforhold(Map<InternArbeidsforholdRef, OppgittFraværVerdi> refusjonskrav) {
+        return refusjonskrav.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().erTrektPeriode() ? SamtidigKravStatus.KravStatus.TREKT : SamtidigKravStatus.KravStatus.FINNES));
     }
 
     private OppgittFraværHolder leggTilSøknad(OppgittFraværVerdi søknad) {

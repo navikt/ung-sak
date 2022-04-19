@@ -7,8 +7,10 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -94,11 +96,11 @@ class KravDokumentFraværTest {
 
         var resultat = new KravDokumentFravær().trekkUtFravær(input);
         assertThat(resultat).containsOnlyKeys(aktivitetArbeidsgiver1, aktivitetArbeidsgiver2);
-        assertThat(resultat.get(aktivitetArbeidsgiver1).stream().map(segment -> segment.getValue().samtidigKravStatus()).toList()).containsOnly(SamtidigKravStatus.refusjonskravFinnes());
+        assertThat(resultat.get(aktivitetArbeidsgiver1).stream().map(segment -> segment.getValue().samtidigKravStatus()).toList()).containsOnly(kravStatusForRefusjonskravFinnes(InternArbeidsforholdRef.nullRef()));
         assertThat(resultat.get(aktivitetArbeidsgiver1).stream().map(LocalDateSegment::getLocalDateInterval).toList()).containsOnly(
             new LocalDateInterval(LocalDate.now().minusDays(30), LocalDate.now().minusDays(25)),
             new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(5)));
-        assertThat(resultat.get(aktivitetArbeidsgiver2).stream().map(segment -> segment.getValue().samtidigKravStatus()).toList()).containsOnly(SamtidigKravStatus.refusjonskravFinnes());
+        assertThat(resultat.get(aktivitetArbeidsgiver2).stream().map(segment -> segment.getValue().samtidigKravStatus()).toList()).containsOnly(kravStatusForRefusjonskravFinnes(InternArbeidsforholdRef.nullRef()));
         assertThat(resultat.get(aktivitetArbeidsgiver2).stream().map(LocalDateSegment::getLocalDateInterval).toList()).containsOnly(
             new LocalDateInterval(LocalDate.now().minusDays(26), LocalDate.now().minusDays(25)));
     }
@@ -395,7 +397,7 @@ class KravDokumentFraværTest {
         assertThat(segment1.getFom()).isEqualTo(idag.minusDays(10));
         assertThat(segment1.getTom()).isEqualTo(idag.minusDays(9));
         assertThat(segment1.getValue().søknadGjelder()).isTrue();
-        assertThat(segment1.getValue().samtidigKravStatus()).isEqualTo(SamtidigKravStatus.søknadFinnes());
+        assertThat(segment1.getValue().samtidigKravStatus()).isEqualTo(kravStatusForSøknadFinnes());
         assertThat(segment1.getValue().getSøknad().fraværPerDag()).isEqualTo(fraværSøknad);
         assertThat(segment1.getValue().fraværÅrsak()).isEqualTo(FraværÅrsak.SMITTEVERNHENSYN);
         assertThat(segment1.getValue().søknadÅrsak()).isEqualTo(SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER);
@@ -404,7 +406,7 @@ class KravDokumentFraværTest {
         assertThat(segment2.getTom()).isEqualTo(idag.minusDays(2));
         assertThat(segment2.getValue().søknadGjelder()).isFalse();
         assertThat(segment2.getValue().refusjonskravGjelder()).isTrue();
-        assertThat(segment2.getValue().samtidigKravStatus()).isEqualTo(SamtidigKravStatus.refusjonskravOgSøknadFinnes());
+        assertThat(segment2.getValue().samtidigKravStatus()).isEqualTo(kravStatusForRefusjonskravOgSøknadFinnes(arbeidsforholdId));
         assertThat(segment2.getValue().getRefusjonskrav().get(arbeidsforholdId).fraværPerDag()).isEqualTo(fraværIm);
         assertThat(segment2.getValue().fraværÅrsak()).isEqualTo(FraværÅrsak.SMITTEVERNHENSYN);
         assertThat(segment2.getValue().søknadÅrsak()).isEqualTo(SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER);
@@ -413,7 +415,7 @@ class KravDokumentFraværTest {
         assertThat(segment3.getTom()).isEqualTo(idag);
         assertThat(segment3.getValue().søknadGjelder()).isFalse();
         assertThat(segment3.getValue().refusjonskravGjelder()).isTrue();
-        assertThat(segment3.getValue().samtidigKravStatus()).isEqualTo(SamtidigKravStatus.refusjonskravFinnes());
+        assertThat(segment3.getValue().samtidigKravStatus()).isEqualTo(kravStatusForRefusjonskravFinnes(arbeidsforholdId));
         assertThat(segment2.getValue().getRefusjonskrav().get(arbeidsforholdId).fraværPerDag()).isEqualTo(fraværIm);
         assertThat(segment3.getValue().fraværÅrsak()).isEqualTo(FraværÅrsak.UDEFINERT);
         assertThat(segment3.getValue().søknadÅrsak()).isEqualTo(SøknadÅrsak.UDEFINERT);
@@ -470,7 +472,7 @@ class KravDokumentFraværTest {
         assertThat(segment1.getFom()).isEqualTo(LocalDate.now().minusDays(10));
         assertThat(segment1.getTom()).isEqualTo(LocalDate.now());
         assertThat(segment1.getValue().søknadGjelder()).isTrue();
-        assertThat(segment1.getValue().samtidigKravStatus()).isEqualTo(SamtidigKravStatus.refusjonskravOgSøknadFinnes().oppdaterRefusjonskravTrekt());
+        assertThat(segment1.getValue().samtidigKravStatus()).isEqualTo(kravStatusForSøknadOgRefusjonskrav(SamtidigKravStatus.KravStatus.FINNES, SamtidigKravStatus.KravStatus.TREKT, InternArbeidsforholdRef.nullRef()));
         assertThat(segment1.getValue().getSøknad().fraværPerDag()).isEqualTo(fraværSøknad);
 
     }
@@ -518,7 +520,7 @@ class KravDokumentFraværTest {
         assertThat(segment1.getTom()).isEqualTo(LocalDate.now());
         assertThat(segment1.getValue().refusjonskravGjelder()).isTrue();
         assertThat(segment1.getValue().getRefusjonskrav().get(InternArbeidsforholdRef.nullRef()).fraværPerDag()).isEqualTo(Duration.ZERO);
-        assertThat(segment1.getValue().samtidigKravStatus()).isEqualTo(SamtidigKravStatus.refusjonskravTrekt().oppdaterInntektsmeldingUtenRefusjonskravStatus(SamtidigKravStatus.KravStatus.TREKT));
+        assertThat(segment1.getValue().samtidigKravStatus()).isEqualTo(kravStatusForBeggeImTyperTrekt(InternArbeidsforholdRef.nullRef()));
     }
 
     @Test
@@ -605,7 +607,7 @@ class KravDokumentFraværTest {
         assertThat(segment1.getTom()).isEqualTo(LocalDate.now());
         assertThat(segment1.getValue().søknadGjelder()).isTrue();
         assertThat(segment1.getValue().getSøknad().fraværPerDag()).isEqualTo(fraværSøknad);
-        assertThat(segment1.getValue().samtidigKravStatus()).isEqualTo(SamtidigKravStatus.søknadFinnes().oppdaterRefusjonskravTrekt());
+        assertThat(segment1.getValue().samtidigKravStatus()).isEqualTo(kravStatusForSøknadOgRefusjonskrav(SamtidigKravStatus.KravStatus.FINNES, SamtidigKravStatus.KravStatus.TREKT, arbeidsforholdId1, arbeidsforholdId2));
     }
 
     @Test
@@ -657,7 +659,7 @@ class KravDokumentFraværTest {
         assertThat(segment1_1.getTom()).isEqualTo(LocalDate.now());
         assertThat(segment1_1.getValue().søknadGjelder()).isTrue();
         assertThat(segment1_1.getValue().getSøknad().fraværPerDag()).isEqualTo(fraværVirksomhet1);
-        assertThat(segment1_1.getValue().samtidigKravStatus()).isEqualTo(SamtidigKravStatus.søknadFinnes());
+        assertThat(segment1_1.getValue().samtidigKravStatus()).isEqualTo(kravStatusForSøknadFinnes());
 
         LocalDateTimeline<OppgittFraværHolder> resultatTidslinje2 = resultat.get(aktivitetArbeidsgiver2);
         var segmenter2 = new ArrayList<>(resultatTidslinje2.toSegments());
@@ -667,7 +669,7 @@ class KravDokumentFraværTest {
         assertThat(segment2_1.getTom()).isEqualTo(LocalDate.now());
         assertThat(segment2_1.getValue().søknadGjelder()).isTrue();
         assertThat(segment2_1.getValue().getSøknad().fraværPerDag()).isEqualTo(fraværVirksomhet2);
-        assertThat(segment2_1.getValue().samtidigKravStatus()).isEqualTo(SamtidigKravStatus.søknadFinnes());
+        assertThat(segment2_1.getValue().samtidigKravStatus()).isEqualTo(kravStatusForSøknadFinnes());
 
     }
 
@@ -757,6 +759,34 @@ class KravDokumentFraværTest {
             new AktivitetTypeArbeidsgiver(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver),
             new LocalDateTimeline<>(perioderMedInnsendingstidspunkter.entrySet().stream()
                 .map(e -> new LocalDateSegment<>(e.getKey(), OppgittFraværHolder.fraRefusjonskrav(InternArbeidsforholdRef.nullRef(), new OppgittFraværVerdi(e.getValue(), null, fraværÅrsak, søknadÅrsak, søknadsfristUtfall)))).toList()));
+    }
+
+    private static SamtidigKravStatus kravStatusForSøknadFinnes() {
+        return new SamtidigKravStatus(SamtidigKravStatus.KravStatus.FINNES, SamtidigKravStatus.KravStatus.FINNES_IKKE, SamtidigKravStatus.KravStatus.FINNES_IKKE, Map.of());
+    }
+
+    private static SamtidigKravStatus kravStatusForRefusjonskravOgSøknadFinnes(InternArbeidsforholdRef arbeidsforhold1, InternArbeidsforholdRef... evtFlereArbeidsforhold) {
+        return kravStatusForSøknadOgRefusjonskrav(SamtidigKravStatus.KravStatus.FINNES, SamtidigKravStatus.KravStatus.FINNES, arbeidsforhold1, evtFlereArbeidsforhold);
+    }
+
+    private static SamtidigKravStatus kravStatusForRefusjonskravFinnes(InternArbeidsforholdRef arbeidsforhold1, InternArbeidsforholdRef... evtFlereArbeidsforhold) {
+        return kravStatusForSøknadOgRefusjonskrav(SamtidigKravStatus.KravStatus.FINNES_IKKE, SamtidigKravStatus.KravStatus.FINNES, arbeidsforhold1, evtFlereArbeidsforhold);
+    }
+
+    private static SamtidigKravStatus kravStatusForSøknadOgRefusjonskrav(SamtidigKravStatus.KravStatus søknadStatus, SamtidigKravStatus.KravStatus refusjonskraStatus, InternArbeidsforholdRef arbeidsforhold1, InternArbeidsforholdRef... evtFlereArbeidsforhold) {
+        List<InternArbeidsforholdRef> arbeidsforhold = new ArrayList<>();
+        arbeidsforhold.add(arbeidsforhold1);
+        arbeidsforhold.addAll(Arrays.asList(evtFlereArbeidsforhold));
+        var statusPrArbeidsforhold = arbeidsforhold.stream().collect(Collectors.toMap(a -> a, a -> refusjonskraStatus));
+        return new SamtidigKravStatus(søknadStatus, refusjonskraStatus, SamtidigKravStatus.KravStatus.FINNES_IKKE, statusPrArbeidsforhold);
+    }
+
+    private static SamtidigKravStatus kravStatusForBeggeImTyperTrekt(InternArbeidsforholdRef arbeidsforhold1, InternArbeidsforholdRef... evtFlereArbeidsforhold) {
+        List<InternArbeidsforholdRef> arbeidsforhold = new ArrayList<>();
+        arbeidsforhold.add(arbeidsforhold1);
+        arbeidsforhold.addAll(Arrays.asList(evtFlereArbeidsforhold));
+        var statusPrArbeidsforhold = arbeidsforhold.stream().collect(Collectors.toMap(a -> a, a -> SamtidigKravStatus.KravStatus.TREKT));
+        return new SamtidigKravStatus(SamtidigKravStatus.KravStatus.FINNES_IKKE, SamtidigKravStatus.KravStatus.TREKT, SamtidigKravStatus.KravStatus.TREKT, statusPrArbeidsforhold);
     }
 
 
