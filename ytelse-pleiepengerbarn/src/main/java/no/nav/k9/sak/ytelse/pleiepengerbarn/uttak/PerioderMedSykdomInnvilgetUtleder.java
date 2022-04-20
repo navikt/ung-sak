@@ -10,7 +10,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -24,6 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 
 @Dependent
 public class PerioderMedSykdomInnvilgetUtleder {
@@ -56,7 +56,7 @@ public class PerioderMedSykdomInnvilgetUtleder {
         LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
         for (VilkårType vilkårType : perioderTilVurderingTjeneste.definerendeVilkår()) {
             NavigableSet<DatoIntervallEntitet> perioderForVilkår = perioderTilVurderingTjeneste.utled(behandlingId, vilkårType);
-            var perioderSomTidslinje = new LocalDateTimeline<>(perioderForVilkår.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).toList());
+            var perioderSomTidslinje = SykdomUtils.toLocalDateTimeline(perioderForVilkår);
             tidslinje = tidslinje.crossJoin(perioderSomTidslinje, StandardCombinators::alwaysTrueForMatch);
         }
         return DatoIntervallEntitet.fraTimeline(tidslinje.compress());
