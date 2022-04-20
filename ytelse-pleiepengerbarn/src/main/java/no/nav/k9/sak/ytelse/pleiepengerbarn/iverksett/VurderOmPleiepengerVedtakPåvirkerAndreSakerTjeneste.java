@@ -101,37 +101,6 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     }
 
     @Override
-    public List<Saksnummer> utledSakerSomErKanVærePåvirket(Ytelse vedtakHendelse) {
-        var fagsak = fagsakRepository.hentSakGittSaksnummer(new Saksnummer(vedtakHendelse.getSaksnummer())).orElseThrow();
-        Behandling vedtattBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
-
-        AktørId pleietrengende = vedtattBehandling.getFagsak().getPleietrengendeAktørId();
-        List<Saksnummer> alleSaksnummer = sykdomVurderingRepository.hentAlleSaksnummer(pleietrengende);
-
-        var result = new ArrayList<Saksnummer>();
-        for (Saksnummer kandidatsaksnummer : alleSaksnummer) {
-            if (!kandidatsaksnummer.equals(fagsak.getSaksnummer())) {
-                var kandidatFagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
-                if (kandidatFagsak.getYtelseType() != fagsak.getYtelseType()) {
-                    continue;
-                }
-                var sisteBehandlingPåKandidat = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(kandidatFagsak.getId()).orElseThrow();
-                boolean skalRevurderesPgaSykdom = vurderBehovForRevurderingPgaSykdom(pleietrengende, kandidatsaksnummer, sisteBehandlingPåKandidat);
-                var referanse = BehandlingReferanse.fra(sisteBehandlingPåKandidat);
-                boolean skalRevurderesPgaEtablertTilsyn = skalRevurderesPgaEtablertTilsyn(referanse);
-                boolean skalRevurderesPgaNattevåkOgBeredskap = skalRevurderesPgaNattevåkOgBeredskap(referanse);
-                boolean skalRevurderesPgaEndretUttak = skalRevurderesPgaUttak(sisteBehandlingPåKandidat, referanse);
-                if (skalRevurderesPgaSykdom || skalRevurderesPgaEtablertTilsyn || skalRevurderesPgaNattevåkOgBeredskap || skalRevurderesPgaEndretUttak) {
-                    result.add(kandidatsaksnummer);
-                    log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}", kandidatsaksnummer, skalRevurderesPgaSykdom, skalRevurderesPgaEtablertTilsyn, skalRevurderesPgaNattevåkOgBeredskap, skalRevurderesPgaEndretUttak);
-                }
-            }
-        }
-
-        return result;
-    }
-
-    @Override
     public List<SakMedPeriode> utledSakerMedPerioderSomErKanVærePåvirket(Ytelse vedtakHendelse) {
         var fagsak = fagsakRepository.hentSakGittSaksnummer(new Saksnummer(vedtakHendelse.getSaksnummer())).orElseThrow();
         Behandling vedtattBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
@@ -211,13 +180,6 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         return resultat;
     }
 
-    private boolean skalRevurderesPgaUttak(Behandling sisteBehandlingPåKandidat, BehandlingReferanse referanse) {
-        if (!sisteBehandlingPåKandidat.getStatus().erFerdigbehandletStatus() && !samtidigUttakTjeneste.harKommetTilUttak(referanse)) {
-            return false;
-        }
-        return samtidigUttakTjeneste.isEndringerMedUbesluttedeData(referanse);
-    }
-
     private NavigableSet<DatoIntervallEntitet> perioderMedRevurderingPgaUttak(Behandling sisteBehandlingPåKandidat, BehandlingReferanse referanse) {
         if (!sisteBehandlingPåKandidat.getStatus().erFerdigbehandletStatus() && !samtidigUttakTjeneste.harKommetTilUttak(referanse)) {
             return new TreeSet<>();
@@ -225,16 +187,8 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         return samtidigUttakTjeneste.perioderMedEndringerMedUbesluttedeData(referanse);
     }
 
-    private boolean skalRevurderesPgaNattevåkOgBeredskap(BehandlingReferanse referanse) {
-        return endringUnntakEtablertTilsynTjeneste.harEndringerSidenBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId());
-    }
-
     private NavigableSet<DatoIntervallEntitet> perioderMedRevurderesPgaNattevåkOgBeredskap(BehandlingReferanse referanse) {
         return new TreeSet<>(endringUnntakEtablertTilsynTjeneste.utledRelevanteEndringerSidenBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId()));
-    }
-
-    private boolean skalRevurderesPgaEtablertTilsyn(BehandlingReferanse referanse) {
-        return erEndringPåEtablertTilsynTjeneste.erEndringerSidenBehandling(referanse);
     }
 
     private NavigableSet<DatoIntervallEntitet> perioderMedRevurderingPgaEtablertTilsyn(BehandlingReferanse referanse) {
@@ -245,12 +199,6 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
             .filter(it -> Objects.nonNull(it.getValue()))
             .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             .collect(Collectors.toCollection(TreeSet::new));
-    }
-
-    private boolean vurderBehovForRevurderingPgaSykdom(AktørId pleietrengende, Saksnummer kandidatsaksnummer, Behandling sisteBehandlingPåKandidat) {
-        var endringerISøktePerioder = perioderMedRevurderingSykdom(pleietrengende, kandidatsaksnummer, sisteBehandlingPåKandidat);
-
-        return !endringerISøktePerioder.isEmpty();
     }
 
     private NavigableSet<DatoIntervallEntitet> perioderMedRevurderingSykdom(AktørId pleietrengende, Saksnummer kandidatsaksnummer, Behandling sisteBehandlingPåKandidat) {
@@ -286,23 +234,18 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     }
 
     private List<Periode> utledVurderingsperiode(Behandling behandling) {
+        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
         var vilkårene = vilkårResultatRepository.hent(behandling.getId());
-        var vurderingsperioder = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR)
-            .map(Vilkår::getPerioder)
-            .orElse(List.of())
-            .stream()
-            .map(VilkårPeriode::getPeriode)
-            .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
-            .collect(Collectors.toCollection(ArrayList::new));
-
-        vurderingsperioder.addAll(vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR)
-            .map(Vilkår::getPerioder)
-            .orElse(List.of())
-            .stream()
-            .map(VilkårPeriode::getPeriode)
-            .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
-            .toList());
-
+        List<Periode> vurderingsperioder = new ArrayList<>();
+        for (VilkårType vilkårType : perioderTilVurderingTjeneste.definerendeVilkår()) {
+            vilkårene.getVilkår(vilkårType)
+                .map(Vilkår::getPerioder)
+                .orElse(List.of())
+                .stream()
+                .map(VilkårPeriode::getPeriode)
+                .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
+                .forEach(vurderingsperioder::add);
+        }
         return vurderingsperioder;
     }
 
