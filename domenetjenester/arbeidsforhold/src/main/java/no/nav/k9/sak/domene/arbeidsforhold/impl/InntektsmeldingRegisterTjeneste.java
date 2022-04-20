@@ -118,21 +118,6 @@ public class InntektsmeldingRegisterTjeneste {
         return filtrerInntektsmeldingerForYtelseUtvidet(referanse, inntektArbeidYtelseGrunnlag, filtrert);
     }
 
-    /**
-     * Liste av arbeidsforhold per arbeidsgiver (ident) som må sende inntektsmelding for.
-     */
-    protected Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> utledManglendeInntektsmeldingerFraGrunnlagForVurdering(BehandlingReferanse referanse, boolean erEndringssøknad, LocalDate vurderingsdato) {
-        Objects.requireNonNull(referanse, VALID_REF);
-        final Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(referanse.getBehandlingId());
-        Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> påkrevdeInntektsmeldinger = utledPåkrevdeInntektsmeldingerFraGrunnlag(referanse, inntektArbeidYtelseGrunnlag, vurderingsdato);
-        logInntektsmeldinger(referanse, påkrevdeInntektsmeldinger, "UFILTRERT");
-
-        filtrerUtMottatteInntektsmeldinger(referanse, påkrevdeInntektsmeldinger, erEndringssøknad, (a, i) -> i, vurderingsdato);
-        logInntektsmeldinger(referanse, påkrevdeInntektsmeldinger, "FILTRERT");
-
-        return filtrerInntektsmeldingerForYtelse(referanse, inntektArbeidYtelseGrunnlag, påkrevdeInntektsmeldinger);
-    }
-
     private <V> void filtrerUtMottatteInntektsmeldinger(BehandlingReferanse referanse, Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger,
                                                         boolean erEndringssøknad,
                                                         BiFunction<Arbeidsgiver, InternArbeidsforholdRef, V> tilnternArbeidsforhold, LocalDate vurderingsdato) {
