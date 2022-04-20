@@ -27,7 +27,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
@@ -71,7 +70,6 @@ public class KompletthetForBeregningRestTjeneste {
     private VilkårResultatRepository vilkårResultatRepository;
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
-    private boolean skipKompletthetVedAvslagSøknadsfrist;
 
     public KompletthetForBeregningRestTjeneste() {
         // for resteasy
@@ -81,13 +79,11 @@ public class KompletthetForBeregningRestTjeneste {
     public KompletthetForBeregningRestTjeneste(BehandlingRepository behandlingRepository,
                                                VilkårResultatRepository vilkårResultatRepository,
                                                KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
-                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                               @KonfigVerdi(value = "KOMPLETTHET_SKIP_VED_AVSLAG_SOKNADSFRIST", defaultVerdi = "false", required = false) boolean skipKompletthetVedAvslagSøknadsfrist) {
+                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
-        this.skipKompletthetVedAvslagSøknadsfrist = skipKompletthetVedAvslagSøknadsfrist;
     }
 
     @GET
@@ -114,9 +110,6 @@ public class KompletthetForBeregningRestTjeneste {
     }
 
     private NavigableSet<DatoIntervallEntitet> utledPerioderMedInnvilgetPåSøknadsfrist(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
-        if (!skipKompletthetVedAvslagSøknadsfrist) {
-            return perioderTilVurdering;
-        }
         return vilkårResultatRepository.hent(ref.getBehandlingId())
             .getVilkår(VilkårType.SØKNADSFRIST)
             .orElseThrow()

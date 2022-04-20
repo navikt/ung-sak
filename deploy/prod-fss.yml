@@ -219,8 +219,6 @@ spec:
       value: "true"
     - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
       value: "true"
-    - name: KOMPLETTHET_SKIP_VED_AVSLAG_SOKNADSFRIST
-      value: "true"
     - name: KOMPLETTHET_BEREGNING_OMP
       value: "false"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE

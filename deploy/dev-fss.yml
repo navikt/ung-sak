@@ -226,8 +226,6 @@ spec:
       value: "true"
     - name: PSB_UTVIDE_VED_DODSFALL
       value: "true"
-    - name: KOMPLETTHET_SKIP_VED_AVSLAG_SOKNADSFRIST
-      value: "true"
     - name: KOMPLETTHET_BEREGNING_OMP
       value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE

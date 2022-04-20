@@ -17,7 +17,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
@@ -57,7 +56,6 @@ public class KompletthetBeregningTjeneste {
     private final KompletthetUtleder kompletthetUtleder = new KompletthetUtleder();
     private final EtterlysInntektsmeldingUtleder etterlysInntektsmeldingUtleder = new EtterlysInntektsmeldingUtleder();
     private final EtterlysInntektsmeldingOgVarsleOmAvslagUtleder etterlysInntektsmeldingOgVarsleOmAvslagUtleder = new EtterlysInntektsmeldingOgVarsleOmAvslagUtleder();
-    private boolean skipKompletthetVedAvslagSøknadsfrist;
 
     @Inject
     public KompletthetBeregningTjeneste(BehandlingRepository behandlingRepository,
@@ -65,15 +63,13 @@ public class KompletthetBeregningTjeneste {
                                         BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                         BestiltEtterlysningRepository etterlysningRepository,
                                         @Any Instance<Kompletthetsjekker> kompletthetsjekkere,
-                                        VilkårResultatRepository vilkårResultatRepository,
-                                        @KonfigVerdi(value = "KOMPLETTHET_SKIP_VED_AVSLAG_SOKNADSFRIST", defaultVerdi = "false", required = false) boolean skipKompletthetVedAvslagSøknadsfrist) {
+                                        VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.kompletthetsjekkere = kompletthetsjekkere;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.skipKompletthetVedAvslagSøknadsfrist = skipKompletthetVedAvslagSøknadsfrist;
     }
 
 
@@ -142,9 +138,6 @@ public class KompletthetBeregningTjeneste {
     }
 
     private NavigableSet<DatoIntervallEntitet> utledPerioderMedSøknadsfristInnvilget(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
-        if (!skipKompletthetVedAvslagSøknadsfrist) {
-            return perioderTilVurdering;
-        }
         return vilkårResultatRepository.hent(ref.getBehandlingId())
             .getVilkår(VilkårType.SØKNADSFRIST)
             .orElseThrow()
