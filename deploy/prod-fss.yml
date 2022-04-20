@@ -231,6 +231,8 @@ spec:
       value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
       value: "false"
+    - name: UTENLANDSPERIODER_MAPPING_ENABLET
+      value: "true"
 
 
     # Audit logging
