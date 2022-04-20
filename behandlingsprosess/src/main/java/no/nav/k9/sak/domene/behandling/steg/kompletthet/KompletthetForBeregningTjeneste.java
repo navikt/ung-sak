@@ -186,7 +186,7 @@ public class KompletthetForBeregningTjeneste {
         return grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of());
     }
 
-    public List<Inntektsmelding> utledInntektsmeldingerSomBenytteMotBeregningForPeriode(BehandlingReferanse referanse, Set<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {
+    public List<Inntektsmelding> utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(BehandlingReferanse referanse, Set<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {
         var relevanteImTjeneste = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregning, referanse.getFagsakYtelseType());
         var inntektsmeldings = relevanteImTjeneste.begrensSakInntektsmeldinger(referanse, alleInntektsmeldingerPåSak, periode);
         return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldings, periode);
@@ -201,7 +201,7 @@ public class KompletthetForBeregningTjeneste {
         if (påkrevdeInntektsmeldinger.isEmpty()) {
             return List.of();
         } else {
-            var prioriterteInntektsmeldinger = utledInntektsmeldingerSomBenytteMotBeregningForPeriode(ref, inntektsmeldinger, periode);
+            var prioriterteInntektsmeldinger = utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(ref, inntektsmeldinger, periode);
 
             for (Inntektsmelding inntektsmelding : prioriterteInntektsmeldinger) {
                 if (påkrevdeInntektsmeldinger.containsKey(inntektsmelding.getArbeidsgiver())) {

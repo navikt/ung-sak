@@ -51,6 +51,7 @@ import no.nav.k9.sak.kontrakt.kompletthet.KompletthetsTilstandPåPeriodeV2Dto;
 import no.nav.k9.sak.kontrakt.kompletthet.KompletthetsVurderingDto;
 import no.nav.k9.sak.kontrakt.kompletthet.KompletthetsVurderingV2Dto;
 import no.nav.k9.sak.kontrakt.kompletthet.Status;
+import no.nav.k9.sak.kontrakt.kompletthet.inntektsmelding.VurderingPerPeriode;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
@@ -65,11 +66,14 @@ public class KompletthetForBeregningRestTjeneste {
 
     static public final String PATH = "/behandling/kompletthet/beregning";
     static public final String KOMPLETTHET_FOR_BEREGNING_PATH = PATH;
+    static public final String KOMPLETTHET_FOR_BEREGNING_IM_VURDERINGER_PATH = PATH + "/vurderinger";
     static public final String KOMPLETTHET_FOR_BEREGNING_PATH_V2 = PATH + "-v2";
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+
+    private InntektsmeldingVurderingUtleder inntektsmeldingVurderingUtleder;
 
     public KompletthetForBeregningRestTjeneste() {
         // for resteasy
@@ -79,11 +83,13 @@ public class KompletthetForBeregningRestTjeneste {
     public KompletthetForBeregningRestTjeneste(BehandlingRepository behandlingRepository,
                                                VilkårResultatRepository vilkårResultatRepository,
                                                KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
-                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                               InntektsmeldingVurderingUtleder inntektsmeldingVurderingUtleder) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.inntektsmeldingVurderingUtleder = inntektsmeldingVurderingUtleder;
     }
 
     @GET
@@ -157,6 +163,18 @@ public class KompletthetForBeregningRestTjeneste {
         return new KompletthetsVurderingV2Dto(status);
     }
 
+    @GET
+    @Operation(description = "Henter vurderinger på bruk av inntektsmeldinger", summary = ("Henter vurderinger på bruk av inntektsmeldinger"), tags = "kompletthet")
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @Path(KOMPLETTHET_FOR_BEREGNING_IM_VURDERINGER_PATH)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public VurderingPerPeriode utledVurderingerAvMottatteInntektsmeldinger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        var ref = BehandlingReferanse.fra(behandling);
+
+        return inntektsmeldingVurderingUtleder.utled(ref);
+    }
+
     private KompletthetsTilstandPåPeriodeV2Dto mapPeriode(BehandlingReferanse ref, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, List<KompletthetPeriode> kompletthetPerioder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, NavigableSet<DatoIntervallEntitet> innvilgetSøknadsfrist) {
         var kompletthetsvurdering = finnRelevantVurderingForPeriode(it.getKey(), kompletthetPerioder);
         return new KompletthetsTilstandPåPeriodeV2Dto(new Periode(it.getKey().getFomDato(), it.getKey().getTomDato()),
@@ -172,7 +190,7 @@ public class KompletthetForBeregningRestTjeneste {
             .map(at -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(at.getArbeidsgiver().getIdentifikator(), at.getArbeidsforholdId()), utledStatus(kompletthetsvurdering), null))
             .collect(Collectors.toCollection(ArrayList::new));
 
-        resultat.addAll(kompletthetForBeregningTjeneste.utledInntektsmeldingerSomBenytteMotBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
+        resultat.addAll(kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
             .stream()
             .map(im -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(im.getArbeidsgiver().getIdentifikator(),
                 im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), Status.MOTTATT, im.getJournalpostId()))
@@ -187,7 +205,7 @@ public class KompletthetForBeregningRestTjeneste {
             .map(at -> new ArbeidsgiverArbeidsforholdStatusV2(new ArbeidsgiverArbeidsforholdIdV2(at.getArbeidsgiver(), at.getArbeidsforholdId()), utledStatus(kompletthetsvurdering), null))
             .collect(Collectors.toCollection(ArrayList::new));
 
-        resultat.addAll(kompletthetForBeregningTjeneste.utledInntektsmeldingerSomBenytteMotBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
+        resultat.addAll(kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
             .stream()
             .map(im -> new ArbeidsgiverArbeidsforholdStatusV2(new ArbeidsgiverArbeidsforholdIdV2(im.getArbeidsgiver(),
                 im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), Status.MOTTATT, im.getJournalpostId()))
