@@ -68,4 +68,5 @@ public interface VurderSøknadsfristTjeneste<T extends SøktPeriodeData> {
             .filter(it -> relevanteKrav.stream().anyMatch(at -> at.getJournalpostId().equals(it.getKey().getJournalpostId())))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
+
 }

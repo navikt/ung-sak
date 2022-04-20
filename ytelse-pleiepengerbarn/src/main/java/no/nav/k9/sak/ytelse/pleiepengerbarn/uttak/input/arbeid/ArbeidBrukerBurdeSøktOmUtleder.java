@@ -1,7 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +12,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -24,7 +24,6 @@ import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
@@ -47,9 +46,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeD�
 @ApplicationScoped
 public class ArbeidBrukerBurdeSøktOmUtleder {
 
+
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
-    private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester;
     private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
     private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
@@ -61,24 +61,26 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
 
     @Inject
     public ArbeidBrukerBurdeSøktOmUtleder(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                          @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                          @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
+                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                          @Any Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester,
                                           PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
                                           PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
                                           OpptjeningRepository opptjeningRepository,
                                           VilkårResultatRepository vilkårResultatRepository,
                                           HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
         this.perioderMedSykdomInnvilgetUtleder = perioderMedSykdomInnvilgetUtleder;
         this.opptjeningRepository = opptjeningRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.søknadsfristTjeneste = søknadsfristTjeneste;
+        this.søknadsfristTjenester = søknadsfristTjenester;
         this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
     }
 
     public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledMangler(BehandlingReferanse referanse) {
+        var søknadsfristTjeneste = finnSøknadsfristTjeneste(referanse);
+
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
         var perioderFraSøknader = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(referanse);
@@ -112,6 +114,11 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         var aktørArbeidFraRegister = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId()).getAktørArbeidFraRegister(referanse.getAktørId());
 
         return utledFraInput(timelineMedYtelse, timelineMedInnvilgetYtelse, input, aktørArbeidFraRegister);
+    }
+
+    private VurderSøknadsfristTjeneste<Søknadsperiode> finnSøknadsfristTjeneste(BehandlingReferanse referanse) {
+        return FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, referanse.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalStateException("Har ikke " + getClass().getSimpleName() + " for ytelse=" + referanse.getFagsakYtelseType()));
     }
 
     private LocalDateTimeline<Boolean> utledYtelse(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
@@ -152,10 +159,12 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     }
 
     private NavigableSet<DatoIntervallEntitet> finnSykdomsperioder(BehandlingReferanse referanse) {
-        final var s1 = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
-        final var s2 = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR);
-        final var resultat = new TreeSet<>(s1);
-        resultat.addAll(s2);
+        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
+
+        final var resultat = new TreeSet<DatoIntervallEntitet>();
+        for (VilkårType vilkårType : perioderTilVurderingTjeneste.definerendeVilkår()) {
+            resultat.addAll(perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), vilkårType));
+        }
         return resultat;
     }
 
