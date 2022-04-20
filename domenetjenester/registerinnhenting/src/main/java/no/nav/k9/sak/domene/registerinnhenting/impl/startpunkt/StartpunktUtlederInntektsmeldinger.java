@@ -11,7 +11,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 @Dependent
 class StartpunktUtlederInntektsmeldinger {
 
-    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private final InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     @Inject
     StartpunktUtlederInntektsmeldinger(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
