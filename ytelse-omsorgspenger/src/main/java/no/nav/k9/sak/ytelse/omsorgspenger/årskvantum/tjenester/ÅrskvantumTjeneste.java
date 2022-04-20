@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -462,11 +463,12 @@ public class ÅrskvantumTjeneste {
             .toList();
 
         PersonIdent personIdentBarn = tpsTjeneste.hentFnrForAktør(personinfoBarn.getAktørId());
-        return new Barn(personIdentBarn.getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBostedsadresseDelerAvVilkårsperiodene, perioderDeltBosted, BarnType.VANLIG);
+        //TODO Legge til sammeBostedPerioder under her
+        return new Barn(personIdentBarn.getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBostedsadresseDelerAvVilkårsperiodene, perioderDeltBosted, List.of(), BarnType.VANLIG);
     }
 
     private Barn mapFosterbarn(Personinfo personinfo) {
-        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), true, List.of(), BarnType.FOSTERBARN);
+        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), true, List.of(), List.of(), BarnType.FOSTERBARN);
     }
 
     private boolean kreverArbeidsgiverRefusjon(Set<Inntektsmelding> sakInntektsmeldinger,
