@@ -45,7 +45,7 @@
         <k9format.version>5.8.5</k9format.version>
         <jackson.version>2.13.2.20220328</jackson.version>
         <asm.version>9.3</asm.version>
-        <kotlin-stdlib.version>1.6.20</kotlin-stdlib.version>
+        <kotlin-stdlib.version>1.6.21</kotlin-stdlib.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
