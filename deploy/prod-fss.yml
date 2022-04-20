@@ -230,7 +230,7 @@ spec:
     - name: OMP_DELT_BOSTED_RAMMEVEDTAK
       value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
-      value: "false"
+      value: "true"
     - name: UTENLANDSPERIODER_MAPPING_ENABLET
       value: "true"
 
