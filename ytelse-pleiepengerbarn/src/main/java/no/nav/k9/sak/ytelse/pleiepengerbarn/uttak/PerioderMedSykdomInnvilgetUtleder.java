@@ -5,13 +5,11 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -50,18 +48,13 @@ public class PerioderMedSykdomInnvilgetUtleder {
     }
 
     private NavigableSet<DatoIntervallEntitet> utledPerioderVurdert(Long behandlingId) {
-        var perioderUnder18 = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
-        var perioder18OgOver = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.MEDISINSKEVILKÅR_18_ÅR);
-
-        var perioderUnder = new LocalDateTimeline<>(perioderUnder18.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()));
-        var perioderOver = new LocalDateTimeline<>(perioder18OgOver.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()));
-
-        return perioderUnder.combine(perioderOver, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN)
-            .compress()
-            .toSegments()
-            .stream()
-            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new));
+        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
+        for (VilkårType vilkårType : perioderTilVurderingTjeneste.definerendeVilkår()) {
+            NavigableSet<DatoIntervallEntitet> perioderForVilkår = perioderTilVurderingTjeneste.utled(behandlingId, vilkårType);
+            var perioderSomTidslinje = new LocalDateTimeline<>(perioderForVilkår.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).toList());
+            tidslinje = tidslinje.crossJoin(perioderSomTidslinje, StandardCombinators::alwaysTrueForMatch);
+        }
+        return DatoIntervallEntitet.fraTimeline(tidslinje.compress());
     }
 
     private Set<VilkårPeriode> finnInnvilgedePerioder(Vilkårene vilkårene,
