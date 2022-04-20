@@ -1,10 +1,10 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
@@ -47,12 +47,11 @@ public class PerioderMedSykdomInnvilgetUtleder {
 
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
 
-        return finnInnvilgedePerioder(vilkårene, perioderVurdertISykdom);
+        return finnInnvilgedePerioder(behandlingId, vilkårene, perioderVurdertISykdom);
     }
 
     private NavigableSet<DatoIntervallEntitet> utledPerioderVurdert(Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
+        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = finnVilkårsPerioderTjeneste(behandlingId);
 
         LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
         for (VilkårType vilkårType : perioderTilVurderingTjeneste.definerendeVilkår()) {
@@ -63,24 +62,22 @@ public class PerioderMedSykdomInnvilgetUtleder {
         return DatoIntervallEntitet.fraTimeline(tidslinje.compress());
     }
 
-    private Set<VilkårPeriode> finnInnvilgedePerioder(Vilkårene vilkårene,
-                                                      NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
-        var s1 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR)
-            .map(Vilkår::getPerioder)
-            .orElse(List.of())
-            .stream();
-        var s2 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR)
-            .map(Vilkår::getPerioder)
-            .orElse(List.of())
-            .stream();
-        var s3 = vilkårene.getVilkår(VilkårType.I_LIVETS_SLUTTFASE)
-            .map(Vilkår::getPerioder)
-            .orElse(List.of())
-            .stream();
-        return Stream.concat(Stream.concat(s1, s2), s3)
+    private Set<VilkårPeriode> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+        VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = finnVilkårsPerioderTjeneste(behandlingId);
+
+        List<VilkårPeriode> vilkårsperioder = new ArrayList<>();
+        for (VilkårType vilkårType : vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()) {
+            vilkårene.getVilkår(vilkårType).map(Vilkår::getPerioder).ifPresent(vilkårsperioder::addAll);
+        }
+
+        return vilkårsperioder.stream()
             .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
             .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
             .collect(Collectors.toSet());
     }
 
+    private VilkårsPerioderTilVurderingTjeneste finnVilkårsPerioderTjeneste(Long behandlingId) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
+    }
 }
