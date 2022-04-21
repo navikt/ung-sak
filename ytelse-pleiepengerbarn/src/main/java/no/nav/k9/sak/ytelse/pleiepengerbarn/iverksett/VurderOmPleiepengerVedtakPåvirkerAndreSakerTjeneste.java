@@ -4,6 +4,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRST�
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -23,7 +24,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -236,17 +236,16 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private List<Periode> utledVurderingsperiode(Behandling behandling) {
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
         var vilkårene = vilkårResultatRepository.hent(behandling.getId());
-        List<Periode> vurderingsperioder = new ArrayList<>();
-        for (VilkårType vilkårType : perioderTilVurderingTjeneste.definerendeVilkår()) {
-            vilkårene.getVilkår(vilkårType)
-                .map(Vilkår::getPerioder)
-                .orElse(List.of())
-                .stream()
-                .map(VilkårPeriode::getPeriode)
-                .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
-                .forEach(vurderingsperioder::add);
-        }
-        return vurderingsperioder;
+
+        return perioderTilVurderingTjeneste.definerendeVilkår()
+            .stream()
+            .map(vilkårType -> vilkårene.getVilkår(vilkårType)
+                .map(Vilkår::getPerioder))
+            .flatMap(Optional::stream)
+            .flatMap(Collection::stream)
+            .map(VilkårPeriode::getPeriode)
+            .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
+            .toList();
     }
 
 }

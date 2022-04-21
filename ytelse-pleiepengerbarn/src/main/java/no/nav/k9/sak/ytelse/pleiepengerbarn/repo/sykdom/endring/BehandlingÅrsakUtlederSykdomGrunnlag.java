@@ -3,10 +3,11 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.endring;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,7 +17,6 @@ import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -136,17 +136,15 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
             return List.of();
         }
 
-        VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
-        List<Periode> vurderingsperioder = new ArrayList<>();
-        for (VilkårType vilkårType : vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()) {
-            vilkårene.get().getVilkår(vilkårType)
-                .map(Vilkår::getPerioder)
-                .orElse(List.of())
-                .stream()
-                .map(VilkårPeriode::getPeriode)
-                .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
-                .forEach(vurderingsperioder::add);
-        }
-        return vurderingsperioder;
+        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
+        return perioderTilVurderingTjeneste.definerendeVilkår()
+            .stream()
+            .map(vilkårType -> vilkårene.get().getVilkår(vilkårType)
+                .map(Vilkår::getPerioder))
+            .flatMap(Optional::stream)
+            .flatMap(Collection::stream)
+            .map(VilkårPeriode::getPeriode)
+            .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
+            .toList();
     }
 }

@@ -3,10 +3,11 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.endring;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -137,18 +137,16 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
             return List.of();
         }
 
-        VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
-        List<Periode> vurderingsperioder = new ArrayList<>();
-        for (VilkårType vilkårType : vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()) {
-            vilkårene.get().getVilkår(vilkårType)
-                .map(Vilkår::getPerioder)
-                .orElse(List.of())
-                .stream()
-                .map(VilkårPeriode::getPeriode)
-                .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
-                .forEach(vurderingsperioder::add);
-        }
-        return vurderingsperioder;
+        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
+        return perioderTilVurderingTjeneste.definerendeVilkår()
+            .stream()
+            .map(vilkårType -> vilkårene.get().getVilkår(vilkårType)
+                .map(Vilkår::getPerioder))
+            .flatMap(Optional::stream)
+            .flatMap(Collection::stream)
+            .map(VilkårPeriode::getPeriode)
+            .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
+            .toList();
     }
 
 }

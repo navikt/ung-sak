@@ -5,10 +5,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.enterprise.inject.Instance;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 
 public interface VurderSøknadsfristTjeneste<T extends SøktPeriodeData> {
+
+    static <T extends SøktPeriodeData> VurderSøknadsfristTjeneste<T> finnSøknadsfristTjeneste(Instance<VurderSøknadsfristTjeneste<T>> søknadsfristTjenester, FagsakYtelseType fagsakYtelseType) {
+        return FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, fagsakYtelseType)
+            .orElseThrow(() -> new IllegalStateException("Har ikke " + VurderSøknadsfristTjeneste.class.getSimpleName() + " for ytelse=" + fagsakYtelseType));
+    }
 
     Map<KravDokument, List<VurdertSøktPeriode<T>>> vurderSøknadsfrist(BehandlingReferanse referanse);
 
