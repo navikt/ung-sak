@@ -31,9 +31,9 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
 /**
  * Håndtering av krav fra forskjellige søkere på den samme dagen.
- * 
+ *
  * <h4>Regler for samtidig uttak</h4>
- * 
+ *
  * <ol>
  *   <li>Et krav er definert som søknadsdata for en gitt dato.</li>
  *   <li>Kravet med det tidligste mottattidspunktet prioriteres.</li>
@@ -47,7 +47,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
  *       besluttede behandlinger, men med en reberegning basert på gjeldende
  *       kravprioritet.</li>
  * </ol>
- * 
+ *
  * <p>
  * Det vurderes som juridisk problematisk å tilbakekreve penger fra en lavere prioritert
  * søker grunnet etterrapportering fra den prioriterte søkeren. En slik tilbakekreving
@@ -55,33 +55,33 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
  * ikke blir høyere enn pleiebehovet. Det jobbes for å sikre en god juridisk forankring av
  * denne praksisen.
  * </p>
- * 
+ *
  * <p>
  * Merk at en alternativ løsning der en søker kan ha flere, ulikt prioriterte, krav på samme dag
  * har blitt forkastet som mulig løsning. Dette fordi den første søkeren skal ha mulighet til
  * etterrapportering uten fare for at man har mistet retten/prioriteten.
  * </p>
  *
- * 
+ *
  * <h4>Om løsningen i denne klassen</h4>
- * 
+ *
  * <p>
  * Denne tjenesten forsøker å hindre feilaktige vedtak, ved å kreve at behandlinger
  * med prioriterte perioder skal håndteres før behandlinger som har lavere prioritet.
  * </p>
- * 
+ *
  * <p>
  * Merk at det kan være tilfeller der to behandlinger gjensidig har perioder som har
  * prioritet fremfor den andre. Dette håndteres ved at én av disse behandlingene blir
  * besluttet med for mye utbetalt. Etter at den andre behandlingen har blitt besluttet
  * vil det automatisk bli opprettet en revurdering som korrigerer dette.
  * </p>
- * 
+ *
  * <p>
  * En bedre løsning ville vært å utsette behandling av perioder der man ikke har prioritet
  * til en senere behandling, men dette har ikke blitt implementert ennå.
  * </p>
- * 
+ *
  * @see PleietrengendeKravprioritet#vurderKravprioritet
  * @see no.nav.k9.sak.ytelse.pleiepengerbarn.foreslåvedtak.PSBYtelsespesifikkForeslåVedtak
  * @see no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett.VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste
@@ -149,7 +149,6 @@ public class SamtidigUttakTjeneste {
 
     private List<Fagsak> hentAndreFagsakerPåPleietrengende(BehandlingReferanse ref) {
         final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(ref.getFagsakYtelseType(), ref.getPleietrengendeAktørId(), null, null, null);
-        //TODO PLS, riktig semantikk (!any vs none)?
         if (fagsaker.stream().noneMatch(f -> f.getSaksnummer().equals(ref.getSaksnummer()))) {
             throw new IllegalStateException("Utviklerfeil: Klarte ikke å finne saken.");
         }

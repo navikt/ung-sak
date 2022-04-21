@@ -3,18 +3,19 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.endring;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -23,6 +24,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
@@ -46,6 +48,7 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
     StartpunktUtlederPleiepengerSyktBarn() {
         // For CDI
@@ -57,13 +60,15 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
                                          VilkårResultatRepository vilkårResultatRepository,
                                          ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
                                          EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
-                                         SamtidigUttakTjeneste samtidigUttakTjeneste) {
+                                         SamtidigUttakTjeneste samtidigUttakTjeneste,
+                                         @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
+        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
     @Override
@@ -117,7 +122,7 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
         var sykdomGrunnlag = sykdomGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
             .map(SykdomGrunnlagBehandling::getGrunnlag);
 
-        List<Periode> nyeVurderingsperioder = utledVurderingsperiode(ref.getBehandlingId());
+        List<Periode> nyeVurderingsperioder = utledVurderingsperiode(ref);
         var utledGrunnlag = sykdomGrunnlagService.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
         var sykdomGrunnlagSammenlikningsresultat = sykdomGrunnlagService.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
@@ -126,28 +131,22 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
         return startpunktType;
     }
 
-    private List<Periode> utledVurderingsperiode(Long behandlingId) {
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
+    private List<Periode> utledVurderingsperiode(BehandlingReferanse ref) {
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(ref.getBehandlingId());
         if (vilkårene.isEmpty()) {
             return List.of();
         }
-        var vurderingsperioder = vilkårene.get().getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR)
-            .map(Vilkår::getPerioder)
-            .orElse(List.of())
+
+        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
+        return perioderTilVurderingTjeneste.definerendeVilkår()
             .stream()
+            .map(vilkårType -> vilkårene.get().getVilkår(vilkårType)
+                .map(Vilkår::getPerioder))
+            .flatMap(Optional::stream)
+            .flatMap(Collection::stream)
             .map(VilkårPeriode::getPeriode)
             .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
-            .collect(Collectors.toCollection(ArrayList::new));
-
-        vurderingsperioder.addAll(vilkårene.get().getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR)
-            .map(Vilkår::getPerioder)
-            .orElse(List.of())
-            .stream()
-            .map(VilkårPeriode::getPeriode)
-            .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
-            .collect(Collectors.toList()));
-
-        return vurderingsperioder;
+            .toList();
     }
 
 }
