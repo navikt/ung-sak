@@ -1,11 +1,9 @@
 package no.nav.k9.sak.domene.behandling.steg.avklarfakta;
 
-import java.util.List; 
+import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederHolder;
@@ -28,10 +26,6 @@ public class KontrollerFaktaUtledereTjenesteImpl implements KontrollerFaktaUtled
 
         // Legger til utledere som alltid skal kjøres
         leggTilStandardUtledere(utlederHolder);
-
-        if (FagsakYtelseType.OMP.equals(ref.getFagsakYtelseType())) {
-            utlederHolder.leggTil(AksjonspunktutlederForAlder.class);
-        }
 
         return utlederHolder;
     }
