@@ -102,6 +102,9 @@ public class AleneomsorgVilkårsvurderingSteg implements BehandlingSteg {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
+        if (behandling.erManueltOpprettet()){
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunktDef));
+        }
 
         Vilkår vilkår = vilkårene.getVilkår(VILKÅRET).orElseThrow();
         List<VilkårPeriode> ikkeVurdertePerioder = vilkår.getPerioder().stream().filter(v -> v.getUtfall() == Utfall.IKKE_VURDERT).toList();
