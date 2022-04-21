@@ -26,6 +26,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
+import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkårDto;
@@ -146,6 +147,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         // Validering før opptjening kan gå videre til beregningsvilkår
         long antall = opptjeningAktiviteter.stream()
             .filter(oa -> !oa.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD))
+            .filter(oa -> !oa.getVurderingsStatus().equals(VurderingsStatus.UNDERKJENT))
             .filter(oa -> oa.getPeriode().inkluderer(stp) || oa.getPeriode().getTomDato().plusDays(1).equals(stp)).count();
         if (antall == 0 && innvilgelseMerknad != VilkårUtfallMerknad.VM_7847_A) {
             throw new IllegalArgumentException("Må ha opptjeningsaktivitet på skjæringstidspunktet for å kunne gå videre til beregingsvilkår. (Dersom 8-47 A er tilgjengelig, kan denne velges.) Skjæringstidspunkt=" + stp);
