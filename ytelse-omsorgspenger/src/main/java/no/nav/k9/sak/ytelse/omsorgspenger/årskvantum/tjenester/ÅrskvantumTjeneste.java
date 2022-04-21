@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -446,7 +447,8 @@ public class ÅrskvantumTjeneste {
         var harSammeBosted = relasjonMedBarn.getElement1().getHarSammeBosted(personinfoSøker, personinfoBarn);
         var perioderMedDeltBosted = relasjonMedBarn.getElement1().getPerioderMedDeltBosted(personinfoSøker, personinfoBarn);
         var lukketPeriodeMedDeltBosted = perioderMedDeltBosted.stream().map(p -> new LukketPeriode(p.getFom(), p.getTom())).collect(Collectors.toList());
-        return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBosted, lukketPeriodeMedDeltBosted, BarnType.VANLIG);
+        //TODO Legge til sammeBostedPerioder under her
+        return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBosted, lukketPeriodeMedDeltBosted, List.of(), BarnType.VANLIG);
     }
 
     private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(PersonopplysningerAggregat personopplysningerAggregat, PersonopplysningEntitet personinfoSøker, PersonopplysningEntitet personinfoBarn, LocalDateTimeline<Boolean> vilkårPeriodeTidslinje) {
@@ -462,11 +464,12 @@ public class ÅrskvantumTjeneste {
             .toList();
 
         PersonIdent personIdentBarn = tpsTjeneste.hentFnrForAktør(personinfoBarn.getAktørId());
-        return new Barn(personIdentBarn.getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBostedsadresseDelerAvVilkårsperiodene, perioderDeltBosted, BarnType.VANLIG);
+        //TODO Legge til sammeBostedPerioder under her
+        return new Barn(personIdentBarn.getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBostedsadresseDelerAvVilkårsperiodene, perioderDeltBosted, List.of(), BarnType.VANLIG);
     }
 
     private Barn mapFosterbarn(Personinfo personinfo) {
-        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), true, List.of(), BarnType.FOSTERBARN);
+        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), true, List.of(), List.of(), BarnType.FOSTERBARN);
     }
 
     private boolean kreverArbeidsgiverRefusjon(Set<Inntektsmelding> sakInntektsmeldinger,
