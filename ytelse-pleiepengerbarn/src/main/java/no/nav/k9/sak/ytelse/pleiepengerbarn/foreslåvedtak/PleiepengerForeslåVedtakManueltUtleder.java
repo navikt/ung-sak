@@ -1,10 +1,10 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.foreslåvedtak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -14,17 +14,18 @@ import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.K9FormidlingKlient
 
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @ApplicationScoped
-public class PSBForeslåVedtakManueltUtleder implements ForeslåVedtakManueltUtleder {
+public class PleiepengerForeslåVedtakManueltUtleder implements ForeslåVedtakManueltUtleder {
 
     private K9FormidlingKlient formidlingKlient;
 
-    PSBForeslåVedtakManueltUtleder() {
+    PleiepengerForeslåVedtakManueltUtleder() {
         //for CDI proxy
     }
 
     @Inject
-    public PSBForeslåVedtakManueltUtleder(K9FormidlingKlient formidlingKlient) {
+    public PleiepengerForeslåVedtakManueltUtleder(K9FormidlingKlient formidlingKlient) {
         this.formidlingKlient = formidlingKlient;
     }
 
