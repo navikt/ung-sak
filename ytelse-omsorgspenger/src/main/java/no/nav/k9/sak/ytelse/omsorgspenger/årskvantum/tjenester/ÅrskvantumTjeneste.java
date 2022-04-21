@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -443,11 +442,11 @@ public class ÅrskvantumTjeneste {
     }
 
     private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(Personinfo personinfoSøker, Tuple<Familierelasjon, Optional<Personinfo>> relasjonMedBarn) {
+        //TODO deprecated metode, fjernes når 'bruk fra register' er lansert
         var personinfoBarn = relasjonMedBarn.getElement2().orElseThrow();
         var harSammeBosted = relasjonMedBarn.getElement1().getHarSammeBosted(personinfoSøker, personinfoBarn);
         var perioderMedDeltBosted = relasjonMedBarn.getElement1().getPerioderMedDeltBosted(personinfoSøker, personinfoBarn);
         var lukketPeriodeMedDeltBosted = perioderMedDeltBosted.stream().map(p -> new LukketPeriode(p.getFom(), p.getTom())).collect(Collectors.toList());
-        //TODO Legge til sammeBostedPerioder under her
         return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBosted, lukketPeriodeMedDeltBosted, List.of(), BarnType.VANLIG);
     }
 
@@ -455,17 +454,22 @@ public class ÅrskvantumTjeneste {
         List<PersonAdresseEntitet> søkersAdresser = personopplysningerAggregat.getAdresserFor(personinfoSøker.getAktørId());
         List<PersonAdresseEntitet> barnetsAdresser = personopplysningerAggregat.getAdresserFor(personinfoBarn.getAktørId());
 
-        LocalDateTimeline<Boolean> tidslinjeSammeBostedsadresser = AdresseSammenligner.sammeBostedsadresse(søkersAdresser, barnetsAdresser);
-        //TODO Trenger å støtte periodisert bostedadresse i årskvantum og kontrakt for å gjøre dette skikkelig
-        boolean harSammeBostedsadresseDelerAvVilkårsperiodene = !vilkårPeriodeTidslinje.intersection(tidslinjeSammeBostedsadresser).isEmpty();
+        var tidslinjeDeltBosted = AdresseSammenligner.perioderDeltBosted(søkersAdresser, barnetsAdresser);
+        var tidslinjeSammeBosted = AdresseSammenligner.sammeBostedsadresse(søkersAdresser, barnetsAdresser);
 
-        var perioderDeltBosted = AdresseSammenligner.perioderDeltBosted(søkersAdresser, barnetsAdresser).stream()
-            .map(segment -> new LukketPeriode(segment.getFom(), segment.getTom()))
-            .toList();
+        //TODO deprecated, erstattet av perioder med samme bosted, fjern når årskvantum er klar
+        boolean harSammeBostedsadresseDelerAvVilkårsperiodene = !vilkårPeriodeTidslinje.intersection(tidslinjeSammeBosted).isEmpty();
+
 
         PersonIdent personIdentBarn = tpsTjeneste.hentFnrForAktør(personinfoBarn.getAktørId());
-        //TODO Legge til sammeBostedPerioder under her
-        return new Barn(personIdentBarn.getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBostedsadresseDelerAvVilkårsperiodene, perioderDeltBosted, List.of(), BarnType.VANLIG);
+        return new Barn(personIdentBarn.getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBostedsadresseDelerAvVilkårsperiodene,  tilLukketPeriode(tidslinjeDeltBosted), tilLukketPeriode(tidslinjeSammeBosted), BarnType.VANLIG);
+    }
+
+    private static List<LukketPeriode> tilLukketPeriode(LocalDateTimeline<Boolean> tidslinje){
+        return tidslinje.filterValue(Boolean.TRUE::equals)
+            .stream()
+            .map(segment -> new LukketPeriode(segment.getFom(), segment.getTom()))
+            .toList();
     }
 
     private Barn mapFosterbarn(Personinfo personinfo) {
