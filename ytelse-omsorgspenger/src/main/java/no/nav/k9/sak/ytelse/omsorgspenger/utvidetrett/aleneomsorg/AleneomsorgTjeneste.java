@@ -70,9 +70,10 @@ public class AleneomsorgTjeneste {
         Periode periodeForDatainnhenting = omsluttendePeriode(vilkårsperioder);
         Map<AktørId, List<BostedsAdresse>> foreldreBostedAdresser = finnForeldresAdresser(barnAktørId, periodeForDatainnhenting);
         List<BostedsAdresse> søkerBostedAdresser = finnBostedAdresser(søkerAktørId, periodeForDatainnhenting);
+        List<BostedsAdresse> barnetsDeltBostedAdresser = finnDeltBostedAdresser(barnAktørId, periodeForDatainnhenting);
 
         return new LocalDateTimeline<>(vilkårsperioder.stream()
-            .map(vilkårsperiode -> new LocalDateSegment<>(vilkårsperiode.getFom(), vilkårsperiode.getTom(), new AleneomsorgVilkårGrunnlag(søkerAktørId, søkerBostedAdresser, foreldreBostedAdresser)))
+            .map(vilkårsperiode -> new LocalDateSegment<>(vilkårsperiode.getFom(), vilkårsperiode.getTom(), new AleneomsorgVilkårGrunnlag(søkerAktørId, søkerBostedAdresser, foreldreBostedAdresser, barnetsDeltBostedAdresser)))
             .toList()
         );
     }
@@ -115,6 +116,15 @@ public class AleneomsorgTjeneste {
                 Periode p = tilPeriode(adressePeriode.getGyldighetsperiode());
                 return new BostedsAdresse(p, adresse.getAdresselinje1(), adresse.getAdresselinje2(), adresse.getAdresselinje3(), adresse.getPostnummer(), adresse.getLand());
             })
+            .toList();
+    }
+
+    private List<BostedsAdresse> finnDeltBostedAdresser(AktørId barnAktørId, Periode periodeForDatainnhenting) {
+        Personinfo personinfoBarnet = tpsTjeneste.hentBrukerForAktør(barnAktørId).orElseThrow();
+        return personinfoBarnet.getDeltBostedList()
+            .stream()
+            .filter(deltBosted -> periodeForDatainnhenting.overlaps(deltBosted.getPeriode()))
+            .map(deltBosted -> new BostedsAdresse(deltBosted.getPeriode(), deltBosted.getAdresseinfo().getAdresselinje1(), deltBosted.getAdresseinfo().getAdresselinje2(), deltBosted.getAdresseinfo().getAdresselinje3(), deltBosted.getAdresseinfo().getPostNr(), deltBosted.getAdresseinfo().getLand()))
             .toList();
     }
 

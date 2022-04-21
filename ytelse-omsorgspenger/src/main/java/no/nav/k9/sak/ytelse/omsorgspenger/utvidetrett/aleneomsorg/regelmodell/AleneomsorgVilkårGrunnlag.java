@@ -11,11 +11,13 @@ public class AleneomsorgVilkårGrunnlag implements VilkårGrunnlag {
     private final AktørId søkerAktørId;
     private final List<BostedsAdresse> søkerAdresser;
     private final Map<AktørId, List<BostedsAdresse>> foreldreAdresser; //må ha med begge foreldres adresser ettersom søker kan være fosterforelder
+    private final List<BostedsAdresse> barnetsDeltBostedAdresser;
 
-    public AleneomsorgVilkårGrunnlag(AktørId søkerAktørId, List<BostedsAdresse> søkerAdresser, Map<AktørId, List<BostedsAdresse>> foreldreAdresser) {
+    public AleneomsorgVilkårGrunnlag(AktørId søkerAktørId, List<BostedsAdresse> søkerAdresser, Map<AktørId, List<BostedsAdresse>> foreldreAdresser, List<BostedsAdresse> barnetsDeltBostedAdresser) {
         this.søkerAktørId = søkerAktørId;
         this.søkerAdresser = søkerAdresser;
         this.foreldreAdresser = foreldreAdresser;
+        this.barnetsDeltBostedAdresser = barnetsDeltBostedAdresser;
     }
 
     public AktørId getSøkerAktørId() {
@@ -30,12 +32,17 @@ public class AleneomsorgVilkårGrunnlag implements VilkårGrunnlag {
         return søkerAdresser;
     }
 
+    public List<BostedsAdresse> getBarnetsDeltBostedAdresser() {
+        return barnetsDeltBostedAdresser;
+    }
+
     @Override
     public String toString() {
         return "AleneOmOmsorgenVilkårGrunnlag{" +
             "søkerAktørId=" + søkerAktørId +
             ", foreldresAdresser=" + foreldreAdresser +
             ", søkersAdresser=" + søkerAdresser +
+            ", deltBostedAdresser=" + barnetsDeltBostedAdresser +
             '}';
     }
 }
