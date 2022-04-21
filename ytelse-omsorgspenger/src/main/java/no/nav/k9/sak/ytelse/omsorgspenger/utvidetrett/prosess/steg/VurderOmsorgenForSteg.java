@@ -72,6 +72,10 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        if (behandling.erManueltOpprettet()) {
+            //skal alltid ha aksjonspunktet ved manuell revurdering slik at saksbehandler kan korrigere
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR));
+        }
         FagsakYtelseType fagsakYtelseType = behandling.getFagsakYtelseType();
         if (automatiserVedtak && fagsakYtelseType == OMSORGSPENGER_AO) {
             return utførStegAutomatisk(kontekst);
