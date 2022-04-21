@@ -5,8 +5,6 @@ import static no.nav.k9.kodeverk.behandling.BehandlingType.UNNTAKSBEHANDLING;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -31,14 +29,6 @@ public class UnntaksbehandlingVilkårsPerioderTilVurderingTjenesteProvider {
     @Produces
     @ApplicationScoped
     public VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjenesteOMS() {
-        return vilkårsPerioderTilVurderingTjeneste;
-    }
-
-    @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
-    @BehandlingTypeRef(UNNTAKSBEHANDLING)
-    @Produces
-    @ApplicationScoped
-    public VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjenestePSB() {
         return vilkårsPerioderTilVurderingTjeneste;
     }
 
