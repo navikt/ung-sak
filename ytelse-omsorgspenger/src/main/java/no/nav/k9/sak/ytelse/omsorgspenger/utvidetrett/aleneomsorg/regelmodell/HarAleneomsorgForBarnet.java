@@ -17,11 +17,15 @@ public class HarAleneomsorgForBarnet extends LeafSpecification<AleneomsorgVilkå
 
     @Override
     public Evaluation evaluate(AleneomsorgVilkårGrunnlag grunnlag) {
-        if (!søkerHarSammeAdresseSomEnAnnenForelder(grunnlag)) {
+        if (!søkerHarSammeAdresseSomEnAnnenForelder(grunnlag) && !barnetHarDeltOmsorg(grunnlag)) {
             return ja();
         }
 
         return kanIkkeVurdere(AleneomsorgKanIkkeVurdereAutomatiskÅrsaker.KAN_IKKE_AUTOMATISK_INNVILGE_OMSORGEN_FOR.toRuleReason());
+    }
+
+    private boolean barnetHarDeltOmsorg(AleneomsorgVilkårGrunnlag grunnlag) {
+        return !grunnlag.getBarnetsDeltBostedAdresser().isEmpty();
     }
 
     private boolean søkerHarSammeAdresseSomEnAnnenForelder(AleneomsorgVilkårGrunnlag grunnlag) {
