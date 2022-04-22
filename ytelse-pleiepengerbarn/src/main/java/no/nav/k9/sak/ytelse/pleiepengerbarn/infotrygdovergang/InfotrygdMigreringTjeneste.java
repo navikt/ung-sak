@@ -179,27 +179,26 @@ public class InfotrygdMigreringTjeneste {
 
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var eksisterendeInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(fagsakId);
-        validerIngenTrukketPeriode(behandlingId, eksisterendeInfotrygdMigreringer);
 
         var skjæringstidspunkterTilVurdering = perioderTilVurdering.stream()
-            .filter(p -> eksisterendeInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt)
-                .anyMatch(p::inkluderer))
             .map(DatoIntervallEntitet::getFomDato)
+            .filter(fomDato -> eksisterendeInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).anyMatch(fomDato::equals))
             .collect(Collectors.toSet());
 
         var datoerForOverlapp = finnDatoerForOverlapp(perioderTilVurdering, behandlingId, aktørId);
+        var alleSøknadsperioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandlingId);
+        validerIngenTrukketPeriode(behandlingId, aktørId, eksisterendeInfotrygdMigreringer, alleSøknadsperioder);
 
         var utledetInfotrygdmigreringTilVurdering = new HashSet<LocalDate>();
         utledetInfotrygdmigreringTilVurdering.addAll(datoerForOverlapp);
         utledetInfotrygdmigreringTilVurdering.addAll(skjæringstidspunkterTilVurdering);
         utledetInfotrygdmigreringTilVurdering.forEach(localDate -> opprettMigrering(fagsakId, localDate, perioderTilVurdering));
-        deaktiverSkjæringstidspunkterSomErFlyttet(eksisterendeInfotrygdMigreringer, perioderTilVurdering);
+        deaktiverSkjæringstidspunkterSomErFlyttet(eksisterendeInfotrygdMigreringer, alleSøknadsperioder);
     }
 
-    private void deaktiverSkjæringstidspunkterSomErFlyttet(List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer,
-                                                           NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+    private void deaktiverSkjæringstidspunkterSomErFlyttet(List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer, NavigableSet<DatoIntervallEntitet> alleSøknadsperioder) {
         var migreringerSomSkalDeaktiveres = eksisterendeInfotrygdMigreringer.stream()
-            .filter(m -> perioderTilVurdering.stream().anyMatch(periode -> periode.inkluderer(m.getSkjæringstidspunkt()) && !m.getSkjæringstidspunkt().equals(periode.getFomDato())))
+            .filter(m -> alleSøknadsperioder.stream().noneMatch(periode -> m.getSkjæringstidspunkt().equals(periode.getFomDato())))
             .collect(Collectors.toUnmodifiableSet());
         migreringerSomSkalDeaktiveres.forEach(this::deaktiver);
     }
@@ -209,13 +208,15 @@ public class InfotrygdMigreringTjeneste {
         fagsakRepository.deaktiverInfotrygdmigrering(m.getFagsakId(), m.getSkjæringstidspunkt());
     }
 
-    private void validerIngenTrukketPeriode(Long behandlingId, List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer) {
-        var fullstendigePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandlingId);
+    private void validerIngenTrukketPeriode(Long behandlingId, AktørId aktørId, List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer, NavigableSet<DatoIntervallEntitet> alleSøknadsperioder) {
+        var anvistePerioder = finnPerioderMedPSBFraInfotrygd(behandlingId, aktørId);
         var migreringUtenSøknad = eksisterendeInfotrygdMigreringer.stream()
-            .filter(sim -> fullstendigePerioder.stream().noneMatch(periode -> periode.inkluderer(sim.getSkjæringstidspunkt())))
+            .map(SakInfotrygdMigrering::getSkjæringstidspunkt)
+            .filter(migrertStp -> alleSøknadsperioder.stream().noneMatch(periode -> periode.inkluderer(migrertStp)) &&
+                anvistePerioder.stream().noneMatch(p -> p.inkluderer(migrertStp)))
             .collect(Collectors.toList());
         if (!migreringUtenSøknad.isEmpty()) {
-            throw new IllegalStateException("Støtter ikke trukket søknad for migrering fra infotrygd");
+            throw new IllegalStateException("Støtter ikke trukket søknad for migrering fra infotrygd etter fjerning av periode fra inforygd.");
         }
     }
 
@@ -227,37 +228,39 @@ public class InfotrygdMigreringTjeneste {
     }
 
     private Set<LocalDate> finnDatoerForOverlapp(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Long behandlingId, AktørId aktørId) {
-        YtelseFilter ytelseFilter = finnPSBInfotryd(behandlingId, aktørId);
+        List<DatoIntervallEntitet> anvistePerioder = finnPerioderMedPSBFraInfotrygd(behandlingId, aktørId);
         var stpForMigrering = new HashSet<LocalDate>();
-        stpForMigrering.addAll(finnSkjæringstidspunktForOverlapp(perioderTilVurdering, ytelseFilter));
-        stpForMigrering.addAll(finnSkjæringstidspunktForKantIKant(perioderTilVurdering, ytelseFilter));
+        stpForMigrering.addAll(finnSkjæringstidspunktForOverlapp(perioderTilVurdering, anvistePerioder));
+        stpForMigrering.addAll(finnSkjæringstidspunktForKantIKant(perioderTilVurdering, anvistePerioder));
         return stpForMigrering;
     }
 
-    private Set<LocalDate> finnSkjæringstidspunktForKantIKant(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, YtelseFilter ytelseFilter) {
-        var kantIKantPerioder = finnKantIKantPeriode(ytelseFilter, perioderTilVurdering);
-        return kantIKantPerioder.stream().map(DatoIntervallEntitet::getFomDato).collect(Collectors.toSet());
-    }
-
-    private Set<LocalDate> finnSkjæringstidspunktForOverlapp(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, YtelseFilter ytelseFilter) {
-        var alleAnvistePerioder = ytelseFilter.getFiltrertYtelser()
+    private List<DatoIntervallEntitet> finnPerioderMedPSBFraInfotrygd(Long behandlingId, AktørId aktørId) {
+        YtelseFilter ytelseFilter = finnPSBInfotryd(behandlingId, aktørId);
+        var anvistePerioder = ytelseFilter.getFiltrertYtelser()
             .stream()
             .filter(y -> y.getYtelseAnvist() != null)
             .flatMap(y -> y.getYtelseAnvist().stream())
             .map(y -> DatoIntervallEntitet.fraOgMedTilOgMed(y.getAnvistFOM(), y.getAnvistTOM()))
             .toList();
+        return anvistePerioder;
+    }
+
+    private Set<LocalDate> finnSkjæringstidspunktForKantIKant(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, List<DatoIntervallEntitet> anvistePerioder) {
+        var kantIKantPerioder = finnKantIKantPeriode(perioderTilVurdering, anvistePerioder);
+        return kantIKantPerioder.stream().map(DatoIntervallEntitet::getFomDato).collect(Collectors.toSet());
+    }
+
+    private Set<LocalDate> finnSkjæringstidspunktForOverlapp(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, List<DatoIntervallEntitet> anvistePerioder) {
         return perioderTilVurdering.stream()
-            .map(DatoIntervallEntitet::getFomDato).filter(d -> alleAnvistePerioder.stream()
+            .map(DatoIntervallEntitet::getFomDato).filter(d -> anvistePerioder.stream()
                 .anyMatch(p -> p.inkluderer(d))).collect(Collectors.toSet());
 
     }
 
-    private Set<DatoIntervallEntitet> finnKantIKantPeriode(YtelseFilter ytelseFilter, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+    private Set<DatoIntervallEntitet> finnKantIKantPeriode(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, List<DatoIntervallEntitet> anvistePerioder) {
         return perioderTilVurdering.stream()
-            .filter(p -> ytelseFilter.getFiltrertYtelser().stream()
-                .anyMatch(y ->
-                    y.getYtelseAnvist().stream()
-                        .anyMatch(ya -> kantIKantVurderer.erKantIKant(p, DatoIntervallEntitet.fraOgMedTilOgMed(ya.getAnvistFOM(), ya.getAnvistTOM())))))
+            .filter(p -> anvistePerioder.stream().anyMatch(ap -> kantIKantVurderer.erKantIKant(p, ap)))
             .collect(Collectors.toSet());
     }
 
