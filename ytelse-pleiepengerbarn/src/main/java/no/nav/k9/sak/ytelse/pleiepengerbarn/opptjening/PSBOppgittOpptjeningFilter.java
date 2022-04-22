@@ -18,7 +18,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -77,7 +76,7 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
             .orElseThrow(() -> new IllegalStateException("Har ikke " + getClass().getSimpleName() + " for ytelse=" + ref.getFagsakYtelseType()));
         Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokMedFravær = tjeneste.hentPerioderTilVurdering(ref);
         if (lansertNyPrioritering) {
-            finnOppgittOpptjeningLansert(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
+            return finnOppgittOpptjeningLansert(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
         }
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
     }
@@ -92,7 +91,7 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
             .orElseThrow(() -> new IllegalStateException("Har ikke " + getClass().getSimpleName() + " for ytelse=" + ref.getFagsakYtelseType()));
         Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokMedFravær = tjeneste.hentPerioderTilVurdering(ref);
         if (lansertNyPrioritering) {
-            finnOppgittOpptjeningLansert(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
+            return finnOppgittOpptjeningLansert(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
         }
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
     }

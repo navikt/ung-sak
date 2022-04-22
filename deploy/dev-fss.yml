@@ -200,8 +200,6 @@ spec:
       value: "true"
     - name: ENABLE_STONADSTATISTIKK
       value: "true"
-    - name: ENABLE_RELEVANT_SYKDOMSPERIODE
-      value: "true"
     - name: MAP_ALLE_KRAV
       value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
@@ -219,8 +217,6 @@ spec:
     - name: HENLEGGELSE_PSB_ENABLET
       value: "true"
     - name: K9_RAPID_AIVEN
-      value: "true"
-    - name: UTENLANDSPERIODER_MAPPING_ENABLET
       value: "true"
     - name: PSB_UTVIDE_VED_DODSFALL
       value: "true"
