@@ -223,8 +223,6 @@ spec:
       value: "false"
     - name: OMP_AVSLAG_SOKNAD_MANGLER_IM
       value: "false"
-    - name: OMP_AARSKVANTUMTJENESTE_BRUK_FERDIGUTLEDET_FLAGG_REFUSJON
-      value: "false"
     - name: OMP_DELT_BOSTED_RAMMEVEDTAK
       value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
