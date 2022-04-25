@@ -33,7 +33,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -82,7 +81,7 @@ class InfotrygdMigreringTjenesteTest {
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
         when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any())).thenReturn(Collections.emptyMap());
-        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, behandlingRepository, infotrygdService);
+        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, behandlingRepository, infotrygdService, true);
     }
 
     @Test

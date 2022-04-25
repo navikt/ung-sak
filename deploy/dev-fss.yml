@@ -228,6 +228,8 @@ spec:
       value: "true"
     - name: OMP_DELT_BOSTED_RAMMEVEDTAK
       value: "true"
+    - name: PSB_TREKKE_MIGRERT_PERIODE
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
