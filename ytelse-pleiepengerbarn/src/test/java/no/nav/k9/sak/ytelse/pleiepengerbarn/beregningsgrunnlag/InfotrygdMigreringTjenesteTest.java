@@ -7,7 +7,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,9 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
@@ -56,6 +61,7 @@ class InfotrygdMigreringTjenesteTest {
     private EntityManager entityManager;
 
     private FagsakRepository fagsakRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = mock(VilkårsPerioderTilVurderingTjeneste.class);
@@ -71,7 +77,7 @@ class InfotrygdMigreringTjenesteTest {
 
         fagsakRepository = new FagsakRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
-
+        vilkårResultatRepository = new VilkårResultatRepository(entityManager);
         fagsak = Fagsak.opprettNy(FagsakYtelseType.PSB, new AktørId(123L), new Saksnummer("987"), STP, STP.plusDays(10));
         fagsakRepository.opprettNy(fagsak);
         behandling = Behandling.forFørstegangssøknad(fagsak).medBehandlingStatus(BehandlingStatus.UTREDES).build();
@@ -81,12 +87,35 @@ class InfotrygdMigreringTjenesteTest {
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
         when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any())).thenReturn(Collections.emptyMap());
-        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, behandlingRepository, infotrygdService, true);
+        when(perioderTilVurderingTjeneste.getKantIKantVurderer())
+            .thenReturn(new PåTversAvHelgErKantIKantVurderer());
+
+        lagreVilkårPeriode(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))));
+        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, vilkårResultatRepository, fagsakRepository, behandlingRepository, infotrygdService, true);
+    }
+
+    private void lagreVilkårPeriode(List<DatoIntervallEntitet> perioder) {
+        var vilkårene = new VilkårResultatBuilder().leggTilIkkeVurderteVilkår(perioder, VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+            .build();
+        vilkårResultatRepository.lagre(behandling.getId(), vilkårene);
     }
 
     @Test
     void skal_opprette_ved_overlapp() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP));
+
+        tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
+
+        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
+        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP);
+    }
+
+    @Test
+    void skal_deaktivere_der_periode_er_slått_sammen_med_periode_i_forkant() {
+        lagreVilkårPeriode(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))));
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP));
+        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.plusDays(5));
 
         tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
 
@@ -127,6 +156,9 @@ class InfotrygdMigreringTjenesteTest {
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30))))));
+        lagreVilkårPeriode(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
+            DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30))));
+
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.plusDays(30)));
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.plusDays(2));
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.plusDays(20));
@@ -146,6 +178,10 @@ class InfotrygdMigreringTjenesteTest {
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusDays(10))
             ))));
+        lagreVilkårPeriode(List.of(
+            DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
+            DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusDays(10))
+        ));
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusDays(10)));
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.minusDays(10));
 
@@ -175,6 +211,8 @@ class InfotrygdMigreringTjenesteTest {
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusMonths(1).plusDays(10))))));
+        lagreVilkårPeriode(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
+            DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusMonths(1).plusDays(10))));
         lagInfotrygdPsbYtelsePerioder(List.of(
             DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
             DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusMonths(1).plusDays(10))));
@@ -196,6 +234,9 @@ class InfotrygdMigreringTjenesteTest {
             .thenReturn(new TreeSet<>((Set.of(
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
             ))));
+        lagreVilkårPeriode(List.of(
+            DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
+        ));
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.minusMonths(1));
         lagUtenInfotrygdPsbYtelse();
 
@@ -209,6 +250,9 @@ class InfotrygdMigreringTjenesteTest {
             .thenReturn(new TreeSet<>((Set.of(
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
             ))));
+        lagreVilkårPeriode(List.of(
+            DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
+        ));
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusDays(10)));
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.minusMonths(1));
 
@@ -259,6 +303,10 @@ class InfotrygdMigreringTjenesteTest {
                 DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2022, 1, 3), STP.minusMonths(1).plusDays(10)),
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
             ))));
+        lagreVilkårPeriode(List.of(
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2022, 1, 3), STP.minusMonths(1).plusDays(10)),
+            DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
+        ));
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
 
         var aksjonspunkter = tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling, STP));
