@@ -25,6 +25,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -62,6 +63,7 @@ public class InfotrygdMigreringTjeneste {
     private BehandlingRepository behandlingRepository;
     private final KantIKantVurderer kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
     private InfotrygdService infotrygdService;
+    private boolean støtterTrukketPeriodeToggle;
 
     public InfotrygdMigreringTjeneste() {
     }
@@ -70,12 +72,14 @@ public class InfotrygdMigreringTjeneste {
     public InfotrygdMigreringTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                       @BehandlingTypeRef @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                       FagsakRepository fagsakRepository,
-                                      BehandlingRepository behandlingRepository, InfotrygdService infotrygdService) {
+                                      BehandlingRepository behandlingRepository, InfotrygdService infotrygdService,
+                                      @KonfigVerdi(value = "PSB_TREKKE_MIGRERT_PERIODE", defaultVerdi = "false") boolean støtterTrukketPeriodeToggle) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.infotrygdService = infotrygdService;
+        this.støtterTrukketPeriodeToggle = støtterTrukketPeriodeToggle;
     }
 
     public List<AksjonspunktResultat> utledAksjonspunkter(BehandlingReferanse ref) {
@@ -213,7 +217,7 @@ public class InfotrygdMigreringTjeneste {
         var migreringUtenSøknad = eksisterendeInfotrygdMigreringer.stream()
             .map(SakInfotrygdMigrering::getSkjæringstidspunkt)
             .filter(migrertStp -> alleSøknadsperioder.stream().noneMatch(periode -> periode.inkluderer(migrertStp)) &&
-                anvistePerioder.stream().noneMatch(p -> p.inkluderer(migrertStp)))
+                (!støtterTrukketPeriodeToggle || anvistePerioder.stream().noneMatch(p -> p.inkluderer(migrertStp))))
             .collect(Collectors.toList());
         if (!migreringUtenSøknad.isEmpty()) {
             throw new IllegalStateException("Støtter ikke trukket søknad for migrering fra infotrygd etter fjerning av periode fra inforygd.");

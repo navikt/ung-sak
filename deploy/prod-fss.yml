@@ -225,6 +225,8 @@ spec:
       value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
       value: "true"
+    - name: PSB_TREKKE_MIGRERT_PERIODE
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
