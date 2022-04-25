@@ -2,6 +2,7 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.beregningsresultat;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.List;
@@ -10,7 +11,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
-
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
@@ -20,6 +20,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 @ApplicationScoped
 @FagsakYtelseTypeRef(OMSORGSPENGER)
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(FRISINN)
 public class BeregningsresultatDump implements DebugDumpFagsak {
 

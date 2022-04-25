@@ -2,23 +2,25 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import java.util.List;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Tuple;
-import java.util.List;
-
 @ApplicationScoped
 @FagsakYtelseTypeRef(OMSORGSPENGER)
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(FRISINN)
 public class BeregningsgrunnlagDump implements DebugDumpFagsak {
 
