@@ -5,7 +5,10 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,9 +30,14 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
@@ -47,6 +55,7 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private PSBVilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     public ForvaltningInfotrygMigreringRestTjeneste() {
     }
@@ -54,10 +63,12 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
     @Inject
     public ForvaltningInfotrygMigreringRestTjeneste(FagsakRepository fagsakRepository,
                                                     BehandlingRepository behandlingRepository,
-                                                    @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PSBVilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+                                                    @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PSBVilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                                    VilkårResultatRepository vilkårResultatRepository) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     @GET
@@ -119,10 +130,9 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
 
         var sakerMedFlerePerioderOgDeaktivertMigrering = fagsakIder.stream().filter(id -> behandlingRepository.hentSisteBehandlingForFagsakId(id)
                 .map(b -> {
-                    var allePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(b.getId());
-                    var migreringer = grupperteMigreringer.get(id);
-                    var harDeaktivertMigreringForSkjæringstidspunkt = migreringer.stream().anyMatch(m -> !m.getAktiv() && allePerioder.stream().anyMatch(p -> p.getFomDato().equals(m.getSkjæringstidspunkt())));
-                    return harDeaktivertMigreringForSkjæringstidspunkt && allePerioder.size() > 1;
+                    var alleSkjæringstidspunkt = finnAlleSkjæringstidspunkterForSak(b);
+                    boolean harDeaktivertMigreringForStp = harDeaktivertMigreringForSkjæringstidspunkt(grupperteMigreringer, id, alleSkjæringstidspunkt);
+                    return harDeaktivertMigreringForStp && alleSkjæringstidspunkt.size() > 1;
                 }).orElse(false))
             .collect(Collectors.toSet());
 
@@ -132,5 +142,53 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
             .collect(Collectors.toList());
         return Response.ok(saksnummer).build();
     }
+
+    @GET
+    @Path("/feilbehandletMigrering")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Hent saker som feilaktig har blitt behandlet som ikke migrert fra infotrygd", tags = "infotrygdmigrering", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer saker som feilaktig har blitt behandlet som ikke migrert fra infotrygd",
+            content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = List.class), schema = @Schema(implementation = SaksnummerDto.class)), mediaType = MediaType.APPLICATION_JSON))
+    })
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response feilbehandledeMigreringer() { // NOSONAR
+        var grupperteMigreringer = fagsakRepository.hentAlleSakInfotrygdMigreringerForAlleFagsaker()
+            .stream().collect(Collectors.groupingBy(SakInfotrygdMigrering::getFagsakId));
+
+        var fagsakIder = grupperteMigreringer.keySet();
+
+        var sakerMedFjernetMigreringUtenOverstyrInntekt = fagsakIder.stream().filter(id -> behandlingRepository.hentSisteBehandlingForFagsakId(id)
+                .map(b -> {
+                    var alleSkjæringstidspunkt = finnAlleSkjæringstidspunkterForSak(b);
+                    boolean harDeaktivertMigreringForStp = harDeaktivertMigreringForSkjæringstidspunkt(grupperteMigreringer, id, alleSkjæringstidspunkt);
+                    var harAvbruttOverstyrInntekt = harAvbruttOverstyrInntektAksjonspunkt(b);
+                    return harAvbruttOverstyrInntekt && harDeaktivertMigreringForStp && alleSkjæringstidspunkt.size() > 1;
+                }).orElse(false))
+            .collect(Collectors.toSet());
+
+        var saksnummer = sakerMedFjernetMigreringUtenOverstyrInntekt.stream().map(fagsakRepository::finnEksaktFagsak)
+            .map(Fagsak::getSaksnummer)
+            .map(SaksnummerDto::new)
+            .collect(Collectors.toList());
+        return Response.ok(saksnummer).build();
+    }
+
+    private boolean harDeaktivertMigreringForSkjæringstidspunkt(Map<Long, List<SakInfotrygdMigrering>> grupperteMigreringer, Long id, Set<LocalDate> alleSkjæringstidspunkt) {
+        var migreringer = grupperteMigreringer.get(id);
+        return migreringer.stream().anyMatch(m -> !m.getAktiv() && alleSkjæringstidspunkt.stream().anyMatch(stp -> stp.equals(m.getSkjæringstidspunkt())));
+    }
+
+    private boolean harAvbruttOverstyrInntektAksjonspunkt(Behandling b) {
+        return b.getAksjonspunkter().stream().anyMatch(a -> a.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT) && a.getStatus().equals(AksjonspunktStatus.AVBRUTT));
+    }
+
+    private Set<LocalDate> finnAlleSkjæringstidspunkterForSak(Behandling behandling) {
+        return vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)).stream()
+            .flatMap(v -> v.getPerioder().stream())
+            .map(VilkårPeriode::getSkjæringstidspunkt)
+            .collect(Collectors.toSet());
+    }
+
 
 }
