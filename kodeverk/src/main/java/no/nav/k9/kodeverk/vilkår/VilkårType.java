@@ -62,6 +62,7 @@ public enum VilkårType implements Kodeverdi {
         "Aldersvilkåret",
         Map.of(
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-3 første ledd",
+            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 9-3 første ledd",
             FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-3 første ledd",
             FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-3 første ledd",
             FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-3 første ledd"),
