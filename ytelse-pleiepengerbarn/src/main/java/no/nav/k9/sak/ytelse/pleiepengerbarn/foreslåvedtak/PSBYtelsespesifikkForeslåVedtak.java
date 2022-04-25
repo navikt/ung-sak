@@ -13,6 +13,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.YtelsespesifikkForeslåVedtak;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
@@ -29,6 +30,7 @@ public class PSBYtelsespesifikkForeslåVedtak implements YtelsespesifikkForeslå
     private BehandlingRepository behandlingRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
+    private AksjonspunktRepository aksjonspunktRepository;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     @Inject
@@ -37,12 +39,14 @@ public class PSBYtelsespesifikkForeslåVedtak implements YtelsespesifikkForeslå
                                            BehandlingRepository behandlingRepository,
                                            SykdomGrunnlagService sykdomGrunnlagService,
                                            AksjonspunktKontrollRepository aksjonspunktKontrollRepository,
+                                           AksjonspunktRepository aksjonspunktRepository,
                                            SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
+        this.aksjonspunktRepository = aksjonspunktRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
 
@@ -69,7 +73,14 @@ public class PSBYtelsespesifikkForeslåVedtak implements YtelsespesifikkForeslå
             behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling.getId()));
         }
 
+        if (!harUbesluttedeSykdomsVurderinger && behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE).isPresent()) {
+            Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
+            if (aksjonspunkt.isToTrinnsBehandling()) {
+                aksjonspunktRepository.fjernToTrinnsBehandlingKreves(aksjonspunkt);
+                behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+            }
+        }
+
         return null;
     }
-
 }

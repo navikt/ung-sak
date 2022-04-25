@@ -7,6 +7,8 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PSB;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.AVBRYTES;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.ENTRINN;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.FORBLI;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.KAN_OVERSTYRE_TOTRINN_ETTER_LUKKING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.SKAL_IKKE_AVBRYTES;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TILBAKE;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TOTRINN;
@@ -52,296 +54,296 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     // Gruppe : 5xxx
     AVKLAR_TILLEGGSOPPLYSNINGER(
             AksjonspunktKodeDefinisjon.AVKLAR_TILLEGGSOPPLYSNINGER_KODE, AksjonspunktType.MANUELL, "Avklar tilleggsopplysninger",
-            BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     FORESLÅ_VEDTAK(AksjonspunktKodeDefinisjon.FORESLÅ_VEDTAK_KODE,
             AksjonspunktType.MANUELL, "Foreslå vedtak", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT,
-            UTEN_VILKÅR, SkjermlenkeType.VEDTAK, ENTRINN, EnumSet.of(OMP, PSB)),
+            UTEN_VILKÅR, SkjermlenkeType.VEDTAK, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     FATTER_VEDTAK(AksjonspunktKodeDefinisjon.FATTER_VEDTAK_KODE,
             AksjonspunktType.MANUELL, "Fatter vedtak", Set.of(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.UTREDES), BehandlingStegType.FATTE_VEDTAK, VurderingspunktType.INN, UTEN_VILKÅR,
             SkjermlenkeType.VEDTAK,
-            ENTRINN, EnumSet.of(OMP, PSB)),
+            ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     SØKERS_OPPLYSNINGSPLIKT_MANU(
             AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_MANU_KODE, AksjonspunktType.MANUELL,
             "Vurder søkers opplysningsplikt ved ufullstendig/ikke-komplett søknad", BehandlingStatus.UTREDES,
-            BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT, VurderingspunktType.UT, VilkårType.SØKERSOPPLYSNINGSPLIKT, SkjermlenkeType.OPPLYSNINGSPLIKT, ENTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT, VurderingspunktType.UT, VilkårType.SØKERSOPPLYSNINGSPLIKT, SkjermlenkeType.OPPLYSNINGSPLIKT, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     VEDTAK_UTEN_TOTRINNSKONTROLL(
             AksjonspunktKodeDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL_KODE, AksjonspunktType.MANUELL, "Foreslå vedtak uten totrinnskontroll",
-            BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB, FRISINN)),
+            BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB, FRISINN)),
     AVKLAR_LOVLIG_OPPHOLD(AksjonspunktKodeDefinisjon.AVKLAR_LOVLIG_OPPHOLD_KODE,
             AksjonspunktType.MANUELL, "Avklar lovlig opphold.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
-            VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, EnumSet.of(OMP, PSB)),
+            VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     AVKLAR_OM_ER_BOSATT(AksjonspunktKodeDefinisjon.AVKLAR_OM_ER_BOSATT_KODE,
             AksjonspunktType.MANUELL, "Avklar om bruker er bosatt.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
-            VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, EnumSet.of(OMP, PSB)),
+            VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE(
             AksjonspunktKodeDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE_KODE, AksjonspunktType.MANUELL, "Avklar om bruker har gyldig periode.",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET,
-            SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, EnumSet.of(OMP, PSB)),
+            SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     AVKLAR_OPPHOLDSRETT(AksjonspunktKodeDefinisjon.AVKLAR_OPPHOLDSRETT_KODE,
             AksjonspunktType.MANUELL, "Avklar oppholdsrett.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
-            VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, EnumSet.of(OMP, PSB)),
+            VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     VARSEL_REVURDERING_MANUELL(
             AksjonspunktKodeDefinisjon.VARSEL_REVURDERING_MANUELL_KODE, AksjonspunktType.MANUELL, "Varsel om revurdering opprettet manuelt",
-            BehandlingStatus.UTREDES, BehandlingStegType.VARSEL_REVURDERING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.VARSEL_REVURDERING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     FORESLÅ_VEDTAK_MANUELT(AksjonspunktKodeDefinisjon.FORESLÅ_VEDTAK_MANUELT_KODE,
             AksjonspunktType.MANUELL, "Foreslå vedtak manuelt", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR,
-            SkjermlenkeType.VEDTAK, ENTRINN, EnumSet.of(OMP, PSB, FRISINN)),
+            SkjermlenkeType.VEDTAK, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB, FRISINN)),
     AVKLAR_VERGE(AksjonspunktKodeDefinisjon.AVKLAR_VERGE_KODE, AksjonspunktType.MANUELL,
-            "Avklar verge", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.INN, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_VERGE, ENTRINN, EnumSet.of(OMP, PSB)),
+            "Avklar verge", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.INN, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_VERGE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     VURDERE_ANNEN_YTELSE_FØR_VEDTAK(
             AksjonspunktKodeDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere annen ytelse før vedtak",
-            BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     VURDERE_DOKUMENT_FØR_VEDTAK(
             AksjonspunktKodeDefinisjon.VURDERE_DOKUMENT_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere dokument før vedtak",
             BehandlingStatus.UTREDES,
-            BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK(
             AksjonspunktKodeDefinisjon.VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere overlappende ytelse før vedtak",
             BehandlingStatus.UTREDES,
-            BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS(
             AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS_KODE, AksjonspunktType.MANUELL,
             "Fastsette beregningsgrunnlag for arbeidstaker/frilanser skjønnsmessig", BehandlingStatus.UTREDES,
-            BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE(
             AksjonspunktKodeDefinisjon.VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE, AksjonspunktType.MANUELL,
             "Vurder varig endret/nyoppstartet næring selvstendig næringsdrivende", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG,
-            VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
+            VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE(
             AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE_KODE, AksjonspunktType.MANUELL,
             "Fastsett beregningsgrunnlag for selvstendig næringsdrivende", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG,
-            VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
+            VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     FORDEL_BEREGNINGSGRUNNLAG(AksjonspunktKodeDefinisjon.FORDEL_BEREGNINGSGRUNNLAG_KODE,
             AksjonspunktType.MANUELL, "Fordel beregningsgrunnlag", BehandlingStatus.UTREDES, BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG, VurderingspunktType.UT,
-            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_FORDELING, TOTRINN, EnumSet.of(OMP, PSB)),
+            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_FORDELING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     VURDER_REFUSJON_BERGRUNN(AksjonspunktKodeDefinisjon.VURDER_REFUSJON_BERGRUNN_KODE,
         AksjonspunktType.MANUELL, "Vurder refusjon beregningsgrunnlag", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_REF_BERGRUNN, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_FORDELING, TOTRINN, EnumSet.of(PSB)),
+        UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_FORDELING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(PSB)),
     FASTSETT_BEREGNINGSGRUNNLAG_TIDSBEGRENSET_ARBEIDSFORHOLD(
             AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_TIDSBEGRENSET_ARBEIDSFORHOLD_KODE, AksjonspunktType.MANUELL,
             "Fastsett beregningsgrunnlag for tidsbegrenset arbeidsforhold", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG,
-            VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
+            VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     FASTSETT_BEREGNINGSGRUNNLAG_FOR_SN_NY_I_ARBEIDSLIVET(
             AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_FOR_SN_NY_I_ARBEIDSLIVET_KODE, AksjonspunktType.MANUELL,
             "Fastsett beregningsgrunnlag for SN som er ny i arbeidslivet", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, VurderingspunktType.UT,
-            UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
+            UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     VURDER_GRADERING_UTEN_BEREGNINGSGRUNNLAG(
             AksjonspunktKodeDefinisjon.VURDER_GRADERING_UTEN_BEREGNINGSGRUNNLAG_KODE, AksjonspunktType.MANUELL,
             "Vurder gradering på andel uten beregningsgrunnlag",
-            BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     VURDER_PERIODER_MED_OPPTJENING(
             AksjonspunktKodeDefinisjon.VURDER_PERIODER_MED_OPPTJENING_KODE, AksjonspunktType.MANUELL, "Vurder perioder med opptjening",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OPPTJENINGSVILKÅR, VurderingspunktType.INN, VilkårType.OPPTJENINGSVILKÅRET,
-            SkjermlenkeType.FAKTA_FOR_OPPTJENING, ENTRINN, EnumSet.of(OMP, PSB)),
+            SkjermlenkeType.FAKTA_FOR_OPPTJENING, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     AVKLAR_AKTIVITETER(AksjonspunktKodeDefinisjon.AVKLAR_AKTIVITETER_KODE,
             AksjonspunktType.MANUELL, "Avklar aktivitet for beregning", BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
-            VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
+            VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     AVKLAR_FORTSATT_MEDLEMSKAP(
             AksjonspunktKodeDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP_KODE, AksjonspunktType.MANUELL, "Avklar medlemskap.",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, VurderingspunktType.INN,
-            VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, TOTRINN, EnumSet.of(OMP, PSB)),
+            VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST(
             AksjonspunktKodeDefinisjon.KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST_KODE, AksjonspunktType.MANUELL,
             "Vurder varsel ved vedtak til ugunst",
-            BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB, FRISINN)),
+            BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB, FRISINN)),
     KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING(
             AksjonspunktKodeDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING_KODE, AksjonspunktType.MANUELL,
             "Kontroll av manuelt opprettet revurderingsbehandling", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT,
             UTEN_VILKÅR, UTEN_SKJERMLENKE,
-            ENTRINN, EnumSet.of(OMP, PSB, FRISINN)),
+            ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB, FRISINN)),
     MANUELL_TILKJENT_YTELSE(
             AksjonspunktKodeDefinisjon.MANUELL_TILKJENT_YTELSE_KODE, AksjonspunktType.MANUELL,
             "Manuell tilkjenning av ytelse", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.MANUELL_TILKJENNING_YTELSE, VurderingspunktType.INN,
             UTEN_VILKÅR, SkjermlenkeType.TILKJENT_YTELSE,
-            TOTRINN, EnumSet.of(OMP, PSB, FRISINN)),
+            TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB, FRISINN)),
     VURDER_FAKTA_FOR_ATFL_SN(AksjonspunktKodeDefinisjon.VURDER_FAKTA_FOR_ATFL_SN_KODE,
             AksjonspunktType.MANUELL, "Vurder fakta for arbeidstaker, frilans og selvstendig næringsdrivende", BehandlingStatus.UTREDES,
-            BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     AUTOMATISK_MARKERING_AV_UTENLANDSSAK(
             AksjonspunktKodeDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE, AksjonspunktType.MANUELL,
             "Innhent dokumentasjon fra utenlandsk trygdemyndighet",
-            BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.INN, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.INN, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     TILKNYTTET_STORTINGET(AksjonspunktKodeDefinisjon.TILKNYTTET_STORTINGET_KODE,
             AksjonspunktType.MANUELL, "Søker er stortingsrepresentant/administrativt ansatt i Stortinget", BehandlingStatus.UTREDES,
-            BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     VURDER_ARBEIDSFORHOLD(AksjonspunktKodeDefinisjon.VURDER_ARBEIDSFORHOLD_KODE,
             AksjonspunktType.MANUELL, "Avklar arbeidsforhold", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, VurderingspunktType.UT,
-            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ARBEIDSFORHOLD, ENTRINN, EnumSet.of(OMP, PSB)),
+            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ARBEIDSFORHOLD, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     VURDER_FEILUTBETALING(AksjonspunktKodeDefinisjon.VURDER_FEILUTBETALING_KODE,
-            AksjonspunktType.MANUELL, "Vurder feilutbetaling", BehandlingStatus.UTREDES, BehandlingStegType.SIMULER_OPPDRAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN,
+            AksjonspunktType.MANUELL, "Vurder feilutbetaling", BehandlingStatus.UTREDES, BehandlingStegType.SIMULER_OPPDRAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING,
             EnumSet.of(OMP, PSB)),
     VURDER_OPPTJENINGSVILKÅRET(
             AksjonspunktKodeDefinisjon.VURDER_OPPTJENINGSVILKÅRET_KODE, AksjonspunktType.MANUELL, "Manuell vurdering av opptjeningsvilkår",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OPPTJENINGSVILKÅR, VurderingspunktType.UT, VilkårType.OPPTJENINGSVILKÅRET,
-            SkjermlenkeType.PUNKT_FOR_OPPTJENING, TOTRINN, EnumSet.of(OMP, PSB)),
+            SkjermlenkeType.PUNKT_FOR_OPPTJENING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     VURDER_TILBAKETREKK(AksjonspunktKodeDefinisjon.VURDER_TILBAKETREKK_KODE,
             AksjonspunktType.MANUELL, "Vurder tilbaketrekk", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_TILBAKETREKK, VurderingspunktType.UT,
-            UTEN_VILKÅR, SkjermlenkeType.TILKJENT_YTELSE, TOTRINN, EnumSet.of(OMP, PSB)),
+            UTEN_VILKÅR, SkjermlenkeType.TILKJENT_YTELSE, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     /** @deprecated pt. ikke i bruk i K9 */
     @Deprecated(forRemoval=true)
     VURDER_FARESIGNALER(AksjonspunktKodeDefinisjon.VURDER_FARESIGNALER_KODE,
             AksjonspunktType.MANUELL, "Vurder Faresignaler", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FARESIGNALER, VurderingspunktType.UT,
-            UTEN_VILKÅR, SkjermlenkeType.VURDER_FARESIGNALER, TOTRINN, EnumSet.of(OMP, PSB)),
+            UTEN_VILKÅR, SkjermlenkeType.VURDER_FARESIGNALER, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE,
             AksjonspunktType.MANUELL, "Vurder søknadsfrist", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST, VurderingspunktType.UT,
-            VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null, EnumSet.of(OMP, PSB)),
+            VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, null, EnumSet.of(OMP, PSB)),
     AVKLAR_KOMPLETT_NOK_FOR_BEREGNING(AksjonspunktKodeDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE,
             AksjonspunktType.MANUELL, "Avklar om inntektsmeldinger kreves for å kunne beregne", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT,
-            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, ENTRINN, FORBLI, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
+            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, FORBLI, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
     ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING(AksjonspunktKodeDefinisjon.ENDELING_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE,
             AksjonspunktType.MANUELL, "Endeling avklaring om inntektsmeldinger kreves for å kunne beregne eller om perioden skal avslås", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT,
-            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
+            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
 
     // Gruppe : 60xx
 
     SØKERS_OPPLYSNINGSPLIKT_OVST(AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_OVST_KODE, AksjonspunktType.SAKSBEHANDLEROVERSTYRING,
             "Saksbehandler initierer kontroll av søkers opplysningsplikt", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT,
-            VurderingspunktType.UT, VilkårType.SØKERSOPPLYSNINGSPLIKT, SkjermlenkeType.OPPLYSNINGSPLIKT, ENTRINN, EnumSet.of(OMP, PSB)),
+            VurderingspunktType.UT, VilkårType.SØKERSOPPLYSNINGSPLIKT, SkjermlenkeType.OPPLYSNINGSPLIKT, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av medlemskapsvilkåret",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, VurderingspunktType.UT, VilkårType.MEDLEMSKAPSVILKÅRET,
-            SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, TOTRINN, EnumSet.of(OMP, PSB)),
+            SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_SØKNADSFRISTVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av Søknadsfrist",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST, VurderingspunktType.UT, VilkårType.SØKNADSFRIST,
-            SkjermlenkeType.SOEKNADSFRIST, TOTRINN, EnumSet.of(OMP, PSB)),
+            SkjermlenkeType.SOEKNADSFRIST, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_MEDISINSKESVILKÅRET_UNDER_18(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_MEDISINSKVILKÅR_UNDER_18_KODE, AksjonspunktType.OVERSTYRING,
             "Overstyring av medisinskvilkår for pleietrengende under 18 år",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, VurderingspunktType.UT, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR,
-            SkjermlenkeType.PUNKT_FOR_MEDISINSK, TOTRINN, EnumSet.of(OMP, PSB)),
+            SkjermlenkeType.PUNKT_FOR_MEDISINSK, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_MEDISINSKESVILKÅRET_OVER_18(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_MEDISINSKVILKÅR_OVER_18_KODE, AksjonspunktType.OVERSTYRING,
             "Overstyring av medisinskvilkår for pleietrengende 18 år",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, VurderingspunktType.UT, VilkårType.MEDISINSKEVILKÅR_18_ÅR,
-            SkjermlenkeType.PUNKT_FOR_MEDISINSK, TOTRINN, EnumSet.of(OMP, PSB)),
+            SkjermlenkeType.PUNKT_FOR_MEDISINSK, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_OMSORGENFOR_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av OMPorgen for",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT, VilkårType.OMSORGEN_FOR,
-            SkjermlenkeType.PUNKT_FOR_OMSORGEN_FOR, TOTRINN, EnumSet.of(OMP, PSB, FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO)),
+            SkjermlenkeType.PUNKT_FOR_OMSORGEN_FOR, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB, FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO)),
     OVERSTYRING_AV_BEREGNING(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNING_KODE,
             AksjonspunktType.OVERSTYRING, "Overstyring av beregning", BehandlingStatus.UTREDES, BehandlingStegType.BEREGN_YTELSE, VurderingspunktType.UT,
-            UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
+            UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_OPPTJENINGSVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_OPPTJENINGSVILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av opptjeningsvilkåret",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OPPTJENINGSVILKÅR, VurderingspunktType.UT, VilkårType.OPPTJENINGSVILKÅRET,
-            SkjermlenkeType.PUNKT_FOR_OPPTJENING, TOTRINN, EnumSet.of(OMP, PSB)),
+            SkjermlenkeType.PUNKT_FOR_OPPTJENING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_BEREGNINGSAKTIVITETER(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNINGSAKTIVITETER_KODE, AksjonspunktType.OVERSTYRING,
             "Overstyring av beregningsaktiviteter", BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
-            VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
+            VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_BEREGNINGSGRUNNLAG(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av beregningsgrunnlag",
-            BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_K9_VILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_K9_VILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av K9-vilkåret",
             Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.MANUELL_VILKÅRSVURDERING, VurderingspunktType.INN, UTEN_VILKÅR,
-            SkjermlenkeType.PUNKT_FOR_MAN_VILKÅRSVURDERING, TOTRINN, EnumSet.of(OMP, PSB, FRISINN)),
+            SkjermlenkeType.PUNKT_FOR_MAN_VILKÅRSVURDERING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB, FRISINN)),
     MANUELL_MARKERING_AV_UTLAND_SAKSTYPE(AksjonspunktKodeDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE, AksjonspunktType.MANUELL, "Manuell markering av utenlandssak",
-            BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTLAND, ENTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTLAND, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(OMP, PSB)),
 
     // Gruppe : 70xx
 
     AUTO_MANUELT_SATT_PÅ_VENT(AksjonspunktKodeDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT_KODE, AksjonspunktType.AUTOPUNKT,
             "Manuelt satt på vent", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE,
-            ENTRINN, FORBLI, "P4W", EnumSet.of(OMP, PSB)),
+            ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, FORBLI, "P4W", EnumSet.of(OMP, PSB)),
     AUTO_VENTER_PÅ_KOMPLETT_SØKNAD(AksjonspunktKodeDefinisjon.AUTO_VENTER_PÅ_KOMPLETT_SØKNAD_KODE, AksjonspunktType.AUTOPUNKT,
-            "Venter på komplett søknad", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, FORBLI, "P4W",
+            "Venter på komplett søknad", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, FORBLI, "P4W",
             EnumSet.of(OMP, PSB)),
     AUTO_SATT_PÅ_VENT_REVURDERING(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING_KODE, AksjonspunktType.AUTOPUNKT,
             "Satt på vent etter varsel om revurdering", BehandlingStatus.UTREDES, BehandlingStegType.VARSEL_REVURDERING, VurderingspunktType.UT, UTEN_VILKÅR,
-            UTEN_SKJERMLENKE, ENTRINN, FORBLI, "P4W", EnumSet.of(OMP, PSB)),
+            UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, FORBLI, "P4W", EnumSet.of(OMP, PSB)),
     AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER_KODE, AksjonspunktType.AUTOPUNKT, "Venter på opptjeningsopplysninger",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OPPTJENINGSVILKÅR, VurderingspunktType.UT, VilkårType.OPPTJENINGSVILKÅRET,
-            SkjermlenkeType.FAKTA_FOR_OPPTJENING, ENTRINN, TILBAKE, "P2W", EnumSet.of(OMP, PSB)),
+            SkjermlenkeType.FAKTA_FOR_OPPTJENING, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, "P2W", EnumSet.of(OMP, PSB)),
     VENT_PGA_FOR_TIDLIG_SØKNAD(AksjonspunktKodeDefinisjon.VENT_PGA_FOR_TIDLIG_SØKNAD_KODE, AksjonspunktType.AUTOPUNKT, "Satt på vent pga for tidlig søknad",
-            BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, UTEN_FRIST, EnumSet.of(OMP, PSB)),
     AUTO_VENT_KOMPLETT_OPPDATERING(AksjonspunktKodeDefinisjon.AUTO_VENT_KOMPLETT_OPPDATERING_KODE, AksjonspunktType.AUTOPUNKT, "Vent på oppdatering som passerer kompletthetssjekk",
-            BehandlingStatus.UTREDES, BehandlingStegType.FATTE_VEDTAK, VurderingspunktType.INN, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, FORBLI, UTEN_FRIST, EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.FATTE_VEDTAK, VurderingspunktType.INN, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, FORBLI, UTEN_FRIST, EnumSet.of(OMP, PSB)),
     AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST_KODE, AksjonspunktType.AUTOPUNKT, "Vent på rapporteringsfrist for inntekt",
-            BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST,
+            BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, UTEN_FRIST,
             EnumSet.of(OMP, PSB)),
     AUTO_VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG(AksjonspunktKodeDefinisjon.AUTO_VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG_KODE, AksjonspunktType.AUTOPUNKT,
             "Autopunkt gradering uten beregningsgrunnlag",
-            BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, UTEN_FRIST, EnumSet.of(OMP, PSB)),
     AUTO_VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT_KODE, AksjonspunktType.AUTOPUNKT,
             "Vent på siste meldekort for AAP eller DP-mottaker", BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.UT,
-            UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(OMP, PSB)),
+            UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, UTEN_FRIST, EnumSet.of(OMP, PSB)),
     AUTO_VENT_INNTEKTSMELDING_MED_UGYLDIG_ARBEIDSFORHOLDID(AksjonspunktKodeDefinisjon.AUTO_VENT_INNTEKTSMELDING_MED_UGYLDIG_ARBEIDSFORHOLDID_KODE, AksjonspunktType.AUTOPUNKT,
             "Vent på ny inntektsmelding med gyldig arbeidsforholdId", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, VurderingspunktType.UT,
-            UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(OMP, PSB)),
+            UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, UTEN_FRIST, EnumSet.of(OMP, PSB)),
     AUTO_VENT_MILITÆR_OG_BG_UNDER_3G(AksjonspunktKodeDefinisjon.AUTO_VENT_MILITÆR_OG_BG_UNDER_3G_KODE, AksjonspunktType.AUTOPUNKT,
             "Autopunkt militær i opptjeningsperioden og beregninggrunnlag under 3G", BehandlingStatus.UTREDES,
-            BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(OMP, PSB)),
+            BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, UTEN_FRIST, EnumSet.of(OMP, PSB)),
     AUTO_VENT_GRADERING_FLERE_ARBEIDSFORHOLD(AksjonspunktKodeDefinisjon.AUTO_VENT_GRADERING_FLERE_ARBEIDSFORHOLD_KODE, AksjonspunktType.AUTOPUNKT, "Autopunkt gradering flere arbeidsforhold",
-            BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, UTEN_FRIST, EnumSet.of(OMP, PSB)),
     AUTO_VENT_ETTERLYST_INNTEKTSMELDING(AksjonspunktKodeDefinisjon.AUTO_VENT_ETTERLYST_INNTEKTSMELDING_KODE, AksjonspunktType.AUTOPUNKT, "Vent på etterlyst inntektsmelding",
-            BehandlingStatus.UTREDES, BehandlingStegType.INREG_AVSL, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P4D", EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.INREG_AVSL, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, "P4D", EnumSet.of(OMP, PSB)),
     AUTO_VENT_BRUKER_70_ÅR(AksjonspunktKodeDefinisjon.AUTO_VENT_BRUKER_70_ÅR, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet, bruker 70år ved refusjonskrav",
-            BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OPPTJENING_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OPPTJENING_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, "P26W", EnumSet.of(OMP, PSB)),
     AUTO_VENT_ETTERLYS_IM_FOR_BEREGNING(AksjonspunktKodeDefinisjon.ETTERLYS_IM_FOR_BEREGNING_KODE, AksjonspunktType.AUTOPUNKT, "Vent på etterlyst inntektsmelding",
-        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", EnumSet.of(OMP, PSB)),
+        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, "P2W", EnumSet.of(OMP, PSB)),
     AUTO_VENT_ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING(AksjonspunktKodeDefinisjon.ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING_KODE, AksjonspunktType.AUTOPUNKT, "Vent på etterlyst inntektsmelding og/eller tilsvar på varsel om avslag",
-        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P3W", EnumSet.of(OMP, PSB)),
+        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, "P3W", EnumSet.of(OMP, PSB)),
 
     // Gruppe : 80xx (FRISINN)
     AUTO_VENT_FRISINN_BEREGNING(AksjonspunktKodeDefinisjon.AUTO_VENT_FRISINN_BEREGNING, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",
-            BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P1D", EnumSet.of(FRISINN)),
+            BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, "P1D", EnumSet.of(FRISINN)),
     AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",
-            BehandlingStatus.UTREDES, BehandlingStegType.VARIANT_FILTER, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", EnumSet.of(FRISINN)),
+            BehandlingStatus.UTREDES, BehandlingStegType.VARIANT_FILTER, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, "P26W", EnumSet.of(FRISINN)),
 
     AUTO_VENT_FRISINN_ATFL_SAMME_ORG(AksjonspunktKodeDefinisjon.AUTO_VENT_FRISINN_ATFL_SAMME_ORG_KODE, AksjonspunktType.AUTOPUNKT, "Arbeidstaker og frilanser i samme organisasjon, kan ikke beregnes.",
-            BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", EnumSet.of(FRISINN)),
+            BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, "P26W", EnumSet.of(FRISINN)),
 
     OVERSTYRING_FRISINN_OPPGITT_OPPTJENING(AksjonspunktKodeDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING_KODE, AksjonspunktType.MANUELL, "Saksbehandler overstyrer oppgitt opptjening",
-            Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN,
+            Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING,
             Set.of(FRISINN)),
 
     // Gruppe : 90xx
 
     KONTROLLER_LEGEERKLÆRING(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE,
             AksjonspunktType.MANUELL, "Kontroller legeerklæring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, VurderingspunktType.UT,
-            VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, SkjermlenkeType.FAKTA_OM_MEDISINSK, ENTRINN, FORBLI, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
+            VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, SkjermlenkeType.FAKTA_OM_MEDISINSK, ENTRINN, KAN_OVERSTYRE_TOTRINN_ETTER_LUKKING, FORBLI, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
     VURDER_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE,
             AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT,
-            VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN, EnumSet.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO)),
+            VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO)),
     VURDER_OMSORGEN_FOR_V2(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE_V2,
             AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT,
-            VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
+            VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
     VURDER_ÅRSKVANTUM_KVOTE(AksjonspunktKodeDefinisjon.VURDER_ÅRSKVANTUM_KVOTE,
             AksjonspunktType.MANUELL, "Årskvantum", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT,
-            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, ENTRINN, TILBAKE, null, EnumSet.of(OMSORGSPENGER)),
+            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, null, EnumSet.of(OMSORGSPENGER)),
     VURDER_ÅRSKVANTUM_DOK(AksjonspunktKodeDefinisjon.VURDER_ÅRSKVANTUM_DOK,
             AksjonspunktType.MANUELL, "Årskvantum dokumentasjon", BehandlingStatus.UTREDES, BehandlingStegType.BEKREFT_UTTAK, VurderingspunktType.INN,
-            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, TOTRINN, TILBAKE, null, EnumSet.of(OMSORGSPENGER)),
+            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, null, EnumSet.of(OMSORGSPENGER)),
     VURDER_OMS_UTVIDET_RETT(AksjonspunktKodeDefinisjon.VURDER_OMS_UTVIDET_RETT,
             AksjonspunktType.MANUELL, "Utvidet Rett", BehandlingStatus.UTREDES, BehandlingStegType.MANUELL_VILKÅRSVURDERING, VurderingspunktType.UT,
-            VilkårType.UTVIDETRETT, SkjermlenkeType.FAKTA_OM_UTVIDETRETT, TOTRINN, EnumSet.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO)),
+            VilkårType.UTVIDETRETT, SkjermlenkeType.FAKTA_OM_UTVIDETRETT, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO)),
     OVERSTYR_BEREGNING_INPUT(AksjonspunktKodeDefinisjon.OVERSTYR_BEREGNING_INPUT,
         AksjonspunktType.MANUELL, "Overstyr input beregning", BehandlingStatus.UTREDES, BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, TOTRINN, EnumSet.of(PSB)),
+        UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(PSB)),
     AUTO_VENT_PÅ_KOMPLETT_SØKNAD_VED_OVERGANG_FRA_INFOTRYGD(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_KOMPLETT_SØKNAD_FOR_PERIODE,
         AksjonspunktType.AUTOPUNKT, "Venter på punsjet søknad", BehandlingStatus.UTREDES, BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, ENTRINN, TILBAKE, AVBRYTES, EnumSet.of(PSB)),
+        UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, AVBRYTES, EnumSet.of(PSB)),
     TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE(AksjonspunktKodeDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE,
         AksjonspunktType.MANUELL, "Mangler søknad for periode i inneværende år", BehandlingStatus.UTREDES, BehandlingStegType.OVERGANG_FRA_INFOTRYGD, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.INFOTRYGD_MIGRERING, TOTRINN, EnumSet.of(PSB)),
+        UTEN_VILKÅR, SkjermlenkeType.INFOTRYGD_MIGRERING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(PSB)),
     TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART(AksjonspunktKodeDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART,
         AksjonspunktType.MANUELL, "Mangler søknad for annen parts periode", BehandlingStatus.UTREDES, BehandlingStegType.OVERGANG_FRA_INFOTRYGD, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.INFOTRYGD_MIGRERING, TOTRINN, EnumSet.of(PSB)),
+        UTEN_VILKÅR, SkjermlenkeType.INFOTRYGD_MIGRERING, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, EnumSet.of(PSB)),
 
     // Gruppe: 92xx - Pleiepenger
     VURDER_NATTEVÅK(AksjonspunktKodeDefinisjon.VURDER_NATTEVÅK, AksjonspunktType.MANUELL,
         "Vurder nattevåk og beredskap", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
-        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_NATTEVÅK, TOTRINN, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_NATTEVÅK, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
     VURDER_BEREDSKAP(AksjonspunktKodeDefinisjon.VURDER_BEREDSKAP, AksjonspunktType.MANUELL,
         "Vurder nattevåk og beredskap", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
-        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_BEREDSKAP, TOTRINN, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_BEREDSKAP, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
     VURDER_RETT_ETTER_PLEIETRENGENDES_DØD(AksjonspunktKodeDefinisjon.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD, AksjonspunktType.MANUELL,
         "Vurder rett etter pleietrengendes død", BehandlingStatus.UTREDES,  BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
-        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD, TOTRINN, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD, TOTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, SKAL_IKKE_AVBRYTES, EnumSet.of(PSB)),
     MANGLER_AKTIVITETER(AksjonspunktKodeDefinisjon.MANGLER_AKTIVITETER, AksjonspunktType.MANUELL,
         "Bruker har ikke oppgitt alle arbeidsgiverne sine", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
-        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, ENTRINN, FORBLI, AVBRYTES, EnumSet.of(PSB)),
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, FORBLI, AVBRYTES, EnumSet.of(PSB)),
     VENT_ANNEN_PSB_SAK(AksjonspunktKodeDefinisjon.VENT_ANNEN_PSB_SAK_KODE, AksjonspunktType.MANUELL,
         "En annen sak tilknyttet barnet må behandles frem til uttak, eller besluttes, før denne saken kan behandles videre.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK_V2, VurderingspunktType.UT, UTEN_VILKÅR,
-        UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(PSB)),
+        UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, UTEN_FRIST, EnumSet.of(PSB)),
 
 
     // Gruppe : 999x
     AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",
-            BehandlingStatus.UTREDES, BehandlingStegType.VARIANT_FILTER, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", EnumSet.of(OMP, FRISINN, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.VARIANT_FILTER, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING, TILBAKE, "P26W", EnumSet.of(OMP, FRISINN, PSB)),
 
     UNDEFINED,
 
@@ -388,6 +390,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
      */
     @JsonIgnore
     private boolean defaultTotrinnBehandling = false;
+
+    @JsonIgnore
+    private boolean kanOverstyreTotrinnEtterLukking = false;
 
     /**
      * Hvorvidt aksjonspunktet har en frist før det må være løst. Brukes i forbindelse med når Behandling er lagt til
@@ -450,7 +455,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
                                    VurderingspunktType vurderingspunktType,
                                    VilkårType vilkårType,
                                    SkjermlenkeType skjermlenkeType,
-                                   boolean defaultTotrinnBehandling, Set<FagsakYtelseType> ytelseTyper) {
+                                   boolean defaultTotrinnBehandling,
+                                   boolean kanOverstyreTotrinnEtterLukking,
+                                   Set<FagsakYtelseType> ytelseTyper) {
         this.kode = Objects.requireNonNull(kode);
         this.behandlingStatus = Set.of(behandlingStatus);
         this.navn = navn;
@@ -460,6 +467,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.ytelseTyper = ytelseTyper;
         this.vilkårType = vilkårType;
         this.defaultTotrinnBehandling = defaultTotrinnBehandling;
+        this.kanOverstyreTotrinnEtterLukking = kanOverstyreTotrinnEtterLukking;
         this.skjermlenkeType = skjermlenkeType;
         this.tilbakehoppVedGjenopptakelse = false;
         this.fristPeriode = null;
@@ -474,7 +482,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
                                    VurderingspunktType vurderingspunktType,
                                    VilkårType vilkårType,
                                    SkjermlenkeType skjermlenkeType,
-                                   boolean defaultTotrinnBehandling, Set<FagsakYtelseType> ytelseTyper) {
+                                   boolean defaultTotrinnBehandling,
+                                   boolean kanOverstyreTotrinnEtterLukking,
+                                   Set<FagsakYtelseType> ytelseTyper) {
         this.kode = Objects.requireNonNull(kode);
         this.behandlingStatus = behandlingStatus;
         this.navn = navn;
@@ -484,6 +494,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.ytelseTyper = ytelseTyper;
         this.vilkårType = vilkårType;
         this.defaultTotrinnBehandling = defaultTotrinnBehandling;
+        this.kanOverstyreTotrinnEtterLukking = kanOverstyreTotrinnEtterLukking;
         this.skjermlenkeType = skjermlenkeType;
         this.tilbakehoppVedGjenopptakelse = false;
         this.fristPeriode = null;
@@ -499,6 +510,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
                                    VilkårType vilkårType,
                                    SkjermlenkeType skjermlenkeType,
                                    boolean defaultTotrinnBehandling,
+                                   boolean kanOverstyreTotrinnEtterLukking,
                                    boolean tilbakehoppVedGjenopptakelse,
                                    String fristPeriode, Set<FagsakYtelseType> ytelseTyper) {
         this.kode = Objects.requireNonNull(kode);
@@ -510,6 +522,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.ytelseTyper = ytelseTyper;
         this.vilkårType = vilkårType;
         this.defaultTotrinnBehandling = defaultTotrinnBehandling;
+        this.kanOverstyreTotrinnEtterLukking = kanOverstyreTotrinnEtterLukking;
         this.skjermlenkeType = skjermlenkeType;
         this.tilbakehoppVedGjenopptakelse = tilbakehoppVedGjenopptakelse;
         this.fristPeriode = fristPeriode;
@@ -524,6 +537,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
                                    VilkårType vilkårType,
                                    SkjermlenkeType skjermlenkeType,
                                    boolean defaultTotrinnBehandling,
+                                   boolean kanOverstyreTotrinnEtterLukking,
                                    boolean tilbakehoppVedGjenopptakelse,
                                    boolean skalAvbrytesVedTilbakeføring, Set<FagsakYtelseType> ytelseTyper) {
         this.kode = Objects.requireNonNull(kode);
@@ -535,6 +549,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.ytelseTyper = ytelseTyper;
         this.vilkårType = vilkårType;
         this.defaultTotrinnBehandling = defaultTotrinnBehandling;
+        this.kanOverstyreTotrinnEtterLukking = kanOverstyreTotrinnEtterLukking;
         this.skjermlenkeType = skjermlenkeType;
         this.tilbakehoppVedGjenopptakelse = tilbakehoppVedGjenopptakelse;
         this.skalAvbrytesVedTilbakeføring = skalAvbrytesVedTilbakeføring;
@@ -672,6 +687,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     public Set<BehandlingStatus> getGyldigBehandlingStatus() {
         return behandlingStatus;
+    }
+
+    public boolean isKanOverstyreTotrinnEtterLukking() {
+        return kanOverstyreTotrinnEtterLukking;
     }
 
     @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)

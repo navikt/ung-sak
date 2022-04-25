@@ -171,6 +171,9 @@ public class AksjonspunktKodeDefinisjon {
     public static final String UTEN_FRIST = null;
     public static final boolean TOTRINN = true;
     public static final boolean ENTRINN = false;
+
+    public static final boolean KAN_OVERSTYRE_TOTRINN_ETTER_LUKKING = true;
+    public static final boolean KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING = false;
     public static final boolean TILBAKE = true;
     public static final boolean SKAL_IKKE_AVBRYTES = false;
     public static final boolean AVBRYTES = true;

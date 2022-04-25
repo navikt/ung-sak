@@ -6,6 +6,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
@@ -17,10 +20,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
@@ -238,7 +237,9 @@ public class Aksjonspunkt extends BaseEntitet {
     }
 
     void fjernToTrinnsFlagg() {
-        validerIkkeUtførtAvbruttAllerede();
+        if (!aksjonspunktDefinisjon.isKanOverstyreTotrinnEtterLukking()) {
+            validerIkkeUtførtAvbruttAllerede();
+        }
         this.setToTrinnsBehandling(false);
     }
 
