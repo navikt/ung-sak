@@ -11,14 +11,13 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
@@ -111,15 +110,17 @@ class HentReferanserTjeneste {
         return originaltGrunnlag
             .stream().flatMap(gr -> gr.getGrunnlagPerioder().stream())
             .filter(periode -> vilkårsperiode.inkluderer(periode.getSkjæringstidspunkt()))
-            .filter(periode -> harKunOppfylteVilkår(originaleVilkår, periode))
+            .filter(periode -> harOppfyltBeregning(originaleVilkår, periode))
             .collect(Collectors.toMap(BeregningsgrunnlagPeriode::getSkjæringstidspunkt, BeregningsgrunnlagPeriode::getEksternReferanse));
     }
 
-    private boolean harKunOppfylteVilkår(Optional<Vilkårene> originalVilkår, BeregningsgrunnlagPeriode periode) {
-        return originalVilkår.stream().flatMap(v -> v.getVilkårene().stream())
+    private boolean harOppfyltBeregning(Optional<Vilkårene> originalVilkår, BeregningsgrunnlagPeriode periode) {
+        var originalBeregningvilkår = originalVilkår.stream().flatMap(v -> v.getVilkårene().stream())
+            .filter(v -> v.getVilkårType().equals(VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
             .flatMap(v -> v.getPerioder().stream())
             .filter(r -> r.getPeriode().getFomDato().equals(periode.getSkjæringstidspunkt()))
-            .allMatch(vr -> vr.getUtfall().equals(Utfall.OPPFYLT));
+            .findFirst();
+        return originalBeregningvilkår.map(VilkårPeriode::getUtfall).map(Utfall.OPPFYLT::equals).orElse(false);
     }
 
     private BgRef finnReferanseFraPeriode(List<BgRef> bgReferanser, DatoIntervallEntitet p) {
