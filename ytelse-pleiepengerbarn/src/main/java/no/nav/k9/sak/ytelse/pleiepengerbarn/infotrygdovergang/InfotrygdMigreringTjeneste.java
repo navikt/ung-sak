@@ -36,8 +36,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
@@ -59,9 +59,9 @@ public class InfotrygdMigreringTjeneste {
     public static final int ÅR_2022 = 2022;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
-    private final KantIKantVurderer kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
     private InfotrygdService infotrygdService;
     private boolean støtterTrukketPeriodeToggle;
 
@@ -71,11 +71,12 @@ public class InfotrygdMigreringTjeneste {
     @Inject
     public InfotrygdMigreringTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                       @BehandlingTypeRef @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                      FagsakRepository fagsakRepository,
+                                      VilkårResultatRepository vilkårResultatRepository, FagsakRepository fagsakRepository,
                                       BehandlingRepository behandlingRepository, InfotrygdService infotrygdService,
                                       @KonfigVerdi(value = "PSB_TREKKE_MIGRERT_PERIODE", defaultVerdi = "false") boolean støtterTrukketPeriodeToggle) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+        this.vilkårResultatRepository = vilkårResultatRepository;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.infotrygdService = infotrygdService;
@@ -197,12 +198,16 @@ public class InfotrygdMigreringTjeneste {
         utledetInfotrygdmigreringTilVurdering.addAll(datoerForOverlapp);
         utledetInfotrygdmigreringTilVurdering.addAll(skjæringstidspunkterTilVurdering);
         utledetInfotrygdmigreringTilVurdering.forEach(localDate -> opprettMigrering(fagsakId, localDate, perioderTilVurdering));
-        deaktiverSkjæringstidspunkterSomErFlyttet(eksisterendeInfotrygdMigreringer, alleSøknadsperioder);
+        deaktiverSkjæringstidspunkterSomErFlyttet(eksisterendeInfotrygdMigreringer, alleSøknadsperioder, behandlingId);
     }
 
-    private void deaktiverSkjæringstidspunkterSomErFlyttet(List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer, NavigableSet<DatoIntervallEntitet> alleSøknadsperioder) {
+    private void deaktiverSkjæringstidspunkterSomErFlyttet(List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer, NavigableSet<DatoIntervallEntitet> alleSøknadsperioder, Long behandlingId) {
+        var alleSkjæringstidspunkt = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)).stream()
+            .flatMap(v -> v.getPerioder().stream())
+            .map(VilkårPeriode::getSkjæringstidspunkt)
+            .collect(Collectors.toSet());
         var migreringerSomSkalDeaktiveres = eksisterendeInfotrygdMigreringer.stream()
-            .filter(m -> alleSøknadsperioder.stream().noneMatch(periode -> m.getSkjæringstidspunkt().equals(periode.getFomDato())))
+            .filter(m -> alleSkjæringstidspunkt.stream().noneMatch(m.getSkjæringstidspunkt()::equals))
             .collect(Collectors.toUnmodifiableSet());
         migreringerSomSkalDeaktiveres.forEach(this::deaktiver);
     }
@@ -264,7 +269,7 @@ public class InfotrygdMigreringTjeneste {
 
     private Set<DatoIntervallEntitet> finnKantIKantPeriode(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, List<DatoIntervallEntitet> anvistePerioder) {
         return perioderTilVurdering.stream()
-            .filter(p -> anvistePerioder.stream().anyMatch(ap -> kantIKantVurderer.erKantIKant(p, ap)))
+            .filter(p -> anvistePerioder.stream().anyMatch(ap -> perioderTilVurderingTjeneste.getKantIKantVurderer().erKantIKant(p, ap)))
             .collect(Collectors.toSet());
     }
 
