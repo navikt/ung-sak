@@ -60,7 +60,6 @@ public class FosterbarnRestTjeneste {
      * Hent fosterbarn registrert i k9
      */
     @GET
-    @Path(BASE_PATH)
     @Operation(description = "Hent fosterbarn for omsorgspenger", tags = "behandling - fosterbarn", responses = {
         @ApiResponse(responseCode = "200", description = "Returnerer Fosterbarn, null hvis ikke finnes (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FosterbarnListeDto.class)))
     })
