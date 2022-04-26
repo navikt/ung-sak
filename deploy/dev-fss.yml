@@ -143,7 +143,7 @@ spec:
     - name: K9_OPPDRAG_DIREKTE_URL
       value: http://k9-oppdrag.k9saksbehandling/k9/oppdrag/api
     - name: K9_TILBAKE_DIREKTE_URL
-      value: http://k9-tilbake.default/k9/tilbake/api
+      value: http://k9-tilbake.k9saksbehandling/k9/tilbake/api
     - name: K9_FORMIDLING_URL
       value: http://k9-formidling.k9saksbehandling/k9/formidling
     - name : K9_PUNSJ_URL
