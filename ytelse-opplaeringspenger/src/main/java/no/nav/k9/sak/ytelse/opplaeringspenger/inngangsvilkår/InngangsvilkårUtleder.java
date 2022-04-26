@@ -13,6 +13,7 @@ import static no.nav.k9.kodeverk.vilkår.VilkårType.OPPTJENINGSVILKÅRET;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -21,7 +22,7 @@ import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OLP")
+@FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
 @BehandlingTypeRef
 public class InngangsvilkårUtleder implements VilkårUtleder {
 

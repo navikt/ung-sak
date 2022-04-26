@@ -12,6 +12,8 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -35,9 +37,9 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 
-@BehandlingStegRef(kode = "POST_MEDISINSK")
+@BehandlingStegRef(value = BehandlingStegType.POST_VURDER_MEDISINSKVILKÅR)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("OLP")
+@FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
 @ApplicationScoped
 public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
@@ -54,7 +56,7 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     @Inject
     public PostSykdomOgKontinuerligTilsynSteg(BehandlingRepositoryProvider repositoryProvider,
                                               BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                              @FagsakYtelseTypeRef("OLP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                              @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                               AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap) {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();

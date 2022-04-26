@@ -14,7 +14,7 @@ import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
-@FagsakYtelseTypeRef("OLP")
+@FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
 @ApplicationScoped
 public class OLPSøknadMottaker implements SøknadMottakTjeneste<OLPSøknadInnsending> {
 

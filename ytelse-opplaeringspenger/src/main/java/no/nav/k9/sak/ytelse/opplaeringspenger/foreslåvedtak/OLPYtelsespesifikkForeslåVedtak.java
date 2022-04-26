@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.foreslåvedtak;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -12,7 +13,7 @@ import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.YtelsespesifikkForesl
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OLP")
+@FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
 public class OLPYtelsespesifikkForeslåVedtak implements YtelsespesifikkForeslåVedtak {
 
     private SamtidigUttakTjeneste samtidigUttakTjeneste;

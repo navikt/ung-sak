@@ -4,13 +4,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.ForeslåVedtakManueltUtleder;
 import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.K9FormidlingKlient;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OLP")
+@FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
 public class OLPForeslåVedtakManueltUtleder implements ForeslåVedtakManueltUtleder {
 
     private K9FormidlingKlient formidlingKlient;

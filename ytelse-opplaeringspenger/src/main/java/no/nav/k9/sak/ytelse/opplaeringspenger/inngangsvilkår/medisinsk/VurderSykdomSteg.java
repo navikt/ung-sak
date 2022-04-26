@@ -16,6 +16,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -55,9 +56,9 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
-@BehandlingStegRef(kode = "VURDER_MEDISINSK")
+@BehandlingStegRef(value = BehandlingStegType.VURDER_MEDISINSKE_VILKÅR)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("OLP")
+@FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
 @ApplicationScoped
 public class VurderSykdomSteg implements BehandlingSteg {
 
@@ -78,7 +79,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
     @Inject
     public VurderSykdomSteg(BehandlingRepositoryProvider repositoryProvider,
                             PleiebehovResultatRepository resultatRepository,
-                            @FagsakYtelseTypeRef("OLP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                            @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                             SykdomVurderingService sykdomVurderingService,
                             SykdomGrunnlagRepository sykdomGrunnlagRepository,
                             SøknadsperiodeTjeneste søknadsperiodeTjeneste) {

@@ -6,6 +6,7 @@ import java.util.Set;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -26,7 +27,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerio
 
 @ApplicationScoped
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("OLP")
+@FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
 public class OLPVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårsPerioderTilVurderingTjeneste {
 
     // MERK: DERSOM PPN og PSB begynner å divergere, må det vurderes å erstatte arv med komposisjon
@@ -36,7 +37,7 @@ public class OLPVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
     }
 
     @Inject
-    public OLPVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("OLP") VilkårUtleder vilkårUtleder,
+    public OLPVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER) VilkårUtleder vilkårUtleder,
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   BehandlingRepository behandlingRepository,
                                                   SykdomGrunnlagService sykdomGrunnlagService,
