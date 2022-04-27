@@ -136,7 +136,7 @@ public class MapYtelseperioderTjeneste {
             return OpptjeningAktivitetType.SYKEPENGER;
         }
 
-        if (FagsakYtelseType.PLEIEPENGER_SYKT_BARN.equals(ytelse.getYtelseType())) {
+        if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN) .contains(ytelse.getYtelseType()) ) {
             boolean harPSBBasertPåDP = ytelse.getYtelseGrunnlag().flatMap(YtelseGrunnlag::getArbeidskategori)
                 .stream().anyMatch(a -> Arbeidskategori.DAGPENGER.equals(a) || Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER.equals(a));
             if (harPSBBasertPåDP) {
