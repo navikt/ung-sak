@@ -470,10 +470,10 @@ public class StatistikkRepository {
         // hardkoder statuser for bedre access plan for partisjon i db
         String sql = " select coalesce(f.ytelse_type, 'NONE') as ytelse_type, p.task_type, p.status, count(*) antall " +
             " from prosess_task_type t" +
-            " inner join prosess_task p on p.task_type=t.kode and p.status in ('FEILET', 'VENTER_SVAR', 'KLAR')" +
+            " inner join prosess_task p on p.task_type=t.kode and p.status in ('FEILET', 'VENTER_SVAR', 'KLAR', 'SUSPENDERT')" +
             " left outer join fagsak_prosess_task fpt on fpt.prosess_task_id=p.id" +
             " left outer join fagsak f on f.id=fpt.fagsak_id" +
-            " where p.status IN ('FEILET', 'VENTER_SVAR', 'KLAR')" +
+            " where p.status IN ('FEILET', 'VENTER_SVAR', 'KLAR', 'SUSPENDERT')" +
             " group by 1, 2, 3" +
             " order by 1, 2, 3";
 
