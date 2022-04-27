@@ -2,19 +2,21 @@ package no.nav.k9.sak.metrikker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -23,11 +25,14 @@ public class StatistikkRepositoryTest {
     @Inject
     private EntityManager entityManager;
 
-    private StatistikkRepository statistikkRepository ;
+    private StatistikkRepository statistikkRepository;
+
+    @Inject
+    private @Any Instance<ProsessTaskHandler> handlers;
 
     @BeforeEach
     public void setup(){
-        statistikkRepository = new StatistikkRepository(entityManager);
+        statistikkRepository = new StatistikkRepository(entityManager, handlers);
     }
 
 

@@ -29,6 +29,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
@@ -44,7 +46,9 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskFeil;
+import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 
 @Dependent
@@ -54,17 +58,15 @@ public class StatistikkRepository {
 
     private static final String UDEFINERT = "-";
 
-    static final List<String> YTELSER = List.of(
+    static final List<String> YTELSER = Stream.of(
         FagsakYtelseType.FRISINN,
         FagsakYtelseType.OMSORGSPENGER,
         FagsakYtelseType.OMSORGSPENGER_KS,
         FagsakYtelseType.OMSORGSPENGER_MA,
         FagsakYtelseType.OMSORGSPENGER_AO,
-        FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
-        .stream().map(k -> k.getKode()).collect(Collectors.toList());
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN).map(FagsakYtelseType::getKode).collect(Collectors.toList());
 
-    static final List<String> PROSESS_TASK_STATUSER = List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.FEILET, ProsessTaskStatus.VENTER_SVAR, ProsessTaskStatus.SUSPENDERT)
-        .stream().map(k -> k.getDbKode()).collect(Collectors.toList());
+    static final List<String> PROSESS_TASK_STATUSER = Stream.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.FEILET, ProsessTaskStatus.VENTER_SVAR, ProsessTaskStatus.SUSPENDERT).map(ProsessTaskStatus::getDbKode).collect(Collectors.toList());
     static final List<String> AKSJONSPUNKTER = AksjonspunktDefinisjon.kodeMap().values().stream()
         .filter(p -> !AksjonspunktDefinisjon.UNDEFINED.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
     static final List<String> AKSJONSPUNKT_STATUSER = AksjonspunktStatus.kodeMap().values().stream()
@@ -83,12 +85,14 @@ public class StatistikkRepository {
     private static final ObjectMapper OM = new ObjectMapper();
 
     static final String PROSESS_TASK_VER = "v4";
+    private final Set<String> taskTyper;
 
     private EntityManager entityManager;
 
     @Inject
-    public StatistikkRepository(EntityManager entityManager) {
+    public StatistikkRepository(EntityManager entityManager, @Any Instance<ProsessTaskHandler> handlers) {
         this.entityManager = entityManager;
+        this.taskTyper = handlers.stream().map(it -> it.getClass().getAnnotation(ProsessTask.class).value()).collect(Collectors.toSet());
     }
 
     public List<SensuEvent> hentAlle() {
@@ -470,20 +474,18 @@ public class StatistikkRepository {
         // hardkoder statuser for bedre access plan for partisjon i db
         String sql = " select coalesce(f.ytelse_type, 'NONE') as ytelse_type, p.task_type, p.status, count(*) antall " +
             " from prosess_task_type t" +
-            " inner join prosess_task p on p.task_type=t.kode and p.status in ('FEILET', 'VENTER_SVAR', 'KLAR', 'SUSPENDERT')" +
+            " inner join prosess_task p on p.task_type=t.kode and p.status in (:statuser)" +
             " left outer join fagsak_prosess_task fpt on fpt.prosess_task_id=p.id" +
             " left outer join fagsak f on f.id=fpt.fagsak_id" +
-            " where p.status IN ('FEILET', 'VENTER_SVAR', 'KLAR', 'SUSPENDERT')" +
+            " where p.status IN (:statuser)" +
             " group by 1, 2, 3" +
             " order by 1, 2, 3";
 
         String metricName = "prosess_task_" + PROSESS_TASK_VER;
         String metricField = "totalt_antall";
 
-        NativeQuery<Tuple> queryType = (NativeQuery<Tuple>) entityManager.createNativeQuery("select kode from prosess_task_type", Tuple.class);
-        var typer = queryType.getResultStream().map(t -> t.get(0, String.class)).collect(Collectors.toSet());
-
-        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setParameter("statuser", PROSESS_TASK_STATUSER);
 
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class))); // forkaster dummy ytelse_type fra db
@@ -500,7 +502,7 @@ public class StatistikkRepository {
         var zeroValues = emptyEvents(metricName,
             Map.of(
                 "ytelse_type", YTELSER,
-                "prosess_task_type", typer,
+                "prosess_task_type", taskTyper,
                 "status", PROSESS_TASK_STATUSER),
             Map.of(
                 metricField, BigInteger.ZERO));
