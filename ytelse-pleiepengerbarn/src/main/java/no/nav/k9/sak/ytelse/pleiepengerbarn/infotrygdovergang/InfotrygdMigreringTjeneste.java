@@ -222,11 +222,15 @@ public class InfotrygdMigreringTjeneste {
         var migreringUtenSøknad = eksisterendeInfotrygdMigreringer.stream()
             .map(SakInfotrygdMigrering::getSkjæringstidspunkt)
             .filter(migrertStp -> alleSøknadsperioder.stream().noneMatch(periode -> periode.inkluderer(migrertStp)) &&
-                (!støtterTrukketPeriodeToggle || anvistePerioder.stream().noneMatch(p -> p.inkluderer(migrertStp))))
+                (!støtterTrukketPeriodeToggle || anvistePerioder.stream().noneMatch(p -> inkludererEllerErKantIKantMedPeriodeFraInfotrygd(migrertStp, p))))
             .collect(Collectors.toList());
         if (!migreringUtenSøknad.isEmpty()) {
             throw new IllegalStateException("Støtter ikke trukket søknad for migrering fra infotrygd etter fjerning av periode fra inforygd.");
         }
+    }
+
+    private boolean inkludererEllerErKantIKantMedPeriodeFraInfotrygd(LocalDate migrertStp, DatoIntervallEntitet p) {
+        return p.inkluderer(migrertStp) || perioderTilVurderingTjeneste.getKantIKantVurderer().erKantIKant(p, DatoIntervallEntitet.fraOgMedTilOgMed(migrertStp, migrertStp));
     }
 
     private void opprettMigrering(Long fagsakId, LocalDate skjæringstidspunkt, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
