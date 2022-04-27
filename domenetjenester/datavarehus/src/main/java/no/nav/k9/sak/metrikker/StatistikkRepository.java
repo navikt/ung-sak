@@ -92,7 +92,10 @@ public class StatistikkRepository {
     @Inject
     public StatistikkRepository(EntityManager entityManager, @Any Instance<ProsessTaskHandler> handlers) {
         this.entityManager = entityManager;
-        this.taskTyper = handlers.stream().map(it -> it.getClass().getAnnotation(ProsessTask.class).value()).collect(Collectors.toSet());
+        this.taskTyper = handlers.stream()
+            .filter(it -> it.getClass().isAnnotationPresent(ProsessTask.class))
+            .map(it -> it.getClass().getAnnotation(ProsessTask.class).value())
+            .collect(Collectors.toSet());
     }
 
     public List<SensuEvent> hentAlle() {
