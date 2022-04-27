@@ -263,6 +263,24 @@ class InfotrygdMigreringTjenesteTest {
     }
 
     @Test
+    void skal_ikke_feile_ved_trukket_søknad_dersom_periode_fra_infotrygd_ligger_kant_i_kant() {
+        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
+            .thenReturn(new TreeSet<>((Set.of(
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
+            ))));
+        lagreVilkårPeriode(List.of(
+            DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
+        ));
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1).minusDays(1), STP.minusMonths(1).minusDays(1)));
+        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.minusMonths(1));
+
+        tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
+
+        var migreringer = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(migreringer.size()).isEqualTo(0);
+    }
+
+    @Test
     void skal_ikkje_opprette_uten_overlapp() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusDays(10)));
 
