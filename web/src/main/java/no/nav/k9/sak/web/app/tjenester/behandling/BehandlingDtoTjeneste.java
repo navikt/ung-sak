@@ -354,14 +354,14 @@ public class BehandlingDtoTjeneste {
 
         var ytelseType = behandling.getFagsakYtelseType();
         switch (ytelseType) {
-            case FRISINN:
+            case FRISINN -> {
                 dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_OPPGITT, "uttak-oppgitt", uuidQueryParams));
                 dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_FASTSATT, "uttak-fastsatt", uuidQueryParams));
                 dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.OPPGITT_OPPTJENING_PATH_V2, "oppgitt-opptjening-v2", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregning-koblinger-til-vurdering", uuidQueryParams));
-                break;
-            case OMSORGSPENGER:
+            }
+            case OMSORGSPENGER -> {
                 dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 dto.leggTil(getFraMap(ÅrskvantumRestTjeneste.FORBRUKTEDAGER, "forbrukte-dager", uuidQueryParams));
@@ -370,15 +370,12 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregning-koblinger-til-vurdering", uuidQueryParams));
                 dto.leggTil(getFraMap(OverlapendeYtelserRestTjeneste.OVERLAPPENDE_YTELSER_PATH, "overlappende-ytelser", uuidQueryParams));
-                break;
-            case OMSORGSPENGER_KS:
-            case OMSORGSPENGER_MA:
-            case OMSORGSPENGER_AO:
+            }
+            case OMSORGSPENGER_KS, OMSORGSPENGER_MA, OMSORGSPENGER_AO -> {
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 dto.leggTil(getFraMap(RammevedtakRestTjeneste.RAMMEVEDTAK, "rammevedtak", uuidQueryParams));
-                break;
-            case OPPLÆRINGSPENGER:
-            case PLEIEPENGER_SYKT_BARN:
+            }
+            case OPPLÆRINGSPENGER, PLEIEPENGER_SYKT_BARN -> {
                 dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomRestTjeneste.SYKDOM_AKSJONSPUNKT_PATH, "sykdom-aksjonspunkt", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_KTP_PATH, "sykdom-vurdering-oversikt-ktp", uuidQueryParams));
@@ -405,8 +402,8 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(SaksbehandlerRestTjeneste.SAKSBEHANDLER_PATH, "saksbehandler-info", uuidQueryParams));
                 dto.leggTil(getFraMap(BehandlingRestTjeneste.DIREKTE_OVERGANG_PATH, "direkte-overgang", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
-                break;
-            case PLEIEPENGER_NÆRSTÅENDE:
+            }
+            case PLEIEPENGER_NÆRSTÅENDE -> {
                 dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomRestTjeneste.SYKDOM_AKSJONSPUNKT_PATH, "sykdom-aksjonspunkt", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_SLU_PATH, "sykdom-vurdering-oversikt-slu", uuidQueryParams));
@@ -427,9 +424,8 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(DokumenterMedUstrukturerteDataRestTjeneste.FRITEKSTDOKUMENTER_PATH, "pleiepenger-fritekstdokumenter", uuidQueryParams));
                 dto.leggTil(getFraMap(SaksbehandlerRestTjeneste.SAKSBEHANDLER_PATH, "saksbehandler-info", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
-                break;
-            default:
-                throw new UnsupportedOperationException("Støtter ikke ytelse " + ytelseType);
+            }
+            default -> throw new UnsupportedOperationException("Støtter ikke ytelse " + ytelseType);
         }
 
     }
