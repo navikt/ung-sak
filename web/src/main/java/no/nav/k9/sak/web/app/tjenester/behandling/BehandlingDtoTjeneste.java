@@ -93,22 +93,18 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 @Dependent
 public class BehandlingDtoTjeneste {
 
-    private BehandlingRepository behandlingRepository;
-    private BehandlingVedtakRepository behandlingVedtakRepository;
-    private SøknadRepository søknadRepository;
-    private TilbakekrevingRepository tilbakekrevingRepository;
-    private VilkårResultatRepository vilkårResultatRepository;
-    private TotrinnTjeneste totrinnTjeneste;
+    private final BehandlingRepository behandlingRepository;
+    private final BehandlingVedtakRepository behandlingVedtakRepository;
+    private final SøknadRepository søknadRepository;
+    private final TilbakekrevingRepository tilbakekrevingRepository;
+    private final VilkårResultatRepository vilkårResultatRepository;
+    private final TotrinnTjeneste totrinnTjeneste;
 
     /**
      * denne kan overstyres for testing lokalt
      */
-    private String k9OppdragProxyUrl;
-    private Instance<InformasjonselementerUtleder> informasjonselementer;
-
-    BehandlingDtoTjeneste() {
-        // for CDI proxy
-    }
+    private final String k9OppdragProxyUrl;
+    private final Instance<InformasjonselementerUtleder> informasjonselementer;
 
     @Inject
     public BehandlingDtoTjeneste(BehandlingRepository behandlingRepository,
@@ -214,7 +210,7 @@ public class BehandlingDtoTjeneste {
             return Collections.emptyList();
         }
         Optional<BehandlingVedtak> gjeldendeVedtak = behandlingVedtakRepository.hentGjeldendeVedtak(behandlinger.get(0).getFagsak());
-        Optional<Long> behandlingMedGjeldendeVedtak = gjeldendeVedtak.map(bv -> bv.getBehandlingId());
+        Optional<Long> behandlingMedGjeldendeVedtak = gjeldendeVedtak.map(BehandlingVedtak::getBehandlingId);
         return behandlinger.stream().map(behandling -> {
             boolean erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(behandling, behandlingMedGjeldendeVedtak);
             var behandlingsresultat = lagBehandlingsresultat(behandling);
@@ -224,8 +220,7 @@ public class BehandlingDtoTjeneste {
 
     BehandlingsresultatDto lagBehandlingsresultat(Behandling behandling) {
         var ref = BehandlingReferanse.fra(behandling);
-        var behandlingsresultat = lagBehandlingsresultat(ref);
-        return behandlingsresultat;
+        return lagBehandlingsresultat(ref);
     }
 
     private BehandlingsresultatDto lagBehandlingsresultat(BehandlingReferanse ref) {
@@ -499,10 +494,6 @@ public class BehandlingDtoTjeneste {
         }
 
         return links;
-    }
-
-    public Boolean finnBehandlingOperasjonRettigheter(Behandling behandling) {
-        return this.søknadRepository.hentSøknadHvisEksisterer(behandling.getId()).isPresent();
     }
 
     public BehandlingOperasjonerDto lovligeOperasjoner(Behandling b) {
