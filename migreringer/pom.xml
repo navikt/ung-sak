@@ -25,6 +25,7 @@
         <dependency>
             <groupId>no.nav.k9.felles</groupId>
             <artifactId>k9-felles-testutilities</artifactId>
+            <scope>test</scope>
         </dependency>
          <dependency>
             <groupId>org.eclipse.jetty</groupId>
