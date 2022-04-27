@@ -113,6 +113,32 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), migrerFraInfotrygdDto.getSkjæringstidspunkt());
     }
 
+    @POST
+    @Path("/deaktiverSkjærinstidspunkt")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Deaktiverer migrert skjæringstidspunkt fra infotrygd for gitt sak", tags = "infotrygdmigrering")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public void deaktiverSkjærinstidspunkt(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MigrerFraInfotrygdDto migrerFraInfotrygdDto) { // NOSONAR
+        var fagsak = fagsakRepository.hentSakGittSaksnummer(migrerFraInfotrygdDto.getSaksnummer()).orElseThrow();
+
+        var behandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+
+        if (behandling.erStatusFerdigbehandlet()) {
+            throw new IllegalStateException("Må ha åpen behandling");
+        }
+
+        var alleSkjæringstidspunkt = finnAlleSkjæringstidspunkterForBehandling(behandling);
+
+        if (alleSkjæringstidspunkt.stream().anyMatch(migrerFraInfotrygdDto.getSkjæringstidspunkt()::equals)) {
+            throw new IllegalStateException("Støtter kun deaktivering for perioder som er fjernet");
+        }
+
+        fagsakRepository.deaktiverInfotrygdmigrering(fagsak.getId(), migrerFraInfotrygdDto.getSkjæringstidspunkt());
+
+    }
+
+
     @GET
     @Path("/defaktiverteMigreringer")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -130,7 +156,7 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
 
         var sakerMedFlerePerioderOgDeaktivertMigrering = fagsakIder.stream().filter(id -> behandlingRepository.hentSisteBehandlingForFagsakId(id)
                 .map(b -> {
-                    var alleSkjæringstidspunkt = finnAlleSkjæringstidspunkterForSak(b);
+                    var alleSkjæringstidspunkt = finnAlleSkjæringstidspunkterForBehandling(b);
                     boolean harDeaktivertMigreringForStp = harDeaktivertMigreringForSkjæringstidspunkt(grupperteMigreringer, id, alleSkjæringstidspunkt);
                     return harDeaktivertMigreringForStp && alleSkjæringstidspunkt.size() > 1;
                 }).orElse(false))
@@ -160,7 +186,7 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
 
         var sakerMedFjernetMigreringUtenOverstyrInntekt = fagsakIder.stream().filter(id -> behandlingRepository.hentSisteBehandlingForFagsakId(id)
                 .map(b -> {
-                    var alleSkjæringstidspunkt = finnAlleSkjæringstidspunkterForSak(b);
+                    var alleSkjæringstidspunkt = finnAlleSkjæringstidspunkterForBehandling(b);
                     boolean harDeaktivertMigreringForStp = harDeaktivertMigreringForSkjæringstidspunkt(grupperteMigreringer, id, alleSkjæringstidspunkt);
                     var harAvbruttOverstyrInntekt = harAvbruttOverstyrInntektAksjonspunkt(b);
                     return harAvbruttOverstyrInntekt && harDeaktivertMigreringForStp && alleSkjæringstidspunkt.size() > 1;
@@ -183,7 +209,7 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
         return b.getAksjonspunkter().stream().anyMatch(a -> a.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.OVERSTYR_BEREGNING_INPUT) && a.getStatus().equals(AksjonspunktStatus.AVBRUTT));
     }
 
-    private Set<LocalDate> finnAlleSkjæringstidspunkterForSak(Behandling behandling) {
+    private Set<LocalDate> finnAlleSkjæringstidspunkterForBehandling(Behandling behandling) {
         return vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)).stream()
             .flatMap(v -> v.getPerioder().stream())
             .map(VilkårPeriode::getSkjæringstidspunkt)
