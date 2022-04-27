@@ -117,7 +117,7 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
     @Path("/deaktiverSkjærinstidspunkt")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Deaktiverer migrert skjæringstidspunkt fra infotrygd for gitt sak", tags = "infotrygdmigrering")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public void deaktiverSkjærinstidspunkt(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MigrerFraInfotrygdDto migrerFraInfotrygdDto) { // NOSONAR
         var fagsak = fagsakRepository.hentSakGittSaksnummer(migrerFraInfotrygdDto.getSaksnummer()).orElseThrow();
