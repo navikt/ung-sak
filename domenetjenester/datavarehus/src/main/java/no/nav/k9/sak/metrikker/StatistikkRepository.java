@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 import org.hibernate.QueryTimeoutException;
 import org.hibernate.jpa.QueryHints;
 import org.hibernate.query.NativeQuery;
+import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,9 +94,17 @@ public class StatistikkRepository {
     public StatistikkRepository(EntityManager entityManager, @Any Instance<ProsessTaskHandler> handlers) {
         this.entityManager = entityManager;
         this.taskTyper = handlers.stream()
-            .filter(it -> it.getClass().isAnnotationPresent(ProsessTask.class))
-            .map(it -> it.getClass().getAnnotation(ProsessTask.class).value())
+            .map(this::extractClass)
+            .map(it -> it.getAnnotation(ProsessTask.class).value())
             .collect(Collectors.toSet());
+    }
+
+    private Class<?> extractClass(ProsessTaskHandler bean) {
+        if (!bean.getClass().isAnnotationPresent(ProsessTask.class) && bean instanceof TargetInstanceProxy<?> tip) {
+            return tip.weld_getTargetInstance().getClass();
+        } else {
+            return bean.getClass();
+        }
     }
 
     public List<SensuEvent> hentAlle() {
