@@ -32,6 +32,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
@@ -99,6 +100,37 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
         }
 
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), migrerFraInfotrygdDto.getSkjæringstidspunkt());
+    }
+
+    @GET
+    @Path("/defaktiverteMigreringer")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Hent saker som har fått deaktivert migrering og har flere perioder", tags = "infotrygdmigrering", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer aker som har fått deaktivert migrering og har flere perioder",
+            content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = List.class), schema = @Schema(implementation = SaksnummerDto.class)), mediaType = MediaType.APPLICATION_JSON))
+    })
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response finnSakerMedDeaktivertMigrering() { // NOSONAR
+        var grupperteMigreringer = fagsakRepository.hentAlleSakInfotrygdMigreringerForAlleFagsaker()
+            .stream().collect(Collectors.groupingBy(SakInfotrygdMigrering::getFagsakId));
+
+        var fagsakIder = grupperteMigreringer.keySet();
+
+        var sakerMedFlerePerioderOgDeaktivertMigrering = fagsakIder.stream().filter(id -> behandlingRepository.hentSisteBehandlingForFagsakId(id)
+                .map(b -> {
+                    var allePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(b.getId());
+                    var migreringer = grupperteMigreringer.get(id);
+                    var harDeaktivertMigreringForSkjæringstidspunkt = migreringer.stream().anyMatch(m -> !m.getAktiv() && allePerioder.stream().anyMatch(p -> p.getFomDato().equals(m.getSkjæringstidspunkt())));
+                    return harDeaktivertMigreringForSkjæringstidspunkt && allePerioder.size() > 1;
+                }).orElse(false))
+            .collect(Collectors.toSet());
+
+        var saksnummer = sakerMedFlerePerioderOgDeaktivertMigrering.stream().map(fagsakRepository::finnEksaktFagsak)
+            .map(Fagsak::getSaksnummer)
+            .map(SaksnummerDto::new)
+            .collect(Collectors.toList());
+        return Response.ok(saksnummer).build();
     }
 
 }

@@ -56,15 +56,12 @@ public class MapInputTilUttakTjeneste {
 
     private HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private String unntak;
-    private Boolean utenlandsperioderMappingEnablet;
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
-                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
-                                    @KonfigVerdi(value = "UTENLANDSPERIODER_MAPPING_ENABLET", defaultVerdi = "false") Boolean utenlandsperioderMappingEnablet) {
+                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
-        this.utenlandsperioderMappingEnablet = utenlandsperioderMappingEnablet;
     }
 
 
@@ -136,13 +133,7 @@ public class MapInputTilUttakTjeneste {
         var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
         final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
-        Map<LukketPeriode, UtenlandsoppholdInfo> utenlandsoppholdperioder;
-        if (utenlandsperioderMappingEnablet) {
-            utenlandsoppholdperioder = MapUtenlandsopphold.map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
-        } else {
-            utenlandsoppholdperioder = Map.of();
-        }
-
+        Map<LukketPeriode, UtenlandsoppholdInfo> utenlandsoppholdperioder = MapUtenlandsopphold.map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
 
         return new Uttaksgrunnlag(
             mapTilYtelseType(behandling),

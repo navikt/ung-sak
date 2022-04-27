@@ -237,7 +237,7 @@ public class Aksjonspunkt extends BaseEntitet {
     }
 
     void fjernToTrinnsFlagg() {
-        if (!aksjonspunktDefinisjon.isKanOverstyreTotrinnEtterLukking()) {
+        if (!aksjonspunktDefinisjon.kanOverstyreTotrinnEtterLukking()) {
             validerIkkeUtførtAvbruttAllerede();
         }
         this.setToTrinnsBehandling(false);

@@ -194,15 +194,11 @@ spec:
       value: "true"
     - name: TOTRINN_TEMP_DEAKTIVERT
       value: "true"
-    - name: "AKSJONSPUNKT_7035_ENABLED"
-      value: "false"
     - name: K9TILBAKE_AKTIVERT
       value: "true"
     - name: ENABLE_UTLEDET_ENDRINGSPERIODE
       value: "true"
     - name: ENABLE_STONADSTATISTIKK
-      value: "true"
-    - name: ENABLE_RELEVANT_SYKDOMSPERIODE
       value: "true"
     - name: MAP_ALLE_KRAV
       value: "true"
@@ -222,8 +218,6 @@ spec:
       value: "true"
     - name: K9_RAPID_AIVEN
       value: "true"
-    - name: UTENLANDSPERIODER_MAPPING_ENABLET
-      value: "true"
     - name: PSB_UTVIDE_VED_DODSFALL
       value: "true"
     - name: KOMPLETTHET_BEREGNING_OMP
@@ -232,9 +226,9 @@ spec:
       value: "true"
     - name: OMP_AVSLAG_SOKNAD_MANGLER_IM
       value: "true"
-    - name: OMP_AARSKVANTUMTJENESTE_BRUK_FERDIGUTLEDET_FLAGG_REFUSJON
-      value: "true"
     - name: OMP_DELT_BOSTED_RAMMEVEDTAK
+      value: "true"
+    - name: PSB_TREKKE_MIGRERT_PERIODE
       value: "true"
 
     # Audit logging

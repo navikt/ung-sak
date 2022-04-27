@@ -58,12 +58,6 @@ public class UtledStatusPåPerioderTjeneste {
 
         tidslinje = mergeTidslinjer(relevanteTidslinjer, kantIKantVurderer, this::mergeSegments);
 
-        var tilbakestillingSegmenter = perioderSomSkalTilbakestilles.stream()
-            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.TRUKKET_KRAV))))
-            .collect(Collectors.toList());
-
-        tidslinje = tidslinje.combine(new LocalDateTimeline<>(tilbakestillingSegmenter, StandardCombinators::coalesceRightHandSide), this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-
         var endringFraBruker = andreRelevanteDokumenterForPeriodenTilVurdering.stream()
             .map(entry -> tilSegments(entry, kantIKantVurderer, utledRevurderingÅrsak(behandling)))
             .map(LocalDateTimeline::new)
@@ -77,6 +71,11 @@ public class UtledStatusPåPerioderTjeneste {
             tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
         }
         tidslinje = tidslinje.intersection(perioderTilVurderingKombinert);
+        var tilbakestillingSegmenter = perioderSomSkalTilbakestilles.stream()
+            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.TRUKKET_KRAV))))
+            .collect(Collectors.toList());
+
+        tidslinje = tidslinje.combine(new LocalDateTimeline<>(tilbakestillingSegmenter, StandardCombinators::coalesceRightHandSide), this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         var perioder = tidslinje.compress()
             .toSegments()

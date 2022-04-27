@@ -81,7 +81,7 @@ class InfotrygdMigreringTjenesteTest {
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
         when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any())).thenReturn(Collections.emptyMap());
-        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, behandlingRepository, infotrygdService);
+        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, fagsakRepository, behandlingRepository, infotrygdService, true);
     }
 
     @Test
@@ -140,7 +140,7 @@ class InfotrygdMigreringTjenesteTest {
     }
 
     @Test
-    void skal_rydde_infotrygdmigrering_for_periode_som_ikke_vurderes() {
+    void skal_rydde_infotrygdmigrering_dersom_den_ikke_sammenfaller_med_eksisterende_skjæringstidspunkt() {
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
@@ -152,8 +152,7 @@ class InfotrygdMigreringTjenesteTest {
         tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
 
         var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
-        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP.minusDays(10));
+        assertThat(sakInfotrygdMigrering.size()).isEqualTo(0);
     }
 
     @Test
@@ -192,7 +191,20 @@ class InfotrygdMigreringTjenesteTest {
 
 
     @Test
-    void skal_feile_ved_trukket_søknad() {
+    void skal_feile_ved_trukket_søknad_dersom_periode_er_fjernet_infotrygd() {
+        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
+            .thenReturn(new TreeSet<>((Set.of(
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
+            ))));
+        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.minusMonths(1));
+        lagUtenInfotrygdPsbYtelse();
+
+        assertThrows(IllegalStateException.class, () -> tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId()));
+
+    }
+
+    @Test
+    void skal_ikke_feile_ved_trukket_søknad_dersom_periode_ikke_er_fjernet_infotrygd() {
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(
                 DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
@@ -200,8 +212,10 @@ class InfotrygdMigreringTjenesteTest {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusDays(10)));
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.minusMonths(1));
 
-        assertThrows(IllegalStateException.class, () -> tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId()));
+        tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
 
+        var migreringer = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
+        assertThat(migreringer.size()).isEqualTo(0);
     }
 
     @Test
@@ -327,32 +341,9 @@ class InfotrygdMigreringTjenesteTest {
 
     }
 
-    @Test
-    void skal_ikke_fjerne_migrering_dersom_ny_periode_i_forkant_uten_overlapp() {
-        lagInfotrygdPsbYtelsePerioder(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP)));
-
-        tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
-
-        var sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
-        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP);
-
-
-        when(perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
-            .thenReturn(new TreeSet<>((Set.of(
-                DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusDays(3), STP.plusDays(10))))));
-        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
-            .thenReturn(new TreeSet<>((Set.of(
-                DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusDays(3), STP.plusDays(10))))));
-        tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
-
-        sakInfotrygdMigrering = fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
-        assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
-        assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP.minusDays(3));
-    }
 
     @Test
-    void skal_ikke_fjerne_migrering_dersom_overlapp_forsvinner_for_eksisterende_migrering() {
+    void skal_fjerne_migrering_dersom_overlapp_forsvinner_for_eksisterende_migrering() {
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
         lagUtenInfotrygdPsbYtelse();
         tjeneste.finnOgOpprettMigrertePerioder(behandling.getId(), behandling.getAktørId(), behandling.getFagsakId());
