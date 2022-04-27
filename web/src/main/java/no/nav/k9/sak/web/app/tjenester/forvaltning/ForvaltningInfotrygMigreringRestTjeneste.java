@@ -117,24 +117,22 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
     @Path("/deaktiverSkjærinstidspunkt")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Deaktiverer migrert skjæringstidspunkt fra infotrygd for gitt sak", tags = "infotrygdmigrering")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = DRIFT)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public void deaktiverSkjærinstidspunkt(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MigrerFraInfotrygdDto migrerFraInfotrygdDto) { // NOSONAR
-        var fagsak = fagsakRepository.hentSakGittSaksnummer(migrerFraInfotrygdDto.getSaksnummer()).orElseThrow();
+    public void deaktiverSkjærinstidspunkt(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) DeaktiverSkjæringstidspunktDto dto) { // NOSONAR
 
-        var behandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+        var behandling = dto.getBehandlingUuid() != null ? behandlingRepository.hentBehandling(dto.getBehandlingUuid()) : behandlingRepository.hentBehandling(dto.getBehandlingId());
 
         if (behandling.erStatusFerdigbehandlet()) {
             throw new IllegalStateException("Må ha åpen behandling");
         }
-
         var alleSkjæringstidspunkt = finnAlleSkjæringstidspunkterForBehandling(behandling);
 
-        if (alleSkjæringstidspunkt.stream().anyMatch(migrerFraInfotrygdDto.getSkjæringstidspunkt()::equals)) {
+        if (alleSkjæringstidspunkt.stream().anyMatch(dto.getSkjæringstidspunkt()::equals)) {
             throw new IllegalStateException("Støtter kun deaktivering for perioder som er fjernet");
         }
 
-        fagsakRepository.deaktiverInfotrygdmigrering(fagsak.getId(), migrerFraInfotrygdDto.getSkjæringstidspunkt());
+        fagsakRepository.deaktiverInfotrygdmigrering(behandling.getFagsak().getId(), dto.getSkjæringstidspunkt());
 
     }
 
