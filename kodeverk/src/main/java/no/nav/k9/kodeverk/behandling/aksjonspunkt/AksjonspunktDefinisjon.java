@@ -3,6 +3,7 @@ package no.nav.k9.kodeverk.behandling.aksjonspunkt;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.AVBRYTES;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.ENTRINN;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.FORBLI;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.KAN_OVERSTYRE_TOTRINN_ETTER_LUKKING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.SKAL_IKKE_AVBRYTES;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TILBAKE;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TOTRINN;
@@ -285,7 +286,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     KONTROLLER_LEGEERKLÆRING(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE,
         AksjonspunktType.MANUELL, "Kontroller legeerklæring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, VurderingspunktType.UT,
-        VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, SkjermlenkeType.FAKTA_OM_MEDISINSK, ENTRINN, FORBLI, SKAL_IKKE_AVBRYTES),
+        VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, SkjermlenkeType.FAKTA_OM_MEDISINSK, ENTRINN, KAN_OVERSTYRE_TOTRINN_ETTER_LUKKING, FORBLI, SKAL_IKKE_AVBRYTES),
     VURDER_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE,
         AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT,
         VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN),
@@ -383,6 +384,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
      */
     @JsonIgnore
     private boolean defaultTotrinnBehandling = false;
+
+    @JsonIgnore
+    private boolean kanOverstyreTotrinnEtterLukking = false;
 
     /**
      * Hvorvidt aksjonspunktet har en frist før det må være løst. Brukes i forbindelse med når Behandling er lagt til
@@ -528,6 +532,32 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.skalAvbrytesVedTilbakeføring = skalAvbrytesVedTilbakeføring;
     }
 
+    private AksjonspunktDefinisjon(String kode,
+                                   AksjonspunktType aksjonspunktType,
+                                   String navn,
+                                   BehandlingStatus behandlingStatus,
+                                   BehandlingStegType behandlingStegType,
+                                   VurderingspunktType vurderingspunktType,
+                                   VilkårType vilkårType,
+                                   SkjermlenkeType skjermlenkeType,
+                                   boolean defaultTotrinnBehandling,
+                                   boolean kanOverstyreTotrinnEtterLukking,
+                                   boolean tilbakehoppVedGjenopptakelse,
+                                   boolean skalAvbrytesVedTilbakeføring) {
+        this.kode = Objects.requireNonNull(kode);
+        this.navn = navn;
+        this.aksjonspunktType = aksjonspunktType;
+        this.behandlingStatus = Set.of(behandlingStatus);
+        this.behandlingStegType = behandlingStegType;
+        this.vurderingspunktType = vurderingspunktType;
+        this.vilkårType = vilkårType;
+        this.defaultTotrinnBehandling = defaultTotrinnBehandling;
+        this.kanOverstyreTotrinnEtterLukking = kanOverstyreTotrinnEtterLukking;
+        this.skjermlenkeType = skjermlenkeType;
+        this.tilbakehoppVedGjenopptakelse = tilbakehoppVedGjenopptakelse;
+        this.skalAvbrytesVedTilbakeføring = skalAvbrytesVedTilbakeføring;
+    }
+
     @JsonCreator(mode = Mode.DELEGATING)
     public static AksjonspunktDefinisjon fraKode(Object node) {
         if (node == null) {
@@ -656,6 +686,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     public Set<BehandlingStatus> getGyldigBehandlingStatus() {
         return behandlingStatus;
+    }
+
+    public boolean kanOverstyreTotrinnEtterLukking() {
+        return kanOverstyreTotrinnEtterLukking;
     }
 
     @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)
