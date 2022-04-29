@@ -115,7 +115,7 @@ public class MottatteDokumentRepository {
     }
 
     public List<MottattDokument> hentMottatteDokument(Long fagsakId, Collection<JournalpostId> journalpostIder) {
-        return hentMottatteDokument(fagsakId, journalpostIder, DokumentStatus.GYLDIG);
+        return hentMottatteDokument(fagsakId, journalpostIder, DokumentStatus.GYLDIG, DokumentStatus.MOTTATT);
     }
 
     public List<MottattDokument> hentMottatteDokument(Long fagsakId, Collection<JournalpostId> journalpostIder, DokumentStatus... statuser) {
