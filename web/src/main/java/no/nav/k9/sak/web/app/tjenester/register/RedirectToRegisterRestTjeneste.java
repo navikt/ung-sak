@@ -63,7 +63,7 @@ public class RedirectToRegisterRestTjeneste {
         TpsTjeneste tpsTjeneste,
         BehandlingRepository behandlingRepository,
         FagsakRepository fagsakRepository, OidcRestClient restClient,
-        @KonfigVerdi(value = "aareg.base.url", required = false, defaultVerdi = "https://arbeid-og-inntekt.nais.adeo.no") String arbeidOgInntektBaseURL) {
+        @KonfigVerdi(value = "arbeid.og.inntekt.base.url", required = false, defaultVerdi = "https://arbeid-og-inntekt.nais.adeo.no") String arbeidOgInntektBaseURL) {
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.restClient = restClient;
