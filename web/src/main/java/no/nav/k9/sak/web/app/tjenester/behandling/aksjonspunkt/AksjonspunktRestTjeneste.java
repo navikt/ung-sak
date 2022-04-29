@@ -6,9 +6,14 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UP
 
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,13 +30,6 @@ import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -42,7 +40,7 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktDto;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktKode;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftedeAksjonspunkterDto;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
-import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyrteAksjonspunkterDto;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetOgOverstyrteAksjonspunkterDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
@@ -86,7 +84,7 @@ public class AksjonspunktRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path(AKSJONSPUNKT_PATH)
     @Operation(description = "Hent aksjonspunter for en behandling", tags = "aksjonspunkt", responses = {
-            @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = Set.class), schema = @Schema(implementation = AksjonspunktDto.class)), mediaType = MediaType.APPLICATION_JSON))
+        @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = Set.class), schema = @Schema(implementation = AksjonspunktDto.class)), mediaType = MediaType.APPLICATION_JSON))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -112,7 +110,7 @@ public class AksjonspunktRestTjeneste {
     @Path(AKSJONSPUNKT_V2_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent aksjonspunter for en behandling", tags = "aksjonspunkt", responses = {
-            @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = Set.class), schema = @Schema(implementation = AksjonspunktDto.class)), mediaType = MediaType.APPLICATION_JSON))
+        @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = Set.class), schema = @Schema(implementation = AksjonspunktDto.class)), mediaType = MediaType.APPLICATION_JSON))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -121,13 +119,15 @@ public class AksjonspunktRestTjeneste {
         return getAksjonspunkter(behandling);
     }
 
-    /** @deprecated pt. ikke i bruk i K9 */
-    @Deprecated(forRemoval=true)
+    /**
+     * @deprecated pt. ikke i bruk i K9
+     */
+    @Deprecated(forRemoval = true)
     @GET
     @Path(AKSJONSPUNKT_RISIKO_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent risikoaksjonspunkt for en behandling", tags = "aksjonspunkt", responses = {
-            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AksjonspunktDto.class), mediaType = MediaType.APPLICATION_JSON))
+        @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AksjonspunktDto.class), mediaType = MediaType.APPLICATION_JSON))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -143,7 +143,7 @@ public class AksjonspunktRestTjeneste {
     @Path(AKSJONSPUNKT_KONTROLLER_REVURDERING_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Har behandling åpent kontroller revurdering aksjonspunkt", tags = "aksjonspunkt", responses = {
-            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Boolean.class), mediaType = MediaType.APPLICATION_JSON))
+        @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Boolean.class), mediaType = MediaType.APPLICATION_JSON))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -173,7 +173,7 @@ public class AksjonspunktRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response bekreft(@Context HttpServletRequest request,
                             @Parameter(description = "Liste over aksjonspunkt som skal bekreftes, inklusiv data som trengs for å løse de.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BekreftedeAksjonspunkterDto apDto)
-            throws URISyntaxException { // NOSONAR
+        throws URISyntaxException { // NOSONAR
 
         Long behandlingId = apDto.getBehandlingId();
         Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer = apDto.getBekreftedeAksjonspunktDtoer();
@@ -192,7 +192,7 @@ public class AksjonspunktRestTjeneste {
     }
 
     /**
-     * Oppretting og prosessering av aksjonspunkt som har type overstyringspunkt.
+     * Oppretting og prosessering av aksjonspunkt som har type overstyringspunkt og eventuelt andre aksjonspunkter.
      * <p>
      * MERK: Det skal ikke ligge spesifikke sjekker som avhenger av status på behanlding, steg eller knytning til
      * spesifikke aksjonspunkter idenne tjenesten.
@@ -204,8 +204,8 @@ public class AksjonspunktRestTjeneste {
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response overstyr(@Context HttpServletRequest request,
-                             @Parameter(description = "Liste over overstyring aksjonspunkter.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) OverstyrteAksjonspunkterDto apDto)
-            throws URISyntaxException { // NOSONAR
+                             @Parameter(description = "Liste over aksjonspunkter.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BekreftetOgOverstyrteAksjonspunkterDto apDto)
+        throws URISyntaxException { // NOSONAR
 
         Long behandlingId = apDto.getBehandlingId();
         Behandling behandling = behandlingId != null
@@ -214,12 +214,19 @@ public class AksjonspunktRestTjeneste {
 
         behandlingutredningTjeneste.kanEndreBehandling(behandling.getId(), apDto.getBehandlingVersjon());
 
-        validerBetingelserForAksjonspunkt(behandling, apDto.getOverstyrteAksjonspunktDtoer());
+        if (!apDto.getBekreftedeAksjonspunktDtoer().isEmpty()) {
+            validerBetingelserForAksjonspunkt(behandling, apDto.getBekreftedeAksjonspunktDtoer());
+            applikasjonstjeneste.bekreftAksjonspunkter(apDto.getBekreftedeAksjonspunktDtoer(), behandling.getId());
+        }
 
-        applikasjonstjeneste.overstyrAksjonspunkter(apDto.getOverstyrteAksjonspunktDtoer(), behandling.getId());
+        if (!apDto.getOverstyrteAksjonspunktDtoer().isEmpty()) {
+            validerBetingelserForAksjonspunkt(behandling, apDto.getOverstyrteAksjonspunktDtoer());
+            applikasjonstjeneste.overstyrAksjonspunkter(apDto.getOverstyrteAksjonspunktDtoer(), behandling.getId());
+        }
 
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
     }
+
 
     private void validerBetingelserForAksjonspunkt(Behandling behandling, Collection<? extends AksjonspunktKode> aksjonspunktDtoer) {
         if (behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK) && !erFatteVedtakAkpt(aksjonspunktDtoer)) {
