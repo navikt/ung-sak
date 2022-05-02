@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.math.BigDecimal;
@@ -63,6 +64,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Årsak;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHendelseBygger {
 
     private static final Logger logger = LoggerFactory.getLogger(PsbStønadstatistikkHendelseBygger.class);
@@ -113,7 +115,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
             logger.info("Lager ikke StønadstatistikkHendelse siden behandingen mangler søknadsperioder: " + behandlingUuid.toString());
             return null;
         }
-        
+
         final List<SykdomDiagnosekode> diagnosekoder = hentDiagnosekoder(grunnlagOpt.get());
         final LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> periodetidslinje = stønadstatistikkPeriodetidslinjebygger.lagTidslinjeFor(behandling);
 

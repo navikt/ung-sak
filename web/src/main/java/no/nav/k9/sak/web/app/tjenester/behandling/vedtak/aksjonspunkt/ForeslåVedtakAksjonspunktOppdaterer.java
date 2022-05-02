@@ -1,5 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 
+import java.util.Set;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
@@ -35,7 +37,7 @@ public class ForeslåVedtakAksjonspunktOppdaterer implements AksjonspunktOppdate
         vedtaksbrevHåndterer.oppdaterBegrunnelse(behandling);
 
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
-        if (behandling.getFagsakYtelseType().equals(FagsakYtelseType.PSB)) {
+        if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains( behandling.getFagsakYtelseType())) {
             if (dto.isSkalBrukeOverstyrendeFritekstBrev() || trengerManueltBrev(behandling)) {
                 builder.medTotrinn();
             }

@@ -16,7 +16,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -77,7 +76,7 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
             return true;
         }
 
-        var vurderer = EndringPåForlengelsePeriodeVurderer.finnVurderer(endringsVurderere, VilkårType.OPPTJENINGSVILKÅRET, FagsakYtelseType.PSB);
+        var vurderer = EndringPåForlengelsePeriodeVurderer.finnVurderer(endringsVurderere, VilkårType.OPPTJENINGSVILKÅRET, input.getBehandlingReferanse().getFagsakYtelseType());
 
         return vurderer.harPeriodeEndring(input, periode);
     }

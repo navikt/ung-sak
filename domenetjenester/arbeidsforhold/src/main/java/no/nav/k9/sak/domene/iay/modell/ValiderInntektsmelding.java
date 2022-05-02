@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.iay.modell;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +42,7 @@ public class ValiderInntektsmelding {
                 }
             }
         }
-        if (FagsakYtelseType.PSB.equals(kladd.getFagsakYtelseType())) {
+        if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(kladd.getFagsakYtelseType())) {
             // valider kombo refusjonkrav/fravær
             // Må opplyse brutto inntekt
             if (kladd.getInntektBeløp() == null) {

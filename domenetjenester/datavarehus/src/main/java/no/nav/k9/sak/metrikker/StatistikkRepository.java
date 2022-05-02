@@ -65,7 +65,9 @@ public class StatistikkRepository {
         FagsakYtelseType.OMSORGSPENGER_KS,
         FagsakYtelseType.OMSORGSPENGER_MA,
         FagsakYtelseType.OMSORGSPENGER_AO,
-        FagsakYtelseType.PLEIEPENGER_SYKT_BARN).map(FagsakYtelseType::getKode).collect(Collectors.toList());
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+        FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
+        .map(FagsakYtelseType::getKode).collect(Collectors.toList());
 
     static final List<String> PROSESS_TASK_STATUSER = Stream.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.FEILET, ProsessTaskStatus.VENTER_SVAR, ProsessTaskStatus.SUSPENDERT).map(ProsessTaskStatus::getDbKode).collect(Collectors.toList());
     static final List<String> AKSJONSPUNKTER = AksjonspunktDefinisjon.kodeMap().values().stream()
