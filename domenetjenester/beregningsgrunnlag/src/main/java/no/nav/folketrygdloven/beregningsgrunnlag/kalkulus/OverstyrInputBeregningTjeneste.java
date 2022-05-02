@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -110,7 +109,8 @@ public class OverstyrInputBeregningTjeneste {
 
     private Optional<YtelseGrunnlag> finnKantIKantGrunnlagsliste(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
         return new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandling.getAktørId()))
-            .filter(y -> Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(y.getYtelseType()) && y.getKilde().equals(Fagsystem.INFOTRYGD))
+            //det er riktig at PPN ikke er med her, siden dette bare  migrerte data for PSB
+            .filter(y -> y.getYtelseType().equals(FagsakYtelseType.PSB) && y.getKilde().equals(Fagsystem.INFOTRYGD))
             .filter(y -> y.getYtelseAnvist().stream().anyMatch(ya -> {
                 var stpIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(migrertStp, migrertStp);
                 var anvistIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(ya.getAnvistFOM(), ya.getAnvistTOM());
@@ -122,7 +122,8 @@ public class OverstyrInputBeregningTjeneste {
 
     private Optional<YtelseGrunnlag> finnOverlappendeGrunnlag(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
         return new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandling.getAktørId()))
-            .filter(y -> Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(y.getYtelseType()) && y.getKilde().equals(Fagsystem.INFOTRYGD))
+            //det er riktig at PPN ikke er med her, siden dette bare  migrerte data for PSB
+            .filter(y -> y.getYtelseType().equals(FagsakYtelseType.PSB) && y.getKilde().equals(Fagsystem.INFOTRYGD))
             .filter(y -> y.getYtelseAnvist().stream().anyMatch(ya -> {
                 var stpIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(migrertStp, migrertStp);
                 var anvistIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(ya.getAnvistFOM(), ya.getAnvistTOM());
