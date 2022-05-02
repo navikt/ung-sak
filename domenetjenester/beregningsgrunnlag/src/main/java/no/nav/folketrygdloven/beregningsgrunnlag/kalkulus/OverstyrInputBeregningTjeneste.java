@@ -12,7 +12,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -110,6 +109,7 @@ public class OverstyrInputBeregningTjeneste {
 
     private Optional<YtelseGrunnlag> finnKantIKantGrunnlagsliste(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
         return new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandling.getAktørId()))
+            //det er riktig at PPN ikke er med her, siden dette bare gjelder migrerte data for PSB
             .filter(y -> y.getYtelseType().equals(FagsakYtelseType.PSB) && y.getKilde().equals(Fagsystem.INFOTRYGD))
             .filter(y -> y.getYtelseAnvist().stream().anyMatch(ya -> {
                 var stpIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(migrertStp, migrertStp);
@@ -122,6 +122,7 @@ public class OverstyrInputBeregningTjeneste {
 
     private Optional<YtelseGrunnlag> finnOverlappendeGrunnlag(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
         return new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandling.getAktørId()))
+            //det er riktig at PPN ikke er med her, siden dette bare gjelder migrerte data for PSB
             .filter(y -> y.getYtelseType().equals(FagsakYtelseType.PSB) && y.getKilde().equals(Fagsystem.INFOTRYGD))
             .filter(y -> y.getYtelseAnvist().stream().anyMatch(ya -> {
                 var stpIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(migrertStp, migrertStp);
