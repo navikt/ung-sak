@@ -1,7 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import static no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OverstyrInntektsmelding.finnOverstyrteInntektsmeldinger;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,9 +74,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
 
 /**
@@ -286,8 +284,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     private Set<Inntektsmelding> finnInntektsmeldingerForSak(BehandlingReferanse referanse, List<BeregnInput> beregnInput) {
-        var overstyrteInntektsmeldinger = finnOverstyrtInntektsmeldinger(beregnInput);
         var inntektsmeldingerForSak = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
+        Set<Inntektsmelding> overstyrteInntektsmeldinger = togglePsbMigrering ? finnOverstyrteInntektsmeldinger(beregnInput, inntektsmeldingerForSak) : Set.of();
         var utvalgteInntektsmeldinger = inntektsmeldingerForSak.stream()
             .filter(im -> !harIMSomOverstyrer(im, overstyrteInntektsmeldinger))
             .collect(Collectors.toCollection(HashSet::new));
@@ -298,29 +296,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     private boolean harIMSomOverstyrer(Inntektsmelding im, Set<Inntektsmelding> overstyrteInntektsmeldinger) {
         return overstyrteInntektsmeldinger.stream().anyMatch(overstyrtIM -> overstyrtIM.getStartDatoPermisjon().equals(im.getStartDatoPermisjon())
             && overstyrtIM.gjelderSammeArbeidsforhold(im));
-    }
-
-    private Set<Inntektsmelding> finnOverstyrtInntektsmeldinger(List<BeregnInput> beregnInput) {
-        if (!togglePsbMigrering) {
-            return Collections.emptySet();
-        }
-        return beregnInput.stream().flatMap(i -> i.getInputOverstyringPeriode().stream())
-            .flatMap(overstyrtPeriode -> {
-                LocalDate stp = overstyrtPeriode.getSkjæringstidspunkt();
-                return overstyrtPeriode.getAktivitetOverstyringer().stream()
-                    .filter(a -> a.getAktivitetStatus().erArbeidstaker())
-                    .map(a -> InntektsmeldingBuilder.builder()
-                        .medInnsendingstidspunkt(stp.atStartOfDay())
-                        .medArbeidsgiver(a.getArbeidsgiver())
-                        .medStartDatoPermisjon(stp)
-                        .medRefusjon(a.getRefusjonPrÅr() == null ? BigDecimal.ZERO :
-                            a.getRefusjonPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP), a.getOpphørRefusjon())
-                        .medBeløp(a.getInntektPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP))
-                        .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
-                        .medJournalpostId("OVERSTYRT_FOR_INFOTRYGDMIGRERING" + stp)
-                        .medKanalreferanse("OVERSTYRT_FOR_INFOTRYGDMIGRERING" + stp)
-                        .build());
-            }).collect(Collectors.toSet());
     }
 
     protected SamletKalkulusResultat mapFraTilstand(Collection<TilstandResponse> response, Collection<BgRef> bgReferanser) {
