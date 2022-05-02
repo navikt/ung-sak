@@ -109,7 +109,7 @@ public class OverstyrInputBeregningTjeneste {
 
     private Optional<YtelseGrunnlag> finnKantIKantGrunnlagsliste(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
         return new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandling.getAktørId()))
-            //det er riktig at PPN ikke er med her, siden dette bare  migrerte data for PSB
+            //det er riktig at PPN ikke er med her, siden dette bare gjelder migrerte data for PSB
             .filter(y -> y.getYtelseType().equals(FagsakYtelseType.PSB) && y.getKilde().equals(Fagsystem.INFOTRYGD))
             .filter(y -> y.getYtelseAnvist().stream().anyMatch(ya -> {
                 var stpIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(migrertStp, migrertStp);
@@ -122,7 +122,7 @@ public class OverstyrInputBeregningTjeneste {
 
     private Optional<YtelseGrunnlag> finnOverlappendeGrunnlag(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
         return new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandling.getAktørId()))
-            //det er riktig at PPN ikke er med her, siden dette bare  migrerte data for PSB
+            //det er riktig at PPN ikke er med her, siden dette bare gjelder migrerte data for PSB
             .filter(y -> y.getYtelseType().equals(FagsakYtelseType.PSB) && y.getKilde().equals(Fagsystem.INFOTRYGD))
             .filter(y -> y.getYtelseAnvist().stream().anyMatch(ya -> {
                 var stpIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(migrertStp, migrertStp);
