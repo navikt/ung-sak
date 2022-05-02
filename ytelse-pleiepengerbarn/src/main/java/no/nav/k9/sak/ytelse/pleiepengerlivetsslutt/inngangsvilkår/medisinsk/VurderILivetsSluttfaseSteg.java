@@ -198,7 +198,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
                     .medMerknadParametere(vilkårData.getMerknadParametere())
                     .medRegelEvaluering(vilkårData.getRegelEvaluering())
                     .medRegelInput(vilkårData.getRegelInput())
-                    .medAvslagsårsak(Avslagsårsak.MANGLENDE_DOKUMENTASJON)
+                    .medAvslagsårsak(Avslagsårsak.IKKE_I_LIVETS_SLUTTFASE)
                     .medMerknad(vilkårData.getVilkårUtfallMerknad())));
         }
     }
