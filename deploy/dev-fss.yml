@@ -150,6 +150,8 @@ spec:
       value: https://k9-punsj.dev.adeo.no/api
     - name: INFOTRYGD_BS_BASE_URI
       value: https://k9-infotrygd.dev.intern.nav.no
+    - name: ARBEID_OG_INNTEKT_BASE_URL
+      value: https://arbeid-og-inntekt.nais.preprod.local
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL

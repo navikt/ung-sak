@@ -19,6 +19,8 @@ import no.nav.k9.sak.typer.Saksnummer;
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY, isGetterVisibility = Visibility.NONE)
 public class SaksnummerDto {
+    public static final String DESC = "SAKSNUMMER";
+    public static final String NAME = "Saksnummer";
 
     @JsonProperty(value = "saksnummer", required = true)
     @NotNull
