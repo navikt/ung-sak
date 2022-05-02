@@ -72,7 +72,7 @@ public class RedirectToRegisterRestTjeneste {
 
     @GET
     @Operation(description = "Redirecter til aa-reg for arbeidstakeren", tags = "aktoer", responses = {
-        @ApiResponse(responseCode = "200", description = "Redirecter til aa-reg for arbeidstakeren", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SaksnummerDto.class)))
+        @ApiResponse(responseCode = "307", description = "Redirecter til aa-reg for arbeidstakeren" )
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(AA_REG_POSTFIX)
@@ -96,7 +96,7 @@ public class RedirectToRegisterRestTjeneste {
 
     @GET
     @Operation(description = "Redirecter til a-inntekt for arbeidstakeren", tags = "aktoer", responses = {
-        @ApiResponse(responseCode = "200", description = "Redirecter til a-inntekt for arbeidstakeren", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SaksnummerDto.class)))
+        @ApiResponse(responseCode = "307", description = "Redirecter til a-inntekt for arbeidstakeren")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(AINNTEKT_REG_POSTFIX)
