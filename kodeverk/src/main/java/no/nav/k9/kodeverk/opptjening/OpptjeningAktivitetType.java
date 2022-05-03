@@ -85,7 +85,7 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
         Set.of()),
     PLEIEPENGER_AV_DAGPENGER("PLEIEPENGER_AV_DAGPENGER", "Pleiepenger",
         Set.of(),
-        Set.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN),
+        Set.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE),
         Set.of()),
     VENTELØNN_VARTPENGER("VENTELØNN_VARTPENGER", "Ventelønn eller vartpenger",
         Set.of(ArbeidType.VENTELØNN_VARTPENGER),
