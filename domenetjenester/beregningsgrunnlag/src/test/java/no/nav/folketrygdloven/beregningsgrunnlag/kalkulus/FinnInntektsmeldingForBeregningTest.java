@@ -18,7 +18,7 @@ import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputAktivitetOverstyring;
 
-class OverstyrInntektsmeldingTest {
+class FinnInntektsmeldingForBeregningTest {
 
     @Test
     void skal_mappe_overstyrt_uten_mottatt_fra_arbeidsgiver() {
@@ -30,7 +30,7 @@ class OverstyrInntektsmeldingTest {
             new Beløp(BigDecimal.valueOf(12000)), null, AktivitetStatus.ARBEIDSTAKER, null);
 
         // Act
-        var mappetInntektsmelding = OverstyrInntektsmelding.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of());
+        var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of());
 
         // Assert
         assertThat(mappetInntektsmelding.getArbeidsgiver()).isEqualTo(virksomhet);
@@ -49,7 +49,7 @@ class OverstyrInntektsmeldingTest {
             new Beløp(BigDecimal.valueOf(12000)), null, AktivitetStatus.ARBEIDSTAKER, null);
 
         // Act
-        var mappetInntektsmelding = OverstyrInntektsmelding.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of(inntektsmelding));
+        var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of(inntektsmelding));
 
         // Assert
         assertThat(mappetInntektsmelding.getArbeidsgiver()).isEqualTo(virksomhet);
@@ -70,7 +70,7 @@ class OverstyrInntektsmeldingTest {
             new Beløp(BigDecimal.valueOf(12000)), null, AktivitetStatus.ARBEIDSTAKER, null);
 
         // Act
-        var mappetInntektsmelding = OverstyrInntektsmelding.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of(inntektsmelding1, inntektsmelding2));
+        var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of(inntektsmelding1, inntektsmelding2));
 
         // Assert
         assertThat(mappetInntektsmelding.getArbeidsgiver()).isEqualTo(virksomhet);
@@ -92,7 +92,7 @@ class OverstyrInntektsmeldingTest {
             new Beløp(BigDecimal.valueOf(12000)), null, AktivitetStatus.ARBEIDSTAKER, null);
 
         // Act
-        var mappetInntektsmelding = OverstyrInntektsmelding.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of(inntektsmelding1, inntektsmelding2));
+        var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of(inntektsmelding1, inntektsmelding2));
 
         // Assert
         assertThat(mappetInntektsmelding.getArbeidsgiver()).isEqualTo(virksomhet);

@@ -1,13 +1,10 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-import static no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OverstyrInntektsmelding.finnOverstyrteInntektsmeldinger;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +55,6 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
@@ -73,7 +69,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -91,7 +86,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     protected InntektArbeidYtelseTjeneste iayTjeneste;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
     protected LagBeregnRequestTjeneste beregnRequestTjeneste;
-    private boolean togglePsbMigrering;
+    private FinnInntektsmeldingForBeregning finnInntektsmeldingForBeregning;
 
     public KalkulusTjeneste() {
     }
@@ -102,14 +97,13 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                             InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                             @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                             LagBeregnRequestTjeneste beregnRequestTjeneste,
-                            @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering
-    ) {
+                            FinnInntektsmeldingForBeregning finnInntektsmeldingForBeregning) {
         this.restTjeneste = restTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.beregnRequestTjeneste = beregnRequestTjeneste;
-        this.togglePsbMigrering = toggleMigrering;
+        this.finnInntektsmeldingForBeregning = finnInntektsmeldingForBeregning;
     }
 
     @Override
@@ -120,7 +114,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             return new SamletKalkulusResultat(Collections.emptyMap(), Collections.emptyMap());
         }
         var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
-        var sakInntektsmeldinger = finnInntektsmeldingerForSak(referanse, beregningInput);
+        var sakInntektsmeldinger = finnInntektsmeldingForBeregning.finnInntektsmeldinger(referanse, beregningInput);
         var request = beregnRequestTjeneste.lagMedInput(stegType, referanse, beregningInput, iayGrunnlag, sakInntektsmeldinger);
         TilstandListeResponse tilstandResponse = restTjeneste.beregn(request);
         var bgReferanser = beregningInput.stream()
@@ -281,21 +275,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
     protected KalkulusRestKlient getKalkulusRestTjeneste() {
         return restTjeneste;
-    }
-
-    private Set<Inntektsmelding> finnInntektsmeldingerForSak(BehandlingReferanse referanse, List<BeregnInput> beregnInput) {
-        var inntektsmeldingerForSak = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
-        Set<Inntektsmelding> overstyrteInntektsmeldinger = togglePsbMigrering ? finnOverstyrteInntektsmeldinger(beregnInput, inntektsmeldingerForSak) : Set.of();
-        var utvalgteInntektsmeldinger = inntektsmeldingerForSak.stream()
-            .filter(im -> !harIMSomOverstyrer(im, overstyrteInntektsmeldinger))
-            .collect(Collectors.toCollection(HashSet::new));
-        utvalgteInntektsmeldinger.addAll(overstyrteInntektsmeldinger);
-        return utvalgteInntektsmeldinger;
-    }
-
-    private boolean harIMSomOverstyrer(Inntektsmelding im, Set<Inntektsmelding> overstyrteInntektsmeldinger) {
-        return overstyrteInntektsmeldinger.stream().anyMatch(overstyrtIM -> overstyrtIM.getStartDatoPermisjon().equals(im.getStartDatoPermisjon())
-            && overstyrtIM.gjelderSammeArbeidsforhold(im));
     }
 
     protected SamletKalkulusResultat mapFraTilstand(Collection<TilstandResponse> response, Collection<BgRef> bgReferanser) {

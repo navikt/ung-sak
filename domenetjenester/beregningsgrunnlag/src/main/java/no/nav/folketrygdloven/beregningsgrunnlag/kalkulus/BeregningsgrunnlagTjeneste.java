@@ -221,6 +221,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                                              List<BgRef> bgReferanser) {
         var perioder = vilkårsperioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
         var originalReferanserMap = hentReferanserTjeneste.finnMapTilOriginaleReferanserUtenAvslag(referanse, perioder, bgReferanser);
+
         return bgReferanser.stream().map(e -> {
             var bgRef = e.getRef();
             var stp = e.getStp();
