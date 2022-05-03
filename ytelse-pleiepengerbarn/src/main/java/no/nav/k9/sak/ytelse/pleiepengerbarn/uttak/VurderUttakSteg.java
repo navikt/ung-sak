@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_UTTAK;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,7 +15,6 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 @BehandlingStegRef(value = VURDER_UTTAK)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
-@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class VurderUttakSteg implements BehandlingSteg {
 
     public VurderUttakSteg() {
