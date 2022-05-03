@@ -57,7 +57,7 @@ public class PSBYtelsespesifikkForeslåVedtak implements YtelsespesifikkForeslå
         var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         if (samtidigUttakTjeneste.isSkalHaTilbakehopp(ref)) {
             behandlingProsesseringTjeneste.opprettTasksForFortsettBehandling(behandling);
-            return BehandleStegResultat.tilbakeførtTilStegUtenVidereKjøring(BehandlingStegType.VURDER_UTTAK);
+            return BehandleStegResultat.tilbakeførtTilStegUtenVidereKjøring(BehandlingStegType.VURDER_UTTAK_V2);
         }
 
         if (søknadsperiodeTjeneste.utledFullstendigPeriode(ref.getBehandlingId()).isEmpty()) {
