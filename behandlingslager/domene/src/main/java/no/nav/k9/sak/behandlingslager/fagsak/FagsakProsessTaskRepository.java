@@ -87,7 +87,30 @@ public class FagsakProsessTaskRepository {
         query.setParameter("prosessTaskId", prosessTaskId); // NOSONAR
         query.setParameter("fagsakId", fagsakId); // NOSONAR
         query.executeUpdate();
+        frigiVeto(ptData);
         em.flush();
+    }
+
+    boolean frigiVeto(ProsessTaskData blokkerendeTask) {
+        String updateSql = "update PROSESS_TASK SET "
+            + " status='KLAR'"
+            + ", blokkert_av=NULL"
+            + ", siste_kjoering_feil_kode=NULL"
+            + ", siste_kjoering_feil_tekst=NULL"
+            + ", neste_kjoering_etter=NULL"
+            + ", versjon = versjon +1"
+            + " WHERE blokkert_av=:id";
+
+        int frigitt = em.createNativeQuery(updateSql)
+            .setParameter("id", blokkerendeTask.getId())
+            .executeUpdate();
+
+        if (frigitt > 0) {
+            log.info("ProsessTask [id={}, taskType={}] SUSPENDERT. Frigitt {} tidligere blokkerte tasks", blokkerendeTask.getId(), blokkerendeTask.taskType(),
+                frigitt);
+            return true;
+        }
+        return false; // Har ikke hatt noe veto å frigi
     }
 
     public List<ProsessTaskData> finnAlleForAngittSøk(Long fagsakId, String behandlingId, String gruppeId, Collection<ProsessTaskStatus> statuser,
