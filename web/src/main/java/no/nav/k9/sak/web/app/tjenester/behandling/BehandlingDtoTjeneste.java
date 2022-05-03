@@ -83,7 +83,6 @@ import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.register.RedirectToRegisterRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.SaksbehandlerRestTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
@@ -151,17 +150,15 @@ public class BehandlingDtoTjeneste {
         dto.setSpråkkode(getSpråkkode(behandling, søknadRepository));
         dto.setBehandlingsresultat(behandlingsresultatDto);
 
-        leggTilRettigheterLinks(behandling, dto);
+        leggTilRettigheterLinks(dto);
         leggTilGrunnlagResourceLinks(behandling, dto);
         leggTilStatusResultaterLinks(behandling, dto);
         leggTilHandlingerResourceLinks(behandling, dto);
     }
 
-    private void leggTilRettigheterLinks(Behandling behandling, BehandlingDto dto) {
+    private void leggTilRettigheterLinks(BehandlingDto dto) {
         var uuidQueryParams = Map.of(BehandlingUuidDto.NAME, dto.getUuid().toString());
         dto.leggTil(getFraMap(BehandlingRestTjeneste.RETTIGHETER_PATH, "behandling-rettigheter", uuidQueryParams));
-        dto.leggTil(getFraMap(RedirectToRegisterRestTjeneste.AA_REG_PATH, "arbeidstaker-redirect", Map.of(SaksnummerDto.NAME, behandling.getFagsak().getSaksnummer().toString())));
-        dto.leggTil(getFraMap(RedirectToRegisterRestTjeneste.AINNTEKT_REG_PATH, "ainntekt-redirect", Map.of(SaksnummerDto.NAME, behandling.getFagsak().getSaksnummer().toString())));
     }
 
     private void leggTilStatusResultaterLinks(Behandling behandling, BehandlingDto dto) {
