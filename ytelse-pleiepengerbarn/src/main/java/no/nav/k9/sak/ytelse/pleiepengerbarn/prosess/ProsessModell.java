@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.prosess;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -44,7 +43,6 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_OPPTJENING_FAKTA)
             .medSteg(BehandlingStegType.VURDER_OPPTJENINGSVILKÅR)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_UTTAK, StartpunktType.UTTAKSVILKÅR, StartpunktType.BEREGNING)
-            .medSteg(BehandlingStegType.VURDER_UTTAK)
             .medSteg(BehandlingStegType.PRECONDITION_BEREGNING)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING)
             .medSteg(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING)
@@ -94,7 +92,6 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_OPPTJENING_FAKTA)
             .medSteg(BehandlingStegType.VURDER_OPPTJENINGSVILKÅR)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_UTTAK, StartpunktType.UTTAKSVILKÅR, StartpunktType.BEREGNING)
-            .medSteg(BehandlingStegType.VURDER_UTTAK)
             .medSteg(BehandlingStegType.PRECONDITION_BEREGNING)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING)
             .medSteg(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING)
