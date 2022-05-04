@@ -1,6 +1,6 @@
 package no.nav.k9.sak.behandling.aksjonspunkt;
 
-import java.util.HashSet;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -10,6 +10,7 @@ import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.k9.sak.behandlingskontroll.impl.transisjoner.Transisjoner;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
 
 public class OverhoppResultat {
@@ -17,6 +18,10 @@ public class OverhoppResultat {
 
     public static OverhoppResultat tomtResultat() {
         return new OverhoppResultat();
+    }
+
+    public Set<OppdateringResultat> getOppdatereResultater() {
+        return oppdatereResultater;
     }
 
     public void leggTil(OppdateringResultat delresultat) {
@@ -45,17 +50,15 @@ public class OverhoppResultat {
         return oppdatereResultater.stream().anyMatch(OppdateringResultat::kreverTotrinnsKontroll);
     }
 
-    public Optional<TransisjonIdentifikator> finnFremoverTransisjon() {
+    public Optional<TransisjonIdentifikator> finnFremoverTransisjon(Comparator<BehandlingStegType> stegSammenligner) {
         return oppdatereResultater.stream()
             .filter(delresultat -> delresultat.getOverhoppKontroll().equals(OverhoppKontroll.FREMOVERHOPP))
             .map(OppdateringResultat::getTransisjon)
-            .findFirst(); // TODO (essv): Sorter steg ut fra deres rekkefølge
+            .max(Comparator.comparing(t -> Transisjoner.finnTransisjon(t).getMålstegHvisFremoverhopp().orElseThrow(), stegSammenligner));
     }
 
     public Set<Tuple<AksjonspunktDefinisjon, AksjonspunktStatus>> finnEkstraAksjonspunktResultat() {
-        Set<Tuple<AksjonspunktDefinisjon, AksjonspunktStatus>> resultater = new HashSet<>();
-        oppdatereResultater.stream().forEach(res -> resultater.addAll(res.getEkstraAksjonspunktResultat()));
-        return resultater;
+        return oppdatereResultater.stream().flatMap(res -> res.getEkstraAksjonspunktResultat().stream()).collect(Collectors.toSet());
     }
 
     @Override

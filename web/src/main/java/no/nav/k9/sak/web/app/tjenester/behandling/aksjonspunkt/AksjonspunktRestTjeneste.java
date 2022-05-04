@@ -213,16 +213,9 @@ public class AksjonspunktRestTjeneste {
             : behandlingRepository.hentBehandling(apDto.getBehandlingUuid());
 
         behandlingutredningTjeneste.kanEndreBehandling(behandling.getId(), apDto.getBehandlingVersjon());
-
-        if (!apDto.getBekreftedeAksjonspunktDtoer().isEmpty()) {
-            validerBetingelserForAksjonspunkt(behandling, apDto.getBekreftedeAksjonspunktDtoer());
-            applikasjonstjeneste.bekreftAksjonspunkter(apDto.getBekreftedeAksjonspunktDtoer(), behandling.getId());
-        }
-
-        if (!apDto.getOverstyrteAksjonspunktDtoer().isEmpty()) {
-            validerBetingelserForAksjonspunkt(behandling, apDto.getOverstyrteAksjonspunktDtoer());
-            applikasjonstjeneste.overstyrAksjonspunkter(apDto.getOverstyrteAksjonspunktDtoer(), behandling.getId());
-        }
+        validerBetingelserForAksjonspunkt(behandling, apDto.getBekreftedeAksjonspunktDtoer());
+        validerBetingelserForAksjonspunkt(behandling, apDto.getOverstyrteAksjonspunktDtoer());
+        applikasjonstjeneste.overstyrAksjonspunkter(apDto, behandling.getId());
 
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
     }
