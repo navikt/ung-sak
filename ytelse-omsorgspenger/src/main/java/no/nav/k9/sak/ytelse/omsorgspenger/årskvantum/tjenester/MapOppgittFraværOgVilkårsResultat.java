@@ -51,12 +51,6 @@ public class MapOppgittFraværOgVilkårsResultat {
 
     private static final Logger log = LoggerFactory.getLogger(MapOppgittFraværOgVilkårsResultat.class);
 
-    private boolean brukVurderingAvNyoppstartet;
-
-    public MapOppgittFraværOgVilkårsResultat(boolean brukVurderingAvNyoppstartet) {
-        this.brukVurderingAvNyoppstartet = brukVurderingAvNyoppstartet;
-    }
-
     Map<Aktivitet, List<WrappedOppgittFraværPeriode>> utledPerioderMedUtfall(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktivitetPerioder, Vilkårene vilkårene, DatoIntervallEntitet fagsakPeriode, Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> fraværsPerioder) {
         var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId()));
 
@@ -69,9 +63,7 @@ public class MapOppgittFraværOgVilkårsResultat {
         fraværsTidslinje = kombinerFraværOgArbeidsforholdsTidslinjer(fraværsTidslinje, egenNæringTidslinje);
         fraværsTidslinje = kombinerFraværOgArbeidsforholdsTidslinjer(fraværsTidslinje, oppgittFrilansTidslinje);
 
-        if (brukVurderingAvNyoppstartet) {
-            fraværsTidslinje = leggPåVurderingAvNyoppstartetArbeidsforholdHvorAktuelt(fraværsTidslinje, iayGrunnlag, ref.getAktørId());
-        }
+        fraværsTidslinje = leggPåVurderingAvNyoppstartetArbeidsforholdHvorAktuelt(fraværsTidslinje, iayGrunnlag, ref.getAktørId());
 
         LocalDateTimeline<WrappedOppgittFraværPeriode> avslåtteVilkårTidslinje = opprettAvslåttInngangsVilkårTidslinje(vilkårene);
 
