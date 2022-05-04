@@ -12,7 +12,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -50,8 +49,6 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     private OmsorgenForTjeneste omsorgenForTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
-    private boolean automatiserVedtak;
-
     VurderOmsorgenForSteg() {
         //
     }
@@ -60,13 +57,11 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     public VurderOmsorgenForSteg(BehandlingRepository behandlingRepository,
                                  VilkårResultatRepository vilkårResultatRepository,
                                  OmsorgenForTjeneste omsorgenForTjeneste,
-                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                 @KonfigVerdi(value = "OMP_DELT_BOSTED_RAMMEVEDTAK", defaultVerdi = "true") boolean automatiserVedtak) {
+                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.omsorgenForTjeneste = omsorgenForTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
-        this.automatiserVedtak = automatiserVedtak;
     }
 
     @Override
@@ -77,7 +72,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR));
         }
         FagsakYtelseType fagsakYtelseType = behandling.getFagsakYtelseType();
-        if (automatiserVedtak && fagsakYtelseType == OMSORGSPENGER_AO) {
+        if (fagsakYtelseType == OMSORGSPENGER_AO) {
             return utførStegAutomatisk(kontekst);
         }
         return utførStegManuelt(kontekst);
