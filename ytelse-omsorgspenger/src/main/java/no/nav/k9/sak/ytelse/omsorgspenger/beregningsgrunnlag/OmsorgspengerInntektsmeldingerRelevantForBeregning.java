@@ -4,7 +4,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,11 +16,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
@@ -30,19 +25,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 @ApplicationScoped
 @FagsakYtelseTypeRef(OMSORGSPENGER)
 public class OmsorgspengerInntektsmeldingerRelevantForBeregning implements InntektsmeldingerRelevantForBeregning {
-
-    private boolean lansertSjekkFørsteFraværsdag;
-
-    private Period GRENSE_AKSEPTER_STARTDATO_FØR_VILKÅRSPERIODE = Period.ofWeeks(4);
-    private Period GRENSE_AKSEPTER_STARTDATO_ETTER_VILKÅRSPERIODE = Period.ofDays(0);
-
-    OmsorgspengerInntektsmeldingerRelevantForBeregning() {
-    }
-
-    @Inject
-    public OmsorgspengerInntektsmeldingerRelevantForBeregning(@KonfigVerdi(value = "OMP_IM_SJEKK_FORSTE_FRAVAERSDAG", defaultVerdi = "true") boolean lansertSjekkFørsteFraværsdag) {
-        this.lansertSjekkFørsteFraværsdag = lansertSjekkFørsteFraværsdag;
-    }
 
     @Override
     public List<Inntektsmelding> utledInntektsmeldingerSomGjelderForPeriode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
@@ -77,9 +59,6 @@ public class OmsorgspengerInntektsmeldingerRelevantForBeregning implements Innte
     }
 
     private Optional<LocalDate> finnDatoNærmestSkjæringstidspunktet(Inntektsmelding inntektsmelding, LocalDate skjæringstidspunkt) {
-        if (lansertSjekkFørsteFraværsdag && inntektsmelding.getOppgittFravær().isEmpty()) {
-            return inntektsmelding.getStartDatoPermisjon();
-        }
         var inkludert = inntektsmelding.getOppgittFravær()
             .stream()
             .filter(at -> !Duration.ZERO.equals(at.getVarighetPerDag()))
@@ -111,21 +90,14 @@ public class OmsorgspengerInntektsmeldingerRelevantForBeregning implements Innte
     }
 
     private Set<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
-        LocalDateInterval intervallForAksepterbarStartdato = new LocalDateInterval(
-            vilkårsPeriode.getFomDato().minus(GRENSE_AKSEPTER_STARTDATO_FØR_VILKÅRSPERIODE),
-            vilkårsPeriode.getTomDato().plus(GRENSE_AKSEPTER_STARTDATO_ETTER_VILKÅRSPERIODE));
-
         Predicate<Inntektsmelding> filterGittFraværsperioder = it -> it.getOppgittFravær()
             .stream()
             .filter(at -> !Duration.ZERO.equals(at.getVarighetPerDag()))
             .anyMatch(at -> vilkårsPeriode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom())));
 
-        Predicate<Inntektsmelding> filtrerGittFraværsperioderOgFørsteStønadsdag = im ->
-            filterGittFraværsperioder.test(im) || im.getOppgittFravær().isEmpty() && im.getStartDatoPermisjon().isPresent() && intervallForAksepterbarStartdato.encloses(im.getStartDatoPermisjon().get());
-
         return sakInntektsmeldinger
             .stream()
-            .filter(lansertSjekkFørsteFraværsdag ? filtrerGittFraværsperioderOgFørsteStønadsdag : filterGittFraværsperioder)
+            .filter(filterGittFraværsperioder)
             .sorted(Inntektsmelding.COMP_REKKEFØLGE)
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
