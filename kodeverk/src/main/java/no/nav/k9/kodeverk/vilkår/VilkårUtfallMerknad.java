@@ -56,6 +56,7 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     VM_1069("1069", "Ikke behov for kontinuerlig pleie."),
     VM_1071("1071", "Ikke dokumentert omsorgen for."),
 
+    VM_1080("1080", "Pleietrengende innlagt i stedet for hjemme."),
     VM_1081("1081", "Ikke i livets sluttfase."),
 
     VM_5007("5007", "søknadsfristvilkåret"),
