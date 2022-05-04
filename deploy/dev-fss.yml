@@ -186,8 +186,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: OMP_IM_SJEKK_FORSTE_FRAVAERSDAG
-      value: "true"
     - name: PSB_OPPG_OPPTJENING_PRIORITERING
       value: "true"
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
