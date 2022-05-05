@@ -122,8 +122,10 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT),
     I_LIVETS_SLUTTFASE("K9_VK_16",
         "I livets sluttfase",
-        Map.of(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 9-16 4. ledd"),
-        Avslagsårsak.MANGLENDE_DOKUMENTASJON
+        Map.of(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 9-13"),
+        Avslagsårsak.MANGLENDE_DOKUMENTASJON,
+        Avslagsårsak.IKKE_I_LIVETS_SLUTTFASE,
+        Avslagsårsak.PLEIETRENGENDE_INNLAGT_I_STEDET_FOR_HJEMME
     ),
     UTVIDETRETT("K9_VK_9_6", "Utvidet rett",
         Map.of(FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-6 1. ledd",
