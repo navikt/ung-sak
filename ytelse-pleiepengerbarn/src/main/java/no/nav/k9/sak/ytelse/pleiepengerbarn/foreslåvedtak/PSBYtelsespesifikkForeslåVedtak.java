@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.foreslåvedtak;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -24,7 +23,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
-@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class PSBYtelsespesifikkForeslåVedtak implements YtelsespesifikkForeslåVedtak {
 
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
