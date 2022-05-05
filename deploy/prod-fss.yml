@@ -219,8 +219,6 @@ spec:
       value: "false"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "false"
-    - name: OMP_AVSLAG_SOKNAD_MANGLER_IM
-      value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
       value: "true"
     - name: PSB_TREKKE_MIGRERT_PERIODE
