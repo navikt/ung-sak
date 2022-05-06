@@ -40,7 +40,7 @@ public class FastsettBGTidsbegrensetArbeidsforholdOppdaterer implements Aksjonsp
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto1 -> MapDtoTilRequest.map(dto1, dtoer.getBegrunnelse())));
         oppdateringjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef(), false);
         // TODO FIKS HISTORIKK
-        OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
+        OppdateringResultat.Builder builder = OppdateringResultat.builder();
         Behandling behandling = param.getBehandling();
         håndterEventueltOverflødigAksjonspunkt(behandling)
             .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));

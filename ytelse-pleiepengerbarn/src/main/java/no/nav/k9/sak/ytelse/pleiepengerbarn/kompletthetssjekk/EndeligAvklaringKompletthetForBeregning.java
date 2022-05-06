@@ -55,7 +55,7 @@ public class EndeligAvklaringKompletthetForBeregning implements AksjonspunktOppd
         lagreVurderinger(param, perioderMedManglendeGrunnlag, dto);
 
         // Rekjører steget etter løsing
-        return OppdateringResultat.utenTransisjon()
+        return OppdateringResultat.builder()
             .medTotrinn()
             .build();
     }

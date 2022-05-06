@@ -35,6 +35,6 @@ public class FastsettBruttoBeregningsgrunnlagSNOppdaterer implements Aksjonspunk
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto1 -> MapDtoTilRequest.map(dto1, dtoer.getBegrunnelse())));
         oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef(), false);
         // TODO FIKS HISTORIKK
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 }

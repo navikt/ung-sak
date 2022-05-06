@@ -60,7 +60,7 @@ public class BeregningsaktivitetOverstyringshåndterer extends AbstractOverstyri
         HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.mapOverstyring(dto);
         var oppdaterBeregningsgrunnlagResultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, behandlingReferanse, dto.getPeriode().getFom());
         lagHistorikk(dto, behandling, oppdaterBeregningsgrunnlagResultat);
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
     private void lagHistorikk(OverstyrBeregningsaktiviteterDto dto, Behandling behandling, OppdaterBeregningsgrunnlagResultat oppdaterBeregningsgrunnlagResultat) {

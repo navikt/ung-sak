@@ -36,7 +36,7 @@ public class ForeslåVedtakAksjonspunktOppdaterer implements AksjonspunktOppdate
         Behandling behandling = param.getBehandling();
         vedtaksbrevHåndterer.oppdaterBegrunnelse(behandling);
 
-        OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
+        OppdateringResultat.Builder builder = OppdateringResultat.builder();
         if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains( behandling.getFagsakYtelseType())) {
             if (dto.isSkalBrukeOverstyrendeFritekstBrev() || trengerManueltBrev(behandling)) {
                 builder.medTotrinn();

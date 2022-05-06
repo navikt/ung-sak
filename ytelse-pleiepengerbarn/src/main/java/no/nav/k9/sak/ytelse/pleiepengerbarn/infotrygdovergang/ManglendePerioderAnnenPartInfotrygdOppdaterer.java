@@ -43,7 +43,7 @@ public class ManglendePerioderAnnenPartInfotrygdOppdaterer implements Aksjonspun
         historikkTjenesteAdapter.tekstBuilder()
             .medBegrunnelse(dto.getBegrunnelse())
             .medSkjermlenke(SkjermlenkeType.INFOTRYGD_MIGRERING);
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
     private boolean harTillatelseTilÅLøseAksjonspunkt() {

@@ -58,7 +58,7 @@ public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<Avkla
         stpTilDtoMap.keySet().forEach(e -> validerOppdatering(e, param.getRef()));
         var oppdaterBeregningsgrunnlagResultat = oppdateringjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef(), false);
         lagHistorikk(dtoer, param.getRef(), oppdaterBeregningsgrunnlagResultat);
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
     private void lagHistorikk(AvklarteAktiviteterDtoer dto,
