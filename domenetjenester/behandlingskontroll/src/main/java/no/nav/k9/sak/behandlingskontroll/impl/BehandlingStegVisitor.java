@@ -304,7 +304,7 @@ class BehandlingStegVisitor {
         int antallTilbakeføringer = behandlingRepository.antallTilbakeføringerSiden(behandling.getId(), ettDøgnSiden);
 
         if (antallTilbakeføringer > 20) {
-            throw new IllegalStateException("Mulig evig løkke ved tilbakeføring. Har hatt " + antallTilbakeføringer + " tilbakeføringer uten aksjonspunkt siden " + ettDøgnSiden + ". Stopper prosessering midlertidig. ");
+            throw new IllegalStateException("Mulig evig løkke ved tilbakeføring. Har hatt " + antallTilbakeføringer + " tilbakeføringer uten aksjonspunkt for behandlingen siden " + ettDøgnSiden + ". Stopper prosessering midlertidig. ");
         }
     }
 
