@@ -69,13 +69,11 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
             opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FAKTA_ENDRET, "Rammemelding er endret eller lagt til");
 
             OppdateringResultat resultat = OppdateringResultat.nyttResultat();
-            resultat.skalRekjøreSteg();
+            resultat.rekjørSteg();
             resultat.setSteg(BehandlingStegType.VURDER_UTTAK);
             return resultat;
         }
-
-        return OppdateringResultat.nyttResultat();
-
+        
     }
 
     private void opprettHistorikkInnslag(AvklarÅrskvantumDto dto, Long behandlingId, HistorikkinnslagType historikkinnslagType, String valg) {
