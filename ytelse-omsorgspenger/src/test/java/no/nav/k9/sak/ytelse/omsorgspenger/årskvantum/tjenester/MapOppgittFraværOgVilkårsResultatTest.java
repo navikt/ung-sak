@@ -54,7 +54,7 @@ class MapOppgittFraværOgVilkårsResultatTest {
 
     private Arbeidsgiver virksomhet1 = Arbeidsgiver.virksomhet("000000001");
 
-    private MapOppgittFraværOgVilkårsResultat mapper = new MapOppgittFraværOgVilkårsResultat(true);
+    private MapOppgittFraværOgVilkårsResultat mapper = new MapOppgittFraværOgVilkårsResultat();
 
     @Test
     void skal_ta_hensyn_til_avslåtte_vilkår() {

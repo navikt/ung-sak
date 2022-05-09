@@ -3,15 +3,15 @@ package no.nav.k9.sak.web.app.tjenester.register;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.io.IOException;
 import java.net.URI;
-import java.util.Set;
 
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -21,10 +21,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
-import no.nav.k9.felles.integrasjon.saf.Sak;
+import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -32,10 +31,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.k9.sak.kontrakt.person.AktørIdDto;
-import no.nav.k9.sak.kontrakt.person.AktørInfoDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @ApplicationScoped
@@ -88,10 +84,16 @@ public class RedirectToRegisterRestTjeneste {
 
         var uri = URI.create(arbeidOgInntektBaseURL + "/api/v2/redirect/sok/arbeidstaker");
 
-        var redirectUrl = restClient.get(uri, Set.of(new BasicHeader("Nav-Personident", personIdent.getIdent())), String.class);
+        HttpUriRequest request = new HttpGet(uri);
+        request.addHeader(new BasicHeader("Nav-Personident", personIdent.getIdent()));
+        try {
+            var respons = restClient.execute(request, new OidcRestClientResponseHandler.StringResponseHandler(uri));
+            var redirectUri = URI.create(respons);
 
-        var redirectUri = URI.create(redirectUrl);
-        return Response.temporaryRedirect(redirectUri).build();
+            return Response.temporaryRedirect(redirectUri).build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @GET
@@ -111,9 +113,15 @@ public class RedirectToRegisterRestTjeneste {
         var personIdent = tpsTjeneste.hentFnrForAktør(fagsak.getAktørId());
 
         var uri = URI.create(arbeidOgInntektBaseURL + "/api/v2/redirect/sok/a-inntekt");
-        var redirectUrl = restClient.get(uri, Set.of(new BasicHeader("Nav-Personident", personIdent.getIdent())), String.class);
+        HttpUriRequest request = new HttpGet(uri);
+        request.addHeader(new BasicHeader("Nav-Personident", personIdent.getIdent()));
+        try {
+            var respons = restClient.execute(request, new OidcRestClientResponseHandler.StringResponseHandler(uri));
+            var redirectUri = URI.create(respons);
 
-        var redirectUri = URI.create(redirectUrl);
-        return Response.temporaryRedirect(redirectUri).build();
+            return Response.temporaryRedirect(redirectUri).build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -44,7 +44,6 @@ import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -104,8 +103,6 @@ public class ÅrskvantumTjeneste {
     private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
-    private boolean brukLokalPersoninfo; //styrer også denne med OMP_AVSLAG_SOKNAD_MANGLER_IM
-
     ÅrskvantumTjeneste() {
         // CDI
     }
@@ -121,8 +118,7 @@ public class ÅrskvantumTjeneste {
                               @FagsakYtelseTypeRef(OMSORGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                               TrekkUtFraværTjeneste trekkUtFraværTjeneste,
                               OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste,
-                              MottatteDokumentRepository mottatteDokumentRepository,
-                              @KonfigVerdi(value = "OMP_AVSLAG_SOKNAD_MANGLER_IM", defaultVerdi = "false") Boolean skruPåAvslagSøknadManglerIm) {
+                              MottatteDokumentRepository mottatteDokumentRepository) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
@@ -135,8 +131,7 @@ public class ÅrskvantumTjeneste {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.opptjeningTjeneste = opptjeningTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.mapOppgittFraværOgVilkårsResultat = new MapOppgittFraværOgVilkårsResultat(skruPåAvslagSøknadManglerIm);
-        this.brukLokalPersoninfo = skruPåAvslagSøknadManglerIm;
+        this.mapOppgittFraværOgVilkårsResultat = new MapOppgittFraværOgVilkårsResultat();
     }
 
     public void bekreftUttaksplan(Long behandlingId) {
@@ -181,58 +176,31 @@ public class ÅrskvantumTjeneste {
         }
 
 
-        if (brukLokalPersoninfo) {
-            LocalDateTimeline<Boolean> vilkårsperioderTidsserie = new LocalDateTimeline<>(vilkårsperioder.stream().map(vp -> new LocalDateSegment<>(vp.toLocalDateInterval(), true)).toList());
-            PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), omsluttende(vilkårsperioder)).orElseThrow();
-            PersonopplysningEntitet søkerPersonopplysninger = personopplysninger.getSøker();
-            var barna = personopplysninger.getSøkersRelasjoner()
-                .stream()
-                .filter(relasjon -> relasjon.getRelasjonsrolle() == RelasjonsRolleType.BARN)
-                .filter(relasjon -> !tpsTjeneste.hentFnrForAktør(relasjon.getTilAktørId()).erFdatNummer())
-                .map(barnRelasjon -> personopplysninger.getPersonopplysning(barnRelasjon.getTilAktørId()))
-                .map(barnPersonopplysninger -> mapBarn(personopplysninger, søkerPersonopplysninger, barnPersonopplysninger, vilkårsperioderTidsserie))
-                .toList();
-            var fosterbarna = fosterbarnRepository.hentHvisEksisterer(behandling.getId())
-                .map(grunnlag -> grunnlag.getFosterbarna().getFosterbarn().stream()
-                    .map(fosterbarn -> innhentPersonopplysningForBarn(fosterbarn.getAktørId()))
-                    .map(personinfo -> mapFosterbarn(personinfo))
-                    .collect(Collectors.toSet())
-                ).orElse(Set.of());
-            var alleBarna = Stream.concat(barna.stream(), fosterbarna.stream()).collect(Collectors.toSet());
+        LocalDateTimeline<Boolean> vilkårsperioderTidsserie = new LocalDateTimeline<>(vilkårsperioder.stream().map(vp -> new LocalDateSegment<>(vp.toLocalDateInterval(), true)).toList());
+        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), omsluttende(vilkårsperioder)).orElseThrow();
+        PersonopplysningEntitet søkerPersonopplysninger = personopplysninger.getSøker();
+        var barna = personopplysninger.getSøkersRelasjoner()
+            .stream()
+            .filter(relasjon -> relasjon.getRelasjonsrolle() == RelasjonsRolleType.BARN)
+            .filter(relasjon -> !tpsTjeneste.hentFnrForAktør(relasjon.getTilAktørId()).erFdatNummer())
+            .map(barnRelasjon -> personopplysninger.getPersonopplysning(barnRelasjon.getTilAktørId()))
+            .map(barnPersonopplysninger -> mapBarn(personopplysninger, søkerPersonopplysninger, barnPersonopplysninger, vilkårsperioderTidsserie))
+            .toList();
+        var fosterbarna = fosterbarnRepository.hentHvisEksisterer(behandling.getId())
+            .map(grunnlag -> grunnlag.getFosterbarna().getFosterbarn().stream()
+                .map(fosterbarn -> innhentPersonopplysningForBarn(fosterbarn.getAktørId()))
+                .map(personinfo -> mapFosterbarn(personinfo, behandling.getFagsak().getPeriode()))
+                .collect(Collectors.toSet())
+            ).orElse(Set.of());
+        var alleBarna = Stream.concat(barna.stream(), fosterbarna.stream()).collect(Collectors.toSet());
 
-            return new ÅrskvantumGrunnlag(ref.getSaksnummer().getVerdi(),
-                ref.getBehandlingUuid().toString(),
-                fraværPerioder,
-                tpsTjeneste.hentFnrForAktør(ref.getAktørId()).getIdent(),
-                søkerPersonopplysninger.getFødselsdato(),
-                søkerPersonopplysninger.getDødsdato(),
-                new ArrayList<>(alleBarna));
-
-        } else {
-            var personMedRelasjoner = tpsTjeneste.hentBrukerForAktør(ref.getAktørId()).orElseThrow();
-            var barna = personMedRelasjoner.getFamilierelasjoner()
-                .stream()
-                .filter(it -> it.getRelasjonsrolle().equals(RelasjonsRolleType.BARN))
-                .filter(it -> !it.getPersonIdent().erFdatNummer())
-                .map(this::innhentFamilierelasjonForBarn)
-                .map((Tuple<Familierelasjon, Optional<Personinfo>> relasjonBarn) -> mapBarn(personMedRelasjoner, relasjonBarn))
-                .toList();
-            var fosterbarna = fosterbarnRepository.hentHvisEksisterer(behandling.getId())
-                .map(grunnlag -> grunnlag.getFosterbarna().getFosterbarn().stream()
-                    .map(fosterbarn -> innhentPersonopplysningForBarn(fosterbarn.getAktørId()))
-                    .map(personinfo -> mapFosterbarn(personinfo))
-                    .collect(Collectors.toSet())
-                ).orElse(Set.of());
-            var alleBarna = Stream.concat(barna.stream(), fosterbarna.stream()).collect(Collectors.toSet());
-
-            return new ÅrskvantumGrunnlag(ref.getSaksnummer().getVerdi(),
-                ref.getBehandlingUuid().toString(),
-                fraværPerioder,
-                personMedRelasjoner.getPersonIdent().getIdent(),
-                personMedRelasjoner.getFødselsdato(),
-                personMedRelasjoner.getDødsdato(),
-                new ArrayList<>(alleBarna));
-        }
+        return new ÅrskvantumGrunnlag(ref.getSaksnummer().getVerdi(),
+            ref.getBehandlingUuid().toString(),
+            fraværPerioder,
+            tpsTjeneste.hentFnrForAktør(ref.getAktørId()).getIdent(),
+            søkerPersonopplysninger.getFødselsdato(),
+            søkerPersonopplysninger.getDødsdato(),
+            new ArrayList<>(alleBarna));
     }
 
     private static DatoIntervallEntitet omsluttende(Collection<DatoIntervallEntitet> perioder) {
@@ -437,18 +405,26 @@ public class ÅrskvantumTjeneste {
 
 
         PersonIdent personIdentBarn = tpsTjeneste.hentFnrForAktør(personinfoBarn.getAktørId());
-        return new Barn(personIdentBarn.getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBostedsadresseDelerAvVilkårsperiodene,  tilLukketPeriode(tidslinjeDeltBosted), tilLukketPeriode(tidslinjeSammeBosted), BarnType.VANLIG);
+        return new Barn(personIdentBarn.getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBostedsadresseDelerAvVilkårsperiodene, tilLukketPeriode(tidslinjeDeltBosted), tilLukketPeriode(tidslinjeSammeBosted), BarnType.VANLIG);
     }
 
-    private static List<LukketPeriode> tilLukketPeriode(LocalDateTimeline<Boolean> tidslinje){
+    private static List<LukketPeriode> tilLukketPeriode(LocalDateTimeline<Boolean> tidslinje) {
         return tidslinje.filterValue(Boolean.TRUE::equals)
             .stream()
             .map(segment -> new LukketPeriode(segment.getFom(), segment.getTom()))
             .toList();
     }
 
-    private Barn mapFosterbarn(Personinfo personinfo) {
-        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), true, List.of(), List.of(), BarnType.FOSTERBARN);
+    private Barn mapFosterbarn(Personinfo personinfo, DatoIntervallEntitet fagsakPeriode) {
+        //midlertidig løsning, skal helst ha reell start-dato. Ønsket fikset ved at vi informasjon om fosterbarn fra register
+        LocalDateTimeline<Boolean> erBarn = new LocalDateTimeline<>(personinfo.getFødselsdato(), personinfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31), true);
+        LocalDateTimeline<Boolean> harFagsak = new LocalDateTimeline<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), true);
+        LocalDateTimeline<Boolean> harFagsakOgErBarn = erBarn.combine(harFagsak, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.INNER_JOIN);
+        List<LukketPeriode> sammeBostedPerioder = harFagsakOgErBarn.stream()
+            .map(segment -> new LukketPeriode(segment.getFom(), segment.getTom()))
+            .toList();
+
+        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), true, List.of(), sammeBostedPerioder, BarnType.FOSTERBARN);
     }
 
     private Optional<UUID> hentBehandlingUuid(JournalpostId journalpostId, Map<JournalpostId, MottattDokument> mottatteDokumenter) {

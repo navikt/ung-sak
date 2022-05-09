@@ -2,10 +2,6 @@ package no.nav.k9.sak.kontrakt.behandling;
 
 import java.util.Objects;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -13,6 +9,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -20,7 +19,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY, isGetterVisibility = Visibility.NONE)
 public class SaksnummerDto {
     public static final String DESC = "SAKSNUMMER";
-    public static final String NAME = "Saksnummer";
+    public static final String NAME = "saksnummer";
 
     @JsonProperty(value = "saksnummer", required = true)
     @NotNull

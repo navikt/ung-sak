@@ -187,8 +187,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: OMP_IM_SJEKK_FORSTE_FRAVAERSDAG
-      value: "false"
     - name: PSB_OPPG_OPPTJENING_PRIORITERING
       value: "false"
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
@@ -221,10 +219,6 @@ spec:
       value: "false"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "false"
-    - name: OMP_AVSLAG_SOKNAD_MANGLER_IM
-      value: "false"
-    - name: OMP_DELT_BOSTED_RAMMEVEDTAK
-      value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
       value: "true"
     - name: PSB_TREKKE_MIGRERT_PERIODE
@@ -243,7 +237,7 @@ spec:
 
     # Pleiepenger infotrygd migrering
     - name: INFOTRYGD_MIGRERING_TILLATELSER
-      value: "K137924,N106674,H137477,N130802,N140249,A100265,D101758,E151154,A147438,S164910,B100673,R145708"
+      value: "K137924,N106674,H137477,N130802,N140249,A100265,D101758,E151154,A147438,S164910,B100673,R145708,G119972,U112286,L120563,A100265,O126651,H151541,K120680"
 
     # FRISINN NYE REGLER 2022
     - name: FRISINN_NYTT_STP_TOGGLE
