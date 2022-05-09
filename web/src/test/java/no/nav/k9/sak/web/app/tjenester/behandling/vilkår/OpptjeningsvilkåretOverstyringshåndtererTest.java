@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetOgOverstyrteAksjonspunkterDto;
 import no.nav.k9.sak.kontrakt.opptjening.OverstyringOpptjeningsvilkåretDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Periode;
@@ -71,7 +73,8 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
         assertThat(behandling.getAksjonspunkter()).hasSize(1);
 
         // Act
-        aksjonspunktApplikasjonTjeneste.overstyrAksjonspunkter(Set.of(overstyringspunktDto), behandling.getId());
+        var aksjonspunkterDto = BekreftetOgOverstyrteAksjonspunkterDto.lagDto(behandling.getId(), behandling.getVersjon(), Set.of(overstyringspunktDto), Collections.emptyList());
+        aksjonspunktApplikasjonTjeneste.overstyrAksjonspunkter(aksjonspunkterDto, behandling.getId());
 
         // Assert
         Set<Aksjonspunkt> aksjonspunktSet = behandling.getAksjonspunkter();
@@ -99,7 +102,8 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
             "test av overstyring opptjeningsvilkåret", "1035");
 
         // Act
-        aksjonspunktApplikasjonTjeneste.overstyrAksjonspunkter(Set.of(overstyringspunktDto), behandling.getId());
+        var aksjonspunkterDto = BekreftetOgOverstyrteAksjonspunkterDto.lagDto(behandling.getId(), behandling.getVersjon(), Set.of(overstyringspunktDto), Collections.emptyList());
+        aksjonspunktApplikasjonTjeneste.overstyrAksjonspunkter(aksjonspunkterDto, behandling.getId());
 
         // Assert
         List<Historikkinnslag> historikkinnslagene = repositoryProvider.getHistorikkRepository().hentHistorikk(behandling.getId());
@@ -130,7 +134,8 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
 
         // Act
         try {
-            aksjonspunktApplikasjonTjeneste.overstyrAksjonspunkter(Set.of(overstyringspunktDto), behandling.getId());
+            var aksjonspunkterDto = BekreftetOgOverstyrteAksjonspunkterDto.lagDto(behandling.getId(), behandling.getVersjon(), Set.of(overstyringspunktDto), Collections.emptyList());
+            aksjonspunktApplikasjonTjeneste.overstyrAksjonspunkter(aksjonspunkterDto, behandling.getId());
             fail("Skal kaste exception");
         } catch (FunksjonellException e) {
             assertThat(e).hasMessage("FP-093923:Kan ikke overstyre vilkår. Det må være minst en aktivitet for at opptjeningsvilkåret skal kunne overstyres.");

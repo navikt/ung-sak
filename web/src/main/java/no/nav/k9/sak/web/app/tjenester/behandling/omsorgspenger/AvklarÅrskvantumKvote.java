@@ -54,7 +54,7 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
             //Bekreft uttaksplan og fortsett behandling
             opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FASTSATT_UTTAK, "Fortsett uten endring, avslåtte perioder er korrekt");
             årskvantumTjeneste.bekreftUttaksplan(behandlingId);
-            return OppdateringResultat.utenOverhopp(); //skulle her ønske å overstyre Aksjonspunktets tilbakehopp
+            return OppdateringResultat.nyttResultat(); //skulle her ønske å overstyre Aksjonspunktets tilbakehopp
         } else {
             // Oppretter fosterbarn kun dersom eksplisitt angitt av GUI
             if (dto.getFosterbarn() != null) {
@@ -68,12 +68,12 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
             // kjør steget på nytt, aka hent nye rammevedtak fra infotrygd
             opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FAKTA_ENDRET, "Rammemelding er endret eller lagt til");
 
-            OppdateringResultat resultat = OppdateringResultat.utenOverhopp();
-            resultat.skalRekjøreSteg();
+            OppdateringResultat resultat = OppdateringResultat.nyttResultat();
+            resultat.rekjørSteg();
             resultat.setSteg(BehandlingStegType.VURDER_UTTAK);
             return resultat;
         }
-
+        
     }
 
     private void opprettHistorikkInnslag(AvklarÅrskvantumDto dto, Long behandlingId, HistorikkinnslagType historikkinnslagType, String valg) {

@@ -4,103 +4,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.k9.felles.util.Tuple;
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
-import no.nav.k9.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
 
 public class OppdateringResultat {
 
     private BehandlingStegType nesteSteg;
-    private AksjonspunktStatus nesteStatus = AksjonspunktStatus.UTFØRT;
-    private OverhoppKontroll overhoppKontroll;
-    private BehandlingResultatType henleggelseResultat;
-    private String henleggingsbegrunnelse;
     private boolean skalRekjøreSteg = false;
-    private boolean beholdAksjonspunktÅpent = false;
-    private boolean avbrytAksjonspunkt = false;
     private boolean totrinnsKontroll = false;
-    private TransisjonIdentifikator transisjonId;
-    private List<Tuple<AksjonspunktDefinisjon, AksjonspunktStatus>> ekstraAksjonspunktResultat = new ArrayList<>();
+    private final List<Tuple<AksjonspunktDefinisjon, AksjonspunktStatus>> ekstraAksjonspunktResultat = new ArrayList<>();
 
-    private OppdateringResultat(BehandlingStegType nesteSteg, OverhoppKontroll overhoppKontroll, TransisjonIdentifikator transisjonId, boolean totrinn) {
-        this.overhoppKontroll = overhoppKontroll;
-        this.nesteSteg = nesteSteg;
-        this.transisjonId = transisjonId;
-        this.totrinnsKontroll = totrinn;
-    }
 
-    private OppdateringResultat(OverhoppKontroll overhoppKontroll) {
-        this.overhoppKontroll = overhoppKontroll;
-        this.nesteSteg = null;
-    }
-
-    private OppdateringResultat(OverhoppKontroll overhoppKontroll, BehandlingResultatType henleggelseResultat, String henleggingsbegrunnelse) {
-        this.overhoppKontroll = overhoppKontroll;
-        this.henleggelseResultat = henleggelseResultat;
-        this.henleggingsbegrunnelse = henleggingsbegrunnelse;
+    private OppdateringResultat() {
     }
 
     /**
      * Klassisk resultat - uten spesiell håndtering annet enn å sette Aksjonspunkt til UTFO
      */
-    public static OppdateringResultat utenOverhopp() {
-        return new OppdateringResultat(OverhoppKontroll.UTEN_OVERHOPP);
+    public static OppdateringResultat nyttResultat() {
+        return new OppdateringResultat();
     }
 
     /**
      * Brukes i tilfelle med behov for tilstandsavhengig håndtering av resultat
      */
-    public static Builder utenTransisjon() {
+    public static Builder builder() {
         return new Builder();
     }
 
-    /**
-     * Brukes typisk ved avslag på Vilår for å hoppe fram til uttak/vedtak
-     */
-    public static OppdateringResultat medFremoverHopp(TransisjonIdentifikator transisjonId) {
-        return new OppdateringResultat(null, OverhoppKontroll.FREMOVERHOPP, transisjonId, false);
-    }
-
-    /**
-     * Brukes typisk ved avslag på Vilår for å hoppe fram til uttak/vedtak men setter totrinnskontroll
-     */
-    public static OppdateringResultat medFremoverHoppTotrinn(TransisjonIdentifikator transisjonId) {
-        return new OppdateringResultat(null, OverhoppKontroll.FREMOVERHOPP, transisjonId, true);
-    }
 
     public BehandlingStegType getNesteSteg() {
         return nesteSteg;
     }
 
-    public AksjonspunktStatus getNesteAksjonspunktStatus() {
-        return nesteStatus;
-    }
-
-    public TransisjonIdentifikator getTransisjon() {
-        return transisjonId;
-    }
-
-    public OverhoppKontroll getOverhoppKontroll() {
-        return overhoppKontroll;
-    }
-
-    public BehandlingResultatType getHenleggelseResultat() {
-        return henleggelseResultat;
-    }
-
-    public String getHenleggingsbegrunnelse() {
-        return henleggingsbegrunnelse;
-    }
-
-    public boolean skalUtføreAksjonspunkt() {
-        return !beholdAksjonspunktÅpent && !avbrytAksjonspunkt;
-    }
-
-    public boolean skalAvbryteAksjonspunkt() {
-        return avbrytAksjonspunkt;
-    }
 
     public boolean kreverTotrinnsKontroll() {
         return totrinnsKontroll;
@@ -114,7 +51,7 @@ public class OppdateringResultat {
         return skalRekjøreSteg;
     }
 
-    public void skalRekjøreSteg() {
+    public void rekjørSteg() {
         this.skalRekjøreSteg = true;
     }
 
@@ -123,35 +60,10 @@ public class OppdateringResultat {
     }
 
     public static class Builder {
-        private OppdateringResultat resultat;
+        private final OppdateringResultat resultat;
 
         Builder() {
-            resultat = new OppdateringResultat(OverhoppKontroll.UTEN_OVERHOPP);
-        }
-
-        /*
-         * Lar aksjonspunkt bli stående i  OPPRETTET etter oppdatering
-         */
-        public Builder medBeholdAksjonspunktÅpent() {
-            resultat.nesteStatus = AksjonspunktStatus.OPPRETTET;
-            resultat.beholdAksjonspunktÅpent = true;
-            return this;
-        }
-
-        /*
-         * Sett aksjonspunkt til AVBRUTT etter oppdatering
-         */
-        public Builder medAvbruttAksjonspunkt() {
-            resultat.nesteStatus = AksjonspunktStatus.AVBRUTT;
-            return this;
-        }
-
-        /*
-         * Brukes KUN ved behov for oppdatering av registerdata, fx dersom kjernedato for registerinnhenting flyttes mer enn 12M
-         */
-        public Builder medOppdaterGrunnlag() {
-            resultat.overhoppKontroll = OverhoppKontroll.OPPDATER;
-            return this;
+            resultat = new OppdateringResultat();
         }
 
         /*
@@ -167,15 +79,6 @@ public class OppdateringResultat {
          */
         public Builder medTotrinnHvis(boolean erTotrinn) {
             resultat.totrinnsKontroll = erTotrinn;
-            return this;
-        }
-
-        /*
-         * Brukes i spesielle tilfelle rundt foreslå vedtak og avslag vilkår
-         */
-        public Builder medFremoverHopp(TransisjonIdentifikator transisjonId) {
-            resultat.overhoppKontroll = OverhoppKontroll.FREMOVERHOPP;
-            resultat.transisjonId = transisjonId;
             return this;
         }
 
@@ -197,11 +100,6 @@ public class OppdateringResultat {
     public String toString() {
         return "OppdateringResultat{" +
             "nesteSteg=" + nesteSteg +
-            ", nesteStatus" + nesteStatus +
-            ", transisjonId=" + transisjonId +
-            ", overhoppKontroll=" + overhoppKontroll +
-            ", henleggelseResultat=" + henleggelseResultat +
-            ", henleggingsbegrunnelse='" + henleggingsbegrunnelse + '\'' +
             '}';
     }
 }

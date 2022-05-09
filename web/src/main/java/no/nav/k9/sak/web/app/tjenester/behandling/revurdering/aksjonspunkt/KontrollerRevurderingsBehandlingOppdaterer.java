@@ -15,7 +15,7 @@ class KontrollerRevurderingsBehandlingOppdaterer implements AksjonspunktOppdater
 
     @Override
     public OppdateringResultat oppdater(KontrollerRevurderingsBehandlingDto dto, AksjonspunktOppdaterParameter param) {
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
 }

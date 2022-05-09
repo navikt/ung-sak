@@ -107,7 +107,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
                 oppdaterMedIkkeOppfylt(vilkårType, avslagsårsak, param, behandling);
             }
 
-            return OppdateringResultat.utenTransisjon().medTotrinn().build();
+            return OppdateringResultat.builder().medTotrinn().build();
         }
 
         /*
@@ -124,8 +124,8 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
 
         lagHistorikkinnslag(param, "Sykdom manuelt behandlet.");
 
-        final OppdateringResultat resultat = OppdateringResultat.utenTransisjon().medTotrinnHvis(skalHaToTrinn).build();
-        resultat.skalRekjøreSteg();
+        final OppdateringResultat resultat = OppdateringResultat.builder().medTotrinnHvis(skalHaToTrinn).build();
+        resultat.rekjørSteg();
         resultat.setSteg(BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
 
         return resultat;

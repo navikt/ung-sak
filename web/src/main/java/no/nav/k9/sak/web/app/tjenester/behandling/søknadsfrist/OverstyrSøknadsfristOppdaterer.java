@@ -48,9 +48,9 @@ public class OverstyrSøknadsfristOppdaterer extends AbstractOverstyringshåndte
         Set<AvklartKravDokument> overstyringer = mapTilOverstyrteKrav(behandling.getId(), dto);
         avklartSøknadsfristRepository.lagreOverstyring(kontekst.getBehandlingId(), overstyringer);
 
-        var builder = OppdateringResultat.utenTransisjon()
+        var builder = OppdateringResultat.builder()
             .medTotrinn().build();
-        builder.skalRekjøreSteg();
+        builder.rekjørSteg();
         builder.setSteg(BehandlingStegType.INIT_PERIODER);
         return builder;
     }

@@ -51,7 +51,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
 
         Optional<BekreftedePerioderDto> bekreftedeDto = dto.getBekreftedePerioder().stream().findFirst();
         if (bekreftedeDto.isEmpty()) {
-            return OppdateringResultat.utenOverhopp();
+            return OppdateringResultat.nyttResultat();
         }
         BekreftedePerioderDto bekreftet = bekreftedeDto.get();
         Optional<MedlemskapAggregat> medlemskap = medlemskapRepository.hentMedlemskap(behandlingId);
@@ -79,6 +79,6 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
         var adapter = new BekreftErMedlemVurderingAksjonspunkt(bekreftetVurdering, begrunnelse);
         medlemTjeneste.aksjonspunktBekreftMeldlemVurdering(behandlingId, adapter);
 
-        return OppdateringResultat.utenTransisjon().medTotrinnHvis(erEndret).build();
+        return OppdateringResultat.builder().medTotrinnHvis(erEndret).build();
     }
 }

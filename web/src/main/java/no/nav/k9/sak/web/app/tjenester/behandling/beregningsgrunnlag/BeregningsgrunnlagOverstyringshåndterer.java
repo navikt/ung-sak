@@ -58,7 +58,7 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
         oppdaterBeregningsgrunnlagResultat.getBeregningsgrunnlagEndring().ifPresent(
             endring -> verdierHistorikkTjeneste.lagHistorikkForBeregningsgrunnlagVerdier(behandling.getId(),
                 endring.getBeregningsgrunnlagPeriodeEndringer().get(0), getHistorikkAdapter().tekstBuilder()));
-        OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
+        OppdateringResultat.Builder builder = OppdateringResultat.builder();
         fjernOverstyrtAksjonspunkt(behandling)
             .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
         return builder.build();
