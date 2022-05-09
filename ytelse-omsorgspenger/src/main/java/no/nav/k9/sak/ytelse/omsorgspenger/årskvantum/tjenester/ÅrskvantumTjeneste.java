@@ -189,7 +189,7 @@ public class ÅrskvantumTjeneste {
         var fosterbarna = fosterbarnRepository.hentHvisEksisterer(behandling.getId())
             .map(grunnlag -> grunnlag.getFosterbarna().getFosterbarn().stream()
                 .map(fosterbarn -> innhentPersonopplysningForBarn(fosterbarn.getAktørId()))
-                .map(personinfo -> mapFosterbarn(personinfo))
+                .map(personinfo -> mapFosterbarn(personinfo, behandling.getFagsak().getPeriode()))
                 .collect(Collectors.toSet())
             ).orElse(Set.of());
         var alleBarna = Stream.concat(barna.stream(), fosterbarna.stream()).collect(Collectors.toSet());
@@ -415,8 +415,16 @@ public class ÅrskvantumTjeneste {
             .toList();
     }
 
-    private Barn mapFosterbarn(Personinfo personinfo) {
-        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), true, List.of(), List.of(), BarnType.FOSTERBARN);
+    private Barn mapFosterbarn(Personinfo personinfo, DatoIntervallEntitet fagsakPeriode) {
+        //midlertidig løsning, skal helst ha reell start-dato. Ønsket fikset ved at vi informasjon om fosterbarn fra register
+        LocalDateTimeline<Boolean> erBarn = new LocalDateTimeline<>(personinfo.getFødselsdato(), personinfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31), true);
+        LocalDateTimeline<Boolean> harFagsak = new LocalDateTimeline<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), true);
+        LocalDateTimeline<Boolean> harFagsakOgErBarn = erBarn.combine(harFagsak, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.INNER_JOIN);
+        List<LukketPeriode> sammeBostedPerioder = harFagsakOgErBarn.stream()
+            .map(segment -> new LukketPeriode(segment.getFom(), segment.getTom()))
+            .toList();
+
+        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), true, List.of(), sammeBostedPerioder, BarnType.FOSTERBARN);
     }
 
     private Optional<UUID> hentBehandlingUuid(JournalpostId journalpostId, Map<JournalpostId, MottattDokument> mottatteDokumenter) {
