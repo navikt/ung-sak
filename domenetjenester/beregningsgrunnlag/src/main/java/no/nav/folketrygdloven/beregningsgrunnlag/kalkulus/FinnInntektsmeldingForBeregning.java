@@ -87,12 +87,12 @@ public class FinnInntektsmeldingForBeregning {
         return mapInntektsmelding(stp, a, summertRefusjonTidslinje, inntektsmeldingerForAktivitet);
     }
 
-    private static Set<Inntektsmelding> finnInntektsmeldingerMottattForAktivitet(Collection<Inntektsmelding> inntektsmeldingerForSak, InputAktivitetOverstyring a) {
+    public static Set<Inntektsmelding> finnInntektsmeldingerMottattForAktivitet(Collection<Inntektsmelding> inntektsmeldingerForSak, InputAktivitetOverstyring a) {
         return inntektsmeldingerForSak.stream().filter(im -> im.getArbeidsgiver().equals(a.getArbeidsgiver()))
             .collect(Collectors.toSet());
     }
 
-    private static LocalDateTimeline<BigDecimal> lagSummertRefusjontidslinje(LocalDate stp, Collection<Inntektsmelding> inntektsmeldingerForAktivitet) {
+    public static LocalDateTimeline<BigDecimal> lagSummertRefusjontidslinje(LocalDate stp, Collection<Inntektsmelding> inntektsmeldingerForAktivitet) {
         return inntektsmeldingerForAktivitet.stream()
             .map(im -> tilRefusjontidslinje(im, stp))
             .reduce((tidslinje1, tidslinje2) -> tidslinje1.combine(tidslinje2, StandardCombinators::sum, LocalDateTimeline.JoinStyle.CROSS_JOIN))
@@ -190,11 +190,6 @@ public class FinnInntektsmeldingForBeregning {
 
     private static boolean refusjonOpphørerFørStart(LocalDate startdatoRefusjon, LocalDate refusjonOpphører) {
         return refusjonOpphører != null && refusjonOpphører.isBefore(startdatoRefusjon);
-    }
-
-    private boolean harIMSomOverstyrer(Inntektsmelding im, Set<Inntektsmelding> overstyrteInntektsmeldinger) {
-        return overstyrteInntektsmeldinger.stream().anyMatch(overstyrtIM -> overstyrtIM.getStartDatoPermisjon().equals(im.getStartDatoPermisjon())
-            && overstyrtIM.gjelderSammeArbeidsforhold(im));
     }
 
     private InntektsmeldingerRelevantForBeregning finnInntektsmeldingForBeregningTjeneste(BehandlingReferanse referanse) {
