@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingskontroll.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -273,6 +274,7 @@ class BehandlingStegVisitor {
         }
 
         if (FellesTransisjoner.TILBAKEFØRT_TIL_STEG.getId().equals(transisjon.getId())) {
+            validerTilbakeføringUtenAksjonspunktCircuitBreaker(behandling);
             Optional<BehandlingStegTilstand> forrige = behandling.getSisteBehandlingStegTilstand();
             BehandlingStegStatus behandlingStegStatus = håndterTilbakeføringTilTidligereSteg(behandling, stegModell.getBehandlingStegType(), resultat.getStegType());
             fyrEventBehandlingStegTilbakeføring(forrige, behandling.getSisteBehandlingStegTilstand());
@@ -295,6 +297,15 @@ class BehandlingStegVisitor {
             return behandlingStegKonfigurasjon.getVenter();
         }
         throw new IllegalArgumentException("Utvikler-feil: ikke-håndtert transisjon " + transisjon.getId());
+    }
+
+    private void validerTilbakeføringUtenAksjonspunktCircuitBreaker(Behandling behandling) {
+        LocalDateTime ettDøgnSiden = LocalDateTime.now().minusDays(1);
+        int antallTilbakeføringer = behandlingRepository.antallTilbakeføringerSiden(behandling.getId(), ettDøgnSiden);
+
+        if (antallTilbakeføringer > 20) {
+            throw new IllegalStateException("Mulig evig løkke ved tilbakeføring. Har hatt " + antallTilbakeføringer + " tilbakeføringer uten aksjonspunkt siden " + ettDøgnSiden + ". Stopper prosessering midlertidig. ");
+        }
     }
 
     private BehandlingStegStatus utledUtgangStegStatus(BehandlingStegType behandlingStegType) {
