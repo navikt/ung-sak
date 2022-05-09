@@ -303,7 +303,7 @@ class BehandlingStegVisitor {
         LocalDateTime ettDøgnSiden = LocalDateTime.now().minusDays(1);
         int antallTilbakeføringer = behandlingRepository.antallTilbakeføringerSiden(behandling.getId(), ettDøgnSiden);
 
-        if (antallTilbakeføringer > 20) {
+        if (antallTilbakeføringer > 100) {
             throw new IllegalStateException("Mulig evig løkke ved tilbakeføring. Har hatt " + antallTilbakeføringer + " tilbakeføringer uten aksjonspunkt for behandlingen siden " + ettDøgnSiden + ". Stopper prosessering midlertidig. ");
         }
     }
