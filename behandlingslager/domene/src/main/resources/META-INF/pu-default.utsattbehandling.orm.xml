@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+        version="3.0">
+
+    <sequence-generator name="SEQ_UTSATT_BEHANDLING_AV" allocation-size="50" sequence-name="SEQ_UTSATT_BEHANDLING_AV"/>
+    <sequence-generator name="SEQ_UB_PERIODER" allocation-size="50" sequence-name="SEQ_UB_PERIODER"/>
+    <sequence-generator name="SEQ_UB_PERIODE" allocation-size="50" sequence-name="SEQ_UB_PERIODE"/>
+
+    <entity class="no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode"/>
+    <entity class="no.nav.k9.sak.utsatt.UtsattePerioder"/>
+    <entity class="no.nav.k9.sak.utsatt.UtsattPeriode"/>
+
+</entity-mappings>

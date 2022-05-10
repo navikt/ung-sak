@@ -241,4 +241,11 @@ public class SamtidigUttakTjeneste {
         }
         return new TreeSet<>();
     }
+
+    public UttakPrioriteringsrekkefølge utledPrioriteringsrekkefølge(BehandlingReferanse ref) {
+        var annenSakSomMåBehandlesFørst = isAnnenSakSomMåBehandlesFørst(ref);
+        var tidslinjeUtenPrioritet = samtidigUttakOverlappsjekker.utledPerioderHvorSøkerIkkeHarPrioritetMedUbesluttetOverlapp(ref);
+
+        return new UttakPrioriteringsrekkefølge(annenSakSomMåBehandlesFørst, tidslinjeUtenPrioritet);
+    }
 }

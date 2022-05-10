@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
@@ -43,6 +45,9 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
+import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
@@ -69,7 +74,9 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private BehandlingModellRepository behandlingModellRepository;
+    private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private Boolean aktivertUtsattBehandlingAvPeriode;
 
     VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste() {
     }
@@ -86,7 +93,9 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                                                                SamtidigUttakTjeneste samtidigUttakTjeneste,
                                                                SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                                                BehandlingModellRepository behandlingModellRepository,
-                                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+                                                               UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
+                                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                                               @KonfigVerdi(value = "utsatt.behandling.av.periode.aktivert", defaultVerdi = "false") Boolean aktivertUtsattBehandlingAvPeriode) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -98,7 +107,9 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.behandlingModellRepository = behandlingModellRepository;
+        this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.aktivertUtsattBehandlingAvPeriode = aktivertUtsattBehandlingAvPeriode;
     }
 
     @Override
@@ -127,6 +138,13 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                     log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty());
                 }
             }
+        }
+        var utsattBehandlingAvPeriode = utsattBehandlingAvPeriodeRepository.hentGrunnlag(vedtattBehandling.getId()).map(UtsattBehandlingAvPeriode::getPerioder).orElse(Set.of());
+
+        if (aktivertUtsattBehandlingAvPeriode && !utsattBehandlingAvPeriode.isEmpty()) {
+            var perioderSomErUtsatt = utsattBehandlingAvPeriode.stream().map(UtsattPeriode::getPeriode).collect(Collectors.toCollection(TreeSet::new));
+            result.add(new SakMedPeriode(fagsak.getSaksnummer(), perioderSomErUtsatt));
+            log.info("Sak='{}' har utsatte perioder som må behandles", fagsak.getSaksnummer());
         }
 
         return result;

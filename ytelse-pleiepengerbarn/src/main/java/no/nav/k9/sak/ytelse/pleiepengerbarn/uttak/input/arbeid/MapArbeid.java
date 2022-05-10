@@ -172,10 +172,10 @@ public class MapArbeid {
         var kunYtelsePåSkjæringstidspunktet = filtrerPeriode(vilkår, periode, kunYtelseFilter);
 
         var midlertidigInaktivPeriode = mapInaktivePerioder(arbeidsforhold, midlertidigInaktivVilkårsperioder);
-        mapPerioderMedType(arbeidsforhold, dagpengerPåSkjæringstidspunktet, UttakArbeidType.DAGPENGER);
-        mapPerioderMedType(arbeidsforhold, sykepengerFraDagpengerOgIkkeDagpengerPåSkjæringstidspunktet, UttakArbeidType.SYKEPENGER_AV_DAGPENGER);
-        mapPerioderMedType(arbeidsforhold, pleiepengerFraDagpengerOgIkkeDagpengerPåSkjæringstidspunktet, UttakArbeidType.PLEIEPENGER_AV_DAGPENGER);
-        mapPerioderMedType(arbeidsforhold, kunYtelsePåSkjæringstidspunktet, UttakArbeidType.KUN_YTELSE);
+        mapPerioderMedType(arbeidsforhold, dagpengerPåSkjæringstidspunktet, periode, UttakArbeidType.DAGPENGER);
+        mapPerioderMedType(arbeidsforhold, sykepengerFraDagpengerOgIkkeDagpengerPåSkjæringstidspunktet, periode, UttakArbeidType.SYKEPENGER_AV_DAGPENGER);
+        mapPerioderMedType(arbeidsforhold, pleiepengerFraDagpengerOgIkkeDagpengerPåSkjæringstidspunktet, periode, UttakArbeidType.PLEIEPENGER_AV_DAGPENGER);
+        mapPerioderMedType(arbeidsforhold, kunYtelsePåSkjæringstidspunktet, periode, UttakArbeidType.KUN_YTELSE);
 
         kravDokumenter.stream()
             .sorted(KravDokument::compareTo)
@@ -260,7 +260,7 @@ public class MapArbeid {
 
     private void mapPerioderMedType(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold,
                                     List<VilkårPeriode> dagpengerPåSkjæringstidspunktet,
-                                    UttakArbeidType type) {
+                                    DatoIntervallEntitet periode, UttakArbeidType type) {
 
         var tidslinje = new LocalDateTimeline<WrappedArbeid>(List.of());
         for (VilkårPeriode vilkårPeriode : dagpengerPåSkjæringstidspunktet) {
@@ -269,7 +269,7 @@ public class MapArbeid {
             tidslinje = tidslinje.combine(other, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
         if (!dagpengerPåSkjæringstidspunktet.isEmpty()) {
-            arbeidsforhold.put(new AktivitetIdentifikator(type, null, null), tidslinje.compress());
+            arbeidsforhold.put(new AktivitetIdentifikator(type, null, null), tidslinje.intersection(periode.toLocalDateInterval()).compress());
         }
     }
 
