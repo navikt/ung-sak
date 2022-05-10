@@ -88,10 +88,8 @@ public class UtledStatusPåPerioderTjeneste {
         var perioderTilVurderingSet = perioderTilVurderingKombinert.toSegments()
             .stream()
             .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new))
-            .stream()
             .map(DatoIntervallEntitet::tilPeriode)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(TreeSet::new));
 
         return new StatusForPerioderPåBehandling(perioderTilVurderingSet, perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode));
     }

@@ -3,6 +3,7 @@ package no.nav.k9.sak.behandlingslager.behandling.repository;
 import static no.nav.k9.felles.jpa.HibernateVerktøy.hentEksaktResultat;
 import static no.nav.k9.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -15,16 +16,16 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.hibernate.jpa.QueryHints;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
-
-import org.hibernate.jpa.QueryHints;
-
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -400,5 +401,16 @@ public class BehandlingRepository {
         Timestamp timestamp = (Timestamp) resultat;
         LocalDateTime value = LocalDateTime.ofInstant(timestamp.toInstant(), TimeZone.getDefault().toZoneId());
         return Optional.of(value);
+    }
+
+    public int antallTilbakeføringerSiden(Long behandlingId, LocalDateTime tidspunkt) {
+        Query query = getEntityManager().createNativeQuery(
+            "SELECT count(*) FROM behandling_steg_tilstand WHERE behandling_id = :behandling_id AND behandling_steg_status = :tilbakeført_status AND opprettet_tid > :tidspunkt");
+        query.setParameter("behandling_id", behandlingId);
+        query.setParameter("tilbakeført_status", BehandlingStegStatus.TILBAKEFØRT.getKode());
+        query.setParameter("tidspunkt", tidspunkt);
+
+        BigInteger resultat = (BigInteger) query.getSingleResult();
+        return resultat.intValue();
     }
 }

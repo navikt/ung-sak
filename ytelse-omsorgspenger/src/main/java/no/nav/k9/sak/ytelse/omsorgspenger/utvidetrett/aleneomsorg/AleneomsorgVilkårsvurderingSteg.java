@@ -11,7 +11,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -51,7 +50,6 @@ public class AleneomsorgVilkårsvurderingSteg implements BehandlingSteg {
     private VilkårTjeneste vilkårTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private AleneomsorgTjeneste aleneomsorgTjeneste;
-    private boolean automatiserVedtak;
 
     public AleneomsorgVilkårsvurderingSteg() {
         // CDO
@@ -63,26 +61,17 @@ public class AleneomsorgVilkårsvurderingSteg implements BehandlingSteg {
                                            VilkårTjeneste vilkårTjeneste,
                                            VilkårResultatRepository vilkårResultatRepository,
                                            @FagsakYtelseTypeRef(OMSORGSPENGER_AO) VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                           AleneomsorgTjeneste aleneomsorgTjeneste,
-                                           @KonfigVerdi(value = "OMP_DELT_BOSTED_RAMMEVEDTAK", defaultVerdi = "true") boolean automatiserVedtak) {
+                                           AleneomsorgTjeneste aleneomsorgTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.søknadRepository = søknadRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.aleneomsorgTjeneste = aleneomsorgTjeneste;
-        this.automatiserVedtak = automatiserVedtak;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        if (automatiserVedtak) {
-            return utførStegAutomatisk(kontekst);
-        }
-        return utførStegManuelt(kontekst);
-    }
-
-    public BehandleStegResultat utførStegAutomatisk(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var fagsak = behandling.getFagsak();

@@ -52,7 +52,7 @@ public class FatterVedtakAksjonspunktOppdaterer implements AksjonspunktOppdatere
         Behandling behandling = param.getBehandling();
         fatterVedtakAksjonspunkt.oppdater(behandling, aksjonspunkter);
 
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
     private Collection<String> fraDto(Collection<VurderÅrsak> arsaker) {

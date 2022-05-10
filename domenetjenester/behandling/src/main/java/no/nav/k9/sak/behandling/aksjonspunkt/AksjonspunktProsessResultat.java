@@ -1,8 +1,6 @@
 package no.nav.k9.sak.behandling.aksjonspunkt;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -10,13 +8,16 @@ import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
-import no.nav.k9.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
 
-public class OverhoppResultat {
+public class AksjonspunktProsessResultat {
     Set<OppdateringResultat> oppdatereResultater = new LinkedHashSet<>();
 
-    public static OverhoppResultat tomtResultat() {
-        return new OverhoppResultat();
+    public static AksjonspunktProsessResultat tomtResultat() {
+        return new AksjonspunktProsessResultat();
+    }
+
+    public Set<OppdateringResultat> getOppdatereResultater() {
+        return oppdatereResultater;
     }
 
     public void leggTil(OppdateringResultat delresultat) {
@@ -37,25 +38,12 @@ public class OverhoppResultat {
         throw new IllegalStateException("Støtter bare et steg ved løsning av aksjonspunkt ..");
     }
 
-    public boolean skalOppdatereGrunnlag() {
-        return oppdatereResultater.stream().anyMatch(delresultat -> delresultat.getOverhoppKontroll().equals(OverhoppKontroll.OPPDATER));
-    }
-
     public boolean finnTotrinn() {
         return oppdatereResultater.stream().anyMatch(OppdateringResultat::kreverTotrinnsKontroll);
     }
 
-    public Optional<TransisjonIdentifikator> finnFremoverTransisjon() {
-        return oppdatereResultater.stream()
-            .filter(delresultat -> delresultat.getOverhoppKontroll().equals(OverhoppKontroll.FREMOVERHOPP))
-            .map(OppdateringResultat::getTransisjon)
-            .findFirst(); // TODO (essv): Sorter steg ut fra deres rekkefølge
-    }
-
     public Set<Tuple<AksjonspunktDefinisjon, AksjonspunktStatus>> finnEkstraAksjonspunktResultat() {
-        Set<Tuple<AksjonspunktDefinisjon, AksjonspunktStatus>> resultater = new HashSet<>();
-        oppdatereResultater.stream().forEach(res -> resultater.addAll(res.getEkstraAksjonspunktResultat()));
-        return resultater;
+        return oppdatereResultater.stream().flatMap(res -> res.getEkstraAksjonspunktResultat().stream()).collect(Collectors.toSet());
     }
 
     @Override

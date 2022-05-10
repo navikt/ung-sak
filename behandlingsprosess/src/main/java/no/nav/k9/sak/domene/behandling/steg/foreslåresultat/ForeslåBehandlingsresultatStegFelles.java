@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.foreslåresultat;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -78,7 +77,7 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
                 "Behandling " + behandling.getId() + " har ugyldig resultatType=" + resultatType + ", støtter ikke allerede henlagt behandling i Foreslå Behandlingsresultat");
         }
 
-        if (BehandlingResultatType.getInnvilgetKoder().contains(resultatType) || Objects.equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, behandling.getFagsakYtelseType())) {
+        if (BehandlingResultatType.getInnvilgetKoder().contains(resultatType) || Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(behandling.getFagsakYtelseType())) {
             validerAtAlleVilkårErVurdert(behandling.getId());
         }
     }

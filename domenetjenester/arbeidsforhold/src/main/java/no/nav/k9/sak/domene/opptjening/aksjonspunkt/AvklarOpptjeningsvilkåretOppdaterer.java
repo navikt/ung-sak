@@ -81,7 +81,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
             oppdaterUtfallOgLagre(nyttUtfall, vilkårPeriodeVurdering, vilkårBuilder);
         }
         builder.leggTil(vilkårBuilder);
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
     private HistorikkEndretFeltVerdiType finnTilVerdiHistorikk(VilkårPeriodeVurderingDto vilkårPeriodeVurdering, VilkårUtfallMerknad innvilgelseMerknad) {

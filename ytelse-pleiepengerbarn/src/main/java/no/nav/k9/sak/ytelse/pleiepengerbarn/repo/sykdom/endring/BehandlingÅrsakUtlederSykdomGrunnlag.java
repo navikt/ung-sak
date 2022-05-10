@@ -106,7 +106,7 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
     }
 
     private boolean harEndringerForEtablertTilsyn(BehandlingReferanse referanse) {
-        return erEndringPåEtablertTilsynTjeneste.erEndringerSidenBehandling(referanse) && skalGiÅrsak(referanse, BehandlingStegType.VURDER_UTTAK);
+        return erEndringPåEtablertTilsynTjeneste.erEndringerSidenBehandling(referanse) && skalGiÅrsak(referanse, BehandlingStegType.VURDER_UTTAK_V2);
     }
 
     private boolean harEndringerForSykdom(BehandlingReferanse ref) {

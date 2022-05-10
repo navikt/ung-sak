@@ -4,7 +4,7 @@ import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus.AVBR
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus.UTFØRT;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType.INN;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType.UT;
-import static no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT;
+import static no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner.FREMHOPP_TIL_IVERKSETT_VEDTAK;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -168,14 +168,9 @@ public class FremoverhoppTest {
         }
 
         BehandlingStegTilstand fraTilstand = new BehandlingStegTilstand(fra.getSteg(), fraStatus);
-        // BehandlingStegTilstand tilTilstand = new BehandlingStegTilstand(behandling, til, BehandlingStegStatus.VENTER);
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(), behandlingLås);
-        /*
-         * BehandlingStegOvergangEvent.BehandlingStegOverhoppEvent behandlingEvent =
-         * new BehandlingStegOvergangEvent.BehandlingStegOverhoppEvent(kontekst, Optional.of(fraTilstand), Optional.of(tilTilstand));
-         */
-        BehandlingTransisjonEvent transisjonEvent = new BehandlingTransisjonEvent(kontekst, FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT, fraTilstand,
+        BehandlingTransisjonEvent transisjonEvent = new BehandlingTransisjonEvent(kontekst, FREMHOPP_TIL_IVERKSETT_VEDTAK, fraTilstand,
             til, true);
 
         // act

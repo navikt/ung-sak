@@ -22,6 +22,7 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum BehandlingTema implements Kodeverdi {
     PLEIEPENGER_SYKT_BARN("PLEIE", "Pleiepenger sykt barn", "ab0320", FagsakYtelseType.PLEIEPENGER_SYKT_BARN), // ny ordning fom 011017
+    PLEIEPENGER_LIVETS_SLUTTFASE("PLEIE_PPN", "Pleiepenger i livets sluttfase", "ab0094", FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE),
     OMSORGSPENGER("OMS_OMSORG", "Omsorgspenger", "ab0149", FagsakYtelseType.OMSORGSPENGER),
     UDEFINERT("-", "Ikke definert", null, FagsakYtelseType.UDEFINERT),
 

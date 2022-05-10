@@ -31,7 +31,7 @@ public class AvklarVerge implements AksjonspunktOppdaterer<AvklarVergeDto>  {
             .medHendelse(HistorikkinnslagType.REGISTRER_OM_VERGE)
             .medBegrunnelse(dto.getBegrunnelse())
             .medSkjermlenke(SkjermlenkeType.FAKTA_OM_VERGE);
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
 }

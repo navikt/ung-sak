@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -86,7 +85,7 @@ class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
         if (personstatusUnntattDødEndret) {
             leggTilBasertPåSTP(grunnlag1.getId(), grunnlag2.getId(), startpunkter, poDiff.erPersonstatusEndretForSøkerFør(skjæringstidspunkt), "personstatus");
         }
-        if (!Objects.equals(FagsakYtelseType.PSB,ref.getFagsakYtelseType()) && poDiff.erAdresserEndretFør(null)) {
+        if (!Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(ref.getFagsakYtelseType()) && poDiff.erAdresserEndretFør(null)) {
             leggTilBasertPåSTP(grunnlag1.getId(), grunnlag2.getId(), startpunkter, poDiff.erSøkersAdresseEndretFør(skjæringstidspunkt), "adresse");
         }
 

@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
 
     public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(event.getFagsakId());
-        if (fagsak.getYtelseType() != FagsakYtelseType.PSB) {
+        if (!Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(fagsak.getYtelseType())) {
             return;
         }
         if (!IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {

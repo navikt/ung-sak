@@ -96,7 +96,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
             throw new ManglerTilgangException("K9-IF-01", "Har ikke tilgang til å løse aksjonspunkt.");
         }
         lagreInputOverstyringer(param.getRef(), dto);
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
     private boolean harTillatelseTilÅLøseAksjonspunkt() {

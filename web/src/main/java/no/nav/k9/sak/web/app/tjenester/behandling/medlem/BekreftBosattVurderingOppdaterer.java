@@ -54,13 +54,13 @@ public class BekreftBosattVurderingOppdaterer implements AksjonspunktOppdaterer<
 
         Optional<BekreftedePerioderDto> bekreftedeDto = dto.getBekreftedePerioder().stream().findFirst();
         if (bekreftedeDto.isEmpty()) {
-            return OppdateringResultat.utenOverhopp();
+            return OppdateringResultat.nyttResultat();
         }
         BekreftedePerioderDto bekreftet = bekreftedeDto.get();
         boolean totrinn = håndterEndringHistorikk(bekreftet, behandling, param);
         medlemTjeneste.aksjonspunktBekreftBosattVurdering(behandlingId, new BekreftBosattVurderingAksjonspunktDto(bekreftet.getBosattVurdering(), bekreftet.getBegrunnelse()));
 
-        return OppdateringResultat.utenTransisjon().medTotrinnHvis(totrinn).build();
+        return OppdateringResultat.builder().medTotrinnHvis(totrinn).build();
     }
 
     private boolean håndterEndringHistorikk(BekreftedePerioderDto bekreftet, Behandling behandling, AksjonspunktOppdaterParameter param) {

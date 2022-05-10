@@ -1,6 +1,7 @@
 package no.nav.k9.sak.hendelse.stønadstatistikk;
 
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -39,7 +40,7 @@ public class StønadstatistikkService {
 
 
     public void publiserHendelse(Behandling behandling) {
-        if (!enableStønadstatistikk || behandling.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+        if (!enableStønadstatistikk || !Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(behandling.getFagsakYtelseType())) {
             return;
         }
         final ProsessTaskData pd = PubliserStønadstatistikkHendelseTask.createProsessTaskData(behandling);

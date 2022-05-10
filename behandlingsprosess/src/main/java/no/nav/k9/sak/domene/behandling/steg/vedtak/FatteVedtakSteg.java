@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.behandling.steg.vedtak;
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FATTE_VEDTAK;
 
 import java.util.Objects;
+import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -63,7 +64,8 @@ public class FatteVedtakSteg implements BehandlingSteg {
         if (Objects.equals(BehandlingType.UNNTAKSBEHANDLING, fra.getBehandlingType())) {
             return;
         }
-        if (Objects.equals(FagsakYtelseType.OMSORGSPENGER, fra.getFagsakYtelseType()) || Objects.equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, fra.getFagsakYtelseType())) {
+
+        if (Set.of(FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(fra.getFagsakYtelseType())){
             // Konsistenssjekk ved at vi har like mange grunnlag som vi har vilkårsperioder innvilget
             beregningsgrunnlagTjeneste.hentEksaktFastsattForAllePerioder(fra);
         }

@@ -10,7 +10,7 @@ import no.nav.k9.sak.inngangsvilkår.IkkeOppfylt;
 @RuleDocumentation(value = MedisinskVilkår.ID, specificationReference = "")
 public class MedisinskVilkår implements RuleService<MedisinskVilkårGrunnlag> {
 
-    public static final String ID = "PLS_VK 9.16";
+    public static final String ID = "PLS_VK 9.13";
 
     @Override
     public Evaluation evaluer(MedisinskVilkårGrunnlag grunnlag, Object resultatStruktur) {
@@ -31,7 +31,7 @@ public class MedisinskVilkår implements RuleService<MedisinskVilkårGrunnlag> {
             .hvis(new ErPleietrengendeILivetsSluttfase(), rs.hvisRegel(BeregnPleielokasjon.ID,  "Er pleietrengende hjemme?")
                 .hvis(new BeregnPleielokasjon(), new ErPleietrengendeIHjemmet())
                 .ellers(new IkkeOppfylt(MedisinskVilkårAvslagsårsaker.PLEIETRENGENDE_INNLAGT_I_STEDET_FOR_HJEMME.toRuleReason())))
-            .ellers(new IkkeOppfylt(MedisinskVilkårAvslagsårsaker.MANGLENDE_DOKUMENTASJON.toRuleReason()));
+            .ellers(new IkkeOppfylt(MedisinskVilkårAvslagsårsaker.IKKE_I_LIVETS_SLUTTFASE.toRuleReason()));
 
     }
 }

@@ -189,7 +189,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, TILBAKE, SKAL_IKKE_AVBRYTES),
 
     // Gruppe : 60xx
-
+    @Deprecated(forRemoval = true)
     SØKERS_OPPLYSNINGSPLIKT_OVST(AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_OVST_KODE, AksjonspunktType.SAKSBEHANDLEROVERSTYRING,
         "Saksbehandler initierer kontroll av søkers opplysningsplikt", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT,
         VurderingspunktType.UT, VilkårType.SØKERSOPPLYSNINGSPLIKT, SkjermlenkeType.OPPLYSNINGSPLIKT, ENTRINN),
@@ -295,7 +295,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN, TILBAKE, SKAL_IKKE_AVBRYTES),
     VURDER_ÅRSKVANTUM_KVOTE(AksjonspunktKodeDefinisjon.VURDER_ÅRSKVANTUM_KVOTE,
         AksjonspunktType.MANUELL, "Årskvantum", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, ENTRINN, TILBAKE, null),
+        UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, ENTRINN, FORBLI, null),
     VURDER_ÅRSKVANTUM_DOK(AksjonspunktKodeDefinisjon.VURDER_ÅRSKVANTUM_DOK,
         AksjonspunktType.MANUELL, "Årskvantum dokumentasjon", BehandlingStatus.UTREDES, BehandlingStegType.BEKREFT_UTTAK, VurderingspunktType.INN,
         UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, TOTRINN, TILBAKE, null),

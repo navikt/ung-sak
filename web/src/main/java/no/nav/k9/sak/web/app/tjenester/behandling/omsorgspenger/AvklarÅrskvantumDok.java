@@ -47,7 +47,7 @@ public class AvklarÅrskvantumDok implements AksjonspunktOppdaterer<AvklarÅrskv
             årskvantumTjeneste.innvilgeEllerAvslåPeriodeneManuelt(behandlingId, innvilgePeriodene, antallDager);
         }
 
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
     private void opprettHistorikkInnslag(AvklarÅrskvantumDokDto dto, Long behandlingId, HistorikkinnslagType historikkinnslagType, String valg) {
