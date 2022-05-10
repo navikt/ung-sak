@@ -3,7 +3,6 @@ package no.nav.k9.sak.domene.vedtak.ekstern;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,10 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -68,14 +65,14 @@ public class VurderOverlappendeInfotrygdYtelser {
             .entrySet()
             .stream()
             .filter(entry -> List.of(Fagsystem.INFOTRYGD, Fagsystem.VLSP).contains(entry.getKey().getKilde()))
-            .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
         var tilkjentYtelseTimeline = hentTilkjentYtelsePerioder(ref);
 
-        for (Map.Entry<Ytelse, NavigableSet<LocalDateInterval>> entry : overlappendeEksterneYtelser.entrySet()) {
-            var ytelseperioderTimeline = byggYtelsesperioderTidslinje(entry.getValue());
-            var overlappendeTilkjentYtelse = tilkjentYtelseTimeline.intersection(ytelseperioderTimeline);
+        for (Map.Entry<Ytelse, LocalDateTimeline<Boolean>> entry : overlappendeEksterneYtelser.entrySet()) {
+            var overlappendeTilkjentYtelse = tilkjentYtelseTimeline.intersection(entry.getValue());
 
-            var overlappendePerioderBeskrivelse = overlappendeTilkjentYtelse.toSegments().stream()
+            var overlappendePerioderBeskrivelse = overlappendeTilkjentYtelse.stream()
                 .map(segment -> "" + segment.getValue().getPeriode() + " og utbetalingsgrad: " + segment.getValue().getLavestUtbetalingsgrad().orElse(BigDecimal.ZERO))
                 .collect(Collectors.joining(", "));
             var beskrivelse = "K9-ytelse '" + behandling.getFagsakYtelseType().getNavn() + "' er innvilget for saksnummer " + ref.getSaksnummer() +  " med overlappende perioder: " + overlappendePerioderBeskrivelse;
@@ -87,13 +84,6 @@ public class VurderOverlappendeInfotrygdYtelser {
             };
             log.info("Opprettet VKY-oppgave med oppgaveId={} for overlappende InfoTrygd-ytelse: {}", oppgaveId, beskrivelse);
         }
-    }
-
-    private LocalDateTimeline<Boolean> byggYtelsesperioderTidslinje(NavigableSet<LocalDateInterval> ytelsesPerioder) {
-        var periodeSegmenter = ytelsesPerioder.stream()
-            .map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), Boolean.TRUE))
-            .toList();
-        return new LocalDateTimeline<>(periodeSegmenter, StandardCombinators::alwaysTrueForMatch);
     }
 
     private LocalDateTimeline<BeregningsresultatPeriode> hentTilkjentYtelsePerioder(BehandlingReferanse ref) {

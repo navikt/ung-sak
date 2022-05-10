@@ -2,19 +2,14 @@ package no.nav.k9.sak.domene.vedtak.ekstern;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.NavigableSet;
-import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -52,7 +47,7 @@ public class OverlappendeYtelserTjeneste {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
-    public Map<Ytelse, NavigableSet<LocalDateInterval>> finnOverlappendeYtelser(BehandlingReferanse ref, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
+    public Map<Ytelse, LocalDateTimeline<Boolean>> finnOverlappendeYtelser(BehandlingReferanse ref, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
         var perioderTilVurderingTidslinje = hentBeregningsgrunnlagPerioderTilVurderingTidslinje(ref);
         var tilkjentYtelseTidslinje = hentTilkjentYtelseTidslinje(ref);
         tilkjentYtelseTidslinje = tilkjentYtelseTidslinje.intersection(perioderTilVurderingTidslinje);
@@ -69,48 +64,33 @@ public class OverlappendeYtelserTjeneste {
         return doFinnOverlappendeYtelser(ref.getSaksnummer(), tilkjentYtelseTidslinje, new YtelseFilter(aktørYtelse.get()).filter(yt -> ytelseTyperSomSjekkesMot.contains(yt.getYtelseType())));
     }
 
-    private Map<Ytelse, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(Saksnummer saksnummer, LocalDateTimeline<Boolean> tilkjentYtelseTimeline, YtelseFilter ytelseFilter) {
-        Map<Ytelse, NavigableSet<LocalDateInterval>> overlappendeYtelser = new HashMap<>();
-        if (!tilkjentYtelseTimeline.isEmpty()) {
+    private Map<Ytelse, LocalDateTimeline<Boolean>> doFinnOverlappendeYtelser(Saksnummer saksnummer, LocalDateTimeline<Boolean> tilkjentYtelseTimeline, YtelseFilter ytelseFilter) {
+        Map<Ytelse, LocalDateTimeline<Boolean>> overlappendeYtelser = new HashMap<>();
+        for (var yt : ytelseFilter.getFiltrertYtelser()) {
+            if (saksnummer.equals(yt.getSaksnummer())) {
+                // Skal ikke sjekke overlappende ytelser i IAY mot egen fagsak
+                continue;
+            }
 
-            for (var yt : ytelseFilter.getFiltrertYtelser()) {
-                if (saksnummer.equals(yt.getSaksnummer())) {
-                    // Skal ikke sjekke overlappende ytelser i IAY mot egen fagsak
-                    continue;
-                }
-                var ytp = yt.getPeriode();
-                var overlappPeriode = innvilgelseOverlapperMedAnnenYtelse(tilkjentYtelseTimeline, ytp);
-                if (!overlappPeriode.isEmpty()) {
-                    if (yt.getYtelseAnvist().isEmpty()) {
-                        // har ingen utbetaling (kan skyldes både at ytelse er under behandling, eller at ytelsetype ikke er av type kontantytelse)
-                        continue;
-                    } else {
-                        var anvistSegmenter = yt.getYtelseAnvist().stream()
-                            .map(ya -> new LocalDateSegment<>(ya.getAnvistFOM(), ya.getAnvistTOM(), Boolean.TRUE))
-                            .sorted()
-                            .collect(Collectors.toCollection(LinkedHashSet::new));
-
-                        var anvistTimeline = new LocalDateTimeline<>(anvistSegmenter, StandardCombinators::alwaysTrueForMatch);
-                        var ovelappendeTidslinje = anvistTimeline.intersection(tilkjentYtelseTimeline);
-                        if (!ovelappendeTidslinje.isEmpty()) {
-                            var ovelappendeDatoIntervaller = new TreeSet<>(overlappendeYtelser.getOrDefault(yt, new TreeSet<>()));
-                            ovelappendeDatoIntervaller.addAll(ovelappendeTidslinje.getLocalDateIntervals());
-                            overlappendeYtelser.put(yt, ovelappendeDatoIntervaller);
-                        }
-                    }
+            //TODO Det sjekkes uansett mot yt.getAnvistFOM-TOM, virker unødvendig å sjekke mot yt.getPeriode. Fjerne sjekken?
+            if (innvilgelseOverlapperMedAnnenYtelse(tilkjentYtelseTimeline, yt.getPeriode())) {
+                var anvistSegmenter = yt.getYtelseAnvist().stream()
+                    .map(ya -> new LocalDateSegment<>(ya.getAnvistFOM(), ya.getAnvistTOM(), Boolean.TRUE))
+                    .toList();
+                var anvistTimeline = new LocalDateTimeline<>(anvistSegmenter, StandardCombinators::alwaysTrueForMatch);
+                var ovelappendeTidslinje = anvistTimeline.intersection(tilkjentYtelseTimeline);
+                if (!ovelappendeTidslinje.isEmpty()) {
+                    LocalDateTimeline<Boolean> samletOverlapp = overlappendeYtelser.getOrDefault(yt, LocalDateTimeline.empty());
+                    overlappendeYtelser.put(yt, samletOverlapp.crossJoin(ovelappendeTidslinje, StandardCombinators::alwaysTrueForMatch).compress());
                 }
             }
         }
         return overlappendeYtelser;
     }
 
-    private static NavigableSet<LocalDateInterval> innvilgelseOverlapperMedAnnenYtelse(LocalDateTimeline<Boolean> vilkårPeriode, DatoIntervallEntitet ytp) {
-        return vilkårPeriode.getLocalDateIntervals()
-            .stream()
-            .map(it -> it.overlap(new LocalDateInterval(ytp.getFomDato(), ytp.getTomDato())))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collect(Collectors.toCollection(TreeSet::new));
+    private static boolean innvilgelseOverlapperMedAnnenYtelse(LocalDateTimeline<Boolean> vilkårPeriode, DatoIntervallEntitet ytp) {
+        LocalDateTimeline<?> ytpTidslinje = new LocalDateTimeline<>(ytp.getFomDato(), ytp.getTomDato(), null);
+        return vilkårPeriode.intersects(ytpTidslinje);
     }
 
     private LocalDateTimeline<Boolean> hentBeregningsgrunnlagPerioderTilVurderingTidslinje(BehandlingReferanse ref) {

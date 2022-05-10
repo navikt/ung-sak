@@ -37,11 +37,7 @@ class NulledePerioder implements VilkårsPeriodiseringsFunksjon {
 
         nullTimerTidslinje = nullTimerTidslinje.disjoint(fagsakTidslinjeIkkeNull);
 
-        return Collections.unmodifiableNavigableSet(nullTimerTidslinje.compress()
-            .toSegments()
-            .stream()
-            .map(segment -> DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new)));
+        return DatoIntervallEntitet.fraTimeline(nullTimerTidslinje.compress());
     }
 
     private LocalDateTimeline<Boolean> opprettTidslinjeFraPerioder(Collection<OppgittFraværPeriode> oppgittePerioder, Predicate<OppgittFraværPeriode> filter) {

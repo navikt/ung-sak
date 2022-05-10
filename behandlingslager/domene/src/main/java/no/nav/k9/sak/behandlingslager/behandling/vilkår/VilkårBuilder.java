@@ -262,11 +262,7 @@ public class VilkårBuilder {
         if (fagsakTidslinje != null) {
             var tidslinjeSomFaltBort = vilkårTidslinje.disjoint(fagsakTidslinje);
             vilkårTidslinje = vilkårTidslinje.intersection(fagsakTidslinje);
-            var periodeneSomFaltBort = tidslinjeSomFaltBort.toSegments()
-                .stream()
-                .filter(it -> it.getValue() != null)
-                .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
-                .collect(Collectors.toCollection(TreeSet::new));
+            var periodeneSomFaltBort = DatoIntervallEntitet.fraTimeline( tidslinjeSomFaltBort.filterValue(Objects::nonNull));
             justereUtfallVedTilbakestilling(periodeneSomFaltBort);
         }
         bygget = true;

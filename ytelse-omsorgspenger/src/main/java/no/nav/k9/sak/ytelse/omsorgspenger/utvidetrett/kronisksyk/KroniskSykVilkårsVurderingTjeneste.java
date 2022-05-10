@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,8 +79,7 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
             if (vilkårTidslinje.isEmpty()) {
                 return Collections.emptyNavigableSet();
             }
-            NavigableSet<DatoIntervallEntitet> utlededePerioder = vilkårTidslinje.getLocalDateIntervals().stream().map(p -> DatoIntervallEntitet.fra(p)).collect(Collectors.toCollection(TreeSet::new));
-            return Collections.unmodifiableNavigableSet(utlededePerioder);
+            return DatoIntervallEntitet.fraTimeline(vilkårTidslinje);
         } else {
             // default til 'fullstedige' perioder hvis vilkår ikke angitt.
             return utledFullstendigePerioder(behandlingId);

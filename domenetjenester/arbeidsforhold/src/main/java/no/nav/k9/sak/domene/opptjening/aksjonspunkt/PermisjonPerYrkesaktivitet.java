@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -43,24 +41,14 @@ public final class PermisjonPerYrkesaktivitet {
             var permisjonstidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), true)));
             permisjonstidslinje = permisjonstidslinje.disjoint(ytelsesTidslinje);
 
-            return permisjonstidslinje.compress()
-                .toSegments()
-                .stream()
-                .map(LocalDateSegment::getLocalDateInterval)
-                .map(DatoIntervallEntitet::fra)
-                .collect(Collectors.toCollection(TreeSet::new));
+            return DatoIntervallEntitet.fraTimeline(permisjonstidslinje.compress());
         } else if (Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.VELFERDSPERMISJON)) {
             var permisjonstidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), true)));
             for (OpptjeningAktivitetType aktivitetType : OpptjeningAktivitetType.K9_YTELSER) {
                 var ytelsesTidslinje = tidslinjePerYtelse.getOrDefault(aktivitetType, new LocalDateTimeline<>(List.of()));
                 permisjonstidslinje = permisjonstidslinje.disjoint(ytelsesTidslinje);
             }
-            return permisjonstidslinje.compress()
-                .toSegments()
-                .stream()
-                .map(LocalDateSegment::getLocalDateInterval)
-                .map(DatoIntervallEntitet::fra)
-                .collect(Collectors.toCollection(TreeSet::new));
+            return DatoIntervallEntitet.fraTimeline(permisjonstidslinje.compress());
         }
         return Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed()));
     }

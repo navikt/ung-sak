@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -123,11 +122,7 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
 
         timeline = timeline.combine(permisjonsTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        return timeline.compress()
-            .toSegments()
-            .stream()
-            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
-            .collect(Collectors.toSet());
+        return DatoIntervallEntitet.fraTimeline(timeline.compress());
     }
 
     private static LocalDateSegment<Boolean> lagSegment(LocalDateInterval di, Boolean siste) {

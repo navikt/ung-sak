@@ -7,11 +7,9 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -61,8 +59,7 @@ public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPeriod
             if (vilkårTidslinje.isEmpty()) {
                 return Collections.emptyNavigableSet();
             }
-            var utlededePerioder = vilkårTidslinje.getLocalDateIntervals().stream().map(p -> DatoIntervallEntitet.fra(p)).collect(Collectors.toCollection(TreeSet::new));
-            return Collections.unmodifiableNavigableSet(utlededePerioder);
+            return DatoIntervallEntitet.fraTimeline(vilkårTidslinje);
         } else {
             // default til 'fullstedige' perioder hvis vilkår ikke angitt.
             return utledFullstendigePerioder(behandlingId);

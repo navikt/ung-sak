@@ -48,10 +48,6 @@ class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
             timeline = timeline.combine(new LocalDateTimeline<>(List.of(periode)), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        return Collections.unmodifiableNavigableSet(timeline.compress()
-            .toSegments()
-            .stream()
-            .map(segment -> DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new)));
+        return DatoIntervallEntitet.fraTimeline(timeline.compress());
     }
 }

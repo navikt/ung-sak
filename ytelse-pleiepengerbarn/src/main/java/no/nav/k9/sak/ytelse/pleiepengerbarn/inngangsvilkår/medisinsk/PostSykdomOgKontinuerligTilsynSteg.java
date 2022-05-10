@@ -119,11 +119,7 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             timeline = timeline.combine(periodeTidslinje, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        return timeline.compress()
-            .toSegments()
-            .stream()
-            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new));
+        return DatoIntervallEntitet.fraTimeline(timeline.compress());
     }
 
     VilkårResultatBuilder justerVilkårsperioderEtterSykdom(Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
@@ -188,20 +184,14 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         if (periode != null) {
             vilkårPerioder.add(periode);
         }
-        return adjustAndCompress(vilkårPerioder);
+        return compress(vilkårPerioder);
     }
 
-    private NavigableSet<DatoIntervallEntitet> adjustAndCompress(ArrayList<DatoIntervallEntitet> vilkårPerioder) {
-        var segmenter = vilkårPerioder.stream()
+    private NavigableSet<DatoIntervallEntitet> compress(List<DatoIntervallEntitet> vilkårPerioder) {
+        LocalDateTimeline<Boolean> tidslinje = new LocalDateTimeline<>(vilkårPerioder.stream()
             .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true))
-            .toList();
-
-        return new LocalDateTimeline<>(segmenter)
-            .compress()
-            .toSegments()
-            .stream()
-            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
-            .collect(Collectors.toCollection(TreeSet::new));
+            .toList());
+        return DatoIntervallEntitet.fraTimeline(tidslinje.compress());
     }
 
 }
