@@ -1,10 +1,12 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -101,18 +103,25 @@ public class SøknadsperiodeTjeneste {
             .sorted(Comparator.comparing(MottattDokument::getInnsendingstidspunkt))
             .toList();
 
-        LocalDateTimeline<Kravperiode> tidslinje = LocalDateTimeline.empty();
+        List<LocalDateSegment<Kravperiode>> segmenter = new ArrayList<>();
+
         for (MottattDokument kd : mottatteDokumenter) {
-            var segments = søknadsperioders.stream()
+            segmenter.addAll(søknadsperioders.stream()
                 .filter(sp -> sp.getJournalpostId().equals(kd.getJournalpostId()))
                 .map(sp -> sp.getPerioder().stream().map(p -> new Kravperiode(p.getPeriode(), kd.getBehandlingId(), p.isHarTrukketKrav())).toList())
                 .flatMap(Collection::stream)
                 .map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p))
-                .toList();
-            tidslinje = tidslinje.union(new LocalDateTimeline<>(segments).compress(), StandardCombinators::coalesceRightHandSide);
+                .toList()
+            );
         }
 
-        return tidslinje.compress().stream().map(s -> new Kravperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue().getBehandlingId(), s.getValue().isHarTrukketKrav())).toList();
+        LocalDateTimeline<Kravperiode> tidslinje = new LocalDateTimeline<>(segmenter, StandardCombinators::coalesceRightHandSide);
+        LocalDateTimeline<Kravperiode> komprimertTidslinje = tidslinje.compress(
+            (a, b) -> Objects.equals(a.behandlingId, b.behandlingId) && a.harTrukketKrav == b.harTrukketKrav,
+            (i, lhs, rhs) -> new LocalDateSegment<>(i, new Kravperiode(DatoIntervallEntitet.fra(i), lhs.getValue().getBehandlingId(), lhs.getValue().isHarTrukketKrav())));
+        return komprimertTidslinje.stream()
+            .map(LocalDateSegment::getValue)
+            .toList();
     }
 
     public static class Kravperiode {
