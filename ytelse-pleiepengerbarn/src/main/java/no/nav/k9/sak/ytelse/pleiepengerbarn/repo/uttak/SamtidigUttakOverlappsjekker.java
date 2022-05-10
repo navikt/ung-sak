@@ -111,7 +111,7 @@ public class SamtidigUttakOverlappsjekker {
     }
 
     private NavigableSet<LocalDateSegment<List<Kravprioritet>>> hensyntaBesluttedeKrav(LocalDateTimeline<List<Kravprioritet>> vedtatteKrav, LocalDateSegment<List<Kravprioritet>> segment) {
-        var vedtatteKravSomOverlapper = vedtatteKrav.intersection(new LocalDateTimeline<>(List.of(segment)), (datoInterval, segmentLeft, segmentRight) -> {
+        var vedtatteKravSomOverlapper = vedtatteKrav.union(new LocalDateTimeline<>(List.of(segment)), (datoInterval, segmentLeft, segmentRight) -> {
             if (segmentLeft == null) {
                 return new LocalDateSegment<>(datoInterval, segmentRight.getValue());
             }
@@ -123,12 +123,17 @@ public class SamtidigUttakOverlappsjekker {
                 .stream()
                 .filter(it -> segmentLeft.getValue()
                     .stream()
-                    .noneMatch(at -> Objects.equals(at.getSaksnummer(), it.getSaksnummer()) && Objects.equals(at.getTidspunktForKrav(), it.getTidspunktForKrav())))
+                    .filter(at -> Objects.equals(it.getSaksnummer(), at.getSaksnummer())) // relevante vedtak
+                    .noneMatch(at -> harBlittVedtatt(it, at)))
                 .collect(Collectors.toList());
             return new LocalDateSegment<>(datoInterval, filtrertKravliste);
         });
 
         return vedtatteKravSomOverlapper.toSegments();
+    }
+
+    private boolean harBlittVedtatt(Kravprioritet it, Kravprioritet at) {
+        return Objects.equals(at.getTidspunktForKrav(), it.getTidspunktForKrav()) && at.getAktuellBehandling().erSaksbehandlingAvsluttet();
     }
 
     private LocalDateTimeline<Boolean> utledUtsattTidslinje(BehandlingReferanse ref) {
