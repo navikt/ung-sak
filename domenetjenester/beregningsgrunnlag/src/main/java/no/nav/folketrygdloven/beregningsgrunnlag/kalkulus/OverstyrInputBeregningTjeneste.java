@@ -12,9 +12,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -64,7 +61,8 @@ public class OverstyrInputBeregningTjeneste {
                                           @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjenester,
                                           BeregningPerioderGrunnlagRepository grunnlagRepository,
                                           InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste, Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning) {
+                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
+                                          @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning) {
         this.fagsakRepository = fagsakRepository;
         this.opptjeningForBeregningTjenester = opptjeningForBeregningTjenester;
         this.grunnlagRepository = grunnlagRepository;
@@ -73,20 +71,20 @@ public class OverstyrInputBeregningTjeneste {
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
     }
 
-    public List<OverstyrBeregningInputPeriode> getPerioderForInputOverstyring(Behandling behandling) {
-        List<SakInfotrygdMigrering> sakInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(behandling.getFagsakId());
+    public List<OverstyrBeregningInputPeriode> getPerioderForInputOverstyring(BehandlingReferanse behandlingReferanse) {
+        List<SakInfotrygdMigrering> sakInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(behandlingReferanse.getFagsakId());
         return sakInfotrygdMigreringer.stream().map(sakInfotrygdMigrering -> {
             LocalDate migrertStp = sakInfotrygdMigrering.getSkjæringstidspunkt();
-            List<OpptjeningAktiviteter.OpptjeningPeriode> arbeidsaktiviteter = finnArbeidsaktiviteterForOverstyring(behandling, migrertStp);
-            Optional<InputOverstyringPeriode> overstyrtInputPeriode = finnEksisterendeOverstyring(behandling, migrertStp);
-            var inntektsmeldingerForSak = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(behandling.getFagsak().getSaksnummer());
-            var imTjeneste = finnInntektsmeldingForBeregningTjeneste(behandling);
+            List<OpptjeningAktiviteter.OpptjeningPeriode> arbeidsaktiviteter = finnArbeidsaktiviteterForOverstyring(behandlingReferanse, migrertStp);
+            Optional<InputOverstyringPeriode> overstyrtInputPeriode = finnEksisterendeOverstyring(behandlingReferanse, migrertStp);
+            var inntektsmeldingerForSak = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(behandlingReferanse.getSaksnummer());
+            var imTjeneste = finnInntektsmeldingForBeregningTjeneste(behandlingReferanse);
             var inntektsmeldingerForPeriode = imTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingerForSak, DatoIntervallEntitet.fraOgMedTilOgMed(migrertStp, migrertStp));
             var overstyrteAktiviteter = arbeidsaktiviteter.stream()
                 .map(a -> mapTilOverstyrAktiviteter(migrertStp, overstyrtInputPeriode, a, inntektsmeldingerForPeriode))
                 .collect(Collectors.toList());
-            var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandling.getId());
-            var ytelseGrunnlag = finnYtelseGrunnlagForMigrering(behandling, migrertStp, iayGrunnlag);
+            var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingReferanse.getId());
+            var ytelseGrunnlag = finnYtelseGrunnlagForMigrering(behandlingReferanse, migrertStp, iayGrunnlag);
             var harKategoriNæring = harNæring(ytelseGrunnlag);
             var harKategoriFrilans = harFrilans(ytelseGrunnlag);
             return new OverstyrBeregningInputPeriode(migrertStp, overstyrteAktiviteter, harKategoriNæring, harKategoriFrilans);
@@ -107,17 +105,17 @@ public class OverstyrInputBeregningTjeneste {
     }
 
 
-    private Optional<YtelseGrunnlag> finnYtelseGrunnlagForMigrering(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        var overlappGrunnlagListe = finnOverlappendeGrunnlag(behandling, migrertStp, iayGrunnlag);
+    private Optional<YtelseGrunnlag> finnYtelseGrunnlagForMigrering(BehandlingReferanse behandlingReferanse, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
+        var overlappGrunnlagListe = finnOverlappendeGrunnlag(behandlingReferanse, migrertStp, iayGrunnlag);
         // Sjekker overlapp og deretter kant i kant
         if (overlappGrunnlagListe.isPresent()) {
             return overlappGrunnlagListe;
         }
-        return finnKantIKantGrunnlagsliste(behandling, migrertStp, iayGrunnlag);
+        return finnKantIKantGrunnlagsliste(behandlingReferanse, migrertStp, iayGrunnlag);
     }
 
-    private Optional<YtelseGrunnlag> finnKantIKantGrunnlagsliste(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        return new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandling.getAktørId()))
+    private Optional<YtelseGrunnlag> finnKantIKantGrunnlagsliste(BehandlingReferanse behandlingReferanse, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
+        return new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandlingReferanse.getAktørId()))
             //det er riktig at PPN ikke er med her, siden dette bare gjelder migrerte data for PSB
             .filter(y -> y.getYtelseType().equals(FagsakYtelseType.PSB) && y.getKilde().equals(Fagsystem.INFOTRYGD))
             .filter(y -> y.getYtelseAnvist().stream().anyMatch(ya -> {
@@ -129,8 +127,8 @@ public class OverstyrInputBeregningTjeneste {
             .flatMap(Ytelse::getYtelseGrunnlag);
     }
 
-    private Optional<YtelseGrunnlag> finnOverlappendeGrunnlag(Behandling behandling, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        return new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandling.getAktørId()))
+    private Optional<YtelseGrunnlag> finnOverlappendeGrunnlag(BehandlingReferanse behandlingReferanse, LocalDate migrertStp, InntektArbeidYtelseGrunnlag iayGrunnlag) {
+        return new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandlingReferanse.getAktørId()))
             //det er riktig at PPN ikke er med her, siden dette bare gjelder migrerte data for PSB
             .filter(y -> y.getYtelseType().equals(FagsakYtelseType.PSB) && y.getKilde().equals(Fagsystem.INFOTRYGD))
             .filter(y -> y.getYtelseAnvist().stream().anyMatch(ya -> {
@@ -142,24 +140,24 @@ public class OverstyrInputBeregningTjeneste {
             .flatMap(Ytelse::getYtelseGrunnlag);
     }
 
-    private Optional<InputOverstyringPeriode> finnEksisterendeOverstyring(Behandling behandling, LocalDate migrertStp) {
-        return grunnlagRepository.hentGrunnlag(behandling.getId())
+    private Optional<InputOverstyringPeriode> finnEksisterendeOverstyring(BehandlingReferanse behandlingReferanse, LocalDate migrertStp) {
+        return grunnlagRepository.hentGrunnlag(behandlingReferanse.getId())
             .stream()
             .flatMap(gr -> gr.getInputOverstyringPerioder().stream())
             .filter(p -> p.getSkjæringstidspunkt().equals(migrertStp))
             .findFirst();
     }
 
-    private List<OpptjeningAktiviteter.OpptjeningPeriode> finnArbeidsaktiviteterForOverstyring(Behandling behandling, LocalDate migrertStp) {
-        var perioderTilVurdering = getPerioderTilVurderingTjeneste(behandling).utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+    private List<OpptjeningAktiviteter.OpptjeningPeriode> finnArbeidsaktiviteterForOverstyring(BehandlingReferanse behandlingReferanse, LocalDate migrertStp) {
+        var perioderTilVurdering = getPerioderTilVurderingTjeneste(behandlingReferanse).utled(behandlingReferanse.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
         var vilkårsperiode = perioderTilVurdering.stream()
             .filter(p -> p.getFomDato().equals(migrertStp))
             .findFirst().orElseThrow(() -> new IllegalStateException("Fant ingen periode for sakinfotrygdmigrering"));
 
-        var opptjeningAktiviteter = finnOpptjeningForBeregningTjeneste(behandling).hentEksaktOpptjeningForBeregning(
-            BehandlingReferanse.fra(behandling),
-            inntektArbeidYtelseTjeneste.hentGrunnlag(behandling.getId()), vilkårsperiode);
+        var opptjeningAktiviteter = finnOpptjeningForBeregningTjeneste(behandlingReferanse).hentEksaktOpptjeningForBeregning(
+            behandlingReferanse,
+            inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingReferanse.getId()), vilkårsperiode);
 
         return opptjeningAktiviteter.stream()
             .flatMap(a -> a.getOpptjeningPerioder().stream())
@@ -177,13 +175,24 @@ public class OverstyrInputBeregningTjeneste {
                 matcherArbeidsgiver(a, overstyrt.getArbeidsgiver()))
             .findFirst();
         var inntektsmeldingerForArbeidsgiver = inntektsmeldingerForPeriode.stream().filter(i -> matcherArbeidsgiver(a, i.getArbeidsgiver())).collect(Collectors.toList());
+
         var harRefusjonskrav = inntektsmeldingerForArbeidsgiver.stream().anyMatch(im -> !im.getRefusjonBeløpPerMnd().erNullEllerNulltall() || im.getEndringerRefusjon().size() > 0);
+        var refusjonskravFraIM = inntektsmeldingerForArbeidsgiver.stream().map(Inntektsmelding::getRefusjonBeløpPerMnd)
+            .filter(Objects::nonNull)
+            .map(Beløp::getVerdi)
+            .map(BigDecimal.valueOf(12)::multiply)
+            .reduce(BigDecimal::add)
+            .map(BigDecimal::intValue)
+            .orElse(0);
+        var refusjonOpphører = inntektsmeldingerForArbeidsgiver.stream().map(Inntektsmelding::getRefusjonOpphører)
+            .filter(Objects::nonNull)
+            .min(Comparator.naturalOrder());
         return new OverstyrBeregningAktivitet(
             a.getArbeidsgiverOrgNummer() == null ? null : new OrgNummer(a.getArbeidsgiverOrgNummer()),
             a.getArbeidsgiverAktørId() == null ? null : new AktørId(a.getArbeidsgiverAktørId()),
             matchendeOverstyring.map(InputAktivitetOverstyring::getInntektPrÅr).map(Beløp::getVerdi).map(BigDecimal::intValue).orElse(null),
-            matchendeOverstyring.map(InputAktivitetOverstyring::getRefusjonPrÅr).map(Beløp::getVerdi).map(BigDecimal::intValue).orElse(null),
-            matchendeOverstyring.map(InputAktivitetOverstyring::getOpphørRefusjon).orElse(null),
+            harRefusjonskrav ? refusjonskravFraIM : matchendeOverstyring.map(InputAktivitetOverstyring::getRefusjonPrÅr).map(Beløp::getVerdi).map(BigDecimal::intValue).orElse(null),
+            harRefusjonskrav ? refusjonOpphører.orElse(null) : matchendeOverstyring.map(InputAktivitetOverstyring::getOpphørRefusjon).orElse(null),
             !harRefusjonskrav
         );
     }
@@ -198,23 +207,22 @@ public class OverstyrInputBeregningTjeneste {
             arbeidsgiver.getArbeidsgiverAktørId().getAktørId();
     }
 
-    private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(Behandling behandling) {
-        FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
+    private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(BehandlingReferanse behandlingReferanse) {
+        FagsakYtelseType ytelseType = behandlingReferanse.getFagsakYtelseType();
         return FagsakYtelseTypeRef.Lookup.find(opptjeningForBeregningTjenester, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningForBeregningTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
     }
 
-    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
-        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, vilkårsPerioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType())
-            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
+    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(BehandlingReferanse behandlingReferanse) {
+        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, vilkårsPerioderTilVurderingTjeneste, behandlingReferanse.getFagsakYtelseType(), behandlingReferanse.getBehandlingType())
+            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandlingReferanse.getFagsakYtelseType() + "], behandlingtype [" + behandlingReferanse.getBehandlingType() + "]"));
     }
 
-    private InntektsmeldingerRelevantForBeregning finnInntektsmeldingForBeregningTjeneste(Behandling behandling) {
-        FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
+    private InntektsmeldingerRelevantForBeregning finnInntektsmeldingForBeregningTjeneste(BehandlingReferanse behandlingReferanse) {
+        FagsakYtelseType ytelseType = behandlingReferanse.getFagsakYtelseType();
         return FagsakYtelseTypeRef.Lookup.find(inntektsmeldingerRelevantForBeregning, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + InntektsmeldingerRelevantForBeregning.class.getSimpleName() + " for ytelseType=" + ytelseType));
     }
-
 
 
 }

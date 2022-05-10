@@ -10,15 +10,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OverstyrInputBeregningTjeneste;
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
@@ -65,6 +63,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
     private BrukerTokenProvider brukerTokenProvider;
     private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
+    private OverstyrInputBeregningTjeneste overstyrInputBeregningTjeneste;
     private Environment environment;
 
 
@@ -79,7 +78,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
                                     BrukerTokenProvider brukerTokenProvider,
                                     ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag,
-                                    HistorikkTjenesteAdapter historikkTjenesteAdapter) {
+                                    HistorikkTjenesteAdapter historikkTjenesteAdapter, OverstyrInputBeregningTjeneste overstyrInputBeregningTjeneste) {
         this.grunnlagRepository = grunnlagRepository;
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
@@ -87,6 +86,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
         this.brukerTokenProvider = brukerTokenProvider;
         this.arbeidsgiverHistorikkinnslag = arbeidsgiverHistorikkinnslag;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
+        this.overstyrInputBeregningTjeneste = overstyrInputBeregningTjeneste;
         this.environment = Environment.current();
     }
 
@@ -104,6 +104,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
     }
 
     private void lagreInputOverstyringer(BehandlingReferanse ref, OverstyrInputForBeregningDto dto) {
+        var inputPerioder = overstyrInputBeregningTjeneste.getPerioderForInputOverstyring(ref);
         Long behandlingId = ref.getBehandlingId();
         InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
         FagsakYtelseType fagsakYtelseType = ref.getFagsakYtelseType();
@@ -111,12 +112,16 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
             .utled(behandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var overstyrtePerioder = dto.getPerioder().stream()
             .filter(it -> !it.getAktivitetliste().isEmpty())
-            .map(it -> mapPeriode(ref, iayGrunnlag, perioderTilVurdering, it))
+            .map(it -> mapPeriode(ref, iayGrunnlag, perioderTilVurdering, finnInputPeriode(inputPerioder, it), it))
             .collect(Collectors.toList());
 
         lagHistorikk(behandlingId, overstyrtePerioder);
 
         grunnlagRepository.lagreInputOverstyringer(behandlingId, overstyrtePerioder);
+    }
+
+    private OverstyrBeregningInputPeriode finnInputPeriode(List<OverstyrBeregningInputPeriode> perioderForInputOverstyring, OverstyrBeregningInputPeriode it) {
+        return perioderForInputOverstyring.stream().filter(p -> p.getSkjaeringstidspunkt().equals(it.getSkjaeringstidspunkt())).findFirst().orElseThrow();
     }
 
     private void lagHistorikk(Long behandlingId, List<InputOverstyringPeriode> overstyrtePerioder) {
@@ -160,46 +165,52 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
         }
     }
 
-    @Nullable
     private BigDecimal finnFraBeløp(Beløp fastsatt, Optional<Beløp> fra) {
         var forrige = fra.map(Beløp::getVerdi).orElse(null);
         return forrige == null || forrige.compareTo(fastsatt.getVerdi()) == 0 ? null : forrige;
     }
 
-    @NotNull
-    private InputOverstyringPeriode mapPeriode(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, OverstyrBeregningInputPeriode it) {
-        var vilkårsperiode = perioderTilVurdering.stream().filter(p -> p.getFomDato().equals(it.getSkjaeringstidspunkt())).findFirst()
+    private InputOverstyringPeriode mapPeriode(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                               NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
+                                               OverstyrBeregningInputPeriode inputPeriode,
+                                               OverstyrBeregningInputPeriode overstyrtPeriode) {
+        var vilkårsperiode = perioderTilVurdering.stream().filter(p -> p.getFomDato().equals(overstyrtPeriode.getSkjaeringstidspunkt())).findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Fikk inn periode som ikke er til vurdering i behandlingen"));
 
         var opptjeningAktiviteter = finnOpptjeningForBeregningTjeneste(ref.getFagsakYtelseType()).hentEksaktOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode)
             .orElseThrow()
             .getOpptjeningPerioder()
             .stream()
-            .filter(p -> !p.getPeriode().getTom().isBefore(it.getSkjaeringstidspunkt().minusDays(1)))
+            .filter(p -> !p.getPeriode().getTom().isBefore(overstyrtPeriode.getSkjaeringstidspunkt().minusDays(1)))
             .collect(Collectors.toList());
-        return new InputOverstyringPeriode(it.getSkjaeringstidspunkt(), mapAktiviteter(it.getAktivitetliste(), opptjeningAktiviteter));
+        return new InputOverstyringPeriode(overstyrtPeriode.getSkjaeringstidspunkt(), mapAktiviteter(overstyrtPeriode.getAktivitetliste(), inputPeriode.getAktivitetliste(), opptjeningAktiviteter));
     }
 
-    private List<InputAktivitetOverstyring> mapAktiviteter(List<OverstyrBeregningAktivitet> aktivitetliste, List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningAktiviteter) {
+    private List<InputAktivitetOverstyring> mapAktiviteter(List<OverstyrBeregningAktivitet> aktivitetliste, List<OverstyrBeregningAktivitet> inputAktiviteter, List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningAktiviteter) {
         return aktivitetliste.stream()
-            .map(a -> mapAktivitet(opptjeningAktiviteter, a))
+            .map(a -> mapAktivitet(opptjeningAktiviteter, finnInputAktivitet(inputAktiviteter, a), a))
             .collect(Collectors.toList());
     }
 
-    @NotNull
-    private InputAktivitetOverstyring mapAktivitet(List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningAktiviteter, OverstyrBeregningAktivitet a) {
-        List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningsaktivitetForArbeidsgiver = opptjeningAktiviteter.stream().filter(oa -> Objects.equals(oa.getArbeidsgiverOrgNummer(), finnOrgnrString(a)) ||
-                Objects.equals(oa.getArbeidsgiverAktørId(), finnAktørIdString(a)))
+    private OverstyrBeregningAktivitet finnInputAktivitet(List<OverstyrBeregningAktivitet> inputAktiviteter, OverstyrBeregningAktivitet a) {
+        return inputAktiviteter.stream().filter(akt -> Objects.equals(akt.getArbeidsgiverAktørId(), a.getArbeidsgiverAktørId()) && Objects.equals(akt.getArbeidsgiverOrgnr(), a.getArbeidsgiverOrgnr())).findFirst().orElseThrow();
+    }
+
+    private InputAktivitetOverstyring mapAktivitet(List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningAktiviteter,
+                                                   OverstyrBeregningAktivitet inputAktivitet,
+                                                   OverstyrBeregningAktivitet overstyrtAktivitet) {
+        List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningsaktivitetForArbeidsgiver = opptjeningAktiviteter.stream().filter(oa -> Objects.equals(oa.getArbeidsgiverOrgNummer(), finnOrgnrString(overstyrtAktivitet)) ||
+                Objects.equals(oa.getArbeidsgiverAktørId(), finnAktørIdString(overstyrtAktivitet)))
             .collect(Collectors.toList());
         if (opptjeningsaktivitetForArbeidsgiver.isEmpty()) {
-            throw new IllegalArgumentException("Fant ikke aktivitet på skjæringstidspunkt: " + a);
+            throw new IllegalArgumentException("Fant ikke aktivitet på skjæringstidspunkt: " + overstyrtAktivitet);
         }
         finnMinMaksPeriode(opptjeningsaktivitetForArbeidsgiver);
         return new InputAktivitetOverstyring(
-            mapArbeidsgiver(a),
-            mapBeløp(a.getInntektPrAar()),
-            mapBeløp(a.getRefusjonPrAar()),
-            a.getOpphørRefusjon(),
+            mapArbeidsgiver(overstyrtAktivitet),
+            mapBeløp(overstyrtAktivitet.getInntektPrAar()),
+            inputAktivitet.getSkalKunneEndreRefusjon() ? mapBeløp(overstyrtAktivitet.getRefusjonPrAar()) : null,
+            inputAktivitet.getSkalKunneEndreRefusjon() ? overstyrtAktivitet.getOpphørRefusjon() : null,
             AktivitetStatus.ARBEIDSTAKER,
             finnMinMaksPeriode(opptjeningsaktivitetForArbeidsgiver));
     }
