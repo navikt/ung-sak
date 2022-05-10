@@ -2,17 +2,16 @@ package no.nav.k9.sak.kontrakt.beregninginput;
 
 import java.time.LocalDate;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.OrgNummer;
 
@@ -44,18 +43,24 @@ public class OverstyrBeregningAktivitet {
     @JsonProperty(value = "opphørRefusjon")
     private LocalDate opphørRefusjon;
 
+    @JsonProperty(value = "skalKunneEndreRefusjon")
+    private Boolean skalKunneEndreRefusjon;
+
     public OverstyrBeregningAktivitet() {
     }
 
     public OverstyrBeregningAktivitet(OrgNummer arbeidsgiverOrgnr,
                                       AktørId arbeidsgiverAktørId,
-                                      Integer inntektPrAar, Integer
-                                          refusjonPrAar, LocalDate opphørRefusjon) {
+                                      Integer inntektPrAar,
+                                      Integer refusjonPrAar,
+                                      LocalDate opphørRefusjon,
+                                      Boolean skalKunneEndreRefusjon) {
         this.arbeidsgiverOrgnr = arbeidsgiverOrgnr;
         this.arbeidsgiverAktørId = arbeidsgiverAktørId;
         this.inntektPrAar = inntektPrAar;
         this.refusjonPrAar = refusjonPrAar;
         this.opphørRefusjon = opphørRefusjon;
+        this.skalKunneEndreRefusjon = skalKunneEndreRefusjon;
     }
 
 
@@ -77,6 +82,10 @@ public class OverstyrBeregningAktivitet {
 
     public LocalDate getOpphørRefusjon() {
         return opphørRefusjon;
+    }
+
+    public Boolean getSkalKunneEndreRefusjon() {
+        return skalKunneEndreRefusjon;
     }
 
     @Override
