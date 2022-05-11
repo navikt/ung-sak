@@ -64,6 +64,7 @@ public class LagBeregnRequestTjeneste {
         AktørIdPersonident aktør = new AktørIdPersonident(fagsak.getAktørId().getId());
         return new BeregnListeRequest(
             fagsak.getSaksnummer().getVerdi(),
+            referanse.getBehandlingUuid(),
             aktør,
             YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
             new StegType(stegType.getKode()),

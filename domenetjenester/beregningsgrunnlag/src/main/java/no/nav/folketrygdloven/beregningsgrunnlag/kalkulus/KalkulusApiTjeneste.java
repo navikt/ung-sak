@@ -76,11 +76,11 @@ public interface KalkulusApiTjeneste {
      * Deaktiverer beregningsgrunnlag og kalkulatorinput.
      *
      * Skal kun kalles fra første beregningssteg.
-     *
-     * @param fagsakYtelseType Fagsakytelsetype
+     *  @param fagsakYtelseType Fagsakytelsetype
+     * @param behandlingUuid
      * @param bgReferanse koblingreferanse
      */
-    void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, List<UUID> bgReferanse);
+    void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, UUID behandlingUuid, List<UUID> bgReferanse);
 
     /**
      * Henter grunnbeløp (GVERDI)
