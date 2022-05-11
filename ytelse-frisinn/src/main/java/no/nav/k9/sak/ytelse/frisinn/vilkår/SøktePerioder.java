@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
@@ -29,7 +30,7 @@ class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
         } else {
             var perioder = søknadsperioder.map(Søknadsperioder::getPerioder).orElse(Collections.emptySet()).stream().map(Søknadsperiode::getPeriode).collect(Collectors.toSet());
             var timeline = new LocalDateTimeline<>(perioder.stream().map(a -> new LocalDateSegment<>(a.getFomDato(), a.getTomDato(), true)).toList()).compress();
-            return DatoIntervallEntitet.fraTimeline(timeline);
+            return TidslinjeUtil.tilDatoIntervallEntiteter(timeline);
         }
     }
 }

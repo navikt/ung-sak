@@ -44,6 +44,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
@@ -148,7 +149,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     }
 
     private NavigableSet<DatoIntervallEntitet> kunPerioderMedOmsorgenFor(final LocalDateTimeline<Utfall> perioderUnder18årTidslinje, Utfall utfall) {
-        return DatoIntervallEntitet.fraTimeline(perioderUnder18årTidslinje.filterValue(s -> utfall == s));
+        return TidslinjeUtil.tilDatoIntervallEntiteter(perioderUnder18årTidslinje.filterValue(s -> utfall == s));
     }
 
     private LocalDateTimeline<Utfall> medOmsorgenFor(NavigableSet<DatoIntervallEntitet> perioder, Vilkårene vilkårene) {

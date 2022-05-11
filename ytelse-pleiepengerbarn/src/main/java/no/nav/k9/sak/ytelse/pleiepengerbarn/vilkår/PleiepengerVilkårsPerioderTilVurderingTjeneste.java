@@ -25,6 +25,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
@@ -132,7 +133,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
             .filter(segment -> !perioderTidslinje.intersection(segment.getLocalDateInterval()).isEmpty())
             .toList());
 
-        return DatoIntervallEntitet.fraTimeline(relevantTidslinje.compress());
+        return TidslinjeUtil.tilDatoIntervallEntiteter(relevantTidslinje.compress());
     }
 
     private LocalDateTimeline<Boolean> opprettTidslinje(NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
@@ -176,7 +177,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
 
         final LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
 
-        var ekstraPerioder = DatoIntervallEntitet.fraTimeline(utvidedePerioder);
+        var ekstraPerioder = TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
 
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId())
             .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
@@ -240,7 +241,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         utvidedePerioder = utvidedePerioder.union(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId()), StandardCombinators::alwaysTrueForMatch);
         utvidedePerioder = utvidedePerioder.union(uttaksendringerSidenForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
 
-        return DatoIntervallEntitet.fraTimeline(utvidedePerioder);
+        return TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
     }
 
     private LocalDateTimeline<Boolean> uttaksendringerSidenForrigeBehandling(BehandlingReferanse referanse) {

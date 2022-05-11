@@ -41,6 +41,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedlemskap;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 
@@ -119,7 +120,7 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             timeline = timeline.combine(periodeTidslinje, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        return DatoIntervallEntitet.fraTimeline(timeline.compress());
+        return TidslinjeUtil.tilDatoIntervallEntiteter(timeline.compress());
     }
 
     VilkårResultatBuilder justerVilkårsperioderEtterSykdom(Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
@@ -191,7 +192,7 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         LocalDateTimeline<Boolean> tidslinje = new LocalDateTimeline<>(vilkårPerioder.stream()
             .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true))
             .toList());
-        return DatoIntervallEntitet.fraTimeline(tidslinje.compress());
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }
 
 }

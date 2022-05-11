@@ -36,6 +36,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.hendelse.vedtak.SakMedPeriode;
 import no.nav.k9.sak.hendelse.vedtak.VurderOmVedtakPåvirkerSakerTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -152,7 +153,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         var tidslinjeHull = new LocalDateTimeline<>(segmenterSomMangler, StandardCombinators::coalesceRightHandSide);
         tidslinje = tidslinje.combine(tidslinjeHull, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        return DatoIntervallEntitet.fraTimeline(tidslinje.compress());
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }
 
     private List<LocalDateSegment<Boolean>> utledHullSomMåTettes(LocalDateTimeline<Boolean> tidslinjen, KantIKantVurderer kantIKantVurderer) {
@@ -186,7 +187,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     }
 
     private NavigableSet<DatoIntervallEntitet> perioderMedRevurderingPgaEtablertTilsyn(BehandlingReferanse referanse) {
-        return DatoIntervallEntitet.fraTimeline(erEndringPåEtablertTilsynTjeneste.perioderMedEndringerFraEksisterendeVersjon(referanse).filterValue(Objects::nonNull));
+        return TidslinjeUtil.tilDatoIntervallEntiteter(erEndringPåEtablertTilsynTjeneste.perioderMedEndringerFraEksisterendeVersjon(referanse).filterValue(Objects::nonNull));
     }
 
     private NavigableSet<DatoIntervallEntitet> perioderMedRevurderingSykdom(AktørId pleietrengende, Saksnummer kandidatsaksnummer, Behandling sisteBehandlingPåKandidat) {

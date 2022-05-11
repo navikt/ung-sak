@@ -17,6 +17,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder;
 
@@ -59,7 +60,7 @@ public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPeriod
             if (vilkårTidslinje.isEmpty()) {
                 return Collections.emptyNavigableSet();
             }
-            return DatoIntervallEntitet.fraTimeline(vilkårTidslinje);
+            return TidslinjeUtil.tilDatoIntervallEntiteter(vilkårTidslinje);
         } else {
             // default til 'fullstedige' perioder hvis vilkår ikke angitt.
             return utledFullstendigePerioder(behandlingId);

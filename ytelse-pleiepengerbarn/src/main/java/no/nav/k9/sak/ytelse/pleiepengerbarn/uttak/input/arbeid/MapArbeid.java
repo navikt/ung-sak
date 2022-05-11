@@ -31,6 +31,7 @@ import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.Permisjon;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -68,8 +69,8 @@ public class MapArbeid {
 
         final Map<DatoIntervallEntitet, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>> arbeidsforholdPerPeriode = new HashMap<>();
 
-        var perioderTilVurdering = DatoIntervallEntitet.fraTimeline(tidslinjeTilVurdering
-            .filterValue(Objects::nonNull));;
+        var perioderTilVurdering = TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeTilVurdering
+                .filterValue(Objects::nonNull));;
 
         var fiktivtKravPgaDødsfall = utledFiktivtKravPgaDødsfall(input);
 

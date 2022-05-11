@@ -12,6 +12,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 
@@ -48,7 +49,7 @@ public class EndringUnntakEtablertTilsynTjeneste {
         final LocalDateTimeline<Boolean> nattevåkendringer = utledEndringerMedTidslinje(toNattevåkTidslinje(eksisterendeGrunnlag), toNattevåkTidslinje(nyttGrunnlag));
         final LocalDateTimeline<Boolean> beredskapendringer = utledEndringerMedTidslinje(toBeredskapTidslinje(eksisterendeGrunnlag), toBeredskapTidslinje(nyttGrunnlag));
 
-        return DatoIntervallEntitet.fraTimeline(nattevåkendringer.union(beredskapendringer, StandardCombinators::coalesceLeftHandSide));
+        return TidslinjeUtil.tilDatoIntervallEntiteter(nattevåkendringer.union(beredskapendringer, StandardCombinators::coalesceLeftHandSide));
     }
 
     private LocalDateTimeline<Boolean> utledEndringerMedTidslinje(LocalDateTimeline<UnntakEtablertTilsynPeriode> eksisterende,

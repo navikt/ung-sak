@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 
@@ -59,7 +60,7 @@ public class PerioderMedSykdomInnvilgetUtleder {
             var perioderSomTidslinje = SykdomUtils.toLocalDateTimeline(perioderForVilkår);
             tidslinje = tidslinje.crossJoin(perioderSomTidslinje, StandardCombinators::alwaysTrueForMatch);
         }
-        return DatoIntervallEntitet.fraTimeline(tidslinje.compress());
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }
 
     private Set<VilkårPeriode> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {

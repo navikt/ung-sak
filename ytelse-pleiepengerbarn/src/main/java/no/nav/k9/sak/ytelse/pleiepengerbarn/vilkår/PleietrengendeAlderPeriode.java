@@ -11,6 +11,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
@@ -101,7 +102,7 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
     }
 
     private static NavigableSet<DatoIntervallEntitet> tilNavigableSet(LocalDateTimeline<Boolean> resultat) {
-        return DatoIntervallEntitet.fraTimeline(resultat);
+        return TidslinjeUtil.tilDatoIntervallEntiteter(resultat);
     }
 
     public static final PleietrengendeAlderPeriode under18(

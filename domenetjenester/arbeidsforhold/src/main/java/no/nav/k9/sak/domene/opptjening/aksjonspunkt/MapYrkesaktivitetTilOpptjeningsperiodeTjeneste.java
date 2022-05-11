@@ -25,6 +25,7 @@ import no.nav.k9.sak.domene.opptjening.MellomliggendeHelgUtleder;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
@@ -122,7 +123,7 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
 
         timeline = timeline.combine(permisjonsTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        return DatoIntervallEntitet.fraTimeline(timeline.compress());
+        return TidslinjeUtil.tilDatoIntervallEntiteter(timeline.compress());
     }
 
     private static LocalDateSegment<Boolean> lagSegment(LocalDateInterval di, Boolean siste) {

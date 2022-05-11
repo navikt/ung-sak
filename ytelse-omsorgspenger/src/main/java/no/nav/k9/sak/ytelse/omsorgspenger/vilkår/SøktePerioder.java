@@ -12,6 +12,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
@@ -48,6 +49,6 @@ class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
             timeline = timeline.combine(new LocalDateTimeline<>(List.of(periode)), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        return DatoIntervallEntitet.fraTimeline(timeline.compress());
+        return TidslinjeUtil.tilDatoIntervallEntiteter(timeline.compress());
     }
 }

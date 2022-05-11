@@ -24,6 +24,7 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder;
@@ -75,7 +76,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         var optVilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (optVilkårene.isPresent()) {
             var vilkårTidslinje = optVilkårene.get().getVilkårTimeline(vilkårType);
-            return DatoIntervallEntitet.fraTimeline(vilkårTidslinje);
+            return TidslinjeUtil.tilDatoIntervallEntiteter(vilkårTidslinje);
         } else {
             var søknadsperioder = søktePerioder.utledPeriode(behandlingId);
             var søknadsperioderEtterBarnetsFødsel = justerTilDefaultAlder(behandlingId, søknadsperioder);
@@ -102,7 +103,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         LocalDate søknadsdato = søknad.getSøknadsdato();
         LocalDate tremånedersregelDato = søknadsdato.withDayOfMonth(1).minusMonths(3);
         LocalDateTimeline<?> justert = søknadstidslinje.intersection(new LocalDateTimeline<>(tremånedersregelDato, LocalDate.MAX, null));
-        return DatoIntervallEntitet.fraTimeline(justert);
+        return TidslinjeUtil.tilDatoIntervallEntiteter(justert);
     }
 
     private NavigableSet<DatoIntervallEntitet> justerTilDefaultAlder(Long behandlingId, NavigableSet<DatoIntervallEntitet> vilårsperiodeUtvidetRett) {
@@ -114,7 +115,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         // sett 'tom' for utvidet rett til barnet fyller 18 år by default
         var _18år = new LocalDateTimeline<>(barninfo.getFødselsdato(), barninfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31), Boolean.TRUE);
         var sammenstiltUtvidetRettTimeline = _18år.intersection(new LocalDateInterval(vilårsperiodeUtvidetRett.first().getFomDato(), vilårsperiodeUtvidetRett.last().getTomDato()));
-        return DatoIntervallEntitet.fraTimeline(sammenstiltUtvidetRettTimeline);
+        return TidslinjeUtil.tilDatoIntervallEntiteter(sammenstiltUtvidetRettTimeline);
     }
 
     DatoIntervallEntitet utledMaksPeriode(NavigableSet<DatoIntervallEntitet> søktePerioder, AktørId barnAktørId) {

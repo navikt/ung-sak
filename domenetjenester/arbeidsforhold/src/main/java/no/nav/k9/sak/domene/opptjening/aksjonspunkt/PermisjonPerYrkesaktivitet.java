@@ -14,6 +14,7 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.domene.iay.modell.Permisjon;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
 public final class PermisjonPerYrkesaktivitet {
@@ -41,14 +42,14 @@ public final class PermisjonPerYrkesaktivitet {
             var permisjonstidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), true)));
             permisjonstidslinje = permisjonstidslinje.disjoint(ytelsesTidslinje);
 
-            return DatoIntervallEntitet.fraTimeline(permisjonstidslinje.compress());
+            return TidslinjeUtil.tilDatoIntervallEntiteter(permisjonstidslinje.compress());
         } else if (Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.VELFERDSPERMISJON)) {
             var permisjonstidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), true)));
             for (OpptjeningAktivitetType aktivitetType : OpptjeningAktivitetType.K9_YTELSER) {
                 var ytelsesTidslinje = tidslinjePerYtelse.getOrDefault(aktivitetType, new LocalDateTimeline<>(List.of()));
                 permisjonstidslinje = permisjonstidslinje.disjoint(ytelsesTidslinje);
             }
-            return DatoIntervallEntitet.fraTimeline(permisjonstidslinje.compress());
+            return TidslinjeUtil.tilDatoIntervallEntiteter(permisjonstidslinje.compress());
         }
         return Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed()));
     }
