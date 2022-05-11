@@ -109,10 +109,10 @@ public class SøknadsperiodeTjeneste {
                 .flatMap(Collection::stream)
                 .map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p))
                 .toList();
-            tidslinje = tidslinje.union(new LocalDateTimeline<>(segments).compress(), StandardCombinators::coalesceRightHandSide);
+            tidslinje = tidslinje.union(new LocalDateTimeline<>(segments), StandardCombinators::coalesceRightHandSide);
         }
 
-        return tidslinje.compress().stream().map(s -> new Kravperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue().getBehandlingId(), s.getValue().isHarTrukketKrav())).toList();
+        return tidslinje.stream().map(s -> new Kravperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue().getBehandlingId(), s.getValue().isHarTrukketKrav())).toList();
     }
 
     public static class Kravperiode {
