@@ -358,7 +358,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                     .filter(it -> erIkkeInitiellVersjon(initiellVersjon, it))
                     .map(BgRef::getRef)
                     .collect(Collectors.toList());
-                finnTjeneste(ref.getFagsakYtelseType()).deaktiverBeregningsgrunnlag(ref.getFagsakYtelseType(), ref.getSaksnummer(), bgReferanser);
+                finnTjeneste(ref.getFagsakYtelseType()).deaktiverBeregningsgrunnlag(ref.getFagsakYtelseType(), ref.getSaksnummer(), ref.getBehandlingUuid(), bgReferanser);
             }
         }
 

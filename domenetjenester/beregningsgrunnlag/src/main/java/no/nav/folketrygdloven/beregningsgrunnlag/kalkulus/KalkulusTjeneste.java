@@ -135,6 +135,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
     private KopierBeregningListeRequest getKopierBeregningListeRequest(BehandlingReferanse referanse, List<BeregnInput> beregningInput) {
         return new KopierBeregningListeRequest(referanse.getSaksnummer().getVerdi(),
+            referanse.getBehandlingUuid(),
             YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
             StegType.VURDER_VILKAR_BERGRUNN,
             beregningInput.stream().map(i -> new KopierBeregningRequest(i.getBgReferanse(),
@@ -258,9 +259,9 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, List<UUID> bgReferanse) {
+    public void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, UUID behandlingUuid, List<UUID> bgReferanse) {
         var bgRequests = bgReferanse.stream().map(BeregningsgrunnlagRequest::new).collect(Collectors.toList());
-        var request = new BeregningsgrunnlagListeRequest(saksnummer.getVerdi(), bgRequests);
+        var request = new BeregningsgrunnlagListeRequest(saksnummer.getVerdi(), bgRequests, behandlingUuid);
         restTjeneste.deaktiverBeregningsgrunnlag(request);
     }
 

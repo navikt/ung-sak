@@ -119,6 +119,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
         // samlet request til beregning
         var startBeregningRequest = new BeregnListeRequest(
             ref.getSaksnummer().getVerdi(),
+            ref.getBehandlingUuid(),
             new AktørIdPersonident(ref.getAktørId().getId()),
             YtelseTyperKalkulusStøtterKontrakt.FRISINN,
             new StegType(stegType.getKode()),
