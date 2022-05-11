@@ -15,6 +15,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
@@ -44,6 +45,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   PersoninfoAdapter personinfoAdapter,
                                                   SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+                                                  UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                                   UttakTjeneste uttakTjeneste) {
 
         super(vilkårUtleder
@@ -57,6 +59,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
             , endringUnntakEtablertTilsynTjeneste
             , revurderingPerioderTjeneste
             , søknadsperiodeTjeneste
+            , utsattBehandlingAvPeriodeRepository
             , uttakTjeneste
         );
     }
