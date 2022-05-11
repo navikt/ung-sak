@@ -221,7 +221,6 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                                              List<BgRef> bgReferanser) {
         var perioder = vilkårsperioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
         var originalReferanserMap = hentReferanserTjeneste.finnMapTilOriginaleReferanserUtenAvslag(referanse, perioder, bgReferanser);
-
         return bgReferanser.stream().map(e -> {
             var bgRef = e.getRef();
             var stp = e.getStp();
@@ -264,11 +263,12 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     @Override
     public Optional<BeregningsgrunnlagListe> hentBeregningsgrunnlag(BehandlingReferanse ref) {
         var beregningsgrunnlagPerioderGrunnlag = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
-        if (harGrunnlagsperioder(beregningsgrunnlagPerioderGrunnlag)) {
+        var vilkårene = vilkårTjeneste.hentHvisEksisterer(ref.getBehandlingId());
+        var vilkårOptional = vilkårene.flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+        if (harGrunnlagsperioder(beregningsgrunnlagPerioderGrunnlag) && vilkårOptional.isPresent()) {
+            var vilkår = vilkårOptional.get();
             var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
-            var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
-            var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
-            var grunnlag = beregningsgrunnlagPerioderGrunnlag.get();
+            var grunnlag = beregningsgrunnlagPerioderGrunnlag.orElseThrow();
 
             var bgReferanser = vilkår.getPerioder()
                 .stream()
