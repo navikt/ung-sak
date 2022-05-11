@@ -14,7 +14,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.KravperioderMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
@@ -88,11 +87,12 @@ public class KalkulatorInputTjeneste {
         };
     }
 
-    /** Finner vilkårmerknad for opptjeningsvilkåret
-     *  Brukes til å merke saker som skal beregnes som inaktiv § 8-47
+    /**
+     * Finner vilkårmerknad for opptjeningsvilkåret
+     * Brukes til å merke saker som skal beregnes som inaktiv § 8-47
      *
      * @param opptjeningsvilkår Opptjeningvilkår
-     * @param i input
+     * @param i                 input
      * @return Vilkårutfallmerknad
      */
     private VilkårUtfallMerknad finnVilkårmerknadForOpptjening(Optional<Vilkår> opptjeningsvilkår, BeregnInput i) {
@@ -103,13 +103,15 @@ public class KalkulatorInputTjeneste {
         return vilkårsMerknad;
     }
 
-    /** Mapper inputdto for beregning
-     * @param referanse Behandlingreferanse
-     * @param iayGrunnlag   IAY-grunnlag
-     * @param sakInntektsmeldinger  Inntektsmeldinger for saken
-     * @param ytelseGrunnlag Ytelsesspesifikt grunnlag
-     * @param vilkårsperiode Vilkårsperioden
-     * @param vilkårsMerknad Vilkårutfallmerknad fra opptjening (for inaktiv § 8-47)
+    /**
+     * Mapper inputdto for beregning
+     *
+     * @param referanse            Behandlingreferanse
+     * @param iayGrunnlag          IAY-grunnlag
+     * @param sakInntektsmeldinger Inntektsmeldinger for saken
+     * @param ytelseGrunnlag       Ytelsesspesifikt grunnlag
+     * @param vilkårsperiode       Vilkårsperioden
+     * @param vilkårsMerknad       Vilkårutfallmerknad fra opptjening (for inaktiv § 8-47)
      * @return Input-dto
      */
     public KalkulatorInputDto byggDto(BehandlingReferanse referanse,

@@ -323,15 +323,15 @@ public class TilKalkulusMapper {
     }
 
 
-    public static ArbeidDto mapArbeidDto(Collection<Yrkesaktivitet> yrkesaktiviteterForBeregning) {
-        List<YrkesaktivitetDto> yrkesaktivitetDtoer = yrkesaktiviteterForBeregning.stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList());
+    public static ArbeidDto mapArbeidDto(Collection<Yrkesaktivitet> yrkesaktiviteterForBeregning, DatoIntervallEntitet vilkårsPeriode) {
+        List<YrkesaktivitetDto> yrkesaktivitetDtoer = yrkesaktiviteterForBeregning.stream().map(ya -> TilKalkulusMapper.mapTilDto(ya, vilkårsPeriode)).collect(Collectors.toList());
         if (!yrkesaktivitetDtoer.isEmpty()) {
             return new ArbeidDto(yrkesaktivitetDtoer);
         }
         return null;
     }
 
-    private static YrkesaktivitetDto mapTilDto(Yrkesaktivitet yrkesaktivitet) {
+    private static YrkesaktivitetDto mapTilDto(Yrkesaktivitet yrkesaktivitet, DatoIntervallEntitet vilkårsPeriode) {
         List<AktivitetsAvtaleDto> aktivitetsAvtaleDtos = yrkesaktivitet.getAlleAktivitetsAvtaler().stream().map(aktivitetsAvtale -> new AktivitetsAvtaleDto(mapPeriode(aktivitetsAvtale.getPeriode()),
             aktivitetsAvtale.getSisteLønnsendringsdato(),
             aktivitetsAvtale.getProsentsats() != null ? aktivitetsAvtale.getProsentsats().getVerdi() : null)
@@ -339,6 +339,7 @@ public class TilKalkulusMapper {
 
         String arbeidsforholdRef = yrkesaktivitet.getArbeidsforholdRef().getReferanse();
         List<PermisjonDto> permisjoner = yrkesaktivitet.getPermisjon().stream()
+            .filter(p -> !gjelderSøktYtelse(p, vilkårsPeriode))
             .map(TilKalkulusMapper::mapTilPermisjonDto)
             .collect(Collectors.toList());
         return new YrkesaktivitetDto(
@@ -347,6 +348,11 @@ public class TilKalkulusMapper {
             ArbeidType.fraKode(yrkesaktivitet.getArbeidType().getKode()),
             aktivitetsAvtaleDtos,
             permisjoner);
+    }
+
+    private static boolean gjelderSøktYtelse(Permisjon p, DatoIntervallEntitet vilkårsPeriode) {
+        return p.getPermisjonsbeskrivelseType().equals(no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType.VELFERDSPERMISJON) &&
+            p.getProsentsats().getVerdi().compareTo(BigDecimal.valueOf(100)) >= 0 && p.getPeriode().overlapper(vilkårsPeriode);
     }
 
     public static OpptjeningAktiviteterDto mapTilDto(OpptjeningAktiviteter opptjeningAktiviteter, VilkårUtfallMerknad vilkårsMerknad) {
@@ -407,7 +413,7 @@ public class TilKalkulusMapper {
         var alleRelevanteInntekter = finnRelevanteInntekter(inntektFilter);
         var inntektArbeidYtelseGrunnlagDto = new InntektArbeidYtelseGrunnlagDto();
 
-        inntektArbeidYtelseGrunnlagDto.medArbeidDto(mapArbeidDto(yrkesaktiviteterForBeregning));
+        inntektArbeidYtelseGrunnlagDto.medArbeidDto(mapArbeidDto(yrkesaktiviteterForBeregning, vilkårsPeriode));
         inntektArbeidYtelseGrunnlagDto.medInntekterDto(mapInntektDto(alleRelevanteInntekter));
         inntektArbeidYtelseGrunnlagDto.medYtelserDto(mapYtelseDto(ytelseFilter.getAlleYtelser()));
         inntektArbeidYtelseGrunnlagDto.medInntektsmeldingerDto(mapTilDto(imTjeneste, sakInntektsmeldinger, vilkårsPeriode, referanse));
