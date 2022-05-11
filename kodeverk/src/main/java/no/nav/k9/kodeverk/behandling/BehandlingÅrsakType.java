@@ -69,8 +69,6 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_ET", "Nye opplysninger om etablert tilsyn"),
     RE_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_NB", "Nye opplysninger om nattevåk/beredskap"),
     RE_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_S", "Nye opplysninger om sykdom"),
-    RE_UTSATT_BEHANDLING("RE_UTSATT_BEHANDLING", "Utsatt behandling av periode på grunn av avhengighet til annen omsorgspersons uttak"),
-    RE_GJENOPPTAR_UTSATT_BEHANDLING("RE_GJENOPPTAR_UTSATT_BEHANDLING", "Gjenopptar utsatt behandling av periode fra forrige behandling"),
     RE_NATTEVÅKBEREDSKAP_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_NB_ET", "Nye opplysninger om etablert tilsyn og nattevåk/beredskap"),
     RE_SYKDOM_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_S_ET", "Nye opplysninger om sykdom og etablert tilsyn"),
     RE_SYKDOM_NATTEVÅK_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_S_NB", "Nye opplysninger om sykdom og nattevåk/beredskap"),
