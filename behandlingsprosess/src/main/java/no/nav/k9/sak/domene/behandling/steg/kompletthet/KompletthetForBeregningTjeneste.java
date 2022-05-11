@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
@@ -24,6 +25,8 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.UtledManglendeInntektsmeldingerFraGrunnlagFunction;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.FinnEksternReferanse;
@@ -49,6 +52,7 @@ public class KompletthetForBeregningTjeneste {
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
+    private FagsakRepository fagsakRepository;
 
     KompletthetForBeregningTjeneste() {
         // CDI
@@ -60,13 +64,15 @@ public class KompletthetForBeregningTjeneste {
                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                            BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                            VilkårResultatRepository vilkårResultatRepository,
-                                           BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
+                                           BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
+                                           FagsakRepository fagsakRepository) {
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.fraværFiltere = fraværFiltere;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
+        this.fagsakRepository = fagsakRepository;
     }
 
     /**
@@ -122,12 +128,33 @@ public class KompletthetForBeregningTjeneste {
         }
         var vilkåret = vilkårene.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
+        var stpMigrertFraInfotrygd = fagsakRepository.hentSakInfotrygdMigreringer(referanse.getFagsakId()).stream()
+            .map(SakInfotrygdMigrering::getSkjæringstidspunkt)
+            .min(Comparator.naturalOrder());
+
         return vilkåret.map(vilkår -> new LocalDateTimeline<>(vilkår.getPerioder().stream()
                 .map(VilkårPeriode::getPeriode)
                 .map(DatoIntervallEntitet::toLocalDateInterval)
-                .map(it -> new LocalDateSegment<>(it, true))
+                .map(it -> utvidPeriodeForPeriodeFraInfotrygd(it, stpMigrertFraInfotrygd))
                 .collect(Collectors.toList())))
             .orElseGet(() -> new LocalDateTimeline<>(List.of(new LocalDateSegment<>(referanse.getFagsakPeriode().toLocalDateInterval(), true))));
+    }
+
+    /**
+     * I tilfelle der vilkårsperioden er migrert fra infotrygd må vi utvide relevant periode for at inntektsmeldinger lenger tilbake i tid skal vurderes som relevante.
+     * Inntektsmeldinger for perioder fra infotrygd vil ha opprinnelig skjæringstidspunkt oppgitt i inntektsmeldingen og ikke i skjæringstidspunktet i k9-sak.
+     * Vi sier her at vi ser på inntektsmeldinger som er 2 år og 4 mnd gamle.
+     *
+     * @param opprinneligVilkårsperiode     Opprinnelig vilkårsperiode
+     * @param stpMigrertFraInfotrygd Skjæringstidspunkt som er migrert fra infotrygd
+     * @return LocaldateSegment for relevant periode for vilkårsperiode
+     */
+    private LocalDateSegment<Boolean> utvidPeriodeForPeriodeFraInfotrygd(LocalDateInterval opprinneligVilkårsperiode, Optional<LocalDate> stpMigrertFraInfotrygd) {
+        if (stpMigrertFraInfotrygd.map(opprinneligVilkårsperiode.getFomDato()::equals).orElse(false)) {
+            var periode = new LocalDateInterval(opprinneligVilkårsperiode.getFomDato().minusYears(2), opprinneligVilkårsperiode.getTomDato());
+            return new LocalDateSegment<>(periode, true);
+        }
+        return new LocalDateSegment<>(opprinneligVilkårsperiode, true);
     }
 
     public DatoIntervallEntitet utledRelevantPeriode(BehandlingReferanse referanse, DatoIntervallEntitet periode) {
