@@ -213,11 +213,16 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     // Robust task til bruk ved gjenopptak fra vent (eller annen tilstand) (Hendelse: Manuell input, Frist utløpt, mv)
     @Override
     public void opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId) {
+       opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, false);
+    }
+
+    @Override
+    public void opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean forceregisterinnhenting) {
         BehandlingProsessTask.logContext(behandling);
 
         Long fagsakId = behandling.getFagsakId();
         Long behandlingId = behandling.getId();
-        ProsessTaskGruppe gruppe = opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, true);
+        ProsessTaskGruppe gruppe = opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, true, forceregisterinnhenting);
         if (gruppe == null) {
             return;
         }
@@ -226,6 +231,9 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
     @Override
     public ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker) {
+        return opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, skalUtledeÅrsaker, false);
+    }
+    public ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker, boolean forceInnhentingAvRegisterdata) {
         Long fagsakId = behandling.getFagsakId();
         Long behandlingId = behandling.getId();
 
@@ -246,7 +254,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         gjenopptaBehandlingTask.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(gjenopptaBehandlingTask);
 
-        if (skalHenteInnRegisterData(behandling)) {
+        if (forceInnhentingAvRegisterdata || skalHenteInnRegisterData(behandling)) {
             log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandlingId);
             leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, skalUtledeÅrsaker);
         } else {
