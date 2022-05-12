@@ -3,10 +3,10 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.hendelsemottak;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -20,6 +20,7 @@ import no.nav.k9.sak.typer.AktørId;
 @HendelseTypeRef("PDL_DØDSFALL")
 public class PSBDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingUtleder {
 
+    public static final Set<FagsakYtelseType> RELEVANTE_YTELSER = Set.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE);
     private FagsakRepository fagsakRepository;
 
     public PSBDødsfallFagsakTilVurderingUtleder() {
@@ -38,12 +39,14 @@ public class PSBDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
 
         var fagsaker = new HashMap<Fagsak, BehandlingÅrsakType>();
 
-        for (AktørId aktør : dødsfallAktører) {
-            for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, aktør, null, null, periode.getFom(), periode.getTom())) {
-                fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER);
-            }
-            for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, null, aktør, null, periode.getFom(), periode.getTom())) {
-                fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
+        for (FagsakYtelseType fagsakYtelseType : RELEVANTE_YTELSER) {
+            for (AktørId aktør : dødsfallAktører) {
+                for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(fagsakYtelseType, aktør, null, null, periode.getFom(), periode.getTom())) {
+                    fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER);
+                }
+                for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(fagsakYtelseType, null, aktør, null, periode.getFom(), periode.getTom())) {
+                    fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
+                }
             }
         }
 
