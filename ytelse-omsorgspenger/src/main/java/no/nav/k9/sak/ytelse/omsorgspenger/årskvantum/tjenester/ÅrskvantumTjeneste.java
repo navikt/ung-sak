@@ -390,7 +390,7 @@ public class ÅrskvantumTjeneste {
         var harSammeBosted = relasjonMedBarn.getElement1().getHarSammeBosted(personinfoSøker, personinfoBarn);
         var perioderMedDeltBosted = relasjonMedBarn.getElement1().getPerioderMedDeltBosted(personinfoSøker, personinfoBarn);
         var lukketPeriodeMedDeltBosted = perioderMedDeltBosted.stream().map(p -> new LukketPeriode(p.getFom(), p.getTom())).collect(Collectors.toList());
-        return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBosted, lukketPeriodeMedDeltBosted, List.of(), BarnType.VANLIG);
+        return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), lukketPeriodeMedDeltBosted, List.of(), BarnType.VANLIG);
     }
 
     private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(PersonopplysningerAggregat personopplysningerAggregat, PersonopplysningEntitet personinfoSøker, PersonopplysningEntitet personinfoBarn, LocalDateTimeline<Boolean> vilkårPeriodeTidslinje) {
@@ -400,12 +400,8 @@ public class ÅrskvantumTjeneste {
         var tidslinjeDeltBosted = AdresseSammenligner.perioderDeltBosted(søkersAdresser, barnetsAdresser);
         var tidslinjeSammeBosted = AdresseSammenligner.sammeBostedsadresse(søkersAdresser, barnetsAdresser);
 
-        //TODO deprecated, erstattet av perioder med samme bosted, fjern når årskvantum er klar
-        boolean harSammeBostedsadresseDelerAvVilkårsperiodene = !vilkårPeriodeTidslinje.intersection(tidslinjeSammeBosted).isEmpty();
-
-
         PersonIdent personIdentBarn = tpsTjeneste.hentFnrForAktør(personinfoBarn.getAktørId());
-        return new Barn(personIdentBarn.getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBostedsadresseDelerAvVilkårsperiodene, tilLukketPeriode(tidslinjeDeltBosted), tilLukketPeriode(tidslinjeSammeBosted), BarnType.VANLIG);
+        return new Barn(personIdentBarn.getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), tilLukketPeriode(tidslinjeDeltBosted), tilLukketPeriode(tidslinjeSammeBosted), BarnType.VANLIG);
     }
 
     private static List<LukketPeriode> tilLukketPeriode(LocalDateTimeline<Boolean> tidslinje) {
@@ -424,7 +420,7 @@ public class ÅrskvantumTjeneste {
             .map(segment -> new LukketPeriode(segment.getFom(), segment.getTom()))
             .toList();
 
-        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), true, List.of(), sammeBostedPerioder, BarnType.FOSTERBARN);
+        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), List.of(), sammeBostedPerioder, BarnType.FOSTERBARN);
     }
 
     private Optional<UUID> hentBehandlingUuid(JournalpostId journalpostId, Map<JournalpostId, MottattDokument> mottatteDokumenter) {
