@@ -30,7 +30,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     // Perioden ses på pga endringer i felles opplysninger (Nattevåk/beredskap/etablert tilsyn/sykdom
     REVURDERER_ENDRING_FRA_ANNEN_PART("REVURDERER_ENDRING_FRA_ANNEN_PART", "Annen parts vedtak endrer uttak"),
     UTSATT_BEHANDLING("UTSATT_BEHANDLING", "Utsatt behandling av periode på grunn av avhengighet til annen omsorgspersons uttak"),
-    GJENOPPTAR_UTSATT_BEHANDLING("RE_GJENOPPTAR_UTSATT_BEHANDLING", "Gjenopptar utsatt behandling av periode fra forrige behandling"),
+    GJENOPPTAR_UTSATT_BEHANDLING("GJENOPPTAR_UTSATT_BEHANDLING", "Gjenopptar utsatt behandling av periode fra forrige behandling"),
     // Endringer på felles opplysninger på sykdomsopplysningene
     REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON("REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "Endring i vurdering av sykdom"),
     // Endringer på felles opplysninger om etablert tilsyn
