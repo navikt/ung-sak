@@ -24,6 +24,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
@@ -90,7 +91,7 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
     }
 
     private boolean erManuellRevurderingOgHarGjortVurderingerTidligere(Behandling behandling, Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultatOpt) {
-        return behandling.erManueltOpprettet() && harGjortAvklaringerTidligere(avklartSøknadsfristResultatOpt);
+        return behandling.erManueltOpprettet() && harGjortAvklaringerTidligere(avklartSøknadsfristResultatOpt) && !behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE).map(Aksjonspunkt::erUtført).orElse(false);
     }
 
     private boolean harGjortAvklaringerTidligere(Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultatOpt) {
