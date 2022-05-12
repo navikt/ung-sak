@@ -176,7 +176,7 @@ public class OverstyrInputBeregningTjeneste {
             .findFirst();
         var inntektsmeldingerForArbeidsgiver = inntektsmeldingerForPeriode.stream().filter(i -> matcherArbeidsgiver(a, i.getArbeidsgiver())).collect(Collectors.toList());
 
-        var harRefusjonskrav = inntektsmeldingerForArbeidsgiver.stream().anyMatch(im -> !im.getRefusjonBeløpPerMnd().erNullEllerNulltall() || im.getEndringerRefusjon().size() > 0);
+        var harRefusjonskrav = inntektsmeldingerForArbeidsgiver.stream().anyMatch(im -> im.getRefusjonBeløpPerMnd() != null && !im.getRefusjonBeløpPerMnd().erNullEllerNulltall() || im.getEndringerRefusjon().size() > 0);
         var refusjonskravFraIM = inntektsmeldingerForArbeidsgiver.stream().map(Inntektsmelding::getRefusjonBeløpPerMnd)
             .filter(Objects::nonNull)
             .map(Beløp::getVerdi)
