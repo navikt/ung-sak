@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -93,13 +94,23 @@ public class MapOppgittFraværOgVilkårsResultat {
     }
 
     private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> leggPåVurderingAvNyoppstartetArbeidsforholdHvorAktuelt(Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsTidslinje, InntektArbeidYtelseGrunnlag iayGrunnlag, AktørId aktørId) {
-        boolean vilkåretErAktuelt = fraværsTidslinje.values().stream().anyMatch(fraværTidslinje -> fraværTidslinje.stream().anyMatch(segment -> segment.getValue().getPeriode() != null && segment.getValue().getPeriode().getSøknadÅrsak() == SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER));
+
+        Set<SøknadÅrsak> søknadsårsaker = fraværsTidslinje.values().stream()
+            .flatMap(fraværTidslinje -> fraværTidslinje.stream())
+            .filter(segment -> segment.getValue().getPeriode() != null)
+            .map(segment -> segment.getValue().getPeriode().getSøknadÅrsak())
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+
+        log.info("Søknadsårsaker {}", søknadsårsaker);
+        boolean vilkåretErAktuelt = søknadsårsaker.contains(SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER);
         if (!vilkåretErAktuelt) {
             //ikke vits å lage strukturer for å utlede noe
             return fraværsTidslinje;
         }
 
         Map<Arbeidsgiver, LocalDateTimeline<Boolean>> perioderNyoppstartet = new NyoppstartetUtleder().utledPerioderMedNyoppstartetArbeidsforhold(iayGrunnlag, aktørId);
+        log.info("Perioder nyoppstartet: {}", perioderNyoppstartet.values());
 
         var resultat = new HashMap<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>>();
         for (var entry : fraværsTidslinje.entrySet()) {
@@ -109,6 +120,7 @@ public class MapOppgittFraværOgVilkårsResultat {
                 resultat.put(aktivitetId, fraværTidslinje);
                 continue;
             }
+            log.info("Fraværsperioder:{} ", fraværsTidslinje);
             //må vurdere perioder hvor det er søknad som gjelder, og søknadårsak er NYOPPSTARTET_HOS_ARBEIDSGIVER
             LocalDateTimeline<Boolean> fraværsperioderSomSkalVurderes = new LocalDateTimeline<>(
                 fraværTidslinje.stream()
@@ -117,6 +129,8 @@ public class MapOppgittFraværOgVilkårsResultat {
                         && segment.getValue().getSamtidigeKrav().inntektsmeldingMedRefusjonskrav() != SamtidigKravStatus.KravStatus.FINNES)
                     .map(segment -> new LocalDateSegment<>(segment.getLocalDateInterval(), true))
                     .toList());
+
+            log.info("Perioder som vurderes ifht nyoppstartet: {} ", fraværsperioderSomSkalVurderes);
 
             LocalDateTimeline<Boolean> periodeNyoppstartet = perioderNyoppstartet.getOrDefault(aktivitetId.getArbeidsgiver(), LocalDateTimeline.empty());
             var innvilgetTidslinje = fraværsperioderSomSkalVurderes.mapValue(v -> no.nav.k9.aarskvantum.kontrakter.Utfall.INNVILGET).intersection(periodeNyoppstartet);
