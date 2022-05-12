@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +19,7 @@ public class EndringUnntakEtablertTilsynTjenesteTest {
     public void utledEndringerSkalHåndtereIngenEndring() {
         final EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste = new EndringUnntakEtablertTilsynTjeneste(null);
         final AktørId pleietrengende = AktørId.dummy();
-        
+
         final UnntakEtablertTilsynForPleietrengende eksisterendeGrunnlag = new UnntakEtablertTilsynForPleietrengende(
             pleietrengende,
             new UnntakEtablertTilsyn(List.of(
@@ -32,7 +33,7 @@ public class EndringUnntakEtablertTilsynTjenesteTest {
             ), List.of()),
             new UnntakEtablertTilsyn(List.of(), List.of())
         );
-        
+
         final UnntakEtablertTilsynForPleietrengende nyttGrunnlag = new UnntakEtablertTilsynForPleietrengende(
                 pleietrengende,
                 new UnntakEtablertTilsyn(List.of(
@@ -46,11 +47,11 @@ public class EndringUnntakEtablertTilsynTjenesteTest {
                 ), List.of()),
                 new UnntakEtablertTilsyn(List.of(), List.of())
             );
-        
-        final List<DatoIntervallEntitet> endringer = endringUnntakEtablertTilsynTjeneste.utledEndringer(Optional.of(eksisterendeGrunnlag), Optional.of(nyttGrunnlag));
+
+        final Set<DatoIntervallEntitet> endringer = endringUnntakEtablertTilsynTjeneste.utledEndringer(Optional.of(eksisterendeGrunnlag), Optional.of(nyttGrunnlag));
         assertThat(endringer).isEmpty();
     }
-    
+
     @Test
     public void utledEndringerSkalHåndtereTomEksisterende() {
         final EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste = new EndringUnntakEtablertTilsynTjeneste(null);
@@ -69,16 +70,16 @@ public class EndringUnntakEtablertTilsynTjenesteTest {
                 ), List.of()),
                 new UnntakEtablertTilsyn(List.of(), List.of())
             );
-        
-        final List<DatoIntervallEntitet> endringer = endringUnntakEtablertTilsynTjeneste.utledEndringer(Optional.empty(), Optional.of(nyttGrunnlag));
+
+        final Set<DatoIntervallEntitet> endringer = endringUnntakEtablertTilsynTjeneste.utledEndringer(Optional.empty(), Optional.of(nyttGrunnlag));
         assertThat(endringer).isNotEmpty();
     }
-    
+
     @Test
     public void utledEndringerSkalHåndtereEndretResultat() {
         final EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste = new EndringUnntakEtablertTilsynTjeneste(null);
         final AktørId pleietrengende = AktørId.dummy();
-        
+
         final UnntakEtablertTilsynForPleietrengende eksisterendeGrunnlag = new UnntakEtablertTilsynForPleietrengende(
             pleietrengende,
             new UnntakEtablertTilsyn(List.of(
@@ -92,7 +93,7 @@ public class EndringUnntakEtablertTilsynTjenesteTest {
             ), List.of()),
             new UnntakEtablertTilsyn(List.of(), List.of())
         );
-        
+
         final UnntakEtablertTilsynForPleietrengende nyttGrunnlag = new UnntakEtablertTilsynForPleietrengende(
                 pleietrengende,
                 new UnntakEtablertTilsyn(List.of(
@@ -106,8 +107,8 @@ public class EndringUnntakEtablertTilsynTjenesteTest {
                 ), List.of()),
                 new UnntakEtablertTilsyn(List.of(), List.of())
             );
-        
-        final List<DatoIntervallEntitet> endringer = endringUnntakEtablertTilsynTjeneste.utledEndringer(Optional.of(eksisterendeGrunnlag), Optional.of(nyttGrunnlag));
+
+        final Set<DatoIntervallEntitet> endringer = endringUnntakEtablertTilsynTjeneste.utledEndringer(Optional.of(eksisterendeGrunnlag), Optional.of(nyttGrunnlag));
         assertThat(endringer).isNotEmpty();
     }
 }

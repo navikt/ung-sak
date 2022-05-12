@@ -20,6 +20,7 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 
 public class VilkårBuilder {
 
@@ -262,11 +263,7 @@ public class VilkårBuilder {
         if (fagsakTidslinje != null) {
             var tidslinjeSomFaltBort = vilkårTidslinje.disjoint(fagsakTidslinje);
             vilkårTidslinje = vilkårTidslinje.intersection(fagsakTidslinje);
-            var periodeneSomFaltBort = tidslinjeSomFaltBort.toSegments()
-                .stream()
-                .filter(it -> it.getValue() != null)
-                .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
-                .collect(Collectors.toCollection(TreeSet::new));
+            var periodeneSomFaltBort = TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeSomFaltBort.filterValue(Objects::nonNull));
             justereUtfallVedTilbakestilling(periodeneSomFaltBort);
         }
         bygget = true;

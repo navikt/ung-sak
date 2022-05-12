@@ -34,9 +34,6 @@ import no.nav.k9.sak.typer.Periode;
 
 public class UtledStatusPåPerioderTjeneste {
 
-    public UtledStatusPåPerioderTjeneste() {
-    }
-
     public StatusForPerioderPåBehandling utled(Behandling behandling,
                                                KantIKantVurderer kantIKantVurderer,
                                                Set<KravDokument> kravdokumenter,
@@ -50,13 +47,12 @@ public class UtledStatusPåPerioderTjeneste {
         var perioderTilVurderingKombinert = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()), StandardCombinators::alwaysTrueForMatch)
             .compress();
 
-        var tidslinje = new LocalDateTimeline<ÅrsakerTilVurdering>(List.of());
         var relevanteTidslinjer = relevanteDokumenterMedPeriode.stream()
             .map(entry -> tilSegments(entry, kantIKantVurderer, ÅrsakTilVurdering.FØRSTEGANGSVURDERING))
             .map(LocalDateTimeline::new)
             .toList();
 
-        tidslinje = mergeTidslinjer(relevanteTidslinjer, kantIKantVurderer, this::mergeSegments);
+        var tidslinje = mergeTidslinjer(relevanteTidslinjer, kantIKantVurderer, this::mergeSegments);
 
         var endringFraBruker = andreRelevanteDokumenterForPeriodenTilVurdering.stream()
             .map(entry -> tilSegments(entry, kantIKantVurderer, utledRevurderingÅrsak(behandling)))
@@ -78,17 +74,15 @@ public class UtledStatusPåPerioderTjeneste {
         tidslinje = tidslinje.combine(new LocalDateTimeline<>(tilbakestillingSegmenter, StandardCombinators::coalesceRightHandSide), this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         var perioder = tidslinje.compress()
-            .toSegments()
             .stream()
             .map(it -> new PeriodeMedÅrsaker(new Periode(it.getFom(), it.getTom()), transformerÅrsaker(it)))
             .collect(Collectors.toList());
 
         var årsakMedPerioder = utledÅrsakMedPerioder(perioder);
 
-        var perioderTilVurderingSet = perioderTilVurderingKombinert.toSegments()
+        var perioderTilVurderingSet = perioderTilVurderingKombinert
             .stream()
-            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
-            .map(DatoIntervallEntitet::tilPeriode)
+            .map(it -> new Periode(it.getFom(), it.getTom()))
             .collect(Collectors.toCollection(TreeSet::new));
 
         return new StatusForPerioderPåBehandling(perioderTilVurderingSet, perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode));
@@ -243,7 +237,6 @@ public class UtledStatusPåPerioderTjeneste {
         }
 
         return tidslinjen.compress()
-            .toSegments()
             .stream()
             .toList();
     }

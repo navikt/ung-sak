@@ -1,18 +1,20 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 
 @Dependent
 public class EndringUnntakEtablertTilsynTjeneste {
@@ -25,7 +27,7 @@ public class EndringUnntakEtablertTilsynTjeneste {
     }
 
 
-    public List<DatoIntervallEntitet> utledRelevanteEndringerSidenBehandling(Long behandlingId, AktørId pleietrengende) {
+    public NavigableSet<DatoIntervallEntitet> utledRelevanteEndringerSidenBehandling(Long behandlingId, AktørId pleietrengende) {
         final Optional<UnntakEtablertTilsynGrunnlag> eksisterendeGrunnlag = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandlingId);
         final Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(pleietrengende);
         return utledEndringer(eksisterendeGrunnlag.map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende), unntakEtablertTilsynForPleietrengende);
@@ -38,24 +40,16 @@ public class EndringUnntakEtablertTilsynTjeneste {
     }
 
     public LocalDateTimeline<Boolean> perioderMedEndringerSidenBehandling(Long behandlingId, AktørId pleietrengende) {
-        var perioder = utledRelevanteEndringerSidenBehandling(behandlingId, pleietrengende)
-            .stream()
-            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
-            .collect(Collectors.toList());
-
-        return new LocalDateTimeline<>(perioder);
+        return SykdomUtils.toLocalDateTimeline(utledRelevanteEndringerSidenBehandling(behandlingId, pleietrengende));
     }
 
-    List<DatoIntervallEntitet> utledEndringer(Optional<UnntakEtablertTilsynForPleietrengende> eksisterendeGrunnlag,
+    NavigableSet<DatoIntervallEntitet> utledEndringer(Optional<UnntakEtablertTilsynForPleietrengende> eksisterendeGrunnlag,
                                                       Optional<UnntakEtablertTilsynForPleietrengende> nyttGrunnlag) {
 
         final LocalDateTimeline<Boolean> nattevåkendringer = utledEndringerMedTidslinje(toNattevåkTidslinje(eksisterendeGrunnlag), toNattevåkTidslinje(nyttGrunnlag));
         final LocalDateTimeline<Boolean> beredskapendringer = utledEndringerMedTidslinje(toBeredskapTidslinje(eksisterendeGrunnlag), toBeredskapTidslinje(nyttGrunnlag));
 
-        return nattevåkendringer.union(beredskapendringer, StandardCombinators::coalesceLeftHandSide)
-            .stream()
-            .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
-            .collect(Collectors.toList());
+        return TidslinjeUtil.tilDatoIntervallEntiteter(nattevåkendringer.union(beredskapendringer, StandardCombinators::coalesceLeftHandSide));
     }
 
     private LocalDateTimeline<Boolean> utledEndringerMedTidslinje(LocalDateTimeline<UnntakEtablertTilsynPeriode> eksisterende,

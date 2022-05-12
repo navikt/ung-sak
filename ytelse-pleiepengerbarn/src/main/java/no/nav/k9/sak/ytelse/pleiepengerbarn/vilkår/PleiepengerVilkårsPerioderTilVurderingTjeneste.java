@@ -5,7 +5,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -26,6 +25,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
@@ -99,7 +99,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         return utledPeriode(behandlingId, vilkårType);
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Long behandlingId, Vilkår vilkår, Set<DatoIntervallEntitet> perioder) {
+    private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Long behandlingId, Vilkår vilkår, NavigableSet<DatoIntervallEntitet> perioder) {
         var perioderTilVurdering = new TreeSet<>(utledPerioderTilVurderingVedÅHensyntaFullstendigTidslinje(behandlingId, perioder));
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
@@ -120,29 +120,20 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private Set<DatoIntervallEntitet> utledPerioderTilVurderingVedÅHensyntaFullstendigTidslinje(Long behandlingId, Set<DatoIntervallEntitet> perioder) {
+    private Set<DatoIntervallEntitet> utledPerioderTilVurderingVedÅHensyntaFullstendigTidslinje(Long behandlingId, NavigableSet<DatoIntervallEntitet> perioder) {
         var datoIntervallEntitets = utledFullstendigePerioder(behandlingId);
         return utledPeriodeEtterHensynÅHaHensyntattFullstendigTidslinje(perioder, datoIntervallEntitets);
     }
 
-    NavigableSet<DatoIntervallEntitet> utledPeriodeEtterHensynÅHaHensyntattFullstendigTidslinje(Set<DatoIntervallEntitet> perioder, NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
-        var fullstendigTidslinje = opprettTidslinje(datoIntervallEntitets)
-            .toSegments()
-            .stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
-            .collect(Collectors.toCollection(TreeSet::new));
+    NavigableSet<DatoIntervallEntitet> utledPeriodeEtterHensynÅHaHensyntattFullstendigTidslinje(NavigableSet<DatoIntervallEntitet> perioder, NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
+        LocalDateTimeline<Boolean> perioderTidslinje = SykdomUtils.toLocalDateTimeline(perioder);
+        var fullstendigTidslinje = opprettTidslinje(datoIntervallEntitets);
 
-        var relevantTidslinje = new LocalDateTimeline<>(
-            fullstendigTidslinje.stream()
-                .filter(it -> perioder.stream().anyMatch(it::overlapper))
-                .map(DatoIntervallEntitet::toLocalDateInterval)
-                .map(it -> new LocalDateSegment<>(it, true))
-                .toList())
-            .compress();
+        var relevantTidslinje = new LocalDateTimeline<>(fullstendigTidslinje.stream()
+            .filter(segment -> !perioderTidslinje.intersection(segment.getLocalDateInterval()).isEmpty())
+            .toList());
 
-        return relevantTidslinje.toSegments()
-            .stream()
-            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
-            .collect(Collectors.toCollection(TreeSet::new));
+        return TidslinjeUtil.tilDatoIntervallEntiteter(relevantTidslinje.compress());
     }
 
     private LocalDateTimeline<Boolean> opprettTidslinje(NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
@@ -186,8 +177,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
 
         final LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
 
-        var ekstraPerioder = utvidedePerioder.stream()
-            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom())).collect(Collectors.toCollection(TreeSet::new));
+        var ekstraPerioder = TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
 
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId())
             .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
@@ -251,7 +241,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         utvidedePerioder = utvidedePerioder.union(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId()), StandardCombinators::alwaysTrueForMatch);
         utvidedePerioder = utvidedePerioder.union(uttaksendringerSidenForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
 
-        return DatoIntervallEntitet.fraTimeline(utvidedePerioder);
+        return TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
     }
 
     private LocalDateTimeline<Boolean> uttaksendringerSidenForrigeBehandling(BehandlingReferanse referanse) {

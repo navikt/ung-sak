@@ -3,8 +3,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.NavigableSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -13,6 +11,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
@@ -102,11 +101,8 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
         return personinfo.getFødselsdato();
     }
 
-    private static TreeSet<DatoIntervallEntitet> tilNavigableSet(LocalDateTimeline<Boolean> resultat) {
-        return resultat
-          .stream()
-          .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
-          .collect(Collectors.toCollection(TreeSet::new));
+    private static NavigableSet<DatoIntervallEntitet> tilNavigableSet(LocalDateTimeline<Boolean> resultat) {
+        return TidslinjeUtil.tilDatoIntervallEntiteter(resultat);
     }
 
     public static final PleietrengendeAlderPeriode under18(

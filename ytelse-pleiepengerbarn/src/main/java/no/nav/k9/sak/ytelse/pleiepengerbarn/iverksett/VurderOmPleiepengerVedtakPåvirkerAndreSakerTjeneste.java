@@ -36,6 +36,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.hendelse.vedtak.SakMedPeriode;
 import no.nav.k9.sak.hendelse.vedtak.VurderOmVedtakPåvirkerSakerTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -121,7 +122,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                 var skalRevurderesPgaEndretUttak = perioderMedRevurderingPgaUttak(sisteBehandlingPåKandidat, referanse);
 
                 if (!skalRevurderesPgaSykdom.isEmpty() || !skalRevurderesPgaEtablertTilsyn.isEmpty() || !skalRevurderesPgaNattevåkOgBeredskap.isEmpty() || !skalRevurderesPgaEndretUttak.isEmpty()) {
-                    TreeSet<DatoIntervallEntitet> perioderMedEndring = utledPerioder(perioderTilVurderingTjeneste, skalRevurderesPgaSykdom, skalRevurderesPgaEtablertTilsyn, skalRevurderesPgaNattevåkOgBeredskap, skalRevurderesPgaEndretUttak);
+                    NavigableSet<DatoIntervallEntitet> perioderMedEndring = utledPerioder(perioderTilVurderingTjeneste, skalRevurderesPgaSykdom, skalRevurderesPgaEtablertTilsyn, skalRevurderesPgaNattevåkOgBeredskap, skalRevurderesPgaEndretUttak);
                     result.add(new SakMedPeriode(kandidatsaksnummer, perioderMedEndring));
                     log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty());
                 }
@@ -131,34 +132,28 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         return result;
     }
 
-    private TreeSet<DatoIntervallEntitet> utledPerioder(VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                                        NavigableSet<DatoIntervallEntitet> skalRevurderesPgaSykdom,
-                                                        NavigableSet<DatoIntervallEntitet> skalRevurderesPgaEtablertTilsyn,
-                                                        NavigableSet<DatoIntervallEntitet> skalRevurderesPgaNattevåkOgBeredskap,
-                                                        NavigableSet<DatoIntervallEntitet> skalRevurderesPgaEndretUttak) {
+    private NavigableSet<DatoIntervallEntitet> utledPerioder(VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                                             NavigableSet<DatoIntervallEntitet> skalRevurderesPgaSykdom,
+                                                             NavigableSet<DatoIntervallEntitet> skalRevurderesPgaEtablertTilsyn,
+                                                             NavigableSet<DatoIntervallEntitet> skalRevurderesPgaNattevåkOgBeredskap,
+                                                             NavigableSet<DatoIntervallEntitet> skalRevurderesPgaEndretUttak) {
         var perioderMedEndring = new TreeSet<>(skalRevurderesPgaEtablertTilsyn);
         perioderMedEndring.addAll(skalRevurderesPgaNattevåkOgBeredskap);
         perioderMedEndring.addAll(skalRevurderesPgaSykdom);
         perioderMedEndring.addAll(skalRevurderesPgaEndretUttak);
 
-        var tidslinje = new LocalDateTimeline<Boolean>(List.of());
-
-        for (DatoIntervallEntitet periode : perioderMedEndring) {
-            tidslinje = tidslinje.combine(new LocalDateSegment<>(periode.toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
+        List<LocalDateSegment<Boolean>> segmenter = perioderMedEndring.stream()
+            .map(periode -> new LocalDateSegment<>(periode.toLocalDateInterval(), true))
+            .toList();
+        var tidslinje = new LocalDateTimeline<>(segmenter, StandardCombinators::coalesceRightHandSide);
 
         // tett hull
         var kantIKantVurderer = perioderTilVurderingTjeneste.getKantIKantVurderer();
         var segmenterSomMangler = utledHullSomMåTettes(tidslinje, kantIKantVurderer);
-        for (LocalDateSegment<Boolean> segment : segmenterSomMangler) {
-            tidslinje = tidslinje.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
+        var tidslinjeHull = new LocalDateTimeline<>(segmenterSomMangler, StandardCombinators::coalesceRightHandSide);
+        tidslinje = tidslinje.combine(tidslinjeHull, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        return tidslinje.compress()
-            .toSegments()
-            .stream()
-            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
-            .collect(Collectors.toCollection(TreeSet::new));
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }
 
     private List<LocalDateSegment<Boolean>> utledHullSomMåTettes(LocalDateTimeline<Boolean> tidslinjen, KantIKantVurderer kantIKantVurderer) {
@@ -188,17 +183,11 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     }
 
     private NavigableSet<DatoIntervallEntitet> perioderMedRevurderesPgaNattevåkOgBeredskap(BehandlingReferanse referanse) {
-        return new TreeSet<>(endringUnntakEtablertTilsynTjeneste.utledRelevanteEndringerSidenBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId()));
+        return endringUnntakEtablertTilsynTjeneste.utledRelevanteEndringerSidenBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId());
     }
 
     private NavigableSet<DatoIntervallEntitet> perioderMedRevurderingPgaEtablertTilsyn(BehandlingReferanse referanse) {
-        return erEndringPåEtablertTilsynTjeneste.perioderMedEndringerFraEksisterendeVersjon(referanse)
-            .compress()
-            .toSegments()
-            .stream()
-            .filter(it -> Objects.nonNull(it.getValue()))
-            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
-            .collect(Collectors.toCollection(TreeSet::new));
+        return TidslinjeUtil.tilDatoIntervallEntiteter(erEndringPåEtablertTilsynTjeneste.perioderMedEndringerFraEksisterendeVersjon(referanse).filterValue(Objects::nonNull));
     }
 
     private NavigableSet<DatoIntervallEntitet> perioderMedRevurderingSykdom(AktørId pleietrengende, Saksnummer kandidatsaksnummer, Behandling sisteBehandlingPåKandidat) {

@@ -6,18 +6,14 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -155,17 +151,9 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
     private boolean overlapperVilkårsperiode(OppgittOpptjening opptjening, DatoIntervallEntitet vilkårsperiode, Map<JournalpostId, LocalDateTimeline<Void>> fraværTidslinjePerJp) {
         Objects.requireNonNull(opptjening.getJournalpostId());
-        var fraværTidslinje = fraværTidslinjePerJp.getOrDefault(opptjening.getJournalpostId(), new LocalDateTimeline<>(List.of()));
-        var overlappendeFraværsperioder = finnOverlappendePerioder(vilkårsperiode, fraværTidslinje);
-        return !overlappendeFraværsperioder.isEmpty();
-    }
-
-    private NavigableSet<LocalDateInterval> finnOverlappendePerioder(DatoIntervallEntitet vilkårsperiode, LocalDateTimeline<Void> tidslinje) {
-        return tidslinje.getLocalDateIntervals().stream()
-            .map(di -> di.overlap(new LocalDateInterval(vilkårsperiode.getFomDato(), vilkårsperiode.getTomDato())))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collect(Collectors.toCollection(TreeSet::new));
+        var fraværTidslinje = fraværTidslinjePerJp.getOrDefault(opptjening.getJournalpostId(), LocalDateTimeline.empty());
+        LocalDateTimeline<?> vilkårsperiodeSomTidslinje = new LocalDateTimeline<>(vilkårsperiode.getFomDato(), vilkårsperiode.getTomDato(), null);
+        return fraværTidslinje.intersects(vilkårsperiodeSomTidslinje);
     }
 
     private LocalDateTimeline<Void> slåSammenPerioder(List<SøktPeriode<?>> søktePerioder) {

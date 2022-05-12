@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -32,6 +31,7 @@ import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.Permisjon;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -69,11 +69,8 @@ public class MapArbeid {
 
         final Map<DatoIntervallEntitet, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>> arbeidsforholdPerPeriode = new HashMap<>();
 
-        var perioderTilVurdering = tidslinjeTilVurdering.toSegments()
-            .stream()
-            .filter(it -> Objects.nonNull(it.getValue()))
-            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
-            .collect(Collectors.toCollection(TreeSet::new));
+        var perioderTilVurdering = TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeTilVurdering
+                .filterValue(Objects::nonNull));;
 
         var fiktivtKravPgaDødsfall = utledFiktivtKravPgaDødsfall(input);
 

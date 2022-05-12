@@ -24,7 +24,7 @@ class PSBVilkårsPerioderTilVurderingTjenesteTest {
 
         var fullstendigePerioder = new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(start1, slutt1), DatoIntervallEntitet.fraOgMedTilOgMed(start2, slutt2)));
 
-        var result = tjeneste.utledPeriodeEtterHensynÅHaHensyntattFullstendigTidslinje(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(start2, slutt2)), fullstendigePerioder);
+        var result = tjeneste.utledPeriodeEtterHensynÅHaHensyntattFullstendigTidslinje(new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(start2, slutt2))), fullstendigePerioder);
 
         assertThat(result).contains(DatoIntervallEntitet.fraOgMedTilOgMed(start1, slutt2));
     }

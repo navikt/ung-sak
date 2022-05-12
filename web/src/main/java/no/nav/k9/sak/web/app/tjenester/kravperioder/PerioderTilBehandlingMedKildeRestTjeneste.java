@@ -161,7 +161,6 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         timeline = timeline.combine(timelineTilVurdering, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         return timeline.compress()
-            .toSegments()
             .stream()
             .map(it -> new PeriodeMedUtfall(DatoIntervallEntitet.fra(it.getLocalDateInterval()).tilPeriode(), it.getValue()))
             .toList();
