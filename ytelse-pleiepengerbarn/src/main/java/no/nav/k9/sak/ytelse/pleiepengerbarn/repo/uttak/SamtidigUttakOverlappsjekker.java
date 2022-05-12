@@ -104,7 +104,7 @@ public class SamtidigUttakOverlappsjekker {
         final var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         final LocalDateTimeline<Boolean> innleggelseTimeline = hentInnleggelseTimeline(behandling);
 
-        var perioderHvorOverlappKanSesBortIfraPgaInnleggelse = taHensynTilInnleggelser(perioderMedOverlapp, innleggelseTimeline, ref);
+        var perioderHvorOverlappKanSesBortIfraPgaInnleggelse = taHensynTilInnleggelser(kravprioritet, innleggelseTimeline, ref);
         var perioderMedOverlappUtenInnleggelse = SykdomUtils.kunPerioderSomIkkeFinnesI(perioderMedOverlapp, perioderHvorOverlappKanSesBortIfraPgaInnleggelse);
 
         return perioderMedOverlappUtenInnleggelse.filterValue(it -> !it.isEmpty()).mapValue(it -> true);
