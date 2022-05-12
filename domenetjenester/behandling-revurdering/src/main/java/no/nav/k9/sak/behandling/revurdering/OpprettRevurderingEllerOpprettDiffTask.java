@@ -6,12 +6,11 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -80,7 +79,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
 
         var behandlinger = behandlingRepository.hentÅpneBehandlingerIdForFagsakId(fagsakId);
         final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(BEHANDLING_ÅRSAK));
-        var perioder = utledPerioder(behandlingÅrsakType, prosessTaskData);
+        var perioder = utledPerioder(prosessTaskData);
         if (behandlinger.isEmpty()) {
             var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
 
@@ -116,11 +115,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         }
     }
 
-    private Set<DatoIntervallEntitet> utledPerioder(BehandlingÅrsakType årsakType, ProsessTaskData prosessTaskData) {
-        if (!Set.of(BehandlingÅrsakType.RE_SATS_REGULERING, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON).contains(årsakType)) {
-            return null;
-        }
-
+    private Set<DatoIntervallEntitet> utledPerioder(ProsessTaskData prosessTaskData) {
         var perioderString = prosessTaskData.getPropertyValue(PERIODER);
         if (perioderString != null && !perioderString.isEmpty()) {
             return parseToPeriodeSet(perioderString);
