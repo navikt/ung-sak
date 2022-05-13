@@ -13,11 +13,10 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class VurderStatusInput {
     private OpptjeningAktivitetType type;
     private BehandlingReferanse behandlingReferanse;
-    private DatoIntervallEntitet opptjeningsperiode;
+    private DatoIntervallEntitet vilkårsperiode;
     private Yrkesaktivitet registerAktivitet;
     private DatoIntervallEntitet aktivitetPeriode;
     private Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse = new HashMap<>();
-    private boolean erMigrertSkjæringstidspunkt = false;
 
     public VurderStatusInput(OpptjeningAktivitetType type, BehandlingReferanse behandlingReferanse) {
         this.type = Objects.requireNonNull(type);
@@ -32,12 +31,12 @@ public class VurderStatusInput {
         return behandlingReferanse;
     }
 
-    public DatoIntervallEntitet getOpptjeningsperiode() {
-        return opptjeningsperiode;
+    public DatoIntervallEntitet getVilkårsperiode() {
+        return vilkårsperiode;
     }
 
-    public void setOpptjeningsperiode(DatoIntervallEntitet opptjeningsperiode) {
-        this.opptjeningsperiode = opptjeningsperiode;
+    public void setVilkårsperiode(DatoIntervallEntitet vilkårsperiode) {
+        this.vilkårsperiode = vilkårsperiode;
     }
 
     public Yrkesaktivitet getRegisterAktivitet() {
@@ -54,14 +53,6 @@ public class VurderStatusInput {
 
     public void setAktivitetPeriode(DatoIntervallEntitet aktivitetPeriode) {
         this.aktivitetPeriode = aktivitetPeriode;
-    }
-
-    public boolean getErMigrertSkjæringstidspunkt() {
-        return erMigrertSkjæringstidspunkt;
-    }
-
-    public void setErMigrertSkjæringstidspunkt(boolean erMigrertSkjæringstidspunkt) {
-        this.erMigrertSkjæringstidspunkt = erMigrertSkjæringstidspunkt;
     }
 
     public Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> getTidslinjePerYtelse() {
