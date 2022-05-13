@@ -27,6 +27,10 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
     private OmsorgspengerRammevedtakTjeneste omsorgspengerRammevedtakTjeneste;
     private AktørTjeneste aktørTjeneste;
 
+    OmsorgspengerRelasjonsFilter() {
+        //for CDI proxy
+    }
+
     @Inject
     public OmsorgspengerRelasjonsFilter(OmsorgspengerRammevedtakTjeneste omsorgspengerRammevedtakTjeneste, AktørTjeneste aktørTjeneste) {
         this.omsorgspengerRammevedtakTjeneste = omsorgspengerRammevedtakTjeneste;
