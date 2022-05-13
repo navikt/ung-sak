@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -111,7 +110,7 @@ public class SjekkMotAndreYtelserTjeneste {
         var overlappendeYtelser = overlappendeYtelserTjeneste.finnOverlappendeYtelser(BehandlingReferanse.fra(behandling), ytelseTyperSomSjekkesMot);
         if (!overlappendeYtelser.isEmpty()) {
             String formattert = overlappendeYtelser.keySet().stream()
-                .map(key -> "Ytelse=" + key.getYtelseType() + ", kilde=" + key.getKilde() + ", saksnummer=" + key.getSaksnummer() + ", antall ytelser anvist=" + key.getYtelseAnvist().size() + ", perioder=" + overlappendeYtelser.get(key))
+                .map(key -> "Ytelse=" + key.getYtelseType() + ", kilde=" + key.getKilde() + ", saksnummer=" + key.getSaksnummer() + ", antall ytelser anvist=" + key.getYtelseAnvist().size() + ", perioder=" + overlappendeYtelser.get(key).getLocalDateIntervals())
                 .collect(Collectors.joining(", ", "{", "}"));
             logger.info("Behandlingen har overlappende ytelser '{}'", formattert);
         }
