@@ -10,5 +10,5 @@ where id in (select a.id
                       join behandling b on b.id = a.behandling_id
                       join fagsak f on b.fagsak_id = f.id
              where a.behandling_steg_funnet = 'VURDER_UTTAK'
-               and a.aksjonspunkt_status not in ('OPPR')
+               and a.aksjonspunkt_status = 'OPPR'
                and ytelse_type = 'PSB');
