@@ -93,7 +93,7 @@ public class MapInputTilUttakTjeneste {
         RettVedDød rettVedDød = utledRettVedDød(input);
         var barn = new Barn(pleietrengendePersonopplysninger.getAktørId().getId(), pleietrengendePersonopplysninger.getDødsdato(), rettVedDød);
 
-        var søker = new Søker(søkerPersonopplysninger.getAktørId().getId());
+        var søker = new Søker(søkerPersonopplysninger.getAktørId().getId(), søkerPersonopplysninger.getDødsdato());
 
         var tidslinjeTilVurdering = new LocalDateTimeline<>(mapPerioderTilVurdering(input));
 
