@@ -24,7 +24,7 @@ public enum Venteårsak implements Kodeverdi {
     UDEFINERT("-", "Ikke definert", false),
 
     ANKE_OVERSENDT_TIL_TRYGDERETTEN("ANKE_OVERSENDT_TIL_TRYGDERETTEN", "Venter på at saken blir behandlet hos Trygderetten", false),
-    ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER("ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER", "Tilbakemelding fra søker", false),
+    ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER("ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER", "Tilbakemelding fra søker", true),
     AVV_DOK("AVV_DOK", "Annen dokumentasjon", true),
     AVV_IM_MOT_AAREG("AVV_IM_MOT_AAREG", "Venter på inntektsmelding fra arbeidsgiver som stemmer med Aareg", false),
     AVV_IM_MOT_SØKNAD_AT("AVV_IM_MOT_SØKNAD_AT", "Venter på inntektsmelding fra arbeidsgiver etter mottatt søknad som arbeidstaker", false),
