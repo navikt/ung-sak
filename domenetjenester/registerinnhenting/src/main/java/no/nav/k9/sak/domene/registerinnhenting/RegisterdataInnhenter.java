@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -55,11 +54,6 @@ import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.registerinnhenting.impl.SaksopplysningerFeil;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.AlleBarnOgTaMedHistorikk;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.IngenRelasjonFilter;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.OmsorgspengerRelasjonsFilter;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.PleietrengendeRelasjonsFilter;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.YtelsesspesifikkRelasjonsFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.AktørId;
@@ -68,15 +62,6 @@ import no.nav.k9.sak.typer.AktørId;
 public class RegisterdataInnhenter {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterdataInnhenter.class);
-
-    private final Map<FagsakYtelseType, YtelsesspesifikkRelasjonsFilter> relasjonsFilter = Map.of(
-        FagsakYtelseType.OMSORGSPENGER_KS, new AlleBarnOgTaMedHistorikk(),
-        FagsakYtelseType.OMSORGSPENGER_MA, new AlleBarnOgTaMedHistorikk(),
-        FagsakYtelseType.OMSORGSPENGER_AO, new AlleBarnOgTaMedHistorikk(),
-        FagsakYtelseType.PSB, new PleietrengendeRelasjonsFilter(),
-        FagsakYtelseType.PPN, new PleietrengendeRelasjonsFilter(),
-        FagsakYtelseType.OMP, new OmsorgspengerRelasjonsFilter(),
-        FagsakYtelseType.FRISINN, new IngenRelasjonFilter());
 
     private PersoninfoAdapter personinfoAdapter;
     private MedlemTjeneste medlemTjeneste;
@@ -87,6 +72,7 @@ public class RegisterdataInnhenter {
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BehandlingLåsRepository behandlingLåsRepository;
     private Instance<InformasjonselementerUtleder> informasjonselementer;
+    private Instance<YtelsesspesifikkRelasjonsFilter> relasjonsFiltre;
 
     RegisterdataInnhenter() {
         // for CDI proxy
@@ -99,7 +85,9 @@ public class RegisterdataInnhenter {
                                  MedlemskapRepository medlemskapRepository,
                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                  AbakusTjeneste abakusTjeneste,
-                                 @Any Instance<InformasjonselementerUtleder> utledInformasjonselementer) {
+                                 @Any Instance<InformasjonselementerUtleder> utledInformasjonselementer,
+                                 @Any Instance<YtelsesspesifikkRelasjonsFilter> relasjonsFiltre
+    ) {
         this.personinfoAdapter = personinfoAdapter;
         this.medlemTjeneste = medlemTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
@@ -109,6 +97,7 @@ public class RegisterdataInnhenter {
         this.medlemskapRepository = medlemskapRepository;
         this.abakusTjeneste = abakusTjeneste;
         this.informasjonselementer = utledInformasjonselementer;
+        this.relasjonsFiltre = relasjonsFiltre;
     }
 
     public Personinfo innhentSaksopplysningerForSøker(AktørId søkerAktørId) {
@@ -423,11 +412,9 @@ public class RegisterdataInnhenter {
 
     private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling, no.nav.k9.sak.typer.Periode opplysningsperioden) {
         List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo);
-        var filter = relasjonsFilter.get(behandling.getFagsakYtelseType());
+        var filter = YtelsesspesifikkRelasjonsFilter.finnTjeneste(relasjonsFiltre, behandling.getFagsakYtelseType());
 
-        return relaterteBarn.stream()
-            .filter(barn -> filter.relasjonsFiltreringBarn(behandling, barn, opplysningsperioden))
-            .toList();
+        return filter.relasjonsFiltreringBarn(behandling, relaterteBarn, opplysningsperioden);
     }
 
     private List<Personinfo> hentAlleRelaterteBarn(Personinfo søkerPersonInfo) {
@@ -513,10 +500,10 @@ public class RegisterdataInnhenter {
     }
 
     private boolean hentHistorikkForRelatertePersoner(Behandling behandling) {
-        return relasjonsFilter.get(behandling.getFagsakYtelseType()).hentHistorikkForRelatertePersoner();
+        return YtelsesspesifikkRelasjonsFilter.finnTjeneste(relasjonsFiltre, behandling.getFagsakYtelseType()).hentHistorikkForRelatertePersoner();
     }
 
     private boolean hentDeltBostedForBarn(Behandling behandling) {
-        return relasjonsFilter.get(behandling.getFagsakYtelseType()).hentDeltBosted();
+        return YtelsesspesifikkRelasjonsFilter.finnTjeneste(relasjonsFiltre, behandling.getFagsakYtelseType()).hentDeltBosted();
     }
 }
