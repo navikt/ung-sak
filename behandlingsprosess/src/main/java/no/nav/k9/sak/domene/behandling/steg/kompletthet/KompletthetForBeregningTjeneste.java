@@ -20,6 +20,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelev
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -136,7 +137,7 @@ public class KompletthetForBeregningTjeneste {
                 .map(VilkårPeriode::getPeriode)
                 .map(DatoIntervallEntitet::toLocalDateInterval)
                 .map(it -> utvidPeriodeForPeriodeFraInfotrygd(it, stpMigrertFraInfotrygd))
-                .collect(Collectors.toList())))
+                .collect(Collectors.toList()), StandardCombinators::coalesceRightHandSide))
             .orElseGet(() -> new LocalDateTimeline<>(List.of(new LocalDateSegment<>(referanse.getFagsakPeriode().toLocalDateInterval(), true))));
     }
 
