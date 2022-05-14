@@ -14,7 +14,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
 public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjon {
@@ -73,7 +72,7 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
     public static NavigableSet<DatoIntervallEntitet> utledPeriodeIHenhold(NavigableSet<DatoIntervallEntitet> perioder, LocalDate fødselsdato, int fomAlder, int toAlder) {
         final var periodeSomKanUtledes = new LocalDateInterval(fødselsdato.plusYears(fomAlder), fødselsdato.plusYears(toAlder).minusDays(1));
 
-        final var tidslinje = SykdomUtils.toLocalDateTimeline(perioder);
+        final var tidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
         final var resultat = tidslinje.intersection(periodeSomKanUtledes);
         return tilNavigableSet(resultat);
     }

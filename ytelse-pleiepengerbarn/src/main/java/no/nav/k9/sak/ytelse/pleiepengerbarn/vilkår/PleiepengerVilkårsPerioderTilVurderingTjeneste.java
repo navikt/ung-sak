@@ -35,7 +35,6 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
@@ -126,7 +125,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     }
 
     NavigableSet<DatoIntervallEntitet> utledPeriodeEtterHensynÅHaHensyntattFullstendigTidslinje(NavigableSet<DatoIntervallEntitet> perioder, NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
-        LocalDateTimeline<Boolean> perioderTidslinje = SykdomUtils.toLocalDateTimeline(perioder);
+        LocalDateTimeline<Boolean> perioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
         var fullstendigTidslinje = opprettTidslinje(datoIntervallEntitets);
 
         var relevantTidslinje = new LocalDateTimeline<>(fullstendigTidslinje.stream()
@@ -169,13 +168,13 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         final var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingUuid());
 
         final var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        final var vurderingsperioderTimeline = SykdomUtils.toLocalDateTimeline(perioder);
-        List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
+        final var vurderingsperioderTimeline = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
+        List<Periode> nyeVurderingsperioder = TidslinjeUtil.tilPerioder(perioder);
 
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagService.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder)
             .getDiffPerioder();
 
-        final LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
+        final LocalDateTimeline<Boolean> utvidedePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
 
         var ekstraPerioder = TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
 

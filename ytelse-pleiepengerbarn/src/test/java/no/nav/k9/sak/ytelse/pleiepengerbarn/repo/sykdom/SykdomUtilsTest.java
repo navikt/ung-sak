@@ -14,14 +14,15 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.Periode;
 
 class SykdomUtilsTest {
-    
+
     @Test
-    public void tilTidslinjeHåndtererEnVerdi() {       
+    public void tilTidslinjeHåndtererEnVerdi() {
         final List<SykdomVurderingVersjon> versjoner = Arrays.asList(
             createSykdomVurderingOgVersjonMock(
                 1L,
@@ -33,21 +34,21 @@ class SykdomUtilsTest {
         final NavigableSet<LocalDateSegment<SykdomVurderingVersjon>> segments = SykdomUtils.tilTidslinje(versjoner).toSegments();
         assertThat(segments.size()).isEqualTo(2);
     }
-    
+
     @Test
     public void kunPerioderSomIkkeFinnesISkalStøtteEnkeltdag() {
         var perioder = new LocalDateTimeline<Boolean>(LocalDate.of(2020, 1, 5), LocalDate.of(2020, 1, 5), true);
         var perdioderSomTrekkesFra = new LocalDateTimeline<Boolean>(LocalDate.of(2020, 1, 5), LocalDate.of(2020, 1, 5), true);
-        var utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(perioder, perdioderSomTrekkesFra);
+        var utvidedePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(perioder, perdioderSomTrekkesFra);
         var segments = utvidedePerioder.toSegments();
         assertThat(segments.size()).isEqualTo(0);
     }
-    
+
     @Test
     public void kunPerioderSomIkkeFinnesISkalStøtteEnkeltdagMidten() {
         var perioder = new LocalDateTimeline<Boolean>(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 5), true);
         var perdioderSomTrekkesFra = new LocalDateTimeline<Boolean>(LocalDate.of(2020, 1, 3), LocalDate.of(2020, 1, 3), true);
-        var utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(perioder, perdioderSomTrekkesFra);
+        var utvidedePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(perioder, perdioderSomTrekkesFra);
         var segments = utvidedePerioder.toSegments();
         assertThat(segments.size()).isEqualTo(2);
         assertThat(segments.first().getFom()).isEqualTo(LocalDate.of(2020, 1, 1));
@@ -56,20 +57,20 @@ class SykdomUtilsTest {
         assertThat(segments.last().getTom()).isEqualTo(LocalDate.of(2020, 1, 5));
 
     }
-    
+
     @Test
     public void kunPerioderSomIkkeFinnesISkalStøtteEnkeltdagSlutten() {
         var perioder = new LocalDateTimeline<Boolean>(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 5), true);
         var perdioderSomTrekkesFra = new LocalDateTimeline<Boolean>(LocalDate.of(2020, 1, 5), LocalDate.of(2020, 1, 5), true);
-        var utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(perioder, perdioderSomTrekkesFra);
+        var utvidedePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(perioder, perdioderSomTrekkesFra);
         var segments = utvidedePerioder.toSegments();
         assertThat(segments.size()).isEqualTo(1);
         assertThat(segments.first().getFom()).isEqualTo(LocalDate.of(2020, 1, 1));
         assertThat(segments.first().getTom()).isEqualTo(LocalDate.of(2020, 1, 4));
     }
-    
+
     @Test
-    public void tilTidslinjeVelgerPrioritertVersjonOgSlårSammenPerioderMedSammeVerdi() {       
+    public void tilTidslinjeVelgerPrioritertVersjonOgSlårSammenPerioderMedSammeVerdi() {
         final List<SykdomVurderingVersjon> versjoner = Arrays.asList(
             createSykdomVurderingOgVersjonMock(
                 1L,
@@ -82,19 +83,19 @@ class SykdomUtilsTest {
                 new Periode(LocalDate.of(2020, 1, 18), LocalDate.of(2020, 1, 29)))
             );
         final NavigableSet<LocalDateSegment<SykdomVurderingVersjon>> segments = new TreeSet<>(SykdomUtils.tilTidslinje(versjoner).toSegments());
-        
+
         assertThat(segments.size()).isEqualTo(3);
         verify(segments.pollFirst(), LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 5), 1);
         verify(segments.pollFirst(), LocalDate.of(2020, 1, 10), LocalDate.of(2020, 1, 13), 1);
         verify(segments.pollFirst(), LocalDate.of(2020, 1, 14), LocalDate.of(2020, 1, 29), 2);
     }
-    
+
     private void verify(LocalDateSegment<SykdomVurderingVersjon> ds, LocalDate fom, LocalDate tom, long rangering) {
         assertThat(ds.getValue().getSykdomVurdering().getRangering()).isEqualTo(rangering);
         assertThat(ds.getFom()).isEqualTo(fom);
         assertThat(ds.getTom()).isEqualTo(tom);
     }
-        
+
     private SykdomVurderingVersjon createSykdomVurderingOgVersjonMock(long rangering, Periode... perioder) {
         return new SykdomVurderingVersjon(
                 createSykdomVurderingMock(rangering),
@@ -111,7 +112,7 @@ class SykdomUtilsTest {
                 Arrays.asList(perioder)
             );
     }
-    
+
     private SykdomVurdering createSykdomVurderingMock(long rangering) {
         var s = new SykdomVurdering(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, Collections.emptyList(), "", LocalDateTime.now());
         s.setRangering(Long.valueOf(rangering));

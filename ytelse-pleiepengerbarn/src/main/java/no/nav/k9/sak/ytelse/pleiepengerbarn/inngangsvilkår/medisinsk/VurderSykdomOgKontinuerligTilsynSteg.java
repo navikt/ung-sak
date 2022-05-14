@@ -58,7 +58,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRe
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
@@ -153,7 +152,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     }
 
     private LocalDateTimeline<Utfall> medOmsorgenFor(NavigableSet<DatoIntervallEntitet> perioder, Vilkårene vilkårene) {
-        final LocalDateTimeline<Boolean> perioderTidslinje = SykdomUtils.toLocalDateTimeline(perioder);
+        final LocalDateTimeline<Boolean> perioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
         final LocalDateTimeline<VilkårPeriode> omsorgenForTidslinje = vilkårene.getVilkårTimeline(VilkårType.OMSORGEN_FOR);
         return perioderTidslinje.combine(omsorgenForTidslinje, new LocalDateSegmentCombinator<Boolean, VilkårPeriode, Utfall>() {
             @Override
