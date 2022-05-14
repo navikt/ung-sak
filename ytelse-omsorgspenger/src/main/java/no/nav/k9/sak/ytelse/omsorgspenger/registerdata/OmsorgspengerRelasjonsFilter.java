@@ -4,9 +4,13 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.aarskvantum.kontrakter.Fosterbarn;
 import no.nav.k9.aarskvantum.kontrakter.Rammevedtak;
 import no.nav.k9.aarskvantum.kontrakter.UtvidetRett;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -19,12 +23,14 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.omsorgspenger.rammevedtak.OmsorgspengerRammevedtakTjeneste;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.FosterbarnRepository;
 
 @FagsakYtelseTypeRef(OMSORGSPENGER)
 @ApplicationScoped
 public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFilter {
 
     private OmsorgspengerRammevedtakTjeneste omsorgspengerRammevedtakTjeneste;
+    private FosterbarnRepository fosterbarnRepository;
     private AktørTjeneste aktørTjeneste;
 
     OmsorgspengerRelasjonsFilter() {
@@ -32,8 +38,9 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
     }
 
     @Inject
-    public OmsorgspengerRelasjonsFilter(OmsorgspengerRammevedtakTjeneste omsorgspengerRammevedtakTjeneste, AktørTjeneste aktørTjeneste) {
+    public OmsorgspengerRelasjonsFilter(OmsorgspengerRammevedtakTjeneste omsorgspengerRammevedtakTjeneste, FosterbarnRepository fosterbarnRepository, AktørTjeneste aktørTjeneste) {
         this.omsorgspengerRammevedtakTjeneste = omsorgspengerRammevedtakTjeneste;
+        this.fosterbarnRepository = fosterbarnRepository;
         this.aktørTjeneste = aktørTjeneste;
     }
 
@@ -45,6 +52,33 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
     @Override
     public boolean hentDeltBosted() {
         return true;
+    }
+
+    public Set<AktørId> hentFosterbarn(Behandling behandling, Periode opplysningsperioden) {
+        Set<AktørId> fosterbarna = new TreeSet<>();
+        fosterbarna.addAll(hentFosterbarnPåBehandlingen(behandling));
+        fosterbarna.addAll(hentFosterbarnFraInfotrygd(behandling, opplysningsperioden));
+        return fosterbarna;
+    }
+
+    private Set<AktørId> hentFosterbarnPåBehandlingen(Behandling behandling) {
+        return fosterbarnRepository.hentHvisEksisterer(behandling.getId()).stream()
+            .flatMap(fosterbarnGrunnlag -> fosterbarnGrunnlag.getFosterbarna().getFosterbarn().stream())
+            .map((fosterbarn -> fosterbarn.getAktørId()))
+            .collect(Collectors.toSet());
+    }
+
+    private Set<AktørId> hentFosterbarnFraInfotrygd(Behandling behandling, Periode opplysningsperioden) {
+        Set<AktørId> fosterbarna = new TreeSet<>();
+        List<Rammevedtak> rammevedtak = omsorgspengerRammevedtakTjeneste.hentRammevedtak(new BehandlingUuidDto(behandling.getUuid())).getRammevedtak();
+        for (Rammevedtak rammevedtaket : rammevedtak) {
+            if (rammevedtaket instanceof Fosterbarn fosterbarn) {
+                if (overlapper(opplysningsperioden, fosterbarn)) {
+                    fosterbarna.add(aktørTjeneste.hentAktørIdForPersonIdent(new PersonIdent(fosterbarn.getMottaker())).orElseThrow());
+                }
+            }
+        }
+        return fosterbarna;
     }
 
     @Override
@@ -83,6 +117,11 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
     }
 
     private boolean overlapper(Periode opplysningsperiode, UtvidetRett utvidetRett) {
+        Periode utvidetRettPeriode = new Periode(utvidetRett.gyldigFraOgMed(), utvidetRett.gyldigTilOgMed());
+        return utvidetRettPeriode.overlaps(opplysningsperiode);
+    }
+
+    private boolean overlapper(Periode opplysningsperiode, no.nav.k9.aarskvantum.kontrakter.Fosterbarn utvidetRett) {
         Periode utvidetRettPeriode = new Periode(utvidetRett.gyldigFraOgMed(), utvidetRett.gyldigTilOgMed());
         return utvidetRettPeriode.overlaps(opplysningsperiode);
     }

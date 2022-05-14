@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
@@ -41,6 +42,9 @@ public enum RelasjonsRolleType implements Kodeverdi {
     // TODO: sjekk denne
     @Deprecated
     HOVEDSØKER_FRA_SØKNAD("HOVS", "Hovedsøker fra søknad"),
+
+    FOSTERBARN("FOSTERBARN", "Fosterbarn"),
+    FOSTERFORELDER("FOSTERFORELDER", "Fosterforelder"),
 
     UDEFINERT("-", "Ikke definert"),
     ;
@@ -110,7 +114,7 @@ public enum RelasjonsRolleType implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();

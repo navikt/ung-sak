@@ -83,6 +83,8 @@ public class JettyServer {
     }
 
     protected void bootStrap() throws Exception { // NOSONAR
+
+        System.setProperty("org.jboss.weld.construction.relaxed", "false");
         konfigurer();
         migrerDatabaser();
         start(appKonfigurasjon);
@@ -180,16 +182,16 @@ public class JettyServer {
         webAppContext.setAttribute("org.eclipse.jetty.server.webapp.WebInfIncludeJarPattern",
             "^.*jersey-.*.jar$|^.*felles-sikkerhet.*.jar$");
         webAppContext.setSecurityHandler(createSecurityHandler());
-        
+
         final ServletContainerInitializerHolder jerseyHolder = webAppContext.addServletContainerInitializer(new JerseyServletContainerInitializer());
         jerseyHolder.addStartupClasses(getJaxRsApplicationClasses());
-        
+
         webAppContext.setThrowUnavailableOnStartupException(true);
-        
+
         return webAppContext;
     }
-    
-    protected Class<?>[] getJaxRsApplicationClasses() {       
+
+    protected Class<?>[] getJaxRsApplicationClasses() {
         return new Class<?>[] {
             no.nav.k9.felles.oidc.OidcApplication.class,
             no.nav.k9.sak.web.app.ApplicationConfig.class,
