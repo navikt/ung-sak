@@ -70,7 +70,7 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
 
             OppdateringResultat resultat = OppdateringResultat.nyttResultat();
             resultat.rekjørSteg();
-            //må til innhent registeropplysninger for å få med barn over 12 år når hvis det er lag til KS-rammevedtak
+            //må til innhent registeropplysninger for å få med barn over 12 år når hvis det er lag til kronisk syk-rammevedtak
             resultat.setSteg(BehandlingStegType.INNHENT_REGISTEROPP);
             return resultat;
         }
