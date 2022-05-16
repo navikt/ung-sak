@@ -39,6 +39,8 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 
 @FagsakYtelseTypeRef
 @BehandlingStegRef(value = PRECONDITION_BEREGNING)
@@ -54,6 +56,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private BeregningsgrunnlagTjeneste kalkulusTjeneste;
+    private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
 
 
     protected VurderPreconditionBeregningSteg() {
@@ -68,7 +71,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
                                            @Any Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere,
                                            BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                           BeregningsgrunnlagTjeneste kalkulusTjeneste) {
+                                           BeregningsgrunnlagTjeneste kalkulusTjeneste,
+                                           BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
@@ -77,6 +81,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         this.aksjonspunktUtledere = aksjonspunktUtledere;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.kalkulusTjeneste = kalkulusTjeneste;
+        this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
     }
 
     @Override
@@ -96,7 +101,37 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         // 4. avbryter alle aksjonspunkt i beregning som er åpne (aksjonspunkt reutledes på nytt ved behov)
         abrytÅpneBeregningaksjonspunkter(kontekst, behandling);
 
+        // 5. kopierer input overstyringer for migrering fra infotrygd
+        kopierInputOverstyring(behandling);
+
         return BehandleStegResultat.utførtMedAksjonspunktResultater(finnAksjonspunkter(behandling));
+    }
+
+    /**
+     * Kopierer overstyrt input i revurderinger som ikke er manuelt opprettet (se https://jira.adeo.no/browse/TSF-2658)
+     *
+     * @param behandling Behandling
+     */
+    private void kopierInputOverstyring(Behandling behandling) {
+        var perioderTilVurdering = vurdertePerioder(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, BehandlingReferanse.fra(behandling));
+        if (behandling.erRevurdering() && !behandling.erManueltOpprettet() && !harEksisterendeOverstyringer(behandling, perioderTilVurdering)) {
+            var kopiertInputOverstyring = behandling.getOriginalBehandlingId().flatMap(beregningPerioderGrunnlagRepository::hentGrunnlag)
+                .stream()
+                .flatMap(it -> it.getInputOverstyringPerioder().stream())
+                .filter(it -> perioderTilVurdering.stream().anyMatch(p -> p.getFomDato().equals(it.getSkjæringstidspunkt())))
+                .map(InputOverstyringPeriode::new)
+                .toList();
+            if (!kopiertInputOverstyring.isEmpty()) {
+                beregningPerioderGrunnlagRepository.lagreInputOverstyringer(behandling.getId(), kopiertInputOverstyring);
+            }
+        }
+    }
+
+    private boolean harEksisterendeOverstyringer(Behandling behandling, Set<DatoIntervallEntitet> perioderTilVurdering) {
+        return beregningPerioderGrunnlagRepository.hentGrunnlag(behandling.getId())
+            .stream()
+            .flatMap(it -> it.getInputOverstyringPerioder().stream())
+            .anyMatch(it -> perioderTilVurdering.stream().anyMatch(p -> p.getFomDato().equals(it.getSkjæringstidspunkt())));
     }
 
     private void abrytÅpneBeregningaksjonspunkter(BehandlingskontrollKontekst kontekst, Behandling behandling) {

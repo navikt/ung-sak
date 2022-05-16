@@ -25,13 +25,17 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
@@ -50,6 +54,8 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilter;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.opptjening.PSBOppgittOpptjeningFilter;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -65,12 +71,15 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
     private BeregningsgrunnlagVilkårTjeneste perioderTilVurderingTjeneste = mock(BeregningsgrunnlagVilkårTjeneste.class);
     private Behandling behandling;
+    private Behandling revurderingIkkeManueltOpprettet;
+    private Behandling behandlingManueltOpprettet;
     private Fagsak fagsak;
     private PSBOpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste;
     private PSBOppgittOpptjeningFilter oppgittOpptjeningFilter;
     private VilkårPeriodeFilterProvider filterProvider = mock(VilkårPeriodeFilterProvider.class);
     private PSBPreconditionBeregningAksjonspunktUtleder utleder;
     private VilkårPeriodeFilter filter = mock(VilkårPeriodeFilter.class);
+    private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
 
 
     @BeforeEach
@@ -82,8 +91,23 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         fagsakRepository.opprettNy(fagsak);
         behandling = Behandling.forFørstegangssøknad(fagsak).medBehandlingStatus(BehandlingStatus.UTREDES).build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+        behandlingManueltOpprettet = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
+            .medBehandlingStatus(BehandlingStatus.UTREDES)
+            .medBehandlingÅrsak(new BehandlingÅrsak.Builder(List.of(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_INNTEKT)).medManueltOpprettet(true)).build();
+        behandlingRepository.lagre(behandlingManueltOpprettet, behandlingRepository.taSkriveLås(behandlingManueltOpprettet));
+
+        revurderingIkkeManueltOpprettet = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
+            .medBehandlingStatus(BehandlingStatus.UTREDES)
+            .medBehandlingÅrsak(new BehandlingÅrsak.Builder(List.of(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_INNTEKT))).build();
+        behandlingRepository.lagre(revurderingIkkeManueltOpprettet, behandlingRepository.taSkriveLås(revurderingIkkeManueltOpprettet));
+
+
         var filter = mock(VilkårPeriodeFilter.class);
         when(filterProvider.getFilter(BehandlingReferanse.fra(behandling), false))
+            .thenReturn(filter);
+        when(filterProvider.getFilter(BehandlingReferanse.fra(behandlingManueltOpprettet), false))
+            .thenReturn(filter);
+        when(filterProvider.getFilter(BehandlingReferanse.fra(revurderingIkkeManueltOpprettet), false))
             .thenReturn(filter);
         when(perioderTilVurderingTjeneste.utledPerioderTilVurdering(any(BehandlingReferanse.class), any(VilkårPeriodeFilter.class)))
             .thenReturn(new TreeSet<>(Set.of(new PeriodeTilVurdering(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
@@ -94,13 +118,15 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.PLEIEPENGER, new Periode(STP.minusMonths(1), STP),
                     null, null, null)))));
 
+        beregningPerioderGrunnlagRepository = new BeregningPerioderGrunnlagRepository(entityManager, new VilkårResultatRepository(entityManager));
+
         oppgittOpptjeningFilter = mock(PSBOppgittOpptjeningFilter.class);
         when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any(LocalDate.class)))
             .thenReturn(Optional.empty());
         utleder = new PSBPreconditionBeregningAksjonspunktUtleder(iayTjeneste, opptjeningForBeregningTjeneste,
             fagsakRepository, oppgittOpptjeningFilter,
             perioderTilVurderingTjeneste,
-            filterProvider, true, true);
+            filterProvider, beregningPerioderGrunnlagRepository, behandlingRepository, true, true);
     }
 
     @Test
@@ -108,15 +134,39 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         utleder = new PSBPreconditionBeregningAksjonspunktUtleder(iayTjeneste, opptjeningForBeregningTjeneste,
             fagsakRepository, oppgittOpptjeningFilter,
             perioderTilVurderingTjeneste,
-            filterProvider, false, true);
+            filterProvider, beregningPerioderGrunnlagRepository, behandlingRepository, false, true);
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
         assertThat(aksjonspunkter.size()).isEqualTo(0);
     }
 
     @Test
+    void skal_ikke_returnere_aksjonspunkt_når_eksisterende_overstyring() {
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP), Arbeidskategori.ARBEIDSTAKER, revurderingIkkeManueltOpprettet);
+        fagsakRepository.opprettInfotrygdmigrering(revurderingIkkeManueltOpprettet.getFagsakId(), STP);
+        beregningPerioderGrunnlagRepository.lagreInputOverstyringer(revurderingIkkeManueltOpprettet.getId(), List.of(new InputOverstyringPeriode(STP, List.of())));
+
+        var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(revurderingIkkeManueltOpprettet, STP)));
+
+        assertThat(aksjonspunkter.size()).isEqualTo(0);
+    }
+
+    @Test
+    void skal_returnere_aksjonspunkt_når_eksisterende_overstyring_og_manuelt_opprettet_behandling() {
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP), Arbeidskategori.ARBEIDSTAKER, behandlingManueltOpprettet);
+        fagsakRepository.opprettInfotrygdmigrering(behandlingManueltOpprettet.getFagsakId(), STP);
+        beregningPerioderGrunnlagRepository.lagreInputOverstyringer(behandlingManueltOpprettet.getId(), List.of(new InputOverstyringPeriode(STP, List.of())));
+
+        var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandlingManueltOpprettet, STP)));
+
+        assertThat(aksjonspunkter.size()).isEqualTo(1);
+    }
+
+
+
+    @Test
     void skal_returnere_aksjonspunkt_eksisterende_migrering() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP), Arbeidskategori.ARBEIDSTAKER);
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP), Arbeidskategori.ARBEIDSTAKER, behandling);
         fagsakRepository.opprettInfotrygdmigrering(behandling.getFagsakId(), STP);
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
@@ -134,7 +184,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         lagInfotrygdPsbYtelsePerioder(List.of(
             DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
             DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30))
-        ), Arbeidskategori.ARBEIDSTAKER);
+        ), Arbeidskategori.ARBEIDSTAKER, behandling);
 
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.plusDays(20));
 
@@ -146,7 +196,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
     @Test
     void skal_ikkje_returnere_aksjonspunkt_med_overlapp_for_periode_som_ikke_vurderes() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusDays(10), STP.minusDays(3)), Arbeidskategori.ARBEIDSTAKER);
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusDays(10), STP.minusDays(3)), Arbeidskategori.ARBEIDSTAKER, behandling);
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP.minusDays(10));
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
@@ -156,7 +206,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
     @Test
     void skal_ikkje_returnere_aksjonspunkt_uten_overlapp() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(2), STP.minusMonths(2).plusDays(2)), Arbeidskategori.ARBEIDSTAKER);
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(2), STP.minusMonths(2).plusDays(2)), Arbeidskategori.ARBEIDSTAKER, behandling);
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
         assertThat(aksjonspunkter.size()).isEqualTo(0);
@@ -164,7 +214,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
     @Test
     void skal_ikke_returnere_ventepunkt_når_ingen_perioder_overlapper_med_infotrygd() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusDays(20), STP.minusDays(10)), Arbeidskategori.ARBEIDSTAKER);
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusDays(20), STP.minusDays(10)), Arbeidskategori.ARBEIDSTAKER, behandling);
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
 
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
@@ -175,7 +225,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
     @Test
     void skal_ikke_returnere_aksjonspunt_ved_pleiepenger_av_dagpenger() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.DAGPENGER);
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.DAGPENGER, behandling);
         when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.PLEIEPENGER_AV_DAGPENGER, new Periode(STP, STP.plusDays(10)),
@@ -189,7 +239,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
     @Test
     void skal_sette_på_vent_ved_pleiepenger_av_næring_uten_søkt_om_næring() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.SELVSTENDIG_NÆRINGSDRIVENDE);
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.SELVSTENDIG_NÆRINGSDRIVENDE, behandling);
         when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.NÆRING, new Periode(STP, STP.plusDays(10)),
@@ -204,7 +254,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
     @Test
     void skal_returnere_aksjonspunkt_ved_pleiepenger_av_næring_med_søkt_om_næring() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.SELVSTENDIG_NÆRINGSDRIVENDE);
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.SELVSTENDIG_NÆRINGSDRIVENDE, behandling);
         when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.NÆRING, new Periode(STP, STP.plusDays(10)),
@@ -222,7 +272,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
     @Test
     void skal_sette_på_vent_ved_pleiepenger_av_frilans_uten_søkt_om_frilans() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.FRILANSER);
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.FRILANSER, behandling);
         when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.FRILANS, new Periode(STP, STP.plusDays(10)),
@@ -238,7 +288,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
     @Test
     void skal_returnere_aksjonspunkt_ved_pleiepenger_av_frilans_med_søkt_om_frilans() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.FRILANSER);
+        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.FRILANSER, behandling);
         when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.FRILANS, new Periode(STP, STP.plusDays(10)),
@@ -270,12 +320,12 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     }
 
 
-    private void lagInfotrygdPsbYtelse(DatoIntervallEntitet periode, Arbeidskategori arbeidskategori) {
-        lagInfotrygdPsbYtelsePerioder(List.of(periode), arbeidskategori);
+    private void lagInfotrygdPsbYtelse(DatoIntervallEntitet periode, Arbeidskategori arbeidskategori, Behandling behandling) {
+        lagInfotrygdPsbYtelsePerioder(List.of(periode), arbeidskategori, behandling);
     }
 
 
-    private void lagInfotrygdPsbYtelsePerioder(List<DatoIntervallEntitet> perioder, Arbeidskategori arbeidskategori) {
+    private void lagInfotrygdPsbYtelsePerioder(List<DatoIntervallEntitet> perioder, Arbeidskategori arbeidskategori, Behandling behandling) {
         var iayBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         var aktørYtelseBuilder = InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder.oppdatere(Optional.empty());
         var ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty());
