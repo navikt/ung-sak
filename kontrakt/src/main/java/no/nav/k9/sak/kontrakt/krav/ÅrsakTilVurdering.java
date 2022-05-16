@@ -29,8 +29,8 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     REVURDERER_NY_INNTEKTSMELDING("REVURDERER_NY_INNTEKTSMELDING", "Ny inntektsmelding"),
     // Perioden ses på pga endringer i felles opplysninger (Nattevåk/beredskap/etablert tilsyn/sykdom
     REVURDERER_ENDRING_FRA_ANNEN_PART("REVURDERER_ENDRING_FRA_ANNEN_PART", "Annen parts vedtak endrer uttak"),
-    UTSATT_BEHANDLING("UTSATT_BEHANDLING", "Utsatt behandling av periode på grunn av avhengighet til annen omsorgspersons uttak"),
-    GJENOPPTAR_UTSATT_BEHANDLING("GJENOPPTAR_UTSATT_BEHANDLING", "Gjenopptar utsatt behandling av periode fra forrige behandling"),
+    UTSATT_BEHANDLING("UTSATT_BEHANDLING", "Utsatt behandling"),
+    GJENOPPTAR_UTSATT_BEHANDLING("GJENOPPTAR_UTSATT_BEHANDLING", "Gjenopptar utsatt behandling"),
     // Endringer på felles opplysninger på sykdomsopplysningene
     REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON("REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "Endring i vurdering av sykdom"),
     // Endringer på felles opplysninger om etablert tilsyn
