@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
 import java.time.DayOfWeek;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,8 @@ import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
@@ -59,6 +62,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
+    private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private UttakTjeneste uttakTjeneste;
 
     public PleiepengerVilkårsPerioderTilVurderingTjeneste() {
@@ -74,6 +78,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
                                                           EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                                           RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                           SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+                                                          UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                                           UttakTjeneste uttakTjeneste) {
         this.vilkårUtleder = vilkårUtleder;
         this.vilkårsPeriodisering = vilkårsPeriodisering;
@@ -84,6 +89,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
+        this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.uttakTjeneste = uttakTjeneste;
 
         søktePerioder = new SøktePerioder(søknadsperiodeTjeneste);
@@ -227,6 +233,14 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
             // TODO: Vurder om uttak skal være med inn her
         }
         periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggereMedÅrsak(referanse));
+        var utsattBehandlingAvPeriode = utsattBehandlingAvPeriodeRepository.hentGrunnlag(referanse.getBehandlingId());
+        if (utsattBehandlingAvPeriode.isPresent()) {
+            periodeMedÅrsaks.addAll(utsattBehandlingAvPeriode.stream()
+                .map(UtsattBehandlingAvPeriode::getPerioder)
+                .flatMap(Collection::stream)
+                .map(it -> new PeriodeMedÅrsak(it.getPeriode(), BehandlingÅrsakType.RE_UTSATT_BEHANDLING))
+                .toList());
+        }
         periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId()))
             .stream()
             .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING))

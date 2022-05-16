@@ -175,7 +175,11 @@ public class UtledStatusPåPerioderTjeneste {
             årsaker.addAll(siste.getValue().getÅrsaker());
         }
         if (årsaker.contains(ÅrsakTilVurdering.FØRSTEGANGSVURDERING)) {
-            årsaker = new HashSet<>(Set.of(ÅrsakTilVurdering.FØRSTEGANGSVURDERING));
+            if (årsaker.contains(ÅrsakTilVurdering.UTSATT_BEHANDLING)) {
+                årsaker = new HashSet<>(Set.of(ÅrsakTilVurdering.FØRSTEGANGSVURDERING, ÅrsakTilVurdering.UTSATT_BEHANDLING));
+            } else {
+                årsaker = new HashSet<>(Set.of(ÅrsakTilVurdering.FØRSTEGANGSVURDERING));
+            }
         }
 
         return new LocalDateSegment<>(interval, new ÅrsakerTilVurdering(årsaker));

@@ -59,7 +59,7 @@ class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
         if (BehandlingÅrsakType.RE_SATS_REGULERING.equals(it.getÅrsak())) {
             return StartpunktType.BEREGNING;
         }
-        if (BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON.equals(it.getÅrsak())) {
+        if (Set.of(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON, BehandlingÅrsakType.RE_UTSATT_BEHANDLING).contains(it.getÅrsak())) {
             return StartpunktType.UTTAKSVILKÅR;
         }
         log.info("Ukjent trigger {} med ukjent startpunkt, starter fra starten", it.getÅrsak());
