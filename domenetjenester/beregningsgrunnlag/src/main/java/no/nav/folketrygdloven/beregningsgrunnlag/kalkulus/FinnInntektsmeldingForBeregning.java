@@ -135,7 +135,7 @@ public class FinnInntektsmeldingForBeregning {
     private static void mapEndringer(LocalDate stp, LocalDateTimeline<BigDecimal> summertRefusjonTidslinje, LocalDate opphører, InntektsmeldingBuilder inntektsmeldingBuilder) {
         summertRefusjonTidslinje.toSegments()
             .stream()
-            .filter(di -> di.getFom().isAfter(stp) && !di.getLocalDateInterval().overlaps(new LocalDateInterval(stp, stp)) && (opphører == null || di.getFom().isBefore(opphører)))
+            .filter(di -> di.getFom().isAfter(stp) && !di.getLocalDateInterval().overlaps(new LocalDateInterval(stp, stp)) && (opphører == null || di.getFom().isBefore(opphører.plusDays(1))))
             .forEach(s -> inntektsmeldingBuilder.leggTil(new Refusjon(s.getValue(), s.getFom())));
     }
 
@@ -147,7 +147,7 @@ public class FinnInntektsmeldingForBeregning {
             .filter(s -> s.getTom().equals(TIDENES_ENDE) && s.getValue().compareTo(BigDecimal.ZERO) == 0)
             .findFirst()
             .map(LocalDateSegment::getFom);
-        return opphørFraInntektsmelding.orElse(null);
+        return opphørFraInntektsmelding.map(d -> d.minusDays(1)).orElse(null);
     }
 
     private static BigDecimal finnRefusjonVedStp(LocalDate stp, LocalDateTimeline<BigDecimal> summertRefusjonTidslinje, InputAktivitetOverstyring a) {
@@ -171,7 +171,9 @@ public class FinnInntektsmeldingForBeregning {
         }
 
         // Opphør
-        alleSegmenter.add(new LocalDateSegment<>(opphørsdatoRefusjon, TIDENES_ENDE, BigDecimal.ZERO));
+        if (opphørsdatoRefusjon != null) {
+            alleSegmenter.add(new LocalDateSegment<>(opphørsdatoRefusjon.plusDays(1), TIDENES_ENDE, BigDecimal.ZERO));
+        }
 
         // Endringer i mellom
         alleSegmenter.addAll(im.getEndringerRefusjon().stream()
