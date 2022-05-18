@@ -64,16 +64,17 @@ public class OpptjeningsperioderTjenesteFRISINN {
                                                                                   InntektArbeidYtelseGrunnlag grunnlag,
                                                                                   OppgittOpptjening oppgittOpptjening,
                                                                                   OpptjeningAktivitetVurdering vurderOpptjening,
-                                                                                  DatoIntervallEntitet opptjeningPeriode) {
+                                                                                  DatoIntervallEntitet opptjeningPeriode,
+                                                                                  DatoIntervallEntitet vilkårsperiode) {
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
 
         var aktørId = ref.getAktørId();
-        var skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
+        var skjæringstidspunkt = vilkårsperiode.getFomDato();
 
         var mapArbeidOpptjening = OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner();
         var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(skjæringstidspunkt);
         for (var yrkesaktivitet : filter.getYrkesaktiviteter()) {
-            var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(ref, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjeningPeriode, Map.of(), false);
+            var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(ref, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjeningPeriode, vilkårsperiode, Map.of());
             perioder.addAll(opptjeningsperioder);
         }
 
