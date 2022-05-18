@@ -42,7 +42,7 @@
         <junit.version>5.8.2</junit.version>
         <felles.version>0.8.0</felles.version>
         <swagger.version>2.2.0</swagger.version>
-        <k9format.version>5.8.7</k9format.version>
+        <k9format.version>5.8.8</k9format.version>
         <jackson.version>2.13.2.20220328</jackson.version>
         <asm.version>9.3</asm.version>
         <kotlin-stdlib.version>1.6.21</kotlin-stdlib.version>
