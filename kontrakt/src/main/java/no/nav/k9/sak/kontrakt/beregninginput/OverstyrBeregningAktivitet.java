@@ -40,6 +40,9 @@ public class OverstyrBeregningAktivitet {
     @Max(100000000)
     private Integer refusjonPrAar;
 
+    @JsonProperty(value = "startdatoRefusjon")
+    private LocalDate startdatoRefusjon;
+
     @JsonProperty(value = "opphørRefusjon")
     private LocalDate opphørRefusjon;
 
@@ -53,12 +56,14 @@ public class OverstyrBeregningAktivitet {
                                       AktørId arbeidsgiverAktørId,
                                       Integer inntektPrAar,
                                       Integer refusjonPrAar,
+                                      LocalDate startdatoRefusjon,
                                       LocalDate opphørRefusjon,
                                       Boolean skalKunneEndreRefusjon) {
         this.arbeidsgiverOrgnr = arbeidsgiverOrgnr;
         this.arbeidsgiverAktørId = arbeidsgiverAktørId;
         this.inntektPrAar = inntektPrAar;
         this.refusjonPrAar = refusjonPrAar;
+        this.startdatoRefusjon = startdatoRefusjon;
         this.opphørRefusjon = opphørRefusjon;
         this.skalKunneEndreRefusjon = skalKunneEndreRefusjon;
     }
@@ -80,6 +85,11 @@ public class OverstyrBeregningAktivitet {
         return refusjonPrAar;
     }
 
+
+    public LocalDate getStartdatoRefusjon() {
+        return startdatoRefusjon;
+    }
+
     public LocalDate getOpphørRefusjon() {
         return opphørRefusjon;
     }
@@ -99,10 +109,18 @@ public class OverstyrBeregningAktivitet {
     }
 
     @AssertTrue(message = "Enten orgnr eller aktørId må være satt")
-    private boolean ok() {
+    public boolean harOrgnrEllerAktørid() {
         var orgnr = getArbeidsgiverOrgnr();
         var aktørId = getArbeidsgiverAktørId();
         return orgnr != null || aktørId != null;
+    }
+
+    @AssertTrue(message = "Enten orgnr eller aktørId må være satt")
+    public boolean erStartdatoRefusjonFørOpphør() {
+        if (startdatoRefusjon == null || opphørRefusjon == null) {
+            return true;
+        }
+        return startdatoRefusjon.isBefore(opphørRefusjon);
     }
 
 

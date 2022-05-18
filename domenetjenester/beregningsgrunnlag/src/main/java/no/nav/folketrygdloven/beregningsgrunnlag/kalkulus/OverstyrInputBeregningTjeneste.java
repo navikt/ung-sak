@@ -12,6 +12,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -20,7 +22,6 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
@@ -177,13 +178,17 @@ public class OverstyrInputBeregningTjeneste {
         var inntektsmeldingerForArbeidsgiver = inntektsmeldingerForPeriode.stream().filter(i -> matcherArbeidsgiver(a, i.getArbeidsgiver())).collect(Collectors.toList());
 
         var harRefusjonskrav = inntektsmeldingerForArbeidsgiver.stream().anyMatch(im -> im.getRefusjonBeløpPerMnd() != null && !im.getRefusjonBeløpPerMnd().erNullEllerNulltall() || im.getEndringerRefusjon().size() > 0);
-        var refusjonskravFraIM = inntektsmeldingerForArbeidsgiver.stream().map(Inntektsmelding::getRefusjonBeløpPerMnd)
-            .filter(Objects::nonNull)
-            .map(Beløp::getVerdi)
+        var refusjonTidslinje = FinnInntektsmeldingForBeregning.lagSummertRefusjontidslinje(migrertStp, inntektsmeldingerForArbeidsgiver);
+        var førsteRefusjonssegment = refusjonTidslinje.toSegments().stream()
+            .filter(s -> s.getValue().compareTo(BigDecimal.ZERO) > 0)
+            .filter(s -> s.getTom().isAfter(migrertStp))
+            .min(Comparator.comparing(LocalDateSegment::getFom));
+        var refusjonskravFraIM = førsteRefusjonssegment
+            .map(LocalDateSegment::getValue)
             .map(BigDecimal.valueOf(12)::multiply)
-            .reduce(BigDecimal::add)
             .map(BigDecimal::intValue)
             .orElse(0);
+        var startdatoRefusjon = førsteRefusjonssegment.map(LocalDateSegment::getFom);
         var refusjonOpphører = inntektsmeldingerForArbeidsgiver.stream().map(Inntektsmelding::getRefusjonOpphører)
             .filter(Objects::nonNull)
             .min(Comparator.naturalOrder());
@@ -192,6 +197,7 @@ public class OverstyrInputBeregningTjeneste {
             a.getArbeidsgiverAktørId() == null ? null : new AktørId(a.getArbeidsgiverAktørId()),
             matchendeOverstyring.map(InputAktivitetOverstyring::getInntektPrÅr).map(Beløp::getVerdi).map(BigDecimal::intValue).orElse(null),
             harRefusjonskrav ? refusjonskravFraIM : matchendeOverstyring.map(InputAktivitetOverstyring::getRefusjonPrÅr).map(Beløp::getVerdi).map(BigDecimal::intValue).orElse(null),
+            matchendeOverstyring.flatMap(InputAktivitetOverstyring::getStartdatoRefusjon).orElse(startdatoRefusjon.orElse(null)),
             harRefusjonskrav ? refusjonOpphører.orElse(null) : matchendeOverstyring.map(InputAktivitetOverstyring::getOpphørRefusjon).orElse(null),
             !harRefusjonskrav
         );

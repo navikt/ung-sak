@@ -210,6 +210,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
             mapArbeidsgiver(overstyrtAktivitet),
             mapBeløp(overstyrtAktivitet.getInntektPrAar()),
             inputAktivitet.getSkalKunneEndreRefusjon() ? mapBeløp(overstyrtAktivitet.getRefusjonPrAar()) : null,
+            overstyrtAktivitet.getStartdatoRefusjon(),
             inputAktivitet.getSkalKunneEndreRefusjon() ? overstyrtAktivitet.getOpphørRefusjon() : null,
             AktivitetStatus.ARBEIDSTAKER,
             finnMinMaksPeriode(opptjeningsaktivitetForArbeidsgiver));
