@@ -83,8 +83,6 @@ public class JettyServer {
     }
 
     protected void bootStrap() throws Exception { // NOSONAR
-
-        System.setProperty("org.jboss.weld.construction.relaxed", "false");
         konfigurer();
         migrerDatabaser();
         start(appKonfigurasjon);
