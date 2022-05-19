@@ -36,7 +36,10 @@ class OpptjeningAktivitetArbeidVurderer {
 
         // Underkjent vurderingsstatus dersom sammenhengende permisjonsperiode > 14 dager og overlapper med aktivitetsperiode
         var permisjonOver14Dager = tidslinjeTilVurdering.compress().stream()
-            .filter(segment -> segment.getValue() == Boolean.TRUE && segment.getLocalDateInterval().days() > 14 && segment.getLocalDateInterval().overlaps(input.getAktivitetPeriode().toLocalDateInterval()))
+            .filter(segment -> segment.getValue() == Boolean.TRUE &&
+                segment.getLocalDateInterval().days() > 14 &&
+                segment.getLocalDateInterval().overlaps(input.getAktivitetPeriode().toLocalDateInterval()) &&
+                segment.getLocalDateInterval().overlaps(input.getOpptjeningsperiode().toLocalDateInterval()))
             .findFirst();
         if (permisjonOver14Dager.isPresent()) {
             log.info("Opptjeningsaktivitet for virksomhet={} underkjennes pga permisjoner som overstiger 14 dager. Permitteringsperiode={}", yrkesaktivitet.getArbeidsgiver(), permisjonOver14Dager.get().getLocalDateInterval());

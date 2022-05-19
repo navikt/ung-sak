@@ -16,6 +16,7 @@ public class VurderStatusInput {
     private DatoIntervallEntitet vilkårsperiode;
     private Yrkesaktivitet registerAktivitet;
     private DatoIntervallEntitet aktivitetPeriode;
+    private DatoIntervallEntitet opptjeningsperiode;
     private Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse = new HashMap<>();
 
     public VurderStatusInput(OpptjeningAktivitetType type, BehandlingReferanse behandlingReferanse) {
@@ -37,6 +38,14 @@ public class VurderStatusInput {
 
     public void setVilkårsperiode(DatoIntervallEntitet vilkårsperiode) {
         this.vilkårsperiode = vilkårsperiode;
+    }
+
+    public DatoIntervallEntitet getOpptjeningsperiode() {
+        return opptjeningsperiode;
+    }
+
+    public void setOpptjeningsperiode(DatoIntervallEntitet opptjeningsperiode) {
+        this.opptjeningsperiode = opptjeningsperiode;
     }
 
     public Yrkesaktivitet getRegisterAktivitet() {
