@@ -1,6 +1,9 @@
 package no.nav.k9.sak.ytelse.beregning.grunnlag;
 
 import java.time.LocalDate;
+import java.util.Optional;
+
+import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
@@ -13,9 +16,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.Immutable;
-
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.kodeverk.AktivitetStatusKodeverdiConverter;
@@ -46,8 +46,11 @@ public class InputAktivitetOverstyring extends BaseEntitet {
     @Column(name = "opphoer_refusjon")
     private LocalDate opphørRefusjon;
 
-    @Convert(converter= AktivitetStatusKodeverdiConverter.class)
-    @Column(name="aktivitet_status", nullable = false)
+    @Column(name = "start_refusjon")
+    private LocalDate startdatoRefusjon;
+
+    @Convert(converter = AktivitetStatusKodeverdiConverter.class)
+    @Column(name = "aktivitet_status", nullable = false)
     private AktivitetStatus aktivitetStatus;
 
     @Embedded
@@ -68,11 +71,14 @@ public class InputAktivitetOverstyring extends BaseEntitet {
     public InputAktivitetOverstyring(Arbeidsgiver arbeidsgiver,
                                      Beløp inntektPrÅr,
                                      Beløp refusjonPrÅr,
-                                     LocalDate opphørRefusjon, AktivitetStatus aktivitetStatus,
+                                     LocalDate startdatoRefusjon,
+                                     LocalDate opphørRefusjon,
+                                     AktivitetStatus aktivitetStatus,
                                      DatoIntervallEntitet periode) {
         this.arbeidsgiver = arbeidsgiver;
         this.inntektPrÅr = inntektPrÅr;
         this.refusjonPrÅr = refusjonPrÅr;
+        this.startdatoRefusjon = startdatoRefusjon;
         this.opphørRefusjon = opphørRefusjon;
         this.aktivitetStatus = aktivitetStatus;
         this.periode = periode;
@@ -84,6 +90,7 @@ public class InputAktivitetOverstyring extends BaseEntitet {
         this.inntektPrÅr = inputAktivitetOverstyring.getInntektPrÅr();
         this.refusjonPrÅr = inputAktivitetOverstyring.getRefusjonPrÅr();
         this.opphørRefusjon = inputAktivitetOverstyring.getOpphørRefusjon();
+        this.startdatoRefusjon = inputAktivitetOverstyring.getStartdatoRefusjon().orElse(null);
         this.periode = inputAktivitetOverstyring.getPeriode();
     }
 
@@ -109,5 +116,9 @@ public class InputAktivitetOverstyring extends BaseEntitet {
 
     public LocalDate getOpphørRefusjon() {
         return opphørRefusjon;
+    }
+
+    public Optional<LocalDate> getStartdatoRefusjon() {
+        return Optional.ofNullable(startdatoRefusjon);
     }
 }
