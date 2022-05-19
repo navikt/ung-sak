@@ -216,7 +216,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
         var aktivitetFraInntektsmelding = OverstyrInputBeregningTjeneste.mapTilInntektsmeldingAktivitet(skjaeringstidspunkt, arbeidsgiver, inntektsmeldingerForPeriode);
 
         var startdatoRefusjonFraInntektsmelding = aktivitetFraInntektsmelding.map(OverstyrBeregningAktivitet::getStartdatoRefusjon);
-        if (startdatoRefusjonFraInntektsmelding.isPresent() && overstyrtAktivitet.getStartdatoRefusjon().isBefore(startdatoRefusjonFraInntektsmelding.get())) {
+        if (startdatoRefusjonFraInntektsmelding.isPresent() && overstyrtAktivitet.getStartdatoRefusjon() != null && overstyrtAktivitet.getStartdatoRefusjon().isBefore(startdatoRefusjonFraInntektsmelding.get())) {
             throw new IllegalStateException("Kan ikke sette startdato for refusjon tidligere enn oppgitt fra arbeidsgiver");
         }
 
