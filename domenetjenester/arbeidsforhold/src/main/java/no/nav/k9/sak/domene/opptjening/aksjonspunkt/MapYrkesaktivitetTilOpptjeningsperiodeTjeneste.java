@@ -80,6 +80,7 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                 input.setAktivitetPeriode(periode);
                 input.setTidslinjePerYtelse(tidslinjePerYtelse);
                 input.setVilkårsperiode(vilkårsperiode);
+                input.setOpptjeningsperiode(opptjeningsperiode);
                 builder.medVurderingsStatus(vurderForSaksbehandling.vurderStatus(input));
                 perioderForAktivitetsavtaler.add(builder.build());
             }

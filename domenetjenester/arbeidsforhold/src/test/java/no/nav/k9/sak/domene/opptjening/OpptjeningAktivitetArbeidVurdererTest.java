@@ -254,6 +254,7 @@ public class OpptjeningAktivitetArbeidVurdererTest {
         var yrkesaktivitet = yrkesaktiviteter.iterator().next();
         input.setRegisterAktivitet(yrkesaktivitet);
         input.setVilkårsperiode(vilkårsperiode);
+        input.setOpptjeningsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(vilkårsperiode.getFomDato().minusDays(29), vilkårsperiode.getFomDato().minusDays(1)));
         input.setAktivitetPeriode(yrkesaktivitet.getAnsettelsesPeriode().stream().findFirst().map(AktivitetsAvtale::getPeriode).orElseThrow());
         return input;
     }

@@ -20,7 +20,8 @@ import no.nav.k9.sak.typer.Stillingsprosent;
 public final class PermisjonPerYrkesaktivitet {
 
     public static LocalDateTimeline<Boolean> utledPermisjonPerYrkesaktivitet(Yrkesaktivitet yrkesaktivitet,
-                                                                             Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse, DatoIntervallEntitet vilkårsperiode) {
+                                                                             Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse,
+                                                                             DatoIntervallEntitet vilkårsperiode) {
         List<LocalDateTimeline<Boolean>> aktivPermisjonTidslinjer = yrkesaktivitet.getPermisjon()
             .stream()
             .filter(permisjon -> erStørreEllerLik100Prosent(permisjon.getProsentsats()))
