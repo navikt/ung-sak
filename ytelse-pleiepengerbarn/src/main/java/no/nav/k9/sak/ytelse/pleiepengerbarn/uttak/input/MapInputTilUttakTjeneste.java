@@ -104,7 +104,15 @@ public class MapInputTilUttakTjeneste {
 
         final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering, input.getUtvidetPeriodeSomFølgeAvDødsfall());
 
-        var inaktivitetUtlederInput = new InaktivitetUtlederInput(behandling.getAktørId(), tidslinjeTilVurdering, input.getInntektArbeidYtelseGrunnlag());
+        var opptjeningTidslinje = new LocalDateTimeline<>(input.getVilkårene()
+            .getVilkår(VilkårType.OPPTJENINGSVILKÅRET)
+            .orElseThrow()
+            .getPerioder()
+            .stream()
+            .map(VilkårPeriode::getPeriode)
+            .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).toList());
+
+        var inaktivitetUtlederInput = new InaktivitetUtlederInput(behandling.getAktørId(), opptjeningTidslinje, input.getInntektArbeidYtelseGrunnlag());
         var inaktivTidslinje = new PerioderMedInaktivitetUtleder().utled(inaktivitetUtlederInput);
 
         var arbeidstidInput = new ArbeidstidMappingInput()
