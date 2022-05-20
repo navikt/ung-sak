@@ -26,11 +26,9 @@ public class UtsattBehandlingAvPeriodeRepository {
         this.entityManager = entityManager;
     }
 
-    public void leggTil(Long behandlingId, Set<UtsattPeriode> utsattePerioder) {
+    public void lagre(Long behandlingId, Set<UtsattPeriode> utsattePerioder) {
         var prosessTriggere = hentEksisterendeGrunnlag(behandlingId);
         var result = new HashSet<>(utsattePerioder);
-
-        prosessTriggere.ifPresent(it -> result.addAll(it.getPerioder()));
 
         if (!Objects.equals(result, prosessTriggere.map(UtsattBehandlingAvPeriode::getPerioder).orElse(Set.of()))) {
             prosessTriggere.ifPresent(this::deaktiver);

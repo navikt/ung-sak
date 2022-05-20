@@ -5,7 +5,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRST�
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.List;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -26,7 +25,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
@@ -92,36 +90,27 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     }
 
     private BehandleStegResultat eksperimentærHåndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
-        var uttakPrioriteringsrekkefølge = samtidigUttakTjeneste.utledPrioriteringsrekkefølge(ref);
-        log.info("[Eksperimentær] annenSakSomMåBehandlesFørst={}, Har perioder uten prio={}", uttakPrioriteringsrekkefølge.isAnnenSakBehandlesFørst(), !uttakPrioriteringsrekkefølge.getTidslinjeUtenPrioritet().isEmpty());
+        var kjøreplan = samtidigUttakTjeneste.utledPrioriteringsrekkefølge(ref);
+        log.info("[Eksperimentær] annenSakSomMåBehandlesFørst={}, Har perioder uten prio={}", !kjøreplan.kanAktuellFagsakFortsette(), kjøreplan.perioderSomSkalUtsettesForAktuellFagsak());
 
-        if (uttakPrioriteringsrekkefølge.harGjensidigAvhengighet()) {
-            var utsattePerioder = uttakPrioriteringsrekkefølge.getTidslinjeUtenPrioritet()
-                .toSegments()
-                .stream()
-                .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
-                .collect(Collectors.toCollection(TreeSet::new));
+        if (kjøreplan.kanAktuellFagsakFortsette()) {
+            var utsattePerioder = kjøreplan.perioderSomSkalUtsettesForAktuellFagsak();
             log.info("[Eksperimentær] Utsettelse behandling av perioder {}", utsattePerioder);
 
-            utsattBehandlingAvPeriodeRepository.leggTil(ref.getBehandlingId(), utsattePerioder.stream().map(UtsattPeriode::new).collect(Collectors.toSet()));
+            utsattBehandlingAvPeriodeRepository.lagre(ref.getBehandlingId(), utsattePerioder.stream().map(UtsattPeriode::new).collect(Collectors.toSet()));
 
             final Uttaksgrunnlag oppdatertRequests = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
             uttakTjeneste.opprettUttaksplan(oppdatertRequests);
 
-            final boolean annenSakSomFortsattMåBehandlesFørst = samtidigUttakTjeneste.isAnnenSakSomMåBehandlesFørst(ref);
-            log.info("[Eksperimentær] Etter utsettelse annenSakSomFortsattMåBehandlesFørst={}", annenSakSomFortsattMåBehandlesFørst);
-            if (annenSakSomFortsattMåBehandlesFørst) {
-                return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK));
-            } else if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK)) {
+            if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK)) {
                 avbrytAksjonspunkt(behandling, kontekst);
             }
-        } else if (uttakPrioriteringsrekkefølge.isAnnenSakBehandlesFørst()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK));
-        } else if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK)) {
-            avbrytAksjonspunkt(behandling, kontekst);
-        }
 
-        return BehandleStegResultat.utførtUtenAksjonspunkter();
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        } else {
+            log.info("[Eksperimentær] Venter på behandling av andre fagsaker");
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK));
+        }
     }
 
     private BehandleStegResultat ordinærHåndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
