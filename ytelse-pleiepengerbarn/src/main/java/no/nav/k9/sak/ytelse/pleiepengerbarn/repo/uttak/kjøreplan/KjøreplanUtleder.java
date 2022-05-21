@@ -159,11 +159,23 @@ public class KjøreplanUtleder {
     private boolean harVærtUtsattOgIkkeHattVedtakkSiden(SakOgBehandlinger sakOgBehandlinger, DatoIntervallEntitet periode, Map<Long, NavigableSet<DatoIntervallEntitet>> utsattePerioderPerBehandling, Long aktuellBehandling) {
         // Antar at utsatte perioder blir behandlet i neste behandling, hvis premisset faller så må det sjekkes om den har blitt utsatt i påfølgende behandling også
         return utsattePerioderPerBehandling.getOrDefault(aktuellBehandling, new TreeSet<>()).stream().anyMatch(p -> p.overlapper(periode))
-            && harIkkeHattVedtakSiden(sakOgBehandlinger, aktuellBehandling);
+            && harIkkeHattVedtakSiden(sakOgBehandlinger, periode, utsattePerioderPerBehandling, aktuellBehandling);
     }
 
-    private Boolean harIkkeHattVedtakSiden(SakOgBehandlinger sakOgBehandlinger, Long aktuellBehandling) {
-        return sakOgBehandlinger.getEtterfølgendeBehandling(aktuellBehandling).map(b -> !sakOgBehandlinger.getBehandlingStatus(b).erFerdigbehandletStatus()).orElse(false);
+    private Boolean harIkkeHattVedtakSiden(SakOgBehandlinger sakOgBehandlinger, DatoIntervallEntitet periode, Map<Long, NavigableSet<DatoIntervallEntitet>> utsattePerioderPerBehandling, Long aktuellBehandling) {
+        var etterfølgendeBehandling = sakOgBehandlinger.getEtterfølgendeBehandling(aktuellBehandling);
+        if (etterfølgendeBehandling.isEmpty()) {
+            return true;
+        }
+        var etterfølgendeBehandlingId = etterfølgendeBehandling.get();
+        var vedtattBehandling = sakOgBehandlinger.getBehandlingStatus(etterfølgendeBehandlingId).erFerdigbehandletStatus();
+        var erUtsatt = utsattePerioderPerBehandling.getOrDefault(etterfølgendeBehandlingId, new TreeSet<>()).stream().anyMatch(p -> p.overlapper(periode));
+
+        if (vedtattBehandling && !erUtsatt) {
+            return false;
+        }
+
+        return harIkkeHattVedtakSiden(sakOgBehandlinger, periode, utsattePerioderPerBehandling, etterfølgendeBehandlingId);
     }
 
     private Map<Long, Boolean> utledBehovForUtsettelse(KravPrioInput input, LocalDateTimeline<List<InternalKravprioritet>> kravprioritetPåEndringerOgVedtakstatus) {
@@ -209,7 +221,7 @@ public class KjøreplanUtleder {
                 .toList();
 
             var unikeSakerMedKrav = kravprioritetForPeriode.stream().map(InternalKravprioritet::getFagsak).collect(Collectors.toSet());
-            // TODO: Utvide med støtte for å kjøre videre ved innleggelse også (utlede antall felt på motorveien)
+            // TODO: Vurdere om det skal utvides med støtte for å kjøre videre ved innleggelse også (utlede antall felt på motorveien)
             if (unikeSakerMedKrav.size() < 2) {
                 continue;
             }
@@ -223,10 +235,6 @@ public class KjøreplanUtleder {
         return harPrioritetIPeriodeAndreHarKravPå && harIkkePrioritetIPeriodeAndreHarKravPå;
     }
 
-    private boolean erIkkeVedtatt(InternalKravprioritet it, Map<Long, NavigableSet<DatoIntervallEntitet>> utsattePerioderPerBehandling) {
-        return false;
-    }
-
     LocalDateTimeline<List<InternalKravprioritet>> utledInternKravprio(List<SakOgBehandlinger> sakOgBehandlinger) {
         LocalDateTimeline<List<InternalKravprioritet>> kravprioritetstidslinje = LocalDateTimeline.empty();
         for (SakOgBehandlinger sakOgBehandling : sakOgBehandlinger) {
@@ -234,13 +242,6 @@ public class KjøreplanUtleder {
             kravprioritetstidslinje = kravprioritetstidslinje.union(fagsakTidslinje, this::mergeKravPåTversAvSaker);
         }
         return kravprioritetstidslinje;
-    }
-
-    private Kravprioritet mapFraInternTilEkstern(InternalKravprioritet kravprio) {
-        return new Kravprioritet(fagsakRepository.finnEksaktFagsak(kravprio.getFagsak()),
-            kravprio.getJournalpostId(),
-            behandlingRepository.hentBehandling(kravprio.getAktuellBehandling()),
-            kravprio.getTidspunktForKrav());
     }
 
     private SakOgBehandlinger mapTilSakOgBehandling(Fagsak fagsak, VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste) {
