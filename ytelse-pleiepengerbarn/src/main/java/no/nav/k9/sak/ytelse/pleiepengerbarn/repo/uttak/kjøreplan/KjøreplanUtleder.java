@@ -171,8 +171,8 @@ public class KjøreplanUtleder {
         var vedtattBehandling = sakOgBehandlinger.getBehandlingStatus(etterfølgendeBehandlingId).erFerdigbehandletStatus();
         var erUtsatt = utsattePerioderPerBehandling.getOrDefault(etterfølgendeBehandlingId, new TreeSet<>()).stream().anyMatch(p -> p.overlapper(periode));
 
-        if (vedtattBehandling && !erUtsatt) {
-            return false;
+        if (!erUtsatt) {
+            return vedtattBehandling;
         }
 
         return harIkkeHattVedtakSiden(sakOgBehandlinger, periode, utsattePerioderPerBehandling, etterfølgendeBehandlingId);
