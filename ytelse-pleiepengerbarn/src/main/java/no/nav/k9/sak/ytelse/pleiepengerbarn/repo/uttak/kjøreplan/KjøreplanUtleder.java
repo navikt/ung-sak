@@ -172,7 +172,7 @@ public class KjøreplanUtleder {
         var erUtsatt = utsattePerioderPerBehandling.getOrDefault(etterfølgendeBehandlingId, new TreeSet<>()).stream().anyMatch(p -> p.overlapper(periode));
 
         if (!erUtsatt) {
-            return vedtattBehandling;
+            return !vedtattBehandling;
         }
 
         return harIkkeHattVedtakSiden(sakOgBehandlinger, periode, utsattePerioderPerBehandling, etterfølgendeBehandlingId);
