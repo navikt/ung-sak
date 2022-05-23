@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -41,7 +40,13 @@ public class KandidaterForGReguleringTjeneste {
     }
 
     public boolean skalGReguleres(Long fagsakId, DatoIntervallEntitet periode) {
-        var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId).orElseThrow();
+        var sisteBehandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
+
+        if (sisteBehandlingOpt.isEmpty()) {
+            return false;
+        }
+
+        var sisteBehandling = sisteBehandlingOpt.get();
 
         if (sisteBehandling.erHenlagt()) {
             var behandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
@@ -69,7 +74,7 @@ public class KandidaterForGReguleringTjeneste {
             .stream()
             .filter(it -> Utfall.OPPFYLT.equals(it.getGjeldendeUtfall()))
             .filter(it -> periode.overlapper(it.getPeriode().getFomDato(), it.getFom()))
-            .collect(Collectors.toList()); // FOM må være i perioden
+            .toList(); // FOM må være i perioden
 
         if (overlappendeGrunnlag.isEmpty()) {
             return false;
