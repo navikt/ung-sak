@@ -81,11 +81,11 @@ import no.nav.k9.sak.typer.Saksnummer;
 @Default
 public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
+    protected InntektArbeidYtelseTjeneste iayTjeneste;
+    protected LagBeregnRequestTjeneste beregnRequestTjeneste;
     private KalkulusRestKlient restTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
-    protected InntektArbeidYtelseTjeneste iayTjeneste;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
-    protected LagBeregnRequestTjeneste beregnRequestTjeneste;
     private FinnInntektsmeldingForBeregning finnInntektsmeldingForBeregning;
 
     public KalkulusTjeneste() {
@@ -316,6 +316,9 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     public Map<UUID, GrunnbeløpReguleringStatus> kontrollerBehovForGregulering(List<UUID> koblingerÅSpørreMot, Saksnummer saksnummer) {
+        if (koblingerÅSpørreMot.isEmpty()) {
+            return Map.of();
+        }
         KontrollerGrunnbeløpRequest request = new KontrollerGrunnbeløpRequest(koblingerÅSpørreMot, saksnummer.getVerdi());
         GrunnbeløpReguleringRespons respons = restTjeneste.kontrollerBehovForGRegulering(request);
         return respons.getResultat();

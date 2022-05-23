@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -71,6 +70,10 @@ public class KandidaterForGReguleringTjeneste {
             .filter(it -> Utfall.OPPFYLT.equals(it.getGjeldendeUtfall()))
             .filter(it -> periode.overlapper(it.getPeriode().getFomDato(), it.getFom()))
             .collect(Collectors.toList()); // FOM må være i perioden
+
+        if (overlappendeGrunnlag.isEmpty()) {
+            return false;
+        }
 
         var bg = beregningPerioderGrunnlagRepository.hentGrunnlag(sisteBehandling.getId()).orElseThrow();
         List<UUID> koblingerÅSpørreMot = new ArrayList<>();
