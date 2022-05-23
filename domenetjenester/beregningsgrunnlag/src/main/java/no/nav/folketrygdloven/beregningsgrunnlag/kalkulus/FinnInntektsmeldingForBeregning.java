@@ -188,7 +188,7 @@ public class FinnInntektsmeldingForBeregning {
         }
 
         // Opphør
-        if (opphørsdatoRefusjon != null) {
+        if (opphørsdatoRefusjon != null && opphørsdatoRefusjon.isBefore(TIDENES_ENDE)) {
             alleSegmenter.add(new LocalDateSegment<>(opphørsdatoRefusjon.plusDays(1), TIDENES_ENDE, BigDecimal.ZERO));
         }
 
