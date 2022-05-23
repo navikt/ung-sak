@@ -10,10 +10,10 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelsePeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 
 @Dependent
@@ -83,7 +83,7 @@ public class SamtidigUttakOverlappsjekker {
 
     private boolean manglerInnleggelseIPeriodeMedOverlapp(LocalDateTimeline<List<Kravprioritet>> perioderMedOverlapp,
                                                           LocalDateTimeline<Boolean> innleggelseTimeline) {
-        return !SykdomUtils.kunPerioderSomIkkeFinnesI(perioderMedOverlapp, innleggelseTimeline).isEmpty();
+        return !TidslinjeUtil.kunPerioderSomIkkeFinnesI(perioderMedOverlapp, innleggelseTimeline).isEmpty();
     }
 
     private boolean erIkkeSøkerMedAndreprioritetPåBarnetIPerioderMedInnleggelse(BehandlingReferanse ref,

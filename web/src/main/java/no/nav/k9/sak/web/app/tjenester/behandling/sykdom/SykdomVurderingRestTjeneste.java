@@ -40,6 +40,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomPeriodeMedEndringDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingDto;
@@ -58,7 +59,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentHarOppdate
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPeriodeMedEndring;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
@@ -391,15 +391,13 @@ public class SykdomVurderingRestTjeneste {
         for (Map.Entry<SykdomVurderingVersjon, List<Periode>> vurderingPerioder : perioderSomSkalFjernesFraVurdering.entrySet()) {
             SykdomVurderingVersjon vurdering = vurderingPerioder.getKey();
 
-            LocalDateTimeline<Boolean> tidslinjeSomSkalTrekkesFra = SykdomUtils.toLocalDateTimeline(vurderingPerioder.getValue());
+            LocalDateTimeline<Boolean> tidslinjeSomSkalTrekkesFra = TidslinjeUtil.tilTidslinjeKomprimert(vurderingPerioder.getValue());
 
-            LocalDateTimeline<Boolean> gammelTidslinje = SykdomUtils.toLocalDateTimeline(
-                vurdering.getPerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList())
-            );
+            LocalDateTimeline<Boolean> gammelTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(vurdering.getPerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList()));
 
-            LocalDateTimeline<Boolean> nyePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(gammelTidslinje, tidslinjeSomSkalTrekkesFra);
+            LocalDateTimeline<Boolean> nyePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(gammelTidslinje, tidslinjeSomSkalTrekkesFra);
 
-            List<Periode> vurderingPerioderTilLagring = SykdomUtils.toPeriodeList(nyePerioder);
+            List<Periode> vurderingPerioderTilLagring = TidslinjeUtil.tilPerioder(nyePerioder);
 
             SykdomVurderingVersjon tilLagring = new SykdomVurderingVersjon(
                 vurdering.getSykdomVurdering(),

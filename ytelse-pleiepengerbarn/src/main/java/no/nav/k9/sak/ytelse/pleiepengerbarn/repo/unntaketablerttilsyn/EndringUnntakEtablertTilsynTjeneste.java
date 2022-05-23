@@ -14,7 +14,6 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 
 @Dependent
 public class EndringUnntakEtablertTilsynTjeneste {
@@ -40,7 +39,7 @@ public class EndringUnntakEtablertTilsynTjeneste {
     }
 
     public LocalDateTimeline<Boolean> perioderMedEndringerSidenBehandling(Long behandlingId, AktørId pleietrengende) {
-        return SykdomUtils.toLocalDateTimeline(utledRelevanteEndringerSidenBehandling(behandlingId, pleietrengende));
+        return TidslinjeUtil.tilTidslinjeKomprimert(utledRelevanteEndringerSidenBehandling(behandlingId, pleietrengende));
     }
 
     NavigableSet<DatoIntervallEntitet> utledEndringer(Optional<UnntakEtablertTilsynForPleietrengende> eksisterendeGrunnlag,
