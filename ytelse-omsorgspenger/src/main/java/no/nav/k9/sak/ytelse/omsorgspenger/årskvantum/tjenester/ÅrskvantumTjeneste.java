@@ -175,9 +175,11 @@ public class ÅrskvantumTjeneste {
                 + ",\tfagsakFravær=" + fagsakFravær);
         }
 
-
         LocalDateTimeline<Boolean> vilkårsperioderTidsserie = new LocalDateTimeline<>(vilkårsperioder.stream().map(vp -> new LocalDateSegment<>(vp.toLocalDateInterval(), true)).toList());
-        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), omsluttende(vilkårsperioder)).orElseThrow();
+        DatoIntervallEntitet informasjonsperiode = vilkårsperioder.isEmpty() //vilkårsperioder er tom hvis hele kravet er trekt
+            ? omsluttende(oppgittFravær.stream().map(OppgittFraværPeriode::getPeriode).toList())
+            : omsluttende(vilkårsperioder);
+        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), informasjonsperiode).orElseThrow();
         PersonopplysningEntitet søkerPersonopplysninger = personopplysninger.getSøker();
         var barna = personopplysninger.getSøkersRelasjoner()
             .stream()
