@@ -100,7 +100,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
                 throw new IllegalStateException("Fant flere åpne behandlinger");
             }
             var behandlingId = behandlinger.get(0);
-            log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake", behandlingId);
+            log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake pga {}", behandlingId, behandlingÅrsakType);
             var behandlingLås = behandlingRepository.taSkriveLås(behandlingId);
             var behandling = behandlingRepository.hentBehandling(behandlingId);
             BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(behandling);
