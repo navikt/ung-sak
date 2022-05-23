@@ -27,7 +27,7 @@ class FinnInntektsmeldingForBeregningTest {
         var virksomhet = Arbeidsgiver.virksomhet("123456789");
         var inntektPrÅr = new Beløp(BigDecimal.valueOf(12));
         InputAktivitetOverstyring aktivitet = new InputAktivitetOverstyring(virksomhet, inntektPrÅr,
-            new Beløp(BigDecimal.valueOf(12000)), null, AktivitetStatus.ARBEIDSTAKER, null);
+            new Beløp(BigDecimal.valueOf(12000)), null, null, AktivitetStatus.ARBEIDSTAKER, null);
 
         // Act
         var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of());
@@ -46,7 +46,7 @@ class FinnInntektsmeldingForBeregningTest {
         var inntektPrÅr = new Beløp(BigDecimal.valueOf(12));
         var inntektsmelding = lagInntektsmelding(stp, virksomhet, InternArbeidsforholdRef.nullRef(), BigDecimal.ZERO, BigDecimal.valueOf(1), stp.plusDays(10), List.of());
         InputAktivitetOverstyring aktivitet = new InputAktivitetOverstyring(virksomhet, inntektPrÅr,
-            new Beløp(BigDecimal.valueOf(12000)), null, AktivitetStatus.ARBEIDSTAKER, null);
+            new Beløp(BigDecimal.valueOf(12000)), null, null, AktivitetStatus.ARBEIDSTAKER, null);
 
         // Act
         var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of(inntektsmelding));
@@ -67,7 +67,7 @@ class FinnInntektsmeldingForBeregningTest {
         var inntektsmelding1 = lagInntektsmelding(stp, virksomhet, InternArbeidsforholdRef.nyRef(), BigDecimal.ZERO, BigDecimal.valueOf(1), null, List.of());
         var inntektsmelding2 = lagInntektsmelding(stp, virksomhet, InternArbeidsforholdRef.nyRef(), BigDecimal.ZERO, BigDecimal.valueOf(1), null, List.of());
         InputAktivitetOverstyring aktivitet = new InputAktivitetOverstyring(virksomhet, inntektPrÅr,
-            new Beløp(BigDecimal.valueOf(12000)), null, AktivitetStatus.ARBEIDSTAKER, null);
+            new Beløp(BigDecimal.valueOf(12000)), null, null, AktivitetStatus.ARBEIDSTAKER, null);
 
         // Act
         var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of(inntektsmelding1, inntektsmelding2));
@@ -89,7 +89,7 @@ class FinnInntektsmeldingForBeregningTest {
         List<Refusjon> endringer2 = List.of(new Refusjon(BigDecimal.valueOf(2), stp.plusDays(3)), new Refusjon(BigDecimal.valueOf(1), stp.plusDays(4)));
         var inntektsmelding2 = lagInntektsmelding(stp, virksomhet, InternArbeidsforholdRef.nyRef(), BigDecimal.ZERO, BigDecimal.valueOf(1), null, endringer2);
         InputAktivitetOverstyring aktivitet = new InputAktivitetOverstyring(virksomhet, inntektPrÅr,
-            new Beløp(BigDecimal.valueOf(12000)), null, AktivitetStatus.ARBEIDSTAKER, null);
+            new Beløp(BigDecimal.valueOf(12000)), null, null, AktivitetStatus.ARBEIDSTAKER, null);
 
         // Act
         var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of(inntektsmelding1, inntektsmelding2));

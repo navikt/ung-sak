@@ -29,8 +29,8 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     REVURDERER_NY_INNTEKTSMELDING("REVURDERER_NY_INNTEKTSMELDING", "Ny inntektsmelding"),
     // Perioden ses på pga endringer i felles opplysninger (Nattevåk/beredskap/etablert tilsyn/sykdom
     REVURDERER_ENDRING_FRA_ANNEN_PART("REVURDERER_ENDRING_FRA_ANNEN_PART", "Annen parts vedtak endrer uttak"),
-    UTSATT_BEHANDLING("UTSATT_BEHANDLING", "Utsatt behandling av periode på grunn av avhengighet til annen omsorgspersons uttak"),
-    GJENOPPTAR_UTSATT_BEHANDLING("RE_GJENOPPTAR_UTSATT_BEHANDLING", "Gjenopptar utsatt behandling av periode fra forrige behandling"),
+    UTSATT_BEHANDLING("UTSATT_BEHANDLING", "Utsatt behandling"),
+    GJENOPPTAR_UTSATT_BEHANDLING("GJENOPPTAR_UTSATT_BEHANDLING", "Gjenopptar utsatt behandling"),
     // Endringer på felles opplysninger på sykdomsopplysningene
     REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON("REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "Endring i vurdering av sykdom"),
     // Endringer på felles opplysninger om etablert tilsyn
@@ -48,6 +48,8 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     private static final Map<BehandlingÅrsakType, ÅrsakTilVurdering> SAMMENHENG = Map.of(
         BehandlingÅrsakType.RE_SATS_REGULERING, G_REGULERING,
         BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_ENDRING_FRA_ANNEN_PART,
+        BehandlingÅrsakType.RE_UTSATT_BEHANDLING, UTSATT_BEHANDLING,
+        BehandlingÅrsakType.RE_GJENOPPTAR_UTSATT_BEHANDLING, GJENOPPTAR_UTSATT_BEHANDLING,
         BehandlingÅrsakType.RE_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON,
         BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON,
         BehandlingÅrsakType.RE_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON,

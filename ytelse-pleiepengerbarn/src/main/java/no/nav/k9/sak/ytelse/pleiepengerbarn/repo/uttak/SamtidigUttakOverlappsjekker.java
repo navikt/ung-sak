@@ -26,8 +26,8 @@ public class SamtidigUttakOverlappsjekker {
 
     @Inject
     public SamtidigUttakOverlappsjekker(BehandlingRepository behandlingRepository,
-            PleietrengendeKravprioritet pleietrengendeKravprioritet,
-            SykdomVurderingService sykdomVurderingService) {
+                                        PleietrengendeKravprioritet pleietrengendeKravprioritet,
+                                        SykdomVurderingService sykdomVurderingService) {
         this.behandlingRepository = behandlingRepository;
         this.pleietrengendeKravprioritet = pleietrengendeKravprioritet;
         this.sykdomVurderingService = sykdomVurderingService;
@@ -38,14 +38,11 @@ public class SamtidigUttakOverlappsjekker {
         final var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
 
         final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(ref.getFagsakId(), ref.getPleietrengendeAktørId(), true);
-
         final LocalDateTimeline<List<Kravprioritet>> perioderMedOverlapp = kravprioritet
             .filterValue(kravprioritetsliste -> !kravprioritetsliste.isEmpty()
                 && harDenneSaken(ref, kravprioritetsliste)
                 && harIkkePrioritetBlantUbesluttedeBehandlinger(ref, kravprioritetsliste)
             );
-
-        // TODO: Fjern perioder fra "perioderMedOverlapp" som ikke er til vurdering i noen av de åpne behandlingene.
 
         if (perioderMedOverlapp.isEmpty()) {
             return false;
@@ -59,13 +56,9 @@ public class SamtidigUttakOverlappsjekker {
         return erIkkeSøkerMedAndreprioritetPåBarnetIPerioderMedInnleggelse(ref, perioderMedOverlapp, innleggelseTimeline);
     }
 
-
     private LocalDateTimeline<Boolean> hentInnleggelseTimeline(Behandling behandling) {
         final List<SykdomInnleggelsePeriode> innleggelser = sykdomVurderingService.hentInnleggelser(behandling).getPerioder();
-        final LocalDateTimeline<Boolean> innleggelseTimeline = new LocalDateTimeline<Boolean>(
-                innleggelser.stream().map(i -> new LocalDateSegment<Boolean>(i.getFom(), i.getTom(), Boolean.TRUE)).collect(Collectors.toList())
-                );
-        return innleggelseTimeline;
+        return new LocalDateTimeline<>(innleggelser.stream().map(i -> new LocalDateSegment<>(i.getFom(), i.getTom(), Boolean.TRUE)).collect(Collectors.toList()));
     }
 
     private boolean harDenneSaken(BehandlingReferanse ref, List<Kravprioritet> kravprioritetsliste) {
@@ -89,17 +82,16 @@ public class SamtidigUttakOverlappsjekker {
     }
 
     private boolean manglerInnleggelseIPeriodeMedOverlapp(LocalDateTimeline<List<Kravprioritet>> perioderMedOverlapp,
-            LocalDateTimeline<Boolean> innleggelseTimeline) {
+                                                          LocalDateTimeline<Boolean> innleggelseTimeline) {
         return !TidslinjeUtil.kunPerioderSomIkkeFinnesI(perioderMedOverlapp, innleggelseTimeline).isEmpty();
     }
 
     private boolean erIkkeSøkerMedAndreprioritetPåBarnetIPerioderMedInnleggelse(BehandlingReferanse ref,
-            LocalDateTimeline<List<Kravprioritet>> perioderMedOverlapp,
-            LocalDateTimeline<Boolean> innleggelseTimeline) {
+                                                                                LocalDateTimeline<List<Kravprioritet>> perioderMedOverlapp,
+                                                                                LocalDateTimeline<Boolean> innleggelseTimeline) {
 
         return !perioderMedOverlapp.intersection(innleggelseTimeline)
-                .filterValue(kravprioritetsliste -> {
-                    return harIkkeAndreprioritet(ref, kravprioritetsliste);
-                }).isEmpty();
+            .filterValue(kravprioritetsliste -> harIkkeAndreprioritet(ref, kravprioritetsliste))
+            .isEmpty();
     }
 }

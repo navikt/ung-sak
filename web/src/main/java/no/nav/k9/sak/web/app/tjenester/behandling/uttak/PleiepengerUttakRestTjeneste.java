@@ -4,6 +4,7 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -34,11 +35,14 @@ import no.nav.k9.sak.kontrakt.uttak.ArbeidsgiverMedPerioderSomManglerDto;
 import no.nav.k9.sak.kontrakt.uttak.ManglendeArbeidstidDto;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifikator;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ApplicationScoped
@@ -48,6 +52,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 public class PleiepengerUttakRestTjeneste {
 
     public static final String GET_UTTAKSPLAN_PATH = "/behandling/pleiepenger/uttak";
+    public static final String GET_UTTAKSPLAN_MED_UTSATT_PERIODE_PATH = "/behandling/pleiepenger/uttak-med-utsatt";
     public static final String GET_SKULLE_SØKT_OM_PATH = "/behandling/pleiepenger/arbeidstid-mangler";
     public static final String GET_DEBUG_INPUT_PATH = "/behandling/pleiepenger/debug-input";
 
@@ -55,6 +60,7 @@ public class PleiepengerUttakRestTjeneste {
     private BehandlingRepository behandlingRepository;
     private ArbeidBrukerBurdeSøktOmUtleder manglendeArbeidstidUtleder;
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
+    private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
 
     public PleiepengerUttakRestTjeneste() {
         // for proxying
@@ -64,11 +70,13 @@ public class PleiepengerUttakRestTjeneste {
     public PleiepengerUttakRestTjeneste(UttakTjeneste uttakRestKlient,
                                         BehandlingRepository behandlingRepository,
                                         ArbeidBrukerBurdeSøktOmUtleder manglendeArbeidstidUtleder,
-                                        MapInputTilUttakTjeneste mapInputTilUttakTjeneste) {
+                                        MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
+                                        UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.manglendeArbeidstidUtleder = manglendeArbeidstidUtleder;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
+        this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
     }
 
     @GET
@@ -81,6 +89,29 @@ public class PleiepengerUttakRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Uttaksplan getUttaksplan(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         return uttakRestKlient.hentUttaksplan(behandlingIdDto.getBehandlingUuid(), true);
+    }
+
+
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path(GET_UTTAKSPLAN_MED_UTSATT_PERIODE_PATH)
+    @Operation(description = "Hent uttaksplan for behandling med utsatte perioder", tags = "behandling - pleiepenger/uttak", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer uttaksplan for angitt behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UttaksplanMedUtsattePerioder.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public UttaksplanMedUtsattePerioder uttaksplanMedUtsattePerioder(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+        var uttaksplan = uttakRestKlient.hentUttaksplan(behandlingIdDto.getBehandlingUuid(), true);
+        var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+        var utsattBehandlingAvPeriode = utsattBehandlingAvPeriodeRepository.hentGrunnlag(behandling.getId());
+
+        var utsattePerioder = utsattBehandlingAvPeriode.stream()
+            .map(UtsattBehandlingAvPeriode::getPerioder)
+            .flatMap(Collection::stream)
+            .map(it -> new LukketPeriode(it.getPeriode().getFomDato(), it.getPeriode().getTomDato()))
+            .collect(Collectors.toSet());
+
+        return new UttaksplanMedUtsattePerioder(uttaksplan, utsattePerioder);
     }
 
     @GET

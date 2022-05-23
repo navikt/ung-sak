@@ -70,10 +70,11 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
 
             OppdateringResultat resultat = OppdateringResultat.nyttResultat();
             resultat.rekjørSteg();
-            resultat.setSteg(BehandlingStegType.VURDER_UTTAK);
+            //må til innhent registeropplysninger for å få med barn over 12 år når hvis det er lag til kronisk syk-rammevedtak
+            resultat.setSteg(BehandlingStegType.INNHENT_REGISTEROPP);
             return resultat;
         }
-        
+
     }
 
     private void opprettHistorikkInnslag(AvklarÅrskvantumDto dto, Long behandlingId, HistorikkinnslagType historikkinnslagType, String valg) {

@@ -23,6 +23,7 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
@@ -37,6 +38,7 @@ import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.opptjening.PSBOppgittOpptjeningFilter;
 
 @ApplicationScoped
@@ -50,6 +52,8 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private VilkårPeriodeFilterProvider periodeFilterProvider;
 
+    private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
+    private BehandlingRepository behandlingRepository;
 
     private boolean toggleMigrering;
     private boolean enableForlengelse;
@@ -66,6 +70,8 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
                                                        @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PSBOppgittOpptjeningFilter oppgittOpptjeningFilter,
                                                        BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                                        VilkårPeriodeFilterProvider periodeFilterProvider,
+                                                       BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
+                                                       BehandlingRepository behandlingRepository,
                                                        @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering,
                                                        @KonfigVerdi(value = "forlengelse.beregning.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
@@ -73,6 +79,8 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         this.oppgittOpptjeningFilter = oppgittOpptjeningFilter;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.periodeFilterProvider = periodeFilterProvider;
+        this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
+        this.behandlingRepository = behandlingRepository;
         this.toggleMigrering = toggleMigrering;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.enableForlengelse = enableForlengelse;
@@ -92,8 +100,7 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         var eksisterendeMigreringTilVurdering = finnEksisterendeMigreringTilVurdering(perioderTilVurdering, eksisterendeInfotrygdMigreringer);
         var psbInfotrygdFilter = finnPSBInfotryd(param);
 
-
-        if (!eksisterendeMigreringTilVurdering.isEmpty()) {
+        if (skalOverstyreInput(param, eksisterendeMigreringTilVurdering)) {
             var harNæringUtenSøknad = harNæringIInfotrygdOgManglerSøknad(
                 perioderTilVurdering,
                 eksisterendeMigreringTilVurdering,
@@ -113,6 +120,25 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         }
 
         return Collections.emptyList();
+    }
+
+    /** Vi oppretter ikke aksjonspunkt dersom det er en revurdering som ikke er manuelt opprettet og vi allerede har kopiert overstyrt input fra forrige behandling for alle perioder til vurdering
+     *
+     * @param param inneholder informasjon om behandling
+     * @param eksisterendeMigreringTilVurdering eksisterende migreringer til vurdering
+     * @return
+     */
+    private boolean skalOverstyreInput(AksjonspunktUtlederInput param, List<SakInfotrygdMigrering> eksisterendeMigreringTilVurdering) {
+        var inputOverstyringer = beregningPerioderGrunnlagRepository.hentGrunnlag(param.getBehandlingId())
+            .stream()
+            .flatMap(gr -> gr.getInputOverstyringPerioder().stream())
+            .toList();
+
+        var harOverstyringForAllePerioder = eksisterendeMigreringTilVurdering.stream().allMatch(it -> inputOverstyringer.stream().anyMatch(o -> o.getSkjæringstidspunkt().equals(it.getSkjæringstidspunkt())));
+        var behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
+        var erManueltOpprettet = behandling.erManueltOpprettet();
+        var erRevurderingMedKopiertInputOverstyring = behandling.erRevurdering() && !erManueltOpprettet && harOverstyringForAllePerioder;
+        return !eksisterendeMigreringTilVurdering.isEmpty() && !erRevurderingMedKopiertInputOverstyring;
     }
 
     private TreeSet<DatoIntervallEntitet> finnPerioderTilVurdering(AksjonspunktUtlederInput param) {

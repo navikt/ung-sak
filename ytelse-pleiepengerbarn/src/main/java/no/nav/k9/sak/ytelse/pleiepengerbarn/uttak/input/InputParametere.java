@@ -18,6 +18,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
@@ -48,6 +49,8 @@ public class InputParametere {
     private UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende;
     private Set<PerioderFraSøknad> perioderFraSøknad;
     private DatoIntervallEntitet utvidetPeriodeSomFølgeAvDødsfall;
+
+    private UtsattBehandlingAvPeriode utsattBehandlingAvPerioder;
 
     public InputParametere() {
     }
@@ -221,6 +224,15 @@ public class InputParametere {
 
     public InputParametere medAutomatiskUtvidelseVedDødsfall(DatoIntervallEntitet utvidetPeriodeSomFølgeAvDødsfall) {
         this.utvidetPeriodeSomFølgeAvDødsfall = utvidetPeriodeSomFølgeAvDødsfall;
+        return this;
+    }
+
+    public Optional<UtsattBehandlingAvPeriode> getUtsattBehandlingAvPerioder() {
+        return Optional.ofNullable(utsattBehandlingAvPerioder);
+    }
+
+    public InputParametere medUtsattePerioder(UtsattBehandlingAvPeriode utsattBehandlingAvPerioder) {
+        this.utsattBehandlingAvPerioder = utsattBehandlingAvPerioder;
         return this;
     }
 }

@@ -40,10 +40,10 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <junit.version>5.8.2</junit.version>
-        <felles.version>0.8.0</felles.version>
+        <felles.version>0.8.1</felles.version>
         <swagger.version>2.2.0</swagger.version>
-        <k9format.version>5.8.7</k9format.version>
-        <jackson.version>2.13.2.20220328</jackson.version>
+        <k9format.version>5.8.8</k9format.version>
+        <jackson.version>2.13.3</jackson.version>
         <asm.version>9.3</asm.version>
         <kotlin-stdlib.version>1.6.21</kotlin-stdlib.version>
     </properties>
@@ -126,7 +126,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>0.8.0</version>
+                <version>0.8.1</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -419,7 +419,7 @@
             <dependency>
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
-                <version>7.1.1</version>
+                <version>7.2</version>
             </dependency>
             <dependency>
                 <groupId>com.papertrailapp</groupId>
@@ -559,7 +559,7 @@
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
-                <version>3.28.0-GA</version>
+                <version>3.29.0-GA</version>
             </dependency>
 
             <!-- Database -->

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -51,6 +52,7 @@ class DokumentmottakerSøknadPPN implements Dokumentmottaker {
     private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
     private ProsessTaskTjeneste taskTjeneste;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
+    private boolean skruPåDokumentmottakPPN;
 
     DokumentmottakerSøknadPPN() {
         // for CDI proxy
@@ -62,17 +64,23 @@ class DokumentmottakerSøknadPPN implements Dokumentmottaker {
                               SøknadOversetter søknadOversetter,
                               SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
                               ProsessTaskTjeneste taskTjeneste,
-                              OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste) {
+                              OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
+                              @KonfigVerdi(value = "ENABLE_DOKUMENTMOTTAK_PPN", defaultVerdi = "true") boolean skruPåDokumentmottakPPN) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
         this.søknadOversetter = søknadOversetter;
         this.taskTjeneste = taskTjeneste;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
+        this.skruPåDokumentmottakPPN = skruPåDokumentmottakPPN;
     }
 
     @Override
     public void lagreDokumentinnhold(Collection<MottattDokument> dokumenter, Behandling behandling) {
+        if (!skruPåDokumentmottakPPN){
+            throw new IllegalArgumentException("Dokumentmottak for PPN er ikke lansert");
+        }
+
         var behandlingId = behandling.getId();
 
         var sorterteDokumenter = sorterSøknadsdokumenter(dokumenter);

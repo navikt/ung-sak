@@ -25,6 +25,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
+import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
@@ -56,12 +58,15 @@ public class MapInputTilUttakTjeneste {
 
     private HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private String unntak;
+    private Boolean utsattBehandlingAvPeriode;
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
-                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
+                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
+                                    @KonfigVerdi(value = "utsatt.behandling.av.periode.aktivert", defaultVerdi = "false") Boolean utsattBehandlingAvPeriode) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
+        this.utsattBehandlingAvPeriode = utsattBehandlingAvPeriode;
     }
 
 
@@ -99,7 +104,15 @@ public class MapInputTilUttakTjeneste {
 
         final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering, input.getUtvidetPeriodeSomFølgeAvDødsfall());
 
-        var inaktivitetUtlederInput = new InaktivitetUtlederInput(behandling.getAktørId(), tidslinjeTilVurdering, input.getInntektArbeidYtelseGrunnlag());
+        var opptjeningTidslinje = new LocalDateTimeline<>(input.getVilkårene()
+            .getVilkår(VilkårType.OPPTJENINGSVILKÅRET)
+            .orElseThrow()
+            .getPerioder()
+            .stream()
+            .map(VilkårPeriode::getPeriode)
+            .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).toList());
+
+        var inaktivitetUtlederInput = new InaktivitetUtlederInput(behandling.getAktørId(), opptjeningTidslinje, input.getInntektArbeidYtelseGrunnlag());
         var inaktivTidslinje = new PerioderMedInaktivitetUtleder().utled(inaktivitetUtlederInput);
 
         var arbeidstidInput = new ArbeidstidMappingInput()
@@ -159,7 +172,8 @@ public class MapInputTilUttakTjeneste {
         return switch (behandling.getFagsakYtelseType()) {
             case PLEIEPENGER_SYKT_BARN -> YtelseType.PSB;
             case PLEIEPENGER_NÆRSTÅENDE -> YtelseType.PLS;
-            default -> throw new IllegalStateException("Ikke støttet ytelse for uttak Pleiepenger: " + behandling.getFagsakYtelseType());
+            default ->
+                throw new IllegalStateException("Ikke støttet ytelse for uttak Pleiepenger: " + behandling.getFagsakYtelseType());
         };
     }
 
@@ -218,7 +232,8 @@ public class MapInputTilUttakTjeneste {
                     var utfall = switch (periode.getResultat()) {
                         case OPPFYLT -> Utfall.OPPFYLT;
                         case IKKE_OPPFYLT -> Utfall.IKKE_OPPFYLT;
-                        case IKKE_VURDERT -> throw new IllegalStateException("Skal ikke komme perioder som ikke er vurdert til uttak.");
+                        case IKKE_VURDERT ->
+                            throw new IllegalStateException("Skal ikke komme perioder som ikke er vurdert til uttak.");
                     };
                     map.put(new LukketPeriode(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato()), utfall);
                 }
@@ -247,6 +262,18 @@ public class MapInputTilUttakTjeneste {
             .stream()
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
             .collect(Collectors.toList()));
+
+        var utsattBehandlingAvPerioder = input.getUtsattBehandlingAvPerioder();
+        if (utsattBehandlingAvPeriode && utsattBehandlingAvPerioder.isPresent()) {
+            var perioderSomHarBlittUtsatt = utsattBehandlingAvPerioder.map(UtsattBehandlingAvPeriode::getPerioder).orElseThrow();
+            var utsattTidslinje = new LocalDateTimeline<>(perioderSomHarBlittUtsatt.stream()
+                .map(UtsattPeriode::getPeriode)
+                .map(DatoIntervallEntitet::toLocalDateInterval)
+                .map(it -> new LocalDateSegment<>(it, false))
+                .collect(Collectors.toSet()), StandardCombinators::alwaysTrueForMatch);
+
+            timeline = timeline.disjoint(utsattTidslinje); // Tar bort periodene som har blitt utsatt
+        }
 
         return new ArrayList<>(timeline.compress().toSegments());
     }

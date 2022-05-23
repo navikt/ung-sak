@@ -1,6 +1,7 @@
 package no.nav.k9.sak.hendelse.vedtak;
 
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -65,7 +66,8 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
 
         for (SakMedPeriode kandidatsaksnummer : kandidaterTilRevurdering) {
             var taskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
-            taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON.getKode());
+            var årsak = utledÅrsak(kandidatsaksnummer, vedtakHendelse.getSaksnummer());
+            taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, årsak.getKode());
             taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODER, utledPerioder(kandidatsaksnummer.getPerioder()));
 
             var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer.getSaksnummer(), false)
@@ -77,6 +79,13 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
 
             fagsakProsessTaskRepository.lagreNyGruppe(taskData);
         }
+    }
+
+    private BehandlingÅrsakType utledÅrsak(SakMedPeriode kandidatsaksnummer, String saksnummer) {
+        if (Objects.equals(kandidatsaksnummer.getSaksnummer().getVerdi(), saksnummer)) {
+            return BehandlingÅrsakType.RE_GJENOPPTAR_UTSATT_BEHANDLING; // TODO: Dra inn igjen når formidling forstår hva dette er
+        }
+        return BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON;
     }
 
     private String utledPerioder(NavigableSet<DatoIntervallEntitet> perioder) {

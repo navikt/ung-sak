@@ -19,12 +19,13 @@ import no.nav.k9.sak.typer.Stillingsprosent;
 
 public final class PermisjonPerYrkesaktivitet {
 
-    public static LocalDateTimeline<Boolean> utledPermisjonPerYrkesaktivitet(Yrkesaktivitet yrkesaktivitet, Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse, boolean erMigrertSkjæringstidspunkt) {
+    public static LocalDateTimeline<Boolean> utledPermisjonPerYrkesaktivitet(Yrkesaktivitet yrkesaktivitet,
+                                                                             Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse,
+                                                                             DatoIntervallEntitet vilkårsperiode) {
         List<LocalDateTimeline<Boolean>> aktivPermisjonTidslinjer = yrkesaktivitet.getPermisjon()
             .stream()
-            .filter(it -> !erMigrertSkjæringstidspunkt || !Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.VELFERDSPERMISJON))
             .filter(permisjon -> erStørreEllerLik100Prosent(permisjon.getProsentsats()))
-            .map(it -> justerPeriodeEtterYtelse(it, tidslinjePerYtelse))
+            .map(it -> justerPeriodeEtterYtelse(it, tidslinjePerYtelse, vilkårsperiode))
             .flatMap(Collection::stream)
             .map(permisjon -> new LocalDateTimeline<>(permisjon.toLocalDateInterval(), Boolean.TRUE))
             .toList();
@@ -35,7 +36,7 @@ public final class PermisjonPerYrkesaktivitet {
         return aktivPermisjonTidslinje;
     }
 
-    private static Set<DatoIntervallEntitet> justerPeriodeEtterYtelse(Permisjon it, Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse) {
+    private static Set<DatoIntervallEntitet> justerPeriodeEtterYtelse(Permisjon it, Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse, DatoIntervallEntitet vilkårsperiode) {
         if (Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.PERMISJON_MED_FORELDREPENGER)) {
             var ytelsesTidslinje = tidslinjePerYtelse.getOrDefault(OpptjeningAktivitetType.FORELDREPENGER, new LocalDateTimeline<>(List.of()));
 
@@ -45,10 +46,14 @@ public final class PermisjonPerYrkesaktivitet {
             return TidslinjeUtil.tilDatoIntervallEntiteter(permisjonstidslinje.compress());
         } else if (Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.VELFERDSPERMISJON)) {
             var permisjonstidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), true)));
+            // Filtrerer bort overlapp av k9-yteser for velferdspermisjon siden k9-ytelser ofte rapporteres som velferdspermisjon
             for (OpptjeningAktivitetType aktivitetType : OpptjeningAktivitetType.K9_YTELSER) {
                 var ytelsesTidslinje = tidslinjePerYtelse.getOrDefault(aktivitetType, new LocalDateTimeline<>(List.of()));
                 permisjonstidslinje = permisjonstidslinje.disjoint(ytelsesTidslinje);
             }
+            // Filtrerer også bort gjeldende vilkårsperiode for å unngå at tidlig innraportering til aareg gir avslag under saksbehandling
+            var vilkårsperiodeTidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vilkårsperiode.getFomDato(), vilkårsperiode.getTomDato(), true)));
+            permisjonstidslinje = permisjonstidslinje.disjoint(vilkårsperiodeTidslinje);
             return TidslinjeUtil.tilDatoIntervallEntiteter(permisjonstidslinje.compress());
         }
         return Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed()));

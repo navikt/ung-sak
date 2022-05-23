@@ -2,14 +2,11 @@ package no.nav.k9.sak.ytelse.omsorgspenger.rammevedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
-import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
-import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -18,34 +15,26 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjene
 @ApplicationScoped
 public class OmsorgspengerRammevedtakTjeneste {
     private ÅrskvantumTjeneste årskvantumTjeneste;
-    private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
-    private PersoninfoAdapter personinfoAdapter;
-    private SøknadRepository søknadRepository;
-
-    @Inject
-    public OmsorgspengerRammevedtakTjeneste(ÅrskvantumTjeneste årskvantumTjeneste, BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste, PersoninfoAdapter personinfoAdapter,
-                                            SøknadRepository søknadRepository) {
-        this.årskvantumTjeneste = årskvantumTjeneste;
-        this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
-        this.personinfoAdapter = personinfoAdapter;
-        this.søknadRepository = søknadRepository;
-    }
+    private BehandlingRepository behandlingRepository;
+    private AktørTjeneste aktørTjeneste;
 
     OmsorgspengerRammevedtakTjeneste() {
         // for CDI
     }
 
+    @Inject
+    public OmsorgspengerRammevedtakTjeneste(ÅrskvantumTjeneste årskvantumTjeneste, BehandlingRepository behandlingRepository, AktørTjeneste aktørTjeneste) {
+        this.årskvantumTjeneste = årskvantumTjeneste;
+        this.behandlingRepository = behandlingRepository;
+        this.aktørTjeneste = aktørTjeneste;
+    }
+
     public RammevedtakResponse hentRammevedtak(BehandlingUuidDto behandlingUuid) {
-        Behandling behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
-        PersonIdent personIdent = personinfoAdapter.hentIdentForAktørId(behandling.getAktørId())
-            .orElseGet(() -> {
-                throw new IllegalStateException("Kunne ikke finne person for aktørId.");
-            }); // todo: send aktørId når Årskvantum får PDL-integrasjon
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        PersonIdent personIdent = aktørTjeneste.hentPersonIdentForAktørId(behandling.getAktørId()).orElseThrow();
 
-        SøknadEntitet søknad = søknadRepository.hentSøknad(behandling);
-        DatoIntervallEntitet søknadsperiode = søknad.getSøknadsperiode();
-
-        return årskvantumTjeneste.hentRammevedtak(personIdent, new LukketPeriode(søknadsperiode.getFomDato(), søknadsperiode.getTomDato()));
+        DatoIntervallEntitet fagsakperiode = behandling.getFagsak().getPeriode();
+        return årskvantumTjeneste.hentRammevedtak(personIdent, new LukketPeriode(fagsakperiode.getFomDato(), fagsakperiode.getTomDato()));
     }
 
 }

@@ -7,13 +7,13 @@ import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
@@ -43,6 +43,7 @@ public class PPNVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
                                                   EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+                                                  UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                                   UttakTjeneste uttakTjeneste) {
         super(vilkårUtleder
             , Map.of(VilkårType.MEDLEMSKAPSVILKÅRET, new MaksSøktePeriode(søknadsperiodeTjeneste))
@@ -53,6 +54,7 @@ public class PPNVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
             , endringUnntakEtablertTilsynTjeneste
             , revurderingPerioderTjeneste
             , søknadsperiodeTjeneste
+            , utsattBehandlingAvPeriodeRepository
             , uttakTjeneste
         );
     }

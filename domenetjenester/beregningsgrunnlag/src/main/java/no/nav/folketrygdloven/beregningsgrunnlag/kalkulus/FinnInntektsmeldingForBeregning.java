@@ -103,17 +103,19 @@ public class FinnInntektsmeldingForBeregning {
 
     private static Inntektsmelding mapInntektsmelding(LocalDate stp, InputAktivitetOverstyring a, LocalDateTimeline<BigDecimal> summertRefusjonTidslinje, Collection<Inntektsmelding> inntektsmeldingerForAktivitet) {
         var opphører = finnOpphør(a, summertRefusjonTidslinje);
+        var startDato = a.getStartdatoRefusjon().filter(d -> !d.isBefore(stp)).orElse(stp);
+
         var kanalReferansePrefiks = finnKanalReferansePrefiks(stp, inntektsmeldingerForAktivitet);
         var inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
             .medInnsendingstidspunkt(stp.atStartOfDay())
             .medArbeidsgiver(a.getArbeidsgiver())
             .medStartDatoPermisjon(stp)
-            .medRefusjon(finnRefusjonVedStp(stp, summertRefusjonTidslinje, a), opphører)
+            .medRefusjon(finnRefusjonVedStp(stp, summertRefusjonTidslinje, a, startDato), opphører)
             .medBeløp(a.getInntektPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP))
             .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
             .medJournalpostId("OVERSTYRT_FOR_INFOTRYGDMIGRERING" + stp)
             .medKanalreferanse(kanalReferansePrefiks + "OVERSTYRT_FOR_INFOTRYGDMIGRERING" + stp);
-        mapEndringer(stp, summertRefusjonTidslinje, opphører, inntektsmeldingBuilder);
+        mapEndringer(stp, summertRefusjonTidslinje, startDato, opphører, inntektsmeldingBuilder);
         return inntektsmeldingBuilder
             .build();
     }
@@ -132,11 +134,20 @@ public class FinnInntektsmeldingForBeregning {
             .orElse("");
     }
 
-    private static void mapEndringer(LocalDate stp, LocalDateTimeline<BigDecimal> summertRefusjonTidslinje, LocalDate opphører, InntektsmeldingBuilder inntektsmeldingBuilder) {
+    private static void mapEndringer(LocalDate stp,
+                                     LocalDateTimeline<BigDecimal> summertRefusjonTidslinje,
+                                     LocalDate startDato,
+                                     LocalDate opphører,
+                                     InntektsmeldingBuilder inntektsmeldingBuilder) {
         summertRefusjonTidslinje.toSegments()
             .stream()
-            .filter(di -> di.getFom().isAfter(stp) && !di.getLocalDateInterval().overlaps(new LocalDateInterval(stp, stp)) && (opphører == null || di.getFom().isBefore(opphører)))
-            .forEach(s -> inntektsmeldingBuilder.leggTil(new Refusjon(s.getValue(), s.getFom())));
+            .filter(di -> di.getTom().isAfter(startDato) && (opphører == null || di.getFom().isBefore(opphører.plusDays(1))))
+            .filter(s -> getFom(startDato, s).isAfter(stp))
+            .forEach(s -> inntektsmeldingBuilder.leggTil(new Refusjon(s.getValue(), getFom(startDato, s))));
+    }
+
+    private static LocalDate getFom(LocalDate startDato, LocalDateSegment<BigDecimal> s) {
+        return s.getFom().isBefore(startDato) ? startDato : s.getFom();
     }
 
     private static LocalDate finnOpphør(InputAktivitetOverstyring a, LocalDateTimeline<BigDecimal> summertRefusjonTidslinje) {
@@ -147,10 +158,16 @@ public class FinnInntektsmeldingForBeregning {
             .filter(s -> s.getTom().equals(TIDENES_ENDE) && s.getValue().compareTo(BigDecimal.ZERO) == 0)
             .findFirst()
             .map(LocalDateSegment::getFom);
-        return opphørFraInntektsmelding.orElse(null);
+        return opphørFraInntektsmelding.map(d -> d.minusDays(1)).orElse(null);
     }
 
-    private static BigDecimal finnRefusjonVedStp(LocalDate stp, LocalDateTimeline<BigDecimal> summertRefusjonTidslinje, InputAktivitetOverstyring a) {
+    private static BigDecimal finnRefusjonVedStp(LocalDate stp,
+                                                 LocalDateTimeline<BigDecimal> summertRefusjonTidslinje,
+                                                 InputAktivitetOverstyring a,
+                                                 LocalDate startDato) {
+        if (startDato.isAfter(stp)) {
+            return BigDecimal.ZERO;
+        }
         var stpOverlapp = summertRefusjonTidslinje.getSegment(new LocalDateInterval(stp, stp));
         if (stpOverlapp == null) {
             return a.getRefusjonPrÅr() == null ? BigDecimal.ZERO :
@@ -171,7 +188,9 @@ public class FinnInntektsmeldingForBeregning {
         }
 
         // Opphør
-        alleSegmenter.add(new LocalDateSegment<>(opphørsdatoRefusjon, TIDENES_ENDE, BigDecimal.ZERO));
+        if (opphørsdatoRefusjon != null && opphørsdatoRefusjon.isBefore(TIDENES_ENDE)) {
+            alleSegmenter.add(new LocalDateSegment<>(opphørsdatoRefusjon.plusDays(1), TIDENES_ENDE, BigDecimal.ZERO));
+        }
 
         // Endringer i mellom
         alleSegmenter.addAll(im.getEndringerRefusjon().stream()

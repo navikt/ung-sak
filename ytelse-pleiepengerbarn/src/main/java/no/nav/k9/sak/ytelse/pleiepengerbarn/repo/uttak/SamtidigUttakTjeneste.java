@@ -23,6 +23,8 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.Kjøreplan;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.KjøreplanUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Endringsstatus;
@@ -96,7 +98,9 @@ public class SamtidigUttakTjeneste {
     private BehandlingRepository behandlingRepository;
     private BehandlingModellRepository behandlingModellRepository;
     private SamtidigUttakOverlappsjekker samtidigUttakOverlappsjekker;
+    private KjøreplanUtleder kjøreplanUtleder;
     private boolean enableRelevantsjekk;
+    private Boolean utsattBehandlingAvPeriode;
 
 
     @Inject
@@ -106,18 +110,26 @@ public class SamtidigUttakTjeneste {
                                  BehandlingRepository behandlingRepository,
                                  BehandlingModellRepository behandlingModellRepository,
                                  SamtidigUttakOverlappsjekker samtidigUttakOverlappsjekker,
-                                 @KonfigVerdi(value = "ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK", defaultVerdi = "false") boolean enableRelevantsjekk) {
+                                 KjøreplanUtleder kjøreplanUtleder,
+                                 @KonfigVerdi(value = "ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK", defaultVerdi = "false") boolean enableRelevantsjekk,
+                                 @KonfigVerdi(value = "utsatt.behandling.av.periode.aktivert", defaultVerdi = "false") Boolean utsattBehandlingAvPeriode) {
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.behandlingModellRepository = behandlingModellRepository;
         this.samtidigUttakOverlappsjekker = samtidigUttakOverlappsjekker;
+        this.kjøreplanUtleder = kjøreplanUtleder;
         this.enableRelevantsjekk = enableRelevantsjekk;
+        this.utsattBehandlingAvPeriode = utsattBehandlingAvPeriode;
     }
 
 
     public boolean isAnnenSakSomMåBehandlesFørst(BehandlingReferanse ref) {
+        if (utsattBehandlingAvPeriode) {
+            return !kjøreplanUtleder.utled(ref).kanAktuellFagsakFortsette();
+        }
+
         final List<Fagsak> andreFagsaker = hentAndreFagsakerPåPleietrengende(ref);
         final List<Behandling> andreÅpneBehandlinger = åpneBehandlingerFra(andreFagsaker);
 
@@ -240,5 +252,9 @@ public class SamtidigUttakTjeneste {
                 .collect(Collectors.toCollection(TreeSet::new));
         }
         return new TreeSet<>();
+    }
+
+    public Kjøreplan utledPrioriteringsrekkefølge(BehandlingReferanse ref) {
+        return kjøreplanUtleder.utled(ref);
     }
 }

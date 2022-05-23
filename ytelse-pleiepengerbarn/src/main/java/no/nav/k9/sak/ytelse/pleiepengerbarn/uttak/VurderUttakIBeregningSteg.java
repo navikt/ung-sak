@@ -5,12 +5,14 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRST�
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -21,7 +23,10 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
+import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
@@ -42,6 +47,8 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     private UttakTjeneste uttakTjeneste;
     private EtablertTilsynTjeneste etablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
+    private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
+    private Boolean utsattBehandlingAvPeriode;
 
     VurderUttakIBeregningSteg() {
         // for proxy
@@ -52,12 +59,16 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                                      MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
                                      UttakTjeneste uttakTjeneste,
                                      EtablertTilsynTjeneste etablertTilsynTjeneste,
-                                     SamtidigUttakTjeneste samtidigUttakTjeneste) {
+                                     SamtidigUttakTjeneste samtidigUttakTjeneste,
+                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
+                                     @KonfigVerdi(value = "utsatt.behandling.av.periode.aktivert", defaultVerdi = "false") Boolean utsattBehandlingAvPeriode) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
+        this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
+        this.utsattBehandlingAvPeriode = utsattBehandlingAvPeriode;
     }
 
     @Override
@@ -71,18 +82,53 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
         final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
         uttakTjeneste.opprettUttaksplan(request);
 
-        final boolean annenSakSomMåBehandlesFørst = samtidigUttakTjeneste.isAnnenSakSomMåBehandlesFørst(ref);
-        log.info("annenSakSomMåBehandlesFørst={}", annenSakSomMåBehandlesFørst);
+        if (utsattBehandlingAvPeriode) {
+            return eksperimentærHåndteringAvSamtidigUttak(behandling, kontekst, ref);
+        } else {
+            return ordinærHåndteringAvSamtidigUttak(behandling, kontekst, ref);
+        }
+    }
 
+    private BehandleStegResultat eksperimentærHåndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+        var kjøreplan = samtidigUttakTjeneste.utledPrioriteringsrekkefølge(ref);
+        log.info("[Eksperimentær] annenSakSomMåBehandlesFørst={}, Har perioder uten prio={}", !kjøreplan.kanAktuellFagsakFortsette(), kjøreplan.perioderSomSkalUtsettesForAktuellFagsak());
+
+        if (kjøreplan.kanAktuellFagsakFortsette()) {
+            var utsattePerioder = kjøreplan.perioderSomSkalUtsettesForAktuellFagsak();
+            log.info("[Eksperimentær] Utsettelse behandling av perioder {}", utsattePerioder);
+
+            utsattBehandlingAvPeriodeRepository.lagre(ref.getBehandlingId(), utsattePerioder.stream().map(UtsattPeriode::new).collect(Collectors.toSet()));
+
+            final Uttaksgrunnlag oppdatertRequests = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
+            uttakTjeneste.opprettUttaksplan(oppdatertRequests);
+
+            if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK)) {
+                avbrytAksjonspunkt(behandling, kontekst);
+            }
+
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        } else {
+            log.info("[Eksperimentær] Venter på behandling av andre fagsaker");
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK));
+        }
+    }
+
+    private BehandleStegResultat ordinærHåndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+        final boolean annenSakSomMåBehandlesFørst = samtidigUttakTjeneste.isAnnenSakSomMåBehandlesFørst(ref);
+        log.info("[Ordinær] annenSakSomMåBehandlesFørst={}", annenSakSomMåBehandlesFørst);
         if (annenSakSomMåBehandlesFørst) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK));
         } else if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK)) {
-            behandling.getAksjonspunktFor(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK)
-                .avbryt();
-            behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+            avbrytAksjonspunkt(behandling, kontekst);
         }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private void avbrytAksjonspunkt(Behandling behandling, BehandlingskontrollKontekst kontekst) {
+        behandling.getAksjonspunktFor(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK)
+            .avbryt();
+        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
     @Override

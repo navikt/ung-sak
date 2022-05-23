@@ -41,11 +41,11 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                                                                               InntektArbeidYtelseGrunnlag grunnlag,
                                                                               OpptjeningAktivitetVurdering vurderForSaksbehandling,
                                                                               Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening,
-                                                                              DatoIntervallEntitet opptjeningPeriode,
-                                                                              Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse, boolean erMigrertSkjæringstidspunkt) {
+                                                                              DatoIntervallEntitet opptjeningsperiode, DatoIntervallEntitet vilkårsPeriode,
+                                                                              Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse) {
         final OpptjeningAktivitetType type = utledOpptjeningType(mapArbeidOpptjening, registerAktivitet.getArbeidType());
         return new ArrayList<>(mapAktivitetsavtaler(behandlingReferanse, registerAktivitet, grunnlag,
-            vurderForSaksbehandling, type, opptjeningPeriode, tidslinjePerYtelse, erMigrertSkjæringstidspunkt));
+            vurderForSaksbehandling, type, opptjeningsperiode, vilkårsPeriode, tidslinjePerYtelse));
     }
 
     private static OpptjeningAktivitetType utledOpptjeningType(Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening, ArbeidType arbeidType) {
@@ -60,12 +60,12 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                                                                                   InntektArbeidYtelseGrunnlag grunnlag,
                                                                                   OpptjeningAktivitetVurdering vurderForSaksbehandling,
                                                                                   OpptjeningAktivitetType type,
-                                                                                  DatoIntervallEntitet opptjeningPeriode,
-                                                                                  Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse,
-                                                                                  boolean erMigrertSkjæringstidspunkt) {
+                                                                                  DatoIntervallEntitet opptjeningsperiode,
+                                                                                  DatoIntervallEntitet vilkårsperiode,
+                                                                                  Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse) {
         List<OpptjeningsperiodeForSaksbehandling> perioderForAktivitetsavtaler = new ArrayList<>();
-        LocalDate skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
-        var permisjonstidslinje = utledPermisjonstidslinjeForPerioden(registerAktivitet, tidslinjePerYtelse, opptjeningPeriode, erMigrertSkjæringstidspunkt);
+        LocalDate skjæringstidspunkt = vilkårsperiode.getFomDato();
+        var permisjonstidslinje = utledPermisjonstidslinjeForPerioden(registerAktivitet, tidslinjePerYtelse, vilkårsperiode, opptjeningsperiode);
         for (AktivitetsAvtale avtale : gjeldendeAvtaler(grunnlag, skjæringstidspunkt, registerAktivitet)) {
             var perioder = utledPerioderEtterÅTattHensynTilPermisjoner(permisjonstidslinje, avtale);
             for (DatoIntervallEntitet periode : perioder) {
@@ -76,11 +76,11 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                     .medStillingsandel(finnStillingsprosent(registerAktivitet, skjæringstidspunkt));
                 settArbeidsgiverInformasjon(registerAktivitet, builder);
                 var input = new VurderStatusInput(type, behandlingReferanse);
-                input.setOpptjeningsperiode(opptjeningPeriode);
                 input.setRegisterAktivitet(registerAktivitet);
                 input.setAktivitetPeriode(periode);
-                input.setErMigrertSkjæringstidspunkt(erMigrertSkjæringstidspunkt);
                 input.setTidslinjePerYtelse(tidslinjePerYtelse);
+                input.setVilkårsperiode(vilkårsperiode);
+                input.setOpptjeningsperiode(opptjeningsperiode);
                 builder.medVurderingsStatus(vurderForSaksbehandling.vurderStatus(input));
                 perioderForAktivitetsavtaler.add(builder.build());
             }
@@ -88,9 +88,10 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
         return perioderForAktivitetsavtaler;
     }
 
-    private static LocalDateTimeline<Boolean> utledPermisjonstidslinjeForPerioden(Yrkesaktivitet yrkesaktivitet, Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse, DatoIntervallEntitet opptjeningsperiode, boolean erMigrertSkjæringstidspunkt) {
-        // Permisjoner på yrkesaktivitet
-        LocalDateTimeline<Boolean> aktivPermisjonTidslinje = PermisjonPerYrkesaktivitet.utledPermisjonPerYrkesaktivitet(yrkesaktivitet, tidslinjePerYtelse, erMigrertSkjæringstidspunkt);
+    private static LocalDateTimeline<Boolean> utledPermisjonstidslinjeForPerioden(Yrkesaktivitet yrkesaktivitet,
+                                                                                  Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse, DatoIntervallEntitet vilkårsperiode,
+                                                                                  DatoIntervallEntitet opptjeningsperiode) {
+        LocalDateTimeline<Boolean> aktivPermisjonTidslinje = PermisjonPerYrkesaktivitet.utledPermisjonPerYrkesaktivitet(yrkesaktivitet, tidslinjePerYtelse, vilkårsperiode);
 
         // Vurder kun permisjonsperioder som overlapper opptjeningsperiode
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(opptjeningsperiode.getFomDato(), opptjeningsperiode.getTomDato(), Boolean.FALSE)));
