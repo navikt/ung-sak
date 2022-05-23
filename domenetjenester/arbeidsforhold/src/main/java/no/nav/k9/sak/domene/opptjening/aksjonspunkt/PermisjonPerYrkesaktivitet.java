@@ -52,7 +52,7 @@ public final class PermisjonPerYrkesaktivitet {
                 permisjonstidslinje = permisjonstidslinje.disjoint(ytelsesTidslinje);
             }
             // Filtrerer også bort gjeldende vilkårsperiode for å unngå at tidlig innraportering til aareg gir avslag under saksbehandling
-            var vilkårsperiodeTidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vilkårsperiode.getFomDato(), vilkårsperiode.getTomDato(), true)));
+            var vilkårsperiodeTidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vilkårsperiode.getFomDato().minusDays(1), vilkårsperiode.getTomDato(), true)));
             permisjonstidslinje = permisjonstidslinje.disjoint(vilkårsperiodeTidslinje);
             return TidslinjeUtil.tilDatoIntervallEntiteter(permisjonstidslinje.compress());
         }
