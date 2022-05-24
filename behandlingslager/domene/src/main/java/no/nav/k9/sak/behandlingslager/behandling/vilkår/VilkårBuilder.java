@@ -61,8 +61,7 @@ public class VilkårBuilder {
     }
 
     private LocalDateSegment<WrappedVilkårPeriode> toSegment(VilkårPeriode a, LocalDateInterval boundry) {
-
-        var vilkårDatoInterval = new LocalDateInterval(a.getPeriode().getFomDato(), a.getPeriode().getTomDato());
+        var vilkårDatoInterval = a.getPeriode().toLocalDateInterval();
 
         if (boundry != null) {
             var overlapp = vilkårDatoInterval.overlap(boundry);
@@ -74,8 +73,7 @@ public class VilkårBuilder {
                 return null;
             }
         } else {
-            var vilkårSegment = new LocalDateSegment<>(vilkårDatoInterval, new WrappedVilkårPeriode(a));
-            return vilkårSegment;
+            return new LocalDateSegment<>(vilkårDatoInterval, new WrappedVilkårPeriode(a));
         }
     }
 
@@ -134,10 +132,9 @@ public class VilkårBuilder {
     public VilkårBuilder leggTil(VilkårPeriodeBuilder periodeBuilder) {
         validerBuilder();
         var periode = periodeBuilder.build();
-        var segment = toSegment(periode, null);
-        var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
+        var segment = new LocalDateSegment<>(periode.getPeriode().toLocalDateInterval(), new WrappedVilkårPeriode(periode));
 
-        this.vilkårTidslinje = vilkårTidslinje.combine(periodeTidslinje, this::sjekkVurdering, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        this.vilkårTidslinje = vilkårTidslinje.combine(segment, this::sjekkVurdering, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         return this;
     }
@@ -276,9 +273,9 @@ public class VilkårBuilder {
             .filter(it -> it.getValue() != null)
             .map(this::opprettHoldKonsistens)
             .map(WrappedVilkårPeriode::getVilkårPeriode)
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(TreeSet::new));
         var vilkårsPerioder = sammenkobleOgJusterUtfallHvisEnPeriodeTilVurdering(vilkårsPerioderRaw);
-        vilkåret.setPerioder(vilkårsPerioder);
+        vilkåret.setPerioder(new ArrayList<>(vilkårsPerioder));
         Objects.requireNonNull(vilkåret.getVilkårType(), "Mangler vilkårType");
         return vilkåret;
     }
@@ -312,8 +309,8 @@ public class VilkårBuilder {
         }
     }
 
-    private List<VilkårPeriode> sammenkobleOgJusterUtfallHvisEnPeriodeTilVurdering(List<VilkårPeriode> vilkårsPerioderRaw) {
-        var periodeTilVurdering = vilkårsPerioderRaw.stream().anyMatch(it -> Utfall.IKKE_VURDERT.equals(it.getGjeldendeUtfall()));
+    private NavigableSet<VilkårPeriode> sammenkobleOgJusterUtfallHvisEnPeriodeTilVurdering(NavigableSet<VilkårPeriode> vilkårsPerioderRaw) {
+        var periodeTilVurdering = vilkårsPerioderRaw.stream().anyMatch(it -> Utfall.IKKE_VURDERT.equals(it.getUtfall()));
         var perioderSomGrenserTil = harPerioderSomIkkeErVurdertOgGrenserTilAnnenPeriode(vilkårsPerioderRaw);
 
         if (perioderSomGrenserTil && periodeTilVurdering) {
@@ -327,8 +324,6 @@ public class VilkårBuilder {
                     periode = new VilkårPeriodeBuilder(periode)
                         .medPeriode(periode.getFom(), vilkårPeriode.getTom())
                         .medUtfall(Utfall.IKKE_VURDERT)
-                        .medUtfallOverstyrt(Utfall.UDEFINERT)
-                        .tilbakestillManuellVurdering()
                         .build();
                 } else {
                     vilkårPerioder.add(periode);
@@ -343,7 +338,7 @@ public class VilkårBuilder {
         return vilkårsPerioderRaw;
     }
 
-    private List<VilkårPeriode> adjustAndCompress(List<VilkårPeriode> vilkårPerioder) {
+    private NavigableSet<VilkårPeriode> adjustAndCompress(List<VilkårPeriode> vilkårPerioder) {
         var timeline = new LocalDateTimeline<>(vilkårPerioder.stream()
             .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new WrappedVilkårPeriode(it)))
             .collect(Collectors.toList()));
@@ -355,13 +350,12 @@ public class VilkårBuilder {
             .filter(it -> it.getValue() != null)
             .map(this::opprettHoldKonsistens)
             .map(WrappedVilkårPeriode::getVilkårPeriode)
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private boolean harPerioderSomIkkeErVurdertOgGrenserTilAnnenPeriode(List<VilkårPeriode> vilkårsPerioderRaw) {
+    private boolean harPerioderSomIkkeErVurdertOgGrenserTilAnnenPeriode(NavigableSet<VilkårPeriode> vilkårsPerioderRaw) {
         return vilkårsPerioderRaw.stream()
-            .filter(it -> !it.getErOverstyrt())
-            .filter(it -> Utfall.IKKE_VURDERT.equals(it.getGjeldendeUtfall()))
+            .filter(it -> Utfall.IKKE_VURDERT.equals(it.getUtfall()))
             .anyMatch(it -> vilkårsPerioderRaw.stream()
                 .map(VilkårPeriode::getPeriode)
                 .filter(at -> !at.equals(it.getPeriode()))
@@ -390,7 +384,7 @@ public class VilkårBuilder {
             .filter(it -> it.getValue() != null)
             .map(this::opprettHoldKonsistens)
             .map(WrappedVilkårPeriode::getVilkårPeriode)
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(TreeSet::new));
         var vilkårsPerioder = sammenkobleOgJusterUtfallHvisEnPeriodeTilVurdering(vilkårsPerioderRaw)
             .stream()
             .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new WrappedVilkårPeriode(it)))
