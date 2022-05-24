@@ -2,6 +2,7 @@ package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 
@@ -332,6 +333,37 @@ public class VilkårBuilderTest {
     }
 
     @Test
+    public void skal_utvide_avslag_periode_ved_ny_dag_til_vurdering_selv_ved_overstyring() {
+        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+            .medKantIKantVurderer(new PåTversAvHelgErKantIKantVurderer())
+            .medMaksMellomliggendePeriodeAvstand(7);
+
+        var førsteSkjæringstidspunkt = finnNærmesteFraSammeDag(DayOfWeek.MONDAY, LocalDate.now().minusMonths(1));
+        var sluttFørstePeriode = finnNærmeste(DayOfWeek.FRIDAY, førsteSkjæringstidspunkt);
+        var førstePeriode = vilkårBuilder.hentBuilderFor(førsteSkjæringstidspunkt, sluttFørstePeriode)
+            .medUtfall(Utfall.IKKE_OPPFYLT)
+            .medUtfallOverstyrt(Utfall.OPPFYLT);
+
+        vilkårBuilder.leggTil(førstePeriode);
+
+        var vilkår = vilkårBuilder.build();
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(1);
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt);
+
+        var oppdateringBuilder = new VilkårBuilder(vilkår).medKantIKantVurderer(new PåTversAvHelgErKantIKantVurderer());
+        var nyPeriode = finnNærmeste(DayOfWeek.MONDAY, sluttFørstePeriode);
+        var sluttSistePeriode = nyPeriode.plusDays(3);
+        oppdateringBuilder.leggTil(oppdateringBuilder.hentBuilderFor(nyPeriode, sluttSistePeriode)
+            .medUtfall(Utfall.IKKE_VURDERT));
+
+        var oppdatertVilkår = oppdateringBuilder.build();
+        assertThat(oppdatertVilkår).isNotNull();
+        assertThat(oppdatertVilkår.getPerioder()).hasSize(1);
+        assertThat(oppdatertVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)).containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(førsteSkjæringstidspunkt, sluttSistePeriode));
+    }
+
+    @Test
     public void skal_nullstille_ved_nulltimer() {
         var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
@@ -375,7 +407,7 @@ public class VilkårBuilderTest {
         var timeline1 = vilkårene1.getVilkårTimeline(VilkårType.UTVIDETRETT);
         assertThat(timeline1.getMinLocalDate()).isEqualTo(v1);
         assertThat(timeline1.getMaxLocalDate()).isEqualTo(v2);
-        
+
         var vilkårene2 = opprettVilkår(VilkårType.UTVIDETRETT, Utfall.OPPFYLT, null, vilkårene1, v1, v2);
 
         var timeline2 = vilkårene2.getVilkårTimeline(VilkårType.UTVIDETRETT);
@@ -397,5 +429,18 @@ public class VilkårBuilderTest {
         vr1.leggTil(builder);
         var vilkårene1 = vr1.build();
         return vilkårene1;
+    }
+
+    private LocalDate finnNærmesteFraSammeDag(DayOfWeek target, LocalDate date) {
+        var startdato = finnNærmeste(DayOfWeek.TUESDAY, date);
+        return finnNærmeste(target, startdato);
+    }
+
+    private LocalDate finnNærmeste(DayOfWeek target, LocalDate date) {
+        var dayOfWeek = date.getDayOfWeek();
+        if (target.equals(dayOfWeek)) {
+            return date;
+        }
+        return finnNærmeste(target, date.plusDays(1));
     }
 }
