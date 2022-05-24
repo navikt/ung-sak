@@ -43,8 +43,8 @@ public enum RelasjonsRolleType implements Kodeverdi {
     @Deprecated
     HOVEDSØKER_FRA_SØKNAD("HOVS", "Hovedsøker fra søknad"),
 
-    FOSTERBARN("FOSTERBARN", "Fosterbarn"),
-    FOSTERFORELDER("FOSTERFORELDER", "Fosterforelder"),
+    FOSTERBARN("K9_FOSTERBARN", "Fosterbarn"),
+    FOSTERFORELDER("K9_FOSTERFORELDER", "Fosterforelder"),
 
     UDEFINERT("-", "Ikke definert"),
     ;
