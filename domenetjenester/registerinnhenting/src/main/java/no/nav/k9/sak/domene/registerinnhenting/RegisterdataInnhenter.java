@@ -143,6 +143,7 @@ public class RegisterdataInnhenter {
         mapInfoMedHistorikkTilEntitet(søkerPersonInfo, personhistorikkinfo, informasjonBuilder, behandling);
 
         leggTilSøkersBarn(søkerPersonInfo, behandling, informasjonBuilder, opplysningsperioden);
+        leggTilFosterbarn(søkerPersonInfo, behandling, informasjonBuilder, opplysningsperioden);
 
         if (fagsakYtelseType.harRelatertePersoner()) {
             leggTilPleietrengende(informasjonBuilder, behandling, opplysningsperioden);
@@ -164,6 +165,20 @@ public class RegisterdataInnhenter {
             }
             mapRelasjon(barn, søkerPersonInfo, utledRelasjonsrolleTilBarn(søkerPersonInfo, barn), informasjonBuilder);
             mapRelasjon(søkerPersonInfo, barn, Collections.singletonList(RelasjonsRolleType.BARN), informasjonBuilder);
+        });
+    }
+
+    private void leggTilFosterbarn(Personinfo søkerPersonInfo, Behandling behandling, PersonInformasjonBuilder informasjonBuilder, no.nav.k9.sak.typer.Periode opplysningsperioden) {
+        List<Personinfo> barna = hentFosterbarn(behandling, opplysningsperioden);
+        barna.forEach(barn -> {
+            if (hentHistorikkForRelatertePersoner(behandling)) {
+                Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(barn.getAktørId(), opplysningsperioden);
+                mapInfoMedHistorikkTilEntitet(barn, personhistorikkinfo, informasjonBuilder, behandling);
+            } else {
+                mapInfoTilEntitet(barn, informasjonBuilder, behandling);
+            }
+            mapRelasjon(barn, søkerPersonInfo, List.of(RelasjonsRolleType.FOSTERFORELDER), informasjonBuilder);
+            mapRelasjon(søkerPersonInfo, barn, List.of(RelasjonsRolleType.FOSTERBARN), informasjonBuilder);
         });
     }
 
@@ -423,6 +438,13 @@ public class RegisterdataInnhenter {
             .filter(r -> r.getRelasjonsrolle().equals(RelasjonsRolleType.BARN))
             .map(r -> personinfoAdapter.innhentSaksopplysningerForBarn(r.getPersonIdent()).orElse(null))
             .filter(Objects::nonNull)
+            .toList();
+    }
+
+    private List<Personinfo> hentFosterbarn(Behandling behandling, no.nav.k9.sak.typer.Periode opplysningsperioden) {
+        var filter = YtelsesspesifikkRelasjonsFilter.finnTjeneste(relasjonsFiltre, behandling.getFagsakYtelseType());
+        return filter.hentFosterbarn(behandling, opplysningsperioden).stream()
+            .map(aktørId -> personinfoAdapter.hentPersoninfo(aktørId))
             .toList();
     }
 
