@@ -80,13 +80,19 @@ public class KandidaterForGReguleringTjeneste {
             return false;
         }
 
+        Saksnummer saksnummer = sisteBehandling.getFagsak().getSaksnummer();
         var bg = beregningPerioderGrunnlagRepository.hentGrunnlag(sisteBehandling.getId()).orElseThrow();
+
         List<UUID> koblingerÅSpørreMot = new ArrayList<>();
+
         overlappendeGrunnlag.forEach(og ->
             bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).ifPresent(bgp -> koblingerÅSpørreMot.add(bgp.getEksternReferanse())));
-        Saksnummer saksnummer = sisteBehandling.getFagsak().getSaksnummer();
+
         Map<UUID, GrunnbeløpReguleringStatus> koblingMotVurderingsmap = kalkulusTjeneste.kontrollerBehovForGregulering(koblingerÅSpørreMot, saksnummer);
-        return koblingMotVurderingsmap.values().stream().anyMatch(v -> v.equals(GrunnbeløpReguleringStatus.NØDVENDIG));
+
+        return koblingMotVurderingsmap.values()
+            .stream()
+            .anyMatch(v -> v.equals(GrunnbeløpReguleringStatus.NØDVENDIG));
     }
 
 }
