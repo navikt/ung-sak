@@ -355,8 +355,7 @@ public class VilkårBuilder {
 
     private boolean harPerioderSomIkkeErVurdertOgGrenserTilAnnenPeriode(NavigableSet<VilkårPeriode> vilkårsPerioderRaw) {
         return vilkårsPerioderRaw.stream()
-            .filter(it -> !it.getErOverstyrt())
-            .filter(it -> Utfall.IKKE_VURDERT.equals(it.getGjeldendeUtfall()))
+            .filter(it -> Utfall.IKKE_VURDERT.equals(it.getUtfall()))
             .anyMatch(it -> vilkårsPerioderRaw.stream()
                 .map(VilkårPeriode::getPeriode)
                 .filter(at -> !at.equals(it.getPeriode()))
