@@ -5,13 +5,11 @@ import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -84,14 +82,13 @@ public class NyoppstartetUtleder {
         // Har ikke helt kontroll på aa-reg mtp overlapp her så better safe than sorry (bruker combinator)
         var arbeidsAktivTidslinje = new LocalDateTimeline<>(segmenter, StandardCombinators::coalesceRightHandSide);
         // Ta bort permisjoner
-        var permitteringsTidslinje = mapPermittering(yrkesaktivitet);
-        arbeidsAktivTidslinje = arbeidsAktivTidslinje.disjoint(permitteringsTidslinje);
+        var permisjonTidslinje = mapPermisjon(yrkesaktivitet);
+        arbeidsAktivTidslinje = arbeidsAktivTidslinje.disjoint(permisjonTidslinje);
         return arbeidsAktivTidslinje.compress();
     }
 
-    private LocalDateTimeline<Boolean> mapPermittering(Yrkesaktivitet yrkesaktivitet) {
+    private LocalDateTimeline<Boolean> mapPermisjon(Yrkesaktivitet yrkesaktivitet) {
         var relevantePermitteringer = yrkesaktivitet.getPermisjon().stream()
-            .filter(it -> Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.PERMITTERING))
             .filter(it -> erStørreEllerLik100Prosent(it.getProsentsats()))
             .map(it -> new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), true))
             .toList();
