@@ -22,6 +22,7 @@ import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
@@ -73,7 +74,8 @@ class MapOpptjening {
         for (var opptjening : opptjeningResultat.getOpptjeningPerioder()) {
             OpptjeningDto resultat = new OpptjeningDto();
             var vilkårsperiode = vilkåret.finnPeriodeForSkjæringstidspunkt(opptjening.getSkjæringstidspunkt()).getPeriode();
-            var relevanteOpptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjening.getOpptjeningPeriode(), vilkårsperiode);
+            var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId())).før(vilkårsperiode.getFomDato());
+            var relevanteOpptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjening.getOpptjeningPeriode(), vilkårsperiode, yrkesaktivitetFilter);
             List<OpptjeningAktivitet> opptjeningAktivitet = opptjening.getOpptjeningAktivitet();
             resultat.setFastsattOpptjening(new FastsattOpptjeningDto(opptjening.getFom(),
                 opptjening.getTom(), mapFastsattOpptjening(opptjening),

@@ -19,10 +19,16 @@ import jakarta.persistence.EntityManager;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
@@ -58,10 +64,12 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
     private AktørId aktørId;
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
     private OppgittOpptjeningFilter oppgittOpptjeningFilter;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     @BeforeEach
     public void setUp() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();
         oppgittOpptjeningFilter = Mockito.mock(OppgittOpptjeningFilter.class);
         oppgittOpptjeningFilterProvider = Mockito.mock(OppgittOpptjeningFilterProvider.class);
@@ -73,7 +81,19 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
         ref = BehandlingReferanse.fra(behandling);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, FØRSTE_UTTAKSDAG.minusMonths(10), FØRSTE_UTTAKSDAG.minusDays(1), false);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, SKJÆRINGSTIDSPUNKT.minusMonths(10), SKJÆRINGSTIDSPUNKT.minusDays(1), false);
-        tjeneste = new OmsorgspengerOpptjeningForBeregningTjeneste(new OpptjeningsperioderTjeneste(opptjeningRepository, repositoryProvider.getFagsakRepository(), oppgittOpptjeningFilterProvider), oppgittOpptjeningFilterProvider);
+
+        var opptjeningsvilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET);
+        var vilkårPeriodeBuilder = opptjeningsvilkårBuilder.hentBuilderFor(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT);
+        vilkårPeriodeBuilder.medUtfall(Utfall.OPPFYLT);
+        opptjeningsvilkårBuilder.leggTil(vilkårPeriodeBuilder);
+        Vilkårene nyttResultat = Vilkårene.builder()
+            .leggTil(opptjeningsvilkårBuilder)
+            .build();
+        vilkårResultatRepository.lagre(behandling.getId(), nyttResultat);
+        tjeneste = new OmsorgspengerOpptjeningForBeregningTjeneste(
+            new OpptjeningsperioderTjeneste(opptjeningRepository, oppgittOpptjeningFilterProvider),
+            oppgittOpptjeningFilterProvider,
+            vilkårResultatRepository);
     }
 
     @Test
@@ -84,6 +104,26 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
             .get();
         List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningPerioder = opptjeningAktiviteter.getOpptjeningPerioder();
         assertThat(opptjeningPerioder.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void skal_mappe_arbeid_for_8_47_B_uten_arbeid_i_opptjeningsperioden() {
+
+        var opptjeningsvilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET);
+        var vilkårPeriodeBuilder = opptjeningsvilkårBuilder.hentBuilderFor(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT);
+        vilkårPeriodeBuilder.medUtfall(Utfall.OPPFYLT).medMerknad(VilkårUtfallMerknad.VM_7847_B);
+        opptjeningsvilkårBuilder.leggTil(vilkårPeriodeBuilder);
+        Vilkårene nyttResultat = Vilkårene.builder()
+            .leggTil(opptjeningsvilkårBuilder)
+            .build();
+        vilkårResultatRepository.lagre(ref.getId(), nyttResultat);
+
+        InntektArbeidYtelseGrunnlag iay = lagIAYForArbeidStarterPåSkjæringstidspunktet();
+        when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any(LocalDate.class))).thenReturn(iay.getOppgittOpptjening());
+        OpptjeningAktiviteter opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(ref, iay, DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT.plusDays(10)))
+            .get();
+        List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningPerioder = opptjeningAktiviteter.getOpptjeningPerioder();
+        assertThat(opptjeningPerioder.size()).isEqualTo(1);
     }
 
     private InntektArbeidYtelseGrunnlag lagIAYForArbeidSomSlutterOgStarterRundtFørsteUttaksdag() {
@@ -98,6 +138,19 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
             .medInformasjon(ArbeidsforholdInformasjonBuilder.oppdatere(Optional.empty()).build())
             .build();
     }
+
+    private InntektArbeidYtelseGrunnlag lagIAYForArbeidStarterPåSkjæringstidspunktet() {
+        InntektArbeidYtelseAggregatBuilder registerBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeid = InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder.oppdatere(Optional.empty())
+            .medAktørId(aktørId)
+            .leggTilYrkesaktivitet(lagArbeid(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT.plusDays(10)));
+        registerBuilder.leggTilAktørArbeid(aktørArbeid);
+        return InntektArbeidYtelseGrunnlagBuilder.nytt()
+            .medData(registerBuilder)
+            .medInformasjon(ArbeidsforholdInformasjonBuilder.oppdatere(Optional.empty()).build())
+            .build();
+    }
+
 
     private YrkesaktivitetBuilder lagArbeid(LocalDate fom, LocalDate tom) {
         return YrkesaktivitetBuilder.oppdatere(Optional.empty())
