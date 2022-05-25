@@ -241,12 +241,10 @@ public class SykdomVurderingService {
              * I tillegg er to omsorgspersoner kun obligatorisk å vurdere for perioder med flere søkere.
              */
             LocalDateTimeline<Boolean> ktpPerioder = TidslinjeUtil.tilTidslinjeKomprimert(hentKontinuerligTilsynOgPleiePerioder(behandling));
-            final LocalDateTimeline<?> flereOmsorgspersoner = harAndreSakerEnn(saksnummer, søknadsperioderPåPleietrengende);
             alleResterendeVurderingsperioder = alleResterendeVurderingsperioder.intersection(ktpPerioder);
             resterendeVurderingsperioder = alleResterendeVurderingsperioder.disjoint(utenOmsorgenForTidslinje)
-                    .intersection(flereOmsorgspersoner)
-                    .intersection(søknadsperioderTilSøker)
-                    .intersection(søknadsperioderForInneværendeBehandling);
+                    .intersection(søknadsperioderForAlleSøkere)
+                    .intersection(søknadsperioderTilSøker);
         } else {
             resterendeVurderingsperioder = alleResterendeVurderingsperioder.disjoint(utenOmsorgenForTidslinje)
                     .intersection(søknadsperioderTilSøker)
