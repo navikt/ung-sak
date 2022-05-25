@@ -6,20 +6,19 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import jakarta.inject.Inject;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 import no.nav.k9.sak.kontrakt.omsorg.OmsorgenForDto;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForPeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 
 @ExtendWith(CdiAwareExtension.class)
 class OmsorgenForDtoMapperTest {
@@ -30,7 +29,7 @@ class OmsorgenForDtoMapperTest {
     public void toOmsorgenForDtoListeCase1Test() {
         List<OmsorgenForPeriode> omsorgenForPerioder = Arrays.asList(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 15)));
 
-        LocalDateTimeline<Boolean> tidslinjeTilVurdering = SykdomUtils.toLocalDateTimeline(Arrays.asList(new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 20))));
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(Arrays.asList(new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 20))));
 
         List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(omsorgenForPerioder, true, tidslinjeTilVurdering);
 
@@ -48,9 +47,9 @@ class OmsorgenForDtoMapperTest {
         List<OmsorgenForPeriode> omsorgenForPerioder = Arrays.asList(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 20)));
 
         LocalDateTimeline<Boolean> tidslinjeTilVurdering =
-            SykdomUtils.toLocalDateTimeline(Arrays.asList(
-                new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 5)),
-                new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 25))));
+                TidslinjeUtil.tilTidslinjeKomprimert(Arrays.asList(
+                        new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 5)),
+                        new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 25))));
 
         List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(omsorgenForPerioder, true, tidslinjeTilVurdering);
 

@@ -1,9 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
-import static no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils.kunPerioderSomIkkeFinnesI;
-import static no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils.toLocalDateTimeline;
-import static no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils.toPeriodeList;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,10 +13,10 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
@@ -54,12 +50,12 @@ public class SykdomGrunnlagRepository {
     private SykdomGrunnlag utledGrunnlag(AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder, List<Periode> søknadsperioderSomSkalFjernes, Optional<SykdomGrunnlagBehandling> grunnlagFraForrigeBehandling) {
         final LocalDateTime opprettetTidspunkt = LocalDateTime.now();
 
-        final LocalDateTimeline<Boolean> søktePerioderFraForrigeBehandling = kunPerioderSomIkkeFinnesI(hentSøktePerioderFraForrigeBehandling(grunnlagFraForrigeBehandling), toLocalDateTimeline(søknadsperioderSomSkalFjernes));
-        final LocalDateTimeline<Boolean> vurderingsperioderTidslinje = toLocalDateTimeline(vurderingsperioder);
+        final LocalDateTimeline<Boolean> søktePerioderFraForrigeBehandling = TidslinjeUtil.kunPerioderSomIkkeFinnesI(hentSøktePerioderFraForrigeBehandling(grunnlagFraForrigeBehandling), TidslinjeUtil.tilTidslinjeKomprimert(søknadsperioderSomSkalFjernes));
+        final LocalDateTimeline<Boolean> vurderingsperioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(vurderingsperioder);
         final LocalDateTimeline<Boolean> søktePerioderTidslinje = søktePerioderFraForrigeBehandling.union(vurderingsperioderTidslinje, (interval, s1, s2) -> new LocalDateSegment<>(interval, true)).compress();
 
-        final List<Periode> søktePerioder = toPeriodeList(søktePerioderTidslinje);
-        final List<Periode> revurderingsperioder = toPeriodeList(kunPerioderSomIkkeFinnesI(søktePerioderTidslinje, søktePerioderFraForrigeBehandling));
+        final List<Periode> søktePerioder = TidslinjeUtil.tilPerioder(søktePerioderTidslinje);
+        final List<Periode> revurderingsperioder = TidslinjeUtil.tilPerioder(TidslinjeUtil.kunPerioderSomIkkeFinnesI(søktePerioderTidslinje, søktePerioderFraForrigeBehandling));
 
         final List<SykdomVurderingVersjon> vurderinger = hentVurderinger(pleietrengendeAktørId);
 

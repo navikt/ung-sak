@@ -12,6 +12,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingEndringDto;
@@ -22,7 +23,6 @@ import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingOversiktElement;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
@@ -65,7 +65,7 @@ public class SykdomVurderingOversiktMapper {
         elements = medInnleggelser(elements, sykdomVurderingerOgPerioder.getInnleggelsesperioder());
         elements = medInformasjonOmSøktePerioder(elements, saksnummer, sykdomVurderingerOgPerioder.getSaksnummerForPerioder());
 
-        return SykdomUtils.values(elements);
+        return TidslinjeUtil.values(elements.compress());
     }
 
     private LocalDateTimeline<SykdomVurderingOversiktElement> vurderingerTilElement(LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje, UUID behandlingUuid) {
@@ -82,7 +82,7 @@ public class SykdomVurderingOversiktMapper {
     }
 
     private LocalDateTimeline<SykdomVurderingOversiktElement> medInnleggelser(LocalDateTimeline<SykdomVurderingOversiktElement> elementsTidslinje, List<Periode> innleggelsesperioder) {
-        final LocalDateTimeline<Boolean> innleggelsesperioderTidslinje = SykdomUtils.toLocalDateTimeline(innleggelsesperioder);
+        final LocalDateTimeline<Boolean> innleggelsesperioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(innleggelsesperioder);
         return elementsTidslinje.combine(innleggelsesperioderTidslinje, new LocalDateSegmentCombinator<SykdomVurderingOversiktElement, Boolean, SykdomVurderingOversiktElement>() {
             @Override
             public LocalDateSegment<SykdomVurderingOversiktElement> combine(

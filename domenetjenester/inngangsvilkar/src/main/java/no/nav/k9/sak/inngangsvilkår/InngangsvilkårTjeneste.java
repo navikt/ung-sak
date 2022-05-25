@@ -69,31 +69,6 @@ public class InngangsvilkårTjeneste {
     }
 
     /**
-     * Overstyr søkers opplysningsplikt.
-     */
-    public void overstyrAksjonspunktForSøkersopplysningsplikt(Long behandlingId, Utfall utfall, BehandlingskontrollKontekst kontekst, LocalDate fom, LocalDate tom, String begrunnelse) {
-        Avslagsårsak avslagsårsak = Avslagsårsak.MANGLENDE_DOKUMENTASJON;
-        VilkårType vilkårType = VilkårType.SØKERSOPPLYSNINGSPLIKT;
-
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-
-        Vilkårene vilkårene = vilkårResultatRepository.hent(behandlingId);
-        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
-
-        var vilkårBuilder = builder.hentBuilderFor(vilkårType);
-        builder.leggTil(vilkårBuilder
-            .leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
-                .medUtfallOverstyrt(utfall)
-                .medAvslagsårsak(Utfall.IKKE_OPPFYLT.equals(utfall) ? avslagsårsak : null)
-                .medBegrunnelse(begrunnelse)
-            )
-        );
-        final var oppdatertVikårResultat = builder.build();
-        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-        vilkårResultatRepository.lagre(behandlingId, oppdatertVikårResultat);
-    }
-
-    /**
      * Overstyr gitt aksjonspunkt på Inngangsvilkår.
      */
     public void overstyrAksjonspunkt(Long behandlingId, VilkårType vilkårType, Utfall utfall, String avslagsårsakKode,

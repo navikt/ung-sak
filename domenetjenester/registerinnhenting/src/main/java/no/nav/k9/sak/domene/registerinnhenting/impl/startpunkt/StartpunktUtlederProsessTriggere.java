@@ -44,12 +44,17 @@ class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
     }
 
     @Override
-    public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {
-        var grunnlag2 = new HashSet<>(prosessTriggereRepository.hentGrunnlagBasertPåId((Long) grunnlagId2)
+    public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object nyeste, Object eldste) {
+        var eldsteGrunnlag = new HashSet<>(prosessTriggereRepository.hentGrunnlagBasertPåId((Long) eldste)
+            .map(ProsessTriggere::getTriggere)
+            .orElseGet(Set::of));
+        var nyesteGrunnlag = new HashSet<>(prosessTriggereRepository.hentGrunnlagBasertPåId((Long) nyeste)
             .map(ProsessTriggere::getTriggere)
             .orElseGet(Set::of));
 
-        return grunnlag2.stream()
+        nyesteGrunnlag.removeAll(eldsteGrunnlag);
+
+        return nyesteGrunnlag.stream()
             .map(this::mapTilStartPunktType)
             .min(Comparator.comparing(StartpunktType::getRangering))
             .orElse(StartpunktType.UDEFINERT);

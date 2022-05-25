@@ -15,6 +15,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.omsorg.OmsorgenForDto;
 import no.nav.k9.sak.kontrakt.omsorg.OmsorgenForOversiktDto;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
@@ -24,7 +25,6 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForPeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 
 @ApplicationScoped
 public class OmsorgenForDtoMapper {
@@ -75,7 +75,7 @@ public class OmsorgenForDtoMapper {
     private LocalDateTimeline<Boolean> lagTidslinjeTilVurdering(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         VilkårsPerioderTilVurderingTjeneste vilkårsperioderTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType());
-        LocalDateTimeline<Boolean> tidslinjeTilVurdering = SykdomUtils.toLocalDateTimeline(vilkårsperioderTjeneste.utled(behandlingId, VilkårType.OMSORGEN_FOR));
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(vilkårsperioderTjeneste.utled(behandlingId, VilkårType.OMSORGEN_FOR));
         return tidslinjeTilVurdering;
     }
 

@@ -15,6 +15,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -41,7 +42,7 @@ public class SykdomGrunnlagService {
     public SykdomGrunnlagBehandling hentGrunnlag(UUID behandlingUuid) {
         return sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandlingUuid).orElseThrow();
     }
-    
+
     public Optional<SykdomGrunnlagBehandling> hentGrunnlagHvisEksisterer(UUID behandlingUuid) {
         return sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandlingUuid);
     }
@@ -59,9 +60,9 @@ public class SykdomGrunnlagService {
     LocalDateTimeline<VilkårPeriode> hentManglendeOmsorgenForTidslinje(Long behandlingId) {
         return hentOmsorgenForTidslinje(behandlingId).filterValue(v -> v.getUtfall() == Utfall.IKKE_OPPFYLT);
     }
-    
+
     public List<Periode> hentManglendeOmsorgenForPerioder(Long behandlingId) {
-        return SykdomUtils.toPeriodeList(hentManglendeOmsorgenForTidslinje(behandlingId));
+        return TidslinjeUtil.tilPerioder(hentManglendeOmsorgenForTidslinje(behandlingId));
     }
 
     public SykdomGrunnlagSammenlikningsresultat utledRelevanteEndringerSidenForrigeGrunnlag(Behandling behandling) {
@@ -109,7 +110,7 @@ public class SykdomGrunnlagService {
         final LocalDateTimeline<SykdomSamletVurdering> nyBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(utledetGrunnlag);
         final LocalDateTimeline<Boolean> endringerSidenForrigeBehandling = SykdomSamletVurdering.finnGrunnlagsforskjeller(forrigeGrunnlagTidslinje, nyBehandlingTidslinje);
 
-        final LocalDateTimeline<Boolean> søktePerioderTimeline = SykdomUtils.toLocalDateTimeline(utledetGrunnlag.getSøktePerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList()));
+        final LocalDateTimeline<Boolean> søktePerioderTimeline = TidslinjeUtil.tilTidslinjeKomprimert(utledetGrunnlag.getSøktePerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList()));
         return endringerSidenForrigeBehandling.intersection(søktePerioderTimeline);
     }
 

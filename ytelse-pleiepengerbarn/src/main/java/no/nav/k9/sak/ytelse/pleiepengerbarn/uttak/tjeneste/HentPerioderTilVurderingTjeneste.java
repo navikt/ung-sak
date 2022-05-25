@@ -18,8 +18,8 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
 @Dependent
@@ -39,7 +39,7 @@ public class HentPerioderTilVurderingTjeneste {
 
     public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingUtenUbesluttet(Behandling behandling) {
         BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
-        var søknadsperioder = SykdomUtils.toLocalDateTimeline(finnSykdomsperioder(referanse));
+        var søknadsperioder = TidslinjeUtil.tilTidslinjeKomprimert(finnSykdomsperioder(referanse));
 
         return fjernTrukkedePerioder(referanse, behandling, søknadsperioder);
     }
@@ -48,7 +48,7 @@ public class HentPerioderTilVurderingTjeneste {
         BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
         var datoer = søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId());
 
-        var søknadsperioder = SykdomUtils.toLocalDateTimeline(datoer);
+        var søknadsperioder = TidslinjeUtil.tilTidslinjeKomprimert(datoer);
         if (utvidetPeriodeSomFølgeAvDødsfall.isPresent()) {
             søknadsperioder = søknadsperioder.combine(new LocalDateSegment<>(utvidetPeriodeSomFølgeAvDødsfall.get().toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
@@ -59,13 +59,13 @@ public class HentPerioderTilVurderingTjeneste {
     @NotNull
     private TreeSet<DatoIntervallEntitet> fjernTrukkedePerioder(BehandlingReferanse referanse, Behandling behandling, LocalDateTimeline<Boolean> søknadsperioder) {
         final LocalDateTimeline<Boolean> trukkedeKrav = hentTrukkedeKravTidslinje(referanse, behandling);
-        return SykdomUtils.kunPerioderSomIkkeFinnesI(søknadsperioder, trukkedeKrav).stream()
+        return TidslinjeUtil.kunPerioderSomIkkeFinnesI(søknadsperioder, trukkedeKrav).stream()
             .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private LocalDateTimeline<Boolean> hentTrukkedeKravTidslinje(BehandlingReferanse referanse, Behandling behandling) {
-        return SykdomUtils.toLocalDateTimeline(søknadsperiodeTjeneste.hentKravperioder(behandling.getFagsakId(), referanse.getBehandlingId())
+        return TidslinjeUtil.tilTidslinjeKomprimert(søknadsperiodeTjeneste.hentKravperioder(behandling.getFagsakId(), referanse.getBehandlingId())
             .stream()
             .filter(kp -> kp.isHarTrukketKrav())
             .map(SøknadsperiodeTjeneste.Kravperiode::getPeriode)
