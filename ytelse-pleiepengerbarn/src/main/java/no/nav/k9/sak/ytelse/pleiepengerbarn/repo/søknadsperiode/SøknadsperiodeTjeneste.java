@@ -57,8 +57,8 @@ public class SøknadsperiodeTjeneste {
             Behandling behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).get();
             NavigableSet<DatoIntervallEntitet> datoIntervallEntitets = utledFullstendigPeriode(behandling.getId());
             LocalDateTimeline<AktørId> timelineForSøker = new LocalDateTimeline<>(datoIntervallEntitets.stream()
-                .map(e -> new LocalDateSegment(e.toLocalDateInterval(), fagsak.getAktørId()))
-                .collect(Collectors.toList()));
+                .map(e -> new LocalDateSegment<>(e.toLocalDateInterval(), fagsak.getAktørId()))
+                .toList());
             samletTimelineForAlleSøkere.union(timelineForSøker, StandardCombinators::allValues);
         }
 
