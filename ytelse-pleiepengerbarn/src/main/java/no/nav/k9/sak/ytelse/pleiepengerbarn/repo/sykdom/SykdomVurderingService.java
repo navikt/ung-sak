@@ -216,6 +216,8 @@ public class SykdomVurderingService {
     public SykdomVurderingerOgPerioder utledPerioder(SykdomVurderingType sykdomVurderingType, Behandling behandling) {
         final Saksnummer saksnummer = behandling.getFagsak().getSaksnummer();
         final LocalDateTimeline<SykdomVurderingVersjon> eksisterendeVurderinger = hentVurderinger(sykdomVurderingType, behandling);
+        //TODO: Dette er "søknadsperioder" fra sykdomsgrunnlaget. Det skjærer litt med søknadsperiodene vi nå henter rett fra kilden, hvor vi filtrere på trukkede perioder. Bedre navn?
+        // Er det evt nå redundant, pga direkte henting fra søknadsperioder, og kan/bør fjernes?
         final LocalDateTimeline<Set<Saksnummer>> søknadsperioderPåPleietrengende = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
         final LocalDateTimeline<Boolean> søknadsperioderTilSøker = søknadsperioderPåPleietrengende.filterValue(s -> s.contains(saksnummer)).mapValue(s -> Boolean.TRUE);
 
