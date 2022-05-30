@@ -23,6 +23,13 @@ public class PeriodeTilVurdering implements Comparable<PeriodeTilVurdering> {
         return erForlengelse;
     }
 
+    @Override
+    public String toString() {
+        return "PeriodeTilVurdering{" +
+            "periode=" + periode +
+            ", erForlengelse=" + erForlengelse +
+            '}';
+    }
 
     @Override
     public int compareTo(PeriodeTilVurdering other) {
