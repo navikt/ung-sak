@@ -41,7 +41,8 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                                                                               InntektArbeidYtelseGrunnlag grunnlag,
                                                                               OpptjeningAktivitetVurdering vurderForSaksbehandling,
                                                                               Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening,
-                                                                              DatoIntervallEntitet opptjeningsperiode, DatoIntervallEntitet vilkårsPeriode,
+                                                                              DatoIntervallEntitet opptjeningsperiode,
+                                                                              DatoIntervallEntitet vilkårsPeriode,
                                                                               Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse) {
         final OpptjeningAktivitetType type = utledOpptjeningType(mapArbeidOpptjening, registerAktivitet.getArbeidType());
         return new ArrayList<>(mapAktivitetsavtaler(behandlingReferanse, registerAktivitet, grunnlag,

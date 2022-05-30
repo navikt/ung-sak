@@ -47,11 +47,13 @@ import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyringBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektspostBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
+import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseBuilder;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
@@ -98,7 +100,7 @@ class OpptjeningsperioderTjenesteTest {
         vurderForVilkår = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
 
-        opptjeningsperioderTjeneste = new OpptjeningsperioderTjeneste(repositoryProvider.getOpptjeningRepository(), repositoryProvider.getFagsakRepository(), oppgittOpptjeningFilterProvider);
+        opptjeningsperioderTjeneste = new OpptjeningsperioderTjeneste(repositoryProvider.getOpptjeningRepository(), oppgittOpptjeningFilterProvider);
         when(oppgittOpptjeningFilterProvider.finnOpptjeningFilter(Mockito.anyLong())).thenReturn(new OppgittOpptjeningFilter() {
         });
 
@@ -123,7 +125,7 @@ class OpptjeningsperioderTjenesteTest {
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
         // Act
-        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)), getYrkesaktivitetFilter(iayGrunnlag, ref.getAktørId()));
 
         // Assert
         assertThat(perioder.size()).isEqualTo(1);
@@ -143,11 +145,15 @@ class OpptjeningsperioderTjenesteTest {
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
         // Act
-        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)), getYrkesaktivitetFilter(iayGrunnlag, behandling.getAktørId()));
 
         // Assert
         assertThat(perioder.size()).isEqualTo(1);
         assertThat(perioder.get(0).getVurderingsStatus()).isEqualTo(VurderingsStatus.TIL_VURDERING);
+    }
+
+    private YrkesaktivitetFilter getYrkesaktivitetFilter(InntektArbeidYtelseGrunnlag iayGrunnlag, AktørId aktørId) {
+        return new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(aktørId)).før(skjæringstidspunkt);
     }
 
     @Test
@@ -164,7 +170,7 @@ class OpptjeningsperioderTjenesteTest {
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
         // Act
-        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)), getYrkesaktivitetFilter(iayGrunnlag, behandling.getAktørId()));
 
         // Assert
         assertThat(perioder.size()).isEqualTo(3);
@@ -191,7 +197,7 @@ class OpptjeningsperioderTjenesteTest {
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
         // Act
-        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)), getYrkesaktivitetFilter(iayGrunnlag, behandling.getAktørId()));
 
         // Assert
         assertThat(perioder.size()).isEqualTo(1);
@@ -217,7 +223,7 @@ class OpptjeningsperioderTjenesteTest {
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
         // Act
-        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)), getYrkesaktivitetFilter(iayGrunnlag, behandling.getAktørId()));
 
         // Assert
         assertThat(perioder.size()).isEqualTo(1);
@@ -240,7 +246,7 @@ class OpptjeningsperioderTjenesteTest {
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
         // Act
-        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)), getYrkesaktivitetFilter(iayGrunnlag, behandling.getAktørId()));
 
         // Assert
         assertThat(perioder.size()).isEqualTo(1);
@@ -263,7 +269,7 @@ class OpptjeningsperioderTjenesteTest {
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
         // Act
-        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)), getYrkesaktivitetFilter(iayGrunnlag, behandling.getAktørId()));
 
         // Assert
         assertThat(perioder.size()).isEqualTo(1);
@@ -286,7 +292,7 @@ class OpptjeningsperioderTjenesteTest {
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
         // Act
-        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)), getYrkesaktivitetFilter(iayGrunnlag, behandling.getAktørId()));
 
         // Assert
         assertThat(perioder.size()).isEqualTo(2);
@@ -308,7 +314,7 @@ class OpptjeningsperioderTjenesteTest {
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
         // Act
-        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(BehandlingReferanse.fra(behandling), iayGrunnlag, vurderForVilkår, opptjening.getOpptjeningPeriode(), DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusMonths(6)), getYrkesaktivitetFilter(iayGrunnlag, behandling.getAktørId()));
 
         // Assert
         assertThat(perioder.size()).isEqualTo(1);

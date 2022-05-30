@@ -129,11 +129,11 @@ public class KalkulatorInputTjeneste {
         var grunnlagDto = mapIAYTilKalkulus(referanse, vilkårsperiode, iayGrunnlag, sakInntektsmeldinger, oppgittOpptjening, imTjeneste);
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode);
 
-        if (opptjeningAktiviteter.isEmpty()) {
+        if (opptjeningAktiviteter.isEmpty() && !erInaktiv(vilkårsMerknad)) {
             throw new IllegalStateException("Forventer opptjening for vilkårsperiode: " + vilkårsperiode + ", iayGrunnlag.opptjening=" + oppgittOpptjening);
         }
 
-        var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter.get(), vilkårsMerknad);
+        var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter, vilkårsMerknad);
 
         KalkulatorInputDto kalkulatorInputDto = new KalkulatorInputDto(grunnlagDto, opptjeningAktiviteterDto, stp);
 
@@ -149,6 +149,10 @@ public class KalkulatorInputTjeneste {
         }
 
         return kalkulatorInputDto;
+    }
+
+    private boolean erInaktiv(VilkårUtfallMerknad vilkårsMerknad) {
+        return vilkårsMerknad.equals(VilkårUtfallMerknad.VM_7847_B) || vilkårsMerknad.equals(VilkårUtfallMerknad.VM_7847_A);
     }
 
 
