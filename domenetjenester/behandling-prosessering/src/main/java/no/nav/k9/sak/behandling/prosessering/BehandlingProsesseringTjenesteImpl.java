@@ -213,7 +213,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     // Robust task til bruk ved gjenopptak fra vent (eller annen tilstand) (Hendelse: Manuell input, Frist utløpt, mv)
     @Override
     public void opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId) {
-       opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, false);
+       opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, false, false);
     }
 
     @Override
@@ -231,7 +231,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
     @Override
     public ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker) {
-        return opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, skalUtledeÅrsaker, false);
+        return opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, skalUtledeÅrsaker, true);
     }
     public ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker, boolean forceInnhentingAvRegisterdata) {
         Long fagsakId = behandling.getFagsakId();
