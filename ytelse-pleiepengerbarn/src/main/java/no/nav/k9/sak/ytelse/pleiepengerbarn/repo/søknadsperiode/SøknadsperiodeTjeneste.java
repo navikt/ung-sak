@@ -59,7 +59,7 @@ public class SøknadsperiodeTjeneste {
             LocalDateTimeline<AktørId> timelineForSøker = new LocalDateTimeline<>(datoIntervallEntitets.stream()
                 .map(e -> new LocalDateSegment<>(e.toLocalDateInterval(), fagsak.getAktørId()))
                 .toList());
-            samletTimelineForAlleSøkere.union(timelineForSøker, StandardCombinators::allValues);
+            samletTimelineForAlleSøkere = samletTimelineForAlleSøkere.union(timelineForSøker, StandardCombinators::allValues);
         }
 
         return samletTimelineForAlleSøkere;
