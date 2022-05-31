@@ -69,20 +69,20 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
     }
 
     @Override
-    public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {
-        return hentAlleStartpunktForInntektArbeidYtelse(ref, (UUID) grunnlagId1, (UUID) grunnlagId2).stream()
+    public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object oppdatertGrunnlag, Object forrigeGrunnlag) {
+        return hentAlleStartpunktForInntektArbeidYtelse(ref, (UUID) oppdatertGrunnlag, (UUID) forrigeGrunnlag).stream()
             .min(Comparator.comparing(StartpunktType::getRangering))
             .orElse(StartpunktType.UDEFINERT);
     }
 
     private List<StartpunktType> hentAlleStartpunktForInntektArbeidYtelse(BehandlingReferanse ref, UUID grunnlagId1, UUID grunnlagId2) { // NOSONAR
         List<StartpunktType> startpunkter = new ArrayList<>();
-        var grunnlag1 = grunnlagId1 != null ? iayTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagId1) : null;
-        var grunnlag2 = grunnlagId2 != null ? iayTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagId2) : null;
-        var diff = new IAYGrunnlagDiff(grunnlag1, grunnlag2);
+        var oppdatertGrunnlag = grunnlagId1 != null ? iayTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagId1) : null;
+        var forrigeGrunnlag = grunnlagId2 != null ? iayTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagId2) : null;
+        var diff = new IAYGrunnlagDiff(oppdatertGrunnlag, forrigeGrunnlag);
 
         if (startpunktUtlederInntektsmeldinger.inntektsmeldingErSøknad(ref)) {
-            var startpunktType = startpunktUtlederInntektsmeldinger.utledStartpunkt(ref, grunnlag2);
+            var startpunktType = startpunktUtlederInntektsmeldinger.utledStartpunkt(ref, forrigeGrunnlag);
             boolean erInntektsmeldingEndret = !StartpunktType.UDEFINERT.equals(startpunktType);
             if (erInntektsmeldingEndret) {
                 leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, startpunktType, "tilkommet inntektsmeldinger");
