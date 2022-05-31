@@ -48,13 +48,12 @@ public class BeregningsgrunnlagOppdateringTjeneste {
     private void validerOppdatering(Map<LocalDate, HåndterBeregningDto> stpTilDtoMap,
                                     BehandlingReferanse ref, boolean skalKunneOppdatereForlengelser) {
         var filter = vilkårPeriodeFilterProvider.getFilter(ref, false);
-        filter.ignorerAvslagPåKompletthet();
         if (!skalKunneOppdatereForlengelser) {
             filter.ignorerForlengelseperioder();
         }
         var perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, filter);
         stpTilDtoMap.keySet().forEach(stp -> {
-            List<DatoIntervallEntitet> vurderingsperioderSomInkludererSTP = finnPerioderSomInkludererDato(perioderSomSkalKunneVurderes.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()), stp);
+            List<DatoIntervallEntitet> vurderingsperioderSomInkludererSTP = finnPerioderSomInkludererDato(perioderSomSkalKunneVurderes, stp);
             if (vurderingsperioderSomInkludererSTP.size() == 0) {
                 throw new IllegalStateException("Prøver å endre grunnlag med skjæringstidspunkt" + stp + " men denne er ikke i" +
                     " listen over vilkårsperioder som er til vurdering " + perioderSomSkalKunneVurderes);
