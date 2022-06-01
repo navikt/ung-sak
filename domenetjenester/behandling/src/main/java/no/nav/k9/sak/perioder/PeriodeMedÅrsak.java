@@ -38,6 +38,10 @@ public class PeriodeMedÅrsak implements Comparable<PeriodeMedÅrsak> {
 
     @Override
     public int compareTo(PeriodeMedÅrsak o) {
-        return periode.compareTo(o.getPeriode());
+        var periodeCompare = periode.compareTo(o.periode);
+        if (periodeCompare == 0) {
+            return årsak.compareTo(o.årsak);
+        }
+        return periodeCompare;
     }
 }
