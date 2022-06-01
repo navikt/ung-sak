@@ -16,6 +16,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -31,6 +32,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 
 @Dependent
@@ -42,6 +44,7 @@ public class SykdomVurderingService {
     private SykdomDokumentRepository sykdomDokumentRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
 
     SykdomVurderingService() {
@@ -49,14 +52,19 @@ public class SykdomVurderingService {
     }
 
     @Inject
-    public SykdomVurderingService(@Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
-                                  SykdomVurderingRepository sykdomVurderingRepository, SykdomDokumentRepository sykdomDokumentRepository,
-                                  SykdomGrunnlagService sykdomGrunnlagService, BasisPersonopplysningTjeneste personopplysningTjeneste) {
+    public SykdomVurderingService(
+            @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
+            SykdomVurderingRepository sykdomVurderingRepository,
+            SykdomDokumentRepository sykdomDokumentRepository,
+            SykdomGrunnlagService sykdomGrunnlagService,
+            BasisPersonopplysningTjeneste personopplysningTjeneste,
+            SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.personopplysningTjeneste = personopplysningTjeneste;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
 
 
@@ -189,8 +197,19 @@ public class SykdomVurderingService {
             alleResterendeVurderingsperioder = LocalDateTimeline.empty();
         }
 
-        List<Periode> resterendeVurderingsperioder = TidslinjeUtil.tilPerioder(alleResterendeVurderingsperioder);
-        List<Periode> resterendeValgfrieVurderingsperioder = TidslinjeUtil.tilPerioder(TidslinjeUtil.kunPerioderSomIkkeFinnesI(TidslinjeUtil.kunPerioderSomIkkeFinnesI(tidslinjeKreverVurdering, alleResterendeVurderingsperioder), vurderinger));
+        //ta høyde for perioder trukket av søker(e)
+        LocalDateTimeline<List<AktørId>> søknadsperioderForAlleSøkere = søknadsperiodeTjeneste.utledSamledePerioderMedSøkereFor(FagsakYtelseType.PPN, behandling.getFagsak().getPleietrengendeAktørId());
+        LocalDateTimeline<List<AktørId>> søknadsperioderForInneværendeBehandling = new LocalDateTimeline<>(søknadsperioderForAlleSøkere.stream().filter(s -> s.getValue().contains(behandling.getAktørId())).collect(Collectors.toList()));
+
+        List<Periode> resterendeVurderingsperioder = TidslinjeUtil.tilPerioder(alleResterendeVurderingsperioder.intersection(søknadsperioderForInneværendeBehandling));
+
+        List<Periode> resterendeValgfrieVurderingsperioder =
+            TidslinjeUtil.tilPerioder(
+            tidslinjeKreverVurdering
+                .disjoint(alleResterendeVurderingsperioder)
+                .disjoint(vurderinger)
+                .intersection(søknadsperioderForAlleSøkere)
+                .compress());
         List<Periode> nyeSøknadsperioder = Collections.emptyList();
 
         return new SykdomVurderingerOgPerioder(
@@ -207,6 +226,8 @@ public class SykdomVurderingService {
     public SykdomVurderingerOgPerioder utledPerioder(SykdomVurderingType sykdomVurderingType, Behandling behandling) {
         final Saksnummer saksnummer = behandling.getFagsak().getSaksnummer();
         final LocalDateTimeline<SykdomVurderingVersjon> eksisterendeVurderinger = hentVurderinger(sykdomVurderingType, behandling);
+        //TODO: Dette er "søknadsperioder" fra sykdomsgrunnlaget. Det skjærer litt med søknadsperiodene vi nå henter rett fra kilden, hvor vi filtrere på trukkede perioder. Bedre navn?
+        // Er det evt nå redundant, pga direkte henting fra søknadsperioder, og kan/bør fjernes?
         final LocalDateTimeline<Set<Saksnummer>> søknadsperioderPåPleietrengende = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
         final LocalDateTimeline<Boolean> søknadsperioderTilSøker = søknadsperioderPåPleietrengende.filterValue(s -> s.contains(saksnummer)).mapValue(s -> Boolean.TRUE);
 
@@ -220,6 +241,11 @@ public class SykdomVurderingService {
                 .disjoint(manglerGodkjentLegeerklæringTidslinje);
 
         LocalDateTimeline<Boolean> resterendeVurderingsperioder;
+
+        //ta høyde for perioder trukket av søker(e)
+        LocalDateTimeline<List<AktørId>> søknadsperioderForAlleSøkere = søknadsperiodeTjeneste.utledSamledePerioderMedSøkereFor(FagsakYtelseType.PSB, behandling.getFagsak().getPleietrengendeAktørId());
+        LocalDateTimeline<List<AktørId>> søknadsperioderForInneværendeBehandling = new LocalDateTimeline<>(søknadsperioderForAlleSøkere.stream().filter(s -> s.getValue().contains(behandling.getAktørId())).collect(Collectors.toList()));
+
         if (sykdomVurderingType.equals(SykdomVurderingType.TO_OMSORGSPERSONER)) {
             /*
              * To omsorgspersoner skal kun vurderes for oppfylte periode med kontinuerlig tilsyn og pleie.
@@ -227,17 +253,19 @@ public class SykdomVurderingService {
              * I tillegg er to omsorgspersoner kun obligatorisk å vurdere for perioder med flere søkere.
              */
             LocalDateTimeline<Boolean> ktpPerioder = TidslinjeUtil.tilTidslinjeKomprimert(hentKontinuerligTilsynOgPleiePerioder(behandling));
-            final LocalDateTimeline<?> flereOmsorgspersoner = harAndreSakerEnn(saksnummer, søknadsperioderPåPleietrengende);
             alleResterendeVurderingsperioder = alleResterendeVurderingsperioder.intersection(ktpPerioder);
             resterendeVurderingsperioder = alleResterendeVurderingsperioder.disjoint(utenOmsorgenForTidslinje)
-                    .intersection(flereOmsorgspersoner)
+                    .intersection(søknadsperioderForAlleSøkere)
                     .intersection(søknadsperioderTilSøker);
         } else {
             resterendeVurderingsperioder = alleResterendeVurderingsperioder.disjoint(utenOmsorgenForTidslinje)
-                    .intersection(søknadsperioderTilSøker);
+                    .intersection(søknadsperioderTilSøker)
+                    .intersection(søknadsperioderForInneværendeBehandling);
         }
 
-        final LocalDateTimeline<Boolean> resterendeValgfrieVurderingsperioder = alleResterendeVurderingsperioder.disjoint(resterendeVurderingsperioder);
+        final LocalDateTimeline<Boolean> resterendeValgfrieVurderingsperioder = alleResterendeVurderingsperioder
+            .disjoint(resterendeVurderingsperioder)
+            .intersection(søknadsperioderForAlleSøkere);
 
         /*
          * Denne er ikke satt siden brukerdialog ikke lenger benytter denne verdien. Hvis den
