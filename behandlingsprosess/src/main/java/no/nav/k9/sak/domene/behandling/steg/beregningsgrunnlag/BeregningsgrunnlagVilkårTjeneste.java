@@ -114,12 +114,12 @@ public class BeregningsgrunnlagVilkårTjeneste {
 
     public NavigableSet<PeriodeTilVurdering> utledDetaljertPerioderTilVurdering(BehandlingReferanse ref, VilkårPeriodeFilter vilkårPeriodeFilter) {
         var allePerioder = vilkårTjeneste.utledPerioderTilVurderingUfiltrert(ref, vilkårType);
-        return vilkårPeriodeFilter.utledPerioderTilVurdering(allePerioder, vilkårType);
+        return vilkårPeriodeFilter.filtrerPerioder(allePerioder, vilkårType);
     }
 
     public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårPeriodeFilter vilkårPeriodeFilter) {
         var allePerioder = vilkårTjeneste.utledPerioderTilVurderingUfiltrert(ref, vilkårType);
-        return vilkårPeriodeFilter.utledPerioderTilVurdering(allePerioder, vilkårType)
+        return vilkårPeriodeFilter.filtrerPerioder(allePerioder, vilkårType)
             .stream()
             .map(PeriodeTilVurdering::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
