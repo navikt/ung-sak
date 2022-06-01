@@ -56,16 +56,17 @@ public class SøknadsperiodeTjeneste {
 
     public LocalDateTimeline<List<AktørId>> utledSamledePerioderMedSøkereFor(FagsakYtelseType ytelseType, AktørId pleietrengende) {
         final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(ytelseType, pleietrengende, null, null, null);
-        List<LocalDateSegment<List<AktørId>>> segmenter = new ArrayList<>();
-
+        LocalDateTimeline<List<AktørId>> samletTimelineForAlleSøkere = LocalDateTimeline.empty();
         for (Fagsak fagsak : fagsaker) {
             Behandling behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).get();
             NavigableSet<DatoIntervallEntitet> datoIntervallEntitets = utledFullstendigPeriode(behandling.getId());
-            datoIntervallEntitets.stream()
-                .forEach(e -> segmenter.add(new LocalDateSegment<>(e.toLocalDateInterval(), Arrays.asList(fagsak.getAktørId()))));
+            LocalDateTimeline<AktørId> timelineForSøker = new LocalDateTimeline<>(datoIntervallEntitets.stream()
+                .map(e -> new LocalDateSegment<>(e.toLocalDateInterval(), fagsak.getAktørId()))
+                .toList());
+            samletTimelineForAlleSøkere = samletTimelineForAlleSøkere.union(timelineForSøker, StandardCombinators::allValues);
         }
 
-        return new LocalDateTimeline<>(segmenter);
+        return samletTimelineForAlleSøkere;
     }
 
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
