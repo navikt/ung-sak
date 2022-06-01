@@ -43,7 +43,7 @@ public class VilkårPeriodeFilter {
     }
 
 
-    public NavigableSet<PeriodeTilVurdering> utledPerioderTilVurdering(Collection<DatoIntervallEntitet> perioder, VilkårType vilkårType) {
+    public NavigableSet<PeriodeTilVurdering> filtrerPerioder(Collection<DatoIntervallEntitet> perioder, VilkårType vilkårType) {
         var sakInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(behandlingReferanse.getFagsakId());
         var behandlingId = behandlingReferanse.getBehandlingId();
         var vilkår = hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));

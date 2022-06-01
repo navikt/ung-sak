@@ -47,12 +47,14 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakInMemoryTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.PleiepengerForlengelseTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utenlandsopphold;
@@ -97,6 +99,7 @@ public class PleiepengerBeregneYtelseStegTest {
             repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository,
             new VilkårTjeneste(behandlingRepository,
                 null, null, repositoryProvider.getVilkårResultatRepository(), repositoryProvider.getFagsakRepository()),
+            new VilkårPeriodeFilterProvider(repositoryProvider.getFagsakRepository(), repositoryProvider.getVilkårResultatRepository(), new UnitTestLookupInstanceImpl<>(null)),
             true);
         beregningsresultat = BeregningsresultatEntitet.builder()
             .medRegelInput("regelInput")

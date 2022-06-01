@@ -212,7 +212,7 @@ public class VilkårTjeneste {
         }
         var perioder = utledPerioderTilVurderingUfiltrert(ref, vilkårType);
 
-        return vilkårPeriodeFilter.utledPerioderTilVurdering(perioder, vilkårType).stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
+        return vilkårPeriodeFilter.filtrerPerioder(perioder, vilkårType).stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
     }
 
     public TreeSet<DatoIntervallEntitet> utledPerioderTilVurderingUfiltrert(BehandlingReferanse ref, VilkårType vilkårType) {
