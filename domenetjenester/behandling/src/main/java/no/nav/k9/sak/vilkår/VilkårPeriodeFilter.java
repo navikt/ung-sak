@@ -93,13 +93,15 @@ public class VilkårPeriodeFilter {
         return this;
     }
 
-    public VilkårPeriodeFilter ignorerAvslåttePerioder() {
+    public VilkårPeriodeFilter ignorerAvslåttePerioderInkludertKompletthet() {
         this.skalIgnorereAvslåttePerioder = true;
+        this.skalIgnorereAvslagPåKompletthet = true;
         return this;
     }
 
-    public VilkårPeriodeFilter ignorerAvslagPåKompletthet() {
-        this.skalIgnorereAvslagPåKompletthet = true;
+    public VilkårPeriodeFilter ignorerAvslåttePerioderUnntattKompletthet() {
+        this.skalIgnorereAvslåttePerioder = true;
+        this.skalIgnorereAvslagPåKompletthet = false;
         return this;
     }
 

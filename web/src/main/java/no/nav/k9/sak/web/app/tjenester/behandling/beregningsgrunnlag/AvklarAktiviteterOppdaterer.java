@@ -24,6 +24,7 @@ import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.AvklarteAktiviteterDtoer;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.BekreftetBeregningsgrunnlagDto;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning.BeregningsaktivitetHistorikkTjeneste;
 
 @ApplicationScoped
@@ -34,6 +35,7 @@ public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<Avkla
     private BeregningsaktivitetHistorikkTjeneste historikkTjeneste;
     private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
+    private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
     AvklarAktiviteterOppdaterer() {
         // for CDI proxy
@@ -43,11 +45,13 @@ public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<Avkla
     public AvklarAktiviteterOppdaterer(BeregningsgrunnlagOppdateringTjeneste oppdateringjeneste,
                                        BeregningsaktivitetHistorikkTjeneste historikkTjeneste,
                                        BeregningsgrunnlagVilkårTjeneste vilkårTjeneste,
-                                       HistorikkTjenesteAdapter historikkTjenesteAdapter) {
+                                       HistorikkTjenesteAdapter historikkTjenesteAdapter,
+                                       VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         this.oppdateringjeneste = oppdateringjeneste;
         this.historikkTjeneste = historikkTjeneste;
         this.vilkårTjeneste = vilkårTjeneste;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
+        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
     }
 
     @Override
@@ -89,7 +93,8 @@ public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<Avkla
 
     private void validerOppdatering(LocalDate stp,
                                     BehandlingReferanse ref) {
-        NavigableSet<DatoIntervallEntitet> perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, false);
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref, false);
+        var perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, periodeFilter);
         var erTilVurdering = perioderSomSkalKunneVurderes.stream().anyMatch(p -> p.getFomDato().equals(stp));
         if (!erTilVurdering) {
             throw new IllegalStateException("Prøver å endre grunnlag med skjæringstidspunkt" + stp + " men denne er ikke i" +

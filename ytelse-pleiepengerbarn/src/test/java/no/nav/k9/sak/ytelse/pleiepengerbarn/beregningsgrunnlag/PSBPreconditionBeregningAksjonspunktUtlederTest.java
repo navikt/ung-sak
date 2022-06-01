@@ -110,7 +110,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         when(filterProvider.getFilter(BehandlingReferanse.fra(revurderingIkkeManueltOpprettet), false))
             .thenReturn(filter);
         when(perioderTilVurderingTjeneste.utledPerioderTilVurdering(any(BehandlingReferanse.class), any(VilkårPeriodeFilter.class)))
-            .thenReturn(new TreeSet<>(Set.of(new PeriodeTilVurdering(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
+            .thenReturn(new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)))));
 
         opptjeningForBeregningTjeneste = mock(PSBOpptjeningForBeregningTjeneste.class);
         when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
@@ -178,9 +178,8 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     @Test
     void skal_returnere_aksjonspunkt_ved_overlapp_med_flere_perioder() {
         when(perioderTilVurderingTjeneste.utledPerioderTilVurdering(any(BehandlingReferanse.class), any(VilkårPeriodeFilter.class)))
-            .thenReturn(new TreeSet<>((Set.of(
-                new PeriodeTilVurdering(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))),
-                new PeriodeTilVurdering(DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30)))))));
+            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
+                DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30))))));
         lagInfotrygdPsbYtelsePerioder(List.of(
             DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
             DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(20), STP.plusDays(30))

@@ -75,13 +75,12 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         kopierGrunnlagForForlengelseperioder(ref, kontekst);
 
         var periodeFilter = periodeFilterProvider.getFilter(ref, enableForlengelse);
-        periodeFilter.ignorerAvslåttePerioder();
-        periodeFilter.ignorerAvslagPåKompletthet();
+        periodeFilter.ignorerAvslåttePerioderInkludertKompletthet();
         if (enableForlengelse) {
             periodeFilter.ignorerForlengelseperioder();
         }
         var perioderTilBeregning = new ArrayList<PeriodeTilVurdering>();
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, periodeFilter);
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
 
         for (var periode : perioderTilVurdering) {
             if (periodeErUtenforFagsaksIntervall(periode.getPeriode(), behandling.getFagsak().getPeriode())) {
@@ -102,8 +101,8 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
     private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
         if (enableForlengelse && ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
             var periodeFilter = periodeFilterProvider.getFilter(ref, enableForlengelse);
-            periodeFilter.ignorerAvslåttePerioder();
-            var allePerioder = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, periodeFilter);
+            periodeFilter.ignorerAvslåttePerioderInkludertKompletthet();
+            var allePerioder = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
             var forlengelseperioder = allePerioder.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toSet());
             if (!forlengelseperioder.isEmpty()) {
                 kalkulusTjeneste.kopier(ref, forlengelseperioder);
