@@ -12,7 +12,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import net.bytebuddy.asm.Advice;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -199,16 +198,18 @@ public class SykdomVurderingService {
         }
 
         //ta høyde for perioder trukket av søker(e)
-        LocalDateTimeline<List<AktørId>> søknadsperioderForAlleSøkere = søknadsperiodeTjeneste.utledSamledePerioderMedSøkereFor(FagsakYtelseType.PSB, behandling.getFagsak().getPleietrengendeAktørId());
+        LocalDateTimeline<List<AktørId>> søknadsperioderForAlleSøkere = søknadsperiodeTjeneste.utledSamledePerioderMedSøkereFor(FagsakYtelseType.PPN, behandling.getFagsak().getPleietrengendeAktørId());
         LocalDateTimeline<List<AktørId>> søknadsperioderForInneværendeBehandling = new LocalDateTimeline<>(søknadsperioderForAlleSøkere.stream().filter(s -> s.getValue().contains(behandling.getAktørId())).collect(Collectors.toList()));
 
         List<Periode> resterendeVurderingsperioder = TidslinjeUtil.tilPerioder(alleResterendeVurderingsperioder.intersection(søknadsperioderForInneværendeBehandling));
-        List<Periode> resterendeValgfrieVurderingsperioder = TidslinjeUtil.tilPerioder(
-            TidslinjeUtil.kunPerioderSomIkkeFinnesI(
-                TidslinjeUtil.kunPerioderSomIkkeFinnesI(
-                    TidslinjeUtil.kunPerioderSomIkkeFinnesI(tidslinjeKreverVurdering, alleResterendeVurderingsperioder)
-                    , vurderinger)
-                    , søknadsperioderForAlleSøkere));
+
+        List<Periode> resterendeValgfrieVurderingsperioder =
+            TidslinjeUtil.tilPerioder(
+            tidslinjeKreverVurdering
+                .disjoint(alleResterendeVurderingsperioder)
+                .disjoint(vurderinger)
+                .intersection(søknadsperioderForAlleSøkere)
+                .compress());
         List<Periode> nyeSøknadsperioder = Collections.emptyList();
 
         return new SykdomVurderingerOgPerioder(
