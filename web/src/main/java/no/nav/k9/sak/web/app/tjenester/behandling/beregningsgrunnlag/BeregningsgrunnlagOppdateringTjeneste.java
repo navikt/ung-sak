@@ -14,7 +14,6 @@ import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @ApplicationScoped
@@ -48,19 +47,22 @@ public class BeregningsgrunnlagOppdateringTjeneste {
     private void validerOppdatering(Map<LocalDate, HåndterBeregningDto> stpTilDtoMap,
                                     BehandlingReferanse ref, boolean skalKunneOppdatereForlengelser) {
         var filter = vilkårPeriodeFilterProvider.getFilter(ref, false);
-        filter.ignorerAvslagPåKompletthet();
         if (!skalKunneOppdatereForlengelser) {
             filter.ignorerForlengelseperioder();
         }
         var perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, filter);
         stpTilDtoMap.keySet().forEach(stp -> {
-            List<DatoIntervallEntitet> vurderingsperioderSomInkludererSTP = finnPerioderSomInkludererDato(perioderSomSkalKunneVurderes.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()), stp);
+            List<DatoIntervallEntitet> vurderingsperioderSomInkludererSTP = finnPerioderSomInkludererDato(perioderSomSkalKunneVurderes, stp);
             if (vurderingsperioderSomInkludererSTP.size() == 0) {
+                var debugFilter = vilkårPeriodeFilterProvider.getFilter(ref, true);
+                var debugPerioder = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, debugFilter);
                 throw new IllegalStateException("Prøver å endre grunnlag med skjæringstidspunkt" + stp + " men denne er ikke i" +
-                    " listen over vilkårsperioder som er til vurdering " + perioderSomSkalKunneVurderes);
+                    " listen over vilkårsperioder som er til vurdering " + debugPerioder);
             } else if (vurderingsperioderSomInkludererSTP.size() >= 2) {
+                var debugFilter = vilkårPeriodeFilterProvider.getFilter(ref, true);
+                var debugPerioder = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, debugFilter);
                 throw new IllegalStateException("Prøver å endre grunnlag med skjæringstidspunkt" + stp + " som finnes i flere perioder som er til vurdering," +
-                    " ugyldig tilstand. Perioder som er til vurdering er: " + perioderSomSkalKunneVurderes);
+                    " ugyldig tilstand. Perioder som er til vurdering er: " + debugPerioder);
             }
         });
     }

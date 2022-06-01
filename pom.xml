@@ -42,7 +42,7 @@
         <junit.version>5.8.2</junit.version>
         <felles.version>0.8.1</felles.version>
         <swagger.version>2.2.0</swagger.version>
-        <k9format.version>5.8.8</k9format.version>
+        <k9format.version>6.0.1</k9format.version>
         <jackson.version>2.13.3</jackson.version>
         <asm.version>9.3</asm.version>
         <kotlin-stdlib.version>1.6.21</kotlin-stdlib.version>
@@ -144,7 +144,7 @@
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>formidling-kontrakt-jakarta</artifactId>
-                <version>0.0.19</version>
+                <version>0.0.20</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
@@ -154,7 +154,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt-jakarta</artifactId>
-                <version>1.5.36</version>
+                <version>1.5.40</version>
             </dependency>
 
             <dependency>
@@ -552,7 +552,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
-                <version>4.8.146</version>
+                <version>4.8.147</version>
             </dependency>
 
             <!-- Java11 -->

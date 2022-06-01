@@ -25,6 +25,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -142,7 +143,8 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         var opptjPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode.getFom(), opptjeningPeriode.getTom());
         var stp = opptjPeriode.getTomDato().plusDays(1);
         var iayGrunnlag = iayTjeneste.finnGrunnlag(ref.getBehandlingId()).orElseThrow();
-        var opptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjPeriode, DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()));
+        var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId())).før(periode.getFom());
+        var opptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjPeriode, DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()), yrkesaktivitetFilter);
 
         // Validering før opptjening kan gå videre til beregningsvilkår
         long antall = opptjeningAktiviteter.stream()

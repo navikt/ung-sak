@@ -100,9 +100,9 @@ public class BeregningsgrunnlagRestTjeneste {
     public List<BeregningsgrunnlagKoblingDto> hentNøkkelknippe(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
 
-        return kalkulusTjeneste.hentKoblingerForInnvilgedePerioder(BehandlingReferanse.fra(behandling))
+        return kalkulusTjeneste.hentKoblingerForPerioder(BehandlingReferanse.fra(behandling))
             .stream()
-            .map(it -> new BeregningsgrunnlagKoblingDto(it.getSkjæringstidspunkt(), it.getReferanse()))
+            .map(it -> new BeregningsgrunnlagKoblingDto(it.getSkjæringstidspunkt(), it.getReferanse(), it.getErForlengelse()))
             .collect(Collectors.toList());
     }
 
@@ -114,9 +114,9 @@ public class BeregningsgrunnlagRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<BeregningsgrunnlagKoblingDto> hentNøklerTilVurdering(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        return kalkulusTjeneste.hentKoblingerForInnvilgedePerioderTilVurdering(BehandlingReferanse.fra(behandling))
+        return kalkulusTjeneste.hentKoblingerForPerioderTilVurdering(BehandlingReferanse.fra(behandling))
             .stream()
-            .map(it -> new BeregningsgrunnlagKoblingDto(it.getSkjæringstidspunkt(), it.getReferanse()))
+            .map(it -> new BeregningsgrunnlagKoblingDto(it.getSkjæringstidspunkt(), it.getReferanse(), it.getErForlengelse()))
             .collect(Collectors.toList());
     }
 

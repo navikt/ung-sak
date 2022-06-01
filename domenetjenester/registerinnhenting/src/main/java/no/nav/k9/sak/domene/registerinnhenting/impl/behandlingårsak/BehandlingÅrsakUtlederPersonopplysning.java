@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -38,8 +37,8 @@ public class BehandlingÅrsakUtlederPersonopplysning implements BehandlingÅrsak
 
     @Override
     public Set<BehandlingÅrsakType> utledBehandlingÅrsaker(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {
-        long grunnlag1 = (long) grunnlagId1;
-        long grunnlag2 = (long) grunnlagId2;
+        Long grunnlag1 = (Long) grunnlagId1;
+        Long grunnlag2 = (Long) grunnlagId2;
 
         PersonopplysningGrunnlagEntitet personopplysningGrunnlag1 = personopplysningRepository.hentPersonopplysningerPåId(grunnlag1);
         PersonopplysningGrunnlagEntitet personopplysningGrunnlag2 = personopplysningRepository.hentPersonopplysningerPåId(grunnlag2);
@@ -50,9 +49,9 @@ public class BehandlingÅrsakUtlederPersonopplysning implements BehandlingÅrsak
 
         if (forelderErDødEndret || barnetsDødsdatoEndret) {
             log.info("Setter behandlingårsak til opplysning om død, grunnlagid1: {}, grunnlagid2: {}", grunnlag1, grunnlag2); //$NON-NLS-1
-            return java.util.Collections.unmodifiableSet(new HashSet<>(Collections.singletonList(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD)));
+            return Set.copyOf(Collections.singletonList(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD));
         }
         log.info("Setter behandlingårsak til registeropplysning, grunnlagid1: {}, grunnlagid2: {}", grunnlag1, grunnlag2); //$NON-NLS-1
-        return java.util.Collections.unmodifiableSet(new HashSet<>(Collections.singletonList(BehandlingÅrsakType.RE_REGISTEROPPLYSNING)));
+        return Set.copyOf(Collections.singletonList(BehandlingÅrsakType.RE_REGISTEROPPLYSNING));
     }
 }

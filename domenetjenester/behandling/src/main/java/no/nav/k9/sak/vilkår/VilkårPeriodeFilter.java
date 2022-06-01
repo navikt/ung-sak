@@ -43,7 +43,7 @@ public class VilkårPeriodeFilter {
     }
 
 
-    public NavigableSet<PeriodeTilVurdering> utledPerioderTilVurdering(Collection<DatoIntervallEntitet> perioder, VilkårType vilkårType) {
+    public NavigableSet<PeriodeTilVurdering> filtrerPerioder(Collection<DatoIntervallEntitet> perioder, VilkårType vilkårType) {
         var sakInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(behandlingReferanse.getFagsakId());
         var behandlingId = behandlingReferanse.getBehandlingId();
         var vilkår = hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
@@ -93,13 +93,15 @@ public class VilkårPeriodeFilter {
         return this;
     }
 
-    public VilkårPeriodeFilter ignorerAvslåttePerioder() {
+    public VilkårPeriodeFilter ignorerAvslåttePerioderInkludertKompletthet() {
         this.skalIgnorereAvslåttePerioder = true;
+        this.skalIgnorereAvslagPåKompletthet = true;
         return this;
     }
 
-    public VilkårPeriodeFilter ignorerAvslagPåKompletthet() {
-        this.skalIgnorereAvslagPåKompletthet = true;
+    public VilkårPeriodeFilter ignorerAvslåttePerioderUnntattKompletthet() {
+        this.skalIgnorereAvslåttePerioder = true;
+        this.skalIgnorereAvslagPåKompletthet = false;
         return this;
     }
 

@@ -153,10 +153,10 @@ public class KjøreplanUtleder {
         if (it.erUbehandlet()) {
             return true;
         }
-        return harVærtUtsattOgIkkeHattVedtakkSiden(sakOgBehandlinger, periode, utsattePerioderPerBehandling, it.getAktuellBehandling()) && it.erVedtatt();
+        return harVærtUtsattOgIkkeHattVedtakSiden(sakOgBehandlinger, periode, utsattePerioderPerBehandling, it.getAktuellBehandling()) && it.erVedtatt();
     }
 
-    private boolean harVærtUtsattOgIkkeHattVedtakkSiden(SakOgBehandlinger sakOgBehandlinger, DatoIntervallEntitet periode, Map<Long, NavigableSet<DatoIntervallEntitet>> utsattePerioderPerBehandling, Long aktuellBehandling) {
+    private boolean harVærtUtsattOgIkkeHattVedtakSiden(SakOgBehandlinger sakOgBehandlinger, DatoIntervallEntitet periode, Map<Long, NavigableSet<DatoIntervallEntitet>> utsattePerioderPerBehandling, Long aktuellBehandling) {
         // Antar at utsatte perioder blir behandlet i neste behandling, hvis premisset faller så må det sjekkes om den har blitt utsatt i påfølgende behandling også
         return utsattePerioderPerBehandling.getOrDefault(aktuellBehandling, new TreeSet<>()).stream().anyMatch(p -> p.overlapper(periode))
             && harIkkeHattVedtakSiden(sakOgBehandlinger, periode, utsattePerioderPerBehandling, aktuellBehandling);

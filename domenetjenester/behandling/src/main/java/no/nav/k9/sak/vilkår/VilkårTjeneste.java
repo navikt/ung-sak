@@ -188,7 +188,7 @@ public class VilkårTjeneste {
     }
 
     public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType) {
-        return utledPerioderTilVurdering(ref, vilkårType, false, false, false);
+        return utledPerioderTilVurderingUfiltrert(ref, vilkårType);
     }
 
     public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType,
@@ -201,24 +201,28 @@ public class VilkårTjeneste {
                                                                         boolean skalIgnorereAvslagPåKompletthet,
                                                                         boolean skalIgnorerePerioderFraInfotrygd) {
         var vilkårPeriodeFilter = new VilkårPeriodeFilter(false, ref, fagsakRepository, vilkårResultatRepository, getForlengelsetjeneste(ref.getFagsakYtelseType(), ref.getBehandlingType()));
-        if (skalIgnorereAvslåttePerioder) {
-            vilkårPeriodeFilter.ignorerAvslåttePerioder();
+        if (skalIgnorereAvslåttePerioder && skalIgnorereAvslagPåKompletthet) {
+            vilkårPeriodeFilter.ignorerAvslåttePerioderInkludertKompletthet();
         }
-        if (skalIgnorereAvslagPåKompletthet) {
-            vilkårPeriodeFilter.ignorerAvslagPåKompletthet();
+        if (skalIgnorereAvslåttePerioder && !skalIgnorereAvslagPåKompletthet) {
+            vilkårPeriodeFilter.ignorerAvslåttePerioderUnntattKompletthet();
         }
         if (skalIgnorerePerioderFraInfotrygd) {
             vilkårPeriodeFilter.ignorerPerioderFraInfotrygd();
         }
-        var behandlingId = ref.getBehandlingId();
+        var perioder = utledPerioderTilVurderingUfiltrert(ref, vilkårType);
+
+        return vilkårPeriodeFilter.filtrerPerioder(perioder, vilkårType).stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    public TreeSet<DatoIntervallEntitet> utledPerioderTilVurderingUfiltrert(BehandlingReferanse ref, VilkårType vilkårType) {
         var perioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(ref.getFagsakYtelseType(), ref.getBehandlingType());
-        var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(behandlingId, vilkårType));
+        var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), vilkårType));
         var utvidetTilVUrdering = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref);
         if (!utvidetTilVUrdering.isEmpty()) {
             perioder.addAll(utvidetTilVUrdering);
         }
-
-        return vilkårPeriodeFilter.utledPerioderTilVurdering(perioder, vilkårType).stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
+        return perioder;
     }
 
     public Optional<Vilkårene> hentHvisEksisterer(Long behandlingId) {

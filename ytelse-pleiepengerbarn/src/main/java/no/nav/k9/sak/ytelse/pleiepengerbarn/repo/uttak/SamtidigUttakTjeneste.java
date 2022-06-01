@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,9 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
+import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.Kjøreplan;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.KjøreplanUtleder;
@@ -99,6 +103,7 @@ public class SamtidigUttakTjeneste {
     private BehandlingModellRepository behandlingModellRepository;
     private SamtidigUttakOverlappsjekker samtidigUttakOverlappsjekker;
     private KjøreplanUtleder kjøreplanUtleder;
+    private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private boolean enableRelevantsjekk;
     private Boolean utsattBehandlingAvPeriode;
 
@@ -111,6 +116,7 @@ public class SamtidigUttakTjeneste {
                                  BehandlingModellRepository behandlingModellRepository,
                                  SamtidigUttakOverlappsjekker samtidigUttakOverlappsjekker,
                                  KjøreplanUtleder kjøreplanUtleder,
+                                 UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                  @KonfigVerdi(value = "ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK", defaultVerdi = "false") boolean enableRelevantsjekk,
                                  @KonfigVerdi(value = "utsatt.behandling.av.periode.aktivert", defaultVerdi = "false") Boolean utsattBehandlingAvPeriode) {
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
@@ -120,6 +126,7 @@ public class SamtidigUttakTjeneste {
         this.behandlingModellRepository = behandlingModellRepository;
         this.samtidigUttakOverlappsjekker = samtidigUttakOverlappsjekker;
         this.kjøreplanUtleder = kjøreplanUtleder;
+        this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.enableRelevantsjekk = enableRelevantsjekk;
         this.utsattBehandlingAvPeriode = utsattBehandlingAvPeriode;
     }
@@ -127,7 +134,10 @@ public class SamtidigUttakTjeneste {
 
     public boolean isAnnenSakSomMåBehandlesFørst(BehandlingReferanse ref) {
         if (utsattBehandlingAvPeriode) {
-            return !kjøreplanUtleder.utled(ref).kanAktuellFagsakFortsette();
+            var kjøreplan = kjøreplanUtleder.utled(ref);
+            var kanAktuellFagsakFortsette = kjøreplan.kanAktuellFagsakFortsette();
+            // har ikke endring i utstatte perioder
+            return !kanAktuellFagsakFortsette && harEndringIUtsattePerioder(ref, kjøreplan.getPerioderSomSkalUtsettes(ref.getFagsakId()));
         }
 
         final List<Fagsak> andreFagsaker = hentAndreFagsakerPåPleietrengende(ref);
@@ -157,6 +167,17 @@ public class SamtidigUttakTjeneste {
         }
 
         return false;
+    }
+
+    private boolean harEndringIUtsattePerioder(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderSomSkalUtsettes) {
+        var eksisterendeUtsattePerioder = utsattBehandlingAvPeriodeRepository.hentGrunnlag(ref.getBehandlingId())
+            .map(UtsattBehandlingAvPeriode::getPerioder)
+            .orElse(Set.of())
+            .stream()
+            .map(UtsattPeriode::getPeriode)
+            .collect(Collectors.toCollection(TreeSet::new));
+
+        return !eksisterendeUtsattePerioder.equals(perioderSomSkalUtsettes);
     }
 
     private List<Fagsak> hentAndreFagsakerPåPleietrengende(BehandlingReferanse ref) {

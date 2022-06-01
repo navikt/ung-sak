@@ -220,8 +220,6 @@ spec:
       value: "true"
     - name: PSB_UTVIDE_VED_DODSFALL
       value: "true"
-    - name: KOMPLETTHET_BEREGNING_OMP
-      value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "true"
     - name: PSB_TREKKE_MIGRERT_PERIODE

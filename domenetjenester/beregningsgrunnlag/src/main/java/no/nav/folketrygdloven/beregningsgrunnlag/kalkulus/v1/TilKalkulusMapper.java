@@ -3,6 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -355,8 +356,14 @@ public class TilKalkulusMapper {
             p.getProsentsats().getVerdi().compareTo(BigDecimal.valueOf(100)) >= 0 && p.getPeriode().overlapper(vilkårsPeriode);
     }
 
-    public static OpptjeningAktiviteterDto mapTilDto(OpptjeningAktiviteter opptjeningAktiviteter, VilkårUtfallMerknad vilkårsMerknad) {
-        return new OpptjeningAktiviteterDto(opptjeningAktiviteter.getOpptjeningPerioder()
+    public static OpptjeningAktiviteterDto mapTilDto(Optional<OpptjeningAktiviteter> opptjeningAktiviteter, VilkårUtfallMerknad vilkårsMerknad) {
+        return new OpptjeningAktiviteterDto(
+            opptjeningAktiviteter.map(TilKalkulusMapper::mapTilKalkulusOpptjeningPerioder).orElse(Collections.emptyList())
+            , finnMidlertidigInaktivType(vilkårsMerknad));
+    }
+
+    private static List<OpptjeningPeriodeDto> mapTilKalkulusOpptjeningPerioder(OpptjeningAktiviteter opptjeningAktiviteter) {
+        return opptjeningAktiviteter.getOpptjeningPerioder()
             .stream()
             .map(opptjeningPeriode -> new OpptjeningPeriodeDto(
                 OpptjeningAktivitetType.fraKode(opptjeningPeriode.getOpptjeningAktivitetType().getKode()),
@@ -365,8 +372,7 @@ public class TilKalkulusMapper {
                 opptjeningPeriode.getArbeidsforholdId() != null && opptjeningPeriode.getArbeidsforholdId().getReferanse() != null
                     ? new InternArbeidsforholdRefDto(opptjeningPeriode.getArbeidsforholdId().getReferanse())
                     : null))
-            .collect(Collectors.toList())
-            , finnMidlertidigInaktivType(vilkårsMerknad));
+            .collect(Collectors.toList());
     }
 
     private static MidlertidigInaktivType finnMidlertidigInaktivType(VilkårUtfallMerknad vilkårsMerknad) {

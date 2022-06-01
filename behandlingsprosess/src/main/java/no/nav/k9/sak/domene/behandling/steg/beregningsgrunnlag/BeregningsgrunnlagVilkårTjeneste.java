@@ -112,8 +112,21 @@ public class BeregningsgrunnlagVilkårTjeneste {
         return vilkårTjeneste.utledPerioderTilVurdering(ref, vilkårType, skalIgnorereAvslåttePerioder, skalIgnoreAvslagPåKompletthet, skalIgnorerePerioderFraInfotrygd);
     }
 
-    public NavigableSet<PeriodeTilVurdering> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårPeriodeFilter vilkårPeriodeFilter) {
-        return vilkårPeriodeFilter.utledPerioderTilVurdering(vilkårTjeneste.utledPerioderTilVurdering(ref, vilkårType), vilkårType);
+    public NavigableSet<PeriodeTilVurdering> utledDetaljertPerioderTilVurdering(BehandlingReferanse ref, VilkårPeriodeFilter vilkårPeriodeFilter) {
+        var allePerioder = vilkårTjeneste.utledPerioderTilVurderingUfiltrert(ref, vilkårType);
+        return vilkårPeriodeFilter.filtrerPerioder(allePerioder, vilkårType);
+    }
+
+    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårPeriodeFilter vilkårPeriodeFilter) {
+        var allePerioder = vilkårTjeneste.utledPerioderTilVurderingUfiltrert(ref, vilkårType);
+        return vilkårPeriodeFilter.filtrerPerioder(allePerioder, vilkårType)
+            .stream()
+            .map(PeriodeTilVurdering::getPeriode)
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref) {
+        return vilkårTjeneste.utledPerioderTilVurderingUfiltrert(ref, vilkårType);
     }
 
 }

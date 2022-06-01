@@ -141,15 +141,13 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         return !eksisterendeMigreringTilVurdering.isEmpty() && !erRevurderingMedKopiertInputOverstyring;
     }
 
-    private TreeSet<DatoIntervallEntitet> finnPerioderTilVurdering(AksjonspunktUtlederInput param) {
+    private NavigableSet<DatoIntervallEntitet> finnPerioderTilVurdering(AksjonspunktUtlederInput param) {
         var periodeFilter = periodeFilterProvider.getFilter(param.getRef(), false);
         if (enableForlengelse) {
             periodeFilter.ignorerForlengelseperioder();
         }
-        periodeFilter.ignorerAvslåttePerioder();
-        periodeFilter.ignorerAvslagPåKompletthet();
-        return beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(param.getRef(), periodeFilter)
-            .stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
+        periodeFilter.ignorerAvslåttePerioderInkludertKompletthet();
+        return beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(param.getRef(), periodeFilter);
     }
 
     private AksjonspunktResultat ventepunkt(Venteårsak venteårsak) {

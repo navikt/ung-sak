@@ -209,7 +209,7 @@ public class ForvaltningBeregningRestTjeneste {
         var stpTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true).stream()
             .map(DatoIntervallEntitet::getFomDato)
             .collect(Collectors.toList());
-        var bgReferanser = beregningsgrunnlagTjeneste.hentKoblingerForInnvilgedePerioder(ref)
+        var bgReferanser = beregningsgrunnlagTjeneste.hentKoblingerForPerioder(ref)
             .stream()
             .filter(kobling -> stpTilVurdering.contains(kobling.getSkjæringstidspunkt()))
             .map(BeregningsgrunnlagKobling::getReferanse)
