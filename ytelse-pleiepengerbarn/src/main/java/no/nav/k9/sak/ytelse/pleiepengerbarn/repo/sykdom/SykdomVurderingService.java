@@ -254,7 +254,9 @@ public class SykdomVurderingService {
              */
             LocalDateTimeline<Boolean> ktpPerioder = TidslinjeUtil.tilTidslinjeKomprimert(hentKontinuerligTilsynOgPleiePerioder(behandling));
             alleResterendeVurderingsperioder = alleResterendeVurderingsperioder.intersection(ktpPerioder);
+            final LocalDateTimeline<?> flereOmsorgspersoner = harAndreSakerEnn(saksnummer, søknadsperioderPåPleietrengende);
             resterendeVurderingsperioder = alleResterendeVurderingsperioder.disjoint(utenOmsorgenForTidslinje)
+                    .intersection(flereOmsorgspersoner)
                     .intersection(søknadsperioderForAlleSøkere)
                     .intersection(søknadsperioderTilSøker);
         } else {
