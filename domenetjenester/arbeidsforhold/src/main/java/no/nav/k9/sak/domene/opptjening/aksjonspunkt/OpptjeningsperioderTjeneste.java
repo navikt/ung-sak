@@ -25,6 +25,8 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -37,7 +39,6 @@ import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
@@ -53,12 +54,15 @@ public class OpptjeningsperioderTjeneste {
     protected OpptjeningRepository opptjeningRepository;
     protected OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
     private final MapYtelseperioderTjeneste mapYtelseperioderTjeneste;
+    private final FagsakRepository fagsakRepository;
 
     @Inject
     public OpptjeningsperioderTjeneste(OpptjeningRepository opptjeningRepository,
-                                       OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
+                                       OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider,
+                                       FagsakRepository fagsakRepository) {
         this.opptjeningRepository = opptjeningRepository;
         this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
+        this.fagsakRepository = fagsakRepository;
         this.mapYtelseperioderTjeneste = new MapYtelseperioderTjeneste();
     }
 
@@ -74,13 +78,16 @@ public class OpptjeningsperioderTjeneste {
         var skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
         var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId());
         var oppgittOpptjening = oppgittOpptjeningFilter.hentOppgittOpptjening(ref.getBehandlingId(), grunnlag, skjæringstidspunkt).orElse(null);
-
+        var erMigrertSkjæringstidspunkt = fagsakRepository.hentSakInfotrygdMigreringer(ref.getFagsakId())
+            .stream()
+            .map(SakInfotrygdMigrering::getSkjæringstidspunkt)
+            .anyMatch(vilkårsPeriode::inkluderer);
         var ytelseFilter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato());
         var ytelsesperioder = mapYtelseperioderTjeneste.mapYtelsePerioder(ref, vurderOpptjening, false, ytelseFilter);
         var mapArbeidOpptjening = OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner();
         var tidslinjePerYtelse = utledYtelsesTidslinjer(ytelsesperioder);
         for (var yrkesaktivitet : yrkesaktivitetFilter.getYrkesaktiviteter()) {
-            var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(ref, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjeningPeriode, vilkårsPeriode, tidslinjePerYtelse);
+            var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(ref, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjeningPeriode, vilkårsPeriode, tidslinjePerYtelse, erMigrertSkjæringstidspunkt);
             perioder.addAll(opptjeningsperioder);
         }
 
