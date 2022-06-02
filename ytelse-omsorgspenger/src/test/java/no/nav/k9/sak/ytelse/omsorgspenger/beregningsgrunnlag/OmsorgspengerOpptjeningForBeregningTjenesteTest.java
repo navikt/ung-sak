@@ -91,7 +91,7 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
             .build();
         vilkårResultatRepository.lagre(behandling.getId(), nyttResultat);
         tjeneste = new OmsorgspengerOpptjeningForBeregningTjeneste(
-            new OpptjeningsperioderTjeneste(opptjeningRepository, oppgittOpptjeningFilterProvider),
+            new OpptjeningsperioderTjeneste(opptjeningRepository, oppgittOpptjeningFilterProvider, repositoryProvider.getFagsakRepository()),
             oppgittOpptjeningFilterProvider,
             vilkårResultatRepository);
     }

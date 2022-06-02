@@ -98,6 +98,54 @@ public class OpptjeningAktivitetArbeidVurdererTest {
         assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.TIL_VURDERING);
     }
 
+    @Test
+    public void skal_ikke_underkjenne_sammenhengende_permisjoner_som_overstiger_14_dager_hvis_migrert_stp_og_foreldrepermisjon() {
+        var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(20), skjæringstidspunkt.minusDays(10));
+        var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(10), skjæringstidspunkt);
+
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.PERMISJON_MED_FORELDREPENGER);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.PERMISJON_MED_FORELDREPENGER);
+        var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
+
+        VurderStatusInput input = byggInput(iayGrunnlag);
+        input.setErMigrertSkjæringstidspunkt(true);
+
+        assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.TIL_VURDERING);
+    }
+
+    @Test
+    public void skal_ikke_underkjenne_sammenhengende_permisjoner_som_overstiger_14_dager_hvis_migrert_stp_og_velferdspermisjon() {
+        var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(20), skjæringstidspunkt.minusDays(10));
+        var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(10), skjæringstidspunkt);
+
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
+        var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
+
+        VurderStatusInput input = byggInput(iayGrunnlag);
+        input.setErMigrertSkjæringstidspunkt(true);
+
+        assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.TIL_VURDERING);
+    }
+
+    @Test
+    public void skal_ikke_underkjenne_sammenhengende_permisjoner_som_overstiger_14_dager_hvis_migrert_stp_og_velferdspermisjon_og_foreldrepermsijon() {
+        var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(10), skjæringstidspunkt.minusDays(10));
+        var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(10), skjæringstidspunkt);
+
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.PERMISJON_MED_FORELDREPENGER);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
+        var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
+
+        VurderStatusInput input = byggInput(iayGrunnlag);
+        input.setErMigrertSkjæringstidspunkt(true);
+
+        assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.TIL_VURDERING);
+    }
+
 
     @Test
     public void skal_underkjenne_sammenhengende_permisjoner_som_overstiger_14_dager() {

@@ -21,9 +21,10 @@ public final class PermisjonPerYrkesaktivitet {
 
     public static LocalDateTimeline<Boolean> utledPermisjonPerYrkesaktivitet(Yrkesaktivitet yrkesaktivitet,
                                                                              Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse,
-                                                                             DatoIntervallEntitet vilkårsperiode) {
+                                                                             DatoIntervallEntitet vilkårsperiode, boolean erMigrertSkjæringstidspunkt) {
         List<LocalDateTimeline<Boolean>> aktivPermisjonTidslinjer = yrkesaktivitet.getPermisjon()
             .stream()
+            .filter(it -> !erMigrertSkjæringstidspunkt || (!Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.VELFERDSPERMISJON) && !Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.PERMISJON_MED_FORELDREPENGER)))
             .filter(permisjon -> erStørreEllerLik100Prosent(permisjon.getProsentsats()))
             .map(it -> justerPeriodeEtterYtelse(it, tidslinjePerYtelse, vilkårsperiode))
             .flatMap(Collection::stream)

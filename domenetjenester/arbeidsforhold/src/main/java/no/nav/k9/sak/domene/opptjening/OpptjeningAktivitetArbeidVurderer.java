@@ -24,7 +24,7 @@ class OpptjeningAktivitetArbeidVurderer {
         var tidslinjePerYtelse = input.getTidslinjePerYtelse();
         var vilkårsperiode = input.getVilkårsperiode();
         // Permisjoner på yrkesaktivitet
-        LocalDateTimeline<Boolean> tidslinjeTilVurdering = PermisjonPerYrkesaktivitet.utledPermisjonPerYrkesaktivitet(yrkesaktivitet, tidslinjePerYtelse, vilkårsperiode);
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering = PermisjonPerYrkesaktivitet.utledPermisjonPerYrkesaktivitet(yrkesaktivitet, tidslinjePerYtelse, vilkårsperiode, input.getErMigrertSkjæringstidspunkt());
 
         // Vurder kun permisjonsperioder som overlapper aktivitetens lengde
 

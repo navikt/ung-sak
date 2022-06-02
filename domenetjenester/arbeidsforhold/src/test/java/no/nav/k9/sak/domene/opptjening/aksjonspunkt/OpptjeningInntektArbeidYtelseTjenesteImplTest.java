@@ -71,7 +71,7 @@ class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         fagsakRepository = new FagsakRepository(entityManager);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
-        opptjeningsperioderTjeneste = new OpptjeningsperioderTjeneste(repositoryProvider.getOpptjeningRepository(), oppgittOpptjeningFilterProvider);
+        opptjeningsperioderTjeneste = new OpptjeningsperioderTjeneste(repositoryProvider.getOpptjeningRepository(), oppgittOpptjeningFilterProvider, fagsakRepository);
         opptjeningTjeneste = new OpptjeningInntektArbeidYtelseTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), opptjeningsperioderTjeneste);
 
         when(oppgittOpptjeningFilterProvider.finnOpptjeningFilter(anyLong())).thenReturn(new OppgittOpptjeningFilter() {
