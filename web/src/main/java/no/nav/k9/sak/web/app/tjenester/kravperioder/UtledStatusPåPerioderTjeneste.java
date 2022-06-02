@@ -62,10 +62,11 @@ public class UtledStatusPåPerioderTjeneste {
         var endringFraBrukerTidslinje = mergeTidslinjer(endringFraBruker, kantIKantVurderer, this::mergeSegmentsAndreDokumenter);
         tidslinje = tidslinje.combine(endringFraBrukerTidslinje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        for (PeriodeMedÅrsak entry : revurderingPerioderFraAndreParter) {
-            var endringFraAndreParter = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(entry.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.mapFra(entry.getÅrsak()))))));
-            tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
-        }
+        var endringFraAndreParter = new LocalDateTimeline<>(revurderingPerioderFraAndreParter.stream()
+            .map(entry -> new LocalDateSegment<>(entry.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.mapFra(entry.getÅrsak())))))
+            .collect(Collectors.toList()), this::mergeAndreBerørtSaker);
+        tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
         tidslinje = tidslinje.intersection(perioderTilVurderingKombinert);
         var tilbakestillingSegmenter = perioderSomSkalTilbakestilles.stream()
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.TRUKKET_KRAV))))
@@ -168,10 +169,10 @@ public class UtledStatusPåPerioderTjeneste {
 
     private LocalDateSegment<ÅrsakerTilVurdering> mergeAndreBerørtSaker(LocalDateInterval interval, LocalDateSegment<ÅrsakerTilVurdering> første, LocalDateSegment<ÅrsakerTilVurdering> siste) {
         Set<ÅrsakTilVurdering> årsaker = new HashSet<>();
-        if (første != null && første.getValue() != null && !første.getValue().getÅrsaker().isEmpty()) {
+        if (første != null && første.getValue() != null) {
             årsaker.addAll(første.getValue().getÅrsaker());
         }
-        if (siste != null && siste.getValue() != null && !siste.getValue().getÅrsaker().isEmpty()) {
+        if (siste != null && siste.getValue() != null) {
             årsaker.addAll(siste.getValue().getÅrsaker());
         }
         if (årsaker.contains(ÅrsakTilVurdering.FØRSTEGANGSVURDERING)) {
