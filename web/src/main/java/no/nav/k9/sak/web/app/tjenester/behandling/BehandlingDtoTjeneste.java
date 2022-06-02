@@ -336,6 +336,7 @@ public class BehandlingDtoTjeneste {
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_UTBETALT_PATH, "beregningsresultat-utbetalt", uuidQueryParams));
             lagBeregningsgrunnlagLink(behandling).ifPresent(dto::leggTil);
             lagBeregningsgrunnlagAlleLink(behandling).ifPresent(dto::leggTil);
+            lagBeregningsgrunnlagReferanserLink(behandling).ifPresent(dto::leggTil);
             lagOverstyrInputBergningLink(behandling).ifPresent(dto::leggTil);
             lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
             lagTilbakekrevingValgLink(behandling).forEach(dto::leggTil);
@@ -452,6 +453,12 @@ public class BehandlingDtoTjeneste {
         var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
         return Optional.of(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_ALLE, "beregningsgrunnlag-alle", queryParams));
     }
+
+    private Optional<ResourceLink> lagBeregningsgrunnlagReferanserLink(Behandling behandling) {
+        var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+        return Optional.of(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregningreferanser-til-vurdering", queryParams));
+    }
+
 
     private Optional<ResourceLink> lagOverstyrInputBergningLink(Behandling behandling) {
         var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
