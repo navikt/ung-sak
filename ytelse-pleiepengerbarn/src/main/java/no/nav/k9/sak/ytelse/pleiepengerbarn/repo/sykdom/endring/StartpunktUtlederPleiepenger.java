@@ -38,9 +38,9 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 @GrunnlagRef(SykdomGrunnlag.class)
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
-class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
+class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
 
-    private static final Logger log = LoggerFactory.getLogger(StartpunktUtlederPleiepengerSyktBarn.class);
+    private static final Logger log = LoggerFactory.getLogger(StartpunktUtlederPleiepenger.class);
 
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
@@ -50,18 +50,18 @@ class StartpunktUtlederPleiepengerSyktBarn implements EndringStartpunktUtleder {
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
-    StartpunktUtlederPleiepengerSyktBarn() {
+    StartpunktUtlederPleiepenger() {
         // For CDI
     }
 
     @Inject
-    StartpunktUtlederPleiepengerSyktBarn(SykdomGrunnlagRepository sykdomGrunnlagRepository,
-                                         SykdomGrunnlagService sykdomGrunnlagService,
-                                         VilkårResultatRepository vilkårResultatRepository,
-                                         ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
-                                         EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
-                                         SamtidigUttakTjeneste samtidigUttakTjeneste,
-                                         @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+    StartpunktUtlederPleiepenger(SykdomGrunnlagRepository sykdomGrunnlagRepository,
+                                 SykdomGrunnlagService sykdomGrunnlagService,
+                                 VilkårResultatRepository vilkårResultatRepository,
+                                 ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
+                                 EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
+                                 SamtidigUttakTjeneste samtidigUttakTjeneste,
+                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.vilkårResultatRepository = vilkårResultatRepository;
