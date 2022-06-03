@@ -18,7 +18,6 @@ public class VurderStatusInput {
     private DatoIntervallEntitet aktivitetPeriode;
     private DatoIntervallEntitet opptjeningsperiode;
     private Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse = new HashMap<>();
-    private boolean erMigrertSkjæringstidspunkt = false;
 
     public VurderStatusInput(OpptjeningAktivitetType type, BehandlingReferanse behandlingReferanse) {
         this.type = Objects.requireNonNull(type);
@@ -71,13 +70,5 @@ public class VurderStatusInput {
 
     public void setTidslinjePerYtelse(Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse) {
         this.tidslinjePerYtelse = tidslinjePerYtelse;
-    }
-
-    public void setErMigrertSkjæringstidspunkt(boolean erMigrertSkjæringstidspunkt) {
-        this.erMigrertSkjæringstidspunkt = erMigrertSkjæringstidspunkt;
-    }
-
-    public boolean getErMigrertSkjæringstidspunkt() {
-        return erMigrertSkjæringstidspunkt;
     }
 }
