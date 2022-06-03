@@ -21,10 +21,9 @@ public final class PermisjonPerYrkesaktivitet {
 
     public static LocalDateTimeline<Boolean> utledPermisjonPerYrkesaktivitet(Yrkesaktivitet yrkesaktivitet,
                                                                              Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse,
-                                                                             DatoIntervallEntitet vilkårsperiode, boolean erMigrertSkjæringstidspunkt) {
+                                                                             DatoIntervallEntitet vilkårsperiode) {
         List<LocalDateTimeline<Boolean>> aktivPermisjonTidslinjer = yrkesaktivitet.getPermisjon()
             .stream()
-            .filter(it -> !erMigrertSkjæringstidspunkt || (!Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.VELFERDSPERMISJON) && !Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.PERMISJON_MED_FORELDREPENGER)))
             .filter(permisjon -> erStørreEllerLik100Prosent(permisjon.getProsentsats()))
             .map(it -> justerPeriodeEtterYtelse(it, tidslinjePerYtelse, vilkårsperiode))
             .flatMap(Collection::stream)
@@ -40,7 +39,8 @@ public final class PermisjonPerYrkesaktivitet {
     private static Set<DatoIntervallEntitet> justerPeriodeEtterYtelse(Permisjon it, Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse, DatoIntervallEntitet vilkårsperiode) {
         if (Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.PERMISJON_MED_FORELDREPENGER)) {
             var ytelsesTidslinje = tidslinjePerYtelse.getOrDefault(OpptjeningAktivitetType.FORELDREPENGER, new LocalDateTimeline<>(List.of()));
-
+            ytelsesTidslinje = ytelsesTidslinje.crossJoin(tidslinjePerYtelse.getOrDefault(OpptjeningAktivitetType.PLEIEPENGER, new LocalDateTimeline<>(List.of())));
+            ytelsesTidslinje = ytelsesTidslinje.crossJoin(tidslinjePerYtelse.getOrDefault(OpptjeningAktivitetType.PLEIEPENGER_AV_DAGPENGER, new LocalDateTimeline<>(List.of())));
             var permisjonstidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), true)));
             permisjonstidslinje = permisjonstidslinje.disjoint(ytelsesTidslinje);
 
