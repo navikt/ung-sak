@@ -137,7 +137,7 @@ public class SamtidigUttakTjeneste {
             var kjøreplan = kjøreplanUtleder.utled(ref);
             var kanAktuellFagsakFortsette = kjøreplan.kanAktuellFagsakFortsette();
             // har ikke endring i utstatte perioder
-            return !kanAktuellFagsakFortsette && harEndringIUtsattePerioder(ref, kjøreplan.getPerioderSomSkalUtsettes(ref.getFagsakId()));
+            return !kanAktuellFagsakFortsette || harEndringIUtsattePerioder(ref, kjøreplan.getPerioderSomSkalUtsettes(ref.getFagsakId()));
         }
 
         final List<Fagsak> andreFagsaker = hentAndreFagsakerPåPleietrengende(ref);
