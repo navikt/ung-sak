@@ -148,6 +148,23 @@ public class OpptjeningAktivitetArbeidVurdererTest {
     }
 
     @Test
+    public void skal_ikke_underkjenne_foreldrepermisjon_som_skjøtes_sammen_over_helg_til_14_dager_med_underliggende_ytelse_pleiepenger() {
+        var førsteLørdagIPeriode = hentFørsteLørdagIPeriode(opptjeningPeriode28Dager.getFomDato(), opptjeningPeriode28Dager.getTomDato());
+        var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode28Dager.getFomDato(), førsteLørdagIPeriode); // 1-7 dager
+        var permisjonPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(førsteLørdagIPeriode.plusDays(2), førsteLørdagIPeriode.plusDays(15)); // 14 dager
+
+        var iayBuilder = opprettIAYMedYrkesaktivitet();
+        leggTilPermisjon(iayBuilder, permisjonPeriode1, PermisjonsbeskrivelseType.PERMISJON_MED_FORELDREPENGER);
+        leggTilPermisjon(iayBuilder, permisjonPeriode2, PermisjonsbeskrivelseType.PERMISJON_MED_FORELDREPENGER);
+        var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
+
+        VurderStatusInput input = byggInput(iayGrunnlag);
+        input.setTidslinjePerYtelse(Map.of(OpptjeningAktivitetType.PLEIEPENGER, new LocalDateTimeline<>(List.of(new LocalDateSegment<>(permisjonPeriode1.getFomDato(), permisjonPeriode2.getTomDato(), true)))));
+
+        assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.TIL_VURDERING);
+    }
+
+    @Test
     public void skal_ikke_underkjenne_velferdspermisjon_som_skjøtes_sammen_over_helg_til_14_dager_med_underliggende_OPL_ytelse() {
         var førsteLørdagIPeriode = hentFørsteLørdagIPeriode(opptjeningPeriode28Dager.getFomDato(), opptjeningPeriode28Dager.getTomDato());
         var permisjonPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode28Dager.getFomDato(), førsteLørdagIPeriode); // 1-7 dager
