@@ -91,11 +91,14 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
     private BehandleStegResultat eksperimentærHåndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
         var kjøreplan = samtidigUttakTjeneste.utledPrioriteringsrekkefølge(ref);
-        log.info("[Eksperimentær] annenSakSomMåBehandlesFørst={}, Har perioder uten prio={}", !kjøreplan.kanAktuellFagsakFortsette(), kjøreplan.perioderSomSkalUtsettesForAktuellFagsak());
+        log.info("[Eksperimentær] annenSakSomMåBehandlesFørst={}, Har perioder uten prio={}, Perioder med prio={}", !kjøreplan.kanAktuellFagsakFortsette(), kjøreplan.perioderSomSkalUtsettesForAktuellFagsak(),
+            kjøreplan.perioderSomKanBehandlesForAktuellFagsak());
 
         if (kjøreplan.kanAktuellFagsakFortsette()) {
             var utsattePerioder = kjøreplan.perioderSomSkalUtsettesForAktuellFagsak();
-            log.info("[Eksperimentær] Utsettelse behandling av perioder {}", utsattePerioder);
+            if (!utsattePerioder.isEmpty()) {
+                log.info("[Eksperimentær] Utsettelse behandling av perioder {}", utsattePerioder);
+            }
 
             utsattBehandlingAvPeriodeRepository.lagre(ref.getBehandlingId(), utsattePerioder.stream().map(UtsattPeriode::new).collect(Collectors.toSet()));
 
