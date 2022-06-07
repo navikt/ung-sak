@@ -1,14 +1,17 @@
 package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
 import java.time.LocalDate;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -31,16 +34,26 @@ public class ArbeidsgiverOpplysningerDto {
     @JsonProperty(value = "fødselsdato")
     private LocalDate fødselsdato;
 
-    public ArbeidsgiverOpplysningerDto(String identifikator, String alternativIdentifikator, String navn, LocalDate fødselsdato) {
+    @Valid
+    @Size()
+    @NotNull
+    @JsonProperty(value = "arbeidsforholdreferanser")
+    private List<ArbeidsforholdIdDto> arbeidsforholdreferanser;
+
+
+    public ArbeidsgiverOpplysningerDto(String identifikator, String alternativIdentifikator, String navn, LocalDate fødselsdato,
+                                       List<ArbeidsforholdIdDto> arbeidsforholdreferanser) {
         this.identifikator = identifikator;
         this.personIdentifikator = alternativIdentifikator;
         this.navn = navn;
         this.fødselsdato = fødselsdato;
+        this.arbeidsforholdreferanser = arbeidsforholdreferanser;
     }
 
-    public ArbeidsgiverOpplysningerDto(String identifikator, String navn) {
+    public ArbeidsgiverOpplysningerDto(String identifikator, String navn, List<ArbeidsforholdIdDto> arbeidsforholdreferanser) {
         this.identifikator = identifikator;
         this.navn = navn;
+        this.arbeidsforholdreferanser = arbeidsforholdreferanser;
     }
 
     public String getPersonIdentifikator() {
@@ -57,5 +70,9 @@ public class ArbeidsgiverOpplysningerDto {
 
     public LocalDate getFødselsdato() {
         return fødselsdato;
+    }
+
+    public List<ArbeidsforholdIdDto> getArbeidsforholdreferanser() {
+        return arbeidsforholdreferanser;
     }
 }
