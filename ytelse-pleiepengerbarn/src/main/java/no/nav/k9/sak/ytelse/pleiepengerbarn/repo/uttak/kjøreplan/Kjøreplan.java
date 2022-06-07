@@ -42,9 +42,13 @@ public class Kjøreplan {
         if (skalVentePåAnnenSak(fagsakId)) {
             return new TreeSet<>();
         }
+        return perioderMedGittAksjon(fagsakId, Aksjon.UTSETT);
+    }
+
+    private TreeSet<DatoIntervallEntitet> perioderMedGittAksjon(Long fagsakId, Aksjon utsett) {
         // Det er viktig at disse periodene kommer ut splittet slik som kravprio er
         return kjøreplanPerPeriode.filterValue(it -> it.stream()
-                .anyMatch(at -> at.getAksjon() == Aksjon.UTSETT && Objects.equals(at.getFagsakId(), fagsakId)))
+                .anyMatch(at -> at.getAksjon() == utsett && Objects.equals(at.getFagsakId(), fagsakId)))
             .toSegments()
             .stream()
             .map(LocalDateSegment::getLocalDateInterval)
@@ -58,5 +62,9 @@ public class Kjøreplan {
 
     public NavigableSet<DatoIntervallEntitet> perioderSomSkalUtsettesForAktuellFagsak() {
         return getPerioderSomSkalUtsettes(aktuellFagsakId);
+    }
+
+    public NavigableSet<DatoIntervallEntitet> perioderSomKanBehandlesForAktuellFagsak() {
+        return perioderMedGittAksjon(aktuellFagsakId, Aksjon.BEHANDLE);
     }
 }

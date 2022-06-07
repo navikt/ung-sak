@@ -37,8 +37,15 @@ import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
+import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
+import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -79,10 +86,10 @@ public class SykdomVurderingRestTjeneste {
     public static final String VURDERING_PATH = BASE_PATH;
     public static final String VURDERING_VERSJON_PATH = BASE_PATH + VURDERING_VERSJON;
     private static final String VURDERING_OVERSIKT_KTP = "/oversikt/KONTINUERLIG_TILSYN_OG_PLEIE";
-    private static final String VURDERING_OVERSIKT_TOO = "/oversikt/TO_OMSORGSPERSONER";
-    private static final String VURDERING_OVERSIKT_SLU = "/oversikt/I_LIVETS_SLUTT";
     public static final String VURDERING_OVERSIKT_KTP_PATH = BASE_PATH + VURDERING_OVERSIKT_KTP;
+    private static final String VURDERING_OVERSIKT_TOO = "/oversikt/TO_OMSORGSPERSONER";
     public static final String VURDERING_OVERSIKT_TOO_PATH = BASE_PATH + VURDERING_OVERSIKT_TOO;
+    private static final String VURDERING_OVERSIKT_SLU = "/oversikt/I_LIVETS_SLUTT";
     public static final String VURDERING_OVERSIKT_SLU_PATH = BASE_PATH + VURDERING_OVERSIKT_SLU;
 
     private BehandlingRepository behandlingRepository;
@@ -92,6 +99,7 @@ public class SykdomVurderingRestTjeneste {
     private SykdomDokumentRepository sykdomDokumentRepository;
     private SykdomVurderingService sykdomVurderingService;
 
+    private SykdomProsessDriver prosessDriver;
 
     public SykdomVurderingRestTjeneste() {
     }
@@ -100,12 +108,39 @@ public class SykdomVurderingRestTjeneste {
     @Inject
     public SykdomVurderingRestTjeneste(BehandlingRepository behandlingRepository, SykdomVurderingRepository sykdomVurderingRepository,
                                        SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingService sykdomVurderingService,
-                                       SykdomVurderingMapper sykdomVurderingMapper) {
+                                       SykdomVurderingMapper sykdomVurderingMapper, SykdomProsessDriver prosessDriver) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.sykdomVurderingService = sykdomVurderingService;
         this.sykdomVurderingMapper = sykdomVurderingMapper;
+        this.prosessDriver = prosessDriver;
+    }
+
+    static boolean isPerioderInneholderFørOgEtter18år(List<Periode> perioder, final LocalDate pleietrengendesFødselsdato) {
+        final LocalDate blir18år = pleietrengendesFødselsdato.plusYears(PleietrengendeAlderPeriode.ALDER_FOR_STRENGERE_PSB_VURDERING);
+        final boolean vurderingUnder18år = perioder.stream().anyMatch(p -> p.getFom().isBefore(blir18år));
+        final boolean vurdering18år = perioder.stream().anyMatch(p -> p.getTom().isAfter(blir18år) || p.getTom().isEqual(blir18år));
+        boolean perioderInneholderFørOgEtter18år = vurderingUnder18år && vurdering18år;
+        return perioderInneholderFørOgEtter18år;
+    }
+
+    private static String getCurrentUserId() {
+        return SubjectHandler.getSubjectHandler().getUid();
+    }
+
+    private static SykdomPeriodeMedEndringDto toSykdomPeriodeMedEndringDto(SykdomPeriodeMedEndring p) {
+        return new SykdomPeriodeMedEndringDto(p.getPeriode(), p.isEndrerVurderingSammeBehandling(), p.isEndrerAnnenVurdering());
+    }
+
+    private static SykdomVurderingEndringResultatDto toSykdomVurderingEndringResultatDto(List<SykdomPeriodeMedEndring> perioderMedEndringer) {
+        return new SykdomVurderingEndringResultatDto(perioderMedEndringer.stream().map(p -> toSykdomPeriodeMedEndringDto(p)).collect(Collectors.toList()));
+    }
+
+    private static void validerYtelsetype(Behandling behandling, FagsakYtelseType fagsakYtelseType) {
+        if (behandling.getFagsakYtelseType() != fagsakYtelseType) {
+            throw new IllegalArgumentException("Tjenesten er ikke støttet for ytelsetype " + behandling.getFagsakYtelseType());
+        }
     }
 
     @GET
@@ -124,7 +159,7 @@ public class SykdomVurderingRestTjeneste {
         @NotNull @QueryParam(BehandlingUuidDto.NAME)
         @Parameter(description = BehandlingUuidDto.DESC)
         @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            BehandlingUuidDto behandlingUuid) {
+        BehandlingUuidDto behandlingUuid) {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         validerYtelsetype(behandling, FagsakYtelseType.PSB);
@@ -150,7 +185,7 @@ public class SykdomVurderingRestTjeneste {
         @NotNull @QueryParam(BehandlingUuidDto.NAME)
         @Parameter(description = BehandlingUuidDto.DESC)
         @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            BehandlingUuidDto behandlingUuid) {
+        BehandlingUuidDto behandlingUuid) {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         validerYtelsetype(behandling, FagsakYtelseType.PSB);
@@ -176,7 +211,7 @@ public class SykdomVurderingRestTjeneste {
         @NotNull @QueryParam(BehandlingUuidDto.NAME)
         @Parameter(description = BehandlingUuidDto.DESC)
         @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            BehandlingUuidDto behandlingUuid) {
+        BehandlingUuidDto behandlingUuid) {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         validerYtelsetype(behandling, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE);
@@ -202,14 +237,14 @@ public class SykdomVurderingRestTjeneste {
         @NotNull
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            BehandlingUuidDto behandlingUuid,
+        BehandlingUuidDto behandlingUuid,
 
         @QueryParam(SykdomVurderingIdDto.NAME)
         @Parameter(description = SykdomVurderingIdDto.DESC)
         @NotNull
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class)
-            SykdomVurderingIdDto vurderingId) {
+        SykdomVurderingIdDto vurderingId) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
 
@@ -227,10 +262,10 @@ public class SykdomVurderingRestTjeneste {
         // TODO: Bedre løsning:
         var sykdomVurderingType = versjoner.get(0).getSykdomVurdering().getType();
         final SykdomVurderingerOgPerioder sykdomUtlededePerioder = switch (sykdomVurderingType) {
-            case KONTINUERLIG_TILSYN_OG_PLEIE -> sykdomVurderingService.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
+            case KONTINUERLIG_TILSYN_OG_PLEIE ->
+                sykdomVurderingService.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
             case TO_OMSORGSPERSONER -> sykdomVurderingService.hentVurderingerForToOmsorgspersoner(behandling);
             case LIVETS_SLUTTFASE -> sykdomVurderingService.hentVurderingerForILivetsSluttfase(behandling);
-            default -> throw new IllegalArgumentException("Sykdomvurderingstype ikke støttet for " + sykdomVurderingType);
         };
 
         return sykdomVurderingMapper.map(behandling.getFagsak().getAktørId(), behandling.getUuid(), versjoner, alleDokumenter, sykdomUtlededePerioder);
@@ -254,7 +289,7 @@ public class SykdomVurderingRestTjeneste {
         @NotNull
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            SykdomVurderingEndringDto sykdomVurderingOppdatering) {
+        SykdomVurderingEndringDto sykdomVurderingOppdatering) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomVurderingOppdatering.getBehandlingUuid()).orElseThrow();
 
         validerOppdatering(sykdomVurderingOppdatering, behandling);
@@ -283,10 +318,13 @@ public class SykdomVurderingRestTjeneste {
         }
 
         switch (behandling.getFagsakYtelseType()) {
-            case PLEIEPENGER_SYKT_BARN -> sikreAtOppdateringIkkeKrysser18årsdag(behandling, sykdomVurderingOppdatering.getPerioder());
+            case PLEIEPENGER_SYKT_BARN ->
+                sikreAtOppdateringIkkeKrysser18årsdag(behandling, sykdomVurderingOppdatering.getPerioder());
             case PLEIEPENGER_NÆRSTÅENDE -> ingenValidering();
             default -> throw new IllegalStateException("Ikke-støttet ytelsetype: " + behandling.getFagsakYtelseType());
         }
+
+        prosessDriver.validerTilstand(behandling, sykdomVurderingOppdatering.isDryRun());
     }
 
     private void sikreAtOppdateringIkkeKrysser18årsdag(Behandling behandling, List<Periode> perioder) {
@@ -294,14 +332,6 @@ public class SykdomVurderingRestTjeneste {
         if (isPerioderInneholderFørOgEtter18år(perioder, pleietrengendesFødselsdato)) {
             throw new IllegalStateException("En sykdomsvurdering kan ikke gjelde både før og etter at barnet har fylt 18 år. For å kunne lagre må vurderingen splittes i to.");
         }
-    }
-
-    static boolean isPerioderInneholderFørOgEtter18år(List<Periode> perioder, final LocalDate pleietrengendesFødselsdato) {
-        final LocalDate blir18år = pleietrengendesFødselsdato.plusYears(PleietrengendeAlderPeriode.ALDER_FOR_STRENGERE_PSB_VURDERING);
-        final boolean vurderingUnder18år = perioder.stream().anyMatch(p -> p.getFom().isBefore(blir18år));
-        final boolean vurdering18år = perioder.stream().anyMatch(p -> p.getTom().isAfter(blir18år) || p.getTom().isEqual(blir18år));
-        boolean perioderInneholderFørOgEtter18år = vurderingUnder18år && vurdering18år;
-        return perioderInneholderFørOgEtter18år;
     }
 
     private Sporingsinformasjon lagSporingsinformasjon(final Behandling behandling) {
@@ -326,7 +356,7 @@ public class SykdomVurderingRestTjeneste {
         @NotNull
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            SykdomVurderingOpprettelseDto sykdomVurderingOpprettelse) {
+        SykdomVurderingOpprettelseDto sykdomVurderingOpprettelse) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomVurderingOpprettelse.getBehandlingUuid()).orElseThrow();
 
         validerOpprettelse(behandling, sykdomVurderingOpprettelse);
@@ -364,16 +394,21 @@ public class SykdomVurderingRestTjeneste {
 
         FagsakYtelseType fagsakYtelseType = behandling.getFagsakYtelseType();
         switch (fagsakYtelseType) {
-            case PLEIEPENGER_SYKT_BARN -> sikreAtOppdateringIkkeKrysser18årsdag(behandling, sykdomVurderingOpprettelse.getPerioder());
+            case PLEIEPENGER_SYKT_BARN ->
+                sikreAtOppdateringIkkeKrysser18årsdag(behandling, sykdomVurderingOpprettelse.getPerioder());
             case PLEIEPENGER_NÆRSTÅENDE -> ingenValidering();
             default -> throw new IllegalStateException("Ikke-støttet ytelsetype: " + fagsakYtelseType);
         }
 
         switch (fagsakYtelseType) {
-            case PLEIEPENGER_SYKT_BARN -> validerSykdomvurderingTyper(sykdomVurderingOpprettelse, Set.of(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, SykdomVurderingType.TO_OMSORGSPERSONER));
-            case PLEIEPENGER_NÆRSTÅENDE -> validerSykdomvurderingTyper(sykdomVurderingOpprettelse, Set.of(SykdomVurderingType.LIVETS_SLUTTFASE));
+            case PLEIEPENGER_SYKT_BARN ->
+                validerSykdomvurderingTyper(sykdomVurderingOpprettelse, Set.of(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, SykdomVurderingType.TO_OMSORGSPERSONER));
+            case PLEIEPENGER_NÆRSTÅENDE ->
+                validerSykdomvurderingTyper(sykdomVurderingOpprettelse, Set.of(SykdomVurderingType.LIVETS_SLUTTFASE));
             default -> throw new IllegalStateException("Ikke-støttet ytelsetype: " + fagsakYtelseType);
         }
+
+        prosessDriver.validerTilstand(behandling, sykdomVurderingOpprettelse.isDryRun());
     }
 
     private void ingenValidering() {
@@ -430,6 +465,11 @@ public class SykdomVurderingRestTjeneste {
         return perioderSomSkalFjernesFraVurdering;
     }
 
+    private List<SykdomPeriodeMedEndring> finnEndringer(Behandling behandling, SykdomVurderingVersjon nyEndring) {
+        var vurderinger = sykdomVurderingService.hentVurderinger(nyEndring.getSykdomVurdering().getType(), behandling);
+        return sykdomVurderingRepository.finnEndringer(vurderinger, nyEndring);
+    }
+
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
 
         @Override
@@ -437,28 +477,5 @@ public class SykdomVurderingRestTjeneste {
             return AbacDataAttributter.opprett();
         }
 
-    }
-
-    private static String getCurrentUserId() {
-        return SubjectHandler.getSubjectHandler().getUid();
-    }
-
-    private List<SykdomPeriodeMedEndring> finnEndringer(Behandling behandling, SykdomVurderingVersjon nyEndring) {
-        var vurderinger = sykdomVurderingService.hentVurderinger(nyEndring.getSykdomVurdering().getType(), behandling);
-        return sykdomVurderingRepository.finnEndringer(vurderinger, nyEndring);
-    }
-
-    private static SykdomPeriodeMedEndringDto toSykdomPeriodeMedEndringDto(SykdomPeriodeMedEndring p) {
-        return new SykdomPeriodeMedEndringDto(p.getPeriode(), p.isEndrerVurderingSammeBehandling(), p.isEndrerAnnenVurdering());
-    }
-
-    private static SykdomVurderingEndringResultatDto toSykdomVurderingEndringResultatDto(List<SykdomPeriodeMedEndring> perioderMedEndringer) {
-        return new SykdomVurderingEndringResultatDto(perioderMedEndringer.stream().map(p -> toSykdomPeriodeMedEndringDto(p)).collect(Collectors.toList()));
-    }
-
-    private static void validerYtelsetype(Behandling behandling, FagsakYtelseType fagsakYtelseType) {
-        if (behandling.getFagsakYtelseType() != fagsakYtelseType) {
-            throw new IllegalArgumentException("Tjenesten er ikke støttet for ytelsetype " + behandling.getFagsakYtelseType());
-        }
     }
 }
