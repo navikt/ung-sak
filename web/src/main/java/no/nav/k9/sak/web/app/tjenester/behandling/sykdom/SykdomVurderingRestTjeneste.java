@@ -99,10 +99,7 @@ public class SykdomVurderingRestTjeneste {
     private SykdomDokumentRepository sykdomDokumentRepository;
     private SykdomVurderingService sykdomVurderingService;
 
-    private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
-    private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
-
-    private BehandlingModellRepository behandlingModellRepository;
+    private SykdomProsessDriver prosessDriver;
 
     public SykdomVurderingRestTjeneste() {
     }
@@ -111,15 +108,13 @@ public class SykdomVurderingRestTjeneste {
     @Inject
     public SykdomVurderingRestTjeneste(BehandlingRepository behandlingRepository, SykdomVurderingRepository sykdomVurderingRepository,
                                        SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingService sykdomVurderingService,
-                                       SykdomVurderingMapper sykdomVurderingMapper, AksjonspunktKontrollRepository aksjonspunktKontrollRepository, BehandlingProsesseringTjeneste behandlingProsesseringTjeneste, BehandlingModellRepository behandlingModellRepository) {
+                                       SykdomVurderingMapper sykdomVurderingMapper, SykdomProsessDriver prosessDriver) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.sykdomVurderingService = sykdomVurderingService;
         this.sykdomVurderingMapper = sykdomVurderingMapper;
-        this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
-        this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
-        this.behandlingModellRepository = behandlingModellRepository;
+        this.prosessDriver = prosessDriver;
     }
 
     static boolean isPerioderInneholderFørOgEtter18år(List<Periode> perioder, final LocalDate pleietrengendesFødselsdato) {
@@ -328,6 +323,8 @@ public class SykdomVurderingRestTjeneste {
             case PLEIEPENGER_NÆRSTÅENDE -> ingenValidering();
             default -> throw new IllegalStateException("Ikke-støttet ytelsetype: " + behandling.getFagsakYtelseType());
         }
+
+        prosessDriver.validerTilstand(behandling, sykdomVurderingOppdatering.isDryRun());
     }
 
     private void sikreAtOppdateringIkkeKrysser18årsdag(Behandling behandling, List<Periode> perioder) {
@@ -411,44 +408,7 @@ public class SykdomVurderingRestTjeneste {
             default -> throw new IllegalStateException("Ikke-støttet ytelsetype: " + fagsakYtelseType);
         }
 
-        validerTilstand(behandling, sykdomVurderingOpprettelse);
-    }
-
-    /*
-     * NB!
-     * Må gjøres kompenserende tiltak for å ha kontroll på prossessen.
-     * Dette bryter med det overordnede arkitektur ved å skrive til behandling utenfor
-     * task/prosess-steg og aksjonsoppdaterer. Så må gjenopprette noe av sikkerheten aksjonspunkt rest gir oss.
-     * Burde vært konvertert til aksjonspunkt som resten av løsningen og er ikke et eksempel til etterfølgelse.
-     *
-     * Her må det sikres at
-     * - Behandlingen har aksjonspunktet
-     * - Aksjonspunktet blir satt til opprettet og prosessen flyttet tilbake hvis passert vurderingspunkt
-     */
-    private void validerTilstand(Behandling behandling, SykdomVurderingOpprettelseDto sykdomVurderingOpprettelse) {
-        if (sykdomVurderingOpprettelse.isDryRun()) {
-            return;
-        }
-
-        var aksjonspunkt = behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE);
-        if (aksjonspunkt.isEmpty()) {
-            // Legg til
-            aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
-        } else if (aksjonspunkt.get().erUtført() || aksjonspunkt.get().erAvbrutt()) {
-            // Reåpner tidligere lukkede aksjonspunkt
-            aksjonspunktKontrollRepository.setReåpnet(aksjonspunkt.get());
-        }
-
-        if (harPassertSykdom(behandling)) {
-            // Flytter prosessen tilbake til sykdom
-            behandlingProsesseringTjeneste.opprettTasksForFortsettBehandlingGjenopptaStegNesteKjøring(behandling, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, null);
-        }
-    }
-
-    private boolean harPassertSykdom(Behandling behandling) {
-        final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();
-        final BehandlingModell modell = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType());
-        return modell.erStegAFørStegB(BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, steg);
+        prosessDriver.validerTilstand(behandling, sykdomVurderingOpprettelse.isDryRun());
     }
 
     private void ingenValidering() {

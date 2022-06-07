@@ -57,6 +57,7 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomInnleggelseDto;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomInnleggelseOppdateringResultatDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomProsessDriver;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
@@ -102,6 +103,8 @@ public class SykdomDokumentRestTjeneste {
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
 
+    private SykdomProsessDriver prosessDriver;
+
 
     public SykdomDokumentRestTjeneste() {
     }
@@ -109,13 +112,13 @@ public class SykdomDokumentRestTjeneste {
 
     @Inject
     public SykdomDokumentRestTjeneste(
-            BehandlingRepository behandlingRepository,
-            SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper,
-            SykdomDokumentRepository sykdomDokumentRepository,
-            SykdomVurderingRepository sykdomVurderingRepository,
-            DokumentArkivTjeneste dokumentArkivTjeneste,
-            SykdomGrunnlagRepository sykdomGrunnlagRepository,
-            @KonfigVerdi(value = "TEST_NYTT_DOKUMENT", defaultVerdi = "false") boolean enableNyttDokument) {
+        BehandlingRepository behandlingRepository,
+        SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper,
+        SykdomDokumentRepository sykdomDokumentRepository,
+        SykdomVurderingRepository sykdomVurderingRepository,
+        DokumentArkivTjeneste dokumentArkivTjeneste,
+        SykdomGrunnlagRepository sykdomGrunnlagRepository,
+        @KonfigVerdi(value = "TEST_NYTT_DOKUMENT", defaultVerdi = "false") boolean enableNyttDokument, SykdomProsessDriver prosessDriver) {
         this.sykdomDokumentOversiktMapper = sykdomDokumentOversiktMapper;
         this.behandlingRepository = behandlingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
@@ -123,6 +126,7 @@ public class SykdomDokumentRestTjeneste {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.enableNyttDokument = enableNyttDokument;
+        this.prosessDriver = prosessDriver;
     }
 
     @GET
@@ -201,9 +205,7 @@ public class SykdomDokumentRestTjeneste {
         var nå = LocalDateTime.now();
 
         var behandling = behandlingRepository.hentBehandlingHvisFinnes(utkvitteringer.getBehandlingUuid()).orElseThrow();
-        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
-            throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
-        }
+        validerOppdatering(behandling, false);
 
         for (String dokumentId : utkvitteringer.getDokumenterSomSkalUtkvitteres()) {
             final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(dokumentId), behandling.getFagsak().getPleietrengendeAktørId()).get();
@@ -260,9 +262,7 @@ public class SykdomDokumentRestTjeneste {
             SykdomInnleggelseDto sykdomInnleggelse) {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomInnleggelse.getBehandlingUuid()).orElseThrow();
-        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
-            throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
-        }
+        validerOppdatering(behandling, sykdomInnleggelse.isDryRun());
 
         for (Periode periode : sykdomInnleggelse.getPerioder()) {
             if (periode.getFom() == null || periode.getTom() == null) {
@@ -279,6 +279,14 @@ public class SykdomDokumentRestTjeneste {
         sykdomDokumentRepository.opprettEllerOppdaterInnleggelser(innleggelser, behandling.getFagsak().getPleietrengendeAktørId());
 
         return new SykdomInnleggelseOppdateringResultatDto(false); // TODO: Sett riktig verdi.
+    }
+
+    private void validerOppdatering(Behandling behandling, boolean dryRun) {
+        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
+            throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
+        }
+
+        prosessDriver.validerTilstand(behandling, dryRun);
     }
 
     @GET
@@ -325,9 +333,7 @@ public class SykdomDokumentRestTjeneste {
             SykdomDiagnosekoderDto sykdomDiagnosekoderDto) {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDiagnosekoderDto.getBehandlingUuid()).orElseThrow();
-        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
-            throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
-        }
+        validerOppdatering(behandling, false);
 
         final SykdomDiagnosekoder diagnosekoder = sykdomDokumentOversiktMapper.toSykdomDiagnosekoder(sykdomDiagnosekoderDto, SubjectHandler.getSubjectHandler().getUid());
         sykdomDokumentRepository.opprettEllerOppdaterDiagnosekoder(diagnosekoder, behandling.getFagsak().getPleietrengendeAktørId());
@@ -373,9 +379,7 @@ public class SykdomDokumentRestTjeneste {
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SykdomDokumentEndringDto sykdomDokumentEndringDto) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDokumentEndringDto.getBehandlingUuid()).orElseThrow();
-        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
-            throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
-        }
+        validerOppdatering(behandling, false);
 
         final Long dokumentId = Long.valueOf(sykdomDokumentEndringDto.getId());
         final var dokument = sykdomDokumentRepository.hentDokument(dokumentId, behandling.getFagsak().getPleietrengendeAktørId()).get();

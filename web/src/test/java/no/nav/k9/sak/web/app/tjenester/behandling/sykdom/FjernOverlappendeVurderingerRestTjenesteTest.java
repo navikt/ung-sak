@@ -51,7 +51,8 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
             repo,
             null,
             null,
-            null, null, null, null);
+            null,
+            null);
     }
 
     @Test
