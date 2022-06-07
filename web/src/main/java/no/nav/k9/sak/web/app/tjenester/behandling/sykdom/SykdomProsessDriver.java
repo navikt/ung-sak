@@ -55,7 +55,7 @@ public class SykdomProsessDriver {
 
         if (måHoppeTilbake(behandling)) {
             // Flytter prosessen tilbake til sykdom
-            behandlingProsesseringTjeneste.opprettTasksForFortsettBehandlingGjenopptaStegNesteKjøring(behandling, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, null);
+            behandlingProsesseringTjeneste.opprettTasksForÅHoppeTilbakeTilGittStegOgFortsettDerfra(behandling, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
         }
     }
 

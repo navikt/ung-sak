@@ -51,6 +51,7 @@ public interface BehandlingProsesseringTjeneste {
     // Til bruk for å kjøre behandlingsprosessen videre. Lagrer tasks. Returnerer gruppe-handle
     String opprettTasksForFortsettBehandling(Behandling behandling);
     String opprettTasksForFortsettBehandlingGjenopptaStegNesteKjøring(Behandling behandling, BehandlingStegType behandlingStegType, LocalDateTime nesteKjøringEtter);
+    String opprettTasksForÅHoppeTilbakeTilGittStegOgFortsettDerfra(Behandling behandling, BehandlingStegType behandlingStegType);
 
     // Robust task til bruk ved gjenopptak fra vent (eller annen tilstand) (Hendelse: Manuell input, Frist utløpt, mv)
     // NB oppdaterer registerdata Lagrer tasks
