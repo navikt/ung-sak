@@ -224,7 +224,7 @@ spec:
     - name: UTSATT_BEHANDLING_AV_PERIODE_AKTIVERT
       value: "true"
     - name: ENABLE_DOKUMENTMOTTAK_PPN
-      value: "false"
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
