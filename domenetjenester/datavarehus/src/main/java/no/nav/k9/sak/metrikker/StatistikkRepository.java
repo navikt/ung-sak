@@ -432,7 +432,7 @@ public class StatistikkRepository {
                 toMap(
                     "ytelse_type", ytelseType,
                     "aksjonspunkt_status", aksjonspunktStatus,
-                    "venteÅrsak", venteÅrsak,
+                    "vente_arsak", venteÅrsak,
                     "aksjonspunkt", aksjonspunktKode),
                 Map.of(
                     "aksjonspunkt_navn", aksjonspunktNavn,
