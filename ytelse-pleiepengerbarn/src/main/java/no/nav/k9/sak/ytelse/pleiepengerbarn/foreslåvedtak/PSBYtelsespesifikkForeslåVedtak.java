@@ -3,6 +3,8 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.foreslåvedtak;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -69,17 +71,26 @@ public class PSBYtelsespesifikkForeslåVedtak implements YtelsespesifikkForeslå
             .stream()
             .anyMatch(v -> !v.isBesluttet());
 
-        if (harUbesluttedeSykdomsVurderinger && behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE).isEmpty()) {
-            Aksjonspunkt aksjonspunkt = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
-            aksjonspunktKontrollRepository.setTilUtført(aksjonspunkt, "Automatisk gjenbruk av ubesluttede vurderinger fra annen fagsak.");
-            behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling.getId()));
-        }
+        Optional<Aksjonspunkt> sykdomAP = behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE);
+        if (harUbesluttedeSykdomsVurderinger) {
+            if (sykdomAP.isEmpty()) {
+                Aksjonspunkt aksjonspunkt = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
+                aksjonspunktKontrollRepository.setTilUtført(aksjonspunkt, "Automatisk gjenbruk av ubesluttede vurderinger fra annen fagsak.");
+                behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling.getId()));
+            }
 
-        if (!harUbesluttedeSykdomsVurderinger && behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE).isPresent()) {
-            Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
-            if (aksjonspunkt.isToTrinnsBehandling()) {
-                aksjonspunktRepository.fjernToTrinnsBehandlingKreves(aksjonspunkt);
+            if (sykdomAP.isPresent() && !sykdomAP.get().isToTrinnsBehandling()) {
+                Aksjonspunkt aksjonspunkt = sykdomAP.get();
+                aksjonspunktRepository.setToTrinnsBehandlingKreves(aksjonspunkt);
                 behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+            }
+        } else {
+            if (sykdomAP.isPresent()) {
+                Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
+                if (aksjonspunkt.isToTrinnsBehandling()) {
+                    aksjonspunktRepository.fjernToTrinnsBehandlingKreves(aksjonspunkt);
+                    behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+                }
             }
         }
 
