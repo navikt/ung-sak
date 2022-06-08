@@ -53,15 +53,15 @@ public class SykdomProsessDriver {
             aksjonspunktKontrollRepository.setReåpnet(aksjonspunkt.get());
         }
 
-        if (harPassertSykdom(behandling)) {
+        if (måHoppeTilbake(behandling)) {
             // Flytter prosessen tilbake til sykdom
-            behandlingProsesseringTjeneste.opprettTasksForFortsettBehandlingGjenopptaStegNesteKjøring(behandling, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, null);
+            behandlingProsesseringTjeneste.opprettTasksForÅHoppeTilbakeTilGittStegOgFortsettDerfra(behandling, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
         }
     }
 
-    private boolean harPassertSykdom(Behandling behandling) {
+    private boolean måHoppeTilbake(Behandling behandling) {
         final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();
         final BehandlingModell modell = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType());
-        return modell.erStegAFørStegB(BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, steg);
+        return steg != BehandlingStegType.VURDER_MEDISINSKE_VILKÅR && !modell.erStegAFørStegB(steg, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
     }
 }

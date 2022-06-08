@@ -29,6 +29,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.k9.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
+import no.nav.k9.sak.behandling.prosessering.task.HoppTilbakeTilStegTask;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -210,10 +211,31 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         return lagreMedCallId(fagsakId, behandlingId, taskData);
     }
 
+    public String opprettTasksForÅHoppeTilbakeTilGittStegOgFortsettDerfra(Behandling behandling, BehandlingStegType behandlingStegType) {
+        Objects.requireNonNull(behandlingStegType);
+
+        Long behandlingId = behandling.getId();
+        Long fagsakId = behandling.getFagsakId();
+        ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
+
+        ProsessTaskData hoppTilbakeTask = ProsessTaskData.forProsessTask(HoppTilbakeTilStegTask.class);
+        hoppTilbakeTask.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
+        hoppTilbakeTask.setProperty(HoppTilbakeTilStegTask.PROPERTY_TIL_STEG, behandlingStegType.getKode());
+
+        gruppe.addNesteSekvensiell(hoppTilbakeTask);
+
+        ProsessTaskData fortsettTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
+        fortsettTask.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
+        gruppe.addNesteSekvensiell(fortsettTask);
+
+        gruppe.setCallIdFraEksisterende();
+        return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, gruppe);
+    }
+
     // Robust task til bruk ved gjenopptak fra vent (eller annen tilstand) (Hendelse: Manuell input, Frist utløpt, mv)
     @Override
     public void opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId) {
-       opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, false, false);
+        opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, false, false);
     }
 
     @Override
@@ -233,6 +255,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     public ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker) {
         return opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, skalUtledeÅrsaker, true);
     }
+
     public ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker, boolean forceInnhentingAvRegisterdata) {
         Long fagsakId = behandling.getFagsakId();
         Long behandlingId = behandling.getId();
