@@ -8,8 +8,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hibernate.jpa.TypedParameterValue;
-import org.hibernate.type.StringType;
+import org.hibernate.query.TypedParameterValue;
+import org.hibernate.type.StandardBasicTypes;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -209,8 +209,8 @@ public class FagsakRepository {
 
         query = entityManager.createNativeQuery(sql, Fagsak.class); // NOSONAR
 
-        query.setParameter("pleietrengendeAktørId", new TypedParameterValue(StringType.INSTANCE, pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getId()));
-        query.setParameter("relatertPersonAktørId", new TypedParameterValue(StringType.INSTANCE, relatertPersonAktørId == null ? null : relatertPersonAktørId.getId()));
+        query.setParameter("pleietrengendeAktørId", new TypedParameterValue<>(StandardBasicTypes.STRING, pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getId()));
+        query.setParameter("relatertPersonAktørId", new TypedParameterValue<>(StandardBasicTypes.STRING, relatertPersonAktørId == null ? null : relatertPersonAktørId.getId()));
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", fom == null ? Tid.TIDENES_BEGYNNELSE : fom);
         query.setParameter("tom", tom == null ? Tid.TIDENES_ENDE : tom);
