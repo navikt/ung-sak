@@ -62,8 +62,7 @@ public class FosterbarnRepository {
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Long eksisterendeBehandlingId, Long nyBehandlingId) {
         Optional<FosterbarnGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(eksisterendeBehandlingId);
-        eksisterendeGrunnlag.ifPresent(entitet -> lagreOgFlush(nyBehandlingId,
-            new Fosterbarna(entitet.getFosterbarna().getFosterbarn())));
+        eksisterendeGrunnlag.ifPresent(entitet -> lagreOgFlush(nyBehandlingId, entitet.getFosterbarna()));
     }
 
 }

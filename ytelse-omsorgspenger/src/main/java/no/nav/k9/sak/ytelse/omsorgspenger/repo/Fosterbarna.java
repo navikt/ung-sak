@@ -2,10 +2,8 @@ package no.nav.k9.sak.ytelse.omsorgspenger.repo;
 
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -13,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
@@ -21,8 +20,7 @@ import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
 @Entity(name = "Fosterbarna")
 @Table(name = "OMP_FOSTERBARNA")
-@DynamicInsert
-@DynamicUpdate
+@Immutable
 public class Fosterbarna extends BaseEntitet {
 
     @Id
@@ -33,9 +31,9 @@ public class Fosterbarna extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-
     @ChangeTracked
-    @OneToMany(mappedBy = "fosterbarna", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinColumn(name = "fosterbarna_id", nullable = false)
     private Set<Fosterbarn> fosterbarn;
 
     Fosterbarna() {
@@ -44,7 +42,10 @@ public class Fosterbarna extends BaseEntitet {
 
     public Fosterbarna(Set<Fosterbarn> fosterbarn) {
         Objects.requireNonNull(fosterbarn);
-        this.fosterbarn = fosterbarn.stream().peek(barn -> barn.setFosterbarna(this)).collect(Collectors.toSet());
+        if (fosterbarn.stream().anyMatch(fb -> fb.getId() != null)) {
+            throw new IllegalArgumentException("Kan ikke gjenbruke allerede lagrede fosterbarn her - ta kopi");
+        }
+        this.fosterbarn = fosterbarn;
     }
 
     public Set<Fosterbarn> getFosterbarn() {
@@ -60,12 +61,12 @@ public class Fosterbarna extends BaseEntitet {
             return false;
         }
         Fosterbarna entitet = (Fosterbarna) o;
-        return Objects.equals(versjon, entitet.versjon) && Objects.equals(fosterbarn, entitet.fosterbarn);
+        return Objects.equals(fosterbarn, entitet.fosterbarn);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(versjon, fosterbarn);
+        return Objects.hash(fosterbarn);
     }
 
     @Override
