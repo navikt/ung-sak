@@ -62,9 +62,12 @@ public class SykdomGrunnlagRepository {
         final SykdomInnleggelser innleggelser = sykdomDokumentRepository.hentInnleggelseOrNull(pleietrengendeAktørId);
         final SykdomDiagnosekoder diagnosekoder = sykdomDokumentRepository.hentDiagnosekoderOrNull(pleietrengendeAktørId);
 
-        List<SykdomDokument> godkjenteLegeerklæringer = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId).stream()
+        final List<SykdomDokument> sykdomDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId);
+        final List<SykdomDokument> godkjenteLegeerklæringer = sykdomDokumenter.stream()
                 .filter(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS)
                 .collect(Collectors.toList());
+
+        final boolean harAndreMedisinskeDokumenter = !sykdomDokumenter.isEmpty();
 
         return new SykdomGrunnlag(
             UUID.randomUUID(),
@@ -72,6 +75,7 @@ public class SykdomGrunnlagRepository {
             revurderingsperioder.stream().map(p -> new SykdomRevurderingPeriode(p.getFom(), p.getTom())).collect(Collectors.toList()),
             vurderinger,
             godkjenteLegeerklæringer,
+            harAndreMedisinskeDokumenter,
             innleggelser,
             diagnosekoder,
             "VL",

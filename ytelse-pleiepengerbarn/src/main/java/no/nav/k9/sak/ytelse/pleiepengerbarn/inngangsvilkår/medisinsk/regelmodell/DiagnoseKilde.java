@@ -4,5 +4,6 @@ public enum DiagnoseKilde {
     FASTLEGE,
     SYKHUSLEGE,
     SPESIALISTHELSETJENESTEN,
-    ANNET
+    ANNET,
+    MANGLENDE
 }

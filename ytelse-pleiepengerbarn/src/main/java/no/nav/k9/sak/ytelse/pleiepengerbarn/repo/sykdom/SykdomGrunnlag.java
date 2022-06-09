@@ -53,7 +53,10 @@ public class SykdomGrunnlag {
         inverseJoinColumns = @JoinColumn( name="SYKDOM_DOKUMENT_ID")
     )
     private List<SykdomDokument> godkjenteLegeerklæringer = new ArrayList<>();
-    
+
+    @Column(name = "SYKDOM_HAR_ANDRE_MEDISINSKE_OPPLYSNINGER", nullable = false)
+    private boolean harAndreMedisinskeOpplysninger;
+
     @OneToOne
     @JoinColumn(name = "SYKDOM_INNLEGGELSER_ID")
     private SykdomInnleggelser innleggelser;
@@ -78,6 +81,7 @@ public class SykdomGrunnlag {
             List<SykdomRevurderingPeriode> revurderingPerioder,
             List<SykdomVurderingVersjon> vurderinger,
             List<SykdomDokument> godkjenteLegeerklæringer,
+            boolean harAndreMedisinskeOpplysninger,
             SykdomInnleggelser innleggelser,
             SykdomDiagnosekoder diagnosekoder,
             String opprettetAv,
@@ -87,6 +91,7 @@ public class SykdomGrunnlag {
         setRevurderingPerioder(revurderingPerioder);
         this.vurderinger = vurderinger;
         this.godkjenteLegeerklæringer = godkjenteLegeerklæringer;
+        this.harAndreMedisinskeOpplysninger = harAndreMedisinskeOpplysninger;
         this.innleggelser = innleggelser;
         this.diagnosekoder = diagnosekoder;
         this.opprettetAv = opprettetAv;
@@ -122,12 +127,16 @@ public class SykdomGrunnlag {
     public void setVurderinger(List<SykdomVurderingVersjon> vurderinger) {
         this.vurderinger = vurderinger;
     }
-    
+
     public List<SykdomDokument> getGodkjenteLegeerklæringer() {
         if (godkjenteLegeerklæringer == null) {
             return List.of();
         }
         return godkjenteLegeerklæringer;
+    }
+
+    public boolean isHarAndreMedisinskeOpplysninger() {
+        return harAndreMedisinskeOpplysninger;
     }
 
     public SykdomInnleggelser getInnleggelser() {
