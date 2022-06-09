@@ -13,11 +13,13 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -26,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -53,6 +56,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
@@ -63,7 +67,6 @@ import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.Tilgangsbeslutning;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -92,7 +95,10 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadMottaker;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 import no.nav.k9.sikkerhet.oidc.token.bruker.BrukerTokenProvider;
+import no.nav.k9.søknad.JsonUtils;
+import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.Språk;
@@ -101,6 +107,7 @@ import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 import no.nav.k9.søknad.frisinn.Inntekter;
 import no.nav.k9.søknad.frisinn.PeriodeInntekt;
 import no.nav.k9.søknad.frisinn.SelvstendigNæringsdrivende;
+import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 
 /**
  * DENNE TJENESTEN ER BARE FOR MIDLERTIDIG BEHOV, OG SKAL AVVIKLES SÅ RASKT SOM MULIG.
@@ -284,6 +291,66 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         final String saksnummerliste = result.stream().reduce((a, b) -> a + ", " + b).orElse("");
 
         return Response.ok(saksnummerliste).build();
+    }
+    
+    @GET
+    @Path("/saker-med-feil2")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response hentSakerMedFeil2() {
+        final Query q = entityManager.createNativeQuery(
+                "SELECT convert_from(lo_get(d.payload), 'UTF-8') as payload, f.saksnummer "
+                        + "FROM MOTTATT_DOKUMENT d INNER JOIN Behandling b ON ( "
+                        + "  b.id = d.behandling_id "
+                        + ") INNER JOIN Fagsak f ON ( "
+                        + "  f.id = b.fagsak_id "
+                        + ") "
+                        + "WHERE d.type = 'PLEIEPENGER_SOKNAD' "
+                        + "  AND d.mottatt_dato >= to_date('2022-05-01', 'YYYY-MM-DD')");
+        q.setHint("javax.persistence.query.timeout", 5 * 60 * 1000); // 5 minutter
+        
+        final List<String> saksnumre = new ArrayList<>();
+        
+        @SuppressWarnings("unchecked")
+        final Stream<Object[]> resultStream = q.getResultStream();
+        resultStream.forEach(d -> {
+            try {
+                final Object[] result = (Object[]) d;
+                final String soknadJson = (String) result[0];
+                final String saksnummer = (String) result[1];
+                final Søknad soknad = JsonUtils.fromString(soknadJson, Søknad.class);
+                if (erFraBrukerdialog(soknad.getYtelse()) && harReellPeriodeMedNullNormal(soknad.getYtelse())) {
+                    saksnumre.add(saksnummer);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        
+        final String saksnummerliste = saksnumre.stream().reduce((a, b) -> a + ", " + b).orElse("");
+
+        return Response.ok(saksnummerliste).build();
+    }
+    
+    private boolean erFraBrukerdialog(PleiepengerSyktBarn soknad) {
+        return soknad.getSøknadInfo().isPresent();
+    }
+
+    private boolean harReellPeriodeMedNullNormal(PleiepengerSyktBarn soknad) {
+        return soknad.getArbeidstid().getArbeidstakerList().stream().anyMatch(a -> {
+            return a.getArbeidstidInfo().getPerioder().entrySet().stream().anyMatch(tid ->
+                tid.getValue().getJobberNormaltTimerPerDag() != null
+                && tid.getValue().getJobberNormaltTimerPerDag().equals(Duration.ofSeconds(0L))
+                && erIkkeHelg(tid.getKey())
+            );
+        });
+    }
+
+    private boolean erIkkeHelg(Periode periode) {
+        final LocalDateTimeline<Boolean> helePerioden = new LocalDateTimeline<>(periode.getFraOgMed(), periode.getTilOgMed(), Boolean.TRUE);
+        final LocalDateTimeline<Boolean> kunHelger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(helePerioden);
+        return !helePerioden.disjoint(kunHelger).isEmpty();
     }
 
     @GET
