@@ -1,36 +1,29 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import kotlin.collections.ArrayDeque;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.MapTilBrevkode;
 
@@ -58,8 +51,11 @@ public class SøknadsperiodeTjeneste {
         final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(ytelseType, pleietrengende, null, null, null);
         LocalDateTimeline<List<AktørId>> samletTimelineForAlleSøkere = LocalDateTimeline.empty();
         for (Fagsak fagsak : fagsaker) {
-            Behandling behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).get();
-            NavigableSet<DatoIntervallEntitet> datoIntervallEntitets = utledFullstendigPeriode(behandling.getId());
+            var behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+            if (behandling.isEmpty()) {
+                continue;
+            }
+            NavigableSet<DatoIntervallEntitet> datoIntervallEntitets = utledFullstendigPeriode(behandling.get().getId());
             LocalDateTimeline<AktørId> timelineForSøker = new LocalDateTimeline<>(datoIntervallEntitets.stream()
                 .map(e -> new LocalDateSegment<>(e.toLocalDateInterval(), fagsak.getAktørId()))
                 .toList());
