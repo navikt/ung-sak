@@ -23,6 +23,7 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultatBuilder;
@@ -85,6 +86,38 @@ class MapArbeidTest {
         assertThat(result).hasSize(1);
         assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, null),
             Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)))));
+    }
+
+    @Test
+    void skal_mappe_arbeid_innenfor_periode_til_vurdering_selv_om_den_overlapper_med_inaktiv() {
+        var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now());
+        var tidlinjeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato(), true)));
+
+        var journalpostId = new JournalpostId(1L);
+        var kravDokumenter = Set.of(new KravDokument(journalpostId, LocalDateTime.now(), KravDokumentType.SØKNAD));
+        var arbeidsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now().minusDays(3));
+        var arbeidsgiverOrgnr = "000000000";
+        var perioderFraSøknader = Set.of(new PerioderFraSøknad(journalpostId,
+            List.of(new UttakPeriode(periodeTilVurdering, Duration.ZERO)),
+            List.of(new ArbeidPeriode(arbeidsperiode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet(arbeidsgiverOrgnr), InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(1))),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of()));
+
+        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET);
+        tidlinjeTilVurdering.toSegments().forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFom(), it.getTom()).medMerknad(VilkårUtfallMerknad.VM_7847_A)));
+        var vilkår = vilkårBuilder.build();
+
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, vilkår, null);
+        var result = mapper.map(input);
+
+        assertThat(result).hasSize(2);
+        assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, null),
+                Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)))),
+            new Arbeid(new Arbeidsforhold(UttakArbeidType.INAKTIV.getKode(), null, null, null),
+                Map.of(new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))));
     }
 
     @Test
