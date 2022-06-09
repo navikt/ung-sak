@@ -288,17 +288,17 @@ public class FagsakRepository {
 
     public List<SakInfotrygdMigrering> hentSakInfotrygdMigreringer(Long fagsakId) {
         TypedQuery<SakInfotrygdMigrering> query = entityManager.createQuery("from SakInfotrygdMigrering " +
-            "where fagsak_id=:fagsakId " +
+            "where fagsakId=:fagsakId " +
             "and aktiv=true " +
-            "order by skjaeringstidspunkt asc", SakInfotrygdMigrering.class);
+            "order by skjæringstidspunkt asc", SakInfotrygdMigrering.class);
         query.setParameter("fagsakId", fagsakId); // NOSONAR
         return query.getResultList();
     }
 
     public List<SakInfotrygdMigrering> hentAlleSakInfotrygdMigreringer(Long fagsakId) {
         TypedQuery<SakInfotrygdMigrering> query = entityManager.createQuery("from SakInfotrygdMigrering " +
-            "where fagsak_id=:fagsakId " +
-            "order by skjaeringstidspunkt asc", SakInfotrygdMigrering.class);
+            "where fagsakId=:fagsakId " +
+            "order by skjæringstidspunkt asc", SakInfotrygdMigrering.class);
         query.setParameter("fagsakId", fagsakId); // NOSONAR
         return query.getResultList();
     }
@@ -311,8 +311,8 @@ public class FagsakRepository {
 
     private Optional<SakInfotrygdMigrering> hentSakInfotrygdMigrering(Long fagsakId, LocalDate stp) {
         TypedQuery<SakInfotrygdMigrering> query = entityManager.createQuery("from SakInfotrygdMigrering " +
-            "where fagsak_id=:fagsakId " +
-            "and skjaeringstidspunkt=:stp", SakInfotrygdMigrering.class);
+            "where fagsakId=:fagsakId " +
+            "and skjæringstidspunkt=:stp", SakInfotrygdMigrering.class);
         query.setParameter("fagsakId", fagsakId); // NOSONAR
         query.setParameter("stp", stp); // NOSONAR
         return HibernateVerktøy.hentUniktResultat(query);

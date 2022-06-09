@@ -10,10 +10,9 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-
+import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
-import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @Dependent
 public class OppgaveBehandlingKoblingRepository {
@@ -43,7 +42,7 @@ public class OppgaveBehandlingKoblingRepository {
 
 
     public Optional<OppgaveBehandlingKobling> hentOppgaveBehandlingKobling(String oppgaveId) {
-        TypedQuery<OppgaveBehandlingKobling> query = entityManager.createQuery("from OppgaveBehandlingKobling where oppgave_id=:oppgaveId", //$NON-NLS-1$
+        TypedQuery<OppgaveBehandlingKobling> query = entityManager.createQuery("from OppgaveBehandlingKobling where oppgaveId=:oppgaveId", //$NON-NLS-1$
             OppgaveBehandlingKobling.class);
         query.setParameter("oppgaveId", oppgaveId); //$NON-NLS-1$
         return HibernateVerktøy.hentUniktResultat(query);
@@ -51,7 +50,7 @@ public class OppgaveBehandlingKoblingRepository {
 
 
     public List<OppgaveBehandlingKobling> hentOppgaverRelatertTilBehandling(Long behandlingId) {
-        TypedQuery<OppgaveBehandlingKobling> query = entityManager.createQuery("from OppgaveBehandlingKobling where behandling_id=:behandlingId", //$NON-NLS-1$
+        TypedQuery<OppgaveBehandlingKobling> query = entityManager.createQuery("from OppgaveBehandlingKobling where behandling.id=:behandlingId", //$NON-NLS-1$
             OppgaveBehandlingKobling.class);
         query.setParameter("behandlingId", behandlingId); //$NON-NLS-1$
         return query.getResultList();
@@ -60,7 +59,7 @@ public class OppgaveBehandlingKoblingRepository {
 
     public List<OppgaveBehandlingKobling> hentUferdigeOppgaverOpprettetTidsrom(LocalDate fom, LocalDate tom, Set<OppgaveÅrsak> oppgaveTyper) {
         TypedQuery<OppgaveBehandlingKobling> query = entityManager.
-            createQuery("from OppgaveBehandlingKobling where ferdigstilt=:ferdig and opprettet_tid >= :fom and opprettet_tid <= :tom and oppgaveÅrsak in :aarsaker", //$NON-NLS-1$
+            createQuery("from OppgaveBehandlingKobling where ferdigstilt=:ferdig and opprettetTidspunkt >= :fom and opprettetTidspunkt <= :tom and oppgaveÅrsak in :aarsaker", //$NON-NLS-1$
             OppgaveBehandlingKobling.class);
         query.setParameter("fom", fom.atStartOfDay()); //$NON-NLS-1$
         query.setParameter("tom", tom.plusDays(1).atStartOfDay().minusMinutes(1)); //$NON-NLS-1$
