@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -21,6 +22,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
@@ -36,8 +38,9 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
+import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
+import no.nav.k9.sak.domene.opptjening.MellomliggendeHelgUtleder;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
@@ -53,6 +56,7 @@ public class OpptjeningsperioderTjeneste {
     protected OpptjeningRepository opptjeningRepository;
     protected OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
     private final MapYtelseperioderTjeneste mapYtelseperioderTjeneste;
+    private final MellomliggendeHelgUtleder mellomliggendeHelgUtleder = new MellomliggendeHelgUtleder();
 
     @Inject
     public OpptjeningsperioderTjeneste(OpptjeningRepository opptjeningRepository,
@@ -76,9 +80,8 @@ public class OpptjeningsperioderTjeneste {
         var oppgittOpptjening = oppgittOpptjeningFilter.hentOppgittOpptjening(ref.getBehandlingId(), grunnlag, skjæringstidspunkt).orElse(null);
 
         var ytelseFilter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato());
-        var ytelsesperioder = mapYtelseperioderTjeneste.mapYtelsePerioder(ref, vurderOpptjening, false, ytelseFilter);
         var mapArbeidOpptjening = OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner();
-        var tidslinjePerYtelse = utledYtelsesTidslinjer(ytelsesperioder);
+        var tidslinjePerYtelse = utledYtelsesTidslinjerForValideringAvPermisjoner(ytelseFilter);
         for (var yrkesaktivitet : yrkesaktivitetFilter.getYrkesaktiviteter()) {
             var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(ref, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjeningPeriode, vilkårsPeriode, tidslinjePerYtelse);
             perioder.addAll(opptjeningsperioder);
@@ -92,22 +95,31 @@ public class OpptjeningsperioderTjeneste {
         return perioder.stream().sorted(Comparator.comparing(OpptjeningsperiodeForSaksbehandling::getPeriode)).collect(Collectors.toList());
     }
 
-    private Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> utledYtelsesTidslinjer(List<OpptjeningsperiodeForSaksbehandling> ytelsesperioder) {
+    private Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> utledYtelsesTidslinjerForValideringAvPermisjoner(YtelseFilter ytelseFilter) {
+        var ytelsesperioder = ytelseFilter.getFiltrertYtelser()
+            .stream().flatMap(this::mapYtelseperioder).toList();
         var gruppertPåYtelse = ytelsesperioder.stream()
-            .collect(Collectors.groupingBy(OpptjeningsperiodeForSaksbehandling::getOpptjeningAktivitetType));
+            .collect(Collectors.groupingBy(Ytelseperiode::ytelseType));
         var timelinePerYtelse = new HashMap<OpptjeningAktivitetType, LocalDateTimeline<Boolean>>();
 
-        for (Map.Entry<OpptjeningAktivitetType, List<OpptjeningsperiodeForSaksbehandling>> entry : gruppertPåYtelse.entrySet()) {
-            var segmenter = entry.getValue().stream().map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), true)).collect(Collectors.toSet());
-            var timeline = new LocalDateTimeline<Boolean>(List.of());
-
-            for (LocalDateSegment<Boolean> segment : segmenter) {
-                timeline = timeline.combine(segment, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-            }
+        for (Map.Entry<OpptjeningAktivitetType, List<Ytelseperiode>> entry : gruppertPåYtelse.entrySet()) {
+            var segmenter = entry.getValue().stream().map(it -> new LocalDateSegment<>(it.periode().toLocalDateInterval(), true)).collect(Collectors.toSet());
+            var timeline = new LocalDateTimeline<>(segmenter, StandardCombinators::alwaysTrueForMatch);
+            var mellomliggendePerioder = mellomliggendeHelgUtleder.beregnMellomliggendeHelg(timeline);
+            timeline = timeline.combine(mellomliggendePerioder, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
             timelinePerYtelse.put(entry.getKey(), timeline.compress());
         }
 
         return timelinePerYtelse;
+    }
+
+    private Stream<Ytelseperiode> mapYtelseperioder(Ytelse y) {
+        // Bruker vedtaksperioden for foreldrepenger (se https://jira.adeo.no/browse/TSF-2735)
+        if (y.getYtelseType().equals(FagsakYtelseType.FORELDREPENGER)) {
+            return Stream.of(new Ytelseperiode(MapYtelseperioderTjeneste.mapYtelseType(y), y.getPeriode()));
+        } else {
+            return y.getYtelseAnvist().stream().map(ya -> new Ytelseperiode(MapYtelseperioderTjeneste.mapYtelseType(y), MapYtelseperioderTjeneste.hentUtDatoIntervall(y, ya)));
+        }
     }
 
     public Optional<OpptjeningResultat> hentOpptjeningHvisFinnes(Long behandlingId) {
@@ -257,6 +269,9 @@ public class OpptjeningsperioderTjeneste {
 
 
         return startDatoFrilans.map(startDato -> DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDatoFrilans));
+    }
+
+    private record Ytelseperiode(OpptjeningAktivitetType ytelseType, DatoIntervallEntitet periode) {
     }
 
 }
