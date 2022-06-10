@@ -42,7 +42,7 @@ public class MapYtelseperioderTjeneste {
     public MapYtelseperioderTjeneste() {
     }
 
-    private static DatoIntervallEntitet hentUtDatoIntervall(Ytelse ytelse, YtelseAnvist ytelseAnvist) {
+    public static DatoIntervallEntitet hentUtDatoIntervall(Ytelse ytelse, YtelseAnvist ytelseAnvist) {
         LocalDate fom = ytelseAnvist.getAnvistFOM();
         if (Fagsystem.ARENA.equals(ytelse.getKilde()) && fom.isBefore(ytelse.getPeriode().getFomDato())) {
             // Kunne vært generell men er forsiktig pga at feil som gir fpsak-ytelser fom = siste uttaksperiode (er rettet)
@@ -118,7 +118,7 @@ public class MapYtelseperioderTjeneste {
         return ytelserAnvist;
     }
 
-    private OpptjeningAktivitetType mapYtelseType(Ytelse ytelse) {
+    public static OpptjeningAktivitetType mapYtelseType(Ytelse ytelse) {
 
         if (!FagsakYtelseType.RELATERT_YTELSE_TYPER_FOR_SØKER.contains(ytelse.getYtelseType())) {
             return OpptjeningAktivitetType.hentFraTemaUnderkategori()
