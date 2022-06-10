@@ -235,7 +235,12 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     // Robust task til bruk ved gjenopptak fra vent (eller annen tilstand) (Hendelse: Manuell input, Frist utløpt, mv)
     @Override
     public void opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId) {
-        opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, false, false);
+        var gruppe = opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, false, false);
+
+        if (gruppe == null) {
+            return;
+        }
+        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), behandling.getId(), gruppe);
     }
 
     @Override
