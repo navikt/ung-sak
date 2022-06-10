@@ -82,8 +82,7 @@ public class PleiepengerKompletthetFraværFilter implements KompletthetFraværFi
     }
 
     private boolean harFravær(Map<LukketPeriode, ArbeidsforholdPeriodeInfo> perioder) {
-        return perioder.values().stream().anyMatch(it -> !it.getJobberNormalt().equals(it.getJobberNå()));
+        return perioder.values().stream().anyMatch(it -> it.getJobberNormalt().compareTo(it.getJobberNå()) > 0);
     }
-
 
 }
