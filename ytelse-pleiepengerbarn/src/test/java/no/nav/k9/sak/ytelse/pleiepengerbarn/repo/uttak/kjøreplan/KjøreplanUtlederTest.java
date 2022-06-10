@@ -13,6 +13,7 @@ import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -153,6 +154,74 @@ class KjøreplanUtlederTest {
         assertThat(kjøreplan).isNotNull();
         assertThat(kjøreplan.skalVentePåAnnenSak(1L)).isFalse();
         assertThat(kjøreplan.skalVentePåAnnenSak(2L)).isTrue();
+    }
+
+    @Test
+    void skal_utlede_en_kjøreplan_hvor_sak1_er_kan_behandles_og_sak2_kan_også_behandles_pga_innleggelse() {
+        var førsteSak = new Saksnummer("1");
+        var andreSak = new Saksnummer("2");
+
+        var idag = LocalDate.now();
+        var førstedag = idag.minusDays(50);
+        var behandling1SøktePerioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(førstedag, idag.minusDays(20)));
+
+        var sistedag = idag.minusDays(10);
+        var behandling2SøktePerioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(idag.minusDays(35), sistedag));
+
+        var mottattDokumenter = List.of(new MottattKrav(new JournalpostId("1"), 100L), new MottattKrav(new JournalpostId("2"), 101L));
+        var førsteKrav = LocalDateTime.now().minusDays(3);
+        var behandlingStatus = Map.of(100L, new BehandlingMedMetadata(BehandlingStatus.UTREDES, null), 101L, new BehandlingMedMetadata(BehandlingStatus.UTREDES, null));
+        var førsteSakOgBehandlinger = new SakOgBehandlinger(1L, førsteSak, 100L,
+            behandlingStatus, mottattDokumenter,
+            Map.of(new KravDokument(new JournalpostId("1"), førsteKrav, KravDokumentType.SØKNAD), søktePerioderTilVurdertePerioder(behandling1SøktePerioder)));
+        var andreKrav = LocalDateTime.now();
+        var andreSakOgBehandlinger = new SakOgBehandlinger(2L, andreSak, 101L,
+            behandlingStatus, mottattDokumenter,
+            Map.of(new KravDokument(new JournalpostId("2"), andreKrav, KravDokumentType.SØKNAD), søktePerioderTilVurdertePerioder(behandling2SøktePerioder)));
+
+        var sakOgBehandlinger = List.of(førsteSakOgBehandlinger, andreSakOgBehandlinger);
+
+        var input = new KravPrioInput(1L, førsteSak, Map.of(), new LocalDateTimeline<>(førstedag, sistedag, true), sakOgBehandlinger);
+
+        var kjøreplan = utleder.utledKravprioInternt(input);
+
+        assertThat(kjøreplan).isNotNull();
+        assertThat(kjøreplan.skalVentePåAnnenSak(1L)).isFalse();
+        assertThat(kjøreplan.skalVentePåAnnenSak(2L)).isFalse();
+    }
+
+    @Test
+    void skal_utlede_en_kjøreplan_hvor_sak1_er_kan_behandles_og_sak2_kan_også_behandles_pga_innleggelse_2() {
+        var førsteSak = new Saksnummer("1");
+        var andreSak = new Saksnummer("2");
+
+        var idag = LocalDate.now();
+        var førstedag = idag.minusDays(50);
+        var behandling1SøktePerioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(førstedag, idag.minusDays(20)));
+
+        var sistedag = idag.minusDays(10);
+        var behandling2SøktePerioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(idag.minusDays(35), sistedag));
+
+        var mottattDokumenter = List.of(new MottattKrav(new JournalpostId("1"), 100L), new MottattKrav(new JournalpostId("2"), 101L));
+        var førsteKrav = LocalDateTime.now().minusDays(3);
+        var behandlingStatus = Map.of(100L, new BehandlingMedMetadata(BehandlingStatus.UTREDES, null), 101L, new BehandlingMedMetadata(BehandlingStatus.UTREDES, null));
+        var førsteSakOgBehandlinger = new SakOgBehandlinger(1L, førsteSak, 100L,
+            behandlingStatus, mottattDokumenter,
+            Map.of(new KravDokument(new JournalpostId("1"), førsteKrav, KravDokumentType.SØKNAD), søktePerioderTilVurdertePerioder(behandling1SøktePerioder)));
+        var andreKrav = LocalDateTime.now();
+        var andreSakOgBehandlinger = new SakOgBehandlinger(2L, andreSak, 101L,
+            behandlingStatus, mottattDokumenter,
+            Map.of(new KravDokument(new JournalpostId("2"), andreKrav, KravDokumentType.SØKNAD), søktePerioderTilVurdertePerioder(behandling2SøktePerioder)));
+
+        var sakOgBehandlinger = List.of(førsteSakOgBehandlinger, andreSakOgBehandlinger);
+
+        var input = new KravPrioInput(1L, førsteSak, Map.of(), new LocalDateTimeline<>(idag.minusDays(35), idag.minusDays(20), true), sakOgBehandlinger);
+
+        var kjøreplan = utleder.utledKravprioInternt(input);
+
+        assertThat(kjøreplan).isNotNull();
+        assertThat(kjøreplan.skalVentePåAnnenSak(1L)).isFalse();
+        assertThat(kjøreplan.skalVentePåAnnenSak(2L)).isFalse();
     }
 
     @Test

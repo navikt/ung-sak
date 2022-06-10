@@ -20,6 +20,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -27,6 +28,8 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kontrakt.sykdom.Resultat;
+import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
@@ -74,10 +77,10 @@ public class KjøreplanUtleder {
 
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
 
-        var innleggelseTimeline = hentInnleggelseTimeline(behandling);
+        var toOmsorgspersonerTidslinje = hentTidslinjeMedFlereOmsorgspersoner(behandling); // Inkludere 200% avklaringer?
         var utsattePerioderPerBehandling = utledUtsattePerioderFraBehandling(fagsaker);
 
-        var input = new KravPrioInput(aktuellFagsak.getId(), aktuellFagsak.getSaksnummer(), utsattePerioderPerBehandling, innleggelseTimeline, fagsaker);
+        var input = new KravPrioInput(aktuellFagsak.getId(), aktuellFagsak.getSaksnummer(), utsattePerioderPerBehandling, toOmsorgspersonerTidslinje, fagsaker);
 
         return utledKravprioInternt(input);
     }
@@ -121,8 +124,16 @@ public class KjøreplanUtleder {
         List<LocalDateSegment<Set<AksjonPerFagsak>>> segmenter = new ArrayList<>();
 
         Map<Long, Boolean> trengerÅUtsettePerioder = utledBehovForUtsettelse(input, kravprioritetPåEndringerOgVedtakstatus);
+        var toOmsorgspersonerTidslinje = input.getToOmsorgspersonerTidslinje();
 
-        for (LocalDateSegment<List<InternalKravprioritet>> segment : kravprioForEldsteKrav) {
+        var splittetKravperioderPåInnleggelser = kravprioForEldsteKrav.combine(toOmsorgspersonerTidslinje, (localDateInterval, leftSegment, rightSegment) -> {
+            if (leftSegment == null) {
+                return null;
+            }
+            return new LocalDateSegment<>(localDateInterval, leftSegment.getValue());
+        }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+
+        for (LocalDateSegment<List<InternalKravprioritet>> segment : splittetKravperioderPåInnleggelser) {
             var prio = new HashSet<AksjonPerFagsak>();
             var kravprioritetPåEndringerOgVedtakstatusSegment = kravprioritetPåEndringerOgVedtakstatus.getSegment(segment.getLocalDateInterval());
             for (InternalKravprioritet internalKravprioritet : segment.getValue()) {
@@ -133,7 +144,7 @@ public class KjøreplanUtleder {
                 }
                 if (!harUbehandledeKrav) {
                     // DO NOTHING
-                } else if (prio.isEmpty()) {
+                } else if (prio.isEmpty() || erInnvilgetToPersonerOgKravetErNrToIPrio(toOmsorgspersonerTidslinje, segment.getValue().indexOf(internalKravprioritet), segment.getLocalDateInterval())) {
                     prio.add(new AksjonPerFagsak(internalKravprioritet.getFagsak(), Aksjon.BEHANDLE));
                 } else if (trengerÅUtsettePerioder.get(internalKravprioritet.getFagsak())) {
                     prio.add(new AksjonPerFagsak(internalKravprioritet.getFagsak(), Aksjon.UTSETT));
@@ -147,6 +158,19 @@ public class KjøreplanUtleder {
         }
 
         return new LocalDateTimeline<>(segmenter);
+    }
+
+    private boolean erInnvilgetToPersonerOgKravetErNrToIPrio(LocalDateTimeline<Boolean> toOmsorgspersonerTidslinje, int prioritetPlassering, LocalDateInterval localDateInterval) {
+        if (prioritetPlassering > 1) {
+            return false;
+        }
+        if (toOmsorgspersonerTidslinje.isEmpty()) {
+            return false;
+        }
+
+        var overlappendeInnleggelser = toOmsorgspersonerTidslinje.intersection(localDateInterval);
+
+        return !overlappendeInnleggelser.isEmpty();
     }
 
     private boolean erUbehandlet(InternalKravprioritet it, SakOgBehandlinger sakOgBehandlinger, DatoIntervallEntitet periode, Map<Long, NavigableSet<DatoIntervallEntitet>> utsattePerioderPerBehandling) {
@@ -306,11 +330,18 @@ public class KjøreplanUtleder {
         return fagsakTidslinje;
     }
 
-    private LocalDateTimeline<Boolean> hentInnleggelseTimeline(Behandling behandling) {
+    private LocalDateTimeline<Boolean> hentTidslinjeMedFlereOmsorgspersoner(Behandling behandling) {
+        var sykdomVurderingerOgPerioder = sykdomVurderingService.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling)
+            .filterValue(it -> it.getResultat() == Resultat.OPPFYLT)
+            .mapValue(it -> true);
+
         final List<SykdomInnleggelsePeriode> innleggelser = sykdomVurderingService.hentInnleggelser(behandling).getPerioder();
+
         return new LocalDateTimeline<>(innleggelser.stream()
             .map(i -> new LocalDateSegment<>(i.getFom(), i.getTom(), Boolean.TRUE))
-            .collect(Collectors.toList()));
+            .collect(Collectors.toList()))
+            .combine(sykdomVurderingerOgPerioder,
+                StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }
 
     private InternalKravprioritet tilKravPrio(SakOgBehandlinger sakOgBehandling, List<MottattKrav> mottattDokumenter, Map.Entry<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> kravdokument) {
