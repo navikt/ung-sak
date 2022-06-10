@@ -44,13 +44,11 @@ import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
-import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -175,7 +173,6 @@ public class ÅrskvantumTjeneste {
                 + ",\tfagsakFravær=" + fagsakFravær);
         }
 
-        LocalDateTimeline<Boolean> vilkårsperioderTidsserie = new LocalDateTimeline<>(vilkårsperioder.stream().map(vp -> new LocalDateSegment<>(vp.toLocalDateInterval(), true)).toList());
         DatoIntervallEntitet informasjonsperiode = vilkårsperioder.isEmpty() //vilkårsperioder er tom hvis hele kravet er trekt
             ? omsluttende(oppgittFravær.stream().map(OppgittFraværPeriode::getPeriode).toList())
             : omsluttende(vilkårsperioder);
@@ -186,7 +183,7 @@ public class ÅrskvantumTjeneste {
             .filter(relasjon -> relasjon.getRelasjonsrolle() == RelasjonsRolleType.BARN)
             .filter(relasjon -> !tpsTjeneste.hentFnrForAktør(relasjon.getTilAktørId()).erFdatNummer())
             .map(barnRelasjon -> personopplysninger.getPersonopplysning(barnRelasjon.getTilAktørId()))
-            .map(barnPersonopplysninger -> mapBarn(personopplysninger, søkerPersonopplysninger, barnPersonopplysninger, vilkårsperioderTidsserie))
+            .map(barnPersonopplysninger -> mapBarn(personopplysninger, søkerPersonopplysninger, barnPersonopplysninger))
             .toList();
         var fosterbarna = fosterbarnRepository.hentHvisEksisterer(behandling.getId())
             .map(grunnlag -> grunnlag.getFosterbarna().getFosterbarn().stream()
@@ -378,24 +375,11 @@ public class ÅrskvantumTjeneste {
         return ArbeidsforholdStatus.AKTIVT;
     }
 
-    private Tuple<Familierelasjon, Optional<Personinfo>> innhentFamilierelasjonForBarn(Familierelasjon familierelasjon) {
-        return new Tuple<>(familierelasjon, tpsTjeneste.hentBrukerForFnr(familierelasjon.getPersonIdent()));
-    }
-
     private Personinfo innhentPersonopplysningForBarn(AktørId aktørId) {
         return tpsTjeneste.hentBrukerForAktør(aktørId).orElseThrow(() -> new IllegalStateException("Finner ikke ident for aktørid"));
     }
 
-    private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(Personinfo personinfoSøker, Tuple<Familierelasjon, Optional<Personinfo>> relasjonMedBarn) {
-        //TODO deprecated metode, fjernes når 'bruk fra register' er lansert
-        var personinfoBarn = relasjonMedBarn.getElement2().orElseThrow();
-        var harSammeBosted = relasjonMedBarn.getElement1().getHarSammeBosted(personinfoSøker, personinfoBarn);
-        var perioderMedDeltBosted = relasjonMedBarn.getElement1().getPerioderMedDeltBosted(personinfoSøker, personinfoBarn);
-        var lukketPeriodeMedDeltBosted = perioderMedDeltBosted.stream().map(p -> new LukketPeriode(p.getFom(), p.getTom())).collect(Collectors.toList());
-        return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), lukketPeriodeMedDeltBosted, List.of(), BarnType.VANLIG);
-    }
-
-    private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(PersonopplysningerAggregat personopplysningerAggregat, PersonopplysningEntitet personinfoSøker, PersonopplysningEntitet personinfoBarn, LocalDateTimeline<Boolean> vilkårPeriodeTidslinje) {
+    private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(PersonopplysningerAggregat personopplysningerAggregat, PersonopplysningEntitet personinfoSøker, PersonopplysningEntitet personinfoBarn) {
         List<PersonAdresseEntitet> søkersAdresser = personopplysningerAggregat.getAdresserFor(personinfoSøker.getAktørId());
         List<PersonAdresseEntitet> barnetsAdresser = personopplysningerAggregat.getAdresserFor(personinfoBarn.getAktørId());
 
