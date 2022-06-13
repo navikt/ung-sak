@@ -314,6 +314,7 @@ public class BehandlingDtoTjeneste {
 
         dto.leggTil(getFraMap(BrevRestTjeneste.HENT_VEDTAKVARSEL_PATH, "vedtak-varsel", uuidQueryParams));
         lagFormidlingLink(behandling).forEach(dto::leggTil);
+        lagLosLink(behandling).forEach(dto::leggTil);
     }
 
     private void leggTilBeregnetYtelseBaserteLinks(Behandling behandling, BehandlingDto dto, Map<String, String> uuidQueryParams) {
@@ -502,6 +503,15 @@ public class BehandlingDtoTjeneste {
             links.add(getFraMap(TilbakekrevingRestTjeneste.VARSELTEKST_PATH, "tilbakekrevingsvarsel-fritekst", queryParams));
         }
 
+        return links;
+    }
+
+    private List<ResourceLink> lagLosLink(Behandling behandling) {
+        final var LOS_PATH = "/k9/los/api";
+
+        List<ResourceLink> links = new ArrayList<>();
+        links.add(ResourceLink.get(LOS_PATH + "/saksbehandler/merknad/" + behandling.getUuid(), "los-hente-merknad"));
+        links.add(ResourceLink.post(LOS_PATH + "/saksbehandler/merknad/" + behandling.getUuid(), "los-lagre-merknad", null));
         return links;
     }
 
