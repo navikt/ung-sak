@@ -505,7 +505,7 @@ public class MapArbeid {
     private Arbeidsforhold mapArbeidsforhold(AktivitetIdentifikator identifikator) {
         var arbeidsforhold = new Arbeidsforhold(identifikator.getAktivitetType().getKode(),
             Optional.ofNullable(identifikator.getArbeidsgiver()).map(Arbeidsgiver::getArbeidsgiverOrgnr).orElse(null),
-            Optional.ofNullable(identifikator.getArbeidsgiver()).map(Arbeidsgiver::getAktørId).map(AktørId::getId).orElse(null),
+            Optional.ofNullable(identifikator.getArbeidsgiver()).map(Arbeidsgiver::getArbeidsgiverAktørId).map(AktørId::getId).orElse(null),
             Optional.ofNullable(identifikator.getArbeidsforhold()).map(InternArbeidsforholdRef::getReferanse).orElse(null)
         );
         valider(arbeidsforhold);

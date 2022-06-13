@@ -3,11 +3,6 @@ package no.nav.k9.sak.trigger;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import org.hibernate.annotations.Type;
-
-import com.vladmihalcea.hibernate.type.range.PostgreSQLRangeType;
-import com.vladmihalcea.hibernate.type.range.Range;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -16,6 +11,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+
+import com.vladmihalcea.hibernate.type.range.Range;
+
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
@@ -36,7 +34,6 @@ public class Trigger extends BaseEntitet {
     private BehandlingÅrsakType årsak = BehandlingÅrsakType.UDEFINERT;
 
     @ChangeTracked
-    @Type(PostgreSQLRangeType.class)
     @Column(name = "periode", columnDefinition = "daterange")
     private Range<LocalDate> periode;
 

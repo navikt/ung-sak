@@ -3,11 +3,6 @@ package no.nav.k9.sak.behandlingslager.fagsak;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import org.hibernate.annotations.Type;
-
-import com.vladmihalcea.hibernate.type.range.PostgreSQLRangeType;
-import com.vladmihalcea.hibernate.type.range.Range;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
@@ -20,7 +15,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
+
+import org.hibernate.annotations.TypeDef;
+
+import com.vladmihalcea.hibernate.type.range.PostgreSQLRangeType;
+import com.vladmihalcea.hibernate.type.range.Range;
+
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -29,9 +29,11 @@ import no.nav.k9.sak.behandlingslager.kodeverk.FagsakYtelseTypeKodeverdiConverte
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 @Entity(name = "Fagsak")
 @Table(name = "FAGSAK")
+@TypeDef(typeClass = PostgreSQLRangeType.class, defaultForType = Range.class)
 public class Fagsak extends BaseEntitet {
 
     @Id
@@ -66,7 +68,6 @@ public class Fagsak extends BaseEntitet {
     @AttributeOverrides(@AttributeOverride(name = "saksnummer", column = @Column(name = "saksnummer")))
     private Saksnummer saksnummer;
 
-    @Type(PostgreSQLRangeType.class)
     @Column(name = "periode", columnDefinition = "daterange")
     private Range<LocalDate> periode;
 

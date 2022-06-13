@@ -49,11 +49,10 @@
     <logger name="com.zaxxer.hikari" level="${log.level.com.zaxxer.hikari:-WARN}" />
     <logger name="org.hibernate.type" level="${log.level.org.hibernate.type:-WARN}" />
     <logger name="org.hibernate" level="${log.level.org.hibernate:-WARN}" />
-    <logger name="org.hibernate.orm.deprecation" level="${log.level.org.hibernate.orm.deprecation:-ERROR}" />
     <logger name="no.nav.vault.jdbc" level="${no.nav.vault.jdbc:-INFO}" />
     <logger name="org.flywaydb" level="${log.level.org.flywaydb:-INFO}" />
     <logger name="Hibernate Types" level="ERROR" />
-
+    
     <!-- genererer en del støy -->
     <logger name="org.jboss.weld" level="${log.level.org.jboss.weld:-WARN}" />
     <logger name="org.jboss.resteasy" level="${log.level.org.jboss.resteasy:-WARN}" />

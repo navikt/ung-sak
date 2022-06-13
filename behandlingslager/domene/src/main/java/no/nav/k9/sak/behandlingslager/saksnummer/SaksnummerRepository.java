@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingslager.saksnummer;
 
+import java.math.BigInteger;
 import java.util.Objects;
 
 import jakarta.enterprise.context.Dependent;
@@ -24,7 +25,7 @@ public class SaksnummerRepository {
 
     public String genererNyttSaksnummer() {
         final Query query = entityManager.createNativeQuery("SELECT nextval('SEQ_SAKSNUMMER')");
-        var tall = (Number) query.getSingleResult();
+        final BigInteger tall = (BigInteger) query.getSingleResult();
 
         return Long.toString(tall.longValue(), 36).toUpperCase().replace("O", "o").replace("I", "i");
     }
