@@ -3,7 +3,10 @@ package no.nav.k9.sak.utsatt;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import com.vladmihalcea.hibernate.type.range.Range;
+import org.hibernate.annotations.Type;
+
+import no.nav.k9.sak.behandlingslager.PostgreSQLRangeType;
+import no.nav.k9.sak.behandlingslager.Range;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,6 +28,7 @@ public class UtsattPeriode extends BaseEntitet {
     private Long id;
 
     @ChangeTracked
+    @Type(PostgreSQLRangeType.class)
     @Column(name = "periode", columnDefinition = "daterange")
     private Range<LocalDate> periode;
 
