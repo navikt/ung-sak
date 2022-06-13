@@ -8,8 +8,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hibernate.jpa.TypedParameterValue;
-import org.hibernate.type.StringType;
+import org.hibernate.query.TypedParameterValue;
+import org.hibernate.type.StandardBasicTypes;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -209,8 +209,8 @@ public class FagsakRepository {
 
         query = entityManager.createNativeQuery(sql, Fagsak.class); // NOSONAR
 
-        query.setParameter("pleietrengendeAktørId", new TypedParameterValue(StringType.INSTANCE, pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getId()));
-        query.setParameter("relatertPersonAktørId", new TypedParameterValue(StringType.INSTANCE, relatertPersonAktørId == null ? null : relatertPersonAktørId.getId()));
+        query.setParameter("pleietrengendeAktørId", new TypedParameterValue<>(StandardBasicTypes.STRING, pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getId()));
+        query.setParameter("relatertPersonAktørId", new TypedParameterValue<>(StandardBasicTypes.STRING, relatertPersonAktørId == null ? null : relatertPersonAktørId.getId()));
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", fom == null ? Tid.TIDENES_BEGYNNELSE : fom);
         query.setParameter("tom", tom == null ? Tid.TIDENES_ENDE : tom);
@@ -288,17 +288,17 @@ public class FagsakRepository {
 
     public List<SakInfotrygdMigrering> hentSakInfotrygdMigreringer(Long fagsakId) {
         TypedQuery<SakInfotrygdMigrering> query = entityManager.createQuery("from SakInfotrygdMigrering " +
-            "where fagsak_id=:fagsakId " +
+            "where fagsakId=:fagsakId " +
             "and aktiv=true " +
-            "order by skjaeringstidspunkt asc", SakInfotrygdMigrering.class);
+            "order by skjæringstidspunkt asc", SakInfotrygdMigrering.class);
         query.setParameter("fagsakId", fagsakId); // NOSONAR
         return query.getResultList();
     }
 
     public List<SakInfotrygdMigrering> hentAlleSakInfotrygdMigreringer(Long fagsakId) {
         TypedQuery<SakInfotrygdMigrering> query = entityManager.createQuery("from SakInfotrygdMigrering " +
-            "where fagsak_id=:fagsakId " +
-            "order by skjaeringstidspunkt asc", SakInfotrygdMigrering.class);
+            "where fagsakId=:fagsakId " +
+            "order by skjæringstidspunkt asc", SakInfotrygdMigrering.class);
         query.setParameter("fagsakId", fagsakId); // NOSONAR
         return query.getResultList();
     }
@@ -311,8 +311,8 @@ public class FagsakRepository {
 
     private Optional<SakInfotrygdMigrering> hentSakInfotrygdMigrering(Long fagsakId, LocalDate stp) {
         TypedQuery<SakInfotrygdMigrering> query = entityManager.createQuery("from SakInfotrygdMigrering " +
-            "where fagsak_id=:fagsakId " +
-            "and skjaeringstidspunkt=:stp", SakInfotrygdMigrering.class);
+            "where fagsakId=:fagsakId " +
+            "and skjæringstidspunkt=:stp", SakInfotrygdMigrering.class);
         query.setParameter("fagsakId", fagsakId); // NOSONAR
         query.setParameter("stp", stp); // NOSONAR
         return HibernateVerktøy.hentUniktResultat(query);

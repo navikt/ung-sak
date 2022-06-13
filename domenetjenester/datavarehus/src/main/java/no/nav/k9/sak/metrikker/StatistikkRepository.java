@@ -381,7 +381,7 @@ public class StatistikkRepository {
                 "aksjonspunkt", t.get(1, String.class),
                 "aksjonspunkt_status", t.get(2, String.class)),
             Map.of(
-                metricField, t.get(3, BigInteger.class))))
+                metricField, t.get(3, Number.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
@@ -509,7 +509,7 @@ public class StatistikkRepository {
                 "prosess_task_type", t.get(1, String.class),
                 "status", t.get(2, String.class)),
             Map.of(
-                metricField, t.get(3, BigInteger.class))))
+                metricField, t.get(3, Number.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
@@ -554,7 +554,7 @@ public class StatistikkRepository {
         Collection<SensuEvent> values = stream.map(t -> {
             String ytelseType = t.get(0, String.class);
             String saksnummer = t.get(1, String.class);
-            String taskId = t.get(2, BigInteger.class).toString();
+            String taskId = t.get(2, Number.class).toString();
             String taskType = t.get(3, String.class);
             String status = t.get(4, String.class);
             Timestamp sistKjørt = t.get(5, Timestamp.class);
@@ -563,7 +563,7 @@ public class StatistikkRepository {
             String sisteFeil = finnStacktraceStartFra(t.get(6, String.class), 500).orElse(UDEFINERT);
             String taskParams = t.get(7, String.class);
 
-            BigInteger blokkertAvId = t.get(8, BigInteger.class);
+            Number blokkertAvId = t.get(8, Number.class);
             String blokkertAv = blokkertAvId == null ? null : blokkertAvId.toString();
 
             String opprettetTid = t.get(9, Timestamp.class).toInstant().toString();
