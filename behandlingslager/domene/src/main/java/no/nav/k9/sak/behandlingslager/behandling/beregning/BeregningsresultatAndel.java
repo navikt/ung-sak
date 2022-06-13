@@ -5,12 +5,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.hibernate.annotations.Type;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.vladmihalcea.hibernate.type.range.PostgreSQLRangeType;
-import com.vladmihalcea.hibernate.type.range.Range;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
@@ -26,6 +20,10 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.vladmihalcea.hibernate.type.range.Range;
+
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -53,9 +51,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    /**
-     * @deprecated fjernes og erstattes med {@link #beregningsresultat}.
-     */
+    /** @deprecated fjernes og erstattes med {@link #beregningsresultat}. */
     @JsonBackReference
     @Deprecated(forRemoval = true)
     @ManyToOne(optional = false)
@@ -92,7 +88,6 @@ public class BeregningsresultatAndel extends BaseEntitet {
     @Column(name = "dagsats_fra_bg", nullable = false)
     private int dagsatsFraBg;
 
-    @Type(PostgreSQLRangeType.class)
     @Column(name = "periode", columnDefinition = "daterange")
     private Range<LocalDate> periode;
 
@@ -113,9 +108,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
         //
     }
 
-    /**
-     * @deprecated skal erstattes av en ren copy ctor uten BeregningsresultatPeriode (under)
-     */
+    /** @deprecated skal erstattes av en ren copy ctor uten BeregningsresultatPeriode (under) */
     @Deprecated(forRemoval = true)
     // copy ctor
     public BeregningsresultatAndel(BeregningsresultatAndel fraAndel, BeregningsresultatPeriode tilknyttPeriode) {
@@ -180,17 +173,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
 
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static Builder builder(BeregningsresultatAndel eksisterendeBeregningsresultatAndel) {
-        return new Builder(eksisterendeBeregningsresultatAndel);
-    }
-
-    /**
-     * @deprecated brukes til migrering (fjerning av BR_PERIODE, BR_FERIEPENGER_PR_AAR er gjort).
-     */
+    /** @deprecated brukes til migrering (fjerning av BR_PERIODE, BR_FERIEPENGER_PR_AAR er gjort). */
     @Deprecated(forRemoval = true)
     @PrePersist
     protected void onCreateMigrate() {
@@ -207,9 +190,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
         }
     }
 
-    /**
-     * @deprecated brukes til migrering (fjerning av BR_PERIODE, BR_FERIEPENGER_PR_AAR er gjort).
-     */
+    /** @deprecated brukes til migrering (fjerning av BR_PERIODE, BR_FERIEPENGER_PR_AAR er gjort). */
     @Deprecated(forRemoval = true)
     @PreUpdate
     protected void onUpdateMigrate() {
@@ -229,9 +210,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
         return id;
     }
 
-    /**
-     * @deprecated bruk fom/tom i stedet.
-     */
+    /** @deprecated bruk fom/tom i stedet. */
     @Deprecated(forRemoval = true)
     public BeregningsresultatPeriode getBeregningsresultatPeriode() {
         return beregningsresultatPeriode;
@@ -379,6 +358,14 @@ public class BeregningsresultatAndel extends BaseEntitet {
     public int hashCode() {
         return Objects.hash(brukerErMottaker, arbeidsgiver, arbeidsforholdRef, arbeidsforholdType, dagsats, aktivitetStatus, dagsatsFraBg, stillingsprosent, utbetalingsgrad, inntektskategori,
             feriepengerBeløp);
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder builder(BeregningsresultatAndel eksisterendeBeregningsresultatAndel) {
+        return new Builder(eksisterendeBeregningsresultatAndel);
     }
 
     public static class Builder {
