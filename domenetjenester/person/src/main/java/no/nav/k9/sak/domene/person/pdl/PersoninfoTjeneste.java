@@ -510,7 +510,7 @@ public class PersoninfoTjeneste {
     private List<AdressePeriode> mapAdresserHistorikk(List<Bostedsadresse> bostedsadresser,
                                                       List<Kontaktadresse> kontaktadresser, List<Oppholdsadresse> oppholdsadresser) {
         List<AdressePeriode> adresser = new ArrayList<>();
-        bostedsadresser.stream().sorted(Comparator.comparing(Bostedsadresse::getGyldigFraOgMed)).forEachOrdered(b -> {
+        bostedsadresser.stream().sorted(Comparator.comparing(it -> fomNullAble(it.getGyldigFraOgMed()))).forEachOrdered(b -> {
             var periode = periodeFraDates(b.getGyldigFraOgMed(), b.getGyldigTilOgMed());
             var flyttedato = b.getAngittFlyttedato() != null
                 ? LocalDate.parse(b.getAngittFlyttedato(), DateTimeFormatter.ISO_LOCAL_DATE)
@@ -521,17 +521,21 @@ public class PersoninfoTjeneste {
             mapAdresser(List.of(b), List.of(), List.of())
                 .forEach(a -> adresser.add(mapAdresseinfoTilAdressePeriode(periode2, a)));
         });
-        kontaktadresser.stream().sorted(Comparator.comparing(Kontaktadresse::getGyldigFraOgMed)).forEachOrdered(k -> {
+        kontaktadresser.stream().sorted(Comparator.comparing(it -> fomNullAble(it.getGyldigFraOgMed()))).forEachOrdered(k -> {
             var periode = periodeFraDates(k.getGyldigFraOgMed(), k.getGyldigTilOgMed());
             mapAdresser(List.of(), List.of(k), List.of())
                 .forEach(a -> adresser.add(mapAdresseinfoTilAdressePeriode(periode, a)));
         });
-        oppholdsadresser.stream().sorted(Comparator.comparing(Oppholdsadresse::getGyldigFraOgMed)).forEachOrdered(o -> {
+        oppholdsadresser.stream().sorted(Comparator.comparing(it -> fomNullAble(it.getGyldigFraOgMed()))).forEachOrdered(o -> {
             var periode = periodeFraDates(o.getGyldigFraOgMed(), o.getGyldigTilOgMed());
             mapAdresser(List.of(), List.of(), List.of(o))
                 .forEach(a -> adresser.add(mapAdresseinfoTilAdressePeriode(periode, a)));
         });
         return adresser;
+    }
+
+    private LocalDate fomNullAble(Date gyldigFraOgMed) {
+        return gyldigFraOgMed == null ? Tid.TIDENES_BEGYNNELSE : LocalDate.ofInstant(gyldigFraOgMed.toInstant(), ZoneId.systemDefault());
     }
 
     private List<Adresseinfo> mapAdresser(List<Bostedsadresse> bostedsadresser, List<Kontaktadresse> kontaktadresser,
