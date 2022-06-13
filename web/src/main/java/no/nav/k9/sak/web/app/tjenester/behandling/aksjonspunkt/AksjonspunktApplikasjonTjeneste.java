@@ -91,10 +91,9 @@ public class AksjonspunktApplikasjonTjeneste {
 
     }
 
-    public void bekreftAksjonspunkter(Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer, Long behandlingId) {
+    public void bekreftAksjonspunkter(Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer, Long behandlingId, BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         AksjonspunktProsessResultat aksjonspunktProsessResultat = spolTilbakeOgBekreft(bekreftedeAksjonspunktDtoer, behandling, kontekst);
 
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
