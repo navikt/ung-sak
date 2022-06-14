@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -20,6 +23,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase;
+import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.k9.søknad.ytelse.psb.v1.Uttak;
 
 @Dependent
@@ -41,14 +45,9 @@ class SøknadOversetter {
         PleipengerLivetsSluttfase ytelse = søknad.getYtelse();
 
         Collection<ArbeidPeriode> arbeidPerioder = new MapSøknadUttakPerioder(tpsTjeneste).mapOppgittArbeidstid(ytelse.getArbeidstid());
-        List<Periode> søknadsperioder;
-        Collection<UttakPeriode> uttakPerioder;
-        if (ytelse.getSøknadsperiodeList().isEmpty()) {
-            throw new IllegalStateException("Støtter midlertidig ikke søknad uten søknadsperioder for pleiepenger i livets sluttfase. Jobbes med!");
-        } else {
-            søknadsperioder = ytelse.getSøknadsperiodeList();
-            uttakPerioder = mapUttak(ytelse.getUttak());
-        }
+        final List<Periode> søknadsperioder = hentAlleSøknadsperioder(ytelse);
+        Collection<UttakPeriode> uttakPerioder = mapUttak(ytelse.getUttak());
+
         PerioderFraSøknad perioderFraSøknad = new PerioderFraSøknad(journalpostId,
             uttakPerioder,
             arbeidPerioder,
@@ -66,6 +65,22 @@ class SøknadOversetter {
         søknadPersisterer.lagreSøknadsperioder(søknadsperioder, ytelse.getTrekkKravPerioder(), journalpostId, behandlingId);
         søknadPersisterer.lagreUttak(perioderFraSøknad, behandlingId);
         søknadPersisterer.oppdaterFagsakperiode(maksSøknadsperiode, fagsakId);
+    }
+
+    private List<Periode> hentAlleSøknadsperioder(PleipengerLivetsSluttfase ytelse) {
+        final LocalDateTimeline<Boolean> kompletteSøknadsperioderTidslinje = tilTidslinje(ytelse.getSøknadsperiodeList());
+        final var endringsperioder = ytelse.getEndringsperiode();
+        final LocalDateTimeline<Boolean> endringssøknadsperioderTidslinje = tilTidslinje(endringsperioder);
+        final LocalDateTimeline<Boolean> søknadsperioder = kompletteSøknadsperioderTidslinje.union(endringssøknadsperioderTidslinje, StandardCombinators::coalesceLeftHandSide).compress();
+        return søknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
+    }
+
+    private LocalDateTimeline<Boolean> tilTidslinje(List<Periode> perioder) {
+        return new LocalDateTimeline<>(
+            perioder.stream()
+                .map(p -> new LocalDateSegment<>(p.getFraOgMed(), p.getTilOgMed(), Boolean.TRUE))
+                .collect(Collectors.toList())
+        ).compress();
     }
 
     Collection<UttakPeriode> mapUttak(Uttak uttak) {
