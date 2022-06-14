@@ -1,13 +1,13 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
@@ -45,7 +45,7 @@ public class OppgittOpptjeningMapper {
         if (opptjeningAktiviteter.getSelvstendigNæringsdrivende() != null) {
             var snAktiviteter = opptjeningAktiviteter.getSelvstendigNæringsdrivende();
             var snBuilders = snAktiviteter.stream().map(this::mapEgenNæring).collect(Collectors.toList());
-            builder.leggTilEgneNæringer(snBuilders);
+            snBuilders.forEach(builder::leggTilEgneNæringer);
         }
         if (opptjeningAktiviteter.getFrilanser() != null) {
             Frilanser frilanser = opptjeningAktiviteter.getFrilanser();
@@ -75,15 +75,13 @@ public class OppgittOpptjeningMapper {
             .build();
     }
 
-    private EgenNæringBuilder mapEgenNæring(SelvstendigNæringsdrivende sn) {
+    private List<EgenNæringBuilder> mapEgenNæring(SelvstendigNæringsdrivende sn) {
         Map.Entry<Periode, SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo> entry = getSnPeriodeInfo(sn);
         var periode = entry.getKey();
         var info = entry.getValue();
-        var virksomhetType = getVirksomhetType(info);
+        var virksomhetTyper = info.getVirksomhetstyper();
         var orgnummer = sn.getOrganisasjonsnummer();
-
-        var egenNæringBuilder = mapNæringForVirksomhetType(periode, info, virksomhetType, orgnummer);
-        return egenNæringBuilder;
+        return virksomhetTyper.stream().map(type -> mapNæringForVirksomhetType(periode, info, type, orgnummer)).toList();
     }
 
     private Map.Entry<Periode, SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo> getSnPeriodeInfo(SelvstendigNæringsdrivende sn) {
@@ -91,13 +89,6 @@ public class OppgittOpptjeningMapper {
             throw new IllegalArgumentException("Søknad må ha eksakt én SN-periode. Størrelse var " + sn.getPerioder().size());
         }
         return sn.getPerioder().entrySet().iterator().next();
-    }
-
-    private no.nav.k9.søknad.felles.type.VirksomhetType getVirksomhetType(SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo info) {
-        if (info.getVirksomhetstyper().size() != 1) {
-            throw new IllegalArgumentException("Søknad må ha eksakt én (hoved)virksomhet. Størrelse var " + info.getVirksomhetstyper().size());
-        }
-        return info.getVirksomhetstyper().get(0);
     }
 
     private EgenNæringBuilder mapNæringForVirksomhetType(no.nav.k9.søknad.felles.type.Periode periode,
