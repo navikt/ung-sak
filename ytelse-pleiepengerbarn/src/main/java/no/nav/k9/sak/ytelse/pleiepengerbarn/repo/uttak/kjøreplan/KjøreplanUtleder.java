@@ -170,7 +170,11 @@ public class KjøreplanUtleder {
 
         var overlappendeInnleggelser = toOmsorgspersonerTidslinje.intersection(localDateInterval);
 
-        return !overlappendeInnleggelser.isEmpty();
+        if (overlappendeInnleggelser.isEmpty()) {
+            return false;
+        }
+
+        return overlappendeInnleggelser.stream().allMatch(it -> Objects.equals(it.getLocalDateInterval(), localDateInterval));
     }
 
     private boolean erUbehandlet(InternalKravprioritet it, SakOgBehandlinger sakOgBehandlinger, DatoIntervallEntitet periode, Map<Long, NavigableSet<DatoIntervallEntitet>> utsattePerioderPerBehandling) {

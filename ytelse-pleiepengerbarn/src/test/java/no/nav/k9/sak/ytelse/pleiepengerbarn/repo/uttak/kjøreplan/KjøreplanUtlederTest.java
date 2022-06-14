@@ -215,7 +215,7 @@ class KjøreplanUtlederTest {
 
         var sakOgBehandlinger = List.of(førsteSakOgBehandlinger, andreSakOgBehandlinger);
 
-        var input = new KravPrioInput(1L, førsteSak, Map.of(), new LocalDateTimeline<>(idag.minusDays(35), idag.minusDays(20), true), sakOgBehandlinger);
+        var input = new KravPrioInput(1L, førsteSak, Map.of(), new LocalDateTimeline<>(List.of(new LocalDateSegment<>(idag.minusDays(35), idag.minusDays(25), true), new LocalDateSegment<>(idag.minusDays(24), idag.minusDays(20), true))), sakOgBehandlinger);
 
         var kjøreplan = utleder.utledKravprioInternt(input);
 
