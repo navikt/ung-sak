@@ -470,7 +470,7 @@ public class BehandlingDtoTjeneste {
     }
 
     private Optional<ResourceLink> lagSimuleringResultatLink(Behandling behandling) {
-        return Optional.of(ResourceLink.post(k9OppdragProxyUrl + "/simulering/detaljert-resultat", "simuleringResultat", behandling.getUuid()));
+        return Optional.of(ResourceLink.eksternPost(k9OppdragProxyUrl + "/simulering/detaljert-resultat", "simuleringResultat", behandling.getUuid()));
     }
 
     private List<ResourceLink> lagFormidlingLink(Behandling behandling) {
@@ -485,11 +485,11 @@ public class BehandlingDtoTjeneste {
             "avsenderApplikasjon", AvsenderApplikasjon.K9SAK.name());
 
         List<ResourceLink> links = new ArrayList<>();
-        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/maler", "brev-maler", standardFormidlingParams));
-        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/tilgjengeligevedtaksbrev", "tilgjengelige-vedtaksbrev", standardFormidlingParams));
-        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/informasjonsbehov", "informasjonsbehov-vedtaksbrev", standardFormidlingParams));
-        links.add(ResourceLink.get(FORMIDLING_DOKUMENTDATA_PATH, "dokumentdata-hente", behandlingUuid));
-        links.add(ResourceLink.post(FORMIDLING_DOKUMENTDATA_PATH + "/" + behandling.getUuid(), "dokumentdata-lagre", null));
+        links.add(ResourceLink.eksternGet(FORMIDLING_PATH + "/brev/maler", "brev-maler", standardFormidlingParams));
+        links.add(ResourceLink.eksternGet(FORMIDLING_PATH + "/brev/tilgjengeligevedtaksbrev", "tilgjengelige-vedtaksbrev", standardFormidlingParams));
+        links.add(ResourceLink.eksternGet(FORMIDLING_PATH + "/brev/informasjonsbehov", "informasjonsbehov-vedtaksbrev", standardFormidlingParams));
+        links.add(ResourceLink.eksternGet(FORMIDLING_DOKUMENTDATA_PATH, "dokumentdata-hente", behandlingUuid));
+        links.add(ResourceLink.eksternPost(FORMIDLING_DOKUMENTDATA_PATH + "/" + behandling.getUuid(), "dokumentdata-lagre", null));
         return links;
     }
 

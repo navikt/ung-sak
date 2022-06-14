@@ -118,7 +118,7 @@ public class BehandlingDtoUtil {
         try {
             URIBuilder builder = new URIBuilder(apiPath);
             uriBuilder.accept(builder);
-            return new ResourceLink(builder.build(), rel, method);
+            return new ResourceLink(builder.build(), rel, method, false);
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Kan ikke bygge uri for: " + path + ", rel=" + rel, e);
         }

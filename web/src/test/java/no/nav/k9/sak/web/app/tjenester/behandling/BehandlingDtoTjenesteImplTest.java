@@ -7,14 +7,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -84,33 +83,18 @@ public class BehandlingDtoTjenesteImplTest {
         for (Behandling behandling : behandlinger) {
             List<ResourceLink> links = tjeneste.lagUtvidetBehandlingDto(behandling, null).getLinks();
             for (ResourceLink dtoLink : links) {
-                assertThat(routeExists(dtoLink)).withFailMessage("Route " + dtoLink.toString() + " does not exist.").isTrue();
+                assertThat(routeExists(dtoLink)).withFailMessage("Route rel= " + dtoLink.getRel() + " - " + dtoLink.toString() + " does not exist.").isTrue();
             }
             List<ResourceLink> revurderingLinks = tjeneste.lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(behandling).getLinks();
             for (ResourceLink dtoLink : revurderingLinks) {
-                assertThat(routeExists(dtoLink)).withFailMessage("Route " + dtoLink.toString() + " does not exist.").isTrue();
+                assertThat(routeExists(dtoLink)).withFailMessage("Route rel= " + dtoLink.getRel() + " - " + dtoLink.toString() + " does not exist.").isTrue();
             }
         }
     }
 
     private Boolean routeExists(ResourceLink dtoLink) {
-        Boolean linkEksists = false;
-        if (dtoLink.getRel().equals("simuleringResultat")) {
-            return true;
-        }
-        if (dtoLink.getRel().equals("brev-maler")) {
-            return true;
-        }
-        if (dtoLink.getRel().equals("tilgjengelige-vedtaksbrev")) {
-            return true;
-        }
-        if (dtoLink.getRel().equals("informasjonsbehov-vedtaksbrev")) {
-            return true;
-        }
-        if (dtoLink.getRel().equals("dokumentdata-lagre")) {
-            return true;
-        }
-        if (dtoLink.getRel().equals("dokumentdata-hente")) {
+        var linkEksists = false;
+        if (dtoLink.getErEksternAdresse()) {
             return true;
         }
         for (ResourceLink routeLink : existingRoutes) {
