@@ -44,9 +44,7 @@ class SøknadOversetter {
         List<Periode> søknadsperioder;
         Collection<UttakPeriode> uttakPerioder;
         if (ytelse.getSøknadsperiodeList().isEmpty()) {
-            //TODO deprecated. Selvbetjening/søknadsdialog skal fylle ut søknadsperioder og uttak.
-            søknadsperioder = arbeidPerioder.stream().map(ArbeidPeriode::getPeriode).map(di -> new Periode(di.getFomDato(), di.getTomDato())).toList();
-            uttakPerioder = mapTilUttakPerioder(arbeidPerioder);
+            throw new IllegalStateException("Støtter midlertidig ikke søknad uten søknadsperioder for pleiepenger i livets sluttfase. Jobbes med!");
         } else {
             søknadsperioder = ytelse.getSøknadsperiodeList();
             uttakPerioder = mapUttak(ytelse.getUttak());
@@ -68,19 +66,6 @@ class SøknadOversetter {
         søknadPersisterer.lagreSøknadsperioder(søknadsperioder, ytelse.getTrekkKravPerioder(), journalpostId, behandlingId);
         søknadPersisterer.lagreUttak(perioderFraSøknad, behandlingId);
         søknadPersisterer.oppdaterFagsakperiode(maksSøknadsperiode, fagsakId);
-    }
-
-    private Collection<UttakPeriode> mapTilUttakPerioder(Collection<ArbeidPeriode> arbeidPerioder) {
-        Collection<UttakPeriode> uttaksperioder = arbeidPerioder.stream()
-            .map(arbeidPeriode -> {
-                // Omregner arbeidsperiode til uttaksperiode
-                var jobberNormaltTimerPerDag = arbeidPeriode.getJobberNormaltTimerPerDag();
-                var faktiskArbeidTimerPerDag = arbeidPeriode.getFaktiskArbeidTimerPerDag();
-                var fraværTimerPerDag = jobberNormaltTimerPerDag.minus(faktiskArbeidTimerPerDag);
-                return new UttakPeriode(arbeidPeriode.getPeriode(), fraværTimerPerDag);
-            })
-            .toList();
-        return uttaksperioder;
     }
 
     Collection<UttakPeriode> mapUttak(Uttak uttak) {
