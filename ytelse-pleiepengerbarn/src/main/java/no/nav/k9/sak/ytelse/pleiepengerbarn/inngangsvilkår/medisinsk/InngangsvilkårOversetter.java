@@ -67,8 +67,13 @@ public class InngangsvilkårOversetter {
             .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
             .collect(Collectors.toList());
 
-        final DiagnoseKilde diagnoseKilde = grunnlag.getGodkjenteLegeerklæringer().isEmpty() ? DiagnoseKilde.ANNET : DiagnoseKilde.SYKHUSLEGE;
-        
+        DiagnoseKilde diagnoseKilde;
+        if (grunnlag.getGodkjenteLegeerklæringer().isEmpty()) {
+            diagnoseKilde = grunnlag.isHarAndreMedisinskeOpplysninger() ? DiagnoseKilde.ANNET : DiagnoseKilde.MANGLENDE;
+        } else {
+            diagnoseKilde = DiagnoseKilde.SYKHUSLEGE;
+        }
+
         vilkårsGrunnlag.medDiagnoseKilde(diagnoseKilde)
             .medDiagnoseKode(diagnosekode)
             .medInnleggelsesPerioder(relevanteInnleggelsesperioder)

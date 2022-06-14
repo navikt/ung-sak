@@ -271,7 +271,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
 
 
     private SykdomGrunnlag grunnlagMock(List<SykdomVurderingVersjon> vurderinger, SykdomInnleggelser innleggelser) {
-        return new SykdomGrunnlag(null, new ArrayList<>(), new ArrayList<>(), vurderinger, new ArrayList<>(), innleggelser, null, "test", LocalDateTime.now());
+        return new SykdomGrunnlag(null, new ArrayList<>(), new ArrayList<>(), vurderinger, new ArrayList<>(), false, innleggelser, null, "test", LocalDateTime.now());
     }
 
     private SykdomInnleggelser innleggelserMock(Periode... perioder) {
