@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
+//Døpe om til SykdomPleietrengendeInformasjon
 @Entity(name = "SykdomVurderinger")
 @Table(name = "SYKDOM_VURDERINGER")
 public class SykdomVurderinger {

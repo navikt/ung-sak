@@ -14,6 +14,9 @@ import jakarta.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
+//TODO: Bedre navn eller forklarende kommentar
+//Saksbehandler har kvittert at de har gjennomgått alle eksisterende vurderinger etter at et nytt dokument er tilkommet,
+// eller at eksisterende dokument har vært oppdatert, feks reklassifisert.
 @Entity(name = "SykdomDokumentHarOppdatertEksisterendeVurderinger")
 @Table(name = "SYKDOM_DOKUMENT_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER")
 public class SykdomDokumentHarOppdatertEksisterendeVurderinger implements Serializable {

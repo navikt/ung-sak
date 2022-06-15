@@ -9,7 +9,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
-
+//Besluttet = Godkjent av saksbehandler med beslutterrolle. Begrepet fordrer forklaring for nye folk.
+// Klarer vi å finne på noe mer beskrivende?
 @Entity(name = "SykdomVurderingVersjonBesluttet")
 @Table(name = "SYKDOM_VURDERING_VERSJON_BESLUTTET")
 public class SykdomVurderingVersjonBesluttet {

@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
+//TODO: SykdomDiagnose
 @Entity(name = "SykdomDiagnosekode")
 @Table(name = "SYKDOM_DIAGNOSEKODE")
 public class SykdomDiagnosekode {

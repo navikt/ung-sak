@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+//TODO: SykdomVurderingVersjonPeriode? Denne tilhører VurderingVersjon og ikke Vurdering
 @Entity(name = "SykdomVurderingPeriode")
 @Table(name = "SYKDOM_VURDERING_PERIODE")
 public class SykdomVurderingPeriode {

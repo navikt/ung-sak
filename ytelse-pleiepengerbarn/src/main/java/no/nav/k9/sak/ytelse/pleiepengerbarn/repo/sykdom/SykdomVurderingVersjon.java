@@ -68,7 +68,7 @@ public class SykdomVurderingVersjon implements Comparable<SykdomVurderingVersjon
 
     @OneToMany
     @JoinTable(
-        name="SYKDOM_VURDERING_VERSJON_DOKUMENT",
+        name="SYKDOM_VURDERING_VERSJON_DOKUMENT",  //TODO: SYKDOM_VURDERING_VERSJON_ANVENDT_DOKUMENT?
         joinColumns = @JoinColumn( name="SYKDOM_VURDERING_VERSJON_ID"),
         inverseJoinColumns = @JoinColumn( name="SYKDOM_DOKUMENT_ID")
     )
