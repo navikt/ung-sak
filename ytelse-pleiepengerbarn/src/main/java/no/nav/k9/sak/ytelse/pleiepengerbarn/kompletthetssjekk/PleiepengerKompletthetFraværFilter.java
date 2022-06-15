@@ -12,6 +12,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -34,6 +35,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 public class PleiepengerKompletthetFraværFilter implements KompletthetFraværFilter {
 
     private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
+    private boolean markerFravær;
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
 
     PleiepengerKompletthetFraværFilter() {
@@ -42,8 +44,10 @@ public class PleiepengerKompletthetFraværFilter implements KompletthetFraværFi
 
     @Inject
     public PleiepengerKompletthetFraværFilter(@Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
+                                              @KonfigVerdi(value = "kompletthet.marker.fravær", defaultVerdi = "false") boolean markerFravær,
                                               PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste) {
         this.søknadsfristTjeneste = søknadsfristTjeneste;
+        this.markerFravær = markerFravær;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
     }
 
@@ -63,7 +67,11 @@ public class PleiepengerKompletthetFraværFilter implements KompletthetFraværFi
             null);
         var arbeidIPeriode = new MapArbeid().map(arbeidstidInput);
 
-        return harFraværFraArbeidsgiverIPerioden(arbeidIPeriode, manglendeVedlegg);
+        var harFraværFraArbeidsgiverIPerioden = harFraværFraArbeidsgiverIPerioden(arbeidIPeriode, manglendeVedlegg);
+        if (markerFravær) {
+            manglendeVedlegg.setHarFraværFraArbeidsgiverIPerioden(harFraværFraArbeidsgiverIPerioden);
+        }
+        return harFraværFraArbeidsgiverIPerioden;
     }
 
     private boolean harFraværFraArbeidsgiverIPerioden(List<Arbeid> arbeidIPeriode, ManglendeVedlegg at) {

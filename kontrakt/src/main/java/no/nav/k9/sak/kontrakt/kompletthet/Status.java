@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public enum Status {
     MOTTATT("MOTTATT"),
+    IKKE_PÅKREVD("IKKE_PÅKREVD"),
     FORTSETT_UTEN("FORTSETT_UTEN"),
     MANGLER("MANGLER");
 

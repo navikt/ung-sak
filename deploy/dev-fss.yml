@@ -228,6 +228,8 @@ spec:
       value: "true"
     - name: ENABLE_DOKUMENTMOTTAK_PPN
       value: "true"
+    - name: KOMPLETTHET_MARKER_FRAVÆR
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
