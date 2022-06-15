@@ -78,9 +78,6 @@ public class BeregningsresultatAndel {
         return inntektskategori;
     }
 
-
-
-    //TODO test på denne
     public boolean girRettTilFeriepenger() {
         return getInntektskategori().erArbeidstakerEllerSjømann() && getDagsats() > 0;
     }
