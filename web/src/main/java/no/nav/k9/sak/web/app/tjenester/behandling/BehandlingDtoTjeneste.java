@@ -512,7 +512,7 @@ public class BehandlingDtoTjeneste {
 
         List<ResourceLink> links = new ArrayList<>();
         links.add(getFraMap(LosTjeneste.MERKNAD_PATH, "los-hente-merknad", queryParams));
-        links.add(post(LosTjeneste.MERKNAD_PATH + "/" + behandling.getUuid(), "los-lagre-merknad", null));
+        links.add(post(LosTjeneste.MERKNAD_PATH, "los-lagre-merknad", new BehandlingUuidDto(behandling.getUuid())));
         return links;
     }
 
