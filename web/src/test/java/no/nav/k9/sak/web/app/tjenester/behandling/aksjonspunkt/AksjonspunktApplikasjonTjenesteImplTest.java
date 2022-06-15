@@ -3,17 +3,22 @@ package no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import jakarta.inject.Inject;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -24,6 +29,8 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
@@ -56,6 +63,8 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     private BehandlingRepositoryProvider repositoryProvider;
 
     private AksjonspunktTestSupport aksjonspunktRepository = new AksjonspunktTestSupport();
+    @Inject
+    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
     private AbstractTestScenario<?> lagScenarioMedAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         var scenario = TestScenarioBuilder.builderMedSøknad();
@@ -67,11 +76,12 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     public void skal_sette_aksjonspunkt_til_utført_og_lagre_behandling() {
         // Arrange
         var behandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        var kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling.getId());
 
         var dto = new AvklarOpptjeningsvilkårDto(List.of(), List.of(), BEGRUNNELSE);
 
         // Act
-        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto), behandling.getId());
+        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto), behandling.getId(), kontekst);
 
         // Assert
         Behandling oppdatertBehandling = behandlingRepository.hentBehandling(behandling.getId());
@@ -104,9 +114,10 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
         aksjonspunktRepository.setTilUtført(førstegangsbehandling.getAksjonspunkter().iterator().next(), BEGRUNNELSE);
         Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
         var dto = new AvklarOpptjeningsvilkårDto(List.of(), List.of(), BEGRUNNELSE);
+        var kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering.getId());
 
         // Act
-        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto), revurdering.getId());
+        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto), revurdering.getId(), kontekst);
 
         // Assert
         Behandling oppdatertBehandling = behandlingRepository.hentBehandling(revurdering.getId());
@@ -118,14 +129,16 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     public void skal_sette_totrinn_når_revurdering_ap_har_endring_i_begrunnelse() {
         // Arrange
         Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        var kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(førstegangsbehandling.getId());
         var dto1 = new AvklarOpptjeningsvilkårDto(List.of(), List.of(), BEGRUNNELSE);
-        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto1), førstegangsbehandling.getId());
+        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto1), førstegangsbehandling.getId(), kontekst);
 
         Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering.getId());
         var dto2 = new AvklarOpptjeningsvilkårDto(List.of(), List.of(), BEGRUNNELSE);
 
         // Act
-        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto2), revurdering.getId());
+        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto2), revurdering.getId(), kontekst);
 
         // Assert
         Behandling oppdatertBehandling = behandlingRepository.hentBehandling(revurdering.getId());
@@ -137,14 +150,16 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     public void skal_sette_totrinn_når_revurdering_ap_verken_har_endring_i_grunnlag_eller_begrunnelse_men_et_bekreftet_ap_i_førstegangsbehandling() {
         // Arrange
         Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        var kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(førstegangsbehandling.getId());
         var dto1 = new AvklarOpptjeningsvilkårDto(List.of(), List.of(), BEGRUNNELSE);
-        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto1), førstegangsbehandling.getId());
+        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto1), førstegangsbehandling.getId(), kontekst);
 
         Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering.getId());
         var dto2 = new AvklarOpptjeningsvilkårDto(List.of(), List.of(), BEGRUNNELSE);
 
         // Act
-        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto2), revurdering.getId());
+        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto2), revurdering.getId(), kontekst);
 
         // Assert
         Behandling oppdatertBehandling = behandlingRepository.hentBehandling(revurdering.getId());
@@ -156,14 +171,16 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     public void skal_ikke_sette_totrinn_når_aksjonspunktet_mangler_skjermlenke_selv_om_det_har_endring_i_begrunnelse() {
         // Arrange
         Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.VURDER_FEILUTBETALING);
+        var kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(førstegangsbehandling.getId());
         var dto1 = new VurderFeilutbetalingDto(BEGRUNNELSE, TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, null);
-        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto1), førstegangsbehandling.getId());
+        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto1), førstegangsbehandling.getId(), kontekst);
 
         Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_FEILUTBETALING);
+        kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering.getId());
         var dto2 = new VurderFeilutbetalingDto(BEGRUNNELSE + "2", TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, null);
 
         // Act
-        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto2), revurdering.getId());
+        aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto2), revurdering.getId(), kontekst);
 
         // Assert
         Behandling oppdatertBehandling = behandlingRepository.hentBehandling(revurdering.getId());
