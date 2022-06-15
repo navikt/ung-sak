@@ -38,6 +38,10 @@ public class BeregningsresultatAndel {
         return brukerErMottaker;
     }
 
+    public MottakerType getMottakerType(){
+        return brukerErMottaker ? MottakerType.BRUKER : MottakerType.ARBEIDSGIVER;
+    }
+
     public Long getDagsats() {
         return dagsats;
     }

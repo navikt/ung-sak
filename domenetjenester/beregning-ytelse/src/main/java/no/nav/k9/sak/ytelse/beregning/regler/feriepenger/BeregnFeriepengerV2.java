@@ -21,6 +21,7 @@ import no.nav.k9.sak.domene.typer.tid.IntervallUtil;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.MottakerType;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
 
@@ -49,9 +50,8 @@ class BeregnFeriepengerV2 extends LeafSpecification<BeregningsresultatFeriepenge
         regelsporingTidslinjerYtelseKanGiFeriepenger(regelsporing, tidslinjeYtelseKanGiFeriepenger);
         regelsporingTidslinjerInnenforKvote(regelsporing, regelModell, tidslinjeFeriepengerInnenforKvote);
 
-        //TODO enum for mottaker
-        beregn(regelsporing, regelModell.getBeregningsresultatPerioder(), tidslinjeFeriepengerInnenforKvote, regelModell.harFeriepengeopptjeningForHelg(), true);
-        beregn(regelsporing, regelModell.getBeregningsresultatPerioder(), tidslinjeFeriepengerInnenforKvoteRefusjon, regelModell.harFeriepengeopptjeningForHelg(), false);
+        beregn(regelsporing, regelModell, tidslinjeFeriepengerInnenforKvote, MottakerType.BRUKER);
+        beregn(regelsporing, regelModell, tidslinjeFeriepengerInnenforKvoteRefusjon, MottakerType.ARBEIDSGIVER);
 
         LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andreSakerOverKvote = regelModell.getAndelerSomKanGiFeriepengerForRelevaneSaker().disjoint(tidslinjeFeriepengerInnenforKvote);
         if (!andreSakerOverKvote.isEmpty()) {
@@ -72,8 +72,10 @@ class BeregnFeriepengerV2 extends LeafSpecification<BeregningsresultatFeriepenge
         }
     }
 
-    private static void beregn(Map<String, Object> regelsporing, List<BeregningsresultatPeriode> beregningsresultatPerioder, LocalDateTimeline<Boolean> tidslinjeHvorFeriepengerGis, boolean harFeriepengeopptjeningForHelg, boolean gjelderBruker) {
-        Predicate<BeregningsresultatAndel> andelFilter = andel -> andel.girRettTilFeriepenger() && andel.erBrukerMottaker() == gjelderBruker;
+    private static void beregn(Map<String, Object> regelsporing, BeregningsresultatFeriepengerRegelModell regelModell, LocalDateTimeline<Boolean> tidslinjeHvorFeriepengerGis, MottakerType mottakerType) {
+        List<BeregningsresultatPeriode> beregningsresultatPerioder = regelModell.getBeregningsresultatPerioder();
+        boolean harFeriepengeopptjeningForHelg = regelModell.harFeriepengeopptjeningForHelg();
+        Predicate<BeregningsresultatAndel> andelFilter = andel -> andel.girRettTilFeriepenger() && andel.getMottakerType() == mottakerType;
 
         for (BeregningsresultatPeriode periode : beregningsresultatPerioder) {
             LocalDateTimeline<Boolean> overlapp = tidslinjeHvorFeriepengerGis.intersection(periode.getPeriode());
@@ -83,7 +85,7 @@ class BeregnFeriepengerV2 extends LeafSpecification<BeregningsresultatFeriepenge
                         ? IntervallUtil.beregnKalanderdager(åretsOverlapp)
                         : IntervallUtil.beregnUkedager(åretsOverlapp);
 
-                    String periodeNavn = "perioden " + åretsOverlapp + "for " + (gjelderBruker ? "bruker" : "arbeidsgiver");
+                    String periodeNavn = "perioden " + åretsOverlapp + "for " + mottakerType.name().toLowerCase();
                     regelsporing.put("Antall feriepengedager i " + periodeNavn, antallFeriepengerDager);
                     regelsporing.put("Opptjeningsår i " + periodeNavn, åretsOverlapp.getFomDato().getYear());
 
@@ -95,9 +97,8 @@ class BeregnFeriepengerV2 extends LeafSpecification<BeregningsresultatFeriepenge
                                 .medOpptjeningÅr(åretsOverlapp.getFomDato().withMonth(12).withDayOfMonth(31))
                                 .medÅrsbeløp(feriepengerAndelPrÅr)
                                 .build(andel);
-                            String mottaker = andel.erBrukerMottaker() ? "Bruker." : "Arbeidsgiver.";
                             String andelId = andel.getArbeidsforhold() != null ? andel.getArbeidsgiverId() : andel.getAktivitetStatus().name();
-                            regelsporing.put("Feriepenger." + mottaker + andelId + " i " + periodeNavn, feriepengerAndelPrÅr);
+                            regelsporing.put("Feriepenger." + andel.getMottakerType() + "." + andelId + " i " + periodeNavn, feriepengerAndelPrÅr);
                         }
                     }
                 }
