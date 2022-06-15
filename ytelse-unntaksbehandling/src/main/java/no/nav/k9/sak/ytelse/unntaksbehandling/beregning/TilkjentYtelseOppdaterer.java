@@ -14,11 +14,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -61,6 +61,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     private VilkårResultatRepository vilkårResultatRepository;
     private ArbeidsgiverValidator arbeidsgiverValidator;
     private HistorikkTjenesteAdapter historikkAdapter;
+    private boolean enableFeriepengerPåTversAvSaker;
 
     TilkjentYtelseOppdaterer() {
         // for CDI proxy
@@ -69,13 +70,16 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     @Inject
     public TilkjentYtelseOppdaterer(BehandlingRepositoryProvider repositoryProvider,
                                     @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                    ArbeidsgiverValidator arbeidsgiverValidator, HistorikkTjenesteAdapter historikkAdapter) {
+                                    ArbeidsgiverValidator arbeidsgiverValidator, HistorikkTjenesteAdapter historikkAdapter,
+                                    @KonfigVerdi(value = "ENABLE_FERIEPENGER_PAA_TVERS_AV_SAKER_OG_PR_AAR", defaultVerdi = "true") boolean enableFeriepengerPåTversAvSaker
+    ) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.arbeidsgiverValidator = arbeidsgiverValidator;
         this.historikkAdapter = historikkAdapter;
+        this.enableFeriepengerPåTversAvSaker = enableFeriepengerPåTversAvSaker;
     }
 
     @Override
@@ -92,8 +96,11 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
 
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(nyttBeregningsresultat);
 
-        getFeriepengerTjeneste(behandling).ifPresent(tjeneste -> tjeneste.beregnFeriepenger(nyttBeregningsresultat));
-
+        if (enableFeriepengerPåTversAvSaker) {
+            getFeriepengerTjeneste(behandling).ifPresent(tjeneste -> tjeneste.beregnFeriepengerV2(nyttBeregningsresultat));
+        } else {
+            getFeriepengerTjeneste(behandling).ifPresent(tjeneste -> tjeneste.beregnFeriepenger(nyttBeregningsresultat));
+        }
         beregningsresultatRepository.lagre(behandling, nyttBeregningsresultat);
 
         opprettHistorikkinnslag(behandling, gammeltBeregningsresultat, nyttBeregningsresultat);

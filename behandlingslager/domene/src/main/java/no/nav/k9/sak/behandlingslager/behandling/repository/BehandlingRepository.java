@@ -251,6 +251,13 @@ public class BehandlingRepository {
         return optionalFirst(finnAlleAvsluttedeIkkeHenlagteBehandlinger(fagsakId));
     }
 
+    public Optional<Behandling> finnSisteAvsluttedeIkkeHenlagteYtelseBehandling(Long fagsakId) {
+        Objects.requireNonNull(fagsakId, FAGSAK_ID);
+        return finnAlleAvsluttedeIkkeHenlagteBehandlinger(fagsakId).stream()
+            .filter(Behandling::erYtelseBehandling)
+            .findFirst();
+    }
+
     public List<Behandling> finnAlleAvsluttedeIkkeHenlagteBehandlinger(Long fagsakId) {
         // BehandlingResultatType = Innvilget, endret, ikke endret, avslått.
         Objects.requireNonNull(fagsakId, FAGSAK_ID); // NOSONAR //$NON-NLS-1$

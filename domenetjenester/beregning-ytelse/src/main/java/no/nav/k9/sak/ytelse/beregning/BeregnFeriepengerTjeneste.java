@@ -3,11 +3,13 @@ package no.nav.k9.sak.ytelse.beregning;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
@@ -23,37 +25,46 @@ import no.nav.k9.sak.ytelse.beregning.adapter.AktivitetStatusMapper;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFeriepengerFraVLTilRegel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepenger;
+import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepengerV2;
+import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
 
 public abstract class BeregnFeriepengerTjeneste {
 
     private JacksonJsonConfig jacksonJsonConfig = new JacksonJsonConfig();
-    private int antallDagerFeriepenger;
-    private boolean feriepengeopptjeningForHelg;
-    private boolean ubegrensedeDagerVedRefusjon;
 
     protected BeregnFeriepengerTjeneste() {
         //NOSONAR
     }
 
-    public BeregnFeriepengerTjeneste(int antallDagerFeriepenger) {
-        this(antallDagerFeriepenger, false, false);
-    }
+    public abstract int antallDagerFeriepenger();
 
-    public BeregnFeriepengerTjeneste(int antallDagerFeriepenger, boolean feriepengeopptjeningForHelg, boolean ubegrensedeDagerVedRefusjon) {
-        this.ubegrensedeDagerVedRefusjon = ubegrensedeDagerVedRefusjon;
-        if (antallDagerFeriepenger == 0) {
-            throw new IllegalStateException("Injeksjon av antallDagerFeriepenger feilet. antallDagerFeriepenger kan ikke være 0.");
-        }
-        this.antallDagerFeriepenger = antallDagerFeriepenger;
-        this.feriepengeopptjeningForHelg = feriepengeopptjeningForHelg;
-    }
+    public abstract boolean feriepengeopptjeningForHelg();
+
+    public abstract boolean ubegrensedeDagerVedRefusjon();
 
     public void beregnFeriepenger(BeregningsresultatEntitet beregningsresultat) {
-
-        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, antallDagerFeriepenger, feriepengeopptjeningForHelg, ubegrensedeDagerVedRefusjon);
+        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, antallDagerFeriepenger(), feriepengeopptjeningForHelg(), ubegrensedeDagerVedRefusjon());
         String regelInput = toJson(regelModell);
 
         RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger();
+        Evaluation evaluation = regelBeregnFeriepenger.evaluer(regelModell);
+        String sporing = EvaluationSerializer.asJson(evaluation);
+
+        beregningsresultat.setFeriepengerRegelInput(regelInput);
+        beregningsresultat.setFeriepengerRegelSporing(sporing);
+
+        mapTilResultatFraRegelModell(beregningsresultat, regelModell);
+    }
+
+    public void beregnFeriepengerV2(BeregningsresultatEntitet beregningsresultat) {
+        beregnFeriepengerV2(beregningsresultat, LocalDateTimeline.empty());
+    }
+
+    public void beregnFeriepengerV2(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker) {
+        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker, antallDagerFeriepenger(), feriepengeopptjeningForHelg(), ubegrensedeDagerVedRefusjon());
+        String regelInput = toJson(regelModell);
+
+        RegelBeregnFeriepengerV2 regelBeregnFeriepenger = new RegelBeregnFeriepengerV2();
         Evaluation evaluation = regelBeregnFeriepenger.evaluer(regelModell);
         String sporing = EvaluationSerializer.asJson(evaluation);
 
