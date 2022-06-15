@@ -225,7 +225,7 @@ spec:
       value: "true"
     - name: ENABLE_DOKUMENTMOTTAK_PPN
       value: "true"
-    - name: KOMPLETTHET_MARKER_FRAVÆR
+    - name: KOMPLETTHET_MARKER_FRAVAER
       value: "false"
 
     # Audit logging

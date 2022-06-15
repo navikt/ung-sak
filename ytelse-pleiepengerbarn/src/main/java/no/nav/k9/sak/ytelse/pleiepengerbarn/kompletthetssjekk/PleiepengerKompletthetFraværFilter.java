@@ -44,7 +44,7 @@ public class PleiepengerKompletthetFraværFilter implements KompletthetFraværFi
 
     @Inject
     public PleiepengerKompletthetFraværFilter(@Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
-                                              @KonfigVerdi(value = "kompletthet.marker.fravær", defaultVerdi = "false") boolean markerFravær,
+                                              @KonfigVerdi(value = "kompletthet.marker.fravaer", defaultVerdi = "false") boolean markerFravær,
                                               PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste) {
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.markerFravær = markerFravær;
