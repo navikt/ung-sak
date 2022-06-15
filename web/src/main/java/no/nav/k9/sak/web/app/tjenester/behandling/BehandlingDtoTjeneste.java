@@ -83,6 +83,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.los.LosTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.SaksbehandlerRestTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
@@ -507,11 +508,11 @@ public class BehandlingDtoTjeneste {
     }
 
     private List<ResourceLink> lagLosLink(Behandling behandling) {
-        final var LOS_PATH = "/k9/los/api";
+        var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
 
         List<ResourceLink> links = new ArrayList<>();
-        links.add(ResourceLink.get(LOS_PATH + "/saksbehandler/merknad/" + behandling.getUuid(), "los-hente-merknad"));
-        links.add(ResourceLink.post(LOS_PATH + "/saksbehandler/merknad/" + behandling.getUuid(), "los-lagre-merknad", null));
+        links.add(getFraMap(LosTjeneste.MERKNAD_PATH, "los-hente-merknad", queryParams));
+        links.add(post(LosTjeneste.MERKNAD_PATH + "/" + behandling.getUuid(), "los-lagre-merknad", null));
         return links;
     }
 
