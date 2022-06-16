@@ -63,9 +63,7 @@ public class LosTjeneste {
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response postMerknad(@Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MerknadEndretDto merknadEndret) {
-        merknadEndret.saksbehandlerIdent = getCurrentUserId();
-
-        var merknad = losKlient.lagreMerknad(merknadEndret.behandlingUuid, merknadEndret);
+        var merknad = losKlient.lagreMerknad(merknadEndret.overstyrSaksbehandlerIdent(getCurrentUserId()));
         var response = (merknad == null) ? Response.noContent() : Response.ok(merknad);
         return response.build();
     }

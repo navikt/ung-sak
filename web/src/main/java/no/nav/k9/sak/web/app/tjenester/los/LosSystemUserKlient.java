@@ -31,9 +31,9 @@ public class LosSystemUserKlient {
         this.endpoint = endpoint;
     }
 
-    public String lagreMerknad(UUID behandlingUUID, MerknadEndretDto merknad) {
+    public String lagreMerknad(MerknadEndretDto merknad) {
         try {
-            var uri = toUri("/saksbehandler/oppgaver/"+behandlingUUID.toString()+"/merknad");
+            var uri = toUri("/saksbehandler/oppgaver/"+merknad.getBehandlingUuid().toString()+"/merknad");
             return restKlient.post(uri, merknad);
         } catch (Exception e) {
             throw LosSystemUserKlient.RestTjenesteFeil.FEIL.feilVedLagringAvMerknad(e.getMessage(), e).toException();
