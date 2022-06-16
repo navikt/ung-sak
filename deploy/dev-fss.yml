@@ -192,8 +192,6 @@ spec:
       value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "true"
-    - name: K9TILBAKE_AKTIVERT
-      value: "true"
     - name: ENABLE_STONADSTATISTIKK
       value: "true"
     - name: MAP_ALLE_KRAV
@@ -215,6 +213,10 @@ spec:
     - name: ENABLE_DOKUMENTMOTTAK_PPN
       value: "true"
     - name: KOMPLETTHET_MARKER_FRAVAER
+      value: "true"
+
+    # Konfigurasjoner
+    - name: K9TILBAKE_AKTIVERT
       value: "true"
 
     # Audit logging
