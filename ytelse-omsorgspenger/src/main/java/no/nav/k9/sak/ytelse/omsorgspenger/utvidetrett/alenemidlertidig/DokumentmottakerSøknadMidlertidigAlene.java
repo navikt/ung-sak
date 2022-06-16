@@ -115,16 +115,14 @@ public class DokumentmottakerSøknadMidlertidigAlene implements Dokumentmottaker
     }
 
     private DatoIntervallEntitet oversettSøknadsperiode(Periode innsendtSøknadsperiode, Søknad søknad) {
-        DatoIntervallEntitet tolketSøknadsperiode;
         if (innsendtSøknadsperiode == null) {
             //innsending helt uten periode bør antagelig fjernes, men brukes i dag fra søknadsdialogen
-            tolketSøknadsperiode = DatoIntervallEntitet.fraOgMed(søknad.getMottattDato().toLocalDate());
+            return DatoIntervallEntitet.fraOgMed(søknad.getMottattDato().toLocalDate());
         } else if (innsendtSøknadsperiode.getTilOgMed() == null) {
-            tolketSøknadsperiode = DatoIntervallEntitet.fraOgMed(innsendtSøknadsperiode.getFraOgMed());
+            return DatoIntervallEntitet.fraOgMed(innsendtSøknadsperiode.getFraOgMed());
         } else {
-            tolketSøknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(innsendtSøknadsperiode.getFraOgMed(), innsendtSøknadsperiode.getTilOgMed());
+            return DatoIntervallEntitet.fraOgMedTilOgMed(innsendtSøknadsperiode.getFraOgMed(), innsendtSøknadsperiode.getTilOgMed());
         }
-        return tolketSøknadsperiode;
     }
 
     private Språkkode getSpråkValg(Språk språk) {
