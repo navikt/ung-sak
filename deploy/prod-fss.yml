@@ -193,8 +193,6 @@ spec:
       value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
-    - name: K9TILBAKE_AKTIVERT
-      value: "true"
     - name: ENABLE_STONADSTATISTIKK
       value: "true"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
