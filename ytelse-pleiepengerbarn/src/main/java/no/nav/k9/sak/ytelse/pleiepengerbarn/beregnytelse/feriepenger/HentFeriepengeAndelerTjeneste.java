@@ -34,7 +34,7 @@ public class HentFeriepengeAndelerTjeneste {
         LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> resultat = LocalDateTimeline.empty();
 
         List<Behandling> sisteYtelsebehanlingerForFagsakene = fagsaker.stream()
-            .flatMap(fagsak -> behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelseBehandling(fagsak.getId()).stream())
+            .flatMap(fagsak -> behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId()).stream())
             .toList();
 
         for (Behandling behandling : sisteYtelsebehanlingerForFagsakene) {
