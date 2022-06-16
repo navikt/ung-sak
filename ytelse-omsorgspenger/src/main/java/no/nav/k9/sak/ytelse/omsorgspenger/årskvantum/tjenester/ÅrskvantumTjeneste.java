@@ -290,12 +290,10 @@ public class ÅrskvantumTjeneste {
             var utfallInngangsvilkår = utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode);
             var avvikImSøknad = utedAvvikImSøknad(wrappedOppgittFraværPeriode);
             var uttaksperiodeOmsorgspenger = new FraværPeriode(arbeidsforhold,
-                arbeidforholdStatus,
                 periode,
                 fraværPeriode.getFraværPerDag(),
                 true,
                 kreverRefusjon,
-                utfallInngangsvilkår,
                 wrappedOppgittFraværPeriode.getInnsendingstidspunkt(),
                 utledFraværÅrsak(fraværPeriode),
                 utledSøknadÅrsak(fraværPeriode),
