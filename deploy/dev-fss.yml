@@ -192,8 +192,6 @@ spec:
       value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "true"
-    - name: ENABLE_STONADSTATISTIKK
-      value: "true"
     - name: MAP_ALLE_KRAV
       value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
