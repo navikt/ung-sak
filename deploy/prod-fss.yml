@@ -201,8 +201,6 @@ spec:
       value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
       value: "true"
-    - name: ENABLE_DOKUMENTMOTTAK_PPN
-      value: "true"
     - name: KOMPLETTHET_MARKER_FRAVAER
       value: "false"
 
