@@ -196,8 +196,6 @@ spec:
       value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
       value: "true"
-    - name: PSB_INFOTRYGD_MIGRERING
-      value: "true"
     - name: FORLENGELSE_MEDLEMSKAP_ENABLET
       value: "true"
     - name: PSB_UTVIDE_VED_DODSFALL
