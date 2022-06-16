@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -51,16 +50,6 @@ class SøknadOversetter {
         final List<Periode> søknadsperioder = hentAlleSøknadsperioder(ytelse);
         final var maksSøknadsperiode = finnMaksperiode(søknadsperioder);
 
-        // Utgår for K9-ytelsene?
-        // .medBegrunnelseForSenInnsending(wrapper.getBegrunnelseForSenSoeknad())
-        // .medTilleggsopplysninger(wrapper.getTilleggsopplysninger())
-
-        // TODO: Stopp barn som mangler norskIdentitetsnummer i k9-punsj ... eller støtt fødselsdato her?
-
-        // TODO etter18feb: Fjern denne fra entitet og DB:
-        final boolean elektroniskSøknad = false;
-
-        // TODO: Hvis vi skal beholde SøknadEntitet trenger vi å lagre SøknadID og sikre idempotens med denne.
         // Felles Pleiepenger
         søknadPersisterer.lagreSøknadEntitet(søknad, journalpostId, behandlingId, maksSøknadsperiode, mottattDato);
         søknadPersisterer.lagreMedlemskapinfo(ytelse.getBosteder(), behandlingId, mottattDato);
