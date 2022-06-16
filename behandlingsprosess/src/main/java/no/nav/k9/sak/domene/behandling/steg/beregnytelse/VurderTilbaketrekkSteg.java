@@ -33,7 +33,6 @@ public class VurderTilbaketrekkSteg implements BehandlingSteg {
     private AksjonspunktutlederTilbaketrekk aksjonspunktutlederTilbaketrekk;
     private BehandlingRepository behandlingRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
-    private boolean disableVurderTilbaketrekk;
 
     VurderTilbaketrekkSteg() {
         // for CDI proxy
@@ -42,12 +41,10 @@ public class VurderTilbaketrekkSteg implements BehandlingSteg {
     @Inject
     public VurderTilbaketrekkSteg(AksjonspunktutlederTilbaketrekk aksjonspunktutlederTilbaketrekk,
                                   BehandlingRepository behandlingRepository,
-                                  BeregningsresultatRepository beregningsresultatRepository,
-                                  @KonfigVerdi(value = "DISABLE_VURDER_TILBAKETREKK", required = false, defaultVerdi = "true") Boolean disableVurderTilbaketrekk) {
+                                  BeregningsresultatRepository beregningsresultatRepository) {
         this.aksjonspunktutlederTilbaketrekk = aksjonspunktutlederTilbaketrekk;
         this.behandlingRepository = behandlingRepository;
         this.beregningsresultatRepository = beregningsresultatRepository;
-        this.disableVurderTilbaketrekk = disableVurderTilbaketrekk;
     }
 
     @Override
@@ -55,16 +52,11 @@ public class VurderTilbaketrekkSteg implements BehandlingSteg {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
-        if (disableVurderTilbaketrekk) {
-            if (bleLøstIForrigeBehandling(ref)) {
-                // Kopierer valget som ble tatt sist og oppretter ikke aksjonspunkt
-                kopierLøsningFraForrigeBehandling(ref);
-            }
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        } else {
-            List<AksjonspunktResultat> aksjonspunkter = aksjonspunktutlederTilbaketrekk.utledAksjonspunkterFor(new AksjonspunktUtlederInput(ref));
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter);
+        if (bleLøstIForrigeBehandling(ref)) {
+            // Kopierer valget som ble tatt sist og oppretter ikke aksjonspunkt
+            kopierLøsningFraForrigeBehandling(ref);
         }
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
     private boolean bleLøstIForrigeBehandling(BehandlingReferanse ref) {
