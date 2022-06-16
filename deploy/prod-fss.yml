@@ -154,6 +154,8 @@ spec:
       value: https://k9-infotrygd.intern.nav.no
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.nais.adeo.no
+    - name: K9_LOS_URL
+      value: http://k9-los-api.k9saksbehandling/api
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
