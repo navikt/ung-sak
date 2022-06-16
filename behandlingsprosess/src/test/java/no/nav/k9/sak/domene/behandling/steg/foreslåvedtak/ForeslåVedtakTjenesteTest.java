@@ -102,7 +102,7 @@ public class ForeslåVedtakTjenesteTest {
         when(overlappendeYtelserTjeneste.finnOverlappendeYtelser(any(), anySet())).thenReturn(Map.of());
 
         SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste = new SjekkMotAndreYtelserTjeneste(historikkRepository, oppgaveTjeneste, overlappendeYtelserTjeneste);
-        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, false, sjekkMotAndreYtelserTjeneste, foreslåVedtakManueltUtledere);
+        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, sjekkMotAndreYtelserTjeneste, foreslåVedtakManueltUtledere);
     }
 
     @Test

@@ -2,9 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.foreslåvedtak;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +11,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -33,8 +30,6 @@ class ForeslåVedtakTjeneste {
     private SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-
-    private Boolean deaktiverTotrinnSelektivt;
     private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
 
     protected ForeslåVedtakTjeneste() {
@@ -44,10 +39,8 @@ class ForeslåVedtakTjeneste {
     @Inject
     ForeslåVedtakTjeneste(FagsakRepository fagsakRepository,
                           BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                          @KonfigVerdi(value = "TOTRINN_TEMP_DEAKTIVERT", defaultVerdi = "false") Boolean deaktiverTotrinnSelektivt,
                           SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste,
                           @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere) {
-        this.deaktiverTotrinnSelektivt = Objects.requireNonNull(deaktiverTotrinnSelektivt, "deaktiverTotrinnSelektivt");
         this.sjekkMotAndreYtelserTjeneste = sjekkMotAndreYtelserTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -112,10 +105,9 @@ class ForeslåVedtakTjeneste {
         var totrinn = !behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL) &&
             behandling.harAksjonspunktMedTotrinnskontroll();
 
-        if (totrinn && deaktiverTotrinnSelektivt) {
+        if (totrinn) {
             var totrinnAks = behandling.getAksjonspunkter().stream()
-                .filter(a -> a.isToTrinnsBehandling())
-                .collect(Collectors.toList());
+                .filter(Aksjonspunkt::isToTrinnsBehandling).toList();
             return !totrinnAks.isEmpty();
         }
         return totrinn;
