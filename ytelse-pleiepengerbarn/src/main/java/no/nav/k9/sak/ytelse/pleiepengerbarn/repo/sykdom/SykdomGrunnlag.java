@@ -21,6 +21,7 @@ import jakarta.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
+//TODO: Sykdom_Behandling_Anvendte_Data?
 @Entity(name = "SykdomGrunnlag")
 @Table(name = "SYKDOM_GRUNNLAG")
 public class SykdomGrunnlag {
@@ -32,12 +33,15 @@ public class SykdomGrunnlag {
     @Column(name = "SYKDOM_GRUNNLAG_UUID", nullable = false)
     private UUID sykdomGrunnlagUUID;
 
+    //TODO: Deprekere, hente data rett fra gr_soeknadsperiode i stedet.
     @OneToMany(mappedBy = "sykdomGrunnlag", cascade = CascadeType.ALL)
     private List<SykdomSøktPeriode> søktePerioder = new ArrayList<>();
 
+    //TODO: Hva skiller denne fra relevanteSøknadsperioder? Kan vi kverke denne også?
     @OneToMany(mappedBy = "sykdomGrunnlag", cascade = CascadeType.ALL)
     private List<SykdomRevurderingPeriode> revurderingPerioder = new ArrayList<>();
 
+    //TODO: AnvendteVurderinger?
     @OneToMany()
     @JoinTable(
         name="SYKDOM_GRUNNLAG_VURDERING",
@@ -48,12 +52,14 @@ public class SykdomGrunnlag {
 
     @OneToMany()
     @JoinTable(
-        name="SYKDOM_GRUNNLAG_DOKUMENT",
+        name="SYKDOM_GRUNNLAG_DOKUMENT", //TODO: Et navn som forklarer relasjonen? Er det subsettet av dokumenter som
+        // blir klassifisert som legeerklæringer i denne behandlingen? I så fall bør vi vel heller peke på sykdom_dokument_informasjon?
+        // Utfra strukturen, kan det tolkes som alle dokumenter som er klassifisert som legeerklæringer til og med denne behandlingen..?
         joinColumns = @JoinColumn( name="SYKDOM_GRUNNLAG_ID"),
         inverseJoinColumns = @JoinColumn( name="SYKDOM_DOKUMENT_ID")
     )
     private List<SykdomDokument> godkjenteLegeerklæringer = new ArrayList<>();
-    
+
     @OneToOne
     @JoinColumn(name = "SYKDOM_INNLEGGELSER_ID")
     private SykdomInnleggelser innleggelser;
@@ -122,7 +128,7 @@ public class SykdomGrunnlag {
     public void setVurderinger(List<SykdomVurderingVersjon> vurderinger) {
         this.vurderinger = vurderinger;
     }
-    
+
     public List<SykdomDokument> getGodkjenteLegeerklæringer() {
         if (godkjenteLegeerklæringer == null) {
             return List.of();
