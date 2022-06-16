@@ -14,7 +14,7 @@
     <name>K9SAK :: Webapp</name>
 
     <properties>
-        <simple.client.version>0.15.0</simple.client.version>
+        <simple.client.version>0.16.0</simple.client.version>
         <swagger-ui.version>4.11.1</swagger-ui.version>
     </properties>
 
