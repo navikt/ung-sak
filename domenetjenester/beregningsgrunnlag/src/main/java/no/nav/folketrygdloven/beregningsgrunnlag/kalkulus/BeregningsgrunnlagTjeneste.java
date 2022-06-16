@@ -31,7 +31,6 @@ import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.BeregningsgrunnlagPrReferanse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -61,21 +60,18 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     private final HentReferanserTjeneste hentReferanserTjeneste;
     private final VilkårTjeneste vilkårTjeneste;
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
-    private final boolean enableForlengelse;
 
     @Inject
     public BeregningsgrunnlagTjeneste(@Any Instance<KalkulusApiTjeneste> kalkulusTjenester,
                                       VilkårResultatRepository vilkårResultatRepository,
                                       BeregningPerioderGrunnlagRepository grunnlagRepository,
                                       VilkårTjeneste vilkårTjeneste,
-                                      VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                      @KonfigVerdi(value = "forlengelse.beregning.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
+                                      VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         this.kalkulusTjenester = kalkulusTjenester;
         this.grunnlagRepository = grunnlagRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.hentReferanserTjeneste = new HentReferanserTjeneste(grunnlagRepository, vilkårResultatRepository);
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
-        this.enableForlengelse = enableForlengelse;
     }
 
 
@@ -234,7 +230,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             Optional<InputOverstyringPeriode> inputOverstyring = finnInputOverstyring(referanse, stp);
             return new BeregnInput(bgRef,
                 vilkårsperiode.getPeriode(),
-                enableForlengelse && vilkårsperiode.erForlengelse(),
+                vilkårsperiode.erForlengelse(),
                 originalReferanserMap.get(bgRef),
                 inputOverstyring.orElse(null));
         }).collect(Collectors.toList());
@@ -342,7 +338,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     private Set<DatoIntervallEntitet> finnForlengelseperioder(BehandlingReferanse ref, Vilkår vilkår) {
-        var filter = vilkårPeriodeFilterProvider.getFilter(ref, enableForlengelse);
+        var filter = vilkårPeriodeFilterProvider.getFilter(ref, true);
         var forlengelsePerioder = filter.filtrerPerioder(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).collect(Collectors.toSet()), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
             .stream().filter(PeriodeTilVurdering::erForlengelse)
             .map(PeriodeTilVurdering::getPeriode)

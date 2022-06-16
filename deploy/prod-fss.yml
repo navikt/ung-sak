@@ -199,8 +199,6 @@ spec:
       value: "true"
     - name: K9TILBAKE_AKTIVERT
       value: "true"
-    - name: ENABLE_UTLEDET_ENDRINGSPERIODE
-      value: "true"
     - name: ENABLE_STONADSTATISTIKK
       value: "true"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
@@ -211,17 +209,11 @@ spec:
       value: "true"
     - name: PSB_INFOTRYGD_MIGRERING
       value: "true"
-    - name: FORLENGELSE_BEREGNING_ENABLET
-      value: "true"
-    - name: ENABLE_SAMTIDIG_UTTAK_RELEVANTSJEKK
-      value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
       value: "true"
     - name: PSB_TREKKE_MIGRERT_PERIODE
-      value: "true"
-    - name: UTSATT_BEHANDLING_AV_PERIODE_AKTIVERT
       value: "true"
     - name: ENABLE_DOKUMENTMOTTAK_PPN
       value: "true"

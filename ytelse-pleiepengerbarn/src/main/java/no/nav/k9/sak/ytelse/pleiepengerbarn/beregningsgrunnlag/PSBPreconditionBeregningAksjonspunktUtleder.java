@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -36,7 +35,6 @@ import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.opptjening.PSBOppgittOpptjeningFilter;
@@ -45,19 +43,16 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.opptjening.PSBOppgittOpptjeningFilte
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class PSBPreconditionBeregningAksjonspunktUtleder implements PreconditionBeregningAksjonspunktUtleder {
 
+    private final PåTversAvHelgErKantIKantVurderer kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private PSBOpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste;
     private FagsakRepository fagsakRepository;
     private PSBOppgittOpptjeningFilter oppgittOpptjeningFilter;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private VilkårPeriodeFilterProvider periodeFilterProvider;
-
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private BehandlingRepository behandlingRepository;
-
     private boolean toggleMigrering;
-    private boolean enableForlengelse;
-    private final PåTversAvHelgErKantIKantVurderer kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
 
     public PSBPreconditionBeregningAksjonspunktUtleder() {
@@ -72,8 +67,7 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
                                                        VilkårPeriodeFilterProvider periodeFilterProvider,
                                                        BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                                        BehandlingRepository behandlingRepository,
-                                                       @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering,
-                                                       @KonfigVerdi(value = "forlengelse.beregning.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
+                                                       @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering) {
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.oppgittOpptjeningFilter = oppgittOpptjeningFilter;
@@ -83,7 +77,6 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         this.behandlingRepository = behandlingRepository;
         this.toggleMigrering = toggleMigrering;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.enableForlengelse = enableForlengelse;
     }
 
     @Override
@@ -122,9 +115,10 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         return Collections.emptyList();
     }
 
-    /** Vi oppretter ikke aksjonspunkt dersom det er en revurdering som ikke er manuelt opprettet og vi allerede har kopiert overstyrt input fra forrige behandling for alle perioder til vurdering
+    /**
+     * Vi oppretter ikke aksjonspunkt dersom det er en revurdering som ikke er manuelt opprettet og vi allerede har kopiert overstyrt input fra forrige behandling for alle perioder til vurdering
      *
-     * @param param inneholder informasjon om behandling
+     * @param param                             inneholder informasjon om behandling
      * @param eksisterendeMigreringTilVurdering eksisterende migreringer til vurdering
      * @return
      */
@@ -143,9 +137,7 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
 
     private NavigableSet<DatoIntervallEntitet> finnPerioderTilVurdering(AksjonspunktUtlederInput param) {
         var periodeFilter = periodeFilterProvider.getFilter(param.getRef(), false);
-        if (enableForlengelse) {
-            periodeFilter.ignorerForlengelseperioder();
-        }
+        periodeFilter.ignorerForlengelseperioder();
         periodeFilter.ignorerAvslåttePerioderInkludertKompletthet();
         return beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(param.getRef(), periodeFilter);
     }

@@ -31,17 +31,14 @@ public class BeregningStegTjeneste {
     private final BeregningTjeneste kalkulusTjeneste;
     private final BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
-    private final boolean enableForlengelse;
 
     @Inject
     public BeregningStegTjeneste(BeregningTjeneste kalkulusTjeneste,
                                  BeregningsgrunnlagVilkårTjeneste vilkårTjeneste,
-                                 VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                 @KonfigVerdi(value = "forlengelse.beregning.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
+                                 VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.vilkårTjeneste = vilkårTjeneste;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
-        this.enableForlengelse = enableForlengelse;
     }
 
 
@@ -54,14 +51,12 @@ public class BeregningStegTjeneste {
     }
 
     public void fortsettBeregningInkludertForlengelser(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
-        fortsettBeregning(ref, stegType, resultatCallback, vilkårPeriodeFilterProvider.getFilter(ref, enableForlengelse));
+        fortsettBeregning(ref, stegType, resultatCallback, vilkårPeriodeFilterProvider.getFilter(ref, true));
     }
 
     public void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
-        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref, enableForlengelse);
-        if (enableForlengelse) {
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref, true);
             periodeFilter.ignorerForlengelseperioder();
-        }
         fortsettBeregning(ref, stegType, resultatCallback, periodeFilter);
     }
 

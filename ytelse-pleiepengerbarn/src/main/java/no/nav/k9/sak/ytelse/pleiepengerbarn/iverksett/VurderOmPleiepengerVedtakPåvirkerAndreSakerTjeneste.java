@@ -76,7 +76,6 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private BehandlingModellRepository behandlingModellRepository;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
-    private Boolean aktivertUtsattBehandlingAvPeriode;
 
     VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste() {
     }
@@ -94,8 +93,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                                                                SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                                                BehandlingModellRepository behandlingModellRepository,
                                                                UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                                               @KonfigVerdi(value = "utsatt.behandling.av.periode.aktivert", defaultVerdi = "false") Boolean aktivertUtsattBehandlingAvPeriode) {
+                                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -109,7 +107,6 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         this.behandlingModellRepository = behandlingModellRepository;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
-        this.aktivertUtsattBehandlingAvPeriode = aktivertUtsattBehandlingAvPeriode;
     }
 
     @Override
@@ -141,7 +138,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         }
         var utsattBehandlingAvPeriode = utsattBehandlingAvPeriodeRepository.hentGrunnlag(vedtattBehandling.getId()).map(UtsattBehandlingAvPeriode::getPerioder).orElse(Set.of());
 
-        if (aktivertUtsattBehandlingAvPeriode && !utsattBehandlingAvPeriode.isEmpty()) {
+        if (!utsattBehandlingAvPeriode.isEmpty()) {
             var perioderSomErUtsatt = utsattBehandlingAvPeriode.stream().map(UtsattPeriode::getPeriode).collect(Collectors.toCollection(TreeSet::new));
             result.add(new SakMedPeriode(fagsak.getSaksnummer(), perioderSomErUtsatt));
             log.info("Sak='{}' har utsatte perioder som må behandles", fagsak.getSaksnummer());

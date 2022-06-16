@@ -99,8 +99,7 @@ public class PleiepengerBeregneYtelseStegTest {
             repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository,
             new VilkårTjeneste(behandlingRepository,
                 null, null, repositoryProvider.getVilkårResultatRepository(), repositoryProvider.getFagsakRepository()),
-            new VilkårPeriodeFilterProvider(repositoryProvider.getFagsakRepository(), repositoryProvider.getVilkårResultatRepository(), new UnitTestLookupInstanceImpl<>(null)),
-            true);
+            new VilkårPeriodeFilterProvider(repositoryProvider.getFagsakRepository(), repositoryProvider.getVilkårResultatRepository(), new UnitTestLookupInstanceImpl<>(null)));
         beregningsresultat = BeregningsresultatEntitet.builder()
             .medRegelInput("regelInput")
             .medRegelSporing("regelSporing")

@@ -24,7 +24,6 @@ class SøknadOversetter {
 
     private TpsTjeneste tpsTjeneste;
     private SøknadPersisterer søknadPersisterer;
-    private boolean skalBrukeUtledetEndringsperiode;
 
     SøknadOversetter() {
         // for CDI proxy
@@ -32,11 +31,9 @@ class SøknadOversetter {
 
     @Inject
     SøknadOversetter(TpsTjeneste tpsTjeneste,
-                     SøknadPersisterer søknadPersisterer,
-                     @KonfigVerdi(value = "ENABLE_UTLEDET_ENDRINGSPERIODE", defaultVerdi = "false") boolean skalBrukeUtledetEndringsperiode) {
+                     SøknadPersisterer søknadPersisterer) {
         this.tpsTjeneste = tpsTjeneste;
         this.søknadPersisterer = søknadPersisterer;
-        this.skalBrukeUtledetEndringsperiode = skalBrukeUtledetEndringsperiode;
     }
 
     void persister(Søknad søknad, JournalpostId journalpostId, Behandling behandling) {
@@ -82,7 +79,7 @@ class SøknadOversetter {
 
     private List<Periode> hentAlleSøknadsperioder(PleiepengerSyktBarn ytelse) {
         final LocalDateTimeline<Boolean> kompletteSøknadsperioderTidslinje = tilTidslinje(ytelse.getSøknadsperiodeList());
-        final var endringsperioder = skalBrukeUtledetEndringsperiode ? ytelse.getUtledetEndringsperiode() : ytelse.getEndringsperiode();
+        final var endringsperioder = ytelse.getEndringsperiode();
         final LocalDateTimeline<Boolean> endringssøknadsperioderTidslinje = tilTidslinje(endringsperioder);
         final LocalDateTimeline<Boolean> søknadsperioder = kompletteSøknadsperioderTidslinje.union(endringssøknadsperioderTidslinje, StandardCombinators::coalesceLeftHandSide).compress();
         return søknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());

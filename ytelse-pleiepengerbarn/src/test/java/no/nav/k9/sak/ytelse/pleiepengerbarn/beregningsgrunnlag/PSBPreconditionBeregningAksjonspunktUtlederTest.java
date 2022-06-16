@@ -126,7 +126,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         utleder = new PSBPreconditionBeregningAksjonspunktUtleder(iayTjeneste, opptjeningForBeregningTjeneste,
             fagsakRepository, oppgittOpptjeningFilter,
             perioderTilVurderingTjeneste,
-            filterProvider, beregningPerioderGrunnlagRepository, behandlingRepository, true, true);
+            filterProvider, beregningPerioderGrunnlagRepository, behandlingRepository, true);
     }
 
     @Test
@@ -134,7 +134,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         utleder = new PSBPreconditionBeregningAksjonspunktUtleder(iayTjeneste, opptjeningForBeregningTjeneste,
             fagsakRepository, oppgittOpptjeningFilter,
             perioderTilVurderingTjeneste,
-            filterProvider, beregningPerioderGrunnlagRepository, behandlingRepository, false, true);
+            filterProvider, beregningPerioderGrunnlagRepository, behandlingRepository, false);
         var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
 
         assertThat(aksjonspunkter.size()).isEqualTo(0);

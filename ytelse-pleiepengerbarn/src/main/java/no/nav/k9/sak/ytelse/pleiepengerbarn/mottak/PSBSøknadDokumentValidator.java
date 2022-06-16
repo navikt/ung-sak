@@ -4,13 +4,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -31,7 +29,6 @@ public class PSBSøknadDokumentValidator implements DokumentValidator {
     private SøknadParser søknadParser;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private BehandlingRepository behandlingRepository;
-    private boolean skalBrukeUtledetEndringsperiode;
 
     PSBSøknadDokumentValidator() {
         // CDI
@@ -40,12 +37,10 @@ public class PSBSøknadDokumentValidator implements DokumentValidator {
     @Inject
     public PSBSøknadDokumentValidator(SøknadParser søknadParser,
                                       SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-                                      BehandlingRepository behandlingRepository,
-                                      @KonfigVerdi(value = "ENABLE_UTLEDET_ENDRINGSPERIODE", defaultVerdi = "false") boolean skalBrukeUtledetEndringsperiode) {
+                                      BehandlingRepository behandlingRepository) {
         this.søknadParser = søknadParser;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.behandlingRepository = behandlingRepository;
-        this.skalBrukeUtledetEndringsperiode = skalBrukeUtledetEndringsperiode;
     }
 
     @Override
@@ -63,21 +58,17 @@ public class PSBSøknadDokumentValidator implements DokumentValidator {
         }
         var søknad = søknadParser.parseSøknad(mottattDokument);
 
-        if (skalBrukeUtledetEndringsperiode) {
-            // Kan ikke hente behandlingId fra mottatt dokument siden dokumentet ikke er knyttet til behandlingen enda
-            // Det skjer først når det er gyldig
-            var endringsperioder = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(mottattDokument.getFagsakId())
-                .map(this::utledEndrignsperioder)
-                .orElse(List.of());
+        // Kan ikke hente behandlingId fra mottatt dokument siden dokumentet ikke er knyttet til behandlingen enda
+        // Det skjer først når det er gyldig
+        var endringsperioder = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(mottattDokument.getFagsakId())
+            .map(this::utledEndrignsperioder)
+            .orElse(List.of());
 
-            if (!endringsperioder.isEmpty()) {
-                log.info("Fant [{}] som gyldige endringsperioder ", endringsperioder);
-            }
-
-            new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad, endringsperioder);
-        } else {
-            new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad);
+        if (!endringsperioder.isEmpty()) {
+            log.info("Fant [{}] som gyldige endringsperioder ", endringsperioder);
         }
+
+        new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad, endringsperioder);
     }
 
     private List<Periode> utledEndrignsperioder(Behandling behandling) {
