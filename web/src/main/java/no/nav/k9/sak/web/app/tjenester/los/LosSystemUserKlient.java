@@ -26,7 +26,7 @@ public class LosSystemUserKlient {
     protected LosSystemUserKlient() { }
 
     @Inject
-    public LosSystemUserKlient(SystemUserOidcRestClient restKlient, @KonfigVerdi(value = "k9.los.url") URI endpoint) {
+    public LosSystemUserKlient(SystemUserOidcRestClient restKlient, @KonfigVerdi(value = "k9.los.url", defaultVerdi = "http://k9-los-api.k9saksbehandling/api") URI endpoint) {
         this.restKlient = restKlient;
         this.endpoint = endpoint;
     }
