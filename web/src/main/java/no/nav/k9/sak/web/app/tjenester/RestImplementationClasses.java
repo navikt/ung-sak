@@ -55,7 +55,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering.RapporteringRest
 import no.nav.k9.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.los.LosTjeneste;
+import no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.punsj.PunsjRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.register.RedirectToRegisterRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.InitielleLinksRestTjeneste;
@@ -115,7 +115,7 @@ public class RestImplementationClasses {
         classes.add(PunsjRestTjeneste.class);
         classes.add(OverlapendeYtelserRestTjeneste.class);
         classes.add(RedirectToRegisterRestTjeneste.class);
-        classes.add(LosTjeneste.class);
+        classes.add(LosRestTjeneste.class);
 
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);

@@ -3,7 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.los;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
-import static no.nav.k9.sak.web.app.tjenester.los.LosTjeneste.BASE_PATH;
+import static no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste.BASE_PATH;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,7 +28,7 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 @ApplicationScoped
 @Path(BASE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
-public class LosTjeneste {
+public class LosRestTjeneste {
 
     public static final String BASE_PATH = "/los";
     public static final String MERKNAD = "/merknad";
@@ -36,12 +36,12 @@ public class LosTjeneste {
 
     private LosSystemUserKlient losKlient;
 
-    public LosTjeneste() {
+    public LosRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public LosTjeneste(LosSystemUserKlient losKlient) {
+    public LosRestTjeneste(LosSystemUserKlient losKlient) {
         this.losKlient = losKlient;
     }
 
