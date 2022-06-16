@@ -307,7 +307,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                         + "  f.id = b.fagsak_id "
                         + ") "
                         + "WHERE d.type = 'PLEIEPENGER_SOKNAD' "
-                        + "  AND d.mottatt_dato >= to_date('2022-05-01', 'YYYY-MM-DD')");
+                        + "  AND d.mottatt_dato >= to_date('2022-05-01', 'YYYY-MM-DD')"
+                        + "  AND d.mottatt_dato <= to_date('2022-06-03', 'YYYY-MM-DD')");
         q.setHint("javax.persistence.query.timeout", 5 * 60 * 1000); // 5 minutter
         
         final List<String> saksnumre = new ArrayList<>();
@@ -342,6 +343,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             return a.getArbeidstidInfo().getPerioder().entrySet().stream().anyMatch(tid ->
                 tid.getValue().getJobberNormaltTimerPerDag() != null
                 && tid.getValue().getJobberNormaltTimerPerDag().equals(Duration.ofSeconds(0L))
+                && tid.getValue().getFaktiskArbeidTimerPerDag() != null
+                && tid.getValue().getFaktiskArbeidTimerPerDag().equals(Duration.ofSeconds(0L))
                 && erIkkeHelg(tid.getKey())
             );
         });
