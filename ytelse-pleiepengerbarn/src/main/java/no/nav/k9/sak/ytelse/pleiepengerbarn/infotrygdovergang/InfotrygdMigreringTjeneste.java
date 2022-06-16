@@ -63,7 +63,6 @@ public class InfotrygdMigreringTjeneste {
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private InfotrygdService infotrygdService;
-    private boolean støtterTrukketPeriodeToggle;
 
     public InfotrygdMigreringTjeneste() {
     }
@@ -72,15 +71,13 @@ public class InfotrygdMigreringTjeneste {
     public InfotrygdMigreringTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                       @BehandlingTypeRef @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                       VilkårResultatRepository vilkårResultatRepository, FagsakRepository fagsakRepository,
-                                      BehandlingRepository behandlingRepository, InfotrygdService infotrygdService,
-                                      @KonfigVerdi(value = "PSB_TREKKE_MIGRERT_PERIODE", defaultVerdi = "false") boolean støtterTrukketPeriodeToggle) {
+                                      BehandlingRepository behandlingRepository, InfotrygdService infotrygdService) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.infotrygdService = infotrygdService;
-        this.støtterTrukketPeriodeToggle = støtterTrukketPeriodeToggle;
     }
 
     public List<AksjonspunktResultat> utledAksjonspunkter(BehandlingReferanse ref) {
@@ -222,7 +219,7 @@ public class InfotrygdMigreringTjeneste {
         var migreringUtenSøknad = eksisterendeInfotrygdMigreringer.stream()
             .map(SakInfotrygdMigrering::getSkjæringstidspunkt)
             .filter(migrertStp -> alleSøknadsperioder.stream().noneMatch(periode -> periode.inkluderer(migrertStp)) &&
-                (!støtterTrukketPeriodeToggle || anvistePerioder.stream().noneMatch(p -> inkludererEllerErKantIKantMedPeriodeFraInfotrygd(migrertStp, p))))
+                (anvistePerioder.stream().noneMatch(p -> inkludererEllerErKantIKantMedPeriodeFraInfotrygd(migrertStp, p))))
             .collect(Collectors.toList());
         if (!migreringUtenSøknad.isEmpty()) {
             throw new IllegalStateException("Støtter ikke trukket søknad for migrering fra infotrygd etter fjerning av periode fra inforygd.");

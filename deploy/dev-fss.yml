@@ -202,8 +202,6 @@ spec:
       value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "true"
-    - name: PSB_TREKKE_MIGRERT_PERIODE
-      value: "true"
     - name: ENABLE_DOKUMENTMOTTAK_PPN
       value: "true"
     - name: KOMPLETTHET_MARKER_FRAVAER
