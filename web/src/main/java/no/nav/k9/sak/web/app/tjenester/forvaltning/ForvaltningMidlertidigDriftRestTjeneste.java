@@ -107,6 +107,7 @@ import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 import no.nav.k9.søknad.frisinn.Inntekter;
 import no.nav.k9.søknad.frisinn.PeriodeInntekt;
 import no.nav.k9.søknad.frisinn.SelvstendigNæringsdrivende;
+import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 
 /**
@@ -332,6 +333,49 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         final String saksnummerliste = saksnumre.stream().reduce((a, b) -> a + ", " + b).orElse("");
 
         return Response.ok(saksnummerliste).build();
+    }
+    
+    @GET
+    @Path("/saker-med-feil3")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Henter saksnumre med feil på PPN.", summary = ("Henter saksnumre med feil på PPN."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response hentSakerMedFeil3() {
+        final Query q = entityManager.createNativeQuery(
+                "SELECT convert_from(lo_get(d.payload), 'UTF-8') as payload, f.saksnummer "
+                        + "FROM MOTTATT_DOKUMENT d INNER JOIN Behandling b ON ( "
+                        + "  b.id = d.behandling_id "
+                        + ") INNER JOIN Fagsak f ON ( "
+                        + "  f.id = b.fagsak_id "
+                        + ") "
+                        + "WHERE d.type = 'PLEIEPENGER_LIVETS_SLUTTFASE_SOKNAD' ");
+        q.setHint("javax.persistence.query.timeout", 5 * 60 * 1000); // 5 minutter
+        
+        final List<String> saksnumre = new ArrayList<>();
+        
+        @SuppressWarnings("unchecked")
+        final Stream<Object[]> resultStream = q.getResultStream();
+        resultStream.forEach(d -> {
+            try {
+                final Object[] result = (Object[]) d;
+                final String soknadJson = (String) result[0];
+                final String saksnummer = (String) result[1];
+                final Søknad soknad = JsonUtils.fromString(soknadJson, Søknad.class);
+                if (!erFraBrukerdialog(soknad.getYtelse()) && harTomSøknadsperiode(soknad.getYtelse())) {
+                    saksnumre.add(saksnummer);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        
+        final String saksnummerliste = saksnumre.stream().reduce((a, b) -> a + ", " + b).orElse("");
+
+        return Response.ok(saksnummerliste).build();
+    }
+    
+    private boolean harTomSøknadsperiode(PleipengerLivetsSluttfase pls) {
+        return pls.getSøknadsperiodeList().isEmpty();
     }
     
     private boolean erFraBrukerdialog(PleiepengerSyktBarn soknad) {
