@@ -220,7 +220,7 @@ spec:
     - name: ENABLE_DOKUMENTMOTTAK_PPN
       value: "true"
     - name: KOMPLETTHET_MARKER_FRAVAER
-      value: "false"
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
