@@ -71,7 +71,7 @@ public abstract class BeregnFeriepengerTjeneste {
         beregningsresultat.setFeriepengerRegelInput(regelInput);
         beregningsresultat.setFeriepengerRegelSporing(sporing);
 
-        mapTilResultatFraRegelModell(beregningsresultat, regelModell);
+        mapTilResultatFraRegelModellV2(beregningsresultat, regelModell);
     }
 
     private String toJson(BeregningsresultatFeriepengerRegelModell grunnlag) {
@@ -85,6 +85,10 @@ public abstract class BeregnFeriepengerTjeneste {
             return;
         }
 
+        regelModell.getBeregningsresultatPerioder().forEach(regelBeregningsresultatPeriode -> mapPeriode(resultat, regelBeregningsresultatPeriode));
+    }
+
+    static void mapTilResultatFraRegelModellV2(BeregningsresultatEntitet resultat, BeregningsresultatFeriepengerRegelModell regelModell) {
         regelModell.getBeregningsresultatPerioder().forEach(regelBeregningsresultatPeriode -> mapPeriode(resultat, regelBeregningsresultatPeriode));
     }
 

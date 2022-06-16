@@ -1,7 +1,9 @@
 package no.nav.k9.sak.ytelse.beregning.regler.feriepenger;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +78,7 @@ class BeregnFeriepengerV2 extends LeafSpecification<BeregningsresultatFeriepenge
         List<BeregningsresultatPeriode> beregningsresultatPerioder = regelModell.getBeregningsresultatPerioder();
         boolean harFeriepengeopptjeningForHelg = regelModell.harFeriepengeopptjeningForHelg();
         Predicate<BeregningsresultatAndel> andelFilter = andel -> andel.girRettTilFeriepenger() && andel.getMottakerType() == mottakerType;
+        Map<FeriepengeNøkkel, BigDecimal> avrundingTilgode = new HashMap<>();
 
         for (BeregningsresultatPeriode periode : beregningsresultatPerioder) {
             LocalDateTimeline<Boolean> overlapp = tidslinjeHvorFeriepengerGis.intersection(periode.getPeriode());
@@ -90,20 +93,38 @@ class BeregnFeriepengerV2 extends LeafSpecification<BeregningsresultatFeriepenge
                     regelsporing.put("Opptjeningsår i " + periodeNavn, åretsOverlapp.getFomDato().getYear());
 
                     for (BeregningsresultatAndel andel : periode.getBeregningsresultatAndelList()) {
+                        if (!andelFilter.test(andel)) {
+                            continue;
+                        }
                         long feriepengerGrunnlag = andel.getDagsats() * antallFeriepengerDager;
                         BigDecimal feriepengerAndelPrÅr = BigDecimal.valueOf(feriepengerGrunnlag).multiply(FERIEPENGER_SATS_PROSENT);
-                        if (andelFilter.test(andel) && feriepengerAndelPrÅr.compareTo(BigDecimal.ZERO) != 0) {
-                            BeregningsresultatFeriepengerPrÅr.builder()
-                                .medOpptjeningÅr(åretsOverlapp.getFomDato().withMonth(12).withDayOfMonth(31))
-                                .medÅrsbeløp(feriepengerAndelPrÅr)
-                                .build(andel);
-                            String andelId = andel.getArbeidsforhold() != null ? andel.getArbeidsgiverId() : andel.getAktivitetStatus().name();
+                        FeriepengeNøkkel nøkkel = new FeriepengeNøkkel(andel.getMottakerType(), andel.getMottakerType() == MottakerType.BRUKER ? null : andel.getArbeidsgiverId(), åretsOverlapp.getFomDato().getYear());
+                        BigDecimal tidligereAvrunding = avrundingTilgode.getOrDefault(nøkkel, BigDecimal.ZERO);
+                        BigDecimal endeligFeriepengerForAndelen = feriepengerAndelPrÅr.subtract(tidligereAvrunding).setScale(0, RoundingMode.HALF_UP);
+                        BigDecimal avrunding = endeligFeriepengerForAndelen.subtract(feriepengerAndelPrÅr);
+
+                        String andelId = andel.getArbeidsforhold() != null ? andel.getArbeidsgiverId() : andel.getAktivitetStatus().name();
+                        if (feriepengerAndelPrÅr.compareTo(BigDecimal.ZERO) != 0) {
                             regelsporing.put("Feriepenger." + andel.getMottakerType() + "." + andelId + " i " + periodeNavn, feriepengerAndelPrÅr);
                         }
+                        if (avrunding.compareTo(BigDecimal.ZERO) != 0) {
+                            regelsporing.put("Feriepenger.avrunding" + andel.getMottakerType() + "." + andelId + " i " + periodeNavn, avrunding);
+                        }
+                        if (endeligFeriepengerForAndelen.compareTo(BigDecimal.ZERO) != 0) {
+                            BeregningsresultatFeriepengerPrÅr.builder()
+                                .medOpptjeningÅr(åretsOverlapp.getFomDato().withMonth(12).withDayOfMonth(31))
+                                .medÅrsbeløp(endeligFeriepengerForAndelen)
+                                .build(andel);
+                        }
+                        avrundingTilgode.put(nøkkel, tidligereAvrunding.add(avrunding));
                     }
                 }
             }
         }
+    }
+
+    record FeriepengeNøkkel(MottakerType mottakerType, String mottakerId, int år) {
+
     }
 
     private static LocalDateInterval unikPeriode(LocalDateTimeline<?> tidslinje) {
