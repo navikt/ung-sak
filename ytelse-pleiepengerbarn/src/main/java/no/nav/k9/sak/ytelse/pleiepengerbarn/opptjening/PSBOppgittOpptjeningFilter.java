@@ -45,7 +45,6 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     private VilkårTjeneste vilkårTjeneste;
     private BehandlingRepository behandlingRepository;
     private Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester;
-    private boolean lansertNyPrioritering;
 
     PSBOppgittOpptjeningFilter() {
         // For CDI
@@ -54,12 +53,10 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     @Inject
     public PSBOppgittOpptjeningFilter(VilkårTjeneste vilkårTjeneste,
                                       BehandlingRepository behandlingRepository,
-                                      @Any Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester,
-                                      @KonfigVerdi(value = "PSB_OPPG_OPPTJENING_PRIORITERING", defaultVerdi = "true") boolean lansertNyPrioritering) {
+                                      @Any Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjenester = søknadsfristTjenester;
-        this.lansertNyPrioritering = lansertNyPrioritering;
     }
 
     /**
@@ -72,9 +69,6 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ref.getFagsakYtelseType())
             .orElseThrow(() -> new IllegalStateException("Har ikke " + getClass().getSimpleName() + " for ytelse=" + ref.getFagsakYtelseType()));
         Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokMedFravær = tjeneste.hentPerioderTilVurdering(ref);
-        if (lansertNyPrioritering) {
-            return finnOppgittOpptjeningLansert(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
-        }
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
     }
 
@@ -87,14 +81,11 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ref.getFagsakYtelseType())
             .orElseThrow(() -> new IllegalStateException("Har ikke " + getClass().getSimpleName() + " for ytelse=" + ref.getFagsakYtelseType()));
         Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokMedFravær = tjeneste.hentPerioderTilVurdering(ref);
-        if (lansertNyPrioritering) {
-            return finnOppgittOpptjeningLansert(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
-        }
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
     }
 
     // Kode for lansering av ny prioriering - START
-    Optional<OppgittOpptjening> finnOppgittOpptjeningLansert(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravDokumenterMedFravær) {
+    Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravDokumenterMedFravær) {
         var stp = vilkårsperiode.getFomDato();
         var sistMottatteSøknadNærmestStp = kravDokumenterMedFravær.entrySet()
             .stream()
@@ -141,20 +132,6 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
             .orElseThrow();
     }
     // Kode for lansering av prioriering - END
-
-    // Resten av kode er duplisert fra OMP, slik at oppførsel er uendret dersom ulansert
-    Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravDokumenterMedFravær) {
-        var journalpostAktivTidslinje = utledJournalpostAktivTidslinje(kravDokumenterMedFravær);
-        List<OppgittOpptjening> oppgitteOpptjeninger = sorterOpptjeningerMotInnsendingstidspunkt(iayGrunnlag, kravDokumenterMedFravær);
-
-        List<OppgittOpptjening> overlappendeOpptjeninger = hentOverlappendeOpptjeninger(vilkårsperiode, journalpostAktivTidslinje, oppgitteOpptjeninger);
-        if (overlappendeOpptjeninger.isEmpty()) {
-            return Optional.empty();
-        }
-
-        var oppgittOpptjening = OppgittOpptjeningMapper.sammenstillOppgittOpptjening(overlappendeOpptjeninger);
-        return Optional.of(oppgittOpptjening);
-    }
 
     private List<OppgittOpptjening> hentOverlappendeOpptjeninger(DatoIntervallEntitet vilkårsperiode, Map<JournalpostId, LocalDateTimeline<Void>> journalpostAktivTidslinje, List<OppgittOpptjening> oppgittOpptjeninger) {
         var overlappendeOpptjeninger = oppgittOpptjeninger.stream()

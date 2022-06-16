@@ -189,8 +189,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: PSB_OPPG_OPPTJENING_PRIORITERING
-      value: "true"
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
       value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
