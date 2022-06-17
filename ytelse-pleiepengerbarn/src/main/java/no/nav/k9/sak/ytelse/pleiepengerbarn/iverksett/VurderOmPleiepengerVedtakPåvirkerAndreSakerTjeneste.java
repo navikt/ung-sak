@@ -48,6 +48,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.FeriepengerAvvikTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
@@ -75,7 +76,9 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private BehandlingModellRepository behandlingModellRepository;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
+    private FeriepengerAvvikTjeneste feriepengerAvvikTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private boolean enableFeriepengerPåTversAvSaker;
 
     VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste() {
     }
@@ -93,7 +96,8 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                                                                SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                                                BehandlingModellRepository behandlingModellRepository,
                                                                UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+                                                               FeriepengerAvvikTjeneste feriepengerAvvikTjeneste, @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                                               @KonfigVerdi(value = "ENABLE_FERIEPENGER_PAA_TVERS_AV_SAKER_OG_PR_AAR", defaultVerdi = "true") boolean enableFeriepengerPåTversAvSaker) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -106,7 +110,9 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.behandlingModellRepository = behandlingModellRepository;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
+        this.feriepengerAvvikTjeneste = feriepengerAvvikTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.enableFeriepengerPåTversAvSaker = enableFeriepengerPåTversAvSaker;
     }
 
     @Override
@@ -128,11 +134,16 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                 var skalRevurderesPgaEtablertTilsyn = perioderMedRevurderingPgaEtablertTilsyn(referanse);
                 var skalRevurderesPgaNattevåkOgBeredskap = perioderMedRevurderesPgaNattevåkOgBeredskap(referanse);
                 var skalRevurderesPgaEndretUttak = perioderMedRevurderingPgaUttak(sisteBehandlingPåKandidat, referanse);
+                boolean skalRevurderesPgaEndringIFeriepenger = enableFeriepengerPåTversAvSaker ? skalRevurderesPgaEndringFeriepenger(sisteBehandlingPåKandidat, referanse) : false;
 
-                if (!skalRevurderesPgaSykdom.isEmpty() || !skalRevurderesPgaEtablertTilsyn.isEmpty() || !skalRevurderesPgaNattevåkOgBeredskap.isEmpty() || !skalRevurderesPgaEndretUttak.isEmpty()) {
+                if (!skalRevurderesPgaSykdom.isEmpty() || !skalRevurderesPgaEtablertTilsyn.isEmpty() || !skalRevurderesPgaNattevåkOgBeredskap.isEmpty() || !skalRevurderesPgaEndretUttak.isEmpty() || skalRevurderesPgaEndringIFeriepenger) {
                     NavigableSet<DatoIntervallEntitet> perioderMedEndring = utledPerioder(perioderTilVurderingTjeneste, skalRevurderesPgaSykdom, skalRevurderesPgaEtablertTilsyn, skalRevurderesPgaNattevåkOgBeredskap, skalRevurderesPgaEndretUttak);
                     result.add(new SakMedPeriode(kandidatsaksnummer, perioderMedEndring));
-                    log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty());
+                    if (enableFeriepengerPåTversAvSaker) {
+                        log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}, feriepenger={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty(), skalRevurderesPgaEndringIFeriepenger);
+                    } else {
+                        log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty());
+                    }
                 }
             }
         }
@@ -195,6 +206,13 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
             return new TreeSet<>();
         }
         return samtidigUttakTjeneste.perioderMedEndringerMedUbesluttedeData(referanse);
+    }
+
+    private boolean skalRevurderesPgaEndringFeriepenger(Behandling sisteBehandlingPåKandidat, BehandlingReferanse referanse) {
+        if (!sisteBehandlingPåKandidat.getStatus().erFerdigbehandletStatus() && !feriepengerAvvikTjeneste.harKommetTilTilkjentYtelse(referanse)) {
+            return false;
+        }
+        return feriepengerAvvikTjeneste.feriepengerMåReberegnes(referanse);
     }
 
     private NavigableSet<DatoIntervallEntitet> perioderMedRevurderesPgaNattevåkOgBeredskap(BehandlingReferanse referanse) {

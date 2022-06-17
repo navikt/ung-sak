@@ -2,11 +2,13 @@ package no.nav.k9.sak.ytelse.beregning;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Year;
 import java.util.Objects;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import jakarta.enterprise.inject.Instance;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -16,6 +18,8 @@ import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
@@ -23,12 +27,19 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.ytelse.beregning.adapter.AktivitetStatusMapper;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFeriepengerFraVLTilRegel;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.MottakerType;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
+import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.FeriepengeOppsummering;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepenger;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepengerV2;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
 
 public abstract class BeregnFeriepengerTjeneste {
+
+    public static BeregnFeriepengerTjeneste finnTjeneste(Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjenester, FagsakYtelseType fagsakYtelseType) {
+        return FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjenester, fagsakYtelseType).orElseThrow(() -> new IllegalArgumentException("Har ikke BeregnFeriepengerTjeneste for " + fagsakYtelseType));
+    }
 
     private JacksonJsonConfig jacksonJsonConfig = new JacksonJsonConfig();
 
@@ -73,6 +84,24 @@ public abstract class BeregnFeriepengerTjeneste {
 
         mapTilResultatFraRegelModellV2(beregningsresultat, regelModell);
     }
+
+    public FeriepengeOppsummering beregnFeriepengerOppsummering(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker) {
+        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker, antallDagerFeriepenger(), feriepengeopptjeningForHelg(), ubegrensedeDagerVedRefusjon());
+        RegelBeregnFeriepengerV2 regelBeregnFeriepenger = new RegelBeregnFeriepengerV2();
+        regelBeregnFeriepenger.evaluer(regelModell);
+
+        FeriepengeOppsummering.Builder feriepengeoppsummeringBuilder = new FeriepengeOppsummering.Builder();
+
+        for (var brPeriode : regelModell.getBeregningsresultatPerioder()) {
+            for (var brAndel : brPeriode.getBeregningsresultatAndelList()) {
+                for (BeregningsresultatFeriepengerPrÅr feriepengerPrÅr : brAndel.getBeregningsresultatFeriepengerPrÅrListe()) {
+                    feriepengeoppsummeringBuilder.leggTil(Year.of(feriepengerPrÅr.getOpptjeningÅr().getYear()), brAndel.getMottakerType(), brAndel.getMottakerType() == MottakerType.ARBEIDSGIVER ? brAndel.getArbeidsgiverId() : null, feriepengerPrÅr.getÅrsbeløp().setScale(0, RoundingMode.UNNECESSARY).longValue());
+                }
+            }
+        }
+        return feriepengeoppsummeringBuilder.build();
+    }
+
 
     private String toJson(BeregningsresultatFeriepengerRegelModell grunnlag) {
         var jsonFac = this.jacksonJsonConfig;
