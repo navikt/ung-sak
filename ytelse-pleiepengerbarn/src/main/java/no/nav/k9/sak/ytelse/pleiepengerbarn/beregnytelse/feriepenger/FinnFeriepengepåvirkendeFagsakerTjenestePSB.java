@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,10 +27,8 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
 
     @Override
     public Set<Fagsak> finnSakerSomPåvirkerFeriepengerFor(Fagsak fagsak) {
-        LocalDate fom = fagsak.getPeriode().getFomDato().withMonth(1).withDayOfMonth(1);
-        LocalDate tom = fagsak.getPeriode().getTomDato();
-        List<Fagsak> psbFagsakerPleietrengende = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PSB, null, fagsak.getPleietrengendeAktørId(), null, fom, tom);
-        List<Fagsak> oppFagsakerPleietrengende = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.OPPLÆRINGSPENGER, null, fagsak.getPleietrengendeAktørId(), null, fom, tom);
+        List<Fagsak> psbFagsakerPleietrengende = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PSB, fagsak.getAktørId(), fagsak.getPleietrengendeAktørId(), null, null, null);
+        List<Fagsak> oppFagsakerPleietrengende = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.OPPLÆRINGSPENGER, fagsak.getAktørId(), fagsak.getPleietrengendeAktørId(), null, null, null);
 
         return Stream.concat(psbFagsakerPleietrengende.stream(), oppFagsakerPleietrengende.stream())
             .filter(s -> !fagsak.equals(s))
