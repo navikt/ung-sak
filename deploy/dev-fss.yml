@@ -202,8 +202,6 @@ spec:
       value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "true"
-    - name: KOMPLETTHET_MARKER_FRAVAER
-      value: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

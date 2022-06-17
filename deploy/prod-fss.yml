@@ -201,8 +201,6 @@ spec:
       value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
       value: "true"
-    - name: KOMPLETTHET_MARKER_FRAVAER
-      value: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
