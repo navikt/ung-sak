@@ -83,6 +83,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.SaksbehandlerRestTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
@@ -314,6 +315,7 @@ public class BehandlingDtoTjeneste {
 
         dto.leggTil(getFraMap(BrevRestTjeneste.HENT_VEDTAKVARSEL_PATH, "vedtak-varsel", uuidQueryParams));
         lagFormidlingLink(behandling).forEach(dto::leggTil);
+        lagLosLink(behandling).forEach(dto::leggTil);
     }
 
     private void leggTilBeregnetYtelseBaserteLinks(Behandling behandling, BehandlingDto dto, Map<String, String> uuidQueryParams) {
@@ -502,6 +504,15 @@ public class BehandlingDtoTjeneste {
             links.add(getFraMap(TilbakekrevingRestTjeneste.VARSELTEKST_PATH, "tilbakekrevingsvarsel-fritekst", queryParams));
         }
 
+        return links;
+    }
+
+    private List<ResourceLink> lagLosLink(Behandling behandling) {
+        var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+
+        List<ResourceLink> links = new ArrayList<>();
+        links.add(getFraMap(LosRestTjeneste.MERKNAD_PATH, "los-hente-merknad", queryParams));
+        links.add(post(LosRestTjeneste.MERKNAD_PATH, "los-lagre-merknad", new BehandlingUuidDto(behandling.getUuid())));
         return links;
     }
 
