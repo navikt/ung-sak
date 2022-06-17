@@ -72,6 +72,7 @@ public class GrunnlagKopiererOmsorgspenger implements GrunnlagKopierer {
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
 
         omsorgspengerGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        fosterbarnRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         beregningPerioderGrunnlagRepository.kopier(originalBehandlingId, nyBehandlingId, true);
 
         // gjør til slutt, innebærer kall til abakus
