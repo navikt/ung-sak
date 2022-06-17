@@ -1,16 +1,13 @@
 package no.nav.k9.sak.ytelse.beregning.regler.feriepenger;
 
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.k9.sak.domene.typer.tid.IntervallUtil;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerPrÅr;
@@ -35,10 +32,10 @@ class BeregnFeriepengerForPeriode {
         for (BeregningsresultatPeriode periode : beregningsresultatPerioder) {
             Optional<LocalDateInterval> overlapp = periode.getPeriode().overlap(feriepengerPeriode);
             if (overlapp.isPresent() && periode.getBeregningsresultatAndelList().stream().anyMatch(andelFilter)) {
-                for (LocalDateInterval åretsOverlapp : periodiserPrÅr(overlapp.get())) {
+                for (LocalDateInterval åretsOverlapp : IntervallUtil.periodiserPrÅr(overlapp.get())) {
                     long antallFeriepengerDager = harFeriepengeopptjeningForHelg
-                        ? beregnKalanderdager(åretsOverlapp)
-                        : beregnUkedager(åretsOverlapp);
+                        ? IntervallUtil.beregnKalanderdager(åretsOverlapp)
+                        : IntervallUtil.beregnUkedager(åretsOverlapp);
 
                     String periodeNavn = "perioden " + åretsOverlapp + "for " + (gjelderBruker ? "bruker" : "arbeidsgiver");
                     regelsporing.put("Antall feriepengedager i " + periodeNavn, antallFeriepengerDager);
@@ -62,37 +59,4 @@ class BeregnFeriepengerForPeriode {
         }
     }
 
-    private static long beregnKalanderdager(LocalDateInterval periode) {
-        return ChronoUnit.DAYS.between(periode.getFomDato(), periode.getTomDato()) + 1;
-    }
-
-    private static int beregnUkedager(LocalDateInterval periode) {
-        return beregnUkedager(periode.getFomDato(), periode.getTomDato());
-    }
-
-    private static int beregnUkedager(LocalDate fom, LocalDate tom) {
-        int antallUkedager = 0;
-        for (LocalDate d = fom; !d.isAfter(tom); d = d.plusDays(1)) {
-            int dag = d.getDayOfWeek().getValue();
-            if (dag <= DayOfWeek.FRIDAY.getValue()) {
-                antallUkedager++;
-            }
-        }
-        return antallUkedager;
-    }
-
-    private static List<LocalDateInterval> periodiserPrÅr(LocalDateInterval feriepengerPeriode) {
-        LocalDate fom = feriepengerPeriode.getFomDato();
-        LocalDate tom = feriepengerPeriode.getTomDato();
-        List<LocalDateInterval> perioder = new ArrayList<>();
-        while (fom.getYear() != tom.getYear()) {
-            LocalDate sisteDagIÅr = fom.withMonth(12).withDayOfMonth(31);
-            LocalDateInterval dateInterval = new LocalDateInterval(fom, sisteDagIÅr);
-            perioder.add(dateInterval);
-            fom = sisteDagIÅr.plusDays(1);
-        }
-        LocalDateInterval dateInterval = new LocalDateInterval(fom, tom);
-        perioder.add(dateInterval);
-        return perioder;
-    }
 }

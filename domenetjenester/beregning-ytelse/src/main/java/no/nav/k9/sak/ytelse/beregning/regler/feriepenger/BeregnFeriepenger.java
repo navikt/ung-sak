@@ -18,7 +18,7 @@ class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerR
     @Override
     public Evaluation evaluate(BeregningsresultatFeriepengerRegelModell regelModell) {
         Map<String, Object> regelsporing = new LinkedHashMap<>();
-        BeregnFeriepengerForPeriode.beregn(regelsporing, regelModell.getBeregningsresultatPerioder(), regelModell.getFeriepengerPeriodeBruker(), regelModell.getFeriepengerPeriodeRefusjon(), regelModell.harFeriepengeopptjeningFoHelg());
+        BeregnFeriepengerForPeriode.beregn(regelsporing, regelModell.getBeregningsresultatPerioder(), regelModell.getFeriepengerPeriodeBruker(), regelModell.getFeriepengerPeriodeRefusjon(), regelModell.harFeriepengeopptjeningForHelg());
         return beregnet(regelsporing);
     }
 }

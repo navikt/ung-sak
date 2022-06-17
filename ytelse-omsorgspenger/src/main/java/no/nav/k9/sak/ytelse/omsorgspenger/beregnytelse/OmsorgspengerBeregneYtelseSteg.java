@@ -21,6 +21,7 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -61,6 +62,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     private OmsorgspengerYtelseVerifiserer omsorgspengerYtelseVerifiserer;
+    private boolean enableFeriepengerPåTversAvSaker;
 
     protected OmsorgspengerBeregneYtelseSteg() {
         // for proxy
@@ -73,7 +75,9 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                           FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                           @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
                                           @FagsakYtelseTypeRef(OMSORGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                          OmsorgspengerYtelseVerifiserer omsorgspengerYtelseVerifiserer) {
+                                          OmsorgspengerYtelseVerifiserer omsorgspengerYtelseVerifiserer,
+                                          @KonfigVerdi(value = "ENABLE_FERIEPENGER_PAA_TVERS_AV_SAKER_OG_PR_AAR", defaultVerdi = "true") boolean enableFeriepengerPåTversAvSaker
+                                          ) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
@@ -82,6 +86,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.omsorgspengerYtelseVerifiserer = omsorgspengerYtelseVerifiserer;
+        this.enableFeriepengerPåTversAvSaker = enableFeriepengerPåTversAvSaker;
     }
 
     @Override
@@ -105,7 +110,11 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
 
         // Beregn feriepenger
         var feriepengerTjeneste = FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, ref.getFagsakYtelseType()).orElseThrow();
-        feriepengerTjeneste.beregnFeriepenger(beregningsresultat);
+        if (enableFeriepengerPåTversAvSaker){
+            feriepengerTjeneste.beregnFeriepengerV2(beregningsresultat);
+        } else {
+            feriepengerTjeneste.beregnFeriepenger(beregningsresultat);
+        }
 
         // Verifiser beregningsresultat
         omsorgspengerYtelseVerifiserer.verifiser(behandling, beregningsresultat);

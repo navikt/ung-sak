@@ -221,6 +221,8 @@ spec:
       value: "true"
     - name: KOMPLETTHET_MARKER_FRAVAER
       value: "true"
+    - name: ENABLE_FERIEPENGER_PAA_TVERS_AV_SAKER_OG_PR_AAR
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
