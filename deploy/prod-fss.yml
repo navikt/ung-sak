@@ -197,8 +197,6 @@ spec:
       value: "false"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
-    - name: MAP_ALLE_KRAV
-      value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
