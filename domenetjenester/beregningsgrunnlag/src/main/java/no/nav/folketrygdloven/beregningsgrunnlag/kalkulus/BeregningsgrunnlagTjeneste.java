@@ -321,7 +321,11 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         var perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
         var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
-        var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
+        var vilkårOpt = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        if (vilkårOpt.isEmpty()) {
+            return Collections.emptyList();
+        }
+        var vilkår = vilkårOpt.orElseThrow();
         var skjæringstidspunkter = vilkår.getPerioder()
             .stream()
             .map(VilkårPeriode::getSkjæringstidspunkt)
