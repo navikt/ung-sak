@@ -41,6 +41,9 @@ public class OppgittOpptjeningMapper {
 
     public OppgittOpptjeningMottattRequest mapRequest(Behandling behandling, MottattDokument dokument, OpptjeningAktivitet opptjeningAktiviteter) {
 
+        if (opptjeningAktiviteter == null) {
+            return null;
+        }
         var builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), LocalDateTime.now());
         if (opptjeningAktiviteter.getSelvstendigNæringsdrivende() != null) {
             var snAktiviteter = opptjeningAktiviteter.getSelvstendigNæringsdrivende();
