@@ -44,7 +44,7 @@ public class FeriepengeOppsummering {
         long absoluttDifferanse = 0;
         for (MottakerOgOpptjeningsår nøkkel : nøkler) {
             long aVerdi = a.tilkjentPrMottakerOgÅr.getOrDefault(nøkkel, 0L);
-            long bVerdi = a.tilkjentPrMottakerOgÅr.getOrDefault(nøkkel, 0L);
+            long bVerdi = b.tilkjentPrMottakerOgÅr.getOrDefault(nøkkel, 0L);
             absoluttDifferanse = Math.abs(aVerdi - bVerdi);
         }
         return absoluttDifferanse;
