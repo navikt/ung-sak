@@ -322,7 +322,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 final String soknadJson = (String) result[0];
                 final String saksnummer = (String) result[1];
                 final Søknad soknad = JsonUtils.fromString(soknadJson, Søknad.class);
-                if (erFraBrukerdialog(soknad.getYtelse()) && harReellPeriodeMedNullNormal(soknad.getYtelse())) {
+                if (erFraBrukerdialogPsb(soknad.getYtelse()) && harReellPeriodeMedNullNormal(soknad.getYtelse())) {
                     saksnumre.add(saksnummer);
                 }
             } catch (Exception e) {
@@ -361,7 +361,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 final String soknadJson = (String) result[0];
                 final String saksnummer = (String) result[1];
                 final Søknad soknad = JsonUtils.fromString(soknadJson, Søknad.class);
-                if (!erFraBrukerdialog(soknad.getYtelse()) && harTomSøknadsperiode(soknad.getYtelse())) {
+                if (harTomSøknadsperiode(soknad.getYtelse())) {
                     saksnumre.add(saksnummer);
                 }
             } catch (Exception e) {
@@ -378,8 +378,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         return pls.getSøknadsperiodeList().isEmpty();
     }
     
-    private boolean erFraBrukerdialog(PleiepengerSyktBarn soknad) {
-        return soknad.getSøknadInfo().isPresent();
+    private boolean erFraBrukerdialogPsb(PleiepengerSyktBarn ytelse) {
+        return ytelse.getSøknadInfo().isPresent();
     }
 
     private boolean harReellPeriodeMedNullNormal(PleiepengerSyktBarn soknad) {
