@@ -124,7 +124,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
 
         var opptjeningstidslinje = new LocalDateTimeline<>(vilkår.get().getPerioder().stream().map(VilkårPeriode::getPeriode).map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList()));
 
-        return opptjeningstidslinje.intersection(tidslinje);
+        return opptjeningstidslinje.combine(tidslinje, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
 
     private LocalDateTimeline<Boolean> utledYtelse(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
