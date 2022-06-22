@@ -87,7 +87,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         var perioderTilVurdering = finnSykdomsperioder(referanse);
         var opptjeningResultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
 
-        var tidslinjeTilVurdering = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList()));
+        var tidslinjeTilVurdering = utledTidslinjeTilVurdering(perioderTilVurdering, vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
 
         var input = new ArbeidstidMappingInput()
             .medSaksnummer(referanse.getSaksnummer())
@@ -114,6 +114,17 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         var aktørArbeidFraRegister = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId()).getAktørArbeidFraRegister(referanse.getAktørId());
 
         return utledFraInput(timelineMedYtelse, timelineMedInnvilgetYtelse, input, aktørArbeidFraRegister);
+    }
+
+    private LocalDateTimeline<Boolean> utledTidslinjeTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Optional<Vilkår> vilkår) {
+        var tidslinje = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList())).compress();
+        if (vilkår.isEmpty()) {
+            return tidslinje;
+        }
+
+        var opptjeningstidslinje = new LocalDateTimeline<>(vilkår.get().getPerioder().stream().map(VilkårPeriode::getPeriode).map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList()));
+
+        return opptjeningstidslinje.intersection(tidslinje);
     }
 
     private LocalDateTimeline<Boolean> utledYtelse(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
