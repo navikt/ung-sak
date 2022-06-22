@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -205,7 +206,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             var erFrilans = opptjening.orElseThrow()
                 .getOpptjeningAktivitet()
                 .stream()
-                .filter(it -> DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(1), skjæringstidspunkt.minusDays(1)).overlapper(it.getFom(), it.getTom()))
+                .filter(it -> erAktivVedSluttAvPerioden(opptjening.get().getTom(), it.getTom()))
                 .anyMatch(it -> OpptjeningAktivitetType.FRILANS.equals(it.getAktivitetType()));
             if (erFrilans) {
                 leggTilSegmentForType(mellomregning, segment, new AktivitetIdentifikator(UttakArbeidType.FRILANSER));
@@ -221,6 +222,10 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
                 leggTilSegmentForType(mellomregning, segment, new AktivitetIdentifikator(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE));
             }
         }
+    }
+
+    private boolean erAktivVedSluttAvPerioden(LocalDate sisteDagIOpptjeningsperioden, LocalDate aktivitetSlutt) {
+        return Objects.equals(sisteDagIOpptjeningsperioden, aktivitetSlutt) || sisteDagIOpptjeningsperioden.isBefore(aktivitetSlutt);
     }
 
     private void leggTilSegmentForType(Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> mellomregning, LocalDateSegment<Boolean> segment, AktivitetIdentifikator aktivitetIdentifikator) {
