@@ -1,4 +1,4 @@
---alter table SYKDOM_PERSON rename to PERSON;
+alter table SYKDOM_PERSON rename to PERSON;
 
 alter table SYKDOM_VURDERINGER rename to PLEIETRENGENDE_SYKDOM;
 alter table PLEIETRENGENDE_SYKDOM rename column syk_person_id to pleietrengende_person_id;
