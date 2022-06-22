@@ -187,9 +187,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             skulleVærtSøktOm = skulleVærtSøktOm.intersection(tidslinjeTilVurdering);
             skulleVærtSøktOm = skulleVærtSøktOm.disjoint(helgeTidslinje);
 
-            if (!skulleVærtSøktOm.isEmpty()) {
-                resultat.put(entry.getKey(), skulleVærtSøktOm);
-            }
+            resultat.put(entry.getKey(), skulleVærtSøktOm);
         }
 
         return resultat;
