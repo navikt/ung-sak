@@ -378,8 +378,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         return pls.getSøknadsperiodeList().isEmpty();
     }
     
-    private boolean erFraBrukerdialogPsb(PleiepengerSyktBarn ytelse) {
-        return ytelse.getSøknadInfo().isPresent();
+    private boolean erFraBrukerdialogPsb(Søknad søknad) {
+        return søknad.getJournalposter() == null || søknad.getJournalposter().isEmpty();
     }
 
     private boolean harReellPeriodeMedNullNormal(PleiepengerSyktBarn soknad) {
