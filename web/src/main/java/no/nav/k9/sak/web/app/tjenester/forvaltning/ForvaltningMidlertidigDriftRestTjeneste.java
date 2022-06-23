@@ -322,7 +322,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 final String soknadJson = (String) result[0];
                 final String saksnummer = (String) result[1];
                 final Søknad soknad = JsonUtils.fromString(soknadJson, Søknad.class);
-                if (erFraBrukerdialogPsb(soknad.getYtelse()) && harReellPeriodeMedNullNormal(soknad.getYtelse())) {
+                if (erFraBrukerdialogPsb(soknad) && harReellPeriodeMedNullNormal(soknad.getYtelse())) {
                     saksnumre.add(saksnummer);
                 }
             } catch (Exception e) {
