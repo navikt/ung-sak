@@ -34,51 +34,51 @@ public class SykdomDokumentRepository {
     }
 
 
-    public List<SykdomDokument> hentAlleDokumenterFor(AktørId pleietrengende) {
-        final TypedQuery<SykdomDokument> q = entityManager.createQuery(
+    public List<PleietrengendeSykdomDokument> hentAlleDokumenterFor(AktørId pleietrengende) {
+        final TypedQuery<PleietrengendeSykdomDokument> q = entityManager.createQuery(
             "SELECT d From SykdomDokument as d "
                 + "inner join d.sykdomVurderinger as sv "
                 + "inner join sv.person as p "
-                + "where p.aktørId = :aktørId", SykdomDokument.class);
+                + "where p.aktørId = :aktørId", PleietrengendeSykdomDokument.class);
 
         q.setParameter("aktørId", pleietrengende);
 
-        List<SykdomDokument> dokuments = q.getResultList();
+        List<PleietrengendeSykdomDokument> dokuments = q.getResultList();
 
         return dokuments;
     }
 
     public boolean isDokumentBruktIVurdering(Long dokumentId) {
-        final TypedQuery<SykdomVurderingVersjon> q = entityManager.createQuery(
+        final TypedQuery<PleietrengendeSykdomVurderingVersjon> q = entityManager.createQuery(
             "SELECT vv From SykdomVurderingVersjon as vv "
                 + "inner join vv.dokumenter as d "
-                + "where d.id = :dokumentId", SykdomVurderingVersjon.class);
+                + "where d.id = :dokumentId", PleietrengendeSykdomVurderingVersjon.class);
         q.setParameter("dokumentId", dokumentId);
 
         return q.getResultList().size() > 0;
     }
 
-    public List<SykdomDokument> hentNyeDokumenterFor(UUID behandlingUUID) {
-        final TypedQuery<SykdomDokument> q = entityManager.createQuery(
+    public List<PleietrengendeSykdomDokument> hentNyeDokumenterFor(UUID behandlingUUID) {
+        final TypedQuery<PleietrengendeSykdomDokument> q = entityManager.createQuery(
             "SELECT d From SykdomDokument as d "
-                + "where d.behandlingUuid = :behandlingUUID", SykdomDokument.class);
+                + "where d.behandlingUuid = :behandlingUUID", PleietrengendeSykdomDokument.class);
 
         q.setParameter("behandlingUUID", behandlingUUID);
 
-        List<SykdomDokument> dokuments = q.getResultList();
+        List<PleietrengendeSykdomDokument> dokuments = q.getResultList();
 
         return dokuments;
     }
 
-    public List<SykdomDokument> hentDokumenterSomErRelevanteForSykdom(AktørId pleietrengende) {
+    public List<PleietrengendeSykdomDokument> hentDokumenterSomErRelevanteForSykdom(AktørId pleietrengende) {
         return hentAlleDokumenterFor(pleietrengende)
             .stream()
             .filter(d -> d.getType().isRelevantForSykdom())
             .collect(Collectors.toList());
     }
 
-    public List<SykdomDokument> hentDuplikaterAv(Long dokumentId) {
-        final TypedQuery<SykdomDokument> q = entityManager.createQuery(
+    public List<PleietrengendeSykdomDokument> hentDuplikaterAv(Long dokumentId) {
+        final TypedQuery<PleietrengendeSykdomDokument> q = entityManager.createQuery(
             "SELECT d From SykdomDokument as d "
                 + "inner join d.informasjoner as i "
                 + "inner join i.duplikatAvDokument as dd "
@@ -87,71 +87,71 @@ public class SykdomDokumentRepository {
                 + "    select max(i2.versjon) "
                 + "    From SykdomDokumentInformasjon as i2 "
                 + "    where i2.dokument = i.dokument"
-                + "  )", SykdomDokument.class);
+                + "  )", PleietrengendeSykdomDokument.class);
 
         q.setParameter("dokumentId", dokumentId);
         return q.getResultList();
     }
 
-    public List<SykdomDokument> hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(AktørId pleietrengende) {
+    public List<PleietrengendeSykdomDokument> hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(AktørId pleietrengende) {
         return hentDokumenterSomErRelevanteForSykdom(pleietrengende)
             .stream()
             .filter(d -> !harKvittertDokumentForEksisterendeVurderinger(d) && !d.isDuplikat())
             .collect(Collectors.toList());
     }
 
-    public List<SykdomDokument> hentGodkjenteLegeerklæringer(AktørId pleietrengende) {
+    public List<PleietrengendeSykdomDokument> hentGodkjenteLegeerklæringer(AktørId pleietrengende) {
         return hentAlleDokumenterFor(pleietrengende).stream().filter(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS && d.getDuplikatAvDokument() == null).collect(Collectors.toList());
     }
 
-    public Optional<SykdomDokument> hentDokument(Long dokumentId, AktørId pleietrengende) {
-        final TypedQuery<SykdomDokument> q = entityManager.createQuery(
+    public Optional<PleietrengendeSykdomDokument> hentDokument(Long dokumentId, AktørId pleietrengende) {
+        final TypedQuery<PleietrengendeSykdomDokument> q = entityManager.createQuery(
             "SELECT d From SykdomDokument as d "
                 + "inner join d.sykdomVurderinger as sv "
                 + "inner join sv.person as p "
                 + "where p.aktørId = :aktørId"
-                + "  and d.id = :dokumentId", SykdomDokument.class);
+                + "  and d.id = :dokumentId", PleietrengendeSykdomDokument.class);
 
         q.setParameter("dokumentId", dokumentId);
         q.setParameter("aktørId", pleietrengende);
 
-        Optional<SykdomDokument> dokument = q.getResultList().stream().findFirst();
+        Optional<PleietrengendeSykdomDokument> dokument = q.getResultList().stream().findFirst();
 
         return dokument;
     }
-    
+
     public boolean finnesSykdomDokument(JournalpostId journalpostId, String dokumentInfoId) {
         Objects.requireNonNull(journalpostId, "journalpostId");
-        
+
         final String dokumentInfoSjekk = (dokumentInfoId == null) ? "d.dokumentInfoId IS NULL" : "d.dokumentInfoId = :dokumentInfoId";
-        
-        final TypedQuery<SykdomDokument> q = entityManager.createQuery(
+
+        final TypedQuery<PleietrengendeSykdomDokument> q = entityManager.createQuery(
                 "SELECT d From SykdomDokument as d "
                     + "where d.journalpostId = :journalpostId"
-                    + "  and " + dokumentInfoSjekk, SykdomDokument.class);
+                    + "  and " + dokumentInfoSjekk, PleietrengendeSykdomDokument.class);
 
         q.setParameter("journalpostId", journalpostId);
         if (dokumentInfoId != null) {
             q.setParameter("dokumentInfoId", dokumentInfoId);
         }
 
-        Optional<SykdomDokument> dokument = q.getResultList().stream().findFirst();
+        Optional<PleietrengendeSykdomDokument> dokument = q.getResultList().stream().findFirst();
 
         return dokument.isPresent();
     }
 
-    public void lagre(SykdomDokument dokument, AktørId pleietrengende) {
+    public void lagre(PleietrengendeSykdomDokument dokument, AktørId pleietrengende) {
         if (dokument.getId() != null) {
             throw new IllegalStateException("Dokumentet har allerede blitt lagret.");
         }
-        final SykdomVurderinger sykdomVurderinger = sykdomVurderingRepository.hentEllerLagreSykdomVurderinger(pleietrengende, dokument.getEndretAv(), dokument.getEndretTidspunkt());
-        dokument.setSykdomVurderinger(sykdomVurderinger);
+        final PleietrengendeSykdom pleietrengendeSykdom = sykdomVurderingRepository.hentEllerLagreSykdomVurderinger(pleietrengende, dokument.getEndretAv(), dokument.getEndretTidspunkt());
+        dokument.setSykdomVurderinger(pleietrengendeSykdom);
 
         entityManager.persist(dokument);
         entityManager.flush();
     }
 
-    public void oppdater(SykdomDokumentInformasjon dokumentInformasjon) {
+    public void oppdater(PleietrengendeSykdomDokumentInformasjon dokumentInformasjon) {
         if (dokumentInformasjon.getDokument().getId() == null) {
             throw new IllegalStateException("Kan ikke oppdatere dokument som ikke har vært lagret før.");
         }
@@ -160,19 +160,19 @@ public class SykdomDokumentRepository {
         entityManager.flush();
     }
 
-    public boolean harKvittertDokumentForEksisterendeVurderinger(SykdomDokument dokument) {
-        TypedQuery<SykdomDokumentHarOppdatertEksisterendeVurderinger> q =
+    public boolean harKvittertDokumentForEksisterendeVurderinger(PleietrengendeSykdomDokument dokument) {
+        TypedQuery<PleietrengendeSykdomDokumentHarOppdatertVurderinger> q =
             entityManager.createQuery(
                 "SELECT k " +
                     "FROM SykdomDokumentHarOppdatertEksisterendeVurderinger as k " +
-                    "WHERE k.id = :id", SykdomDokumentHarOppdatertEksisterendeVurderinger.class);
+                    "WHERE k.id = :id", PleietrengendeSykdomDokumentHarOppdatertVurderinger.class);
 
         q.setParameter("id", dokument.getId());
 
         return q.getResultList().stream().findFirst().isPresent();
     }
 
-    public void kvitterDokumenterMedOppdatertEksisterendeVurderinger(SykdomDokumentHarOppdatertEksisterendeVurderinger utkvittering) {
+    public void kvitterDokumenterMedOppdatertEksisterendeVurderinger(PleietrengendeSykdomDokumentHarOppdatertVurderinger utkvittering) {
 
         String sql = "INSERT INTO sykdom_dokument_har_oppdatert_eksisterende_vurderinger " +
             "(sykdom_dokument_id, opprettet_av, opprettet_tid) " +
@@ -188,16 +188,16 @@ public class SykdomDokumentRepository {
         entityManager.flush();
     }
 
-    public SykdomInnleggelser hentInnleggelse(AktørId pleietrengende) {
+    public PleietrengendeSykdomInnleggelser hentInnleggelse(AktørId pleietrengende) {
         var sykdomInnleggelser = hentInnleggelseOrNull(pleietrengende);
         if (sykdomInnleggelser != null) {
             return sykdomInnleggelser;
         }
-        return new SykdomInnleggelser(null, null, Collections.emptyList(), null, null);
+        return new PleietrengendeSykdomInnleggelser(null, null, Collections.emptyList(), null, null);
     }
 
-    SykdomInnleggelser hentInnleggelseOrNull(AktørId pleietrengende) {
-        final TypedQuery<SykdomInnleggelser> q = entityManager.createQuery(
+    PleietrengendeSykdomInnleggelser hentInnleggelseOrNull(AktørId pleietrengende) {
+        final TypedQuery<PleietrengendeSykdomInnleggelser> q = entityManager.createQuery(
             "SELECT si "
                 + "FROM SykdomInnleggelser as si "
                 + "  inner join si.vurderinger as sv "
@@ -207,10 +207,10 @@ public class SykdomDokumentRepository {
                 + "  from SykdomInnleggelser as si2 "
                 + "  where si2.vurderinger = si.vurderinger "
                 + ") "
-                + "and p.aktørId = :aktørId", SykdomInnleggelser.class);
+                + "and p.aktørId = :aktørId", PleietrengendeSykdomInnleggelser.class);
         q.setParameter("aktørId", pleietrengende);
 
-        final List<SykdomInnleggelser> result = q.getResultList();
+        final List<PleietrengendeSykdomInnleggelser> result = q.getResultList();
         if (result.isEmpty()) {
             return null;
         }
@@ -220,16 +220,16 @@ public class SykdomDokumentRepository {
         return result.get(0);
     }
 
-    public SykdomInnleggelser hentInnleggelse(UUID behandlingUUID) {
+    public PleietrengendeSykdomInnleggelser hentInnleggelse(UUID behandlingUUID) {
         var sykdomInnleggelser = hentInnleggelseOrNull(behandlingUUID);
         if (sykdomInnleggelser != null) {
             return sykdomInnleggelser;
         }
-        return new SykdomInnleggelser(null, null, Collections.emptyList(), null, null);
+        return new PleietrengendeSykdomInnleggelser(null, null, Collections.emptyList(), null, null);
     }
 
-    public SykdomInnleggelser hentInnleggelseOrNull(UUID behandlingUUID) {
-        final TypedQuery<SykdomInnleggelser> q = entityManager.createQuery(
+    public PleietrengendeSykdomInnleggelser hentInnleggelseOrNull(UUID behandlingUUID) {
+        final TypedQuery<PleietrengendeSykdomInnleggelser> q = entityManager.createQuery(
             "SELECT gi " +
                 "FROM SykdomGrunnlagBehandling as sgb " +
                 "inner join sgb.grunnlag as sg " +
@@ -239,10 +239,10 @@ public class SykdomDokumentRepository {
                 "( select max(sgb2.versjon) " +
                 "From SykdomGrunnlagBehandling as sgb2 " +
                 "where sgb2.behandlingUuid = sgb.behandlingUuid )"
-            , SykdomInnleggelser.class);
+            , PleietrengendeSykdomInnleggelser.class);
         q.setParameter("behandlingUuid", behandlingUUID);
 
-        final List<SykdomInnleggelser> result = q.getResultList();
+        final List<PleietrengendeSykdomInnleggelser> result = q.getResultList();
         if (result.isEmpty()) {
             return null;
         }
@@ -252,12 +252,12 @@ public class SykdomDokumentRepository {
         return result.get(0);
     }
 
-    public void opprettEllerOppdaterInnleggelser(SykdomInnleggelser innleggelser, AktørId pleietrengende) {
+    public void opprettEllerOppdaterInnleggelser(PleietrengendeSykdomInnleggelser innleggelser, AktørId pleietrengende) {
         if (innleggelser.getId() != null) {
             throw new IllegalStateException("Innleggelser skal aldri oppdateres. Man skal alltid inserte ny");
         }
-        SykdomVurderinger vurderinger = sykdomVurderingRepository.hentEllerLagreSykdomVurderinger(pleietrengende, innleggelser.getOpprettetAv(), innleggelser.getOpprettetTidspunkt());
-        innleggelser.setVurderinger(vurderinger);
+        PleietrengendeSykdom vurderinger = sykdomVurderingRepository.hentEllerLagreSykdomVurderinger(pleietrengende, innleggelser.getOpprettetAv(), innleggelser.getOpprettetTidspunkt());
+        innleggelser.setPleietrengendeSykdom(vurderinger);
         boolean lagNy = innleggelser.getVersjon() == null;
         if (lagNy) {
             opprettInnleggelser(innleggelser, pleietrengende);
@@ -266,21 +266,21 @@ public class SykdomDokumentRepository {
         }
     }
 
-    private void opprettInnleggelser(SykdomInnleggelser innleggelser, AktørId pleietrengende) {
+    private void opprettInnleggelser(PleietrengendeSykdomInnleggelser innleggelser, AktørId pleietrengende) {
         innleggelser.setVersjon(0L);
         entityManager.persist(innleggelser);
         entityManager.flush();
     }
 
-    private void oppdaterInnleggelser(SykdomInnleggelser innleggelser, AktørId pleietrengende) {
-        final TypedQuery<SykdomInnleggelser> q = entityManager.createQuery(
+    private void oppdaterInnleggelser(PleietrengendeSykdomInnleggelser innleggelser, AktørId pleietrengende) {
+        final TypedQuery<PleietrengendeSykdomInnleggelser> q = entityManager.createQuery(
             "Select si " +
                 "FROM SykdomInnleggelser as si " +
                 "   inner join si.vurderinger as sv " +
                 "   inner join sv.person as sp " +
                 "where si.versjon = :versjon " +
                 "and sp.aktørId = :aktørId "
-            , SykdomInnleggelser.class);
+            , PleietrengendeSykdomInnleggelser.class);
         q.setParameter("versjon", innleggelser.getVersjon());
         q.setParameter("aktørId", pleietrengende);
 
@@ -296,16 +296,16 @@ public class SykdomDokumentRepository {
         entityManager.flush();
     }
 
-    public SykdomDiagnosekoder hentDiagnosekoder(AktørId pleietrengende) {
+    public PleietrengendeSykdomDiagnoser hentDiagnosekoder(AktørId pleietrengende) {
         var diagnosekoder = hentDiagnosekoderOrNull(pleietrengende);
         if (diagnosekoder != null) {
             return diagnosekoder;
         }
-        return new SykdomDiagnosekoder(null, null, new ArrayList<>(), null, null);
+        return new PleietrengendeSykdomDiagnoser(null, null, new ArrayList<>(), null, null);
     }
 
-    SykdomDiagnosekoder hentDiagnosekoderOrNull(AktørId pleietrengende) {
-        final TypedQuery<SykdomDiagnosekoder> q = entityManager.createQuery(
+    PleietrengendeSykdomDiagnoser hentDiagnosekoderOrNull(AktørId pleietrengende) {
+        final TypedQuery<PleietrengendeSykdomDiagnoser> q = entityManager.createQuery(
             "SELECT sd " +
                 "FROM SykdomDiagnosekoder as sd " +
                 "   inner join sd.vurderinger as sv " +
@@ -315,10 +315,10 @@ public class SykdomDokumentRepository {
                 "   from SykdomDiagnosekoder as sd2 " +
                 "   where sd2.vurderinger = sd.vurderinger " +
                 ") " +
-                "and p.aktørId = :aktørId", SykdomDiagnosekoder.class);
+                "and p.aktørId = :aktørId", PleietrengendeSykdomDiagnoser.class);
         q.setParameter("aktørId", pleietrengende);
 
-        final List<SykdomDiagnosekoder> result = q.getResultList();
+        final List<PleietrengendeSykdomDiagnoser> result = q.getResultList();
         if (result.isEmpty()) {
             return null;
         }
@@ -328,12 +328,12 @@ public class SykdomDokumentRepository {
         return result.get(0);
     }
 
-    public void opprettEllerOppdaterDiagnosekoder(SykdomDiagnosekoder diagnosekoder, AktørId pleietrengende) {
+    public void opprettEllerOppdaterDiagnosekoder(PleietrengendeSykdomDiagnoser diagnosekoder, AktørId pleietrengende) {
         if (diagnosekoder.getId() != null) {
             throw new IllegalStateException("Diagnosekoder skal aldri oppdateres. Man skal alltid inserte ny");
         }
-        SykdomVurderinger vurderinger = sykdomVurderingRepository.hentEllerLagreSykdomVurderinger(pleietrengende, diagnosekoder.getOpprettetAv(), diagnosekoder.getOpprettetTidspunkt());
-        diagnosekoder.setVurderinger(vurderinger);
+        PleietrengendeSykdom vurderinger = sykdomVurderingRepository.hentEllerLagreSykdomVurderinger(pleietrengende, diagnosekoder.getOpprettetAv(), diagnosekoder.getOpprettetTidspunkt());
+        diagnosekoder.setPleietrengendeSykdom(vurderinger);
         boolean lagNy = diagnosekoder.getVersjon() == null;
         if (lagNy) {
             opprettDiagnosekoder(diagnosekoder);
@@ -342,21 +342,21 @@ public class SykdomDokumentRepository {
         }
     }
 
-    private void opprettDiagnosekoder(SykdomDiagnosekoder diagnosekoder) {
+    private void opprettDiagnosekoder(PleietrengendeSykdomDiagnoser diagnosekoder) {
         diagnosekoder.setVersjon(0L);
         entityManager.persist(diagnosekoder);
         entityManager.flush();
     }
 
-    private void oppdaterDiagnosekoder(SykdomDiagnosekoder diagnosekoder, AktørId pleietrengende) {
-        final TypedQuery<SykdomDiagnosekoder> q = entityManager.createQuery(
+    private void oppdaterDiagnosekoder(PleietrengendeSykdomDiagnoser diagnosekoder, AktørId pleietrengende) {
+        final TypedQuery<PleietrengendeSykdomDiagnoser> q = entityManager.createQuery(
             "Select sd " +
                 "FROM SykdomDiagnosekoder as sd " +
                 "   inner join sd.vurderinger as sv " +
                 "   inner join sv.person as sp " +
                 "where sd.versjon = :versjon " +
                 "and sp.aktørId = :aktørId "
-            , SykdomDiagnosekoder.class);
+            , PleietrengendeSykdomDiagnoser.class);
         q.setParameter("versjon", diagnosekoder.getVersjon());
         q.setParameter("aktørId", pleietrengende);
 

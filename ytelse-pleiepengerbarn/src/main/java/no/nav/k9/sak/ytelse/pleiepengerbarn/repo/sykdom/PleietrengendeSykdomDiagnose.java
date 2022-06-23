@@ -14,16 +14,16 @@ import jakarta.persistence.Table;
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
 //TODO: SykdomDiagnose
-@Entity(name = "SykdomDiagnosekode")
-@Table(name = "SYKDOM_DIAGNOSEKODE")
-public class SykdomDiagnosekode {
+@Entity(name = "PleietrengendeSykdomDiagnose")
+@Table(name = "PLEIETRENGENDE_SYKDOM_DIAGNOSE")
+public class PleietrengendeSykdomDiagnose {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_DIAGNOSEKODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_DIAGNOSE")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "SYKDOM_DIAGNOSEKODER_ID")
-    private SykdomDiagnosekoder diagnosekoder;
+    @JoinColumn(name = "PLEIETRENGENDE_SYKDOM_DIAGNOSER_ID")
+    private PleietrengendeSykdomDiagnoser diagnoser;
 
     @Column(name = "DIAGNOSEKODE", nullable = false, updatable=false)
     private String diagnosekode;
@@ -36,27 +36,27 @@ public class SykdomDiagnosekode {
     @Column(name = "OPPRETTET_TID", nullable = false, updatable=false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
-    SykdomDiagnosekode() {
+    PleietrengendeSykdomDiagnose() {
         //Hibernate
     }
 
-    public SykdomDiagnosekode(String diagnosekode, String opprettetAv, LocalDateTime opprettetTidspunkt) {
+    public PleietrengendeSykdomDiagnose(String diagnosekode, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         this.diagnosekode = diagnosekode;
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
-    public SykdomDiagnosekode(SykdomDiagnosekoder diagnosekoder, String diagnosekode, String opprettetAv, LocalDateTime opprettetTidspunkt) {
+    public PleietrengendeSykdomDiagnose(PleietrengendeSykdomDiagnoser diagnoser, String diagnosekode, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         this(diagnosekode, opprettetAv, opprettetTidspunkt);
-        this.diagnosekoder = diagnosekoder;
+        this.diagnoser = diagnoser;
     }
 
-    public SykdomDiagnosekoder getDiagnosekoder() {
-        return diagnosekoder;
+    public PleietrengendeSykdomDiagnoser getDiagnoser() {
+        return diagnoser;
     }
 
-    public void setDiagnosekoder(SykdomDiagnosekoder diagnosekoder) {
-        this.diagnosekoder = diagnosekoder;
+    public void setDiagnoser(PleietrengendeSykdomDiagnoser diagnosekoder) {
+        this.diagnoser = diagnosekoder;
     }
 
     public String getDiagnosekode() {

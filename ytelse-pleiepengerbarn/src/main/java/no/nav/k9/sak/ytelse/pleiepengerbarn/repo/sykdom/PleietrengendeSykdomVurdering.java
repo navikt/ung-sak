@@ -21,9 +21,9 @@ import jakarta.persistence.Table;
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 
-@Entity(name = "SykdomVurdering")
-@Table(name = "SYKDOM_VURDERING")
-public class SykdomVurdering implements Comparable<SykdomVurdering> {
+@Entity(name = "PleietrengendeSykdomVurdering")
+@Table(name = "PLEIETRENGENDE_SYKDOM_VURDERING")
+public class PleietrengendeSykdomVurdering implements Comparable<PleietrengendeSykdomVurdering> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_VURDERING")
@@ -37,11 +37,11 @@ public class SykdomVurdering implements Comparable<SykdomVurdering> {
     private Long rangering;
 
     @ManyToOne
-    @JoinColumn(name = "SYKDOM_VURDERINGER_ID", nullable = false, updatable = false, unique = true) //TODO:modifiers
-    private SykdomVurderinger sykdomVurderinger;
+    @JoinColumn(name = "PLEIETRENGENDE_SYKDOM_ID", nullable = false, updatable = false, unique = true) //TODO:modifiers
+    private PleietrengendeSykdom pleietrengendeSykdom;
 
-    @OneToMany(mappedBy = "sykdomVurdering", cascade = CascadeType.PERSIST)
-    private List<SykdomVurderingVersjon> sykdomVurderingVersjoner;
+    @OneToMany(mappedBy = "pleietrengendeSykdomVurdering", cascade = CascadeType.PERSIST)
+    private List<PleietrengendeSykdomVurderingVersjon> pleietrengendeSykdomVurderingVersjoner;
 
     @DiffIgnore
     @Column(name = "OPPRETTET_AV", nullable = false, updatable=false)
@@ -51,17 +51,17 @@ public class SykdomVurdering implements Comparable<SykdomVurdering> {
     @Column(name = "OPPRETTET_TID", nullable = false, updatable=false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
-    SykdomVurdering() {
+    PleietrengendeSykdomVurdering() {
         // hibernate
     }
 
-    public SykdomVurdering(
+    public PleietrengendeSykdomVurdering(
             SykdomVurderingType type,
-            List<SykdomVurderingVersjon> sykdomVurderingVersjoner,
+            List<PleietrengendeSykdomVurderingVersjon> pleietrengendeSykdomVurderingVersjoner,
             String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
         this.type = type;
-        this.sykdomVurderingVersjoner = new ArrayList<>(sykdomVurderingVersjoner);
+        this.pleietrengendeSykdomVurderingVersjoner = new ArrayList<>(pleietrengendeSykdomVurderingVersjoner);
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
@@ -79,23 +79,23 @@ public class SykdomVurdering implements Comparable<SykdomVurdering> {
     }
 
     public void setRangering(Long rangering) {
-        this.rangering = rangering; 
-    }
-    
-    public SykdomVurderinger getSykdomVurderinger() {
-        return sykdomVurderinger;
+        this.rangering = rangering;
     }
 
-    void setSykdomVurderinger(SykdomVurderinger sykdomVurderinger) {
-        this.sykdomVurderinger = sykdomVurderinger;
+    public PleietrengendeSykdom getSykdomVurderinger() {
+        return pleietrengendeSykdom;
     }
 
-    public List<SykdomVurderingVersjon> getSykdomVurderingVersjoner() {
-        return Collections.unmodifiableList(sykdomVurderingVersjoner);
+    void setSykdomVurderinger(PleietrengendeSykdom pleietrengendeSykdom) {
+        this.pleietrengendeSykdom = pleietrengendeSykdom;
     }
-    
-    public void addVersjon(SykdomVurderingVersjon versjon) {
-        this.sykdomVurderingVersjoner.add(versjon);
+
+    public List<PleietrengendeSykdomVurderingVersjon> getSykdomVurderingVersjoner() {
+        return Collections.unmodifiableList(pleietrengendeSykdomVurderingVersjoner);
+    }
+
+    public void addVersjon(PleietrengendeSykdomVurderingVersjon versjon) {
+        this.pleietrengendeSykdomVurderingVersjoner.add(versjon);
     }
 
     public String getOpprettetAv() {
@@ -105,13 +105,13 @@ public class SykdomVurdering implements Comparable<SykdomVurdering> {
     public LocalDateTime getOpprettetTidspunkt() {
         return opprettetTidspunkt;
     }
-    
-    public SykdomVurderingVersjon getSisteVersjon() {
-        return sykdomVurderingVersjoner.stream().max(Comparator.naturalOrder()).orElse(null);
+
+    public PleietrengendeSykdomVurderingVersjon getSisteVersjon() {
+        return pleietrengendeSykdomVurderingVersjoner.stream().max(Comparator.naturalOrder()).orElse(null);
     }
-    
+
     @Override
-    public int compareTo(SykdomVurdering v2) {
+    public int compareTo(PleietrengendeSykdomVurdering v2) {
         return getRangering().compareTo(v2.getRangering());
     }
 }

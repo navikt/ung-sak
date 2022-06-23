@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.k9.sak.typer.Periode;
 
-public class SykdomVurderingRestTjenesteTest {
+public class PleietrengendeSykdomVurderingRestTjenesteTest {
 
     @Test
     public void verifyPerioderInneholderFørOgEtter18år() {

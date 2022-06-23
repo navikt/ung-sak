@@ -42,7 +42,7 @@ import no.nav.k9.sak.kontrakt.saksbehandler.SaksbehandlerDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjon;
 
 @Path("/saksbehandler")
 @ApplicationScoped
@@ -94,8 +94,8 @@ public class SaksbehandlerRestTjeneste {
         Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         List<Historikkinnslag> historikkinnslag = historikkRepository.hentHistorikkForSaksnummer(behandling.getFagsak().getSaksnummer());
 
-        LocalDateTimeline<SykdomVurderingVersjon> ktpTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
-        LocalDateTimeline<SykdomVurderingVersjon> toopTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);
+        LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> ktpTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
+        LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> toopTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);
 
         Set<String> unikeIdenter = historikkinnslag.stream()
             .map(BaseEntitet::getOpprettetAv)
@@ -107,12 +107,12 @@ public class SaksbehandlerRestTjeneste {
 
         unikeIdenter.addAll(ktpTimeline.stream()
             .map(LocalDateSegment::getValue)
-            .map(SykdomVurderingVersjon::getEndretAv)
+            .map(PleietrengendeSykdomVurderingVersjon::getEndretAv)
             .collect(Collectors.toSet()));
 
         unikeIdenter.addAll(toopTimeline.stream()
             .map(LocalDateSegment::getValue)
-            .map(SykdomVurderingVersjon::getEndretAv)
+            .map(PleietrengendeSykdomVurderingVersjon::getEndretAv)
             .collect(Collectors.toSet()));
 
         unikeIdenter.remove(systembruker);

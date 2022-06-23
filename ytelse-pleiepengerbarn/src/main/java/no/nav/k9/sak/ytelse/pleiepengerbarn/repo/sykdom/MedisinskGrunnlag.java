@@ -7,25 +7,25 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "SykdomGrunnlagBehandling")
-@Table(name = "SYKDOM_GRUNNLAG_BEHANDLING")
-public class SykdomGrunnlagBehandling {
+@Entity(name = "MedisinskGrunnlag")
+@Table(name = "GR_MEDISINSK")
+public class MedisinskGrunnlag {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_GRUNNLAG_BEHANDLING")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_MEDISINSK")
     private Long id;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "SYKDOM_GRUNNLAG_ID", nullable = false)
-    private SykdomGrunnlag grunnlag;
+    @JoinColumn(name = "MEDISINSK_GRUNNLAGSDATA_ID", nullable = false)
+    private MedisinskGrunnlagsdata grunnlagsdata;
 
     @ManyToOne
     @JoinColumn(name = "SOEKER_PERSON_ID", nullable = false)
-    private SykdomPerson søker;
+    private Person søker;
 
     @ManyToOne
     @JoinColumn(name = "PLEIETRENGENDE_PERSON_ID", nullable = false)
-    private SykdomPerson pleietrengende;
+    private Person pleietrengende;
 
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "saksnummer", column = @Column(name = "SAKSNUMMER", nullable = false)))
@@ -49,14 +49,14 @@ public class SykdomGrunnlagBehandling {
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
 
-    SykdomGrunnlagBehandling() {
+    MedisinskGrunnlag() {
 
     }
 
-    public SykdomGrunnlagBehandling(SykdomGrunnlag grunnlag, SykdomPerson søker, SykdomPerson pleietrengende, Saksnummer saksnummer,
-            UUID behandlingUuid, Long behandlingsnummer, Long versjon, String opprettetAv,
-            LocalDateTime opprettetTidspunkt) {
-        this.grunnlag = grunnlag;
+    public MedisinskGrunnlag(MedisinskGrunnlagsdata grunnlagsdata, Person søker, Person pleietrengende, Saksnummer saksnummer,
+                             UUID behandlingUuid, Long behandlingsnummer, Long versjon, String opprettetAv,
+                             LocalDateTime opprettetTidspunkt) {
+        this.grunnlagsdata = grunnlagsdata;
         this.søker = søker;
         this.pleietrengende = pleietrengende;
         this.saksnummer = saksnummer;
@@ -68,8 +68,8 @@ public class SykdomGrunnlagBehandling {
     }
 
 
-    public SykdomGrunnlag getGrunnlag() {
-        return grunnlag;
+    public MedisinskGrunnlagsdata getGrunnlagsdata() {
+        return grunnlagsdata;
     }
 
     public Long getBehandlingsnummer() {

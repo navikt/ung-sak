@@ -19,23 +19,23 @@ import jakarta.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
-@Entity(name = "SykdomInnleggelser")
-@Table(name = "SYKDOM_INNLEGGELSER")
-public class SykdomInnleggelser {
+@Entity(name = "PleietrengendeSykdomInnleggelser")
+@Table(name = "PLEIETRENGENDE_SYKDOM_INNLEGGELSER")
+public class PleietrengendeSykdomInnleggelser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_INNLEGGELSER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PLEIETRENGENDE_SYKDOM_INNLEGGELSER")
     private Long id;
 
     @Column(name = "VERSJON", nullable = false)
     private Long versjon;
 
     @ManyToOne
-    @JoinColumn(name = "SYKDOM_VURDERINGER_ID" )
-    private SykdomVurderinger vurderinger;
+    @JoinColumn(name = "PLEIETRENGENDE_SYKDOM_ID" )
+    private PleietrengendeSykdom pleietrengendeSykdom;
 
     @OneToMany(mappedBy = "innleggelser", cascade = CascadeType.PERSIST)
-    private List<SykdomInnleggelsePeriode> perioder = new ArrayList<>();
+    private List<PleietrengendeSykdomInnleggelsePeriode> perioder = new ArrayList<>();
 
     @DiffIgnore
     @Column(name = "OPPRETTET_AV", nullable = false, updatable=false)
@@ -45,13 +45,13 @@ public class SykdomInnleggelser {
     @Column(name = "OPPRETTET_TID", nullable = false, updatable=false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
-    SykdomInnleggelser() {
+    PleietrengendeSykdomInnleggelser() {
         // hibernate
     }
 
-    public SykdomInnleggelser(
+    public PleietrengendeSykdomInnleggelser(
             Long versjon,
-            List<SykdomInnleggelsePeriode> perioder,
+            List<PleietrengendeSykdomInnleggelsePeriode> perioder,
             String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
         this.versjon = versjon;
@@ -67,14 +67,14 @@ public class SykdomInnleggelser {
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
-    public SykdomInnleggelser(
+    public PleietrengendeSykdomInnleggelser(
         Long versjon,
-        SykdomVurderinger vurderinger,
-        List<SykdomInnleggelsePeriode> perioder,
+        PleietrengendeSykdom pleietrengendeSykdom,
+        List<PleietrengendeSykdomInnleggelsePeriode> perioder,
         String opprettetAv,
         LocalDateTime opprettetTidspunkt) {
         this(versjon, perioder, opprettetAv, opprettetTidspunkt);
-        this.vurderinger = vurderinger;
+        this.pleietrengendeSykdom = pleietrengendeSykdom;
     }
 
     public Long getId() {
@@ -89,12 +89,12 @@ public class SykdomInnleggelser {
         this.versjon = versjon;
     }
 
-    public SykdomVurderinger getVurderinger() {
-        return vurderinger;
+    public PleietrengendeSykdom getPleietrengendeSykdom() {
+        return pleietrengendeSykdom;
     }
 
-    public void setVurderinger(SykdomVurderinger vurderinger) {
-        this.vurderinger = vurderinger;
+    public void setPleietrengendeSykdom(PleietrengendeSykdom vurderinger) {
+        this.pleietrengendeSykdom = vurderinger;
     }
 
     public String getOpprettetAv() {
@@ -105,7 +105,7 @@ public class SykdomInnleggelser {
         return opprettetTidspunkt;
     }
 
-    public void leggTilPeriode(SykdomInnleggelsePeriode periode) {
+    public void leggTilPeriode(PleietrengendeSykdomInnleggelsePeriode periode) {
         if(periode.getInnleggelser() != null && periode.getInnleggelser() != this) {
             throw new IllegalStateException("Potensiell krysskobling av perioder fra andre innleggelser!");
         }
@@ -113,7 +113,7 @@ public class SykdomInnleggelser {
         perioder.add(periode);
     }
 
-    public List<SykdomInnleggelsePeriode> getPerioder() {
+    public List<PleietrengendeSykdomInnleggelsePeriode> getPerioder() {
         return Collections.unmodifiableList(perioder);
     }
 }

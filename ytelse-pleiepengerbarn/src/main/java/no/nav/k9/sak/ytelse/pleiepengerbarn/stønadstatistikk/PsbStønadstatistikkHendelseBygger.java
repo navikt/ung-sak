@@ -50,9 +50,9 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforh
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold.Builder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.MapFraUttaksplan;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.OmsorgenForDtoMapper;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDiagnose;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk.StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse;
@@ -106,7 +106,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
 
         final PersonIdent søker = aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getAktørId()).get();
         final PersonIdent pleietrengende= aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getPleietrengendeAktørId()).get();
-        final Optional<SykdomGrunnlagBehandling> grunnlagOpt = sykdomGrunnlagService.hentGrunnlagHvisEksisterer(behandlingUuid);
+        final Optional<MedisinskGrunnlag> grunnlagOpt = sykdomGrunnlagService.hentGrunnlagHvisEksisterer(behandlingUuid);
         if (grunnlagOpt.isEmpty()) {
             final NavigableSet<DatoIntervallEntitet> søknadsperioder = søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId());
             if (!søknadsperioder.isEmpty()) {
@@ -116,7 +116,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
             return null;
         }
 
-        final List<SykdomDiagnosekode> diagnosekoder = hentDiagnosekoder(grunnlagOpt.get());
+        final List<PleietrengendeSykdomDiagnose> diagnosekoder = hentDiagnosekoder(grunnlagOpt.get());
         final LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> periodetidslinje = stønadstatistikkPeriodetidslinjebygger.lagTidslinjeFor(behandling);
 
         final UUID forrigeBehandlingUuid = finnForrigeBehandlingUuid(behandling);
@@ -157,12 +157,12 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
                 .collect(Collectors.toList());
     }
 
-    private List<SykdomDiagnosekode> hentDiagnosekoder(SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
-        final SykdomGrunnlag sykdomGrunnlag = sykdomGrunnlagBehandling.getGrunnlag();
-        if (sykdomGrunnlag.getDiagnosekoder() == null || sykdomGrunnlag.getDiagnosekoder().getDiagnosekoder() == null) {
+    private List<PleietrengendeSykdomDiagnose> hentDiagnosekoder(MedisinskGrunnlag medisinskGrunnlag) {
+        final MedisinskGrunnlagsdata medisinskGrunnlagsdata = medisinskGrunnlag.getGrunnlagsdata();
+        if (medisinskGrunnlagsdata.getDiagnosekoder() == null || medisinskGrunnlagsdata.getDiagnosekoder().getDiagnoser() == null) {
             return List.of();
         }
-        final List<SykdomDiagnosekode> diagnosekoder = sykdomGrunnlag.getDiagnosekoder().getDiagnosekoder();
+        final List<PleietrengendeSykdomDiagnose> diagnosekoder = medisinskGrunnlagsdata.getDiagnosekoder().getDiagnoser();
         return diagnosekoder;
     }
 

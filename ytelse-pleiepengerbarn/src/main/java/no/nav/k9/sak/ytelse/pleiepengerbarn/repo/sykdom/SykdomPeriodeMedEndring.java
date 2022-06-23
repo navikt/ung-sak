@@ -12,31 +12,31 @@ public class SykdomPeriodeMedEndring {
     private boolean endrerVurderingSammeBehandling;
 
     private boolean endrerAnnenVurdering;
-    
-    private SykdomVurderingVersjon gammelVersjon;
+
+    private PleietrengendeSykdomVurderingVersjon gammelVersjon;
 
 
-    public SykdomPeriodeMedEndring(Periode periode, boolean endrerVurderingSammeBehandling, boolean endrerAnnenVurdering, SykdomVurderingVersjon gammelVersjon) {
+    public SykdomPeriodeMedEndring(Periode periode, boolean endrerVurderingSammeBehandling, boolean endrerAnnenVurdering, PleietrengendeSykdomVurderingVersjon gammelVersjon) {
         this.periode = Objects.requireNonNull(periode, "periode");
         this.endrerVurderingSammeBehandling = endrerVurderingSammeBehandling;
         this.endrerAnnenVurdering = endrerAnnenVurdering;
         this.gammelVersjon = Objects.requireNonNull(gammelVersjon, "gammelVersjon");
     }
 
-    
+
     public Periode getPeriode() {
         return periode;
     }
-    
+
     public boolean isEndrerAnnenVurdering() {
         return endrerAnnenVurdering;
     }
-    
+
     public boolean isEndrerVurderingSammeBehandling() {
         return endrerVurderingSammeBehandling;
     }
-    
-    public SykdomVurderingVersjon getGammelVersjon() {
+
+    public PleietrengendeSykdomVurderingVersjon getGammelVersjon() {
         return gammelVersjon;
     }
 }

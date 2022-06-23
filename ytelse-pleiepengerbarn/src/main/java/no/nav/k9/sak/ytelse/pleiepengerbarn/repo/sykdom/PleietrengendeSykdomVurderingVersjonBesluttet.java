@@ -11,12 +11,12 @@ import jakarta.persistence.Table;
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 //Besluttet = Godkjent av saksbehandler med beslutterrolle. Begrepet fordrer forklaring for nye folk.
 // Klarer vi å finne på noe mer beskrivende?
-@Entity(name = "SykdomVurderingVersjonBesluttet")
-@Table(name = "SYKDOM_VURDERING_VERSJON_BESLUTTET")
-public class SykdomVurderingVersjonBesluttet {
+@Entity(name = "PleietrengendeSykdomVurderingVersjonBesluttet")
+@Table(name = "PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON_BESLUTTET")
+public class PleietrengendeSykdomVurderingVersjonBesluttet {
 
     @Id
-    @Column(name = "SYKDOM_VURDERING_VERSJON_ID", nullable = false)
+    @Column(name = "PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON_ID", nullable = false)
     private Long id;
 
     @DiffIgnore
@@ -28,18 +28,18 @@ public class SykdomVurderingVersjonBesluttet {
     private LocalDateTime endretTidspunkt; // NOSONAR
 
     @OneToOne
-    @JoinColumn(name = "SYKDOM_VURDERING_VERSJON_ID")
-    private SykdomVurderingVersjon sykdomVurderingVersjon;
+    @JoinColumn(name = "PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON_ID")
+    private PleietrengendeSykdomVurderingVersjon pleietrengendeSykdomVurderingVersjon;
 
-    SykdomVurderingVersjonBesluttet() {
+    PleietrengendeSykdomVurderingVersjonBesluttet() {
         // hibernate
     }
 
-    public SykdomVurderingVersjonBesluttet(String endretAv, LocalDateTime endretTidspunkt, SykdomVurderingVersjon sykdomVurderingVersjon) {
+    public PleietrengendeSykdomVurderingVersjonBesluttet(String endretAv, LocalDateTime endretTidspunkt, PleietrengendeSykdomVurderingVersjon pleietrengendeSykdomVurderingVersjon) {
         this.endretAv = endretAv;
         this.endretTidspunkt = endretTidspunkt;
-        this.sykdomVurderingVersjon = sykdomVurderingVersjon;
-        this.id = sykdomVurderingVersjon.getId();
+        this.pleietrengendeSykdomVurderingVersjon = pleietrengendeSykdomVurderingVersjon;
+        this.id = pleietrengendeSykdomVurderingVersjon.getId();
     }
 
     public Long getId() {
@@ -54,7 +54,7 @@ public class SykdomVurderingVersjonBesluttet {
         return endretTidspunkt;
     }
 
-    public SykdomVurderingVersjon getSykdomVurderingVersjon() {
-        return sykdomVurderingVersjon;
+    public PleietrengendeSykdomVurderingVersjon getSykdomVurderingVersjon() {
+        return pleietrengendeSykdomVurderingVersjon;
     }
 }

@@ -20,24 +20,23 @@ import jakarta.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
-//TODO: SykdomDiagnoser
-@Entity(name = "SykdomDiagnosekoder")
-@Table(name = "SYKDOM_DIAGNOSEKODER")
-public class SykdomDiagnosekoder {
+@Entity(name = "PleietrengendeSykdomDiagnoser")
+@Table(name = "PLEIETRENGENDE_SYKDOM_DIAGNOSER")
+public class PleietrengendeSykdomDiagnoser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_DIAGNOSEKODER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_DIAGNOSER")
     private Long id;
 
     @Column(name = "VERSJON", nullable = false)
     private Long versjon;
 
     @ManyToOne
-    @JoinColumn(name = "SYKDOM_VURDERINGER_ID" )
-    private SykdomVurderinger vurderinger;
+    @JoinColumn(name = "PLEIETRENGENDE_SYKDOM_ID" )
+    private PleietrengendeSykdom pleietrengendeSykdom;
 
-    @OneToMany(mappedBy = "diagnosekoder", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-    private List<SykdomDiagnosekode> diagnosekoder;
+    @OneToMany(mappedBy = "diagnoser", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    private List<PleietrengendeSykdomDiagnose> diagnoser;
 
     @DiffIgnore
     @Column(name = "OPPRETTET_AV", nullable = false, updatable=false)
@@ -47,36 +46,36 @@ public class SykdomDiagnosekoder {
     @Column(name = "OPPRETTET_TID", nullable = false, updatable=false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
-    SykdomDiagnosekoder() {
+    PleietrengendeSykdomDiagnoser() {
         // hibernate
     }
 
-    public SykdomDiagnosekoder(
+    public PleietrengendeSykdomDiagnoser(
         Long versjon,
-        List<SykdomDiagnosekode> diagnosekoder,
+        List<PleietrengendeSykdomDiagnose> diagnoser,
         String opprettetAv,
         LocalDateTime opprettetTidspunkt) {
         this.versjon = versjon;
-        this.diagnosekoder = diagnosekoder.stream()
+        this.diagnoser = diagnoser.stream()
             .map(k -> {
-                if(k.getDiagnosekoder() != null && k.getDiagnosekoder() != this) {
+                if(k.getDiagnoser() != null && k.getDiagnoser() != this) {
                     throw new IllegalStateException("Potensiell krysskobling av koder fra andre diagnosekodesett!");
                 }
-                k.setDiagnosekoder(this);
+                k.setDiagnoser(this);
                 return k;
             }).collect(Collectors.toCollection(ArrayList::new));
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
-    public SykdomDiagnosekoder(
+    public PleietrengendeSykdomDiagnoser(
             Long versjon,
-            SykdomVurderinger vurderinger,
-            List<SykdomDiagnosekode> diagnosekoder,
+            PleietrengendeSykdom pleietrengendeSykdom,
+            List<PleietrengendeSykdomDiagnose> diagnoser,
             String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
-        this(versjon, diagnosekoder, opprettetAv, opprettetTidspunkt);
-        this.vurderinger = vurderinger;
+        this(versjon, diagnoser, opprettetAv, opprettetTidspunkt);
+        this.pleietrengendeSykdom = pleietrengendeSykdom;
     }
 
     public Long getId() {
@@ -91,24 +90,24 @@ public class SykdomDiagnosekoder {
         this.versjon = versjon;
     }
 
-    public SykdomVurderinger getVurderinger() {
-        return vurderinger;
+    public PleietrengendeSykdom getPleietrengendeSykdom() {
+        return pleietrengendeSykdom;
     }
 
-    public void setVurderinger(SykdomVurderinger vurderinger) {
-        this.vurderinger = vurderinger;
+    public void setPleietrengendeSykdom(PleietrengendeSykdom vurderinger) {
+        this.pleietrengendeSykdom = vurderinger;
     }
 
-    public void leggTilDiagnosekode(SykdomDiagnosekode kode) {
-        if(kode.getDiagnosekoder() != null && kode.getDiagnosekoder() != this) {
+    public void leggTilDiagnosekode(PleietrengendeSykdomDiagnose kode) {
+        if(kode.getDiagnoser() != null && kode.getDiagnoser() != this) {
             throw new IllegalStateException("Potensiell kryssko");
         }
-        kode.setDiagnosekoder(this);
-        diagnosekoder.add(kode);
+        kode.setDiagnoser(this);
+        diagnoser.add(kode);
     }
 
-    public List<SykdomDiagnosekode> getDiagnosekoder() {
-        return Collections.unmodifiableList(diagnosekoder);
+    public List<PleietrengendeSykdomDiagnose> getDiagnoser() {
+        return Collections.unmodifiableList(diagnoser);
     }
 
     public String getOpprettetAv() {

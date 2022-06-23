@@ -37,7 +37,7 @@ import no.nav.k9.sak.kontrakt.vedtak.DokumentMedUstrukturerteDataDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentRestTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 
 @Path("")
@@ -86,10 +86,10 @@ public class DokumenterMedUstrukturerteDataRestTjeneste {
             return Collections.emptyList();
         }
 
-        List<SykdomDokument> sykdomDokumenter = sykdomDokumentRepository.hentNyeDokumenterFor(behandlingUuid.getBehandlingUuid());
+        List<PleietrengendeSykdomDokument> pleietrengendeSykdomDokumenter = sykdomDokumentRepository.hentNyeDokumenterFor(behandlingUuid.getBehandlingUuid());
 
-        return sykdomDokumenter.stream()
-            .filter(SykdomDokument::isHarInfoSomIkkeKanPunsjes)
+        return pleietrengendeSykdomDokumenter.stream()
+            .filter(PleietrengendeSykdomDokument::isHarInfoSomIkkeKanPunsjes)
             .map(d -> new DokumentMedUstrukturerteDataDto(
                 "" + d.getId(),
                 d.getType(),

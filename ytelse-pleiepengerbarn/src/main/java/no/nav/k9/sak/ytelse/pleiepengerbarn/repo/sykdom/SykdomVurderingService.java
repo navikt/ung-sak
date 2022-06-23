@@ -94,7 +94,7 @@ public class SykdomVurderingService {
         switch (behandling.getFagsakYtelseType()) {
             case PLEIEPENGER_SYKT_BARN -> {
                 if (!utledPerioderTilVurderingMedOmsorgenFor(behandling).isEmpty()) {
-                    manglerDiagnosekode = sykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnosekoder().isEmpty();
+                    manglerDiagnosekode = sykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnoser().isEmpty();
                 } else {
                     manglerDiagnosekode = false;
                 }
@@ -129,9 +129,9 @@ public class SykdomVurderingService {
     }
 
     private boolean harUbesluttedeVurderinger(Behandling behandling) {
-        SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(behandling.getUuid());
+        MedisinskGrunnlag medisinskGrunnlag = sykdomGrunnlagService.hentGrunnlag(behandling.getUuid());
 
-        boolean harUbesluttet = sykdomGrunnlagBehandling.getGrunnlag().getVurderinger()
+        boolean harUbesluttet = medisinskGrunnlag.getGrunnlagsdata().getVurderinger()
             .stream()
             .anyMatch(v -> !v.isBesluttet());
         return harUbesluttet;
@@ -175,7 +175,7 @@ public class SykdomVurderingService {
     }
 
     private List<Periode> hentKontinuerligTilsynOgPleiePerioder(Behandling behandling) {
-        final LocalDateTimeline<SykdomVurderingVersjon> vurderinger = hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
+        final LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> vurderinger = hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
         return vurderinger.stream()
             .filter(s -> s.getValue().getResultat() == Resultat.OPPFYLT)
             .map(s -> new Periode(s.getFom(), s.getTom()))
@@ -183,7 +183,7 @@ public class SykdomVurderingService {
     }
 
     public SykdomVurderingerOgPerioder utledPerioderPPN(Behandling behandling) {
-        LocalDateTimeline<SykdomVurderingVersjon> vurderinger = hentVurderinger(SykdomVurderingType.LIVETS_SLUTTFASE, behandling);
+        LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> vurderinger = hentVurderinger(SykdomVurderingType.LIVETS_SLUTTFASE, behandling);
         LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
 
         List<Periode> perioderKreverVurdering = behandledeSøknadsperioder.stream().map(s->new Periode(s.getFom(), s.getTom())).toList();
@@ -225,7 +225,7 @@ public class SykdomVurderingService {
 
     public SykdomVurderingerOgPerioder utledPerioder(SykdomVurderingType sykdomVurderingType, Behandling behandling) {
         final Saksnummer saksnummer = behandling.getFagsak().getSaksnummer();
-        final LocalDateTimeline<SykdomVurderingVersjon> eksisterendeVurderinger = hentVurderinger(sykdomVurderingType, behandling);
+        final LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> eksisterendeVurderinger = hentVurderinger(sykdomVurderingType, behandling);
         //TODO: Dette er "søknadsperioder" fra sykdomsgrunnlaget. Det skjærer litt med søknadsperiodene vi nå henter rett fra kilden, hvor vi filtrere på trukkede perioder. Bedre navn?
         // Er det evt nå redundant, pga direkte henting fra søknadsperioder, og kan/bør fjernes?
         final LocalDateTimeline<Set<Saksnummer>> søknadsperioderPåPleietrengende = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
@@ -332,7 +332,7 @@ public class SykdomVurderingService {
     }
 
 
-    public SykdomInnleggelser hentInnleggelser(final Behandling behandling) {
+    public PleietrengendeSykdomInnleggelser hentInnleggelser(final Behandling behandling) {
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             return sykdomDokumentRepository.hentInnleggelse(behandling.getUuid());
         } else {
@@ -340,7 +340,7 @@ public class SykdomVurderingService {
         }
     }
 
-    public LocalDateTimeline<SykdomVurderingVersjon> hentVurderinger(SykdomVurderingType sykdomVurderingType, final Behandling behandling) {
+    public LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> hentVurderinger(SykdomVurderingType sykdomVurderingType, final Behandling behandling) {
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             return sykdomVurderingRepository.getVurderingstidslinjeFor(sykdomVurderingType, behandling.getUuid());
         } else {
@@ -353,7 +353,7 @@ public class SykdomVurderingService {
             .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
     }
 
-    private LocalDateTimeline<Boolean> finnResterendeVurderingsperioder(Behandling behandling, LocalDateTimeline<Boolean> vurderingsperioder, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje) {
+    private LocalDateTimeline<Boolean> finnResterendeVurderingsperioder(Behandling behandling, LocalDateTimeline<Boolean> vurderingsperioder, LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> vurderingerTidslinje) {
         if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
             return LocalDateTimeline.EMPTY_TIMELINE;
         }
@@ -364,7 +364,7 @@ public class SykdomVurderingService {
         /**
          * Alle gjeldende vurderinger i en tidslinje.
          */
-        private final LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje;
+        private final LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> vurderingerTidslinje;
 
         /**
          * Tidslinje over periodene til alle sakene som er tilknyttet den pleietrengende.
@@ -399,7 +399,7 @@ public class SykdomVurderingService {
         private List<Periode> resterendeValgfrieVurderingsperioder;
 
 
-        public SykdomVurderingerOgPerioder(LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje,
+        public SykdomVurderingerOgPerioder(LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> vurderingerTidslinje,
                                            LocalDateTimeline<Set<Saksnummer>> saksnummerForPerioder,
                                            List<Periode> perioderSomKanVurderes,
                                            List<Periode> resterendeVurderingsperioder,
@@ -416,7 +416,7 @@ public class SykdomVurderingService {
         }
 
 
-        public LocalDateTimeline<SykdomVurderingVersjon> getVurderingerTidslinje() {
+        public LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> getVurderingerTidslinje() {
             return vurderingerTidslinje;
         }
 

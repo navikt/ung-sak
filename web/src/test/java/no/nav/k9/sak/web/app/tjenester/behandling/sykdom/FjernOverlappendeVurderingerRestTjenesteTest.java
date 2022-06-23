@@ -27,9 +27,9 @@ import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPeriodeMedEndring;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjon;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -40,7 +40,7 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
     @Mock
     private SykdomVurderingRepository repo;
     @Captor
-    private ArgumentCaptor<SykdomVurderingVersjon> captor;
+    private ArgumentCaptor<PleietrengendeSykdomVurderingVersjon> captor;
 
     private SykdomVurderingMapper.Sporingsinformasjon mockSporingsinformasjon = new SykdomVurderingMapper.Sporingsinformasjon(null, null, null, null);
 
@@ -63,7 +63,7 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
             createSykdomVurderingOgVersjonMock(0, 1,
                 new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 20)))));
 
-        SykdomVurderingVersjon fasit = createSykdomVurderingOgVersjonMock(1, 1,
+        PleietrengendeSykdomVurderingVersjon fasit = createSykdomVurderingOgVersjonMock(1, 1,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 4)),
             new Periode(LocalDate.of(2021, 1, 11), LocalDate.of(2021, 1, 20)));
 
@@ -88,17 +88,17 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
                     new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 20))))
         );
 
-        SykdomVurderingVersjon fasit1 = createSykdomVurderingOgVersjonMock(1, 1,
+        PleietrengendeSykdomVurderingVersjon fasit1 = createSykdomVurderingOgVersjonMock(1, 1,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 4)),
             new Periode(LocalDate.of(2021, 1, 11), LocalDate.of(2021, 1, 20)));
 
-        SykdomVurderingVersjon fasit2 = createSykdomVurderingOgVersjonMock(1, 1,
+        PleietrengendeSykdomVurderingVersjon fasit2 = createSykdomVurderingOgVersjonMock(1, 1,
             new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 4)),
             new Periode(LocalDate.of(2021, 2, 11), LocalDate.of(2021, 2, 20)));
 
         tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(sykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
         verify(repo, times(2)).lagre(captor.capture());
-        List<SykdomVurderingVersjon> faktisk = captor.getAllValues().stream().sorted(Comparator.comparing(p -> p.getPerioder().get(0).getFom())).collect(Collectors.toList());
+        List<PleietrengendeSykdomVurderingVersjon> faktisk = captor.getAllValues().stream().sorted(Comparator.comparing(p -> p.getPerioder().get(0).getFom())).collect(Collectors.toList());
 
         sjekkPerioder(fasit1, faktisk.get(0));
         sjekkPerioder(fasit2, faktisk.get(1));
@@ -107,7 +107,7 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
     @Test
     void toOverlappendePerioder() {
 
-        SykdomVurderingVersjon vurderingVersjon = createSykdomVurderingOgVersjonMock(0, 1,
+        PleietrengendeSykdomVurderingVersjon vurderingVersjon = createSykdomVurderingOgVersjonMock(0, 1,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 20)));
 
         List<SykdomPeriodeMedEndring> sykdomPeriodeMedEndringer = Arrays.asList(
@@ -121,7 +121,7 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
                 vurderingVersjon)
             );
 
-        SykdomVurderingVersjon fasit = createSykdomVurderingOgVersjonMock(1, 1,
+        PleietrengendeSykdomVurderingVersjon fasit = createSykdomVurderingOgVersjonMock(1, 1,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 4)),
             new Periode(LocalDate.of(2021, 1, 11), LocalDate.of(2021, 1, 14)),
             new Periode(LocalDate.of(2021, 1, 20), LocalDate.of(2021, 1, 20)));
@@ -132,7 +132,7 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
         sjekkPerioder(fasit, captor.getValue());
     }
 
-    private void sjekkPerioder(SykdomVurderingVersjon fasit, SykdomVurderingVersjon faktisk) {
+    private void sjekkPerioder(PleietrengendeSykdomVurderingVersjon fasit, PleietrengendeSykdomVurderingVersjon faktisk) {
         List<Periode> fasitPerioder = fasit.getPerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList());
         List<Periode> faktiskePerioder = faktisk.getPerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList());
         assertThat(faktiskePerioder.size()).isEqualTo(fasit.getPerioder().size());
@@ -143,8 +143,8 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
         }
     }
 
-    private SykdomVurderingVersjon createSykdomVurderingOgVersjonMock(long versjon, long rangering, Periode... perioder) {
-        return new SykdomVurderingVersjon(
+    private PleietrengendeSykdomVurderingVersjon createSykdomVurderingOgVersjonMock(long versjon, long rangering, Periode... perioder) {
+        return new PleietrengendeSykdomVurderingVersjon(
             createSykdomVurderingMock(rangering),
             "",
             Resultat.OPPFYLT,
@@ -160,8 +160,8 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
         );
     }
 
-    private SykdomVurdering createSykdomVurderingMock(long rangering) {
-        var s = new SykdomVurdering(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, Collections.emptyList(), "", LocalDateTime.now());
+    private PleietrengendeSykdomVurdering createSykdomVurderingMock(long rangering) {
+        var s = new PleietrengendeSykdomVurdering(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, Collections.emptyList(), "", LocalDateTime.now());
         s.setRangering(Long.valueOf(rangering));
         return s;
     }

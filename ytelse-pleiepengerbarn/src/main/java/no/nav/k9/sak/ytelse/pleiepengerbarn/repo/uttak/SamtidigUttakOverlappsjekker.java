@@ -13,7 +13,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelsePeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomInnleggelsePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 
 @Dependent
@@ -57,7 +57,7 @@ public class SamtidigUttakOverlappsjekker {
     }
 
     private LocalDateTimeline<Boolean> hentInnleggelseTimeline(Behandling behandling) {
-        final List<SykdomInnleggelsePeriode> innleggelser = sykdomVurderingService.hentInnleggelser(behandling).getPerioder();
+        final List<PleietrengendeSykdomInnleggelsePeriode> innleggelser = sykdomVurderingService.hentInnleggelser(behandling).getPerioder();
         return new LocalDateTimeline<>(innleggelser.stream().map(i -> new LocalDateSegment<>(i.getFom(), i.getTom(), Boolean.TRUE)).collect(Collectors.toList()));
     }
 

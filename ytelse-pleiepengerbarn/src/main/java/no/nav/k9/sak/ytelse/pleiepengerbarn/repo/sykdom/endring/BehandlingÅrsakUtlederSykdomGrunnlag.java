@@ -29,14 +29,14 @@ import no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak.Behandling�
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 
 @ApplicationScoped
-@GrunnlagRef(SykdomGrunnlag.class)
+@GrunnlagRef(MedisinskGrunnlagsdata.class)
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
@@ -111,7 +111,7 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
 
     private boolean harEndringerForSykdom(BehandlingReferanse ref) {
         var sykdomGrunnlag = sykdomGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
-            .map(SykdomGrunnlagBehandling::getGrunnlag);
+            .map(MedisinskGrunnlag::getGrunnlagsdata);
 
         List<Periode> nyeVurderingsperioder = utledVurderingsperiode(ref);
         var utledGrunnlag = sykdomGrunnlagService.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);

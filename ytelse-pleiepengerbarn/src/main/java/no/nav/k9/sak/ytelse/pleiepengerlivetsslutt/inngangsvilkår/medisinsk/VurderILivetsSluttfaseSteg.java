@@ -51,7 +51,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.LivetsSluttfaseDokumentasjon;
@@ -101,18 +101,18 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var perioder = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.I_LIVETS_SLUTTFASE);
 
-        SykdomGrunnlagBehandling sykdomGrunnlagBehandling = opprettGrunnlag(perioder, behandling);
+        MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioder, behandling);
 
         boolean trengerAksjonspunkt = harUklassifiserteDokumenter(pleietrengendeAktørId)
             || manglerGodkjentLegeerklæring(pleietrengendeAktørId)
             || manglerSykdomVurdering(pleietrengendeAktørId);
-        final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && sykdomGrunnlagBehandling.isFørsteGrunnlagPåBehandling();
+        final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && medisinskGrunnlag.isFørsteGrunnlagPåBehandling();
         if (trengerAksjonspunkt || førsteGangManuellRevurdering) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
         var builder = Vilkårene.builderFraEksisterende(vilkårene);
-        vurderVilkår(behandlingId, sykdomGrunnlagBehandling, builder, VilkårType.I_LIVETS_SLUTTFASE, perioder);
+        vurderVilkår(behandlingId, medisinskGrunnlag, builder, VilkårType.I_LIVETS_SLUTTFASE, perioder);
         vilkårResultatRepository.lagre(behandlingId, builder.build());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
@@ -147,7 +147,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
                 || Resultat.IKKE_VURDERT == sykdomVurderingSegment.getValue().getResultat());
     }
 
-    private SykdomGrunnlagBehandling opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, final Behandling behandling) {
+    private MedisinskGrunnlag opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, final Behandling behandling) {
         return sykdomGrunnlagRepository.utledOgLagreGrunnlag(
             behandling.getFagsak().getSaksnummer(),
             behandling.getUuid(),
@@ -161,14 +161,14 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
     }
 
     private void vurderVilkår(Long behandlingId,
-                              SykdomGrunnlagBehandling sykdomGrunnlagBehandling,
+                              MedisinskGrunnlag medisinskGrunnlag,
                               VilkårResultatBuilder builder,
                               VilkårType vilkåret,
                               NavigableSet<DatoIntervallEntitet> perioder) {
 
         var vilkårBuilder = builder.hentBuilderFor(vilkåret);
         for (DatoIntervallEntitet periode : perioder) {
-            final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(vilkåret, periode, sykdomGrunnlagBehandling);
+            final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(vilkåret, periode, medisinskGrunnlag);
             oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårBuilder);
             oppdaterPleiebehovResultat(behandlingId, periode, vilkårData);
         }

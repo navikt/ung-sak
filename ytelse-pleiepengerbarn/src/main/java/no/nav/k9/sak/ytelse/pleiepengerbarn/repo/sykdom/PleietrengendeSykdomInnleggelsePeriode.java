@@ -14,16 +14,16 @@ import jakarta.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
-@Entity(name = "SykdomInnleggelsePeriode")
-@Table(name = "SYKDOM_INNLEGGELSE_PERIODE")
-public class SykdomInnleggelsePeriode {
+@Entity(name = "PleietrengendeSykdomInnleggelsePeriode")
+@Table(name = "PLEIETRENGENDE_SYKDOM_INNLEGGELSE_PERIODE")
+public class PleietrengendeSykdomInnleggelsePeriode {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_INNLEGGELSE_PERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PLEIETRENGENDE_SYKDOM_INNLEGGELSE_PERIODE")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "SYKDOM_INNLEGGELSER_ID")
-    private SykdomInnleggelser innleggelser;
+    @JoinColumn(name = "PLEIETRENGENDE_SYKDOM_INNLEGGELSER_ID")
+    private PleietrengendeSykdomInnleggelser innleggelser;
 
     @Column(name = "FOM", nullable = false)
     private LocalDate fom;
@@ -39,18 +39,18 @@ public class SykdomInnleggelsePeriode {
     @Column(name = "OPPRETTET_TID", nullable = false, updatable=false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
-    SykdomInnleggelsePeriode() {
+    PleietrengendeSykdomInnleggelsePeriode() {
         //HIBERNATE
     }
 
-    public SykdomInnleggelsePeriode(LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
+    public PleietrengendeSykdomInnleggelsePeriode(LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         this.fom = fom;
         this.tom = tom;
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
-    public SykdomInnleggelsePeriode(SykdomInnleggelser innleggelser, LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
+    public PleietrengendeSykdomInnleggelsePeriode(PleietrengendeSykdomInnleggelser innleggelser, LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         this(fom, tom, opprettetAv, opprettetTidspunkt);
         this.innleggelser = innleggelser;
     }
@@ -59,11 +59,11 @@ public class SykdomInnleggelsePeriode {
         return id;
     }
 
-    public SykdomInnleggelser getInnleggelser() {
+    public PleietrengendeSykdomInnleggelser getInnleggelser() {
         return innleggelser;
     }
 
-    public void setInnleggelser(SykdomInnleggelser innleggelser) {
+    public void setInnleggelser(PleietrengendeSykdomInnleggelser innleggelser) {
         this.innleggelser = innleggelser;
     }
 

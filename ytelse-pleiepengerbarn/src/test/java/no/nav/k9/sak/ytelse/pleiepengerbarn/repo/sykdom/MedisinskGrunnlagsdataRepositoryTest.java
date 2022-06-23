@@ -13,7 +13,7 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class SykdomGrunnlagRepositoryTest {
+class MedisinskGrunnlagsdataRepositoryTest {
     @Inject
     private SykdomGrunnlagRepository repo;
 

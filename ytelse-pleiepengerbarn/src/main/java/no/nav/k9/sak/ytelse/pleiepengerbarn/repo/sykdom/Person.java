@@ -8,12 +8,12 @@ import jakarta.persistence.*;
 // og erstattes med aktørid-/fnr-/personnøkkelreferanse både i sykdom_vurderinger og andre steder?
 // Jeg foretrekker nok det første alternativet.. Tabellen kan hete bare "Person"
 
-@Entity(name = "SykdomPerson")
-@Table(name = "SYKDOM_PERSON")
-public class SykdomPerson {
+@Entity(name = "Person")
+@Table(name = "PERSON")
+public class Person {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_PERSON")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PERSON")
     private Long id;
 
     //Iflg de andre på kontoret, så er aktørId noe som pdl har gått bort fra, eller i hvertfall ikke gir noen garanti om stabilitet osv
@@ -25,11 +25,11 @@ public class SykdomPerson {
     @Column(name = "NORSK_IDENTITETSNUMMER", nullable = true) // TODO.
     private String norskIdentitetsnummer; //Datatype?
 
-    SykdomPerson() {
+    Person() {
         // hibernate
     }
 
-    public SykdomPerson(AktørId aktørId, String norskIdentitetsnummer) {
+    public Person(AktørId aktørId, String norskIdentitetsnummer) {
         this.aktørId = aktørId;
         this.norskIdentitetsnummer = norskIdentitetsnummer;
     }

@@ -39,11 +39,11 @@ public class SykdomGrunnlagService {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
 
-    public SykdomGrunnlagBehandling hentGrunnlag(UUID behandlingUuid) {
+    public MedisinskGrunnlag hentGrunnlag(UUID behandlingUuid) {
         return sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandlingUuid).orElseThrow();
     }
 
-    public Optional<SykdomGrunnlagBehandling> hentGrunnlagHvisEksisterer(UUID behandlingUuid) {
+    public Optional<MedisinskGrunnlag> hentGrunnlagHvisEksisterer(UUID behandlingUuid) {
         return sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandlingUuid);
     }
 
@@ -66,41 +66,41 @@ public class SykdomGrunnlagService {
     }
 
     public SykdomGrunnlagSammenlikningsresultat utledRelevanteEndringerSidenForrigeGrunnlag(Behandling behandling) {
-        final Optional<SykdomGrunnlagBehandling> grunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandling.getUuid());
+        final Optional<MedisinskGrunnlag> grunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandling.getUuid());
 
         final List<Periode> søknadsperioderSomSkalFjernes = hentManglendeOmsorgenForPerioder(behandling.getId());
-        final SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), behandling.getFagsak().getPleietrengendeAktørId(),
-            grunnlagBehandling.map(bg -> bg.getGrunnlag().getSøktePerioder().stream().map(sp -> new Periode(sp.getFom(), sp.getTom())).collect(Collectors.toList())).orElse(List.of()),
+        final MedisinskGrunnlagsdata utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), behandling.getFagsak().getPleietrengendeAktørId(),
+            grunnlagBehandling.map(bg -> bg.getGrunnlagsdata().getSøktePerioder().stream().map(sp -> new Periode(sp.getFom(), sp.getTom())).collect(Collectors.toList())).orElse(List.of()),
             søknadsperioderSomSkalFjernes
             );
 
-        return sammenlignGrunnlag(grunnlagBehandling.map(SykdomGrunnlagBehandling::getGrunnlag), utledetGrunnlag);
+        return sammenlignGrunnlag(grunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag);
     }
 
     public SykdomGrunnlagSammenlikningsresultat utledRelevanteEndringerSidenForrigeBehandling(Behandling behandling, List<Periode> nyeVurderingsperioder) {
-        final Optional<SykdomGrunnlagBehandling> forrigeGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagFraForrigeBehandling(behandling.getFagsak().getSaksnummer(), behandling.getUuid());
+        final Optional<MedisinskGrunnlag> forrigeGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagFraForrigeBehandling(behandling.getFagsak().getSaksnummer(), behandling.getUuid());
         final List<Periode> søknadsperioderSomSkalFjernes = hentManglendeOmsorgenForPerioder(behandling.getId());
-        final SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), behandling.getFagsak().getPleietrengendeAktørId(), nyeVurderingsperioder, søknadsperioderSomSkalFjernes);
+        final MedisinskGrunnlagsdata utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), behandling.getFagsak().getPleietrengendeAktørId(), nyeVurderingsperioder, søknadsperioderSomSkalFjernes);
 
-        return sammenlignGrunnlag(forrigeGrunnlagBehandling.map(SykdomGrunnlagBehandling::getGrunnlag), utledetGrunnlag);
+        return sammenlignGrunnlag(forrigeGrunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag);
     }
 
-    public SykdomGrunnlag utledGrunnlagMedManglendeOmsorgFjernet(Saksnummer saksnummer, UUID behandlingUuid, Long behandlingId, AktørId pleietrengende, List<Periode> vurderingsperioder) {
+    public MedisinskGrunnlagsdata utledGrunnlagMedManglendeOmsorgFjernet(Saksnummer saksnummer, UUID behandlingUuid, Long behandlingId, AktørId pleietrengende, List<Periode> vurderingsperioder) {
         final List<Periode> søknadsperioderSomSkalFjernes = hentManglendeOmsorgenForPerioder(behandlingId);
         return sykdomGrunnlagRepository.utledGrunnlag(saksnummer, behandlingUuid, pleietrengende, vurderingsperioder, søknadsperioderSomSkalFjernes);
     }
 
-    public SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<SykdomGrunnlag> forrigeGrunnlagBehandling, SykdomGrunnlag utledetGrunnlag) {
+    public SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
         boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(forrigeGrunnlagBehandling, utledetGrunnlag);
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(forrigeGrunnlagBehandling, utledetGrunnlag);
         return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder);
     }
 
-    LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<SykdomGrunnlag> grunnlagBehandling, SykdomGrunnlag utledetGrunnlag) {
+    LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<MedisinskGrunnlagsdata> grunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
         LocalDateTimeline<SykdomSamletVurdering> grunnlagBehandlingTidslinje;
 
         if (grunnlagBehandling.isPresent()) {
-            final SykdomGrunnlag forrigeGrunnlag = grunnlagBehandling.get();
+            final MedisinskGrunnlagsdata forrigeGrunnlag = grunnlagBehandling.get();
             grunnlagBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(forrigeGrunnlag);
         } else {
             grunnlagBehandlingTidslinje = LocalDateTimeline.empty();
@@ -114,10 +114,10 @@ public class SykdomGrunnlagService {
         return endringerSidenForrigeBehandling.intersection(søktePerioderTimeline);
     }
 
-    private boolean sammenlignDiagnosekoder(Optional<SykdomGrunnlag> grunnlagBehandling, SykdomGrunnlag utledetGrunnlag) {
+    private boolean sammenlignDiagnosekoder(Optional<MedisinskGrunnlagsdata> grunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
         List<String> forrigeDiagnosekoder;
         if (grunnlagBehandling.isPresent()) {
-            final SykdomGrunnlag forrigeGrunnlag = grunnlagBehandling.get();
+            final MedisinskGrunnlagsdata forrigeGrunnlag = grunnlagBehandling.get();
             forrigeDiagnosekoder = forrigeGrunnlag.getSammenlignbarDiagnoseliste();
         } else {
             forrigeDiagnosekoder = Collections.emptyList();

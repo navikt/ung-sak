@@ -5,24 +5,19 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
-//TODO: Bedre navn eller forklarende kommentar
-//Saksbehandler har kvittert at de har gjennomgått alle eksisterende vurderinger etter at et nytt dokument er tilkommet,
-// eller at eksisterende dokument har vært oppdatert, feks reklassifisert.
-@Entity(name = "SykdomDokumentHarOppdatertEksisterendeVurderinger")
-@Table(name = "SYKDOM_DOKUMENT_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER")
-public class SykdomDokumentHarOppdatertEksisterendeVurderinger implements Serializable {
+//Objektet brukes for at saksbehandler skal kvittere ut at de har sjekket alle eksisterende
+// vurderinger på den pleietrengende når et nytt dokument kommer til.
+@Entity(name = "PleietrengendeSykdomDokumentHarOppdatertVurderinger")
+@Table(name = "PLEIETRENGENDE_SYKDOM_DOKUMENT_HAR_OPPDATERT_VURDERINGER")
+public class PleietrengendeSykdomDokumentHarOppdatertVurderinger implements Serializable {
 
     @Id
-    @Column(name = "SYKDOM_DOKUMENT_ID", unique = true, nullable = false)
+    @Column(name = "PLEIETRENGENDE_SYKDOM_DOKUMENT_ID", unique = true, nullable = false)
     private Long id;
 
     @DiffIgnore
@@ -33,11 +28,11 @@ public class SykdomDokumentHarOppdatertEksisterendeVurderinger implements Serial
     @Column(name = "OPPRETTET_TID", nullable = false, updatable = false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
-    SykdomDokumentHarOppdatertEksisterendeVurderinger() {
+    PleietrengendeSykdomDokumentHarOppdatertVurderinger() {
         // hibernate
     }
 
-    public SykdomDokumentHarOppdatertEksisterendeVurderinger(SykdomDokument dokument, String opprettetAv, LocalDateTime opprettetTidspunkt) {
+    public PleietrengendeSykdomDokumentHarOppdatertVurderinger(PleietrengendeSykdomDokument dokument, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         if (dokument.getId() == null) {
             throw new IllegalArgumentException("Kan ikke utkvittere dokumenter som ikke er peristert først");
         }

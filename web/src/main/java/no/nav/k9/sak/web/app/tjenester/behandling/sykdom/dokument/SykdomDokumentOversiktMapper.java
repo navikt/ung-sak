@@ -28,25 +28,25 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomInnleggelseDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDiagnose;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDiagnoser;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelsePeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomInnleggelsePeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomInnleggelser;
 
 @Dependent
 public class SykdomDokumentOversiktMapper {
-    
+
     private SykdomDokumentRepository sykdomDokumentRepository;
-    
+
     @Inject
     public SykdomDokumentOversiktMapper(SykdomDokumentRepository sykdomDokumentRepository) {
         this.sykdomDokumentRepository = sykdomDokumentRepository;
     }
-    
 
-    public SykdomDokumentOversikt map(AktørId aktørId, String behandlingUuid, Collection<SykdomDokument> dokumenter) {
+
+    public SykdomDokumentOversikt map(AktørId aktørId, String behandlingUuid, Collection<PleietrengendeSykdomDokument> dokumenter) {
         final List<SykdomDokumentOversiktElement> elementer = dokumenter
             .stream()
             .map(d -> {
@@ -54,7 +54,7 @@ public class SykdomDokumentOversiktMapper {
                         "" + d.getId(),
                         d.getVersjon().toString(),
                         d.getType(),
-                        !aktørId.equals(d.getPerson().getAktørId()),
+                        !aktørId.equals(d.getSøker().getAktørId()),
                         d.getDatert(),
                         d.getMottattDato(),
                         d.getMottattTidspunkt(),
@@ -84,14 +84,14 @@ public class SykdomDokumentOversiktMapper {
         return ResourceLink.post(BehandlingDtoUtil.getApiPath(SykdomDokumentRestTjeneste.DOKUMENT_PATH), "sykdom-dokument-endring", new SykdomDokumentEndringDto(behandlingUuid, id, versjon));
     }
 
-    public SykdomDiagnosekoder toSykdomDiagnosekoder(SykdomDiagnosekoderDto dto, String brukerId ) {
+    public PleietrengendeSykdomDiagnoser toSykdomDiagnosekoder(SykdomDiagnosekoderDto dto, String brukerId ) {
         LocalDateTime opprettetTidspunkt = LocalDateTime.now();
-        List<SykdomDiagnosekode> kodeliste = dto.getDiagnosekoder()
+        List<PleietrengendeSykdomDiagnose> kodeliste = dto.getDiagnosekoder()
             .stream()
-            .map(k -> new SykdomDiagnosekode(k.getVerdi(), brukerId, opprettetTidspunkt))
+            .map(k -> new PleietrengendeSykdomDiagnose(k.getVerdi(), brukerId, opprettetTidspunkt))
             .collect(Collectors.toCollection(ArrayList::new));
 
-        return new SykdomDiagnosekoder(
+        return new PleietrengendeSykdomDiagnoser(
             dto.getVersjon() != null ? Long.valueOf(dto.getVersjon()) : null,
             null,
             kodeliste,
@@ -99,12 +99,12 @@ public class SykdomDokumentOversiktMapper {
             opprettetTidspunkt);
     }
 
-    public SykdomDiagnosekoderDto toSykdomDiagnosekoderDto(SykdomDiagnosekoder diagnosekoder, Behandling behandling) {
+    public SykdomDiagnosekoderDto toSykdomDiagnosekoderDto(PleietrengendeSykdomDiagnoser diagnosekoder, Behandling behandling) {
         final var endreDiagnosekoderLink = ResourceLink.post(BehandlingDtoUtil.getApiPath(SykdomDokumentRestTjeneste.SYKDOM_DIAGNOSEKODER_PATH), "sykdom-diagnosekoder-endring", new SykdomDiagnosekoderDto(behandling.getUuid().toString()));
         return new SykdomDiagnosekoderDto(
             behandling.getUuid(),
             (diagnosekoder.getVersjon() != null) ? diagnosekoder.getVersjon().toString() : null,
-            diagnosekoder.getDiagnosekoder()
+            diagnosekoder.getDiagnoser()
                 .stream()
                 .map(
                     k -> new SykdomDiagnosekodeDto(k.getDiagnosekode()))
@@ -112,14 +112,14 @@ public class SykdomDokumentOversiktMapper {
             Arrays.asList(endreDiagnosekoderLink));
     }
 
-    public SykdomInnleggelser toSykdomInnleggelser(SykdomInnleggelseDto sykdomInnleggelse, String brukerId) {
+    public PleietrengendeSykdomInnleggelser toSykdomInnleggelser(SykdomInnleggelseDto sykdomInnleggelse, String brukerId) {
 
         LocalDateTime opprettetTidspunkt = LocalDateTime.now();
-        List<SykdomInnleggelsePeriode> perioder = sykdomInnleggelse.getPerioder()
+        List<PleietrengendeSykdomInnleggelsePeriode> perioder = sykdomInnleggelse.getPerioder()
             .stream()
-            .map(p -> new SykdomInnleggelsePeriode(null, p.getFom(), p.getTom(), brukerId, opprettetTidspunkt))
+            .map(p -> new PleietrengendeSykdomInnleggelsePeriode(null, p.getFom(), p.getTom(), brukerId, opprettetTidspunkt))
             .collect(Collectors.toCollection(ArrayList::new));
-        return new SykdomInnleggelser(
+        return new PleietrengendeSykdomInnleggelser(
             (sykdomInnleggelse.getVersjon() != null) ? Long.valueOf(sykdomInnleggelse.getVersjon()) : null,
             null,
             perioder,
@@ -127,7 +127,7 @@ public class SykdomDokumentOversiktMapper {
             opprettetTidspunkt);
     }
 
-    public SykdomInnleggelseDto toSykdomInnleggelseDto(SykdomInnleggelser innleggelser, Behandling behandling) {
+    public SykdomInnleggelseDto toSykdomInnleggelseDto(PleietrengendeSykdomInnleggelser innleggelser, Behandling behandling) {
         return new SykdomInnleggelseDto(
             behandling.getUuid(),
             (innleggelser.getVersjon() != null) ? innleggelser.getVersjon().toString() : null,
@@ -142,7 +142,7 @@ public class SykdomDokumentOversiktMapper {
                 new SykdomInnleggelseDto(behandling.getUuid().toString()))));
     }
 
-    public List<SykdomDokumentDto> mapSykdomsdokumenter(AktørId aktørId, UUID behandlingUuid, List<SykdomDokument> dokumenter, Set<Long> ids) {
+    public List<SykdomDokumentDto> mapSykdomsdokumenter(AktørId aktørId, UUID behandlingUuid, List<PleietrengendeSykdomDokument> dokumenter, Set<Long> ids) {
         return dokumenter.stream()
                 .filter(d -> d.getDuplikatAvDokument() == null)
                 .filter(d -> d.getType().isRelevantForSykdom() || ids.contains(d.getId()))
@@ -150,9 +150,9 @@ public class SykdomDokumentOversiktMapper {
                     "" + d.getId(),
                     d.getType(),
                     ids.contains(d.getId()),
-                    !aktørId.equals(d.getPerson().getAktørId()),
+                    !aktørId.equals(d.getSøker().getAktørId()),
                     d.getDatert(),
-                    behandlingUuid.equals(d.getBehandlingUuid()),
+                    behandlingUuid.equals(d.getSøkersBehandlingUuid()),
                     sykdomDokumentRepository.isDokumentBruktIVurdering(d.getId()),
                     Arrays.asList(linkForGetDokumentinnhold(behandlingUuid.toString(), "" + d.getId()))
                 )).collect(Collectors.toList());

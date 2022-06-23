@@ -5,15 +5,15 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårGrunnlag;
 
 public class InngangsvilkårOversetter {
 
-    public MedisinskVilkårGrunnlag oversettTilRegelModellMedisinsk(DatoIntervallEntitet periode, SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
-        var grunnlag = sykdomGrunnlagBehandling.getGrunnlag();
+    public MedisinskVilkårGrunnlag oversettTilRegelModellMedisinsk(DatoIntervallEntitet periode, MedisinskGrunnlag medisinskGrunnlag) {
+        var grunnlag = medisinskGrunnlag.getGrunnlagsdata();
         final var vilkårsGrunnlag = new MedisinskVilkårGrunnlag(periode.getFomDato(), periode.getTomDato());
 
         var tidslinjeHarDokumentertLivetsSluttfase = SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.LIVETS_SLUTTFASE).filterValue(v -> v.getResultat() == Resultat.OPPFYLT).mapValue(v -> (Void) null);
@@ -27,8 +27,8 @@ public class InngangsvilkårOversetter {
     }
 
 
-    private LocalDateTimeline<Void> mapRelevanteInnleggelsesperioder(SykdomGrunnlag sykdomGrunnlagBehandling) {
-        var innleggelser = sykdomGrunnlagBehandling.getInnleggelser();
+    private LocalDateTimeline<Void> mapRelevanteInnleggelsesperioder(MedisinskGrunnlagsdata medisinskGrunnlagsdataBehandling) {
+        var innleggelser = medisinskGrunnlagsdataBehandling.getInnleggelser();
         if (innleggelser == null) {
             return LocalDateTimeline.empty();
         }

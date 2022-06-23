@@ -21,16 +21,15 @@ import jakarta.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
-//TODO: Sykdom_Behandling_Anvendte_Data?
-@Entity(name = "SykdomGrunnlag")
-@Table(name = "SYKDOM_GRUNNLAG")
-public class SykdomGrunnlag {
+@Entity(name = "MedisinskGrunnlagsdata")
+@Table(name = "MEDISINSK_GRUNNLAGSDATA")
+public class MedisinskGrunnlagsdata {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_GRUNNLAG")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MEDISINSK_GRUNNLAGSDATA")
     private Long id;
 
-    @Column(name = "SYKDOM_GRUNNLAG_UUID", nullable = false)
+    @Column(name = "SPORINGSREFERANSE", nullable = false)
     private UUID sykdomGrunnlagUUID;
 
     //TODO: Deprekere, hente data rett fra gr_soeknadsperiode i stedet.
@@ -44,29 +43,28 @@ public class SykdomGrunnlag {
     //TODO: AnvendteVurderinger?
     @OneToMany()
     @JoinTable(
-        name="SYKDOM_GRUNNLAG_VURDERING",
-        joinColumns = @JoinColumn( name="SYKDOM_GRUNNLAG_ID"),
-        inverseJoinColumns = @JoinColumn( name="SYKDOM_VURDERING_VERSJON_ID")
+        name="MEDISINSK_GRUNNLAGSDATA_GJELDENDE_VURDERINGER",
+        joinColumns = @JoinColumn( name="MEDISINSK_GRUNNLAGSDATA_ID"),
+        inverseJoinColumns = @JoinColumn( name="PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON_ID")
     )
-    private List<SykdomVurderingVersjon> vurderinger = new ArrayList<>();
+    private List<PleietrengendeSykdomVurderingVersjon> vurderinger = new ArrayList<>();
 
+    //Liste over alle godkjente legeerklæringer på den pleietrengende idet grunnlaget opprettes.
     @OneToMany()
     @JoinTable(
-        name="SYKDOM_GRUNNLAG_DOKUMENT", //TODO: Et navn som forklarer relasjonen? Er det subsettet av dokumenter som
-        // blir klassifisert som legeerklæringer i denne behandlingen? I så fall bør vi vel heller peke på sykdom_dokument_informasjon?
-        // Utfra strukturen, kan det tolkes som alle dokumenter som er klassifisert som legeerklæringer til og med denne behandlingen..?
-        joinColumns = @JoinColumn( name="SYKDOM_GRUNNLAG_ID"),
-        inverseJoinColumns = @JoinColumn( name="SYKDOM_DOKUMENT_ID")
+        name="MEDISINSK_GRUNNLAGSDATA_GODKJENTE_LEGEERKLAERINGER",
+        joinColumns = @JoinColumn( name="MEDISINSK_GRUNNLAGSDATA_ID"),
+        inverseJoinColumns = @JoinColumn( name="PLEIETRENGENDE_SYKDOM_DOKUMENT_ID")
     )
-    private List<SykdomDokument> godkjenteLegeerklæringer = new ArrayList<>();
+    private List<PleietrengendeSykdomDokument> godkjenteLegeerklæringer = new ArrayList<>();
 
     @OneToOne
-    @JoinColumn(name = "SYKDOM_INNLEGGELSER_ID")
-    private SykdomInnleggelser innleggelser;
+    @JoinColumn(name = "PLEIETRENGENDE_SYKDOM_INNLEGGELSER_ID")
+    private PleietrengendeSykdomInnleggelser innleggelser;
 
     @OneToOne
-    @JoinColumn(name = "SYKDOM_DIAGNOSEKODER_ID")
-    private SykdomDiagnosekoder diagnosekoder;
+    @JoinColumn(name = "PLEIETRENGENDE_SYKDOM_DIAGNOSER_ID")
+    private PleietrengendeSykdomDiagnoser diagnosekoder;
 
     @DiffIgnore
     @Column(name = "OPPRETTET_AV", nullable = false, updatable=false)
@@ -77,17 +75,17 @@ public class SykdomGrunnlag {
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
 
-    SykdomGrunnlag() {}
+    MedisinskGrunnlagsdata() {}
 
-    public SykdomGrunnlag(UUID sykdomGrunnlagUUID,
-            List<SykdomSøktPeriode> søktePerioder,
-            List<SykdomRevurderingPeriode> revurderingPerioder,
-            List<SykdomVurderingVersjon> vurderinger,
-            List<SykdomDokument> godkjenteLegeerklæringer,
-            SykdomInnleggelser innleggelser,
-            SykdomDiagnosekoder diagnosekoder,
-            String opprettetAv,
-            LocalDateTime opprettetTidspunkt) {
+    public MedisinskGrunnlagsdata(UUID sykdomGrunnlagUUID,
+                                  List<SykdomSøktPeriode> søktePerioder,
+                                  List<SykdomRevurderingPeriode> revurderingPerioder,
+                                  List<PleietrengendeSykdomVurderingVersjon> vurderinger,
+                                  List<PleietrengendeSykdomDokument> godkjenteLegeerklæringer,
+                                  PleietrengendeSykdomInnleggelser innleggelser,
+                                  PleietrengendeSykdomDiagnoser diagnosekoder,
+                                  String opprettetAv,
+                                  LocalDateTime opprettetTidspunkt) {
         this.sykdomGrunnlagUUID = sykdomGrunnlagUUID;
         setSøktePerioder(søktePerioder);
         setRevurderingPerioder(revurderingPerioder);
@@ -121,42 +119,42 @@ public class SykdomGrunnlag {
         this.sykdomGrunnlagUUID = sykdomGrunnlagUUID;
     }
 
-    public List<SykdomVurderingVersjon> getVurderinger() {
+    public List<PleietrengendeSykdomVurderingVersjon> getVurderinger() {
         return vurderinger;
     }
 
-    public void setVurderinger(List<SykdomVurderingVersjon> vurderinger) {
+    public void setVurderinger(List<PleietrengendeSykdomVurderingVersjon> vurderinger) {
         this.vurderinger = vurderinger;
     }
 
-    public List<SykdomDokument> getGodkjenteLegeerklæringer() {
+    public List<PleietrengendeSykdomDokument> getGodkjenteLegeerklæringer() {
         if (godkjenteLegeerklæringer == null) {
             return List.of();
         }
         return godkjenteLegeerklæringer;
     }
 
-    public SykdomInnleggelser getInnleggelser() {
+    public PleietrengendeSykdomInnleggelser getInnleggelser() {
         return innleggelser;
     }
 
-    public void setInnleggelser(SykdomInnleggelser innleggelser) {
+    public void setInnleggelser(PleietrengendeSykdomInnleggelser innleggelser) {
         this.innleggelser = innleggelser;
     }
 
-    public SykdomDiagnosekoder getDiagnosekoder() {
+    public PleietrengendeSykdomDiagnoser getDiagnosekoder() {
         return diagnosekoder;
     }
 
     public List<String> getSammenlignbarDiagnoseliste() {
         if (diagnosekoder != null) {
-            return getDiagnosekoder().getDiagnosekoder().stream().map(SykdomDiagnosekode::getDiagnosekode).sorted().collect(Collectors.toList());
+            return getDiagnosekoder().getDiagnoser().stream().map(PleietrengendeSykdomDiagnose::getDiagnosekode).sorted().collect(Collectors.toList());
         } else {
             return Collections.emptyList();
         }
     }
 
-    public void setDiagnosekoder(SykdomDiagnosekoder diagnosekoder) {
+    public void setDiagnosekoder(PleietrengendeSykdomDiagnoser diagnosekoder) {
         this.diagnosekoder = diagnosekoder;
     }
 
