@@ -169,7 +169,7 @@ public class RegisterdataInnhenter {
     }
 
     private void leggTilFosterbarn(Personinfo søkerPersonInfo, Behandling behandling, PersonInformasjonBuilder informasjonBuilder, no.nav.k9.sak.typer.Periode opplysningsperioden) {
-        List<Personinfo> barna = hentFosterbarn(behandling, opplysningsperioden);
+        List<Personinfo> barna = hentFosterbarn(behandling);
         barna.forEach(barn -> {
             if (hentHistorikkForRelatertePersoner(behandling)) {
                 Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(barn.getAktørId(), opplysningsperioden);
@@ -441,9 +441,9 @@ public class RegisterdataInnhenter {
             .toList();
     }
 
-    private List<Personinfo> hentFosterbarn(Behandling behandling, no.nav.k9.sak.typer.Periode opplysningsperioden) {
+    private List<Personinfo> hentFosterbarn(Behandling behandling) {
         var filter = YtelsesspesifikkRelasjonsFilter.finnTjeneste(relasjonsFiltre, behandling.getFagsakYtelseType());
-        return filter.hentFosterbarn(behandling, opplysningsperioden).stream()
+        return filter.hentFosterbarn(behandling).stream()
             .map(aktørId -> personinfoAdapter.hentPersoninfo(aktørId))
             .toList();
     }
