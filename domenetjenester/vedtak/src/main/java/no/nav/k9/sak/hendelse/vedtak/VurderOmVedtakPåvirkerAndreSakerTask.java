@@ -1,7 +1,6 @@
 package no.nav.k9.sak.hendelse.vedtak;
 
 import java.util.NavigableSet;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -11,7 +10,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -64,13 +62,12 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
             "Etter '{}' vedtak på saksnummer='{}', skal følgende saker '{}' som skal revurderes som følge av vedtak.",
             fagsakYtelseType, vedtakHendelse.getSaksnummer(), kandidaterTilRevurdering);
 
-        for (SakMedPeriode kandidatsaksnummer : kandidaterTilRevurdering) {
+        for (SakMedPeriode kandidat : kandidaterTilRevurdering) {
             var taskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
-            var årsak = utledÅrsak(kandidatsaksnummer, vedtakHendelse.getSaksnummer());
-            taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, årsak.getKode());
-            taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODER, utledPerioder(kandidatsaksnummer.getPerioder()));
+            taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, kandidat.getBehandlingÅrsakType().getKode());
+            taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODER, utledPerioder(kandidat.getPerioder()));
 
-            var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer.getSaksnummer(), false)
+            var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidat.getSaksnummer(), false)
                 .orElseThrow();
             var tilRevurdering = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId())
                 .orElseThrow();
@@ -79,13 +76,6 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
 
             fagsakProsessTaskRepository.lagreNyGruppe(taskData);
         }
-    }
-
-    private BehandlingÅrsakType utledÅrsak(SakMedPeriode kandidatsaksnummer, String saksnummer) {
-        if (Objects.equals(kandidatsaksnummer.getSaksnummer().getVerdi(), saksnummer)) {
-            return BehandlingÅrsakType.RE_GJENOPPTAR_UTSATT_BEHANDLING; // TODO: Dra inn igjen når formidling forstår hva dette er
-        }
-        return BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON;
     }
 
     private String utledPerioder(NavigableSet<DatoIntervallEntitet> perioder) {

@@ -6,12 +6,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.k9.sak.ytelse.beregning.regelmodell.MottakerType;
 
 public class FeriepengeOppsummering {
 
-    public static FeriepengeOppsummering tom(){
+    public static FeriepengeOppsummering tom() {
         return new FeriepengeOppsummering(Map.of());
     }
 
@@ -37,20 +38,29 @@ public class FeriepengeOppsummering {
 
     }
 
-    public static long utledAbsoluttverdiDifferanse(FeriepengeOppsummering a, FeriepengeOppsummering b) {
+    public static Set<Year> utledOpptjeningsårSomHarDifferanse(FeriepengeOppsummering a, FeriepengeOppsummering b) {
+        return utledOpptjeningsårSomHarDifferanseOver(a, b, 0L);
+    }
+
+    public static Set<Year> utledOpptjeningsårSomHarDifferanseOver(FeriepengeOppsummering a, FeriepengeOppsummering b, long akseptabelDifferranseUtenRevurdering) {
         Set<MottakerOgOpptjeningsår> nøkler = new HashSet<>();
         nøkler.addAll(a.tilkjentPrMottakerOgÅr.keySet());
         nøkler.addAll(b.tilkjentPrMottakerOgÅr.keySet());
-        long absoluttDifferanse = 0;
+        Map<Year, Long> absoluttDifferansePrÅr = new HashMap<>();
         for (MottakerOgOpptjeningsår nøkkel : nøkler) {
+            Year år = nøkkel.opptjeningsår;
             long aVerdi = a.tilkjentPrMottakerOgÅr.getOrDefault(nøkkel, 0L);
             long bVerdi = b.tilkjentPrMottakerOgÅr.getOrDefault(nøkkel, 0L);
-            absoluttDifferanse = Math.abs(aVerdi - bVerdi);
+            long absoluttDifferanse = Math.abs(aVerdi - bVerdi);
+            absoluttDifferansePrÅr.put(år, absoluttDifferansePrÅr.getOrDefault(år, 0L) + absoluttDifferanse);
         }
-        return absoluttDifferanse;
+        return absoluttDifferansePrÅr.entrySet().stream()
+            .filter(e -> e.getValue() > akseptabelDifferranseUtenRevurdering)
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toSet());
     }
 
-    static record MottakerOgOpptjeningsår(
+    record MottakerOgOpptjeningsår(
         Year opptjeningsår,
         MottakerType mottakerType,
         String mottkerId) {
@@ -65,8 +75,5 @@ public class FeriepengeOppsummering {
                 throw new IllegalArgumentException("mangler mottakerId for ARBEIDSGIVER");
             }
         }
-
-
     }
-
 }

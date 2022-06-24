@@ -58,14 +58,14 @@ public class FeriepengerAvvikTjeneste {
         return !modell.erStegAFørStegB(steg, BehandlingStegType.BEREGN_YTELSE);
     }
 
-    public boolean feriepengerMåReberegnes(BehandlingReferanse referanse) {
+    public Set<Year> opptjeningsårFeirepengerMåReberegnes(BehandlingReferanse referanse) {
         BeregningsresultatEntitet beregningsresultatEntitet = beregningsresultatRepository.hentEndeligBeregningsresultat(referanse.getBehandlingId()).orElse(null);
         Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(referanse.getSaksnummer()).orElseThrow();
 
         FeriepengeOppsummering innvilgedeFeriepenger = finnInnvilgedeFeriepenger(beregningsresultatEntitet);
         FeriepengeOppsummering forskuttertResultatAvRevurdering = forskuttertResultatAvNyBeregning(referanse, fagsak, beregningsresultatEntitet);
 
-        return FeriepengeOppsummering.utledAbsoluttverdiDifferanse(innvilgedeFeriepenger, forskuttertResultatAvRevurdering) > 0;
+        return FeriepengeOppsummering.utledOpptjeningsårSomHarDifferanse(innvilgedeFeriepenger, forskuttertResultatAvRevurdering);
     }
 
     private FeriepengeOppsummering finnInnvilgedeFeriepenger(BeregningsresultatEntitet beregningsresultatEntitet) {
