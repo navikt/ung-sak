@@ -87,7 +87,7 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
     }
 
     private void validerTilstand(Behandling behandling) {
-        if (behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE).isPresent()) {
+        if (behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.ÅRSKVANTUM_FOSTERBARN).isPresent()) {
             throw new IllegalStateException("Fant åpent aksjonspunkt av typen 9014, dette må løses først.");
         }
     }
