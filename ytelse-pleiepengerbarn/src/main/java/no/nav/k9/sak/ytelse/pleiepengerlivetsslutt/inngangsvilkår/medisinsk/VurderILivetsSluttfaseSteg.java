@@ -112,6 +112,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         }
 
         var builder = Vilkårene.builderFraEksisterende(vilkårene);
+        builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
         vurderVilkår(behandlingId, sykdomGrunnlagBehandling, builder, VilkårType.I_LIVETS_SLUTTFASE, perioder);
         vilkårResultatRepository.lagre(behandlingId, builder.build());
 

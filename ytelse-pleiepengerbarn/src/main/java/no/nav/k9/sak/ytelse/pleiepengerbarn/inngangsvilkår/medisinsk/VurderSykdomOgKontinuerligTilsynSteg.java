@@ -140,6 +140,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         }
 
         var builder = Vilkårene.builderFraEksisterende(vilkårene);
+        builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
         vurder(kontekst, sykdomGrunnlagBehandling, builder, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, perioderUnder18år, perioderUnder18årUtenOmsorgenFor);
         vurder(kontekst, sykdomGrunnlagBehandling, builder, VilkårType.MEDISINSKEVILKÅR_18_ÅR, perioder18år, perioder18årUtenOmsorgenFor);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
