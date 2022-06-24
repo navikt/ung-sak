@@ -122,6 +122,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_ÅRSKVANTUM_KVOTE = "9003";
     public static final String VURDER_ÅRSKVANTUM_DOK = "9004";
     public static final String VURDER_OMS_UTVIDET_RETT = "9013";
+    public static final String ÅRSKVANTUM_FOSTERBARN = "9014";
 
     // FRISINN
     public static final String AUTO_VENT_FRISINN_BEREGNING = "8000";
