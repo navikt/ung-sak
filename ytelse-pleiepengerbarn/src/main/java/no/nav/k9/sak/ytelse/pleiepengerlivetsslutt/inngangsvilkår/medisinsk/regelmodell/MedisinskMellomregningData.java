@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
 public class MedisinskMellomregningData {
 
@@ -17,6 +18,7 @@ public class MedisinskMellomregningData {
         this.grunnlag = grunnlag;
         this.pleiesHjemmetidslinje = new LocalDateTimeline<>(grunnlag.getFom(), grunnlag.getTom(), Pleielokasjon.HJEMME);
         this.dokumentasjonStatusLivetsSluttfaseTidslinje = new LocalDateTimeline<>(grunnlag.getFom(), grunnlag.getTom(), LivetsSluttfaseDokumentasjon.IKKE_DOKUMENTERT);
+        this.dokumentasjonStatusLivetsSluttfaseTidslinje = dokumentasjonStatusLivetsSluttfaseTidslinje.disjoint(Hjelpetidslinjer.lagTidslinjeMedKunHelger(dokumentasjonStatusLivetsSluttfaseTidslinje));
     }
 
     public MedisinskVilkårGrunnlag getGrunnlag() {
