@@ -199,13 +199,13 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
                 .map(it -> new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), it.getLivetsSluttfaseDokumentasjon()))
                 .toList());
             timeline = timeline.disjoint(Hjelpetidslinjer.lagTidslinjeMedKunHelger(timeline));
-                timeline.forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFom(), it.getTom())
-                    .medUtfall(Utfall.IKKE_OPPFYLT)
-                    .medMerknadParametere(vilkårData.getMerknadParametere())
-                    .medRegelEvaluering(vilkårData.getRegelEvaluering())
-                    .medRegelInput(vilkårData.getRegelInput())
-                    .medAvslagsårsak(Avslagsårsak.IKKE_I_LIVETS_SLUTTFASE)
-                    .medMerknad(vilkårData.getVilkårUtfallMerknad())));
+            timeline.forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFom(), it.getTom())
+                .medUtfall(Utfall.IKKE_OPPFYLT)
+                .medMerknadParametere(vilkårData.getMerknadParametere())
+                .medRegelEvaluering(vilkårData.getRegelEvaluering())
+                .medRegelInput(vilkårData.getRegelInput())
+                .medAvslagsårsak(Avslagsårsak.IKKE_I_LIVETS_SLUTTFASE)
+                .medMerknad(vilkårData.getVilkårUtfallMerknad())));
         }
     }
 
