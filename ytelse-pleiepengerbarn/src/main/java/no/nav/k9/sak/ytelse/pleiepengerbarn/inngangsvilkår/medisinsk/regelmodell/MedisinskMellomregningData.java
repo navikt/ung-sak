@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
 class MedisinskMellomregningData {
 
@@ -18,7 +17,6 @@ class MedisinskMellomregningData {
         Objects.requireNonNull(grunnlag);
         this.grunnlag = grunnlag;
         this.pleietidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(grunnlag.getFom(), grunnlag.getTom(), Pleiegrad.INGEN)));
-        this.pleietidslinje = pleietidslinje.disjoint(Hjelpetidslinjer.lagTidslinjeMedKunHelger(pleietidslinje));
     }
 
     private static <V> LocalDateTimeline<V> trimTidslinje(LocalDateTimeline<V> tidslinje, LocalDateInterval maxInterval) {

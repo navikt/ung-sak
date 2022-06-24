@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -54,6 +55,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.LivetsSluttfaseDokumentasjon;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 
@@ -190,17 +192,20 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         // Håndtering av Delvis innvilgelse
         if (vilkårData.getUtfallType().equals(Utfall.OPPFYLT)) {
             final var ekstraVilkårresultat = (MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat();
-            ekstraVilkårresultat.getDokumentasjonLivetsSluttfasePerioder()
+            var timeline = new LocalDateTimeline<>(ekstraVilkårresultat.getDokumentasjonLivetsSluttfasePerioder()
                 .stream()
                 .filter(it -> LivetsSluttfaseDokumentasjon.IKKE_DOKUMENTERT.equals(it.getLivetsSluttfaseDokumentasjon()))
                 .filter(it -> periode.overlapper(it.getFraOgMed(), it.getTilOgMed()))
-                .forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFraOgMed(), it.getTilOgMed())
-                    .medUtfall(Utfall.IKKE_OPPFYLT)
-                    .medMerknadParametere(vilkårData.getMerknadParametere())
-                    .medRegelEvaluering(vilkårData.getRegelEvaluering())
-                    .medRegelInput(vilkårData.getRegelInput())
-                    .medAvslagsårsak(Avslagsårsak.IKKE_I_LIVETS_SLUTTFASE)
-                    .medMerknad(vilkårData.getVilkårUtfallMerknad())));
+                .map(it -> new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), it.getLivetsSluttfaseDokumentasjon()))
+                .toList());
+            timeline = timeline.disjoint(Hjelpetidslinjer.lagTidslinjeMedKunHelger(timeline));
+            timeline.forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFom(), it.getTom())
+                .medUtfall(Utfall.IKKE_OPPFYLT)
+                .medMerknadParametere(vilkårData.getMerknadParametere())
+                .medRegelEvaluering(vilkårData.getRegelEvaluering())
+                .medRegelInput(vilkårData.getRegelInput())
+                .medAvslagsårsak(Avslagsårsak.IKKE_I_LIVETS_SLUTTFASE)
+                .medMerknad(vilkårData.getVilkårUtfallMerknad())));
         }
     }
 
