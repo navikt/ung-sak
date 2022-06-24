@@ -73,6 +73,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_SYKDOM_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_S_ET", "Nye opplysninger om sykdom og etablert tilsyn"),
     RE_SYKDOM_NATTEVÅK_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_S_NB", "Nye opplysninger om sykdom og nattevåk/beredskap"),
     RE_SYKDOM_ETABLERT_TILSYN_NATTVÅK_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_S_ET_NB", "Nye opplysninger om sykdom, nattevåk/beredskap og etablert tilsyn "),
+    RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK("RE_ANNEN_SAK_FP", "Reberegner feriepenger pga endring i annen sak"),
 
     // Unntaksbehandling
     UNNT_GENERELL("UNNT_GENERELL", "Manuell saksbehandling"),
@@ -93,6 +94,10 @@ public enum BehandlingÅrsakType implements Kodeverdi {
         RE_SYKDOM_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON,
         RE_SYKDOM_NATTEVÅK_ENDRING_FRA_ANNEN_OMSORGSPERSON,
         RE_SYKDOM_ETABLERT_TILSYN_NATTVÅK_ENDRING_FRA_ANNEN_OMSORGSPERSON);
+
+    public static final boolean medførerVilkårsperioder(BehandlingÅrsakType behandlingÅrsakType) {
+        return behandlingÅrsakType != RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK;
+    }
 
     @JsonIgnore
     private String navn;

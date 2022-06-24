@@ -96,10 +96,10 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
 
         // Beregn feriepenger
-        var feriepengerTjeneste = FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, ref.getFagsakYtelseType()).orElseThrow();
+        var feriepengerTjeneste = BeregnFeriepengerTjeneste.finnTjeneste(beregnFeriepengerTjeneste, ref.getFagsakYtelseType());
 
         if (enableFeriepengerPåTversAvSaker) {
-            var feriepengepåvirkendeFagsakerTjeneste = FagsakYtelseTypeRef.Lookup.find(feriepengepåvirkendeFagsakerTjenester, ref.getFagsakYtelseType()).orElseThrow();
+            var feriepengepåvirkendeFagsakerTjeneste = FinnFeriepengepåvirkendeFagsakerTjeneste.finnTjeneste(feriepengepåvirkendeFagsakerTjenester, ref.getFagsakYtelseType());
             Set<Fagsak> påvirkendeFagsaker = feriepengepåvirkendeFagsakerTjeneste.finnSakerSomPåvirkerFeriepengerFor(behandling.getFagsak());
             var andelerSomKanGiFeriepengerForRelevaneSaker = hentFeriepengeAndelerTjeneste.finnAndelerSomKanGiFeriepenger(påvirkendeFagsaker);
             feriepengerTjeneste.beregnFeriepengerV2(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker);
