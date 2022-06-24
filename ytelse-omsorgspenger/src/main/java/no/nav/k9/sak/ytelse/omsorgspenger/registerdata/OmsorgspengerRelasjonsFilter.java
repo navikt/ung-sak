@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.aarskvantum.kontrakter.Fosterbarn;
 import no.nav.k9.aarskvantum.kontrakter.Rammevedtak;
 import no.nav.k9.aarskvantum.kontrakter.UtvidetRett;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -54,10 +53,9 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
         return true;
     }
 
-    public Set<AktørId> hentFosterbarn(Behandling behandling, Periode opplysningsperioden) {
+    public Set<AktørId> hentFosterbarn(Behandling behandling) {
         Set<AktørId> fosterbarna = new TreeSet<>();
         fosterbarna.addAll(hentFosterbarnPåBehandlingen(behandling));
-        fosterbarna.addAll(hentFosterbarnFraInfotrygd(behandling, opplysningsperioden));
         return fosterbarna;
     }
 
@@ -66,19 +64,6 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
             .flatMap(fosterbarnGrunnlag -> fosterbarnGrunnlag.getFosterbarna().getFosterbarn().stream())
             .map((fosterbarn -> fosterbarn.getAktørId()))
             .collect(Collectors.toSet());
-    }
-
-    private Set<AktørId> hentFosterbarnFraInfotrygd(Behandling behandling, Periode opplysningsperioden) {
-        Set<AktørId> fosterbarna = new TreeSet<>();
-        List<Rammevedtak> rammevedtak = omsorgspengerRammevedtakTjeneste.hentRammevedtak(new BehandlingUuidDto(behandling.getUuid())).getRammevedtak();
-        for (Rammevedtak rammevedtaket : rammevedtak) {
-            if (rammevedtaket instanceof Fosterbarn fosterbarn) {
-                if (overlapper(opplysningsperioden, fosterbarn)) {
-                    fosterbarna.add(aktørTjeneste.hentAktørIdForPersonIdent(new PersonIdent(fosterbarn.getMottaker())).orElseThrow());
-                }
-            }
-        }
-        return fosterbarna;
     }
 
     @Override
@@ -117,11 +102,6 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
     }
 
     private boolean overlapper(Periode opplysningsperiode, UtvidetRett utvidetRett) {
-        Periode utvidetRettPeriode = new Periode(utvidetRett.gyldigFraOgMed(), utvidetRett.gyldigTilOgMed());
-        return utvidetRettPeriode.overlaps(opplysningsperiode);
-    }
-
-    private boolean overlapper(Periode opplysningsperiode, no.nav.k9.aarskvantum.kontrakter.Fosterbarn utvidetRett) {
         Periode utvidetRettPeriode = new Periode(utvidetRett.gyldigFraOgMed(), utvidetRett.gyldigTilOgMed());
         return utvidetRettPeriode.overlaps(opplysningsperiode);
     }
