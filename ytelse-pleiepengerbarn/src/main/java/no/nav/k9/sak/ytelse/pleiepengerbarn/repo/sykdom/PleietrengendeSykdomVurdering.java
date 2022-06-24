@@ -26,7 +26,7 @@ import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 public class PleietrengendeSykdomVurdering implements Comparable<PleietrengendeSykdomVurdering> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_VURDERING")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PLEIETRENGENDE_SYKDOM_VURDERING")
     private Long id;
 
     @Column(name = "TYPE", nullable = false)

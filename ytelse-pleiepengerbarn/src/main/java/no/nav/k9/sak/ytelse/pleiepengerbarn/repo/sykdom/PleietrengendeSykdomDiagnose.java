@@ -18,7 +18,7 @@ import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 @Table(name = "PLEIETRENGENDE_SYKDOM_DIAGNOSE")
 public class PleietrengendeSykdomDiagnose {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_DIAGNOSE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PLEIETRENGENDE_SYKDOM_DIAGNOSE")
     private Long id;
 
     @ManyToOne

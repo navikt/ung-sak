@@ -137,7 +137,7 @@ public class SykdomGrunnlagRepository {
     public boolean harHattGodkjentLegeerklæringMedUnntakAv(AktørId pleietrengende, UUID behandlingUuid) {
         final TypedQuery<Long> q = entityManager.createQuery(
                 "select l.id "
-                + "from SykdomGrunnlagBehandling as sgb "
+                + "from MedisinskGrunnlag as sgb "
                 + "  inner join sgb.pleietrengende as p "
                 + "  inner join sgb.grunnlag as g "
                 + "  inner join g.godkjenteLegeerklæringer as l "
@@ -154,11 +154,11 @@ public class SykdomGrunnlagRepository {
     public Optional<UUID> hentSisteBehandling(Saksnummer saksnummer) {
         final TypedQuery<UUID> q = entityManager.createQuery(
             "Select sgb.behandlingUuid "
-                + "From SykdomGrunnlagBehandling as sgb "
+                + "From MedisinskGrunnlag as sgb "
                 + "Where sgb.saksnummer = :saksnummer "
                 + "  And sgb.behandlingsnummer = ( "
                 + "    Select max(sgb2.behandlingsnummer) "
-                + "    From SykdomGrunnlagBehandling as sgb2 "
+                + "    From MedisinskGrunnlag as sgb2 "
                 + "    Where sgb2.saksnummer = :saksnummer "
                 + "  ) "
             , UUID.class);
@@ -171,11 +171,11 @@ public class SykdomGrunnlagRepository {
     Optional<UUID> hentSisteBehandlingMedUnntakAv(Saksnummer saksnummer, UUID behandlingUuid) {
         final TypedQuery<UUID> q = entityManager.createQuery(
             "Select sgb.behandlingUuid "
-                + "From SykdomGrunnlagBehandling as sgb "
+                + "From MedisinskGrunnlag as sgb "
                 + "Where sgb.saksnummer = :saksnummer "
                 + "  And sgb.behandlingsnummer = ( "
                 + "    Select max(sgb2.behandlingsnummer) "
-                + "    From SykdomGrunnlagBehandling as sgb2 "
+                + "    From MedisinskGrunnlag as sgb2 "
                 + "    Where sgb2.saksnummer = :saksnummer "
                 + "      And sgb2.behandlingUuid <> :behandlingUuid "
                 + "  ) "
@@ -191,11 +191,11 @@ public class SykdomGrunnlagRepository {
     public Optional<MedisinskGrunnlag> hentGrunnlagForBehandling(UUID behandlingUuid) {
         final TypedQuery<MedisinskGrunnlag> q = entityManager.createQuery(
             "SELECT sgb "
-                + "FROM SykdomGrunnlagBehandling as sgb "
+                + "FROM MedisinskGrunnlag as sgb "
                 + "where sgb.behandlingUuid = :behandlingUuid "
                 + "  and sgb.versjon = ( "
                 + "    select max(sgb2.versjon) "
-                + "    From SykdomGrunnlagBehandling as sgb2 "
+                + "    From MedisinskGrunnlag as sgb2 "
                 + "    where sgb2.behandlingUuid = sgb.behandlingUuid "
                 + "  )"
             , MedisinskGrunnlag.class);
@@ -209,7 +209,7 @@ public class SykdomGrunnlagRepository {
         Objects.requireNonNull(grunnlagReferanse);
         final TypedQuery<MedisinskGrunnlagsdata> q = entityManager.createQuery(
             "SELECT sg "
-                + "FROM SykdomGrunnlag as sg "
+                + "FROM MedisinskGrunnlagsdata as sg "
                 + "WHERE sg.id = :id", MedisinskGrunnlagsdata.class);
 
         q.setParameter("id", grunnlagReferanse);

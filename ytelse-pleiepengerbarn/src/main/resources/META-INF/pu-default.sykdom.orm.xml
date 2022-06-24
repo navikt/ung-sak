@@ -12,7 +12,7 @@
     <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_DOKUMENT" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_DOKUMENT" />
     <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_DOKUMENT_INFORMASJON" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_DOKUMENT_INFORMASJON" />
     <sequence-generator name="SEQ_MEDISINSK_GRUNNLAGSDATA" allocation-size="5" sequence-name="SEQ_MEDISINSK_GRUNNLAGSDATA" />
-    <sequence-generator name="SEQ_GR_MEDISINSK" allocation-size="5" sequence-name="SEQ_GR_MEDISINSK" />n
+    <sequence-generator name="SEQ_GR_MEDISINSK" allocation-size="5" sequence-name="SEQ_GR_MEDISINSK" />
     <sequence-generator name="SEQ_SYKDOM_SOEKT_PERIODE" allocation-size="5" sequence-name="SEQ_SYKDOM_SOEKT_PERIODE" />
     <sequence-generator name="SEQ_SYKDOM_REVURDERING_PERIODE" allocation-size="5" sequence-name="SEQ_SYKDOM_REVURDERING_PERIODE" />
     <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_INNLEGGELSER" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_INNLEGGELSER" />

@@ -33,11 +33,11 @@ public class MedisinskGrunnlagsdata {
     private UUID sykdomGrunnlagUUID;
 
     //TODO: Deprekere, hente data rett fra gr_soeknadsperiode i stedet.
-    @OneToMany(mappedBy = "sykdomGrunnlag", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "medisinskGrunnlagsdata", cascade = CascadeType.ALL)
     private List<SykdomSøktPeriode> søktePerioder = new ArrayList<>();
 
     //TODO: Hva skiller denne fra relevanteSøknadsperioder? Kan vi kverke denne også?
-    @OneToMany(mappedBy = "sykdomGrunnlag", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "medisinskGrunnlagsdata", cascade = CascadeType.ALL)
     private List<SykdomRevurderingPeriode> revurderingPerioder = new ArrayList<>();
 
     //TODO: AnvendteVurderinger?

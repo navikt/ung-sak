@@ -74,8 +74,8 @@ public class SykdomVurderingRepository {
     }
 
     public void lagre(PleietrengendeSykdomVurderingVersjonBesluttet besluttet) {
-        String sql = "INSERT INTO sykdom_vurdering_versjon_besluttet" +
-            " (sykdom_vurdering_versjon_id, endret_av, endret_tid)" +
+        String sql = "INSERT INTO pleietrengende_sykdom_vurdering_versjon_besluttet" +
+            " (pleietrengende_sykdom_vurdering_versjon_id, endret_av, endret_tid)" +
             " VALUES(:id, :endretAv, :endretTid)" +
             " ON CONFLICT DO NOTHING";
 
@@ -98,8 +98,8 @@ public class SykdomVurderingRepository {
     public Optional<PleietrengendeSykdomVurdering> hentVurdering(AktørId pleietrengende, Long vurderingId) {
         final TypedQuery<PleietrengendeSykdomVurdering> q = entityManager.createQuery(
             "SELECT v " +
-            "From SykdomVurdering as v " +
-                "inner join v.sykdomVurderinger as sv " +
+            "From PleietrengendeSykdomVurdering as v " +
+                "inner join v.pleietrengendeSykdom as sv " +
                 "inner join sv.person as p " +
             "where p.aktørId = :aktørId " +
                 "and v.id = :vurderingId"
@@ -113,7 +113,7 @@ public class SykdomVurderingRepository {
     public List<Saksnummer> hentAlleSaksnummer(AktørId pleietrengende) {
         final TypedQuery<Saksnummer> q = entityManager.createQuery(
             "SELECT distinct sgb.saksnummer "
-                + "FROM SykdomGrunnlagBehandling as sgb "
+                + "FROM MedisinskGrunnlag as sgb "
                 +   "inner join sgb.pleietrengende as p "
                 + "where p.aktørId = :aktørId"
                 , Saksnummer.class);
@@ -126,8 +126,8 @@ public class SykdomVurderingRepository {
     public List<SykdomSøktPeriode> hentAlleSøktePerioder(Saksnummer saksnummer) {
         final TypedQuery<SykdomSøktPeriode> q = entityManager.createQuery(
             "SELECT ssp " +
-                "FROM SykdomGrunnlagBehandling as sgb " +
-                "   inner join sgb.grunnlag as sg " +
+                "FROM MedisinskGrunnlag as sgb " +
+                "   inner join sgb.grunnlagsdata as sg " +
                 "   inner join sg.søktePerioder as ssp " +
                 "where sgb.saksnummer = :saksnummer "
                 , SykdomSøktPeriode.class);
@@ -165,15 +165,15 @@ public class SykdomVurderingRepository {
     public List<PleietrengendeSykdomVurderingVersjon> hentVurderingMedVersjonerForBehandling(UUID behandlingUuid, Long vurderingId) {
         final TypedQuery<PleietrengendeSykdomVurderingVersjon> q = entityManager.createQuery(
                 "SELECT vv " +
-                "From SykdomGrunnlagBehandling as sgb " +
-                    "inner join sgb.grunnlag as sg " +
+                "From MedisinskGrunnlag as sgb " +
+                    "inner join sgb.grunnlagsdata as sg " +
                     "inner join sg.vurderinger as vv " +
                     "inner join vv.sykdomVurdering as v " +
                 "where sgb.behandlingUuid = :behandlingUuid " +
                     "and v.id = :vurderingId " +
                     "and sgb.versjon = " +
                         "( select max(sgb2.versjon) " +
-                        "From SykdomGrunnlagBehandling as sgb2 " +
+                        "From MedisinskGrunnlag as sgb2 " +
                         "where sgb2.behandlingUuid = sgb.behandlingUuid )"
                 , PleietrengendeSykdomVurderingVersjon.class);
             q.setParameter("vurderingId", vurderingId);
@@ -186,7 +186,7 @@ public class SykdomVurderingRepository {
 
         final TypedQuery<PleietrengendeSykdomVurdering> q2 = entityManager.createQuery(
                 "SELECT v " +
-                "From SykdomVurdering as v " +
+                "From PleietrengendeSykdomVurdering as v " +
                 "where v.id = :vurderingId"
                 , PleietrengendeSykdomVurdering.class);
             q2.setParameter("vurderingId", vurderingId);
@@ -200,15 +200,15 @@ public class SykdomVurderingRepository {
     public Collection<PleietrengendeSykdomVurderingVersjon> hentBehandlingVurderingerFor(SykdomVurderingType sykdomVurderingType, UUID behandlingUuid) {
         final TypedQuery<PleietrengendeSykdomVurderingVersjon> q = entityManager.createQuery(
             "SELECT vv " +
-            "From SykdomGrunnlagBehandling as sgb " +
-                "inner join sgb.grunnlag as sg " +
+            "From MedisinskGrunnlag as sgb " +
+                "inner join sgb.grunnlagsdata as sg " +
                 "inner join sg.vurderinger as vv " +
                 "inner join vv.sykdomVurdering as v " +
             "where sgb.behandlingUuid = :behandlingUuid " +
                 "and v.type = :sykdomVurderingType " +
                 "and sgb.versjon = " +
                     "( select max(sgb2.versjon) " +
-                    "From SykdomGrunnlagBehandling as sgb2 " +
+                    "From MedisinskGrunnlag as sgb2 " +
                     "where sgb2.behandlingUuid = sgb.behandlingUuid )"
             , PleietrengendeSykdomVurderingVersjon.class);
         q.setParameter("sykdomVurderingType", sykdomVurderingType);
@@ -220,7 +220,7 @@ public class SykdomVurderingRepository {
                                                                                     AktørId pleietrengende) {
         final TypedQuery<PleietrengendeSykdomVurderingVersjon> q = entityManager.createQuery(
             "SELECT vv " +
-            "From SykdomVurderingVersjon as vv " +
+            "From PleietrengendeSykdomVurderingVersjon as vv " +
                 "inner join vv.sykdomVurdering as v " +
                 "inner join v.sykdomVurderinger as sv " +
                 "inner join sv.person as p " +
@@ -228,7 +228,7 @@ public class SykdomVurderingRepository {
                 "and v.type = :sykdomVurderingType " +
                 "and vv.versjon = " +
                     "( select max(vv2.versjon) " +
-                    "From SykdomVurderingVersjon vv2 " +
+                    "From PleietrengendeSykdomVurderingVersjon vv2 " +
                     "where vv2.sykdomVurdering = vv.sykdomVurdering )"
             , PleietrengendeSykdomVurderingVersjon.class);
         q.setParameter("sykdomVurderingType", sykdomVurderingType);
@@ -257,7 +257,7 @@ public class SykdomVurderingRepository {
         final EntityTransaction transaction = innerEntityManager.getTransaction();
         transaction.begin();
         try {
-            final Query q = innerEntityManager.createNativeQuery("INSERT INTO SYKDOM_PERSON (ID, AKTOER_ID, NORSK_IDENTITETSNUMMER) VALUES (nextval('SEQ_SYKDOM_PERSON'), :aktorId, :norskIdentitetsnummer) ON CONFLICT DO NOTHING");
+            final Query q = innerEntityManager.createNativeQuery("INSERT INTO PERSON (ID, AKTOER_ID, NORSK_IDENTITETSNUMMER) VALUES (nextval('SEQ_PERSON'), :aktorId, :norskIdentitetsnummer) ON CONFLICT DO NOTHING");
             q.setParameter("aktorId", person.getAktørId().getId());
             q.setParameter("norskIdentitetsnummer", person.getNorskIdentitetsnummer());
             q.executeUpdate();
@@ -281,7 +281,7 @@ public class SykdomVurderingRepository {
         final EntityTransaction transaction = innerEntityManager.getTransaction();
         transaction.begin();
         try {
-            final Query q = innerEntityManager.createNativeQuery("INSERT INTO SYKDOM_VURDERINGER (ID, SYK_PERSON_ID, OPPRETTET_AV, OPPRETTET_TID) VALUES (nextval('SEQ_SYKDOM_VURDERINGER'), :personId, :opprettetAv, :opprettetTid) ON CONFLICT DO NOTHING");
+            final Query q = innerEntityManager.createNativeQuery("INSERT INTO PLEIETRENGENDE_SYKDOM (ID, PLEIETRENGENDE_PERSON_ID, OPPRETTET_AV, OPPRETTET_TID) VALUES (nextval('SEQ_PLEIETRENGENDE_SYKDOM'), :personId, :opprettetAv, :opprettetTid) ON CONFLICT DO NOTHING");
             q.setParameter("personId", pleietrengendeSykdom.getPerson().getId());
             q.setParameter("opprettetAv", pleietrengendeSykdom.getOpprettetAv());
             q.setParameter("opprettetTid", pleietrengendeSykdom.getOpprettetTidspunkt());
@@ -300,7 +300,7 @@ public class SykdomVurderingRepository {
     private Optional<PleietrengendeSykdom> hentVurderingerForBarn(AktørId pleietrengende) {
         final TypedQuery<PleietrengendeSykdom> q = entityManager.createQuery(
             "select sv " +
-                "From SykdomVurderinger as sv " +
+                "From PleietrengendeSykdom as sv " +
                     "inner join sv.person as p " +
                 "where p.aktørId = :aktørId"
             , PleietrengendeSykdom.class);
@@ -310,7 +310,7 @@ public class SykdomVurderingRepository {
     }
 
     private Person findPerson(AktørId aktørId) {
-        final TypedQuery<Person> q = entityManager.createQuery("select p From SykdomPerson p where p.aktørId = :aktørId", Person.class);
+        final TypedQuery<Person> q = entityManager.createQuery("select p From Person p where p.aktørId = :aktørId", Person.class);
         q.setParameter("aktørId", aktørId);
         return q.getResultList().stream().findFirst().orElse(null);
     }

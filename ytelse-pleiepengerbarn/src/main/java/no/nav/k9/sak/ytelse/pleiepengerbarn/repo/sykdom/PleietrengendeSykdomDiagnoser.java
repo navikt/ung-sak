@@ -25,7 +25,7 @@ import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 public class PleietrengendeSykdomDiagnoser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_DIAGNOSER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PLEIETRENGENDE_SYKDOM_DIAGNOSER")
     private Long id;
 
     @Column(name = "VERSJON", nullable = false)

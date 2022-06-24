@@ -1,7 +1,7 @@
-alter table SYKDOM_PERSON rename to PERSON;
-ALTER SEQUENCE seq_sykdom_person RENAME TO seq_person;
+alter table if exists SYKDOM_PERSON rename to PERSON;
+ALTER SEQUENCE if exists seq_sykdom_person RENAME TO seq_person;
 
-alter table SYKDOM_VURDERINGER rename to PLEIETRENGENDE_SYKDOM;
+alter table if exists SYKDOM_VURDERINGER rename to PLEIETRENGENDE_SYKDOM;
 alter table PLEIETRENGENDE_SYKDOM rename column syk_person_id to pleietrengende_person_id;
 alter table PLEIETRENGENDE_SYKDOM rename constraint "sykdom_vurderinger_pkey" to "pleietrengende_sykdom_pkey";
 alter table PLEIETRENGENDE_SYKDOM rename constraint "sykdom_vurderinger_syk_person_id_key" to "pleietrengende_sykdom_pleietrengende_person_id_key";
@@ -95,7 +95,7 @@ alter table SYKDOM_GRUNNLAG_BEHANDLING rename to GR_MEDISINSK;
 alter table GR_MEDISINSK rename column sykdom_grunnlag_id to medisinsk_grunnlagsdata_id;
 alter table GR_MEDISINSK rename constraint sykdom_grunnlag_behandling_pkey to gr_medisinsk_pkey;
 alter table GR_MEDISINSK rename constraint sykdom_grunnlag_behandling_behandling_uuid_versjon_key to gr_medisinsk_id_behandling_uuid_versjon_key;
-alter table GR_MEDISINSK rename constraint sykdom_grunnlag_behandling_saksnummer_behandlingsnummer_ver_key to gr_medisinsk_id_saksnummer_behandlingsnummer_ver_key;a
+alter table GR_MEDISINSK rename constraint sykdom_grunnlag_behandling_saksnummer_behandlingsnummer_ver_key to gr_medisinsk_id_saksnummer_behandlingsnummer_ver_key;
 alter table GR_MEDISINSK rename constraint fk_sykdom_grunnlag_behandling_01 to fk_gr_medisinsk_01;
 alter table GR_MEDISINSK rename constraint fk_sykdom_grunnlag_behandling_02 to fk_gr_medisinsk_02;
 alter table GR_MEDISINSK rename constraint fk_sykdom_grunnlag_behandling_03 to fk_gr_medisinsk_03;

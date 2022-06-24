@@ -28,7 +28,7 @@ import no.nav.k9.sak.typer.Periode;
 public class PleietrengendeSykdomVurderingVersjon implements Comparable<PleietrengendeSykdomVurderingVersjon> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_VURDERING_VERSJON")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON")
     private Long id;
 
     @ManyToOne
@@ -63,7 +63,7 @@ public class PleietrengendeSykdomVurderingVersjon implements Comparable<Pleietre
     @JoinColumn(name = "ENDRET_FOR_SOEKER", nullable = false)
     private Person endretForSøker;
 
-    @OneToOne(mappedBy = "sykdomVurderingVersjon")
+    @OneToOne(mappedBy = "pleietrengendeSykdomVurderingVersjon")
     private PleietrengendeSykdomVurderingVersjonBesluttet besluttet;
 
     @OneToMany
