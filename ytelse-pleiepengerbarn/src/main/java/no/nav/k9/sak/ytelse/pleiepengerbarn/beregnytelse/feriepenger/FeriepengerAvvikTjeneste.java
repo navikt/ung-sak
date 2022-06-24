@@ -75,7 +75,9 @@ public class FeriepengerAvvikTjeneste {
         FeriepengeOppsummering.Builder feriepengeOppsummeringBuilder = new FeriepengeOppsummering.Builder();
         for (BeregningsresultatPeriode brPeriode : beregningsresultatEntitet.getBeregningsresultatPerioder()) {
             for (BeregningsresultatAndel brAndel : brPeriode.getBeregningsresultatAndelList()) {
-                long beløp = brAndel.getFeriepengerÅrsbeløp().getVerdi().setScale(0, RoundingMode.UNNECESSARY).longValue();
+                long beløp = brAndel.getFeriepengerÅrsbeløp() != null
+                    ? brAndel.getFeriepengerÅrsbeløp().getVerdi().setScale(0, RoundingMode.UNNECESSARY).longValue()
+                    : 0L;
                 int fomYear = brPeriode.getPeriode().getFomDato().getYear();
                 int tomYear = brPeriode.getPeriode().getTomDato().getYear();
                 if (fomYear != tomYear) {
