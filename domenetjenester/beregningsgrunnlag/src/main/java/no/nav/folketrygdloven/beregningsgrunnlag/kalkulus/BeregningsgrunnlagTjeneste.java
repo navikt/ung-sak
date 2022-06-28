@@ -320,8 +320,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     public List<BeregningsgrunnlagKobling> hentKoblingerForPerioderTilVurdering(BehandlingReferanse ref) {
         var perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
-        var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
-        var vilkårOpt = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var vilkårene = vilkårTjeneste.hentHvisEksisterer(ref.getBehandlingId());
+        var vilkårOpt = vilkårene.flatMap(v -> v.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
         if (vilkårOpt.isEmpty()) {
             return Collections.emptyList();
         }
