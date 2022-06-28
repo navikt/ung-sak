@@ -41,7 +41,6 @@ import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
@@ -93,7 +92,6 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandlingId = kontekst.getBehandlingId();
         final Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        AktørId pleietrengendeAktørId = behandling.getFagsak().getPleietrengendeAktørId();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var perioder = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.I_LIVETS_SLUTTFASE);
 
@@ -106,7 +104,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
 
         var builder = Vilkårene.builderFraEksisterende(vilkårene);
         builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
-        vurderVilkår(behandlingId, sykdomGrunnlagBehandling, builder, VilkårType.I_LIVETS_SLUTTFASE, perioder);
+        vurderVilkår(behandlingId, sykdomGrunnlagBehandling, builder, perioder);
         vilkårResultatRepository.lagre(behandlingId, builder.build());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
@@ -135,12 +133,11 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
     private void vurderVilkår(Long behandlingId,
                               SykdomGrunnlagBehandling sykdomGrunnlagBehandling,
                               VilkårResultatBuilder builder,
-                              VilkårType vilkåret,
                               NavigableSet<DatoIntervallEntitet> perioder) {
 
-        var vilkårBuilder = builder.hentBuilderFor(vilkåret);
+        var vilkårBuilder = builder.hentBuilderFor(VilkårType.I_LIVETS_SLUTTFASE);
         for (DatoIntervallEntitet periode : perioder) {
-            final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(vilkåret, periode, sykdomGrunnlagBehandling);
+            final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(VilkårType.I_LIVETS_SLUTTFASE, periode, sykdomGrunnlagBehandling);
             oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårBuilder);
             oppdaterPleiebehovResultat(behandlingId, periode, vilkårData);
         }
@@ -194,13 +191,9 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType førsteSteg, BehandlingStegType sisteSteg) {
-        håndterHoppOverBakover(kontekst, modell, VilkårType.I_LIVETS_SLUTTFASE);
-    }
-
-    private void håndterHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, VilkårType vilkåret) {
-        final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), vilkåret);
+        final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.I_LIVETS_SLUTTFASE);
         perioder.forEach(periode -> {
-            if (!erVilkårOverstyrt(vilkåret, kontekst.getBehandlingId(), periode.getFomDato(), periode.getTomDato())) {
+            if (!erVilkårOverstyrt(kontekst.getBehandlingId(), periode.getFomDato(), periode.getTomDato())) {
                 Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
                 RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(modell, repositoryProvider, behandling, kontekst);
                 ryddVilkårTyper.ryddVedTilbakeføring();
@@ -209,13 +202,13 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         });
     }
 
-    protected boolean erVilkårOverstyrt(VilkårType vilkåret, Long behandlingId, LocalDate fom, LocalDate tom) {
+    protected boolean erVilkårOverstyrt(Long behandlingId, LocalDate fom, LocalDate tom) {
         Optional<Vilkårene> resultatOpt = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (resultatOpt.isPresent()) {
             Vilkårene vilkårene = resultatOpt.get();
             return vilkårene.getVilkårene()
                 .stream()
-                .filter(vilkår -> vilkåret.equals(vilkår.getVilkårType()))
+                .filter(vilkår -> VilkårType.I_LIVETS_SLUTTFASE.equals(vilkår.getVilkårType()))
                 .map(Vilkår::getPerioder)
                 .flatMap(Collection::stream)
                 .filter(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)))
