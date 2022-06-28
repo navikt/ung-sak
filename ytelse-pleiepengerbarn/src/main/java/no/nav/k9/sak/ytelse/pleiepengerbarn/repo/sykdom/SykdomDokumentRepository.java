@@ -36,8 +36,8 @@ public class SykdomDokumentRepository {
 
     public List<PleietrengendeSykdomDokument> hentAlleDokumenterFor(AktørId pleietrengende) {
         final TypedQuery<PleietrengendeSykdomDokument> q = entityManager.createQuery(
-            "SELECT d From SykdomDokument as d "
-                + "inner join d.sykdomVurderinger as sv "
+            "SELECT d From PleietrengendeSykdomDokument as d "
+                + "inner join d.pleietrengendeSykdom as sv "
                 + "inner join sv.person as p "
                 + "where p.aktørId = :aktørId", PleietrengendeSykdomDokument.class);
 
@@ -50,7 +50,7 @@ public class SykdomDokumentRepository {
 
     public boolean isDokumentBruktIVurdering(Long dokumentId) {
         final TypedQuery<PleietrengendeSykdomVurderingVersjon> q = entityManager.createQuery(
-            "SELECT vv From SykdomVurderingVersjon as vv "
+            "SELECT vv From PleietrengendeSykdomVurderingVersjon as vv "
                 + "inner join vv.dokumenter as d "
                 + "where d.id = :dokumentId", PleietrengendeSykdomVurderingVersjon.class);
         q.setParameter("dokumentId", dokumentId);
@@ -60,8 +60,8 @@ public class SykdomDokumentRepository {
 
     public List<PleietrengendeSykdomDokument> hentNyeDokumenterFor(UUID behandlingUUID) {
         final TypedQuery<PleietrengendeSykdomDokument> q = entityManager.createQuery(
-            "SELECT d From SykdomDokument as d "
-                + "where d.behandlingUuid = :behandlingUUID", PleietrengendeSykdomDokument.class);
+            "SELECT d From PleietrengendeSykdomDokument as d "
+                + "where d.søkersBehandlingUuid = :behandlingUUID", PleietrengendeSykdomDokument.class);
 
         q.setParameter("behandlingUUID", behandlingUUID);
 
@@ -79,13 +79,13 @@ public class SykdomDokumentRepository {
 
     public List<PleietrengendeSykdomDokument> hentDuplikaterAv(Long dokumentId) {
         final TypedQuery<PleietrengendeSykdomDokument> q = entityManager.createQuery(
-            "SELECT d From SykdomDokument as d "
+            "SELECT d From PleietrengendeSykdomDokument as d "
                 + "inner join d.informasjoner as i "
                 + "inner join i.duplikatAvDokument as dd "
                 + "where dd.id = :dokumentId"
                 + "  and i.versjon = ("
                 + "    select max(i2.versjon) "
-                + "    From SykdomDokumentInformasjon as i2 "
+                + "    From PleietrengendeSykdomDokumentInformasjon as i2 "
                 + "    where i2.dokument = i.dokument"
                 + "  )", PleietrengendeSykdomDokument.class);
 
@@ -106,8 +106,8 @@ public class SykdomDokumentRepository {
 
     public Optional<PleietrengendeSykdomDokument> hentDokument(Long dokumentId, AktørId pleietrengende) {
         final TypedQuery<PleietrengendeSykdomDokument> q = entityManager.createQuery(
-            "SELECT d From SykdomDokument as d "
-                + "inner join d.sykdomVurderinger as sv "
+            "SELECT d From PleietrengendeSykdomDokument as d "
+                + "inner join d.pleietrengendeSykdom as sv "
                 + "inner join sv.person as p "
                 + "where p.aktørId = :aktørId"
                 + "  and d.id = :dokumentId", PleietrengendeSykdomDokument.class);
@@ -126,7 +126,7 @@ public class SykdomDokumentRepository {
         final String dokumentInfoSjekk = (dokumentInfoId == null) ? "d.dokumentInfoId IS NULL" : "d.dokumentInfoId = :dokumentInfoId";
 
         final TypedQuery<PleietrengendeSykdomDokument> q = entityManager.createQuery(
-                "SELECT d From SykdomDokument as d "
+                "SELECT d From PleietrengendeSykdomDokument as d "
                     + "where d.journalpostId = :journalpostId"
                     + "  and " + dokumentInfoSjekk, PleietrengendeSykdomDokument.class);
 
@@ -164,7 +164,7 @@ public class SykdomDokumentRepository {
         TypedQuery<PleietrengendeSykdomDokumentHarOppdatertVurderinger> q =
             entityManager.createQuery(
                 "SELECT k " +
-                    "FROM SykdomDokumentHarOppdatertEksisterendeVurderinger as k " +
+                    "FROM PleietrengendeSykdomDokumentHarOppdatertVurderinger as k " +
                     "WHERE k.id = :id", PleietrengendeSykdomDokumentHarOppdatertVurderinger.class);
 
         q.setParameter("id", dokument.getId());
@@ -174,8 +174,8 @@ public class SykdomDokumentRepository {
 
     public void kvitterDokumenterMedOppdatertEksisterendeVurderinger(PleietrengendeSykdomDokumentHarOppdatertVurderinger utkvittering) {
 
-        String sql = "INSERT INTO sykdom_dokument_har_oppdatert_eksisterende_vurderinger " +
-            "(sykdom_dokument_id, opprettet_av, opprettet_tid) " +
+        String sql = "INSERT INTO pleietrengende_sykdom_dokument_har_oppdatert_vurderinger " +
+            "(pleietrengende_sykdom_dokument_id, opprettet_av, opprettet_tid) " +
             "VALUES(:id, :opprettetAv, :opprettetTidspunkt) " +
             "ON CONFLICT DO NOTHING";
 
@@ -231,13 +231,13 @@ public class SykdomDokumentRepository {
     public PleietrengendeSykdomInnleggelser hentInnleggelseOrNull(UUID behandlingUUID) {
         final TypedQuery<PleietrengendeSykdomInnleggelser> q = entityManager.createQuery(
             "SELECT gi " +
-                "FROM SykdomGrunnlagBehandling as sgb " +
-                "inner join sgb.grunnlag as sg " +
+                "FROM MedisinskGrunnlag as sgb " +
+                "inner join sgb.grunnlagsdata as sg " +
                 "inner join sg.innleggelser as gi " +
                 "where sgb.behandlingUuid = :behandlingUuid " +
                 "and sgb.versjon = " +
                 "( select max(sgb2.versjon) " +
-                "From SykdomGrunnlagBehandling as sgb2 " +
+                "From MedisinskGrunnlag as sgb2 " +
                 "where sgb2.behandlingUuid = sgb.behandlingUuid )"
             , PleietrengendeSykdomInnleggelser.class);
         q.setParameter("behandlingUuid", behandlingUUID);
@@ -275,8 +275,8 @@ public class SykdomDokumentRepository {
     private void oppdaterInnleggelser(PleietrengendeSykdomInnleggelser innleggelser, AktørId pleietrengende) {
         final TypedQuery<PleietrengendeSykdomInnleggelser> q = entityManager.createQuery(
             "Select si " +
-                "FROM SykdomInnleggelser as si " +
-                "   inner join si.vurderinger as sv " +
+                "FROM PleietrengendeSykdomInnleggelser as si " +
+                "   inner join si.pleietrengendeSykdom as sv " +
                 "   inner join sv.person as sp " +
                 "where si.versjon = :versjon " +
                 "and sp.aktørId = :aktørId "

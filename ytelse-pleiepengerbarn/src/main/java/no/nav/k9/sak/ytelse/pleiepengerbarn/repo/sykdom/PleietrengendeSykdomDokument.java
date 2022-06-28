@@ -8,8 +8,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -50,6 +53,8 @@ public class PleietrengendeSykdomDokument {
     private UUID søkersBehandlingUuid;
 
     @Column(name = "SOEKERS_SAKSNUMMER")
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "saksnummer", column = @Column(name = "soekers_saksnummer")))
     private Saksnummer søkersSaksnummer;
 
     @ManyToOne

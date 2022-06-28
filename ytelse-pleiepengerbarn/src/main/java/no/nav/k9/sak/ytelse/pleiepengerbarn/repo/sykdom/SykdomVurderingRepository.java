@@ -221,15 +221,15 @@ public class SykdomVurderingRepository {
         final TypedQuery<PleietrengendeSykdomVurderingVersjon> q = entityManager.createQuery(
             "SELECT vv " +
             "From PleietrengendeSykdomVurderingVersjon as vv " +
-                "inner join vv.sykdomVurdering as v " +
-                "inner join v.sykdomVurderinger as sv " +
+                "inner join vv.pleietrengendeSykdomVurdering as v " +
+                "inner join v.pleietrengendeSykdom as sv " +
                 "inner join sv.person as p " +
             "where p.aktørId = :aktørId " +
                 "and v.type = :sykdomVurderingType " +
                 "and vv.versjon = " +
                     "( select max(vv2.versjon) " +
                     "From PleietrengendeSykdomVurderingVersjon vv2 " +
-                    "where vv2.sykdomVurdering = vv.sykdomVurdering )"
+                    "where vv2.pleietrengendeSykdomVurdering = vv.pleietrengendeSykdomVurdering )"
             , PleietrengendeSykdomVurderingVersjon.class);
         q.setParameter("sykdomVurderingType", sykdomVurderingType);
         q.setParameter("aktørId", pleietrengende);
