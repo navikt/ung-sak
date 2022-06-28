@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -41,9 +40,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
-import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
-import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
@@ -51,10 +47,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBu
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.LivetsSluttfaseDokumentasjon;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
@@ -65,15 +61,14 @@ import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.reg
 @ApplicationScoped
 public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
 
+    private final MedisinskVilkårTjeneste medisinskVilkårTjeneste = new MedisinskVilkårTjeneste();
     private BehandlingRepositoryProvider repositoryProvider;
     private PleiebehovResultatRepository resultatRepository;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
-    private MedisinskVilkårTjeneste medisinskVilkårTjeneste = new MedisinskVilkårTjeneste();
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private SykdomVurderingTjeneste sykdomVurderingTjeneste;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
-    private SykdomDokumentRepository sykdomDokumentRepository;
-    private SykdomVurderingRepository sykdomVurderingRepository;
 
     VurderILivetsSluttfaseSteg() {
         // CDI
@@ -83,16 +78,15 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
     public VurderILivetsSluttfaseSteg(BehandlingRepositoryProvider repositoryProvider,
                                       PleiebehovResultatRepository resultatRepository,
                                       @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                      SykdomGrunnlagRepository sykdomGrunnlagRepository,
-                                      SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingRepository sykdomVurderingRepository) {
+                                      SykdomVurderingTjeneste sykdomVurderingTjeneste,
+                                      SykdomGrunnlagRepository sykdomGrunnlagRepository) {
         this.resultatRepository = resultatRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
-        this.sykdomDokumentRepository = sykdomDokumentRepository;
-        this.sykdomVurderingRepository = sykdomVurderingRepository;
     }
 
     @Override
@@ -105,11 +99,8 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
 
         SykdomGrunnlagBehandling sykdomGrunnlagBehandling = opprettGrunnlag(perioder, behandling);
 
-        boolean trengerAksjonspunkt = harUklassifiserteDokumenter(pleietrengendeAktørId)
-            || manglerGodkjentLegeerklæring(pleietrengendeAktørId)
-            || manglerSykdomVurdering(pleietrengendeAktørId);
-        final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && sykdomGrunnlagBehandling.isFørsteGrunnlagPåBehandling();
-        if (trengerAksjonspunkt || førsteGangManuellRevurdering) {
+        boolean trengerAksjonspunkt = trengerAksjonspunkt(kontekst, behandling);
+        if (trengerAksjonspunkt) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
@@ -121,33 +112,11 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private boolean harUklassifiserteDokumenter(AktørId pleietrengendeAktørId) {
-        return sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
-    }
-
-    private boolean manglerGodkjentLegeerklæring(final AktørId pleietrengende) {
-        return sykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).isEmpty();
-    }
-
-    private boolean harSykdomDokumenter(AktørId pleietrengendeAktørId) {
-        Set<SykdomDokumentType> aktuelleDokumenttyper = Set.of(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS, SykdomDokumentType.MEDISINSKE_OPPLYSNINGER);
-        return sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId).stream().anyMatch(d -> aktuelleDokumenttyper.contains(d.getType()));
-    }
-
-    private boolean manglerSykdomVurdering(AktørId pleietrengende) {
-        if (!harSykdomDokumenter(pleietrengende)) {
-            //uten sykdomsdokumenter, kan ikke sykdomsvurdering utføres
-            return false;
-        }
-        var gjeldendeSykdomVurdering = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.LIVETS_SLUTTFASE, pleietrengende);
-        var sykdomVurderingSegmenter = gjeldendeSykdomVurdering.toSegments();
-        if (sykdomVurderingSegmenter.isEmpty()) {
-            return true;
-        }
-        return sykdomVurderingSegmenter
-            .stream()
-            .anyMatch(sykdomVurderingSegment -> sykdomVurderingSegment.getValue() == null
-                || Resultat.IKKE_VURDERT == sykdomVurderingSegment.getValue().getResultat());
+    private boolean trengerAksjonspunkt(BehandlingskontrollKontekst kontekst, final Behandling behandling) {
+        final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingTjeneste.vurderAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()));
+        final boolean trengerInput = !sykdomAksjonspunkt.isKanLøseAksjonspunkt() || sykdomAksjonspunkt.isHarDataSomIkkeHarBlittTattMedIBehandling();
+        final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && !behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
+        return trengerInput || førsteGangManuellRevurdering;
     }
 
     private SykdomGrunnlagBehandling opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, final Behandling behandling) {

@@ -14,9 +14,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -58,7 +56,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRe
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
@@ -74,7 +72,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private MedisinskVilkårTjeneste medisinskVilkårTjeneste = new MedisinskVilkårTjeneste();
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-    private SykdomVurderingService sykdomVurderingService;
+    private SykdomVurderingTjeneste sykdomVurderingTjeneste;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
@@ -86,7 +84,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     public VurderSykdomOgKontinuerligTilsynSteg(BehandlingRepositoryProvider repositoryProvider,
                                                 PleiebehovResultatRepository resultatRepository,
                                                 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                                SykdomVurderingService sykdomVurderingService,
+                                                SykdomVurderingTjeneste sykdomVurderingTjeneste,
                                                 SykdomGrunnlagRepository sykdomGrunnlagRepository,
                                                 SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -94,7 +92,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         this.repositoryProvider = repositoryProvider;
         this.resultatRepository = resultatRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
-        this.sykdomVurderingService = sykdomVurderingService;
+        this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
@@ -156,12 +154,8 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private LocalDateTimeline<Utfall> medOmsorgenFor(NavigableSet<DatoIntervallEntitet> perioder, Vilkårene vilkårene) {
         final LocalDateTimeline<Boolean> perioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
         final LocalDateTimeline<VilkårPeriode> omsorgenForTidslinje = vilkårene.getVilkårTimeline(VilkårType.OMSORGEN_FOR);
-        return perioderTidslinje.combine(omsorgenForTidslinje, new LocalDateSegmentCombinator<Boolean, VilkårPeriode, Utfall>() {
-            @Override
-            public LocalDateSegment<Utfall> combine(LocalDateInterval datoInterval, LocalDateSegment<Boolean> p, LocalDateSegment<VilkårPeriode> vp) {
-                return new LocalDateSegment<>(datoInterval, vp.getValue().getUtfall());
-            }
-        }, JoinStyle.LEFT_JOIN).compress();
+
+        return perioderTidslinje.combine(omsorgenForTidslinje, (datoInterval, p, vp) -> new LocalDateSegment<>(datoInterval, vp.getValue().getUtfall()), JoinStyle.LEFT_JOIN).compress();
     }
 
     private SykdomGrunnlagBehandling opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, NavigableSet<DatoIntervallEntitet> perioderTilVurderingUtenOmsorgenFor, final Behandling behandling) {
@@ -180,7 +174,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     }
 
     private boolean trengerAksjonspunkt(BehandlingskontrollKontekst kontekst, final Behandling behandling) {
-        final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()));
+        final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingTjeneste.vurderAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()));
         final boolean trengerInput = !sykdomAksjonspunkt.isKanLøseAksjonspunkt() || sykdomAksjonspunkt.isHarDataSomIkkeHarBlittTattMedIBehandling();
         final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && !behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
         return trengerInput || førsteGangManuellRevurdering;

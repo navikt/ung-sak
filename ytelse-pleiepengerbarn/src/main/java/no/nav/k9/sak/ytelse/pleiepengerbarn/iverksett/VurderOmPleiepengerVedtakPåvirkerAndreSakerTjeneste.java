@@ -52,7 +52,7 @@ import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.FeriepengerAvvikTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
@@ -70,7 +70,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private VilkårResultatRepository vilkårResultatRepository;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
-    private SykdomGrunnlagService sykdomGrunnlagService;
+    private SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste;
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
@@ -90,7 +90,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                                                                VilkårResultatRepository vilkårResultatRepository,
                                                                SykdomGrunnlagRepository sykdomGrunnlagRepository,
                                                                SykdomVurderingRepository sykdomVurderingRepository,
-                                                               SykdomGrunnlagService sykdomGrunnlagService,
+                                                               SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste,
                                                                ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
                                                                EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                                                SamtidigUttakTjeneste samtidigUttakTjeneste,
@@ -104,7 +104,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
-        this.sykdomGrunnlagService = sykdomGrunnlagService;
+        this.sykdomGrunnlagTjeneste = sykdomGrunnlagTjeneste;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
@@ -232,9 +232,9 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         var kandidatSykdomBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(sisteBehandlingPåKandidat.getUuid()).orElseThrow();
         var behandling = behandlingRepository.hentBehandlingHvisFinnes(kandidatSykdomBehandling.getBehandlingUuid()).orElseThrow();
         var vurderingsperioder = utledVurderingsperiode(behandling);
-        var manglendeOmsorgenForPerioder = sykdomGrunnlagService.hentManglendeOmsorgenForPerioder(behandling.getId());
+        var manglendeOmsorgenForPerioder = sykdomGrunnlagTjeneste.hentManglendeOmsorgenForPerioder(behandling.getId());
         var utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, vurderingsperioder, manglendeOmsorgenForPerioder);
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagService.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlag()), utledetGrunnlag).getDiffPerioder();
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlag()), utledetGrunnlag).getDiffPerioder();
 
         return endringerISøktePerioder.compress()
             .filterValue(Objects::nonNull);

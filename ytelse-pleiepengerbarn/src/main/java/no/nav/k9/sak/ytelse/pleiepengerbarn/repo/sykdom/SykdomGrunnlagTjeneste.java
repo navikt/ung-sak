@@ -23,18 +23,18 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomGrunnlagSammenliknings
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomSamletVurdering;
 
 @Dependent
-public class SykdomGrunnlagService {
+public class SykdomGrunnlagTjeneste {
 
     private VilkårResultatRepository vilkårResultatRepository;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
 
 
-    SykdomGrunnlagService() {
+    SykdomGrunnlagTjeneste() {
         // CDI
     }
 
     @Inject
-    public SykdomGrunnlagService(SykdomGrunnlagRepository sykdomGrunnlagRepository, BehandlingRepositoryProvider repositoryProvider) {
+    public SykdomGrunnlagTjeneste(SykdomGrunnlagRepository sykdomGrunnlagRepository, BehandlingRepositoryProvider repositoryProvider) {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }

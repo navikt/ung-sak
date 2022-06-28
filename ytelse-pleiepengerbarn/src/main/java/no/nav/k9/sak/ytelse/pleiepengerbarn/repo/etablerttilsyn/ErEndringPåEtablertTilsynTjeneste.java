@@ -10,21 +10,21 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagTjeneste;
 
 @Dependent
 public class ErEndringPåEtablertTilsynTjeneste {
 
     private EtablertTilsynTjeneste etablertTilsynTjeneste;
-    private SykdomGrunnlagService sykdomGrunnlagService;
+    private SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
 
     @Inject
     public ErEndringPåEtablertTilsynTjeneste(EtablertTilsynTjeneste etablertTilsynTjeneste,
-                                             SykdomGrunnlagService sykdomGrunnlagService,
+                                             SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste,
                                              @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
-        this.sykdomGrunnlagService = sykdomGrunnlagService;
+        this.sykdomGrunnlagTjeneste = sykdomGrunnlagTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
 
@@ -49,7 +49,7 @@ public class ErEndringPåEtablertTilsynTjeneste {
     }
 
     private LocalDateTimeline<Boolean> endringerFra(BehandlingReferanse referanse, LocalDateTimeline<Boolean> resultat) {
-        resultat = TidslinjeUtil.kunPerioderSomIkkeFinnesI(resultat, TidslinjeUtil.tilTidslinjeKomprimert(sykdomGrunnlagService.hentManglendeOmsorgenForPerioder(referanse.getBehandlingId())));
+        resultat = TidslinjeUtil.kunPerioderSomIkkeFinnesI(resultat, TidslinjeUtil.tilTidslinjeKomprimert(sykdomGrunnlagTjeneste.hentManglendeOmsorgenForPerioder(referanse.getBehandlingId())));
         //resultat = SykdomUtils.kunPerioderSomIkkeFinnesI(resultat, SykdomUtils.toLocalDateTimeline(utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)));
         resultat = resultat.intersection(TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurderingTjeneste.utledFullstendigePerioder(referanse.getBehandlingId())));
         return resultat;
