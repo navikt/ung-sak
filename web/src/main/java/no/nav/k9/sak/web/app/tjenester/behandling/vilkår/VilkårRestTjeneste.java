@@ -3,8 +3,10 @@ package no.nav.k9.sak.web.app.tjenester.behandling.vilkår;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -109,10 +111,11 @@ public class VilkårRestTjeneste {
 
     private Response getVilkårV3(BehandlingUuidDto behandlingUuid, boolean inkluderVilkårkjøring) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        var vilkårene = vilkårTjeneste.hentHvisEksisterer(behandling.getId()).orElse(null);
-        var vilkårPeriodeMap = utledFaktiskeVilkårPerioder(behandling, vilkårene);
-
-        var dto = VilkårDtoMapper.lagVilkarMedPeriodeDto(behandling, inkluderVilkårkjøring, vilkårene, vilkårPeriodeMap);
+        var vilkåreneOpt = vilkårTjeneste.hentHvisEksisterer(behandling.getId());
+        var dto = vilkåreneOpt.map(vilkårene -> {
+            var vilkårPeriodeMap = utledFaktiskeVilkårPerioder(behandling, vilkårene);
+            return VilkårDtoMapper.lagVilkarMedPeriodeDto(behandling, inkluderVilkårkjøring, vilkårene, vilkårPeriodeMap);
+        }).orElse(Collections.emptyList());
         CacheControl cc = new CacheControl();
         cc.setNoCache(true);
         cc.setNoStore(true);
