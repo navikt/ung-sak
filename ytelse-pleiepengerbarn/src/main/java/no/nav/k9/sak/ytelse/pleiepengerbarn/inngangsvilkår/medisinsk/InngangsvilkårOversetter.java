@@ -14,11 +14,11 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodel
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskvilkårGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PeriodeMedKontinuerligTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PeriodeMedUtvidetBehov;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDiagnose;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlagsdata;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDiagnose;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 
 public class InngangsvilkårOversetter {
 
@@ -30,8 +30,8 @@ public class InngangsvilkårOversetter {
         final var vilkårsGrunnlag = new MedisinskvilkårGrunnlag(periode.getFomDato(), periode.getTomDato());
 
         String diagnosekode = null;
-        if (grunnlag.getDiagnosekoder() != null) {
-            diagnosekode = grunnlag.getDiagnosekoder()
+        if (grunnlag.getDiagnoser() != null) {
+            diagnosekode = grunnlag.getDiagnoser()
                 .getDiagnoser()
                 .stream()
                 .findAny()
@@ -67,7 +67,12 @@ public class InngangsvilkårOversetter {
             .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
             .collect(Collectors.toList());
 
-        final DiagnoseKilde diagnoseKilde = grunnlag.getGodkjenteLegeerklæringer().isEmpty() ? DiagnoseKilde.ANNET : DiagnoseKilde.SYKHUSLEGE;
+        DiagnoseKilde diagnoseKilde;
+        if (grunnlag.getGodkjenteLegeerklæringer().isEmpty()) {
+            diagnoseKilde = grunnlag.isHarAndreMedisinskeOpplysninger() ? DiagnoseKilde.ANNET : DiagnoseKilde.MANGLENDE;
+        } else {
+            diagnoseKilde = DiagnoseKilde.SYKHUSLEGE;
+        }
 
         vilkårsGrunnlag.medDiagnoseKilde(diagnoseKilde)
             .medDiagnoseKode(diagnosekode)

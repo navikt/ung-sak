@@ -87,22 +87,22 @@ public class KompletthetForBeregningTjeneste {
         var finnArbeidsforholdForIdentPåDagFunction = new UtledManglendeInntektsmeldingerFraGrunnlagFunction(iayTjeneste,
             new FinnEksternReferanse(iayTjeneste, ref.getBehandlingId()));
 
-        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, true);
+        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, true, false);
     }
 
     public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggFraGrunnlag(BehandlingReferanse ref) {
         var finnArbeidsforholdForIdentPåDagFunction = new UtledManglendeInntektsmeldingerFraGrunnlagFunction(iayTjeneste,
             new FinnEksternReferanse(iayTjeneste, ref.getBehandlingId()));
 
-        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, false);
+        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, false, true);
     }
 
     Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedlegg(BehandlingReferanse ref,
-                                                                                BiFunction<BehandlingReferanse, LocalDate, Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>>> finnArbeidsforholdForIdentPåDagFunction, boolean skipVurderingMotArbeid) {
+                                                                                BiFunction<BehandlingReferanse, LocalDate, Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>>> finnArbeidsforholdForIdentPåDagFunction, boolean skipVurderingMotArbeid, boolean skalIgnorerePerioderFraInfotrygd) {
         var perioderMedManglendeVedlegg = new HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>>();
 
         // Utled vilkårsperioder
-        var vilkårsPerioder = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false, false, true)
+        var vilkårsPerioder = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false, false, skalIgnorerePerioderFraInfotrygd)
             .stream()
             .sorted(Comparator.comparing(DatoIntervallEntitet::getFomDato))
             .collect(Collectors.toCollection(TreeSet::new));
@@ -256,6 +256,7 @@ public class KompletthetForBeregningTjeneste {
                 .flatMap(Collection::stream)
                 .filter(im -> skipVurderingMotArbeid ||
                     fraværFilter.harFraværFraArbeidetIPerioden(ref, periode, im))
+                .peek(im -> fraværFilter.harFraværFraArbeidetIPerioden(ref, periode, im))
                 .collect(Collectors.toList());
             return manglendeInntektsmeldinger;
         }

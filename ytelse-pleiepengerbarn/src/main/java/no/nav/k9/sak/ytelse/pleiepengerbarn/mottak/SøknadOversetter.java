@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -25,7 +24,6 @@ class SøknadOversetter {
 
     private TpsTjeneste tpsTjeneste;
     private SøknadPersisterer søknadPersisterer;
-    private boolean skalBrukeUtledetEndringsperiode;
 
     SøknadOversetter() {
         // for CDI proxy
@@ -33,11 +31,9 @@ class SøknadOversetter {
 
     @Inject
     SøknadOversetter(TpsTjeneste tpsTjeneste,
-                     SøknadPersisterer søknadPersisterer,
-                     @KonfigVerdi(value = "ENABLE_UTLEDET_ENDRINGSPERIODE", defaultVerdi = "false") boolean skalBrukeUtledetEndringsperiode) {
+                     SøknadPersisterer søknadPersisterer) {
         this.tpsTjeneste = tpsTjeneste;
         this.søknadPersisterer = søknadPersisterer;
-        this.skalBrukeUtledetEndringsperiode = skalBrukeUtledetEndringsperiode;
     }
 
     void persister(Søknad søknad, JournalpostId journalpostId, Behandling behandling) {
@@ -51,16 +47,6 @@ class SøknadOversetter {
         final List<Periode> søknadsperioder = hentAlleSøknadsperioder(ytelse);
         final var maksSøknadsperiode = finnMaksperiode(søknadsperioder);
 
-        // Utgår for K9-ytelsene?
-        // .medBegrunnelseForSenInnsending(wrapper.getBegrunnelseForSenSoeknad())
-        // .medTilleggsopplysninger(wrapper.getTilleggsopplysninger())
-
-        // TODO: Stopp barn som mangler norskIdentitetsnummer i k9-punsj ... eller støtt fødselsdato her?
-
-        // TODO etter18feb: Fjern denne fra entitet og DB:
-        final boolean elektroniskSøknad = false;
-
-        // TODO: Hvis vi skal beholde SøknadEntitet trenger vi å lagre SøknadID og sikre idempotens med denne.
         // Felles Pleiepenger
         søknadPersisterer.lagreSøknadEntitet(søknad, journalpostId, behandlingId, maksSøknadsperiode, mottattDato);
         søknadPersisterer.lagreMedlemskapinfo(ytelse.getBosteder(), behandlingId, mottattDato);
@@ -93,7 +79,7 @@ class SøknadOversetter {
 
     private List<Periode> hentAlleSøknadsperioder(PleiepengerSyktBarn ytelse) {
         final LocalDateTimeline<Boolean> kompletteSøknadsperioderTidslinje = tilTidslinje(ytelse.getSøknadsperiodeList());
-        final var endringsperioder = skalBrukeUtledetEndringsperiode ? ytelse.getUtledetEndringsperiode() : ytelse.getEndringsperiode();
+        final var endringsperioder = ytelse.getEndringsperiode();
         final LocalDateTimeline<Boolean> endringssøknadsperioderTidslinje = tilTidslinje(endringsperioder);
         final LocalDateTimeline<Boolean> søknadsperioder = kompletteSøknadsperioderTidslinje.union(endringssøknadsperioderTidslinje, StandardCombinators::coalesceLeftHandSide).compress();
         return søknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());

@@ -159,10 +159,10 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
 
     private List<PleietrengendeSykdomDiagnose> hentDiagnosekoder(MedisinskGrunnlag medisinskGrunnlag) {
         final MedisinskGrunnlagsdata medisinskGrunnlagsdata = medisinskGrunnlag.getGrunnlagsdata();
-        if (medisinskGrunnlagsdata.getDiagnosekoder() == null || medisinskGrunnlagsdata.getDiagnosekoder().getDiagnoser() == null) {
+        if (medisinskGrunnlagsdata.getDiagnoser() == null || medisinskGrunnlagsdata.getDiagnoser().getDiagnoser() == null) {
             return List.of();
         }
-        final List<PleietrengendeSykdomDiagnose> diagnosekoder = medisinskGrunnlagsdata.getDiagnosekoder().getDiagnoser();
+        final List<PleietrengendeSykdomDiagnose> diagnosekoder = medisinskGrunnlagsdata.getDiagnoser().getDiagnoser();
         return diagnosekoder;
     }
 

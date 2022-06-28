@@ -83,6 +83,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.SaksbehandlerRestTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
@@ -314,6 +315,7 @@ public class BehandlingDtoTjeneste {
 
         dto.leggTil(getFraMap(BrevRestTjeneste.HENT_VEDTAKVARSEL_PATH, "vedtak-varsel", uuidQueryParams));
         lagFormidlingLink(behandling).forEach(dto::leggTil);
+        lagLosLink(behandling).forEach(dto::leggTil);
     }
 
     private void leggTilBeregnetYtelseBaserteLinks(Behandling behandling, BehandlingDto dto, Map<String, String> uuidQueryParams) {
@@ -470,7 +472,7 @@ public class BehandlingDtoTjeneste {
     }
 
     private Optional<ResourceLink> lagSimuleringResultatLink(Behandling behandling) {
-        return Optional.of(ResourceLink.post(k9OppdragProxyUrl + "/simulering/detaljert-resultat", "simuleringResultat", behandling.getUuid()));
+        return Optional.of(ResourceLink.eksternPost(k9OppdragProxyUrl + "/simulering/detaljert-resultat", "simuleringResultat", behandling.getUuid()));
     }
 
     private List<ResourceLink> lagFormidlingLink(Behandling behandling) {
@@ -485,11 +487,11 @@ public class BehandlingDtoTjeneste {
             "avsenderApplikasjon", AvsenderApplikasjon.K9SAK.name());
 
         List<ResourceLink> links = new ArrayList<>();
-        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/maler", "brev-maler", standardFormidlingParams));
-        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/tilgjengeligevedtaksbrev", "tilgjengelige-vedtaksbrev", standardFormidlingParams));
-        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/informasjonsbehov", "informasjonsbehov-vedtaksbrev", standardFormidlingParams));
-        links.add(ResourceLink.get(FORMIDLING_DOKUMENTDATA_PATH, "dokumentdata-hente", behandlingUuid));
-        links.add(ResourceLink.post(FORMIDLING_DOKUMENTDATA_PATH + "/" + behandling.getUuid(), "dokumentdata-lagre", null));
+        links.add(ResourceLink.eksternGet(FORMIDLING_PATH + "/brev/maler", "brev-maler", standardFormidlingParams));
+        links.add(ResourceLink.eksternGet(FORMIDLING_PATH + "/brev/tilgjengeligevedtaksbrev", "tilgjengelige-vedtaksbrev", standardFormidlingParams));
+        links.add(ResourceLink.eksternGet(FORMIDLING_PATH + "/brev/informasjonsbehov", "informasjonsbehov-vedtaksbrev", standardFormidlingParams));
+        links.add(ResourceLink.eksternGet(FORMIDLING_DOKUMENTDATA_PATH, "dokumentdata-hente", behandlingUuid));
+        links.add(ResourceLink.eksternPost(FORMIDLING_DOKUMENTDATA_PATH + "/" + behandling.getUuid(), "dokumentdata-lagre", null));
         return links;
     }
 
@@ -502,6 +504,15 @@ public class BehandlingDtoTjeneste {
             links.add(getFraMap(TilbakekrevingRestTjeneste.VARSELTEKST_PATH, "tilbakekrevingsvarsel-fritekst", queryParams));
         }
 
+        return links;
+    }
+
+    private List<ResourceLink> lagLosLink(Behandling behandling) {
+        var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+
+        List<ResourceLink> links = new ArrayList<>();
+        links.add(getFraMap(LosRestTjeneste.MERKNAD_PATH, "los-hente-merknad", queryParams));
+        links.add(post(LosRestTjeneste.MERKNAD_PATH, "los-lagre-merknad", new BehandlingUuidDto(behandling.getUuid())));
         return links;
     }
 

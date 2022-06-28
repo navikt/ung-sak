@@ -38,6 +38,8 @@ import no.nav.k9.sak.domene.behandling.steg.kompletthet.internal.KompletthetBere
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
+import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnRepository;
+import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
@@ -52,6 +54,8 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     private BestiltEtterlysningRepository bestiltEtterlysningRepository;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
 
+    private TotrinnRepository totrinnRepository;
+
     protected VurderKompletthetForBeregningSteg() {
         // for CDI proxy
     }
@@ -60,11 +64,13 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     public VurderKompletthetForBeregningSteg(BehandlingRepository behandlingRepository,
                                              KompletthetBeregningTjeneste kompletthetBeregningTjeneste,
                                              BestiltEtterlysningRepository bestiltEtterlysningRepository,
+                                             TotrinnRepository totrinnRepository,
                                              DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
 
         this.behandlingRepository = behandlingRepository;
         this.kompletthetBeregningTjeneste = kompletthetBeregningTjeneste;
         this.bestiltEtterlysningRepository = bestiltEtterlysningRepository;
+        this.totrinnRepository = totrinnRepository;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
     }
 
@@ -166,12 +172,13 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     private void avbrytAksjonspunktHvisTilstede(BehandlingskontrollKontekst kontekst) {
         var haddeAksjonspunktSomSkulleAvbrytes = false;
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING)) {
+        var totrinnsvurderinger = totrinnRepository.hentTotrinnaksjonspunktvurderinger(behandling);
+        if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING) && harIkkeBlittSendtTilbakeAvBeslutter(totrinnsvurderinger, AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING)) {
             behandling.getAksjonspunktFor(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING)
                 .avbryt();
             haddeAksjonspunktSomSkulleAvbrytes = true;
         }
-        if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING)) {
+        if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING) && harIkkeBlittSendtTilbakeAvBeslutter(totrinnsvurderinger, AksjonspunktDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING)) {
             behandling.getAksjonspunktFor(AksjonspunktDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING)
                 .avbryt();
             haddeAksjonspunktSomSkulleAvbrytes = true;
@@ -179,6 +186,15 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         if (haddeAksjonspunktSomSkulleAvbrytes) {
             behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         }
+    }
+
+    private boolean harIkkeBlittSendtTilbakeAvBeslutter(Collection<Totrinnsvurdering> totrinnresultatgrunnlag, AksjonspunktDefinisjon definisjon) {
+        if (totrinnresultatgrunnlag.isEmpty()) {
+            return true;
+        }
+
+        return totrinnresultatgrunnlag.stream()
+            .noneMatch(vur -> Objects.equals(vur.getAksjonspunktDefinisjon().getKode(), definisjon.getKode()) && !vur.isGodkjent());
     }
 
     private Venteårsak utledVenteÅrsak(KompletthetsAksjon kompletthetsAksjon) {

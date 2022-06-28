@@ -34,6 +34,8 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktDto;
@@ -62,6 +64,7 @@ public class AksjonspunktRestTjeneste {
     private AksjonspunktApplikasjonTjeneste applikasjonstjeneste;
     private BehandlingRepository behandlingRepository;
     private BehandlingsutredningApplikasjonTjeneste behandlingutredningTjeneste;
+    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private TotrinnTjeneste totrinnTjeneste;
 
     public AksjonspunktRestTjeneste() {
@@ -72,11 +75,12 @@ public class AksjonspunktRestTjeneste {
     public AksjonspunktRestTjeneste(AksjonspunktApplikasjonTjeneste aksjonpunktApplikasjonTjeneste,
                                     BehandlingRepository behandlingRepository,
                                     BehandlingsutredningApplikasjonTjeneste behandlingutredningTjeneste,
-                                    TotrinnTjeneste totrinnTjeneste) {
+                                    BehandlingskontrollTjeneste behandlingskontrollTjeneste, TotrinnTjeneste totrinnTjeneste) {
 
         this.applikasjonstjeneste = aksjonpunktApplikasjonTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.behandlingutredningTjeneste = behandlingutredningTjeneste;
+        this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.totrinnTjeneste = totrinnTjeneste;
     }
 
@@ -171,11 +175,17 @@ public class AksjonspunktRestTjeneste {
     @Operation(description = "Lagre endringer gitt av aksjonspunktene og rekjør behandling fra gjeldende steg", tags = "aksjonspunkt")
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response bekreft(@Context HttpServletRequest request,
-                            @Parameter(description = "Liste over aksjonspunkt som skal bekreftes, inklusiv data som trengs for å løse de.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BekreftedeAksjonspunkterDto apDto)
+    public Response bekreft(
+                @Context
+            HttpServletRequest request,
+                @Parameter(description = "Liste over aksjonspunkt som skal bekreftes, inklusiv data som trengs for å løse de.")
+                @Valid
+                @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            BekreftedeAksjonspunkterDto apDto)
         throws URISyntaxException { // NOSONAR
-
         Long behandlingId = apDto.getBehandlingId();
+        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
+
         Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer = apDto.getBekreftedeAksjonspunktDtoer();
 
         Behandling behandling = behandlingId != null
@@ -186,7 +196,9 @@ public class AksjonspunktRestTjeneste {
 
         validerBetingelserForAksjonspunkt(behandling, apDto.getBekreftedeAksjonspunktDtoer());
 
-        applikasjonstjeneste.bekreftAksjonspunkter(bekreftedeAksjonspunktDtoer, behandling.getId());
+        applikasjonstjeneste.bekreftAksjonspunkter(bekreftedeAksjonspunktDtoer, behandling.getId(), kontekst);
+
+        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
 
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
     }

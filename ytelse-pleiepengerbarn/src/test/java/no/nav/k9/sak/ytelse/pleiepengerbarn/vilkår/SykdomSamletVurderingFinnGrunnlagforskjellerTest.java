@@ -269,9 +269,18 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         assertThat(interval.getTomDato()).isEqualTo(LocalDate.of(2021, 1, 15));
     }
 
-
     private MedisinskGrunnlagsdata grunnlagMock(List<PleietrengendeSykdomVurderingVersjon> vurderinger, PleietrengendeSykdomInnleggelser innleggelser) {
-        return new MedisinskGrunnlagsdata(null, new ArrayList<>(), new ArrayList<>(), vurderinger, new ArrayList<>(), innleggelser, null, "test", LocalDateTime.now());
+        return new MedisinskGrunnlagsdata(
+            null,
+            new ArrayList<>(),
+            new ArrayList<>(),
+            vurderinger,
+            new ArrayList<>(),
+            false,
+            innleggelser,
+            null,
+            "test",
+            LocalDateTime.now());
     }
 
     private PleietrengendeSykdomInnleggelser innleggelserMock(Periode... perioder) {

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -86,7 +87,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         var perioderTilVurdering = finnSykdomsperioder(referanse);
         var opptjeningResultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
 
-        var tidslinjeTilVurdering = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList()));
+        var tidslinjeTilVurdering = utledTidslinjeTilVurdering(perioderTilVurdering, vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
 
         var input = new ArbeidstidMappingInput()
             .medSaksnummer(referanse.getSaksnummer())
@@ -113,6 +114,17 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         var aktørArbeidFraRegister = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId()).getAktørArbeidFraRegister(referanse.getAktørId());
 
         return utledFraInput(timelineMedYtelse, timelineMedInnvilgetYtelse, input, aktørArbeidFraRegister);
+    }
+
+    private LocalDateTimeline<Boolean> utledTidslinjeTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Optional<Vilkår> vilkår) {
+        var tidslinje = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList())).compress();
+        if (vilkår.isEmpty()) {
+            return tidslinje;
+        }
+
+        var opptjeningstidslinje = new LocalDateTimeline<>(vilkår.get().getPerioder().stream().map(VilkårPeriode::getPeriode).map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList()));
+
+        return opptjeningstidslinje.combine(tidslinje, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
 
     private LocalDateTimeline<Boolean> utledYtelse(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
@@ -187,9 +199,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             skulleVærtSøktOm = skulleVærtSøktOm.intersection(tidslinjeTilVurdering);
             skulleVærtSøktOm = skulleVærtSøktOm.disjoint(helgeTidslinje);
 
-            if (!skulleVærtSøktOm.isEmpty()) {
-                resultat.put(entry.getKey(), skulleVærtSøktOm);
-            }
+            resultat.put(entry.getKey(), skulleVærtSøktOm);
         }
 
         return resultat;
@@ -207,7 +217,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             var erFrilans = opptjening.orElseThrow()
                 .getOpptjeningAktivitet()
                 .stream()
-                .filter(it -> DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(1), skjæringstidspunkt.minusDays(1)).overlapper(it.getFom(), it.getTom()))
+                .filter(it -> erAktivVedSluttAvPerioden(opptjening.get().getTom(), it.getTom()))
                 .anyMatch(it -> OpptjeningAktivitetType.FRILANS.equals(it.getAktivitetType()));
             if (erFrilans) {
                 leggTilSegmentForType(mellomregning, segment, new AktivitetIdentifikator(UttakArbeidType.FRILANSER));
@@ -223,6 +233,10 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
                 leggTilSegmentForType(mellomregning, segment, new AktivitetIdentifikator(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE));
             }
         }
+    }
+
+    private boolean erAktivVedSluttAvPerioden(LocalDate sisteDagIOpptjeningsperioden, LocalDate aktivitetSlutt) {
+        return Objects.equals(sisteDagIOpptjeningsperioden, aktivitetSlutt) || sisteDagIOpptjeningsperioden.isBefore(aktivitetSlutt);
     }
 
     private void leggTilSegmentForType(Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> mellomregning, LocalDateSegment<Boolean> segment, AktivitetIdentifikator aktivitetIdentifikator) {

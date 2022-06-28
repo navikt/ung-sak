@@ -65,6 +65,34 @@ public class MedisinskvilkårTest {
     }
 
     @Test
+    public void skal_avlså_hvis_det_mangler_medisinsk_dokumentasjon() {
+        final var grunnlag = new MedisinskvilkårGrunnlag(LocalDate.now().minusWeeks(8), LocalDate.now())
+            .medDiagnoseKode("SYK");
+        final var resultat = new MedisinskVilkårResultat();
+
+        final var evaluering = new Medisinskvilkår().evaluer(grunnlag, resultat);
+        EvaluationSummary oppsummering = new EvaluationSummary(evaluering);
+
+        assertThat(oppsummering).isNotNull();
+        final var utfall = getUtfall(oppsummering);
+        assertThat(utfall).isNotNull();
+        assertThat(utfall).isEqualTo(Resultat.NEI);
+
+        final var grunnlag2 = new MedisinskvilkårGrunnlag(LocalDate.now().minusWeeks(8), LocalDate.now())
+            .medDiagnoseKode("SYK")
+            .medDiagnoseKilde(DiagnoseKilde.MANGLENDE);
+        final var resultat2 = new MedisinskVilkårResultat();
+
+        final var evaluering2 = new Medisinskvilkår().evaluer(grunnlag2, resultat2);
+        EvaluationSummary oppsummering2 = new EvaluationSummary(evaluering2);
+
+        assertThat(oppsummering2).isNotNull();
+        final var utfall2 = getUtfall(oppsummering2);
+        assertThat(utfall2).isNotNull();
+        assertThat(utfall2).isEqualTo(Resultat.NEI);
+    }
+
+    @Test
     public void skal_avslå_hvis_det_ikke_er_noen_gyldige_perioder() {
         final var grunnlag = new MedisinskvilkårGrunnlag(LocalDate.now().minusWeeks(8), LocalDate.now())
             .medDiagnoseKode("SYK")

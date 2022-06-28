@@ -18,7 +18,6 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
 @Entity(name = "MedisinskGrunnlagsdata")
@@ -58,13 +57,16 @@ public class MedisinskGrunnlagsdata {
     )
     private List<PleietrengendeSykdomDokument> godkjenteLegeerklæringer = new ArrayList<>();
 
+    @Column(name = "SYKDOM_HAR_ANDRE_MEDISINSKE_OPPLYSNINGER", nullable = false)
+    private boolean harAndreMedisinskeOpplysninger;
+
     @OneToOne
     @JoinColumn(name = "PLEIETRENGENDE_SYKDOM_INNLEGGELSER_ID")
     private PleietrengendeSykdomInnleggelser innleggelser;
 
     @OneToOne
     @JoinColumn(name = "PLEIETRENGENDE_SYKDOM_DIAGNOSER_ID")
-    private PleietrengendeSykdomDiagnoser diagnosekoder;
+    private PleietrengendeSykdomDiagnoser diagnoser;
 
     @DiffIgnore
     @Column(name = "OPPRETTET_AV", nullable = false, updatable=false)
@@ -77,22 +79,25 @@ public class MedisinskGrunnlagsdata {
 
     MedisinskGrunnlagsdata() {}
 
-    public MedisinskGrunnlagsdata(UUID sykdomGrunnlagUUID,
-                                  List<SykdomSøktPeriode> søktePerioder,
-                                  List<SykdomRevurderingPeriode> revurderingPerioder,
-                                  List<PleietrengendeSykdomVurderingVersjon> vurderinger,
-                                  List<PleietrengendeSykdomDokument> godkjenteLegeerklæringer,
-                                  PleietrengendeSykdomInnleggelser innleggelser,
-                                  PleietrengendeSykdomDiagnoser diagnosekoder,
-                                  String opprettetAv,
-                                  LocalDateTime opprettetTidspunkt) {
+    public MedisinskGrunnlagsdata(
+            UUID sykdomGrunnlagUUID,
+            List<SykdomSøktPeriode> søktePerioder,
+            List<SykdomRevurderingPeriode> revurderingPerioder,
+            List<PleietrengendeSykdomVurderingVersjon> vurderinger,
+            List<PleietrengendeSykdomDokument> godkjenteLegeerklæringer,
+            boolean harAndreMedisinskeOpplysninger,
+            PleietrengendeSykdomInnleggelser innleggelser,
+            PleietrengendeSykdomDiagnoser diagnoser,
+            String opprettetAv,
+            LocalDateTime opprettetTidspunkt) {
         this.sykdomGrunnlagUUID = sykdomGrunnlagUUID;
         setSøktePerioder(søktePerioder);
         setRevurderingPerioder(revurderingPerioder);
         this.vurderinger = vurderinger;
         this.godkjenteLegeerklæringer = godkjenteLegeerklæringer;
+        this.harAndreMedisinskeOpplysninger = harAndreMedisinskeOpplysninger;
         this.innleggelser = innleggelser;
-        this.diagnosekoder = diagnosekoder;
+        this.diagnoser = diagnoser;
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
@@ -134,6 +139,10 @@ public class MedisinskGrunnlagsdata {
         return godkjenteLegeerklæringer;
     }
 
+    public boolean isHarAndreMedisinskeOpplysninger() {
+        return harAndreMedisinskeOpplysninger;
+    }
+
     public PleietrengendeSykdomInnleggelser getInnleggelser() {
         return innleggelser;
     }
@@ -142,20 +151,20 @@ public class MedisinskGrunnlagsdata {
         this.innleggelser = innleggelser;
     }
 
-    public PleietrengendeSykdomDiagnoser getDiagnosekoder() {
-        return diagnosekoder;
+    public PleietrengendeSykdomDiagnoser getDiagnoser() {
+        return diagnoser;
     }
 
     public List<String> getSammenlignbarDiagnoseliste() {
-        if (diagnosekoder != null) {
-            return getDiagnosekoder().getDiagnoser().stream().map(PleietrengendeSykdomDiagnose::getDiagnosekode).sorted().collect(Collectors.toList());
+        if (diagnoser != null) {
+            return getDiagnoser().getDiagnoser().stream().map(PleietrengendeSykdomDiagnose::getDiagnosekode).sorted().collect(Collectors.toList());
         } else {
             return Collections.emptyList();
         }
     }
 
-    public void setDiagnosekoder(PleietrengendeSykdomDiagnoser diagnosekoder) {
-        this.diagnosekoder = diagnosekoder;
+    public void setDiagnoser(PleietrengendeSykdomDiagnoser diagnoser) {
+        this.diagnoser = diagnoser;
     }
 
     public String getOpprettetAv() {

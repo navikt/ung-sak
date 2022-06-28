@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.krav;
 
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     REVURDERER_NY_INNTEKTSMELDING("REVURDERER_NY_INNTEKTSMELDING", "Ny inntektsmelding"),
     // Perioden ses på pga endringer i felles opplysninger (Nattevåk/beredskap/etablert tilsyn/sykdom
     REVURDERER_ENDRING_FRA_ANNEN_PART("REVURDERER_ENDRING_FRA_ANNEN_PART", "Annen parts vedtak endrer uttak"),
+    REVURDERER_ENDRING_FERIEPENGER("REVURDERER_ENDRING_FERIEPENGER_ANNEN_SAK", "Feriepenger reberegnes som følge av vedtak i annen sak"),
     UTSATT_BEHANDLING("UTSATT_BEHANDLING", "Utsatt behandling"),
     GJENOPPTAR_UTSATT_BEHANDLING("GJENOPPTAR_UTSATT_BEHANDLING", "Gjenopptar utsatt behandling"),
     // Endringer på felles opplysninger på sykdomsopplysningene
@@ -45,17 +47,23 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     FØRSTEGANGSVURDERING("FØRSTEGANGSVURDERING", "Ny periode");
 
     private static final Map<String, ÅrsakTilVurdering> KODER = new LinkedHashMap<>();
-    private static final Map<BehandlingÅrsakType, ÅrsakTilVurdering> SAMMENHENG = Map.of(
-        BehandlingÅrsakType.RE_SATS_REGULERING, G_REGULERING,
-        BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_ENDRING_FRA_ANNEN_PART,
-        BehandlingÅrsakType.RE_UTSATT_BEHANDLING, UTSATT_BEHANDLING,
-        BehandlingÅrsakType.RE_GJENOPPTAR_UTSATT_BEHANDLING, GJENOPPTAR_UTSATT_BEHANDLING,
-        BehandlingÅrsakType.RE_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON,
-        BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON,
-        BehandlingÅrsakType.RE_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON,
-        BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, HENDELSE_DØD_PLEIETRENGENDE,
-        BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, HENDELSE_DØD_BRUKER,
-        BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING, REVURDERER_NY_INNTEKTSMELDING);
+    private static final Map<BehandlingÅrsakType, ÅrsakTilVurdering> SAMMENHENG;
+
+    static {
+        EnumMap<BehandlingÅrsakType, ÅrsakTilVurdering> sammenheng = new EnumMap<>(BehandlingÅrsakType.class);
+        sammenheng.put(BehandlingÅrsakType.RE_SATS_REGULERING, G_REGULERING);
+        sammenheng.put(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_ENDRING_FRA_ANNEN_PART);
+        sammenheng.put(BehandlingÅrsakType.RE_UTSATT_BEHANDLING, UTSATT_BEHANDLING);
+        sammenheng.put(BehandlingÅrsakType.RE_GJENOPPTAR_UTSATT_BEHANDLING, GJENOPPTAR_UTSATT_BEHANDLING);
+        sammenheng.put(BehandlingÅrsakType.RE_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON);
+        sammenheng.put(BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON);
+        sammenheng.put(BehandlingÅrsakType.RE_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON);
+        sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, HENDELSE_DØD_PLEIETRENGENDE);
+        sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, HENDELSE_DØD_BRUKER);
+        sammenheng.put(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING, REVURDERER_NY_INNTEKTSMELDING);
+        sammenheng.put(BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK, REVURDERER_ENDRING_FERIEPENGER);
+        SAMMENHENG = Collections.unmodifiableMap(sammenheng);
+    }
 
     static {
         for (var v : values()) {

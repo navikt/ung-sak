@@ -38,6 +38,10 @@ public class BeregningsresultatAndel {
         return brukerErMottaker;
     }
 
+    public MottakerType getMottakerType(){
+        return brukerErMottaker ? MottakerType.BRUKER : MottakerType.ARBEIDSGIVER;
+    }
+
     public Long getDagsats() {
         return dagsats;
     }
@@ -72,6 +76,10 @@ public class BeregningsresultatAndel {
 
     public Inntektskategori getInntektskategori() {
         return inntektskategori;
+    }
+
+    public boolean girRettTilFeriepenger() {
+        return getInntektskategori().erArbeidstakerEllerSjømann() && getDagsats() > 0;
     }
 
     @Override

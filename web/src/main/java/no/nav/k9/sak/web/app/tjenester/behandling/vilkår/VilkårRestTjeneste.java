@@ -4,9 +4,11 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -37,8 +39,11 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårDto;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårMedPerioderDto;
@@ -59,6 +64,7 @@ public class VilkårRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private VilkårTjeneste vilkårTjeneste;
+    private Instance<VilkårUtleder> vilkårUtledere;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
 
@@ -69,10 +75,12 @@ public class VilkårRestTjeneste {
     @Inject
     public VilkårRestTjeneste(BehandlingRepository behandlingRepository,
                               VilkårTjeneste vilkårTjeneste,
+                              @Any Instance<VilkårUtleder> vilkårUtledere,
                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                               BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårTjeneste = vilkårTjeneste;
+        this.vilkårUtledere = vilkårUtledere;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
     }
@@ -102,7 +110,7 @@ public class VilkårRestTjeneste {
     private Response getVilkårV3(BehandlingUuidDto behandlingUuid, boolean inkluderVilkårkjøring) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var vilkårene = vilkårTjeneste.hentHvisEksisterer(behandling.getId()).orElse(null);
-        var vilkårPeriodeMap = utledFaktiskeVilkårPerioder(behandling);
+        var vilkårPeriodeMap = utledFaktiskeVilkårPerioder(behandling, vilkårene);
 
         var dto = VilkårDtoMapper.lagVilkarMedPeriodeDto(behandling, inkluderVilkårkjøring, vilkårene, vilkårPeriodeMap);
         CacheControl cc = new CacheControl();
@@ -112,13 +120,32 @@ public class VilkårRestTjeneste {
         return Response.ok(dto).cacheControl(cc).build();
     }
 
-    private Map<VilkårType, Set<DatoIntervallEntitet>> utledFaktiskeVilkårPerioder(Behandling behandling) {
-        //TODO kan vurder å ha denne funksjonen i PeriodertTilVurderingTjeneste
+    private Map<VilkårType, Set<DatoIntervallEntitet>> utledFaktiskeVilkårPerioder(Behandling behandling, Vilkårene vilkårene) {
+        Set<VilkårType> aktuelleVilkårTyper = finnAktuelleVilkårTyper(behandling, vilkårene);
         Map<VilkårType, Set<DatoIntervallEntitet>> resultat = new EnumMap<>(VilkårType.class);
-        for (VilkårType vilkårType : VilkårType.values()) {
+        for (VilkårType vilkårType : aktuelleVilkårTyper) {
             resultat.put(vilkårType, utledPeriodeTilVurdering(behandling, vilkårType));
         }
         return resultat;
+    }
+
+    private Set<VilkårType> finnAktuelleVilkårTyper(Behandling behandling, Vilkårene vilkårene) {
+        if (behandling.erAvsluttet()) {
+            return finnVilkårTyperPåPåBehandlingen(vilkårene);
+        } else {
+            Set<VilkårType> vilkår = EnumSet.noneOf(VilkårType.class);
+            vilkår.addAll(utledVilkårTyperForBehandlingen(behandling));
+            vilkår.addAll(finnVilkårTyperPåPåBehandlingen(vilkårene));
+            return vilkår;
+        }
+    }
+
+    private Set<VilkårType> utledVilkårTyperForBehandlingen(Behandling behandling) {
+        return getVilkårUtleder(behandling).utledVilkår(behandling).getAlleAvklarte();
+    }
+
+    private Set<VilkårType> finnVilkårTyperPåPåBehandlingen(Vilkårene vilkårene) {
+        return vilkårene.getVilkårene().stream().map(Vilkår::getVilkårType).collect(Collectors.toSet());
     }
 
     private NavigableSet<DatoIntervallEntitet> utledPeriodeTilVurdering(Behandling behandling, VilkårType vilkårType) {
@@ -131,6 +158,11 @@ public class VilkårRestTjeneste {
     private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
         return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType())
             .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
+    }
+
+    private VilkårUtleder getVilkårUtleder(Behandling behandling) {
+        return BehandlingTypeRef.Lookup.find(VilkårUtleder.class, vilkårUtledere, behandling.getFagsakYtelseType(), behandling.getType())
+            .orElseThrow(() -> new UnsupportedOperationException("VilkårUtleder ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
     }
 
     @GET

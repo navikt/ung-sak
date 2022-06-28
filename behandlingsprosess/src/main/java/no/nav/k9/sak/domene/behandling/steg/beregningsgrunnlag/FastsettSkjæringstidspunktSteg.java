@@ -14,7 +14,6 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -43,7 +42,6 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private VilkårPeriodeFilterProvider periodeFilterProvider;
-    private boolean enableForlengelse;
 
     protected FastsettSkjæringstidspunktSteg() {
         // for CDI proxy
@@ -54,15 +52,13 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                           BehandlingRepository behandlingRepository,
                                           BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                          VilkårPeriodeFilterProvider periodeFilterProvider,
-                                          @KonfigVerdi(value = "forlengelse.beregning.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
+                                          VilkårPeriodeFilterProvider periodeFilterProvider) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.periodeFilterProvider = periodeFilterProvider;
-        this.enableForlengelse = enableForlengelse;
     }
 
     @Override
@@ -74,11 +70,9 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
 
         kopierGrunnlagForForlengelseperioder(ref, kontekst);
 
-        var periodeFilter = periodeFilterProvider.getFilter(ref, enableForlengelse);
+        var periodeFilter = periodeFilterProvider.getFilter(ref, true);
         periodeFilter.ignorerAvslåttePerioderInkludertKompletthet();
-        if (enableForlengelse) {
-            periodeFilter.ignorerForlengelseperioder();
-        }
+        periodeFilter.ignorerForlengelseperioder();
         var perioderTilBeregning = new ArrayList<PeriodeTilVurdering>();
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
 
@@ -99,8 +93,8 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
     }
 
     private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        if (enableForlengelse && ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
-            var periodeFilter = periodeFilterProvider.getFilter(ref, enableForlengelse);
+        if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
+            var periodeFilter = periodeFilterProvider.getFilter(ref, true);
             periodeFilter.ignorerAvslåttePerioderInkludertKompletthet();
             var allePerioder = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
             var forlengelseperioder = allePerioder.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toSet());
