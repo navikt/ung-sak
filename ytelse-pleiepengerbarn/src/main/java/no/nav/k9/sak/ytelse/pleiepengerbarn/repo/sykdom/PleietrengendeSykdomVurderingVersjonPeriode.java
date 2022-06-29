@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class PleietrengendeSykdomVurderingVersjonPeriode {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_VURDERING_PERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_pleietrengende_sykdom_vurdering_versjon_periode")
     private Long id;
 
     @ManyToOne

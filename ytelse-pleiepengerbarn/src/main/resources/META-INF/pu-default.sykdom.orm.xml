@@ -8,7 +8,7 @@
     <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM" />
     <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_VURDERING" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_VURDERING" />
     <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON" />
-    <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_VURDERING_PERIODE" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_VURDERING_PERIODE" />
+    <sequence-generator name="seq_pleietrengende_sykdom_vurdering_versjon_periode" allocation-size="5" sequence-name="seq_pleietrengende_sykdom_vurdering_versjon_periode" />
     <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_DOKUMENT" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_DOKUMENT" />
     <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_DOKUMENT_INFORMASJON" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_DOKUMENT_INFORMASJON" />
     <sequence-generator name="SEQ_MEDISINSK_GRUNNLAGSDATA" allocation-size="5" sequence-name="SEQ_MEDISINSK_GRUNNLAGSDATA" />

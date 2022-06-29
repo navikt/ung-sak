@@ -203,7 +203,7 @@ public class SykdomVurderingRepository {
             "From MedisinskGrunnlag as sgb " +
                 "inner join sgb.grunnlagsdata as sg " +
                 "inner join sg.vurderinger as vv " +
-                "inner join vv.sykdomVurdering as v " +
+                "inner join vv.pleietrengendeSykdomVurdering as v " +
             "where sgb.behandlingUuid = :behandlingUuid " +
                 "and v.type = :sykdomVurderingType " +
                 "and sgb.versjon = " +

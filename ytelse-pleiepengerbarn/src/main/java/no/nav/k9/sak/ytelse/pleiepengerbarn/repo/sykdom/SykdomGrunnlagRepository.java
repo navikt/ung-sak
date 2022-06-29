@@ -143,7 +143,7 @@ public class SykdomGrunnlagRepository {
                 "select l.id "
                 + "from MedisinskGrunnlag as sgb "
                 + "  inner join sgb.pleietrengende as p "
-                + "  inner join sgb.grunnlag as g "
+                + "  inner join sgb.grunnlagsdata as g "
                 + "  inner join g.godkjenteLegeerklæringer as l "
                 + "where p.aktørId = :aktørId "
                 + "  and sgb.behandlingUuid <> :behandlingUuid"
