@@ -1,7 +1,7 @@
-alter table if exists SYKDOM_PERSON rename to PERSON;
-ALTER SEQUENCE if exists seq_sykdom_person RENAME TO seq_person;
+alter table SYKDOM_PERSON rename to PERSON;
+ALTER SEQUENCE seq_sykdom_person RENAME TO seq_person;
 
-alter table if exists SYKDOM_VURDERINGER rename to PLEIETRENGENDE_SYKDOM;
+alter table SYKDOM_VURDERINGER rename to PLEIETRENGENDE_SYKDOM;
 alter table PLEIETRENGENDE_SYKDOM rename column syk_person_id to pleietrengende_person_id;
 alter table PLEIETRENGENDE_SYKDOM rename constraint "sykdom_vurderinger_pkey" to "pleietrengende_sykdom_pkey";
 alter table PLEIETRENGENDE_SYKDOM rename constraint "sykdom_vurderinger_syk_person_id_key" to "pleietrengende_sykdom_pleietrengende_person_id_key";
