@@ -188,6 +188,12 @@
         <dependency>
             <groupId>org.jboss.weld.servlet</groupId>
             <artifactId>weld-servlet-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.glassfish</groupId>
+                    <artifactId>jakarta.faces</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- For Status side -->
