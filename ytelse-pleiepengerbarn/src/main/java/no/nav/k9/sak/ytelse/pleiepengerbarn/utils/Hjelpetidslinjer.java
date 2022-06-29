@@ -9,6 +9,8 @@ import java.util.Set;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public final class Hjelpetidslinjer {
 
@@ -53,5 +55,24 @@ public final class Hjelpetidslinjer {
             return date;
         }
         return finnNærmeste(target, date.plusDays(1));
+    }
+
+    public static <T> LocalDateTimeline<T> utledHullSomMåTettes(LocalDateTimeline<T> tidslinjen, KantIKantVurderer kantIKantVurderer) {
+        var segmenter = tidslinjen.compress().toSegments();
+
+        LocalDateSegment<T> periode = null;
+        var resultat = new ArrayList<LocalDateSegment<T>>();
+
+        for (LocalDateSegment<T> segment : segmenter) {
+            if (periode == null) {
+                periode = segment;
+            } else if (kantIKantVurderer.erKantIKant(DatoIntervallEntitet.fra(segment.getLocalDateInterval()), DatoIntervallEntitet.fra(periode.getLocalDateInterval()))) {
+                resultat.add(new LocalDateSegment<>(periode.getFom(), segment.getTom(), periode.getValue()));
+            } else {
+                periode = segment;
+            }
+        }
+
+        return new LocalDateTimeline<T>(resultat);
     }
 }
