@@ -130,7 +130,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     private LocalDateTimeline<Boolean> utledYtelse(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
         var timeline = new LocalDateTimeline<>(tidslinjeTilVurdering.stream()
             .map(it -> new LocalDateSegment<>(it.getLocalDateInterval(), true))
-            .collect(Collectors.toList()));
+            .toList());
 
         // NB! Ikke legg til vilkår her uten å prate med en voksen først. (Nei, du regnes ikke som en voksen)
         var vilkår = Set.of(VilkårType.OPPTJENINGSVILKÅRET);

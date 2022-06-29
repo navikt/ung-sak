@@ -37,7 +37,7 @@ import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
@@ -55,7 +55,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     private SøktePerioder søktePerioder;
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
-    private SykdomGrunnlagService sykdomGrunnlagService;
+    private SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste;
     private ErEndringPåEtablertTilsynTjeneste etablertTilsynTjeneste;
 
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
@@ -72,7 +72,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
                                                           Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering,
                                                           VilkårResultatRepository vilkårResultatRepository,
                                                           BehandlingRepository behandlingRepository,
-                                                          SykdomGrunnlagService sykdomGrunnlagService,
+                                                          SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste,
                                                           ErEndringPåEtablertTilsynTjeneste etablertTilsynTjeneste,
                                                           EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                                           RevurderingPerioderTjeneste revurderingPerioderTjeneste,
@@ -82,7 +82,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         this.vilkårUtleder = vilkårUtleder;
         this.vilkårsPeriodisering = vilkårsPeriodisering;
         this.behandlingRepository = behandlingRepository;
-        this.sykdomGrunnlagService = sykdomGrunnlagService;
+        this.sykdomGrunnlagTjeneste = sykdomGrunnlagTjeneste;
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
@@ -177,7 +177,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         final var vurderingsperioderTimeline = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
         List<Periode> nyeVurderingsperioder = TidslinjeUtil.tilPerioder(perioder);
 
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagService.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder)
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder)
             .getDiffPerioder();
 
         final LocalDateTimeline<Boolean> utvidedePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
@@ -275,14 +275,14 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
 
     private LocalDateTimeline<Boolean> utledUtvidetPeriodeForSykdom(BehandlingReferanse referanse) {
         var forrigeVedtatteBehandling = behandlingRepository.hentBehandling(referanse.getOriginalBehandlingId().orElseThrow()).getUuid();
-        var vedtattSykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlagHvisEksisterer(forrigeVedtatteBehandling);
+        var vedtattSykdomGrunnlagBehandling = sykdomGrunnlagTjeneste.hentGrunnlagHvisEksisterer(forrigeVedtatteBehandling);
         var pleietrengende = referanse.getPleietrengendeAktørId();
         var vilkårene = vilkårResultatRepository.hent(referanse.getId());
         var vurderingsperioder = utledVurderingsperiode(vilkårene);
 
-        var utledetGrunnlag = sykdomGrunnlagService.utledGrunnlagMedManglendeOmsorgFjernet(referanse.getSaksnummer(), referanse.getBehandlingUuid(), referanse.getBehandlingId(), pleietrengende, vurderingsperioder);
+        var utledetGrunnlag = sykdomGrunnlagTjeneste.utledGrunnlagMedManglendeOmsorgFjernet(referanse.getSaksnummer(), referanse.getBehandlingUuid(), referanse.getBehandlingId(), pleietrengende, vurderingsperioder);
 
-        return sykdomGrunnlagService.sammenlignGrunnlag(vedtattSykdomGrunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag).getDiffPerioder();
+        return sykdomGrunnlagTjeneste.sammenlignGrunnlag(vedtattSykdomGrunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag).getDiffPerioder();
     }
 
     private boolean skalVurdereBerørtePerioderPåBarnet(Behandling behandling) {

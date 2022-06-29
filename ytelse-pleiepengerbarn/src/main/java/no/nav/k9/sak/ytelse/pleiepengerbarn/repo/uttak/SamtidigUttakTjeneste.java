@@ -18,6 +18,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.foreslåvedtak.PleiepengerYtelsespesifikkForeslåVedtak;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.Kjøreplan;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.KjøreplanUtleder;
@@ -81,7 +82,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
  * </p>
  *
  * @see PleietrengendeKravprioritet#vurderKravprioritet
- * @see no.nav.k9.sak.ytelse.pleiepengerbarn.foreslåvedtak.PSBYtelsespesifikkForeslåVedtak
+ * @see PleiepengerYtelsespesifikkForeslåVedtak
  * @see no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett.VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste
  */
 @Dependent

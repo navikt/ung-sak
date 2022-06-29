@@ -17,7 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjonBesluttet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
@@ -30,7 +30,7 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
 
-    private SykdomGrunnlagService sykdomGrunnlagService;
+    private SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste;
     private SykdomVurderingRepository sykdomVurderingRepository;
 
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
@@ -40,10 +40,10 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
     }
 
     @Inject
-    public KvitterSykdomsvurderingerVedtakEventObserver(BehandlingRepositoryProvider repositoryProvider, FagsakRepository fagsakRepository, SykdomGrunnlagService sykdomGrunnlagService, SykdomVurderingRepository sykdomVurderingRepository, SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
+    public KvitterSykdomsvurderingerVedtakEventObserver(BehandlingRepositoryProvider repositoryProvider, FagsakRepository fagsakRepository, SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste, SykdomVurderingRepository sykdomVurderingRepository, SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.fagsakRepository = fagsakRepository;
-        this.sykdomGrunnlagService = sykdomGrunnlagService;
+        this.sykdomGrunnlagTjeneste = sykdomGrunnlagTjeneste;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
@@ -64,7 +64,7 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        MedisinskGrunnlag medisinskGrunnlag = sykdomGrunnlagService.hentGrunnlag(behandling.getUuid());
+        MedisinskGrunnlag medisinskGrunnlag = sykdomGrunnlagTjeneste.hentGrunnlag(behandling.getUuid());
 
         if (!behandling.isToTrinnsBehandling()) {
             if (harUbesluttet(medisinskGrunnlag)) {

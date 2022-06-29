@@ -41,8 +41,8 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.saksbehandler.SaksbehandlerDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 
 @Path("/saksbehandler")
 @ApplicationScoped
@@ -57,7 +57,7 @@ public class SaksbehandlerRestTjeneste {
 
     private HistorikkRepository historikkRepository;
     private BehandlingRepository behandlingRepository;
-    private SykdomVurderingService sykdomVurderingService;
+    private SykdomVurderingTjeneste sykdomVurderingTjeneste;
 
     public SaksbehandlerRestTjeneste() {
         //NOSONAR
@@ -68,11 +68,11 @@ public class SaksbehandlerRestTjeneste {
         @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
         HistorikkRepository historikkRepository,
         BehandlingRepository behandlingRepository,
-        SykdomVurderingService sykdomVurderingService) {
+        SykdomVurderingTjeneste sykdomVurderingTjeneste) {
         this.systembruker = systembruker;
         this.historikkRepository = historikkRepository;
         this.behandlingRepository = behandlingRepository;
-        this.sykdomVurderingService = sykdomVurderingService;
+        this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
     }
 
     @GET
@@ -94,8 +94,8 @@ public class SaksbehandlerRestTjeneste {
         Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         List<Historikkinnslag> historikkinnslag = historikkRepository.hentHistorikkForSaksnummer(behandling.getFagsak().getSaksnummer());
 
-        LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> ktpTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
-        LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> toopTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);
+        LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> ktpTimeline = sykdomVurderingTjeneste.hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
+        LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> toopTimeline = sykdomVurderingTjeneste.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);
 
         Set<String> unikeIdenter = historikkinnslag.stream()
             .map(BaseEntitet::getOpprettetAv)

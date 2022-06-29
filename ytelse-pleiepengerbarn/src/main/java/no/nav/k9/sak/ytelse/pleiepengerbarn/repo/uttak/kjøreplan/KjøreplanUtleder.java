@@ -38,7 +38,7 @@ import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomInnleggelsePeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 
 @Dependent
@@ -49,7 +49,7 @@ public class KjøreplanUtleder {
     private final MottatteDokumentRepository mottatteDokumentRepository;
 
     private final Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester;
-    private final SykdomVurderingService sykdomVurderingService;
+    private final SykdomVurderingTjeneste sykdomVurderingTjeneste;
     private final UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
 
     @Inject
@@ -57,13 +57,13 @@ public class KjøreplanUtleder {
                             BehandlingRepository behandlingRepository,
                             MottatteDokumentRepository mottatteDokumentRepository,
                             @Any Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester,
-                            SykdomVurderingService sykdomVurderingService,
+                            SykdomVurderingTjeneste sykdomVurderingTjeneste,
                             UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadsfristTjenester = søknadsfristTjenester;
-        this.sykdomVurderingService = sykdomVurderingService;
+        this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
     }
 
@@ -335,11 +335,11 @@ public class KjøreplanUtleder {
     }
 
     private LocalDateTimeline<Boolean> hentTidslinjeMedFlereOmsorgspersoner(Behandling behandling) {
-        var sykdomVurderingerOgPerioder = sykdomVurderingService.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling)
+        var sykdomVurderingerOgPerioder = sykdomVurderingTjeneste.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling)
             .filterValue(it -> it.getResultat() == Resultat.OPPFYLT)
             .mapValue(it -> true);
 
-        final List<PleietrengendeSykdomInnleggelsePeriode> innleggelser = sykdomVurderingService.hentInnleggelser(behandling).getPerioder();
+        final List<PleietrengendeSykdomInnleggelsePeriode> innleggelser = sykdomVurderingTjeneste.hentInnleggelser(behandling).getPerioder();
 
         return new LocalDateTimeline<>(innleggelser.stream()
             .map(i -> new LocalDateSegment<>(i.getFom(), i.getTom(), Boolean.TRUE))

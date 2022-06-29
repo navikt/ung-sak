@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.kontrakt.sykdom.SykdomPeriodeMedEndringDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingAnnenInformasjon;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingDto;
@@ -26,8 +25,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPeriodeMedEndring;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjonPeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste.SykdomVurderingerOgPerioder;
 
 @Dependent
 public class SykdomVurderingMapper {

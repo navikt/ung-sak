@@ -30,7 +30,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtab
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlagsdata;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
@@ -43,7 +43,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
     private static final Logger log = LoggerFactory.getLogger(StartpunktUtlederPleiepenger.class);
 
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
-    private SykdomGrunnlagService sykdomGrunnlagService;
+    private SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
@@ -56,14 +56,14 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
 
     @Inject
     StartpunktUtlederPleiepenger(SykdomGrunnlagRepository sykdomGrunnlagRepository,
-                                 SykdomGrunnlagService sykdomGrunnlagService,
+                                 SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste,
                                  VilkårResultatRepository vilkårResultatRepository,
                                  ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
                                  EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                  SamtidigUttakTjeneste samtidigUttakTjeneste,
                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
-        this.sykdomGrunnlagService = sykdomGrunnlagService;
+        this.sykdomGrunnlagTjeneste = sykdomGrunnlagTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
@@ -123,8 +123,8 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
             .map(MedisinskGrunnlag::getGrunnlagsdata);
 
         List<Periode> nyeVurderingsperioder = utledVurderingsperiode(ref);
-        var utledGrunnlag = sykdomGrunnlagService.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
-        var sykdomGrunnlagSammenlikningsresultat = sykdomGrunnlagService.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
+        var utledGrunnlag = sykdomGrunnlagTjeneste.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
+        var sykdomGrunnlagSammenlikningsresultat = sykdomGrunnlagTjeneste.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
         var erIngenEndringIGrunnlaget = sykdomGrunnlagSammenlikningsresultat.getDiffPerioder().isEmpty();
         var startpunktType = erIngenEndringIGrunnlaget ? StartpunktType.UDEFINERT : StartpunktType.INNGANGSVILKÅR_MEDISINSK;

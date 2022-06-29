@@ -8,9 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.ResourceLink;
@@ -23,8 +21,8 @@ import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingOversiktElement;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste.SykdomVurderingerOgPerioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 
 public class SykdomVurderingOversiktMapper {
@@ -83,20 +81,14 @@ public class SykdomVurderingOversiktMapper {
 
     private LocalDateTimeline<SykdomVurderingOversiktElement> medInnleggelser(LocalDateTimeline<SykdomVurderingOversiktElement> elementsTidslinje, List<Periode> innleggelsesperioder) {
         final LocalDateTimeline<Boolean> innleggelsesperioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(innleggelsesperioder);
-        return elementsTidslinje.combine(innleggelsesperioderTidslinje, new LocalDateSegmentCombinator<SykdomVurderingOversiktElement, Boolean, SykdomVurderingOversiktElement>() {
-            @Override
-            public LocalDateSegment<SykdomVurderingOversiktElement> combine(
-                    LocalDateInterval datoInterval,
-                    LocalDateSegment<SykdomVurderingOversiktElement> vs,
-                    LocalDateSegment<Boolean> innleggelse) {
+        return elementsTidslinje.combine(innleggelsesperioderTidslinje, (datoInterval, vs, innleggelse) -> {
 
-                final SykdomVurderingOversiktElement oldElement = (vs != null && vs.getValue() != null) ? vs.getValue() : new SykdomVurderingOversiktElement();
-                final SykdomVurderingOversiktElement newElement = new SykdomVurderingOversiktElement(oldElement);
-                newElement.setPeriode(new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()));
-                newElement.setErInnleggelsesperiode(innleggelse != null);
+            final SykdomVurderingOversiktElement oldElement = (vs != null && vs.getValue() != null) ? vs.getValue() : new SykdomVurderingOversiktElement();
+            final SykdomVurderingOversiktElement newElement = new SykdomVurderingOversiktElement(oldElement);
+            newElement.setPeriode(new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()));
+            newElement.setErInnleggelsesperiode(innleggelse != null);
 
-                return new LocalDateSegment<SykdomVurderingOversiktElement>(datoInterval, newElement);
-            }
+            return new LocalDateSegment<SykdomVurderingOversiktElement>(datoInterval, newElement);
         }, LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }
 
@@ -105,21 +97,18 @@ public class SykdomVurderingOversiktMapper {
             Saksnummer saksnummer,
             LocalDateTimeline<Set<Saksnummer>> søktePerioder) {
 
-        return elementsTidslinje.combine(søktePerioder, new LocalDateSegmentCombinator<SykdomVurderingOversiktElement, Set<Saksnummer>, SykdomVurderingOversiktElement>() {
-            @Override
-            public LocalDateSegment<SykdomVurderingOversiktElement> combine(LocalDateInterval datoInterval, LocalDateSegment<SykdomVurderingOversiktElement> element, LocalDateSegment<Set<Saksnummer>> relevanteSaksnummer) {
-                final SykdomVurderingOversiktElement newElement = new SykdomVurderingOversiktElement(element.getValue());
+        return elementsTidslinje.combine(søktePerioder, (datoInterval, element, relevanteSaksnummer) -> {
+            final SykdomVurderingOversiktElement newElement = new SykdomVurderingOversiktElement(element.getValue());
 
-                final Set<Saksnummer> s = relevanteSaksnummer != null ? relevanteSaksnummer.getValue() : Collections.emptySet();
-                final int antallSomBrukerVurdering = s.size();
-                final boolean enAnnenSakEnnSaksnummerBrukerVurderingen = antallSomBrukerVurdering > 1 || (antallSomBrukerVurdering == 1 && !s.contains(saksnummer));
+            final Set<Saksnummer> s = relevanteSaksnummer != null ? relevanteSaksnummer.getValue() : Collections.emptySet();
+            final int antallSomBrukerVurdering = s.size();
+            final boolean enAnnenSakEnnSaksnummerBrukerVurderingen = antallSomBrukerVurdering > 1 || (antallSomBrukerVurdering == 1 && !s.contains(saksnummer));
 
-                newElement.setPeriode(new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()));
-                newElement.setGjelderForSøker(s.contains(saksnummer));
-                newElement.setGjelderForAnnenPart(enAnnenSakEnnSaksnummerBrukerVurderingen);
+            newElement.setPeriode(new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()));
+            newElement.setGjelderForSøker(s.contains(saksnummer));
+            newElement.setGjelderForAnnenPart(enAnnenSakEnnSaksnummerBrukerVurderingen);
 
-                return new LocalDateSegment<>(datoInterval, newElement);
-            }
+            return new LocalDateSegment<>(datoInterval, newElement);
         }, LocalDateTimeline.JoinStyle.LEFT_JOIN).compress();
     }
 

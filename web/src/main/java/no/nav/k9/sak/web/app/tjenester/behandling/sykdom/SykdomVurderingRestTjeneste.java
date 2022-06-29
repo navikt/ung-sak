@@ -61,8 +61,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPeriodeMedEndring;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste.SykdomVurderingerOgPerioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
@@ -90,7 +90,7 @@ public class SykdomVurderingRestTjeneste {
     private SykdomVurderingMapper sykdomVurderingMapper;
     private SykdomVurderingRepository sykdomVurderingRepository;
     private SykdomDokumentRepository sykdomDokumentRepository;
-    private SykdomVurderingService sykdomVurderingService;
+    private SykdomVurderingTjeneste sykdomVurderingTjeneste;
 
     private SykdomProsessDriver prosessDriver;
 
@@ -100,12 +100,12 @@ public class SykdomVurderingRestTjeneste {
 
     @Inject
     public SykdomVurderingRestTjeneste(BehandlingRepository behandlingRepository, SykdomVurderingRepository sykdomVurderingRepository,
-                                       SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingService sykdomVurderingService,
+                                       SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingTjeneste sykdomVurderingTjeneste,
                                        SykdomVurderingMapper sykdomVurderingMapper, SykdomProsessDriver prosessDriver) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
-        this.sykdomVurderingService = sykdomVurderingService;
+        this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
         this.sykdomVurderingMapper = sykdomVurderingMapper;
         this.prosessDriver = prosessDriver;
     }
@@ -156,8 +156,8 @@ public class SykdomVurderingRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         validerYtelsetype(behandling, FagsakYtelseType.PSB);
-        SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
-        final LocalDate pleietrengendesFødselsdato = sykdomVurderingService.finnPleietrengendesFødselsdato(behandling);
+        SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingTjeneste.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
+        final LocalDate pleietrengendesFødselsdato = sykdomVurderingTjeneste.finnPleietrengendesFødselsdato(behandling);
 
         return sykdomVurderingOversiktMapper.mapPSB(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato);
     }
@@ -182,8 +182,8 @@ public class SykdomVurderingRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         validerYtelsetype(behandling, FagsakYtelseType.PSB);
-        final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForToOmsorgspersoner(behandling);
-        final LocalDate pleietrengendesFødselsdato = sykdomVurderingService.finnPleietrengendesFødselsdato(behandling);
+        final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingTjeneste.hentVurderingerForToOmsorgspersoner(behandling);
+        final LocalDate pleietrengendesFødselsdato = sykdomVurderingTjeneste.finnPleietrengendesFødselsdato(behandling);
 
         return sykdomVurderingOversiktMapper.mapPSB(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato);
     }
@@ -208,7 +208,7 @@ public class SykdomVurderingRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         validerYtelsetype(behandling, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE);
-        final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForILivetsSluttfase(behandling);
+        final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingTjeneste.hentVurderingerForILivetsSluttfase(behandling);
 
         return sykdomVurderingOversiktMapper.mapPPN(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder);
     }
@@ -256,9 +256,9 @@ public class SykdomVurderingRestTjeneste {
         var sykdomVurderingType = versjoner.get(0).getSykdomVurdering().getType();
         final SykdomVurderingerOgPerioder sykdomUtlededePerioder = switch (sykdomVurderingType) {
             case KONTINUERLIG_TILSYN_OG_PLEIE ->
-                sykdomVurderingService.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
-            case TO_OMSORGSPERSONER -> sykdomVurderingService.hentVurderingerForToOmsorgspersoner(behandling);
-            case LIVETS_SLUTTFASE -> sykdomVurderingService.hentVurderingerForILivetsSluttfase(behandling);
+                sykdomVurderingTjeneste.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
+            case TO_OMSORGSPERSONER -> sykdomVurderingTjeneste.hentVurderingerForToOmsorgspersoner(behandling);
+            case LIVETS_SLUTTFASE -> sykdomVurderingTjeneste.hentVurderingerForILivetsSluttfase(behandling);
         };
 
         return sykdomVurderingMapper.map(behandling.getFagsak().getAktørId(), behandling.getUuid(), versjoner, alleDokumenter, sykdomUtlededePerioder);
@@ -321,7 +321,7 @@ public class SykdomVurderingRestTjeneste {
     }
 
     private void sikreAtOppdateringIkkeKrysser18årsdag(Behandling behandling, List<Periode> perioder) {
-        final LocalDate pleietrengendesFødselsdato = sykdomVurderingService.finnPleietrengendesFødselsdato(behandling);
+        final LocalDate pleietrengendesFødselsdato = sykdomVurderingTjeneste.finnPleietrengendesFødselsdato(behandling);
         if (isPerioderInneholderFørOgEtter18år(perioder, pleietrengendesFødselsdato)) {
             throw new IllegalStateException("En sykdomsvurdering kan ikke gjelde både før og etter at barnet har fylt 18 år. For å kunne lagre må vurderingen splittes i to.");
         }
@@ -459,7 +459,7 @@ public class SykdomVurderingRestTjeneste {
     }
 
     private List<SykdomPeriodeMedEndring> finnEndringer(Behandling behandling, PleietrengendeSykdomVurderingVersjon nyEndring) {
-        var vurderinger = sykdomVurderingService.hentVurderinger(nyEndring.getSykdomVurdering().getType(), behandling);
+        var vurderinger = sykdomVurderingTjeneste.hentVurderinger(nyEndring.getSykdomVurdering().getType(), behandling);
         return sykdomVurderingRepository.finnEndringer(vurderinger, nyEndring);
     }
 

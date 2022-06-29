@@ -3,6 +3,8 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.foreslåvedtak;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -18,35 +20,35 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktReposi
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.YtelsespesifikkForeslåVedtak;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
-public class PSBYtelsespesifikkForeslåVedtak implements YtelsespesifikkForeslåVedtak {
+public class PleiepengerYtelsespesifikkForeslåVedtak implements YtelsespesifikkForeslåVedtak {
 
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private BehandlingRepository behandlingRepository;
-    private SykdomGrunnlagService sykdomGrunnlagService;
+    private SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste;
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
     private AksjonspunktRepository aksjonspunktRepository;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     @Inject
-    public PSBYtelsespesifikkForeslåVedtak(SamtidigUttakTjeneste samtidigUttakTjeneste,
-                                           BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                                           BehandlingRepository behandlingRepository,
-                                           SykdomGrunnlagService sykdomGrunnlagService,
-                                           AksjonspunktKontrollRepository aksjonspunktKontrollRepository,
-                                           AksjonspunktRepository aksjonspunktRepository,
-                                           SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
+    public PleiepengerYtelsespesifikkForeslåVedtak(SamtidigUttakTjeneste samtidigUttakTjeneste,
+                                                   BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
+                                                   BehandlingRepository behandlingRepository,
+                                                   SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste,
+                                                   AksjonspunktKontrollRepository aksjonspunktKontrollRepository,
+                                                   AksjonspunktRepository aksjonspunktRepository,
+                                                   SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.behandlingRepository = behandlingRepository;
-        this.sykdomGrunnlagService = sykdomGrunnlagService;
+        this.sykdomGrunnlagTjeneste = sykdomGrunnlagTjeneste;
         this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
@@ -63,24 +65,27 @@ public class PSBYtelsespesifikkForeslåVedtak implements YtelsespesifikkForeslå
         if (søknadsperiodeTjeneste.utledFullstendigPeriode(ref.getBehandlingId()).isEmpty()) {
             return null;
         }
+        var lås = behandlingRepository.taSkriveLås(behandling);
 
-        MedisinskGrunnlag medisinskGrunnlag = sykdomGrunnlagService.hentGrunnlag(behandling.getUuid());
+        MedisinskGrunnlag medisinskGrunnlag = sykdomGrunnlagTjeneste.hentGrunnlag(behandling.getUuid());
         boolean harUbesluttedeSykdomsVurderinger = medisinskGrunnlag.getGrunnlagsdata().getVurderinger()
             .stream()
             .anyMatch(v -> !v.isBesluttet());
 
-        if (harUbesluttedeSykdomsVurderinger && behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE).isEmpty()) {
-            Aksjonspunkt aksjonspunkt = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
-            aksjonspunktKontrollRepository.setTilUtført(aksjonspunkt, "Automatisk gjenbruk av ubesluttede vurderinger fra annen fagsak.");
-            behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling.getId()));
-        }
-
-        if (!harUbesluttedeSykdomsVurderinger && behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE).isPresent()) {
-            Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
-            if (aksjonspunkt.isToTrinnsBehandling()) {
-                aksjonspunktRepository.fjernToTrinnsBehandlingKreves(aksjonspunkt);
-                behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+        Optional<Aksjonspunkt> sykdomAP = behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE);
+        if (harUbesluttedeSykdomsVurderinger) {
+            if (sykdomAP.isEmpty()) {
+                Aksjonspunkt aksjonspunkt = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
+                aksjonspunktKontrollRepository.setTilUtført(aksjonspunkt, "Automatisk gjenbruk av ubesluttede vurderinger fra annen fagsak.");
+                behandlingRepository.lagre(behandling, lås);
+            } else if (sykdomAP.map(Aksjonspunkt::isToTrinnsBehandling).map(it -> !it).orElse(false)) {
+                Aksjonspunkt aksjonspunkt = sykdomAP.get();
+                aksjonspunktRepository.setToTrinnsBehandlingKreves(aksjonspunkt);
+                behandlingRepository.lagre(behandling, lås);
             }
+        } else if (sykdomAP.map(Aksjonspunkt::isToTrinnsBehandling).orElse(false)) {
+            aksjonspunktRepository.fjernToTrinnsBehandlingKreves(sykdomAP.get());
+            behandlingRepository.lagre(behandling, lås);
         }
 
         return null;
