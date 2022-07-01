@@ -166,9 +166,13 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
                 .filter(it -> periode.overlapper(it.getFraOgMed(), it.getTilOgMed()))
                 .map(it -> new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), it.getLivetsSluttfaseDokumentasjon()))
                 .toList());
+            var fullstendigAvslagsTidslinje = new LocalDateTimeline<>(timeline.toSegments());
+            
             timeline = timeline.disjoint(Hjelpetidslinjer.lagTidslinjeMedKunHelger(timeline));
             var tidslinjeMedHullSomMangler = Hjelpetidslinjer.utledHullSomMåTettes(timeline, new PåTversAvHelgErKantIKantVurderer());
             timeline = timeline.combine(tidslinjeMedHullSomMangler, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            var manglendeAvslag = fullstendigAvslagsTidslinje.disjoint(timeline);
+            timeline = timeline.combine(manglendeAvslag, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
             timeline.forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFom(), it.getTom())
                 .medUtfall(Utfall.IKKE_OPPFYLT)
                 .medMerknadParametere(vilkårData.getMerknadParametere())
