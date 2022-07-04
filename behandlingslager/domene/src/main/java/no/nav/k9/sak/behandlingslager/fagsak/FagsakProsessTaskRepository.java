@@ -340,7 +340,7 @@ public class FagsakProsessTaskRepository {
     /**
      * Sett feilet prosesstasks som er koblet til fagsak+behandling til suspendert.
      */
-    public void settTilSuspendert(Long fagsakId, Long behandlingId, Set<ProsessTaskStatus> statuserSomEndres) {
+    private void settTilSuspendert(Long fagsakId, Long behandlingId, Set<ProsessTaskStatus> statuserSomEndres) {
 
         var skalSuspenderes = finnAlleForAngittSøk(fagsakId, String.valueOf(behandlingId), null, statuserSomEndres, false, Tid.TIDENES_BEGYNNELSE.atStartOfDay(),
             Tid.TIDENES_ENDE.plusDays(1).atStartOfDay());
