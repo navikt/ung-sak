@@ -329,14 +329,20 @@ public class FagsakProsessTaskRepository {
         return resultList.stream().map(ProsessTaskEntitet::tilProsessTask).collect(Collectors.toList());
     }
 
+    public void settFeiletTilSuspendert(Long fagsakId, Long behandlingId) {
+        settTilSuspendert(fagsakId, behandlingId, EnumSet.of(ProsessTaskStatus.FEILET));
+    }
+
+    public void settKlarTilSuspendert(Long fagsakId, Long behandlingId) {
+        settTilSuspendert(fagsakId, behandlingId, EnumSet.of(ProsessTaskStatus.KLAR));
+    }
+
     /**
      * Sett feilet prosesstasks som er koblet til fagsak+behandling til suspendert.
      */
-    public void settFeiletTilSuspendert(Long fagsakId, Long behandlingId) {
+    public void settTilSuspendert(Long fagsakId, Long behandlingId, Set<ProsessTaskStatus> statuserSomEndres) {
 
-        Set<ProsessTaskStatus> feiletStatus = EnumSet.of(ProsessTaskStatus.FEILET);
-
-        var skalSuspenderes = finnAlleForAngittSøk(fagsakId, String.valueOf(behandlingId), null, feiletStatus, false, Tid.TIDENES_BEGYNNELSE.atStartOfDay(),
+        var skalSuspenderes = finnAlleForAngittSøk(fagsakId, String.valueOf(behandlingId), null, statuserSomEndres, false, Tid.TIDENES_BEGYNNELSE.atStartOfDay(),
             Tid.TIDENES_ENDE.plusDays(1).atStartOfDay());
         if (!skalSuspenderes.isEmpty()) {
             em.flush(); // flush alt annet
