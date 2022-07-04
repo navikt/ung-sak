@@ -74,6 +74,7 @@ jobs:
           --all-projects
           --configuration-attributes=usage:java-runtime
           --remote-repo-url=https://github.com/${{ github.repository }}.git
+          --prune-repeated-subdependencies
           --exclude=javax
           -- -s snyk-settings.xml -Drevision=$TAG --fail-never
         env:
