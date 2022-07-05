@@ -23,7 +23,7 @@ public class FordelBeregningsgrunnlagDto extends BekreftetBeregningsgrunnlagDto 
 
     @JsonProperty(value = "endretBeregningsgrunnlagPerioder")
     @Valid
-    @Size(max = 100)
+    @Size(min = 1)
     private List<FordelBeregningsgrunnlagPeriodeDto> endretBeregningsgrunnlagPerioder;
 
     public FordelBeregningsgrunnlagDto() {
