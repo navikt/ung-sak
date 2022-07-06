@@ -99,12 +99,13 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
             }
 
             prosessTaskRepository.settFeiletTilSuspendert(fagsakId, behandling.getId());
-
-            if (startSteg == BehandlingStegType.START_STEG) {
-                resetGrunnlag(behandling);
+            if (targetSteg == BehandlingStegType.START_STEG){
                 // hvis det finnes både feilede og klare prosesstasker, må også klare tasker ryddes for at fortsett-task skal kunne opprettes
                 // det er trygt å rydde klare tasker ved hopp helt tilbake til start (men ikke ellers), siden tasker vil gjenutledes
-                prosessTaskRepository.settKlarTilSuspendert(fagsakId, behandling.getId());
+                prosessTaskRepository.settIkkeKjørteTilSuspendert(fagsakId, behandling.getId());
+            }
+            if (startSteg == BehandlingStegType.START_STEG) {
+                resetGrunnlag(behandling);
             }
             hoppTilbake(behandling, targetSteg, kontekst);
 
