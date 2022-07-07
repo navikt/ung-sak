@@ -112,11 +112,11 @@ public class EtablertTilsynTjeneste {
                 .flatMap(Collection::stream)
                 .toList();
 
-            for (var periode : tilsynsordningPerioder) {
-                final var kilde = søkersSaksnummer.equals(kravDokument.getFagsak().getSaksnummer()) ? Kilde.SØKER : Kilde.ANDRE;
-                final var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), new UtledetEtablertTilsyn(periode.getVarighet(), kilde, kravDokument.getKravDokument().getJournalpostId()))));
-                resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-            }
+            final var kilde = søkersSaksnummer.equals(kravDokument.getFagsak().getSaksnummer()) ? Kilde.SØKER : Kilde.ANDRE;
+            var tidslinjeForDokumentet = new LocalDateTimeline<>(tilsynsordningPerioder.stream()
+                .map(periode -> new LocalDateSegment<>(periode.getPeriode().toLocalDateInterval(), new UtledetEtablertTilsyn(periode.getVarighet(), kilde, kravDokument.getKravDokument().getJournalpostId())))
+                .toList());
+            resultatTimeline = resultatTimeline.combine(tidslinjeForDokumentet, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
         return resultatTimeline.compress();
     }
