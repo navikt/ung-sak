@@ -40,7 +40,6 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
     public static final String TASKTYPE = "behandlingskontroll.tilbakeTilStart";
     public static final String PROPERTY_MANUELT_OPPRETTET = "manueltOpprettet";
     public static final String PROPERTY_START_STEG = "startSteg";
-    public static final String PROPERTY_RYDD_IKKEKJØRTE_TASKER = "fjernIkkeKjoerteTasker";
     private BehandlingRepository behandlingRepository;
     private HistorikkRepository historikkRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -83,9 +82,9 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
         var forventetPassertSteg = (startSteg != null) ? startSteg : BehandlingStegType.START_STEG;
 
         if (targetSteg != BehandlingStegType.START_STEG && (
-            erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_VILKÅR)
-                || erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_PERIODER)
-        )) {
+                        erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_VILKÅR)
+                        || erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_PERIODER)
+                   )) {
             throw new IllegalStateException("Ikke implementert: Det er ikke støtte for å hoppe til steg før eller lik INIT_VILKÅR (med unntak av START_STEG.");
         }
 
@@ -100,15 +99,12 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
             }
 
             prosessTaskRepository.settFeiletTilSuspendert(fagsakId, behandling.getId());
-            if (Boolean.valueOf(prosessTaskData.getPropertyValue(PROPERTY_RYDD_IKKEKJØRTE_TASKER))) {
-                if (targetSteg == BehandlingStegType.START_STEG) {
-                    prosessTaskRepository.settIkkeKjørteTilSuspendert(fagsakId, behandling.getId());
-                } else {
-                    throw new IllegalArgumentException("Ikke støttet å rydde ikke-kjørte tasker utenom ved hopp helt tilbake til start");
-                }
-            }
+
             if (startSteg == BehandlingStegType.START_STEG) {
                 resetGrunnlag(behandling);
+                // hvis det finnes både feilede og klare prosesstasker, må også klare tasker ryddes for at fortsett-task skal kunne opprettes
+                // det er trygt å rydde klare tasker ved hopp helt tilbake til start (men ikke ellers), siden tasker vil gjenutledes
+                prosessTaskRepository.settKlarTilSuspendert(fagsakId, behandling.getId());
             }
             hoppTilbake(behandling, targetSteg, kontekst);
 

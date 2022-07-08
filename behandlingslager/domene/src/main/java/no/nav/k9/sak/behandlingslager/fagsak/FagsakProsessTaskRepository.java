@@ -333,8 +333,8 @@ public class FagsakProsessTaskRepository {
         settTilSuspendert(fagsakId, behandlingId, EnumSet.of(ProsessTaskStatus.FEILET));
     }
 
-    public void settIkkeKjørteTilSuspendert(Long fagsakId, Long behandlingId) {
-        settTilSuspendert(fagsakId, behandlingId, EnumSet.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.VETO));
+    public void settKlarTilSuspendert(Long fagsakId, Long behandlingId) {
+        settTilSuspendert(fagsakId, behandlingId, EnumSet.of(ProsessTaskStatus.KLAR));
     }
 
     /**
