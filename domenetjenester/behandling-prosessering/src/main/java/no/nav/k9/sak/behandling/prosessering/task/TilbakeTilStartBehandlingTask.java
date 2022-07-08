@@ -1,10 +1,11 @@
 package no.nav.k9.sak.behandling.prosessering.task;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -102,9 +103,6 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
 
             if (startSteg == BehandlingStegType.START_STEG) {
                 resetGrunnlag(behandling);
-                // hvis det finnes både feilede og klare prosesstasker, må også klare tasker ryddes for at fortsett-task skal kunne opprettes
-                // det er trygt å rydde klare tasker ved hopp helt tilbake til start (men ikke ellers), siden tasker vil gjenutledes
-                prosessTaskRepository.settKlarTilSuspendert(fagsakId, behandling.getId());
             }
             hoppTilbake(behandling, targetSteg, kontekst);
 
