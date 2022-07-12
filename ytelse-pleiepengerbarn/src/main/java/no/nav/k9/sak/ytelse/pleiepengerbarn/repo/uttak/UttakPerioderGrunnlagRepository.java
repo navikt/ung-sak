@@ -1,20 +1,13 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
-import java.time.Duration;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
+
 import no.nav.k9.felles.jpa.HibernateVerktøy;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Dependent
 public class UttakPerioderGrunnlagRepository {
@@ -44,53 +37,9 @@ public class UttakPerioderGrunnlagRepository {
         persister(eksisterendeGrunnlag, nyttGrunnlag);
     }
 
-    public void dedupliserSøktUttak(Long behandlingId) {
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId).orElseThrow();
-        UttaksPerioderGrunnlag deduplisertGrunnlag = new UttaksPerioderGrunnlag(behandlingId);
-        for (PerioderFraSøknad perioderFraSøknad : eksisterendeGrunnlag.getOppgitteSøknadsperioder().getPerioderFraSøknadene()) {
-            deduplisertGrunnlag.leggTil(dedupliserSøktUttak(perioderFraSøknad));
-        }
-        deduplisertGrunnlag.setRelevanteSøknadsperioder(new UttakPerioderHolder(eksisterendeGrunnlag.getRelevantSøknadsperioder().getPerioderFraSøknadene().stream()
-            .map(this::dedupliserSøktUttak)
-            .toList()));
-        persister(Optional.of(eksisterendeGrunnlag), deduplisertGrunnlag);
-    }
-
-    private PerioderFraSøknad dedupliserSøktUttak(PerioderFraSøknad perioderFraSøknad) {
-        if (!perioderFraSøknad.getBeredskap().isEmpty()) {
-            throw new IllegalArgumentException("beredskap ikke tom");
-        }
-        if (!perioderFraSøknad.getFerie().isEmpty()) {
-            throw new IllegalArgumentException("ferie ikke tom");
-        }
-        if (!perioderFraSøknad.getNattevåk().isEmpty()) {
-            throw new IllegalArgumentException("nattevåk ikke tom");
-        }
-        if (!perioderFraSøknad.getTilsynsordning().isEmpty()) {
-            throw new IllegalArgumentException("tilsynsordning ikke tom");
-        }
-        if (!perioderFraSøknad.getUtenlandsopphold().isEmpty()) {
-            throw new IllegalArgumentException("utenlandshopphold ikke tom");
-        }
-        Set<ArbeidPeriode> arbeidPerioder = perioderFraSøknad.getArbeidPerioder()
-            .stream()
-            .map(ArbeidPeriode::new)
-            .collect(Collectors.toSet());
-
-        LocalDateTimeline<Duration> tidslinje = new LocalDateTimeline<>(perioderFraSøknad.getUttakPerioder().stream()
-            .map(up -> new LocalDateSegment<>(up.getPeriode().toLocalDateInterval(), up.getTimerPleieAvBarnetPerDag()))
-            .toList(), StandardCombinators::coalesceLeftHandSide).compress();
-
-        List<UttakPeriode> dedupliserteUttakPerioder = tidslinje.stream()
-            .map(segment -> new UttakPeriode(DatoIntervallEntitet.fra(segment.getLocalDateInterval()), segment.getValue()))
-            .toList();
-        return new PerioderFraSøknad(perioderFraSøknad.getJournalpostId(), dedupliserteUttakPerioder, arbeidPerioder, List.of(), List.of(), List.of(), List.of(), List.of());
-    }
-
     /**
      * Perioder som er knyttet til denne behandlingen. Mao dokumentet periodene kom inn i er knyttet til behandlingen
      * Eventuelt en revurdering som
-     *
      * @param behandlingId
      * @param søknadsperioder
      */
