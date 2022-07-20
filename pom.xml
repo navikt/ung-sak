@@ -41,7 +41,7 @@
         <maven.deploy.skip>true</maven.deploy.skip>
         <junit.version>5.8.2</junit.version>
         <felles.version>0.8.4</felles.version>
-        <swagger.version>2.2.1</swagger.version>
+        <swagger.version>2.2.2</swagger.version>
         <k9format.version>6.0.4</k9format.version>
         <jackson.version>2.13.3</jackson.version>
         <asm.version>9.3</asm.version>
