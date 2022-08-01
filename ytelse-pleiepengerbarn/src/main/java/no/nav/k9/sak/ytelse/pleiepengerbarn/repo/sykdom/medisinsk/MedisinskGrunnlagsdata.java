@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,6 +19,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomSøktPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDiagnose;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDiagnoser;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 
 @Entity(name = "MedisinskGrunnlagsdata")
 @Table(name = "MEDISINSK_GRUNNLAGSDATA")
@@ -34,10 +40,6 @@ public class MedisinskGrunnlagsdata {
     //TODO: Deprekere, hente data rett fra gr_soeknadsperiode i stedet.
     @OneToMany(mappedBy = "medisinskGrunnlagsdata", cascade = CascadeType.ALL)
     private List<SykdomSøktPeriode> søktePerioder = new ArrayList<>();
-
-    //TODO: Hva skiller denne fra relevanteSøknadsperioder? Kan vi kverke denne også?
-    @OneToMany(mappedBy = "medisinskGrunnlagsdata", cascade = CascadeType.ALL)
-    private List<SykdomRevurderingPeriode> revurderingPerioder = new ArrayList<>();
 
     //TODO: AnvendteVurderinger?
     @OneToMany()
@@ -82,7 +84,6 @@ public class MedisinskGrunnlagsdata {
     public MedisinskGrunnlagsdata(
             UUID sykdomGrunnlagUUID,
             List<SykdomSøktPeriode> søktePerioder,
-            List<SykdomRevurderingPeriode> revurderingPerioder,
             List<PleietrengendeSykdomVurderingVersjon> vurderinger,
             List<PleietrengendeSykdomDokument> godkjenteLegeerklæringer,
             boolean harAndreMedisinskeOpplysninger,
@@ -92,7 +93,6 @@ public class MedisinskGrunnlagsdata {
             LocalDateTime opprettetTidspunkt) {
         this.sykdomGrunnlagUUID = sykdomGrunnlagUUID;
         setSøktePerioder(søktePerioder);
-        setRevurderingPerioder(revurderingPerioder);
         this.vurderinger = vurderinger;
         this.godkjenteLegeerklæringer = godkjenteLegeerklæringer;
         this.harAndreMedisinskeOpplysninger = harAndreMedisinskeOpplysninger;
@@ -105,11 +105,6 @@ public class MedisinskGrunnlagsdata {
     private void setSøktePerioder(List<SykdomSøktPeriode> søktePerioder) {
         this.søktePerioder = søktePerioder;
         søktePerioder.forEach(p -> p.setSykdomGrunnlag(this));
-    }
-
-    private void setRevurderingPerioder(List<SykdomRevurderingPeriode> revurderingPerioder) {
-        this.revurderingPerioder = revurderingPerioder;
-        revurderingPerioder.forEach(p -> p.setSykdomGrunnlag(this));
     }
 
     public List<SykdomSøktPeriode> getSøktePerioder() {
@@ -181,10 +176,6 @@ public class MedisinskGrunnlagsdata {
 
     public void setOpprettetTidspunkt(LocalDateTime opprettetTidspunkt) {
         this.opprettetTidspunkt = opprettetTidspunkt;
-    }
-
-    public List<SykdomRevurderingPeriode> getRevurderingPerioder() {
-        return revurderingPerioder;
     }
 
     Long getId() {

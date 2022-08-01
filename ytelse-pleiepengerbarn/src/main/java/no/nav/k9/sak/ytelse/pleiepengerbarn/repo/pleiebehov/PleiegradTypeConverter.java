@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov;
 
 import jakarta.persistence.AttributeConverter;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;

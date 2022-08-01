@@ -8,10 +8,10 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlagsdata;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomInnleggelser;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeTidslinjeUtils;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 
 public class SykdomSamletVurdering {
     private PleietrengendeSykdomVurderingVersjon ktp;
@@ -46,19 +46,19 @@ public class SykdomSamletVurdering {
     public static LocalDateTimeline<SykdomSamletVurdering> grunnlagTilTidslinje(MedisinskGrunnlagsdata grunnlag) {
         final Collection<LocalDateSegment<SykdomSamletVurdering>> segments = new ArrayList<>();
 
-        SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE).forEach(s -> {
+        PleietrengendeTidslinjeUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE).forEach(s -> {
             SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
             samletVurdering.setKtp(s.getValue());
             segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
         });
 
-        SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.TO_OMSORGSPERSONER).forEach(s -> {
+        PleietrengendeTidslinjeUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.TO_OMSORGSPERSONER).forEach(s -> {
             SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
             samletVurdering.setToOp(s.getValue());
             segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
         });
 
-        SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.LIVETS_SLUTTFASE).forEach(s -> {
+        PleietrengendeTidslinjeUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.LIVETS_SLUTTFASE).forEach(s -> {
             SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
             samletVurdering.setSlu(s.getValue());
             segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));

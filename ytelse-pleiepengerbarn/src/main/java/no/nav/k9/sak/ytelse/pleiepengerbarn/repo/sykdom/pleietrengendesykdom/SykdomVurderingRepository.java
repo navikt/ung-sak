@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,6 +27,8 @@ import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomSøktPeriode;
 
 @Dependent
 public class SykdomVurderingRepository {
@@ -317,11 +319,11 @@ public class SykdomVurderingRepository {
 
 
     public LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> getVurderingstidslinjeFor(SykdomVurderingType type, UUID behandlingUuid) {
-        return SykdomUtils.tilTidslinje(hentBehandlingVurderingerFor(type, behandlingUuid));
+        return PleietrengendeTidslinjeUtils.tilTidslinje(hentBehandlingVurderingerFor(type, behandlingUuid));
     }
 
     public LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> getSisteVurderingstidslinjeFor(SykdomVurderingType type, AktørId pleietrengende) {
-        return SykdomUtils.tilTidslinje(hentSisteVurderingerFor(type, pleietrengende));
+        return PleietrengendeTidslinjeUtils.tilTidslinje(hentSisteVurderingerFor(type, pleietrengende));
     }
 
     public List<SykdomPeriodeMedEndring> finnEndringer(LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> tidslinje, PleietrengendeSykdomVurderingVersjon nyEndring) {

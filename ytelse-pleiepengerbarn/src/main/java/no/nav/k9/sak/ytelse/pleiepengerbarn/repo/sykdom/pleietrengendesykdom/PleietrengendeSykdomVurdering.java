@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,6 +20,7 @@ import jakarta.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTypeConverter;
 
 @Entity(name = "PleietrengendeSykdomVurdering")
 @Table(name = "PLEIETRENGENDE_SYKDOM_VURDERING")

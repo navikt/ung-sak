@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -196,7 +196,7 @@ public class SykdomDokumentRepository {
         return new PleietrengendeSykdomInnleggelser(null, null, Collections.emptyList(), null, null);
     }
 
-    PleietrengendeSykdomInnleggelser hentInnleggelseOrNull(AktørId pleietrengende) {
+    public PleietrengendeSykdomInnleggelser hentInnleggelseOrNull(AktørId pleietrengende) {
         final TypedQuery<PleietrengendeSykdomInnleggelser> q = entityManager.createQuery(
             "SELECT si "
                 + "FROM PleietrengendeSykdomInnleggelser as si "
@@ -304,7 +304,7 @@ public class SykdomDokumentRepository {
         return new PleietrengendeSykdomDiagnoser(null, null, new ArrayList<>(), null, null);
     }
 
-    PleietrengendeSykdomDiagnoser hentDiagnosekoderOrNull(AktørId pleietrengende) {
+    public PleietrengendeSykdomDiagnoser hentDiagnosekoderOrNull(AktørId pleietrengende) {
         final TypedQuery<PleietrengendeSykdomDiagnoser> q = entityManager.createQuery(
             "SELECT sd " +
                 "FROM PleietrengendeSykdomDiagnoser as sd " +

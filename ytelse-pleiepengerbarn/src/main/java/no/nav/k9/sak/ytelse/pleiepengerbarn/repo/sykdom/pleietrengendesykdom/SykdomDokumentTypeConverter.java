@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom;
 
 import jakarta.persistence.AttributeConverter;
 
@@ -9,7 +9,7 @@ public class SykdomDokumentTypeConverter implements AttributeConverter<SykdomDok
     public String convertToDatabaseColumn(SykdomDokumentType type) {
         return type.getDatabasekode();
     }
-    
+
     @Override
     public SykdomDokumentType convertToEntityAttribute(String databasekode) {
         for (SykdomDokumentType type : SykdomDokumentType.values()) {

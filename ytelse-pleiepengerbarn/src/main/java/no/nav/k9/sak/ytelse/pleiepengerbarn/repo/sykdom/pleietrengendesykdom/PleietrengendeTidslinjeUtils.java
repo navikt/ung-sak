@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,13 +7,13 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 
-public final class SykdomUtils {
+public final class PleietrengendeTidslinjeUtils {
 
-    private SykdomUtils() {
+    private PleietrengendeTidslinjeUtils() {
     }
 
     public static LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> tilTidslinjeForType(Collection<PleietrengendeSykdomVurderingVersjon> vurderinger, SykdomVurderingType type) {
-        return SykdomUtils.tilTidslinje(vurderinger.stream().filter(v -> v.getSykdomVurdering().getType() == type).toList());
+        return PleietrengendeTidslinjeUtils.tilTidslinje(vurderinger.stream().filter(v -> v.getSykdomVurdering().getType() == type).toList());
     }
 
     public static LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> tilTidslinje(Collection<PleietrengendeSykdomVurderingVersjon> vurderinger) {

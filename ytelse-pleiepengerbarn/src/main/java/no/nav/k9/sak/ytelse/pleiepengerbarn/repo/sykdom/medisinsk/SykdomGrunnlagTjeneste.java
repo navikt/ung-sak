@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk;
 
 import java.util.Collections;
 import java.util.List;
@@ -47,17 +47,17 @@ public class SykdomGrunnlagTjeneste {
         return sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandlingUuid);
     }
 
-    boolean harDataSomIkkeHarBlittTattMedIBehandling(Behandling behandling) {
+    public boolean harDataSomIkkeHarBlittTattMedIBehandling(Behandling behandling) {
         final var resultat = utledRelevanteEndringerSidenForrigeGrunnlag(behandling);
         return resultat.harBlittEndret();
     }
 
-    LocalDateTimeline<VilkårPeriode> hentOmsorgenForTidslinje(Long behandlingId) {
+    public LocalDateTimeline<VilkårPeriode> hentOmsorgenForTidslinje(Long behandlingId) {
         final var vilkåreneOpt = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         return vilkåreneOpt.map(v -> v.getVilkårTimeline(VilkårType.OMSORGEN_FOR)).orElse(LocalDateTimeline.empty());
     }
 
-    LocalDateTimeline<VilkårPeriode> hentManglendeOmsorgenForTidslinje(Long behandlingId) {
+    public LocalDateTimeline<VilkårPeriode> hentManglendeOmsorgenForTidslinje(Long behandlingId) {
         return hentOmsorgenForTidslinje(behandlingId).filterValue(v -> v.getUtfall() == Utfall.IKKE_OPPFYLT);
     }
 

@@ -18,11 +18,11 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlagsdata;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomInnleggelsePeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomInnleggelser;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurdering;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelsePeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurdering;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 
 class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
 
@@ -272,10 +272,9 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
     private MedisinskGrunnlagsdata grunnlagMock(List<PleietrengendeSykdomVurderingVersjon> vurderinger, PleietrengendeSykdomInnleggelser innleggelser) {
         return new MedisinskGrunnlagsdata(
             null,
-            new ArrayList<>(),
-            new ArrayList<>(),
-            vurderinger,
-            new ArrayList<>(),
+            new ArrayList<>(), //søktePerioder
+            vurderinger, //vurderinger
+            new ArrayList<>(), //godkjenteLegeerklæringer
             false,
             innleggelser,
             null,

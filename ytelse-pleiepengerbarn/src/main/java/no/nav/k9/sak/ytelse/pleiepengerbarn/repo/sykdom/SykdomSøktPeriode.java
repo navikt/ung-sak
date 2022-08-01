@@ -1,8 +1,11 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 import jakarta.persistence.*;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
+
 import java.time.LocalDate;
 
+@Deprecated
 @Entity(name = "SykdomSøktPeriode")
 @Table(name = "SYKDOM_SOEKT_PERIODE")
 public class SykdomSøktPeriode {
@@ -33,7 +36,7 @@ public class SykdomSøktPeriode {
         return medisinskGrunnlagsdata;
     }
 
-    void setSykdomGrunnlag(MedisinskGrunnlagsdata medisinskGrunnlagsdata) {
+    public void setSykdomGrunnlag(MedisinskGrunnlagsdata medisinskGrunnlagsdata) {
         this.medisinskGrunnlagsdata = medisinskGrunnlagsdata;
     }
 
