@@ -58,15 +58,12 @@ public class MapInputTilUttakTjeneste {
 
     private HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private String unntak;
-    private Boolean utsattBehandlingAvPeriode;
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
-                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
-                                    @KonfigVerdi(value = "utsatt.behandling.av.periode.aktivert", defaultVerdi = "false") Boolean utsattBehandlingAvPeriode) {
+                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
-        this.utsattBehandlingAvPeriode = utsattBehandlingAvPeriode;
     }
 
 
@@ -264,7 +261,7 @@ public class MapInputTilUttakTjeneste {
             .collect(Collectors.toList()));
 
         var utsattBehandlingAvPerioder = input.getUtsattBehandlingAvPerioder();
-        if (utsattBehandlingAvPeriode && utsattBehandlingAvPerioder.isPresent()) {
+        if (utsattBehandlingAvPerioder.isPresent()) {
             var perioderSomHarBlittUtsatt = utsattBehandlingAvPerioder.map(UtsattBehandlingAvPeriode::getPerioder).orElseThrow();
             var utsattTidslinje = new LocalDateTimeline<>(perioderSomHarBlittUtsatt.stream()
                 .map(UtsattPeriode::getPeriode)
