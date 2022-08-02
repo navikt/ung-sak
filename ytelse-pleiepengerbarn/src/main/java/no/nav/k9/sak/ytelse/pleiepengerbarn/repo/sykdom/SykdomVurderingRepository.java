@@ -80,7 +80,7 @@ public class SykdomVurderingRepository {
             " ON CONFLICT DO NOTHING";
 
         Query query = entityManager.createNativeQuery(sql)
-            .setParameter("id", besluttet.getSykdomVurderingVersjon().getId())
+            .setParameter("id", besluttet.getPleietrengendeSykdomVurderingVersjon().getId())
             .setParameter("endretAv", besluttet.getEndretAv())
             .setParameter("endretTid", besluttet.getEndretTidspunkt());
 
