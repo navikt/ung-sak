@@ -58,7 +58,7 @@ public class SykdomGrunnlagTjeneste {
     }
 
     LocalDateTimeline<VilkårPeriode> hentManglendeOmsorgenForTidslinje(Long behandlingId) {
-        return hentOmsorgenForTidslinje(behandlingId).filterValue(v -> v.getUtfall() == Utfall.IKKE_OPPFYLT);
+        return hentOmsorgenForTidslinje(behandlingId).filterValue(v -> v.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT);
     }
 
     public List<Periode> hentManglendeOmsorgenForPerioder(Long behandlingId) {

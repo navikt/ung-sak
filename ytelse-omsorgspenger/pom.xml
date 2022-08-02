@@ -57,7 +57,7 @@
         <dependency>
             <groupId>no.nav.k9.rapid</groupId>
             <artifactId>behov</artifactId>
-            <version>1.20220616113814-54fdde1</version>
+            <version>1.20220708075341-87c2b3c</version>
         </dependency>
 
 		<!-- Test avhengigheter -->

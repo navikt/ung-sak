@@ -113,7 +113,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
             return false;
         }
         final VilkårPeriode vilkårPeriode = vilkår.getPerioder().get(vilkår.getPerioder().size() - 1);
-        return (vilkårPeriode.getUtfall() == Utfall.OPPFYLT);
+        return (vilkårPeriode.getGjeldendeUtfall() == Utfall.OPPFYLT);
     }
 
 
