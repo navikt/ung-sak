@@ -2,18 +2,24 @@ package no.nav.k9.sak.ytelse.beregning;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Year;
 import java.util.Objects;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import jakarta.enterprise.inject.Instance;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
@@ -21,36 +27,34 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.ytelse.beregning.adapter.AktivitetStatusMapper;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFeriepengerFraVLTilRegel;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.MottakerType;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
+import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.FeriepengeOppsummering;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepenger;
+import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepengerV2;
+import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
 
 public abstract class BeregnFeriepengerTjeneste {
 
+    public static BeregnFeriepengerTjeneste finnTjeneste(Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjenester, FagsakYtelseType fagsakYtelseType) {
+        return FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjenester, fagsakYtelseType).orElseThrow(() -> new IllegalArgumentException("Har ikke BeregnFeriepengerTjeneste for " + fagsakYtelseType));
+    }
+
     private JacksonJsonConfig jacksonJsonConfig = new JacksonJsonConfig();
-    private int antallDagerFeriepenger;
-    private boolean feriepengeopptjeningForHelg;
-    private boolean ubegrensedeDagerVedRefusjon;
 
     protected BeregnFeriepengerTjeneste() {
         //NOSONAR
     }
 
-    public BeregnFeriepengerTjeneste(int antallDagerFeriepenger) {
-        this(antallDagerFeriepenger, false, false);
-    }
+    public abstract int antallDagerFeriepenger();
 
-    public BeregnFeriepengerTjeneste(int antallDagerFeriepenger, boolean feriepengeopptjeningForHelg, boolean ubegrensedeDagerVedRefusjon) {
-        this.ubegrensedeDagerVedRefusjon = ubegrensedeDagerVedRefusjon;
-        if (antallDagerFeriepenger == 0) {
-            throw new IllegalStateException("Injeksjon av antallDagerFeriepenger feilet. antallDagerFeriepenger kan ikke være 0.");
-        }
-        this.antallDagerFeriepenger = antallDagerFeriepenger;
-        this.feriepengeopptjeningForHelg = feriepengeopptjeningForHelg;
-    }
+    public abstract boolean feriepengeopptjeningForHelg();
+
+    public abstract boolean ubegrensedeDagerVedRefusjon();
 
     public void beregnFeriepenger(BeregningsresultatEntitet beregningsresultat) {
-
-        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, antallDagerFeriepenger, feriepengeopptjeningForHelg, ubegrensedeDagerVedRefusjon);
+        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, antallDagerFeriepenger(), feriepengeopptjeningForHelg(), ubegrensedeDagerVedRefusjon());
         String regelInput = toJson(regelModell);
 
         RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger();
@@ -63,6 +67,42 @@ public abstract class BeregnFeriepengerTjeneste {
         mapTilResultatFraRegelModell(beregningsresultat, regelModell);
     }
 
+    public void beregnFeriepengerV2(BeregningsresultatEntitet beregningsresultat) {
+        beregnFeriepengerV2(beregningsresultat, LocalDateTimeline.empty());
+    }
+
+    public void beregnFeriepengerV2(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker) {
+        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker, antallDagerFeriepenger(), feriepengeopptjeningForHelg(), ubegrensedeDagerVedRefusjon());
+        String regelInput = toJson(regelModell);
+
+        RegelBeregnFeriepengerV2 regelBeregnFeriepenger = new RegelBeregnFeriepengerV2();
+        Evaluation evaluation = regelBeregnFeriepenger.evaluer(regelModell);
+        String sporing = EvaluationSerializer.asJson(evaluation);
+
+        beregningsresultat.setFeriepengerRegelInput(regelInput);
+        beregningsresultat.setFeriepengerRegelSporing(sporing);
+
+        mapTilResultatFraRegelModellV2(beregningsresultat, regelModell);
+    }
+
+    public FeriepengeOppsummering beregnFeriepengerOppsummering(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker) {
+        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker, antallDagerFeriepenger(), feriepengeopptjeningForHelg(), ubegrensedeDagerVedRefusjon());
+        RegelBeregnFeriepengerV2 regelBeregnFeriepenger = new RegelBeregnFeriepengerV2();
+        regelBeregnFeriepenger.evaluer(regelModell);
+
+        FeriepengeOppsummering.Builder feriepengeoppsummeringBuilder = new FeriepengeOppsummering.Builder();
+
+        for (var brPeriode : regelModell.getBeregningsresultatPerioder()) {
+            for (var brAndel : brPeriode.getBeregningsresultatAndelList()) {
+                for (BeregningsresultatFeriepengerPrÅr feriepengerPrÅr : brAndel.getBeregningsresultatFeriepengerPrÅrListe()) {
+                    feriepengeoppsummeringBuilder.leggTil(Year.of(feriepengerPrÅr.getOpptjeningÅr().getYear()), brAndel.getMottakerType(), brAndel.getMottakerType() == MottakerType.ARBEIDSGIVER ? brAndel.getArbeidsgiverId() : null, feriepengerPrÅr.getÅrsbeløp().setScale(0, RoundingMode.UNNECESSARY).longValue());
+                }
+            }
+        }
+        return feriepengeoppsummeringBuilder.build();
+    }
+
+
     private String toJson(BeregningsresultatFeriepengerRegelModell grunnlag) {
         var jsonFac = this.jacksonJsonConfig;
         return jsonFac.toJson(grunnlag, BeregnFeriepengerFeil.FACTORY::jsonMappingFeilet);
@@ -74,6 +114,10 @@ public abstract class BeregnFeriepengerTjeneste {
             return;
         }
 
+        regelModell.getBeregningsresultatPerioder().forEach(regelBeregningsresultatPeriode -> mapPeriode(resultat, regelBeregningsresultatPeriode));
+    }
+
+    static void mapTilResultatFraRegelModellV2(BeregningsresultatEntitet resultat, BeregningsresultatFeriepengerRegelModell regelModell) {
         regelModell.getBeregningsresultatPerioder().forEach(regelBeregningsresultatPeriode -> mapPeriode(resultat, regelBeregningsresultatPeriode));
     }
 

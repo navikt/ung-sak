@@ -60,7 +60,7 @@ public class LosRestTjeneste {
     @POST
     @Path(MERKNAD)
     @Operation(description = "Lagrer merknad på oppgave i los", tags = "merknad")
-    @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = FAGSAK) // Står som read så veileder har tilgang
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response postMerknad(@Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MerknadEndretDto merknadEndret) {
         var merknad = losKlient.lagreMerknad(merknadEndret.overstyrSaksbehandlerIdent(getCurrentUserId()));

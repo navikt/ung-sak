@@ -5,12 +5,15 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
@@ -29,6 +32,7 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private FosterbarnRepository fosterbarnRepository;
     private TpsTjeneste tpsTjeneste;
+    private BehandlingRepository behandlingRepository;
 
     AvklarÅrskvantumKvote() {
         // for CDI proxy
@@ -38,17 +42,22 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
     AvklarÅrskvantumKvote(HistorikkTjenesteAdapter historikkTjenesteAdapter,
                           ÅrskvantumTjeneste årskvantumTjeneste,
                           FosterbarnRepository fosterbarnRepository,
-                          TpsTjeneste tpsTjeneste) {
+                          TpsTjeneste tpsTjeneste, BehandlingRepository behandlingRepository) {
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.fosterbarnRepository = fosterbarnRepository;
         this.tpsTjeneste = tpsTjeneste;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
     public OppdateringResultat oppdater(AvklarÅrskvantumDto dto, AksjonspunktOppdaterParameter param) {
         var fortsettBehandling = dto.getfortsettBehandling();
         Long behandlingId = param.getBehandlingId();
+
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+
+        validerTilstand(behandling);
 
         if (fortsettBehandling) {
             //Bekreft uttaksplan og fortsett behandling
@@ -75,6 +84,12 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
             return resultat;
         }
 
+    }
+
+    private void validerTilstand(Behandling behandling) {
+        if (behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.ÅRSKVANTUM_FOSTERBARN).isPresent()) {
+            throw new IllegalStateException("Fant åpent aksjonspunkt av typen 9014, dette må løses først.");
+        }
     }
 
     private void opprettHistorikkInnslag(AvklarÅrskvantumDto dto, Long behandlingId, HistorikkinnslagType historikkinnslagType, String valg) {

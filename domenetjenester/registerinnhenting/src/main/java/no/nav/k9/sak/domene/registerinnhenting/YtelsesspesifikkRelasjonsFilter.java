@@ -23,7 +23,7 @@ public interface YtelsesspesifikkRelasjonsFilter {
 
     List<Personinfo> relasjonsFiltreringBarn(Behandling behandling, List<Personinfo> barn, Periode opplysningsperioden);
 
-    default Set<AktørId> hentFosterbarn(Behandling behandling, Periode opplysningsperioden) {
+    default Set<AktørId> hentFosterbarn(Behandling behandling) {
         return Set.of();
     }
 }

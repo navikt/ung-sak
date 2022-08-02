@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.kontrakt.sykdom.SykdomPeriodeMedEndringDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingAnnenInformasjon;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingDto;
@@ -26,7 +25,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPeriodeMedEndring;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste.SykdomVurderingerOgPerioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 @Dependent
@@ -109,7 +108,7 @@ public class SykdomVurderingMapper {
                 alleDokumenter.stream().filter(d -> oppdatering.getTilknyttedeDokumenter().contains("" + d.getId())).collect(Collectors.toList()),
                 oppdatering.getPerioder()
         );
-        
+
         if (oppdatering.getTilknyttedeDokumenter().size() != versjon.getDokumenter().size()) {
             throw new IllegalStateException("Feil ved mapping: Klarte ikke å finne et av dokumentene saksbehandler har referert til.");
         }
@@ -136,7 +135,7 @@ public class SykdomVurderingMapper {
                 opprettelse.getPerioder()
         );
         sykdomVurdering.addVersjon(versjon);
-        
+
         if (opprettelse.getTilknyttedeDokumenter().size() != versjon.getDokumenter().size()) {
             throw new IllegalStateException("Feil ved mapping: Klarte ikke å finne et av dokumentene saksbehandler har referert til.");
         }
@@ -173,7 +172,7 @@ public class SykdomVurderingMapper {
             return endretForPerson;
         }
     }
-    
+
     public SykdomPeriodeMedEndringDto toSykdomPeriodeMedEndringDto(SykdomPeriodeMedEndring p) {
         return new SykdomPeriodeMedEndringDto(p.getPeriode(), p.isEndrerVurderingSammeBehandling(), p.isEndrerAnnenVurdering());
     }

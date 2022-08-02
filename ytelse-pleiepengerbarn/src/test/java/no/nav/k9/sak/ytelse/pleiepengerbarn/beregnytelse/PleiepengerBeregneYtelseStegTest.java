@@ -53,8 +53,9 @@ import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.FinnFeriepengepåvirkendeFagsakerTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.HentFeriepengeAndelerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakInMemoryTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.PleiepengerForlengelseTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utenlandsopphold;
@@ -82,6 +83,8 @@ public class PleiepengerBeregneYtelseStegTest {
     @Mock
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste = mock(FastsettBeregningsresultatTjeneste.class);
     private BeregnFeriepengerTjeneste beregnFeriepengerTjeneste = mock(BeregnFeriepengerTjeneste.class);
+    private FinnFeriepengepåvirkendeFagsakerTjeneste finnFeriepengepåvirkendeFagsakerTjeneste = mock(FinnFeriepengepåvirkendeFagsakerTjeneste.class);
+    private HentFeriepengeAndelerTjeneste hentAndelserSomKanGiFeriepengerTjeneste = mock(HentFeriepengeAndelerTjeneste.class);
     private BeregningPerioderGrunnlagRepository bgGrunnlagRepository;
     private BeregningTjeneste beregningTjeneste;
 
@@ -107,7 +110,11 @@ public class PleiepengerBeregneYtelseStegTest {
         steg = new PleiepengerBeregneYtelseSteg(repositoryProvider, beregningTjeneste,
             fastsettBeregningsresultatTjeneste,
             uttakTjeneste,
-            new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste));
+            new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste),
+            new UnitTestLookupInstanceImpl<>(finnFeriepengepåvirkendeFagsakerTjeneste),
+                hentAndelserSomKanGiFeriepengerTjeneste,
+            true
+        );
     }
 
     private Behandling lagre(AbstractTestScenario<?> scenario) {

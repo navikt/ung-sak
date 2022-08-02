@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -65,8 +66,14 @@ public class VilkårPeriodeDto {
     /**
      * indikerer om en vilkårsperiode er aktuell for vurdering i inneværende behandling
      */
-    @JsonProperty("vurdersIBehandlingen")
+    @JsonProperty("vurderesIBehandlingen")
+    @JsonAlias("vurdersIBehandlingen")
     private Boolean vurderesIBehandlingen;
+
+
+    @JsonProperty("vurdersIBehandlingen")
+    @JsonAlias("vurderesIBehandlingen")
+    private Boolean vurdersIBehandlingen;
 
     @JsonProperty(value = "merknad")
     @Valid
@@ -131,12 +138,18 @@ public class VilkårPeriodeDto {
         this.begrunnelse = begrunnelse;
     }
 
+
+    public Boolean getVurdersIBehandlingen() {
+        return vurdersIBehandlingen;
+    }
+
     public Boolean getVurderesIBehandlingen() {
         return vurderesIBehandlingen;
     }
 
     public void setVurderesIBehandlingen(Boolean vurderesIBehandlingen) {
         this.vurderesIBehandlingen = vurderesIBehandlingen;
+        this.vurdersIBehandlingen = vurderesIBehandlingen;
     }
 
     public VilkårUtfallMerknad getMerknad() {

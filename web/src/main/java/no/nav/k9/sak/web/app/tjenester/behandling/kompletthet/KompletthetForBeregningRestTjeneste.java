@@ -139,7 +139,7 @@ public class KompletthetForBeregningRestTjeneste {
         var erInfotrygdMigrering = sakInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).anyMatch(at -> it.getKey().inkluderer(at));
 
         return new KompletthetsTilstandPåPeriodeDto(new Periode(it.getKey().getFomDato(), it.getKey().getTomDato()),
-            mapStatusPåInntektsmeldinger(it, unikeInntektsmeldingerForFagsak, ref, kompletthetsvurdering),
+            mapStatusPåInntektsmeldinger(it, unikeInntektsmeldingerForFagsak, ref, kompletthetsvurdering, erInfotrygdMigrering),
             kompletthetsvurdering.map(KompletthetPeriode::getVurdering).orElse(Vurdering.UDEFINERT),
             utledVurdering(it, perioderTilVurdering, erInfotrygdMigrering, innvilgetSøknadsfrist),
             kompletthetsvurdering.map(KompletthetPeriode::getBegrunnelse).orElse(null));
@@ -198,7 +198,7 @@ public class KompletthetForBeregningRestTjeneste {
         var kompletthetsvurdering = finnRelevantVurderingForPeriode(it.getKey(), kompletthetPerioder);
         var erInfotrygdMigrering = sakInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).anyMatch(at -> it.getKey().inkluderer(at));
         return new KompletthetsTilstandPåPeriodeV2Dto(new Periode(it.getKey().getFomDato(), it.getKey().getTomDato()),
-            mapStatusPåInntektsmeldingerV2(it, unikeInntektsmeldingerForFagsak, ref, kompletthetsvurdering),
+            mapStatusPåInntektsmeldingerV2(it, unikeInntektsmeldingerForFagsak, ref, kompletthetsvurdering, erInfotrygdMigrering),
             kompletthetsvurdering.map(KompletthetPeriode::getVurdering).orElse(Vurdering.UDEFINERT),
             utledVurdering(it, perioderTilVurdering, erInfotrygdMigrering, innvilgetSøknadsfrist),
             kompletthetsvurdering.map(KompletthetPeriode::getBegrunnelse).orElse(null));
@@ -207,10 +207,10 @@ public class KompletthetForBeregningRestTjeneste {
     private List<ArbeidsgiverArbeidsforholdStatus> mapStatusPåInntektsmeldinger(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it,
                                                                                 Set<Inntektsmelding> unikeInntektsmeldingerForFagsak,
                                                                                 BehandlingReferanse behandlingReferanse,
-                                                                                Optional<KompletthetPeriode> kompletthetsvurdering) {
+                                                                                Optional<KompletthetPeriode> kompletthetsvurdering, boolean erInfotrygdMigrering) {
         var resultat = it.getValue()
             .stream()
-            .map(at -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(at.getArbeidsgiver().getIdentifikator(), at.getArbeidsforholdId()), utledStatus(kompletthetsvurdering, at.getHarFraværFraArbeidsgiverIPerioden()), null))
+            .map(at -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(at.getArbeidsgiver().getIdentifikator(), at.getArbeidsforholdId()), utledStatus(kompletthetsvurdering, at.getHarFraværFraArbeidsgiverIPerioden(), erInfotrygdMigrering), null))
             .collect(Collectors.toCollection(ArrayList::new));
 
         resultat.addAll(kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
@@ -222,10 +222,10 @@ public class KompletthetForBeregningRestTjeneste {
         return resultat;
     }
 
-    private List<ArbeidsgiverArbeidsforholdStatusV2> mapStatusPåInntektsmeldingerV2(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, BehandlingReferanse behandlingReferanse, Optional<KompletthetPeriode> kompletthetsvurdering) {
+    private List<ArbeidsgiverArbeidsforholdStatusV2> mapStatusPåInntektsmeldingerV2(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, BehandlingReferanse behandlingReferanse, Optional<KompletthetPeriode> kompletthetsvurdering, boolean erInfotrygdMigrering) {
         var resultat = it.getValue()
             .stream()
-            .map(at -> new ArbeidsgiverArbeidsforholdStatusV2(new ArbeidsgiverArbeidsforholdIdV2(at.getArbeidsgiver(), at.getArbeidsforholdId()), utledStatus(kompletthetsvurdering, at.getHarFraværFraArbeidsgiverIPerioden()), null))
+            .map(at -> new ArbeidsgiverArbeidsforholdStatusV2(new ArbeidsgiverArbeidsforholdIdV2(at.getArbeidsgiver(), at.getArbeidsforholdId()), utledStatus(kompletthetsvurdering, at.getHarFraværFraArbeidsgiverIPerioden(), erInfotrygdMigrering), null))
             .collect(Collectors.toCollection(ArrayList::new));
 
         resultat.addAll(kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
@@ -237,16 +237,16 @@ public class KompletthetForBeregningRestTjeneste {
         return resultat;
     }
 
-    private Status utledStatus(Optional<KompletthetPeriode> kompletthetsvurdering, boolean harFraværFraArbeidsgiverIPerioden) {
+    private Status utledStatus(Optional<KompletthetPeriode> kompletthetsvurdering, boolean harFraværFraArbeidsgiverIPerioden, boolean erInfotrygdMigrering) {
         if (kompletthetsvurdering.isEmpty()) {
-            return harFraværFraArbeidsgiverIPerioden ? Status.MANGLER : Status.IKKE_PÅKREVD;
+            return harFraværFraArbeidsgiverIPerioden && !erInfotrygdMigrering ? Status.MANGLER : Status.IKKE_PÅKREVD;
         }
         var vurderingPåPeriode = kompletthetsvurdering.get();
         if (Vurdering.KAN_FORTSETTE.equals(vurderingPåPeriode.getVurdering())) {
             return Status.FORTSETT_UTEN;
         }
 
-        return harFraværFraArbeidsgiverIPerioden ? Status.MANGLER : Status.IKKE_PÅKREVD;
+        return harFraværFraArbeidsgiverIPerioden && !erInfotrygdMigrering ? Status.MANGLER : Status.IKKE_PÅKREVD;
     }
 
     private Optional<KompletthetPeriode> finnRelevantVurderingForPeriode(DatoIntervallEntitet key, List<KompletthetPeriode> kompletthetPerioder) {

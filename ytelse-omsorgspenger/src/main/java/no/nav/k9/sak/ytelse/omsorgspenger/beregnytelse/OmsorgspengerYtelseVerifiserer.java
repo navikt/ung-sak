@@ -18,6 +18,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
@@ -83,7 +84,7 @@ public class OmsorgspengerYtelseVerifiserer {
     }
 
     private LocalDateTimeline<Set<Arbeidsgiver>> finnUtbetalingUtenKrav(LocalDateTimeline<Set<Arbeidsgiver>> krav, LocalDateTimeline<Set<Arbeidsgiver>> utbetalinger) {
-        LocalDateTimeline<Set<Arbeidsgiver>> utbetalingUtenKrav = utbetalinger.combine(krav, TidsserieUtil::minus, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+        LocalDateTimeline<Set<Arbeidsgiver>> utbetalingUtenKrav = utbetalinger.combine(krav, TidslinjeUtil::minus, LocalDateTimeline.JoinStyle.LEFT_JOIN);
         return utbetalingUtenKrav
             .filterValue(v -> !v.isEmpty())
             .compress();
@@ -91,11 +92,11 @@ public class OmsorgspengerYtelseVerifiserer {
 
     private LocalDateTimeline<Set<Arbeidsgiver>> kravTidslinje(List<OppgittFraværPeriode> alleKravperioder) {
         return new LocalDateTimeline<>(alleKravperioder.stream()
-            .map(this::mapPeriode).toList(), TidsserieUtil::union);
+            .map(this::mapPeriode).toList(), TidslinjeUtil::union);
     }
 
     private LocalDateTimeline<Set<Arbeidsgiver>> tidslinjeUtbetaling(BeregningsresultatEntitet beregningsresultat, boolean tilBruker) {
-        return new LocalDateTimeline<>(beregningsresultat.getBeregningsresultatPerioder().stream().map(p -> mapPeriode(p, tilBruker)).toList(), TidsserieUtil::union);
+        return new LocalDateTimeline<>(beregningsresultat.getBeregningsresultatPerioder().stream().map(p -> mapPeriode(p, tilBruker)).toList(), TidslinjeUtil::union);
     }
 
     private LocalDateSegment<Set<Arbeidsgiver>> mapPeriode(BeregningsresultatPeriode brPeriode, boolean tilBruker) {

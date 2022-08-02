@@ -3,6 +3,7 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -39,8 +40,11 @@ public class OppgittOpptjeningMapper {
     OppgittOpptjeningMapper() {
     }
 
-    public OppgittOpptjeningMottattRequest mapRequest(Behandling behandling, MottattDokument dokument, OpptjeningAktivitet opptjeningAktiviteter) {
+    public Optional<OppgittOpptjeningMottattRequest> mapRequest(Behandling behandling, MottattDokument dokument, OpptjeningAktivitet opptjeningAktiviteter) {
 
+        if (opptjeningAktiviteter == null) {
+            return Optional.empty();
+        }
         var builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), LocalDateTime.now());
         if (opptjeningAktiviteter.getSelvstendigNæringsdrivende() != null) {
             var snAktiviteter = opptjeningAktiviteter.getSelvstendigNæringsdrivende();
@@ -66,7 +70,7 @@ public class OppgittOpptjeningMapper {
         builder.leggTilJournalpostId(dokument.getJournalpostId());
         builder.leggTilInnsendingstidspunkt(dokument.getInnsendingstidspunkt());
 
-        return byggRequest(behandling, builder);
+        return Optional.of(byggRequest(behandling, builder));
     }
 
     private OppgittFrilansoppdrag lagFrilansperiode(DatoIntervallEntitet frilansperiode) {

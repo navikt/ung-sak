@@ -114,7 +114,7 @@ public class OpptjeningResultat extends BaseEntitet {
     }
 
     public Optional<Opptjening> finnOpptjening(LocalDate skjæringstidspunkt) {
-        return opptjeningPerioder.stream().filter(it -> it.getOpptjeningPeriode().getTomDato().plusDays(1).equals(skjæringstidspunkt)).findFirst();
+        return opptjeningPerioder.stream().filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt)).findFirst();
     }
 
     @Override

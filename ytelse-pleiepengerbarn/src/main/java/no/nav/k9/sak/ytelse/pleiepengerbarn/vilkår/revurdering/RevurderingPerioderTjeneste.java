@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.util.LRUCache;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -50,15 +51,18 @@ public class RevurderingPerioderTjeneste {
         // CDI
     }
 
+    //denne funksjonen brukes til å utlede vilkårsperioder
     public Set<DatoIntervallEntitet> utledPerioderFraProsessTriggere(BehandlingReferanse referanse) {
         var prosessTriggere = prosessTriggereRepository.hentGrunnlag(referanse.getBehandlingId());
         return prosessTriggere.map(ProsessTriggere::getTriggere)
             .orElseGet(Set::of)
             .stream()
+            .filter(trigger -> BehandlingÅrsakType.medførerVilkårsperioder(trigger.getÅrsak()))
             .map(Trigger::getPeriode)
             .collect(Collectors.toSet());
     }
 
+    //denne funksjonen brukes for å tilby data til visning
     public Set<PeriodeMedÅrsak> utledPerioderFraProsessTriggereMedÅrsak(BehandlingReferanse referanse) {
         var prosessTriggere = prosessTriggereRepository.hentGrunnlag(referanse.getBehandlingId());
         return prosessTriggere.map(ProsessTriggere::getTriggere)

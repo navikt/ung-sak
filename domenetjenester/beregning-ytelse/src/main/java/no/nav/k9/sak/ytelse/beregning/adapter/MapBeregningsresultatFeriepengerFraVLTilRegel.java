@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -12,6 +13,7 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
+import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
 
 public class MapBeregningsresultatFeriepengerFraVLTilRegel {
 
@@ -21,9 +23,7 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
     }
 
     public static BeregningsresultatFeriepengerRegelModell mapFra(BeregningsresultatEntitet beregningsresultat, int antallDagerFeriepenger, boolean feriepengeopptjeningForHelg, boolean ubegrensedeDagerVedRefusjon) {
-
-        List<BeregningsresultatPeriode> beregningsresultatPerioder = beregningsresultat.getBeregningsresultatPerioder().stream()
-                .map(MapBeregningsresultatFeriepengerFraVLTilRegel::mapBeregningsresultatPerioder).collect(Collectors.toList());
+        List<BeregningsresultatPeriode> beregningsresultatPerioder = mapBeregningsresultat(beregningsresultat);
         Set<Inntektskategori> inntektskategorier = mapInntektskategorier(beregningsresultat);
 
         return BeregningsresultatFeriepengerRegelModell.builder()
@@ -33,6 +33,26 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
                 .medFeriepengeopptjeningForHelg(feriepengeopptjeningForHelg)
                 .medUbegrensetFeriepengedagerVedRefusjon(ubegrensedeDagerVedRefusjon)
                 .build();
+    }
+
+    public static BeregningsresultatFeriepengerRegelModell mapFra(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker, int antallDagerFeriepenger, boolean feriepengeopptjeningForHelg, boolean ubegrensedeDagerVedRefusjon) {
+
+        List<BeregningsresultatPeriode> beregningsresultatPerioder = mapBeregningsresultat(beregningsresultat);
+        Set<Inntektskategori> inntektskategorier = mapInntektskategorier(beregningsresultat);
+
+        return BeregningsresultatFeriepengerRegelModell.builder()
+            .medBeregningsresultatPerioder(beregningsresultatPerioder)
+            .medAndelerSomKanGiFeriepengerForRelevaneSaker(andelerSomKanGiFeriepengerForRelevaneSaker)
+            .medInntektskategorier(inntektskategorier)
+            .medAntallDagerFeriepenger(antallDagerFeriepenger)
+            .medFeriepengeopptjeningForHelg(feriepengeopptjeningForHelg)
+            .medUbegrensetFeriepengedagerVedRefusjon(ubegrensedeDagerVedRefusjon)
+            .build();
+    }
+
+    public static List<BeregningsresultatPeriode> mapBeregningsresultat(BeregningsresultatEntitet beregningsresultat) {
+        return beregningsresultat.getBeregningsresultatPerioder().stream()
+            .map(MapBeregningsresultatFeriepengerFraVLTilRegel::mapBeregningsresultatPerioder).collect(Collectors.toList());
     }
 
     private static Set<Inntektskategori> mapInntektskategorier(BeregningsresultatEntitet beregningsresultat) {
