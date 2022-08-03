@@ -38,6 +38,7 @@ import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifikator;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
@@ -56,11 +57,14 @@ public class PleiepengerUttakRestTjeneste {
     public static final String GET_SKULLE_SØKT_OM_PATH = "/behandling/pleiepenger/arbeidstid-mangler";
     public static final String GET_DEBUG_INPUT_PATH = "/behandling/pleiepenger/debug-input";
 
+    public static final String GET_DEBUG_KJØREPLAN_PATH = "/behandling/pleiepenger/debug-kjøreplan";
+
     private UttakTjeneste uttakRestKlient;
     private BehandlingRepository behandlingRepository;
     private ArbeidBrukerBurdeSøktOmUtleder manglendeArbeidstidUtleder;
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
+    private SamtidigUttakTjeneste samtidigUttakTjeneste;
 
     public PleiepengerUttakRestTjeneste() {
         // for proxying
@@ -71,12 +75,14 @@ public class PleiepengerUttakRestTjeneste {
                                         BehandlingRepository behandlingRepository,
                                         ArbeidBrukerBurdeSøktOmUtleder manglendeArbeidstidUtleder,
                                         MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
-                                        UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository) {
+                                        UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
+                                        SamtidigUttakTjeneste samtidigUttakTjeneste) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.manglendeArbeidstidUtleder = manglendeArbeidstidUtleder;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
+        this.samtidigUttakTjeneste = samtidigUttakTjeneste;
     }
 
     @GET
@@ -146,6 +152,23 @@ public class PleiepengerUttakRestTjeneste {
         var uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtOgMapRequest(BehandlingReferanse.fra(behandling));
 
         return Response.ok(uttaksgrunnlag).build();
+    }
+
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path(GET_DEBUG_KJØREPLAN_PATH)
+    @Operation(description = "Henter ut uttaksgrunnlag for behandling", tags = "behandling - pleiepenger/uttak", responses = {
+        @ApiResponse(responseCode = "200", description = "Uttaksgrunnlag", content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    })
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response kjøreplan(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+        var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+
+        var kjøreplan = samtidigUttakTjeneste.utledPrioriteringsrekkefølge(BehandlingReferanse.fra(behandling));
+
+        return Response.ok(kjøreplan.getPlan()).build();
     }
 
     private ArbeidsgiverMedPerioderSomManglerDto mapArbeidsgiver(Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> entry) {
