@@ -67,4 +67,10 @@ public class Kjøreplan {
     public NavigableSet<DatoIntervallEntitet> perioderSomKanBehandlesForAktuellFagsak() {
         return perioderMedGittAksjon(aktuellFagsakId, Aksjon.BEHANDLE);
     }
+
+    public NavigableSet<DatoIntervallEntitet> perioderSomIkkeKanBehandlesForAktuellFagsak() {
+        var perioder = new TreeSet<>(perioderMedGittAksjon(aktuellFagsakId, Aksjon.VENTE_PÅ_ANNEN));
+        perioder.addAll(perioderSomSkalUtsettesForAktuellFagsak());
+        return perioder;
+    }
 }

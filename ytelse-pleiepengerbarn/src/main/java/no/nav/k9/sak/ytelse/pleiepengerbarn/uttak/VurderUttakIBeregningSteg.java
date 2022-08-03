@@ -83,7 +83,8 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
     private BehandleStegResultat eksperimentærHåndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
         var kjøreplan = samtidigUttakTjeneste.utledPrioriteringsrekkefølge(ref);
-        log.info("[Kjøreplan] annenSakSomMåBehandlesFørst={}, Har perioder uten prio={}, Perioder med prio={}", !kjøreplan.kanAktuellFagsakFortsette(), kjøreplan.perioderSomSkalUtsettesForAktuellFagsak(),
+        log.info("[Kjøreplan] annenSakSomMåBehandlesFørst={}, Har perioder uten prio={}, Perioder med prio={}", !kjøreplan.kanAktuellFagsakFortsette(),
+            kjøreplan.perioderSomIkkeKanBehandlesForAktuellFagsak(),
             kjøreplan.perioderSomKanBehandlesForAktuellFagsak());
 
         if (kjøreplan.kanAktuellFagsakFortsette()) {
