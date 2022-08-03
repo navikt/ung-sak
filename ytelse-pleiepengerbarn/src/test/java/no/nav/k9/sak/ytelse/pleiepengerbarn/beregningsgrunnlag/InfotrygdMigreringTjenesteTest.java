@@ -91,7 +91,7 @@ class InfotrygdMigreringTjenesteTest {
             .thenReturn(new PåTversAvHelgErKantIKantVurderer());
 
         lagreVilkårPeriode(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))));
-        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, vilkårResultatRepository, fagsakRepository, behandlingRepository, infotrygdService, true);
+        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, vilkårResultatRepository, fagsakRepository, behandlingRepository, infotrygdService);
     }
 
     private void lagreVilkårPeriode(List<DatoIntervallEntitet> perioder) {

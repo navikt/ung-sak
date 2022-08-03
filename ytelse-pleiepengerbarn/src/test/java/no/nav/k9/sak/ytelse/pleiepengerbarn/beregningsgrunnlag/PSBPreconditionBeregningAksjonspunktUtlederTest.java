@@ -51,7 +51,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilter;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
@@ -126,18 +125,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         utleder = new PSBPreconditionBeregningAksjonspunktUtleder(iayTjeneste, opptjeningForBeregningTjeneste,
             fagsakRepository, oppgittOpptjeningFilter,
             perioderTilVurderingTjeneste,
-            filterProvider, beregningPerioderGrunnlagRepository, behandlingRepository, true);
-    }
-
-    @Test
-    void skal_ikkje_returnere_aksjonspunkt_med_toggle_av() {
-        utleder = new PSBPreconditionBeregningAksjonspunktUtleder(iayTjeneste, opptjeningForBeregningTjeneste,
-            fagsakRepository, oppgittOpptjeningFilter,
-            perioderTilVurderingTjeneste,
-            filterProvider, beregningPerioderGrunnlagRepository, behandlingRepository, false);
-        var aksjonspunkter = utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, STP)));
-
-        assertThat(aksjonspunkter.size()).isEqualTo(0);
+            filterProvider, beregningPerioderGrunnlagRepository, behandlingRepository);
     }
 
     @Test

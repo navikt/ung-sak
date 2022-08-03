@@ -50,7 +50,7 @@ public class PSBOppgittOpptjeningFilterTest {
         var iayGrunnlag = byggIayGrunnlag(List.of(opptjeningBuilder));
 
         // Act
-        var resultat = opptjeningFilter.finnOppgittOpptjeningLansert(iayGrunnlag, vilkårPeriode, kravDokumenterMedFravær);
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, kravDokumenterMedFravær);
 
         // Assert
         assertThat(resultat).isNotEmpty();
@@ -78,7 +78,7 @@ public class PSBOppgittOpptjeningFilterTest {
         var iayGrunnlag = byggIayGrunnlag(List.of(opptjeningBuilder1, opptjeningBuilder2));
 
         // Act
-        var resultat = opptjeningFilter.finnOppgittOpptjeningLansert(iayGrunnlag, vilkårPeriodeMaks, kravDokumenterMedFravær);
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriodeMaks, kravDokumenterMedFravær);
 
         // Assert
         assertThat(resultat).isPresent();
@@ -105,7 +105,7 @@ public class PSBOppgittOpptjeningFilterTest {
         var iayGrunnlag = byggIayGrunnlag(List.of(opptjeningBuilder1, opptjeningBuilder2));
 
         // Act
-        var resultat = opptjeningFilter.finnOppgittOpptjeningLansert(iayGrunnlag, vilkårPeriode, kravDokumenterMedFravær);
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, kravDokumenterMedFravær);
 
         // Assert
         assertThat(resultat).isPresent();

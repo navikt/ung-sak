@@ -40,20 +40,17 @@ public class KalkulatorInputTjeneste {
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
     private VilkårResultatRepository vilkårResultatRepository;
-    private boolean skalMappeAlleKrav;
 
     @Inject
     public KalkulatorInputTjeneste(@Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                    @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
                                    @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
-                                   VilkårResultatRepository vilkårResultatRepository,
-                                   @KonfigVerdi(value = "MAP_ALLE_KRAV", defaultVerdi = "false") boolean skalMappeAlleKrav
+                                   VilkårResultatRepository vilkårResultatRepository
     ) {
         this.opptjeningForBeregningTjeneste = Objects.requireNonNull(opptjeningForBeregningTjeneste, "opptjeningForBeregningTjeneste");
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.skalMappeAlleKrav = skalMappeAlleKrav;
     }
 
     protected KalkulatorInputTjeneste() {
@@ -139,14 +136,12 @@ public class KalkulatorInputTjeneste {
 
         kalkulatorInputDto.medYtelsespesifiktGrunnlag(ytelseGrunnlag);
 
-        if (skalMappeAlleKrav) {
-            kalkulatorInputDto.medRefusjonsperioderPrInntektsmelding(KravperioderMapper.map(
-                referanse,
-                vilkårsperiode,
-                sakInntektsmeldinger,
-                imTjeneste,
-                grunnlagDto));
-        }
+        kalkulatorInputDto.medRefusjonsperioderPrInntektsmelding(KravperioderMapper.map(
+            referanse,
+            vilkårsperiode,
+            sakInntektsmeldinger,
+            imTjeneste,
+            grunnlagDto));
 
         return kalkulatorInputDto;
     }

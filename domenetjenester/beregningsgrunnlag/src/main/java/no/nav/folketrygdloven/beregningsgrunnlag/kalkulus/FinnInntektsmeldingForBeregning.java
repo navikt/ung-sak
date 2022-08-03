@@ -22,7 +22,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -39,7 +38,6 @@ public class FinnInntektsmeldingForBeregning {
 
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private boolean togglePsbMigrering;
 
 
     public FinnInntektsmeldingForBeregning() {
@@ -47,17 +45,15 @@ public class FinnInntektsmeldingForBeregning {
 
     @Inject
     public FinnInntektsmeldingForBeregning(@Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
-                                           InntektArbeidYtelseTjeneste iayTjeneste,
-                                           @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering) {
+                                           InntektArbeidYtelseTjeneste iayTjeneste) {
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.iayTjeneste = iayTjeneste;
-        this.togglePsbMigrering = toggleMigrering;
     }
 
     Set<Inntektsmelding> finnInntektsmeldinger(BehandlingReferanse referanse, List<BeregnInput> beregnInput) {
         var inntektsmeldingerForSak = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
         var imTjeneste = finnInntektsmeldingForBeregningTjeneste(referanse);
-        Set<Inntektsmelding> overstyrteInntektsmeldinger = togglePsbMigrering ? finnOverstyrteInntektsmeldinger(beregnInput, inntektsmeldingerForSak, imTjeneste) : Set.of();
+        Set<Inntektsmelding> overstyrteInntektsmeldinger = finnOverstyrteInntektsmeldinger(beregnInput, inntektsmeldingerForSak, imTjeneste);
         var inntektsmeldinger = new HashSet<Inntektsmelding>();
         inntektsmeldinger.addAll(overstyrteInntektsmeldinger);
         inntektsmeldinger.addAll(inntektsmeldingerForSak);
