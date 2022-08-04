@@ -38,7 +38,7 @@ import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.KjøreplanUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifikator;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
@@ -64,7 +64,7 @@ public class PleiepengerUttakRestTjeneste {
     private ArbeidBrukerBurdeSøktOmUtleder manglendeArbeidstidUtleder;
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
-    private SamtidigUttakTjeneste samtidigUttakTjeneste;
+    private KjøreplanUtleder kjøreplanUtleder;
 
     public PleiepengerUttakRestTjeneste() {
         // for proxying
@@ -76,13 +76,13 @@ public class PleiepengerUttakRestTjeneste {
                                         ArbeidBrukerBurdeSøktOmUtleder manglendeArbeidstidUtleder,
                                         MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
                                         UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                        SamtidigUttakTjeneste samtidigUttakTjeneste) {
+                                        KjøreplanUtleder kjøreplanUtleder) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.manglendeArbeidstidUtleder = manglendeArbeidstidUtleder;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
-        this.samtidigUttakTjeneste = samtidigUttakTjeneste;
+        this.kjøreplanUtleder = kjøreplanUtleder;
     }
 
     @GET
@@ -166,9 +166,13 @@ public class PleiepengerUttakRestTjeneste {
     public Response kjøreplan(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
 
-        var kjøreplan = samtidigUttakTjeneste.utledPrioriteringsrekkefølge(BehandlingReferanse.fra(behandling));
+        var referanse = BehandlingReferanse.fra(behandling);
+        var input = kjøreplanUtleder.utledInput(referanse);
+        var kjøreplan = kjøreplanUtleder.utled(referanse);
 
-        return Response.ok(kjøreplan.getPlan()).build();
+        var respons = new DebugKjøreplan(input, kjøreplan.getPlan());
+
+        return Response.ok(respons).build();
     }
 
     private ArbeidsgiverMedPerioderSomManglerDto mapArbeidsgiver(Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> entry) {
@@ -178,5 +182,6 @@ public class PleiepengerUttakRestTjeneste {
 
         return new ArbeidsgiverMedPerioderSomManglerDto(uttakArbeidsgiver, perioder);
     }
+
 
 }

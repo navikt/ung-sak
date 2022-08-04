@@ -65,8 +65,12 @@ public final class Hjelpetidslinjer {
         var resultat = new ArrayList<LocalDateSegment<T>>();
 
         for (LocalDateSegment<T> segment : segmenter) {
-            if (periode != null && kantIKantVurderer.erKantIKant(DatoIntervallEntitet.fra(segment.getLocalDateInterval()), DatoIntervallEntitet.fra(periode.getLocalDateInterval())) && !periode.getTom().plusDays(1).equals(segment.getFom())) {
-                resultat.add(new LocalDateSegment<>(periode.getTom().plusDays(1), segment.getFom().minusDays(1), periode.getValue()));
+            if (periode != null) {
+                var til = DatoIntervallEntitet.fra(segment.getLocalDateInterval());
+                var fra = DatoIntervallEntitet.fra(periode.getLocalDateInterval());
+                if (kantIKantVurderer.erKantIKant(til, fra) && !fra.grenserTil(til)) {
+                    resultat.add(new LocalDateSegment<>(periode.getTom().plusDays(1), segment.getFom().minusDays(1), periode.getValue()));
+                }
             }
             periode = segment;
         }
