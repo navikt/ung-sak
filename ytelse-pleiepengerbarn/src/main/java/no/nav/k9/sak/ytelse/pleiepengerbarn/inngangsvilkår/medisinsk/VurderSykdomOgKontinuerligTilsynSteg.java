@@ -34,6 +34,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -254,7 +255,12 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                 .map(it -> new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), it.getGrad()))
                 .toList());
 
+            var fullstendigAvslagsTidslinje = new LocalDateTimeline<>(timeline.toSegments());
             timeline = timeline.disjoint(Hjelpetidslinjer.lagTidslinjeMedKunHelger(timeline));
+            var tidslinjeMedHullSomMangler = Hjelpetidslinjer.utledHullSomMåTettes(timeline, new PåTversAvHelgErKantIKantVurderer());
+            timeline = timeline.combine(tidslinjeMedHullSomMangler, StandardCombinators::coalesceRightHandSide, JoinStyle.CROSS_JOIN);
+            var manglendeAvslag = fullstendigAvslagsTidslinje.disjoint(timeline);
+            timeline = timeline.combine(manglendeAvslag, StandardCombinators::coalesceRightHandSide, JoinStyle.CROSS_JOIN);
             timeline.forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFom(), it.getTom())
                 .medUtfall(Utfall.IKKE_OPPFYLT)
                 .medMerknadParametere(vilkårData.getMerknadParametere())
@@ -262,6 +268,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                 .medRegelInput(vilkårData.getRegelInput())
                 .medAvslagsårsak(Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM)
                 .medMerknad(vilkårData.getVilkårUtfallMerknad())));
+
         }
     }
 

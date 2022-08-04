@@ -320,7 +320,7 @@ public class SykdomVurderingTjeneste {
         final LocalDateTimeline<Boolean> perioderTilVurderingTidslinje = new LocalDateTimeline<Boolean>(perioderTilVurdering.stream()
             .map(p -> new LocalDateSegment<Boolean>(p.getFomDato(), p.getTomDato(), Boolean.TRUE))
             .collect(Collectors.toList()));
-        final LocalDateTimeline<VilkårPeriode> omsorgenForTidslinje = sykdomGrunnlagTjeneste.hentOmsorgenForTidslinje(behandling.getId()).filterValue(vp -> vp.getUtfall() == Utfall.IKKE_OPPFYLT);
+        final LocalDateTimeline<VilkårPeriode> omsorgenForTidslinje = sykdomGrunnlagTjeneste.hentOmsorgenForTidslinje(behandling.getId()).filterValue(vp -> vp.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT);
 
         return TidslinjeUtil.kunPerioderSomIkkeFinnesI(perioderTilVurderingTidslinje, omsorgenForTidslinje);
     }

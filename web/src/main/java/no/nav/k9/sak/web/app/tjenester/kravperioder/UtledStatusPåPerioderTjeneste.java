@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.kravperioder;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +30,7 @@ import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
 public class UtledStatusPåPerioderTjeneste {
 
@@ -138,10 +138,8 @@ public class UtledStatusPåPerioderTjeneste {
         for (LocalDateTimeline<ÅrsakerTilVurdering> linje : relevanteTidslinjer) {
             tidslinjen = tidslinjen.combine(linje, mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-        var segmenterSomMangler = utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
-        for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenterSomMangler) {
-            tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
+        var segmenterSomMangler = Hjelpetidslinjer.utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
+        tidslinjen = tidslinjen.combine(segmenterSomMangler, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         return tidslinjen;
     }
 
@@ -236,33 +234,12 @@ public class UtledStatusPåPerioderTjeneste {
             tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        var segmenterSomMangler = utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
-        for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenterSomMangler) {
-            tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
+        var segmenterSomMangler = Hjelpetidslinjer.utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
+        tidslinjen = tidslinjen.combine(segmenterSomMangler, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         return tidslinjen.compress()
             .stream()
             .toList();
-    }
-
-    private List<LocalDateSegment<ÅrsakerTilVurdering>> utledHullSomMåTettes(LocalDateTimeline<ÅrsakerTilVurdering> tidslinjen, KantIKantVurderer kantIKantVurderer) {
-        var segmenter = tidslinjen.compress().toSegments();
-
-        LocalDateSegment<ÅrsakerTilVurdering> periode = null;
-        var resultat = new ArrayList<LocalDateSegment<ÅrsakerTilVurdering>>();
-
-        for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenter) {
-            if (periode == null) {
-                periode = segment;
-            } else if (kantIKantVurderer.erKantIKant(DatoIntervallEntitet.fra(segment.getLocalDateInterval()), DatoIntervallEntitet.fra(periode.getLocalDateInterval()))) {
-                resultat.add(new LocalDateSegment<>(periode.getFom(), segment.getTom(), periode.getValue()));
-            } else {
-                periode = segment;
-            }
-        }
-
-        return resultat;
     }
 
     private Set<Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>>> utledKravdokumenterRelevantForPeriodeTilVurdering(Set<KravDokument> kravdokumenter,

@@ -57,8 +57,8 @@ public class SykdomGrunnlagTjeneste {
         return vilkåreneOpt.map(v -> v.getVilkårTimeline(VilkårType.OMSORGEN_FOR)).orElse(LocalDateTimeline.empty());
     }
 
-    public LocalDateTimeline<VilkårPeriode> hentManglendeOmsorgenForTidslinje(Long behandlingId) {
-        return hentOmsorgenForTidslinje(behandlingId).filterValue(v -> v.getUtfall() == Utfall.IKKE_OPPFYLT);
+    LocalDateTimeline<VilkårPeriode> hentManglendeOmsorgenForTidslinje(Long behandlingId) {
+        return hentOmsorgenForTidslinje(behandlingId).filterValue(v -> v.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT);
     }
 
     public List<Periode> hentManglendeOmsorgenForPerioder(Long behandlingId) {

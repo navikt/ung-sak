@@ -54,7 +54,7 @@ public class PleietrengendeSykdomVurderingVersjonBesluttet {
         return endretTidspunkt;
     }
 
-    public PleietrengendeSykdomVurderingVersjon getSykdomVurderingVersjon() {
+    public PleietrengendeSykdomVurderingVersjon getPleietrengendeSykdomVurderingVersjon() {
         return pleietrengendeSykdomVurderingVersjon;
     }
 }

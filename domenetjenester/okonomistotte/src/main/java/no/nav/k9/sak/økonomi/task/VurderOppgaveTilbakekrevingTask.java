@@ -4,14 +4,15 @@ import static no.nav.k9.sak.økonomi.task.VurderOppgaveTilbakekrevingTask.TASKTY
 
 import java.util.Optional;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -21,8 +22,6 @@ import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(TASKTYPE)
@@ -55,7 +54,7 @@ public class VurderOppgaveTilbakekrevingTask extends BehandlingProsessTask {
         logContext(behandling);
 
         var ref = BehandlingReferanse.fra(behandling);
-        if (skalOppretteOppgaveTilbakekreving(behandling)) {
+        if (ref.getFagsakYtelseType() == FagsakYtelseType.FRISINN && skalOppretteOppgaveTilbakekreving(behandling)) {
             FagsakYtelseType fagsakYtelseType = behandling.getFagsakYtelseType();
             String beskrivelse = "Feilutbetaling " + fagsakYtelseType + ". Opprett en tilbakekrevingsbehandling i Infotrygd.";
 

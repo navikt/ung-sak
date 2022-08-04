@@ -33,12 +33,10 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.hendelse.vedtak.SakMedPeriode;
 import no.nav.k9.sak.hendelse.vedtak.VurderOmVedtakPåvirkerSakerTjeneste;
@@ -57,6 +55,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Syk
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
@@ -172,28 +171,8 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
 
     private LocalDateTimeline<Boolean> tettHull(VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, LocalDateTimeline<Boolean> skalRevurderes) {
         var kantIKantVurderer = perioderTilVurderingTjeneste.getKantIKantVurderer();
-        var segmenterSomMangler = utledHullSomMåTettes(skalRevurderes, kantIKantVurderer);
-        var tidslinjeHull = new LocalDateTimeline<>(segmenterSomMangler, StandardCombinators::coalesceRightHandSide);
+        var tidslinjeHull = Hjelpetidslinjer.utledHullSomMåTettes(skalRevurderes, kantIKantVurderer);
         return skalRevurderes.crossJoin(tidslinjeHull, StandardCombinators::coalesceRightHandSide);
-    }
-
-    private List<LocalDateSegment<Boolean>> utledHullSomMåTettes(LocalDateTimeline<Boolean> tidslinjen, KantIKantVurderer kantIKantVurderer) {
-        var segmenter = tidslinjen.compress().toSegments();
-
-        LocalDateSegment<Boolean> periode = null;
-        var resultat = new ArrayList<LocalDateSegment<Boolean>>();
-
-        for (LocalDateSegment<Boolean> segment : segmenter) {
-            if (periode == null) {
-                periode = segment;
-            } else if (kantIKantVurderer.erKantIKant(DatoIntervallEntitet.fra(segment.getLocalDateInterval()), DatoIntervallEntitet.fra(periode.getLocalDateInterval()))) {
-                resultat.add(new LocalDateSegment<>(periode.getFom(), segment.getTom(), periode.getValue()));
-            } else {
-                periode = segment;
-            }
-        }
-
-        return resultat;
     }
 
     private LocalDateTimeline<Boolean> perioderMedRevurderingPgaUttak(Behandling sisteBehandlingPåKandidat, BehandlingReferanse referanse) {
