@@ -17,10 +17,10 @@ public class SykdomRevurderingPeriode {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_REVURDERING_PERIODE")
     private Long id;
-    
+
     @ManyToOne
     @JoinColumn(name = "SYKDOM_GRUNNLAG_ID", nullable = false)
-    private SykdomGrunnlag sykdomGrunnlag;
+    private MedisinskGrunnlagsdata medisinskGrunnlagsdata;
 
     @Column(name = "FOM", nullable = false)
     private LocalDate fom;
@@ -40,13 +40,13 @@ public class SykdomRevurderingPeriode {
     public Long getId() {
         return id;
     }
-    
-    public SykdomGrunnlag getSykdomGrunnlag() {
-        return sykdomGrunnlag;
+
+    public MedisinskGrunnlagsdata getSykdomGrunnlag() {
+        return medisinskGrunnlagsdata;
     }
-    
-    void setSykdomGrunnlag(SykdomGrunnlag sykdomGrunnlag) {
-        this.sykdomGrunnlag = sykdomGrunnlag;
+
+    void setSykdomGrunnlag(MedisinskGrunnlagsdata medisinskGrunnlagsdata) {
+        this.medisinskGrunnlagsdata = medisinskGrunnlagsdata;
     }
 
     public LocalDate getFom() {

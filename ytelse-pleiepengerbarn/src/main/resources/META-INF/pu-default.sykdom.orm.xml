@@ -4,43 +4,38 @@
         xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
         version="3.0">
 
-    <sequence-generator name="SEQ_SYKDOM_PERSON" allocation-size="5" sequence-name="SEQ_SYKDOM_PERSON" />
-    <sequence-generator name="SEQ_SYKDOM_VURDERINGER" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERINGER" />
-    <sequence-generator name="SEQ_SYKDOM_VURDERING" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERING" />
-    <sequence-generator name="SEQ_SYKDOM_VURDERING_VERSJON" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERING_VERSJON" />
-    <sequence-generator name="SEQ_SYKDOM_VURDERING_PERIODE" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERING_PERIODE" />
-    <sequence-generator name="SEQ_SYKDOM_DOKUMENT" allocation-size="5" sequence-name="SEQ_SYKDOM_DOKUMENT" />
-    <sequence-generator name="SEQ_SYKDOM_DOKUMENT_INFORMASJON" allocation-size="5" sequence-name="SEQ_SYKDOM_DOKUMENT_INFORMASJON" />
-    <sequence-generator name="SEQ_SYKDOM_DOKUMENT_SAK" allocation-size="5" sequence-name="SEQ_SYKDOM_DOKUMENT_SAK" />
-    <sequence-generator name="SEQ_SYKDOM_VURDERING_VERSJON_DOKUMENT" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERING_VERSJON_DOKUMENT" />
-    <sequence-generator name="SEQ_SYKDOM_GRUNNLAG" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG" />
-    <sequence-generator name="SEQ_SYKDOM_GRUNNLAG_BEHANDLING" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG_BEHANDLING" />
-    <sequence-generator name="SEQ_SYKDOM_GRUNNLAG_VURDERING" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG_VURDERING" />
+    <sequence-generator name="SEQ_PERSON" allocation-size="5" sequence-name="SEQ_PERSON" />
+    <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM" />
+    <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_VURDERING" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_VURDERING" />
+    <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON" />
+    <sequence-generator name="seq_pleietrengende_sykdom_vurdering_versjon_periode" allocation-size="5" sequence-name="seq_pleietrengende_sykdom_vurdering_versjon_periode" />
+    <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_DOKUMENT" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_DOKUMENT" />
+    <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_DOKUMENT_INFORMASJON" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_DOKUMENT_INFORMASJON" />
+    <sequence-generator name="SEQ_MEDISINSK_GRUNNLAGSDATA" allocation-size="5" sequence-name="SEQ_MEDISINSK_GRUNNLAGSDATA" />
+    <sequence-generator name="SEQ_GR_MEDISINSK" allocation-size="5" sequence-name="SEQ_GR_MEDISINSK" />
     <sequence-generator name="SEQ_SYKDOM_SOEKT_PERIODE" allocation-size="5" sequence-name="SEQ_SYKDOM_SOEKT_PERIODE" />
     <sequence-generator name="SEQ_SYKDOM_REVURDERING_PERIODE" allocation-size="5" sequence-name="SEQ_SYKDOM_REVURDERING_PERIODE" />
-    <sequence-generator name="SEQ_SYKDOM_INNLEGGELSER" allocation-size="5" sequence-name="SEQ_SYKDOM_INNLEGGELSER" />
-    <sequence-generator name="SEQ_SYKDOM_INNLEGGELSE_PERIODE" allocation-size="5" sequence-name="SEQ_SYKDOM_INNLEGGELSE_PERIODE" />
-    <sequence-generator name="SEQ_SYKDOM_GRUNNLAG_INNLEGGELSE" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG_INNLEGGELSE" />
-    <sequence-generator name="SEQ_SYKDOM_DIAGNOSEKODER" allocation-size="5" sequence-name="SEQ_SYKDOM_DIAGNOSEKODER" />
-    <sequence-generator name="SEQ_SYKDOM_DIAGNOSEKODE" allocation-size="5" sequence-name="SEQ_SYKDOM_DIAGNOSEKODE" />
-    <sequence-generator name="SEQ_SYKDOM_GRUNNLAG_DIAGNOSEKODER" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG_DIAGNOSEKODER" />
+    <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_INNLEGGELSER" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_INNLEGGELSER" />
+    <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_INNLEGGELSE_PERIODE" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_INNLEGGELSE_PERIODE" />
+    <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_DIAGNOSER" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_DIAGNOSER" />
+    <sequence-generator name="SEQ_PLEIETRENGENDE_SYKDOM_DIAGNOSE" allocation-size="5" sequence-name="SEQ_PLEIETRENGENDE_SYKDOM_DIAGNOSE" />
 
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderinger" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjonBesluttet" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentInformasjon" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentHarOppdatertEksisterendeVurderinger" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdom" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurdering" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjon" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjonBesluttet" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjonPeriode" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDokument" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDokumentInformasjon" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDokumentHarOppdatertVurderinger" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlagsdata" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomSøktPeriode" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomRevurderingPeriode" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelsePeriode" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomInnleggelser" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomInnleggelsePeriode" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDiagnose" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDiagnoser" />
 
 </entity-mappings>

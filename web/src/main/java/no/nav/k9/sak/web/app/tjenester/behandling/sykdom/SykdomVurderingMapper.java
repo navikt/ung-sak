@@ -20,13 +20,13 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentOversiktMapper;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPeriodeMedEndring;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurdering;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjonPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste.SykdomVurderingerOgPerioder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 @Dependent
 public class SykdomVurderingMapper {
@@ -46,8 +46,8 @@ public class SykdomVurderingMapper {
      * @param versjoner Versjonene som skal tas med i DTOen.
      * @return En SykdomVurderingDto der kun angitte versjoner har blitt tatt med.
      */
-    public SykdomVurderingDto map(AktørId aktørId, UUID behandlingUuid, List<SykdomVurderingVersjon> versjoner, List<SykdomDokument> alleDokumenter, SykdomVurderingerOgPerioder sykdomUtlededePerioder) {
-        final SykdomVurdering vurdering = versjoner.get(0).getSykdomVurdering();
+    public SykdomVurderingDto map(AktørId aktørId, UUID behandlingUuid, List<PleietrengendeSykdomVurderingVersjon> versjoner, List<PleietrengendeSykdomDokument> alleDokumenter, SykdomVurderingerOgPerioder sykdomUtlededePerioder) {
+        final PleietrengendeSykdomVurdering vurdering = versjoner.get(0).getSykdomVurdering();
 
         if (versjoner.stream().anyMatch(v -> v.getSykdomVurdering() != vurdering)) {
             throw new IllegalArgumentException("Utviklerfeil: Alle SykdomVurderingVersjon i parameteren 'versjoner' må tilhøre samme SykdomVurdering.");
@@ -77,25 +77,25 @@ public class SykdomVurderingMapper {
     }
 
 
-    private List<SykdomDokumentDto> mapDokumenter(AktørId aktørId, UUID behandlingUuid, List<SykdomDokument> tilknyttedeDokumenter, List<SykdomDokument> alleDokumenter) {
+    private List<SykdomDokumentDto> mapDokumenter(AktørId aktørId, UUID behandlingUuid, List<PleietrengendeSykdomDokument> tilknyttedeDokumenter, List<PleietrengendeSykdomDokument> alleDokumenter) {
         final Set<Long> ids = tilknyttedeDokumenter.stream().map(d -> d.getId()).collect(Collectors.toUnmodifiableSet());
         return dokumentMapper.mapSykdomsdokumenter(aktørId, behandlingUuid, alleDokumenter, ids);
     }
 
 
-    private List<Periode> mapPerioder(List<SykdomVurderingPeriode> perioder) {
+    private List<Periode> mapPerioder(List<PleietrengendeSykdomVurderingVersjonPeriode> perioder) {
         return perioder.stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList());
     }
 
-    public SykdomVurderingVersjon map(SykdomVurdering sykdomVurdering, SykdomVurderingEndringDto oppdatering, Sporingsinformasjon sporingsinformasjon, List<SykdomDokument> alleDokumenter) {
-        if (sykdomVurdering.getSisteVersjon().getVersjon() != Long.parseLong(oppdatering.getVersjon())) {
+    public PleietrengendeSykdomVurderingVersjon map(PleietrengendeSykdomVurdering pleietrengendeSykdomVurdering, SykdomVurderingEndringDto oppdatering, Sporingsinformasjon sporingsinformasjon, List<PleietrengendeSykdomDokument> alleDokumenter) {
+        if (pleietrengendeSykdomVurdering.getSisteVersjon().getVersjon() != Long.parseLong(oppdatering.getVersjon())) {
             throw new ConcurrentModificationException("Forsøk på å oppdatere SykdomVurdering på grunnlag av utdatert versjon.");
         }
 
         final LocalDateTime endretTidspunkt = LocalDateTime.now();
 
-        final SykdomVurderingVersjon versjon = new SykdomVurderingVersjon(
-                sykdomVurdering,
+        final PleietrengendeSykdomVurderingVersjon versjon = new PleietrengendeSykdomVurderingVersjon(
+            pleietrengendeSykdomVurdering,
                 oppdatering.getTekst(),
                 oppdatering.getResultat(),
                 Long.parseLong(oppdatering.getVersjon()) + 1L,
@@ -116,12 +116,12 @@ public class SykdomVurderingMapper {
         return versjon;
     }
 
-    public SykdomVurdering map(SykdomVurderingOpprettelseDto opprettelse, Sporingsinformasjon sporingsinformasjon, List<SykdomDokument> alleDokumenter) {
+    public PleietrengendeSykdomVurdering map(SykdomVurderingOpprettelseDto opprettelse, Sporingsinformasjon sporingsinformasjon, List<PleietrengendeSykdomDokument> alleDokumenter) {
         final LocalDateTime endretTidspunkt = LocalDateTime.now();
 
-        final SykdomVurdering sykdomVurdering = new SykdomVurdering(opprettelse.getType(), Collections.emptyList(), sporingsinformasjon.endretAv, LocalDateTime.now());
-        final SykdomVurderingVersjon versjon = new SykdomVurderingVersjon(
-                sykdomVurdering,
+        final PleietrengendeSykdomVurdering pleietrengendeSykdomVurdering = new PleietrengendeSykdomVurdering(opprettelse.getType(), Collections.emptyList(), sporingsinformasjon.endretAv, LocalDateTime.now());
+        final PleietrengendeSykdomVurderingVersjon versjon = new PleietrengendeSykdomVurderingVersjon(
+            pleietrengendeSykdomVurdering,
                 opprettelse.getTekst(),
                 opprettelse.getResultat(),
                 1L,
@@ -134,22 +134,22 @@ public class SykdomVurderingMapper {
                 alleDokumenter.stream().filter(d -> opprettelse.getTilknyttedeDokumenter().contains("" + d.getId())).collect(Collectors.toList()),
                 opprettelse.getPerioder()
         );
-        sykdomVurdering.addVersjon(versjon);
+        pleietrengendeSykdomVurdering.addVersjon(versjon);
 
         if (opprettelse.getTilknyttedeDokumenter().size() != versjon.getDokumenter().size()) {
             throw new IllegalStateException("Feil ved mapping: Klarte ikke å finne et av dokumentene saksbehandler har referert til.");
         }
 
-        return sykdomVurdering;
+        return pleietrengendeSykdomVurdering;
     }
 
     public final static class Sporingsinformasjon {
         private String endretAv;
         private UUID endretBehandlingUuid;
         private String endretSaksnummer;
-        private SykdomPerson endretForPerson;
+        private Person endretForPerson;
 
-        public Sporingsinformasjon(String endretAv, UUID endretBehandlingUuid, String endretSaksnummer, SykdomPerson endretForPerson) {
+        public Sporingsinformasjon(String endretAv, UUID endretBehandlingUuid, String endretSaksnummer, Person endretForPerson) {
             this.endretAv = endretAv;
             this.endretBehandlingUuid = endretBehandlingUuid;
             this.endretSaksnummer = endretSaksnummer;
@@ -168,7 +168,7 @@ public class SykdomVurderingMapper {
             return endretSaksnummer;
         }
 
-        public SykdomPerson getEndretForPerson() {
+        public Person getEndretForPerson() {
             return endretForPerson;
         }
     }

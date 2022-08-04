@@ -54,16 +54,16 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingMapper.Sporingsinformasjon;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentHarOppdatertEksisterendeVurderinger;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDokumentHarOppdatertVurderinger;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPeriodeMedEndring;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste.SykdomVurderingerOgPerioder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
@@ -241,9 +241,9 @@ public class SykdomVurderingRestTjeneste {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
 
-        final List<SykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende);
+        final List<PleietrengendeSykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende);
 
-        final List<SykdomVurderingVersjon> versjoner;
+        final List<PleietrengendeSykdomVurderingVersjon> versjoner;
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             versjoner = sykdomVurderingRepository.hentVurderingMedVersjonerForBehandling(behandling.getUuid(), Long.valueOf(vurderingId.getSykdomVurderingId()));
         } else {
@@ -288,9 +288,9 @@ public class SykdomVurderingRestTjeneste {
         validerOppdatering(sykdomVurderingOppdatering, behandling);
 
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
-        final SykdomVurdering sykdomVurdering = sykdomVurderingRepository.hentVurdering(behandling.getFagsak().getPleietrengendeAktørId(), Long.parseLong(sykdomVurderingOppdatering.getId())).orElseThrow();
-        final List<SykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
-        final SykdomVurderingVersjon nyVersjon = sykdomVurderingMapper.map(sykdomVurdering, sykdomVurderingOppdatering, sporingsinformasjon, alleDokumenter);
+        final PleietrengendeSykdomVurdering pleietrengendeSykdomVurdering = sykdomVurderingRepository.hentVurdering(behandling.getFagsak().getPleietrengendeAktørId(), Long.parseLong(sykdomVurderingOppdatering.getId())).orElseThrow();
+        final List<PleietrengendeSykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
+        final PleietrengendeSykdomVurderingVersjon nyVersjon = sykdomVurderingMapper.map(pleietrengendeSykdomVurdering, sykdomVurderingOppdatering, sporingsinformasjon, alleDokumenter);
 
         final List<SykdomPeriodeMedEndring> endringer = finnEndringer(behandling, nyVersjon);
         if (!sykdomVurderingOppdatering.isDryRun()) {
@@ -328,7 +328,7 @@ public class SykdomVurderingRestTjeneste {
     }
 
     private Sporingsinformasjon lagSporingsinformasjon(final Behandling behandling) {
-        final SykdomPerson endretForPerson = sykdomVurderingRepository.hentEllerLagrePerson(behandling.getAktørId());
+        final Person endretForPerson = sykdomVurderingRepository.hentEllerLagrePerson(behandling.getAktørId());
         return new SykdomVurderingMapper.Sporingsinformasjon(getCurrentUserId(), behandling.getUuid(), behandling.getFagsak().getSaksnummer().getVerdi(), endretForPerson);
     }
 
@@ -355,17 +355,17 @@ public class SykdomVurderingRestTjeneste {
         validerOpprettelse(behandling, sykdomVurderingOpprettelse);
 
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
-        final List<SykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
-        final SykdomVurdering nyVurdering = sykdomVurderingMapper.map(sykdomVurderingOpprettelse, sporingsinformasjon, alleDokumenter);
+        final List<PleietrengendeSykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
+        final PleietrengendeSykdomVurdering nyVurdering = sykdomVurderingMapper.map(sykdomVurderingOpprettelse, sporingsinformasjon, alleDokumenter);
         final List<SykdomPeriodeMedEndring> endringer = finnEndringer(behandling, nyVurdering.getSisteVersjon());
         if (!sykdomVurderingOpprettelse.isDryRun()) {
 
-            Collection<SykdomVurderingVersjon> eksisterendeVurderinger = sykdomVurderingRepository.hentSisteVurderingerFor(nyVurdering.getType(), behandling.getFagsak().getPleietrengendeAktørId());
+            Collection<PleietrengendeSykdomVurderingVersjon> eksisterendeVurderinger = sykdomVurderingRepository.hentSisteVurderingerFor(nyVurdering.getType(), behandling.getFagsak().getPleietrengendeAktørId());
             if (eksisterendeVurderinger.isEmpty()) {
                 var nå = LocalDateTime.now();
-                List<SykdomDokument> dokumenter = sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(behandling.getFagsak().getPleietrengendeAktørId());
-                for (SykdomDokument dokument : dokumenter) {
-                    sykdomDokumentRepository.kvitterDokumenterMedOppdatertEksisterendeVurderinger(new SykdomDokumentHarOppdatertEksisterendeVurderinger(dokument, getCurrentUserId(), nå));
+                List<PleietrengendeSykdomDokument> dokumenter = sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(behandling.getFagsak().getPleietrengendeAktørId());
+                for (PleietrengendeSykdomDokument dokument : dokumenter) {
+                    sykdomDokumentRepository.kvitterDokumenterMedOppdatertEksisterendeVurderinger(new PleietrengendeSykdomDokumentHarOppdatertVurderinger(dokument, getCurrentUserId(), nå));
                 }
             }
 
@@ -414,10 +414,10 @@ public class SykdomVurderingRestTjeneste {
     }
 
     void fjernOverlappendePerioderFraOverskyggendeVurderinger(List<SykdomPeriodeMedEndring> endringer, Sporingsinformasjon sporing, LocalDateTime opprettetTidspunkt) {
-        Map<SykdomVurderingVersjon, List<Periode>> perioderSomSkalFjernesFraVurdering = finnPerioderSomSkalFjernesPerVurdering(endringer);
+        Map<PleietrengendeSykdomVurderingVersjon, List<Periode>> perioderSomSkalFjernesFraVurdering = finnPerioderSomSkalFjernesPerVurdering(endringer);
 
-        for (Map.Entry<SykdomVurderingVersjon, List<Periode>> vurderingPerioder : perioderSomSkalFjernesFraVurdering.entrySet()) {
-            SykdomVurderingVersjon vurdering = vurderingPerioder.getKey();
+        for (Map.Entry<PleietrengendeSykdomVurderingVersjon, List<Periode>> vurderingPerioder : perioderSomSkalFjernesFraVurdering.entrySet()) {
+            PleietrengendeSykdomVurderingVersjon vurdering = vurderingPerioder.getKey();
 
             LocalDateTimeline<Boolean> tidslinjeSomSkalTrekkesFra = TidslinjeUtil.tilTidslinjeKomprimert(vurderingPerioder.getValue());
 
@@ -427,7 +427,7 @@ public class SykdomVurderingRestTjeneste {
 
             List<Periode> vurderingPerioderTilLagring = TidslinjeUtil.tilPerioder(nyePerioder);
 
-            SykdomVurderingVersjon tilLagring = new SykdomVurderingVersjon(
+            PleietrengendeSykdomVurderingVersjon tilLagring = new PleietrengendeSykdomVurderingVersjon(
                 vurdering.getSykdomVurdering(),
                 vurdering.getTekst(),
                 vurdering.getResultat(),
@@ -445,8 +445,8 @@ public class SykdomVurderingRestTjeneste {
         }
     }
 
-    private HashMap<SykdomVurderingVersjon, List<Periode>> finnPerioderSomSkalFjernesPerVurdering(List<SykdomPeriodeMedEndring> endringer) {
-        HashMap<SykdomVurderingVersjon, List<Periode>> perioderSomSkalFjernesFraVurdering = new HashMap<>();
+    private HashMap<PleietrengendeSykdomVurderingVersjon, List<Periode>> finnPerioderSomSkalFjernesPerVurdering(List<SykdomPeriodeMedEndring> endringer) {
+        HashMap<PleietrengendeSykdomVurderingVersjon, List<Periode>> perioderSomSkalFjernesFraVurdering = new HashMap<>();
         endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
             var liste = perioderSomSkalFjernesFraVurdering.get(v.getGammelVersjon());
             if (liste == null) {
@@ -458,7 +458,7 @@ public class SykdomVurderingRestTjeneste {
         return perioderSomSkalFjernesFraVurdering;
     }
 
-    private List<SykdomPeriodeMedEndring> finnEndringer(Behandling behandling, SykdomVurderingVersjon nyEndring) {
+    private List<SykdomPeriodeMedEndring> finnEndringer(Behandling behandling, PleietrengendeSykdomVurderingVersjon nyEndring) {
         var vurderinger = sykdomVurderingTjeneste.hentVurderinger(nyEndring.getSykdomVurdering().getType(), behandling);
         return sykdomVurderingRepository.finnEndringer(vurderinger, nyEndring);
     }

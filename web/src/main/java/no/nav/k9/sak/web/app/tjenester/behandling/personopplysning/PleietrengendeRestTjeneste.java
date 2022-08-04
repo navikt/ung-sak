@@ -79,7 +79,7 @@ public class PleietrengendeRestTjeneste {
             personopplysningPleietrengendeDto.setFnr(fnr.get().getIdent());
         }
         var sykdomDiagnosekoder = sykdomDokumentRepository.hentDiagnosekoder(behandling.getFagsak().getPleietrengendeAktørId());
-        var diagnosekoder = sykdomDiagnosekoder.getDiagnosekoder().stream().map(diagnosekode -> diagnosekode.getDiagnosekode()).toList();
+        var diagnosekoder = sykdomDiagnosekoder.getDiagnoser().stream().map(diagnosekode -> diagnosekode.getDiagnosekode()).toList();
         personopplysningPleietrengendeDto.setDiagnosekoder(diagnosekoder);
         return personopplysningPleietrengendeDto;
     }

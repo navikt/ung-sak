@@ -18,21 +18,21 @@ import jakarta.persistence.Table;
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 
-@Entity(name = "SykdomDokumentInformasjon")
-@Table(name = "SYKDOM_DOKUMENT_INFORMASJON")
-public class SykdomDokumentInformasjon implements Comparable<SykdomDokumentInformasjon> {
+@Entity(name = "PleietrengendeSykdomDokumentInformasjon")
+@Table(name = "PLEIETRENGENDE_SYKDOM_DOKUMENT_INFORMASJON")
+public class PleietrengendeSykdomDokumentInformasjon implements Comparable<PleietrengendeSykdomDokumentInformasjon> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_DOKUMENT_INFORMASJON")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PLEIETRENGENDE_SYKDOM_DOKUMENT_INFORMASJON")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SYKDOM_DOKUMENT_ID")
-    private SykdomDokument dokument;
-    
+    @JoinColumn(name = "PLEIETRENGENDE_SYKDOM_DOKUMENT_ID")
+    private PleietrengendeSykdomDokument dokument;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DUPLIKAT_AV_SYKDOM_DOKUMENT_ID")
-    private SykdomDokument duplikatAvDokument;
+    @JoinColumn(name = "DUPLIKAT_AV_PLEIETRENGENDE_SYKDOM_DOKUMENT_ID")
+    private PleietrengendeSykdomDokument duplikatAvDokument;
 
     @Column(name = "VERSJON", nullable = false)
     private Long versjon;
@@ -58,13 +58,13 @@ public class SykdomDokumentInformasjon implements Comparable<SykdomDokumentInfor
     @Column(name = "OPPRETTET_TID", nullable = false, updatable = false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
-    SykdomDokumentInformasjon() {
+    PleietrengendeSykdomDokumentInformasjon() {
 
     }
 
-    public SykdomDokumentInformasjon(
-            SykdomDokument dokument,
-            SykdomDokument duplikatAvDokument,
+    public PleietrengendeSykdomDokumentInformasjon(
+            PleietrengendeSykdomDokument dokument,
+            PleietrengendeSykdomDokument duplikatAvDokument,
             SykdomDokumentType type,
             boolean harInfoSomIkkeKanPunsjes,
             LocalDate datert,
@@ -83,8 +83,8 @@ public class SykdomDokumentInformasjon implements Comparable<SykdomDokumentInfor
         this.dokument = dokument;
         this.duplikatAvDokument = duplikatAvDokument;
     }
-    
-    public SykdomDokumentInformasjon(
+
+    public PleietrengendeSykdomDokumentInformasjon(
             SykdomDokumentType type,
             boolean harInfoSomIkkeKanPunsjes,
             LocalDate datert,
@@ -127,19 +127,19 @@ public class SykdomDokumentInformasjon implements Comparable<SykdomDokumentInfor
         return harInfoSomIkkeKanPunsjes;
     }
 
-    public void setDokument(SykdomDokument dokument) {
+    public void setDokument(PleietrengendeSykdomDokument dokument) {
         this.dokument = dokument;
     }
 
-    public SykdomDokument getDokument() {
+    public PleietrengendeSykdomDokument getDokument() {
         return dokument;
     }
-    
-    public SykdomDokument getDuplikatAvDokument() {
+
+    public PleietrengendeSykdomDokument getDuplikatAvDokument() {
         return duplikatAvDokument;
     }
-    
-    public void setDuplikatAvDokument(SykdomDokument duplikatAvDokument) {
+
+    public void setDuplikatAvDokument(PleietrengendeSykdomDokument duplikatAvDokument) {
         this.duplikatAvDokument = duplikatAvDokument;
     }
 
@@ -150,9 +150,9 @@ public class SykdomDokumentInformasjon implements Comparable<SykdomDokumentInfor
     public void setType(SykdomDokumentType type) {
         this.type = type;
     }
-    
+
     @Override
-    public int compareTo(SykdomDokumentInformasjon o) {
+    public int compareTo(PleietrengendeSykdomDokumentInformasjon o) {
         return Long.valueOf(versjon).compareTo(o.versjon);
     }
 }

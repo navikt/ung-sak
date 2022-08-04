@@ -28,8 +28,8 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.MapTilBrevkode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentInformasjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 
@@ -98,7 +98,7 @@ public class SykdomsDokumentVedleggHåndterer {
             final SykdomDokumentType type = (erDigitalPleiepengerSyktBarnSøknad || !harMedisinskeOpplysninger) ? SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
             boolean skalAutodateres = erDigitalPleiepengerSyktBarnSøknad || type == SykdomDokumentType.ANNET;
             final LocalDate datert = skalAutodateres ? mottattDato.toLocalDate() : null;
-            final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
+            final PleietrengendeSykdomDokumentInformasjon informasjon = new PleietrengendeSykdomDokumentInformasjon(
                 type,
                 harInfoSomIkkeKanPunsjes,
                 datert,
@@ -106,7 +106,7 @@ public class SykdomsDokumentVedleggHåndterer {
                 0L,
                 "VL",
                 mottattidspunkt);
-            final SykdomDokument dokument = new SykdomDokument(
+            final PleietrengendeSykdomDokument dokument = new PleietrengendeSykdomDokument(
                 journalpostId,
                 dokumentInfo.getDokumentInfoId(),
                 informasjon,

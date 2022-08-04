@@ -48,8 +48,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBu
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
@@ -97,7 +97,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var perioder = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.I_LIVETS_SLUTTFASE);
 
-        SykdomGrunnlagBehandling sykdomGrunnlagBehandling = opprettGrunnlag(perioder, behandling);
+        MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioder, behandling);
 
         boolean trengerAksjonspunkt = trengerAksjonspunkt(kontekst, behandling);
         if (trengerAksjonspunkt) {
@@ -106,7 +106,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
 
         var builder = Vilkårene.builderFraEksisterende(vilkårene);
         builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
-        vurderVilkår(behandlingId, sykdomGrunnlagBehandling, builder, perioder);
+        vurderVilkår(behandlingId, medisinskGrunnlag, builder, perioder);
         vilkårResultatRepository.lagre(behandlingId, builder.build());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
@@ -119,7 +119,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         return trengerInput || førsteGangManuellRevurdering;
     }
 
-    private SykdomGrunnlagBehandling opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, final Behandling behandling) {
+    private MedisinskGrunnlag opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, final Behandling behandling) {
         return sykdomGrunnlagRepository.utledOgLagreGrunnlag(
             behandling.getFagsak().getSaksnummer(),
             behandling.getUuid(),
@@ -133,13 +133,13 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
     }
 
     private void vurderVilkår(Long behandlingId,
-                              SykdomGrunnlagBehandling sykdomGrunnlagBehandling,
+                              MedisinskGrunnlag medisinskGrunnlag,
                               VilkårResultatBuilder builder,
                               NavigableSet<DatoIntervallEntitet> perioder) {
 
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.I_LIVETS_SLUTTFASE);
         for (DatoIntervallEntitet periode : perioder) {
-            final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(VilkårType.I_LIVETS_SLUTTFASE, periode, sykdomGrunnlagBehandling);
+            final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(VilkårType.I_LIVETS_SLUTTFASE, periode, medisinskGrunnlag);
             oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårBuilder);
             oppdaterPleiebehovResultat(behandlingId, periode, vilkårData);
         }

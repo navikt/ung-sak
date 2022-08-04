@@ -55,7 +55,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
@@ -132,7 +132,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         // TODO: Fjern søknadsperioder: perioderTilVurderingUtenOmsorgenFor
 
 
-        final SykdomGrunnlagBehandling sykdomGrunnlagBehandling = opprettGrunnlag(perioderSamlet, perioderTilVurderingUtenOmsorgenFor, behandling);
+        final MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioderSamlet, perioderTilVurderingUtenOmsorgenFor, behandling);
 
         final boolean finnesKunPerioderMedManglendeOmsorgenFor = perioderSamlet.isEmpty() && !perioderTilVurderingUtenOmsorgenFor.isEmpty();
         if (!finnesKunPerioderMedManglendeOmsorgenFor && trengerAksjonspunkt(kontekst, behandling)) {
@@ -141,8 +141,8 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
         var builder = Vilkårene.builderFraEksisterende(vilkårene);
         builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
-        vurder(kontekst, sykdomGrunnlagBehandling, builder, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, perioderUnder18år, perioderUnder18årUtenOmsorgenFor);
-        vurder(kontekst, sykdomGrunnlagBehandling, builder, VilkårType.MEDISINSKEVILKÅR_18_ÅR, perioder18år, perioder18årUtenOmsorgenFor);
+        vurder(kontekst, medisinskGrunnlag, builder, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, perioderUnder18år, perioderUnder18årUtenOmsorgenFor);
+        vurder(kontekst, medisinskGrunnlag, builder, VilkårType.MEDISINSKEVILKÅR_18_ÅR, perioder18år, perioder18årUtenOmsorgenFor);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
@@ -159,7 +159,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         return perioderTidslinje.combine(omsorgenForTidslinje, (datoInterval, p, vp) -> new LocalDateSegment<>(datoInterval, vp.getValue().getUtfall()), JoinStyle.LEFT_JOIN).compress();
     }
 
-    private SykdomGrunnlagBehandling opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, NavigableSet<DatoIntervallEntitet> perioderTilVurderingUtenOmsorgenFor, final Behandling behandling) {
+    private MedisinskGrunnlag opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, NavigableSet<DatoIntervallEntitet> perioderTilVurderingUtenOmsorgenFor, final Behandling behandling) {
         return sykdomGrunnlagRepository.utledOgLagreGrunnlag(
             behandling.getFagsak().getSaksnummer(),
             behandling.getUuid(),
@@ -182,7 +182,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     }
 
     private void vurder(BehandlingskontrollKontekst kontekst,
-                        SykdomGrunnlagBehandling sykdomGrunnlagBehandling,
+                        MedisinskGrunnlag medisinskGrunnlag,
                         VilkårResultatBuilder builder,
                         VilkårType vilkåret,
                         NavigableSet<DatoIntervallEntitet> perioder,
@@ -190,7 +190,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
         var vilkårBuilder = builder.hentBuilderFor(vilkåret);
         for (DatoIntervallEntitet periode : perioder) {
-            final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(vilkåret, kontekst, periode, sykdomGrunnlagBehandling);
+            final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(vilkåret, kontekst, periode, medisinskGrunnlag);
             oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårBuilder);
             oppdaterResultatStruktur(kontekst, periode, vilkårData);
         }

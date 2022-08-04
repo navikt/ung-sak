@@ -16,10 +16,10 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjonBesluttet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjonBesluttet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
 @ApplicationScoped
@@ -64,10 +64,10 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagTjeneste.hentGrunnlag(behandling.getUuid());
+        MedisinskGrunnlag medisinskGrunnlag = sykdomGrunnlagTjeneste.hentGrunnlag(behandling.getUuid());
 
         if (!behandling.isToTrinnsBehandling()) {
-            if (harUbesluttet(sykdomGrunnlagBehandling)) {
+            if (harUbesluttet(medisinskGrunnlag)) {
                 log.warn("Har ubesluttede sykdomsvurderinger uten at AP9001 har blitt generert");
             }
             return;
@@ -76,12 +76,12 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
         String endretAv = behandling.getAnsvarligBeslutter();
         LocalDateTime nå = LocalDateTime.now();
 
-        sykdomGrunnlagBehandling.getGrunnlag().getVurderinger()
+        medisinskGrunnlag.getGrunnlagsdata().getVurderinger()
             .stream()
             .filter(v -> !v.isBesluttet())
             .forEach(v -> {
                 sykdomVurderingRepository.lagre(
-                    new SykdomVurderingVersjonBesluttet(
+                    new PleietrengendeSykdomVurderingVersjonBesluttet(
                         endretAv,
                         nå,
                         v)); //On conflict do nothing
@@ -90,8 +90,8 @@ public class KvitterSykdomsvurderingerVedtakEventObserver {
         log.info("Utført for behandling: {}", behandlingId);
     }
 
-    private boolean harUbesluttet(SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
-        return sykdomGrunnlagBehandling.getGrunnlag().getVurderinger()
+    private boolean harUbesluttet(MedisinskGrunnlag medisinskGrunnlag) {
+        return medisinskGrunnlag.getGrunnlagsdata().getVurderinger()
             .stream()
             .anyMatch(v -> !sykdomVurderingRepository.hentErBesluttet(v));
     }

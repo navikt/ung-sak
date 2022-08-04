@@ -38,7 +38,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelsePeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomInnleggelsePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
@@ -351,7 +351,7 @@ public class KjøreplanUtleder {
             .filterValue(it -> it.getResultat() == Resultat.OPPFYLT)
             .mapValue(it -> true);
 
-        final List<SykdomInnleggelsePeriode> innleggelser = sykdomVurderingTjeneste.hentInnleggelser(behandling).getPerioder();
+        final List<PleietrengendeSykdomInnleggelsePeriode> innleggelser = sykdomVurderingTjeneste.hentInnleggelser(behandling).getPerioder();
 
         var tidslinje = new LocalDateTimeline<>(innleggelser.stream()
             .map(i -> new LocalDateSegment<>(i.getFom(), i.getTom(), Boolean.TRUE))

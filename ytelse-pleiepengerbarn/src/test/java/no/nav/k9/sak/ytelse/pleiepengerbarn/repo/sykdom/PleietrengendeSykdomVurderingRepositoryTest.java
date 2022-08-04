@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.UUID;
 
 import jakarta.inject.Inject;
@@ -22,13 +21,13 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class SykdomVurderingRepositoryTest {
+class PleietrengendeSykdomVurderingRepositoryTest {
     @Inject
     private SykdomVurderingRepository repo;
 
     @Test
     void lagrePerson() {
-        SykdomPerson p = new SykdomPerson(
+        Person p = new Person(
             new AktørId(123456789L),
             "11111111111"
         );
@@ -41,7 +40,7 @@ class SykdomVurderingRepositoryTest {
     }
 
     private void lagreVurdering(AktørId barnAktørId) {
-        final SykdomPerson barn = repo.hentEllerLagre(new SykdomPerson(
+        final Person barn = repo.hentEllerLagre(new Person(
             barnAktørId,
             barnAktørId.getId()
         ));
@@ -49,13 +48,13 @@ class SykdomVurderingRepositoryTest {
         assertThat(barn).isNotNull();
         assertThat(barn.getId()).isNotNull();
 
-        final SykdomVurderinger vurderinger = repo.hentEllerLagre(new SykdomVurderinger(
+        final PleietrengendeSykdom vurderinger = repo.hentEllerLagre(new PleietrengendeSykdom(
             barn,
             "test",
             LocalDateTime.now()
         ));
 
-        final SykdomVurdering vurdering = new SykdomVurdering(
+        final PleietrengendeSykdomVurdering vurdering = new PleietrengendeSykdomVurdering(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Collections.emptyList(),
             "test",
@@ -63,12 +62,12 @@ class SykdomVurderingRepositoryTest {
             );
         vurdering.setRangering(1L);
 
-        final SykdomPerson mor = repo.hentEllerLagre(new SykdomPerson(
+        final Person mor = repo.hentEllerLagre(new Person(
             new AktørId("222456789"),
             "22211111111"
         ));
 
-        final SykdomVurderingVersjon versjon1 = new SykdomVurderingVersjon(
+        final PleietrengendeSykdomVurderingVersjon versjon1 = new PleietrengendeSykdomVurderingVersjon(
             vurdering,
             "Lorem Ipsum",
             Resultat.IKKE_OPPFYLT,
@@ -83,7 +82,7 @@ class SykdomVurderingRepositoryTest {
             Arrays.asList()
         );
 
-        final SykdomVurderingVersjon versjon2 = new SykdomVurderingVersjon(
+        final PleietrengendeSykdomVurderingVersjon versjon2 = new PleietrengendeSykdomVurderingVersjon(
                 vurdering,
                 "Lorem Ipsum",
                 Resultat.OPPFYLT,
@@ -106,17 +105,17 @@ class SykdomVurderingRepositoryTest {
     @Test
     void lagreVurderingVersjonBesluttet() throws Exception {
         AktørId barnAktørId = new AktørId("023456789");
-        final SykdomPerson barn = repo.hentEllerLagre(new SykdomPerson(
+        final Person barn = repo.hentEllerLagre(new Person(
             barnAktørId,
             barnAktørId.getId()
         ));
-        final SykdomVurderinger vurderinger = repo.hentEllerLagre(new SykdomVurderinger(
+        final PleietrengendeSykdom vurderinger = repo.hentEllerLagre(new PleietrengendeSykdom(
             barn,
             "test",
             LocalDateTime.now()
         ));
 
-        final SykdomVurdering vurdering = new SykdomVurdering(
+        final PleietrengendeSykdomVurdering vurdering = new PleietrengendeSykdomVurdering(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Collections.emptyList(),
             "test",
@@ -124,12 +123,12 @@ class SykdomVurderingRepositoryTest {
         );
         vurdering.setRangering(1L);
 
-        final SykdomPerson mor = repo.hentEllerLagre(new SykdomPerson(
+        final Person mor = repo.hentEllerLagre(new Person(
             new AktørId("222456789"),
             "22211111111"
         ));
 
-        final SykdomVurderingVersjon vurderingVersjonUtenBesluttet = new SykdomVurderingVersjon(
+        final PleietrengendeSykdomVurderingVersjon vurderingVersjonUtenBesluttet = new PleietrengendeSykdomVurderingVersjon(
             vurdering,
             "Lorem Ipsum",
             Resultat.IKKE_OPPFYLT,
@@ -146,7 +145,7 @@ class SykdomVurderingRepositoryTest {
 
         repo.lagre(vurdering, vurderinger);
         repo.lagre(vurderingVersjonUtenBesluttet);
-        SykdomVurderingVersjonBesluttet besluttet = new SykdomVurderingVersjonBesluttet("test", LocalDateTime.now(), vurderingVersjonUtenBesluttet);
+        PleietrengendeSykdomVurderingVersjonBesluttet besluttet = new PleietrengendeSykdomVurderingVersjonBesluttet("test", LocalDateTime.now(), vurderingVersjonUtenBesluttet);
         repo.lagre(besluttet);
 
         boolean erBesluttet = repo.hentErBesluttet(vurderingVersjonUtenBesluttet);
@@ -167,12 +166,12 @@ class SykdomVurderingRepositoryTest {
         lagreVurdering(barn1);
         verifyAntallVurderingerPåBarn(barn1, 1);
 
-        final Collection<SykdomVurderingVersjon> vurderinger = repo.hentSisteVurderingerFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, barn1);
+        final Collection<PleietrengendeSykdomVurderingVersjon> vurderinger = repo.hentSisteVurderingerFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, barn1);
         assertThat(vurderinger.iterator().next().getResultat()).isEqualTo(Resultat.OPPFYLT);
     }
 
     private void verifyAntallVurderingerPåBarn(final AktørId barn, final int antall) {
-        final Collection<SykdomVurderingVersjon> vurderinger = repo.hentSisteVurderingerFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, barn);
+        final Collection<PleietrengendeSykdomVurderingVersjon> vurderinger = repo.hentSisteVurderingerFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, barn);
         assertThat(vurderinger.size()).isEqualTo(antall);
     }
 }

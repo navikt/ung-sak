@@ -6,17 +6,18 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity(name = "SykdomVurderingPeriode")
-@Table(name = "SYKDOM_VURDERING_PERIODE")
-public class SykdomVurderingPeriode {
+//TODO: SykdomVurderingVersjonPeriode? Denne tilhører VurderingVersjon og ikke Vurdering
+@Entity(name = "PleietrengendeSykdomVurderingPeriode")
+@Table(name = "PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON_PERIODE")
+public class PleietrengendeSykdomVurderingVersjonPeriode {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_VURDERING_PERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_pleietrengende_sykdom_vurdering_versjon_periode")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "SYKDOM_VURDERING_VERSJON_ID")
-    private SykdomVurderingVersjon vurderingVersjon;
+    @JoinColumn(name = "PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON_ID")
+    private PleietrengendeSykdomVurderingVersjon vurderingVersjon;
 
     @Column(name = "FOM", nullable = false)
     private LocalDate fom;
@@ -33,18 +34,18 @@ public class SykdomVurderingPeriode {
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
 
-    SykdomVurderingPeriode() {
+    PleietrengendeSykdomVurderingVersjonPeriode() {
 
     }
 
-    public SykdomVurderingPeriode(LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
+    public PleietrengendeSykdomVurderingVersjonPeriode(LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         this.fom = fom;
         this.tom = tom;
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
-    public SykdomVurderingPeriode(SykdomVurderingVersjon vurderingVersjon, LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
+    public PleietrengendeSykdomVurderingVersjonPeriode(PleietrengendeSykdomVurderingVersjon vurderingVersjon, LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         this(fom, tom, opprettetAv, opprettetTidspunkt);
         this.vurderingVersjon = vurderingVersjon;
     }
@@ -54,11 +55,11 @@ public class SykdomVurderingPeriode {
         return id;
     }
 
-    public SykdomVurderingVersjon getVurderingVersjon() {
+    public PleietrengendeSykdomVurderingVersjon getVurderingVersjon() {
         return vurderingVersjon;
     }
 
-    void setVurderingVersjon(SykdomVurderingVersjon vurderingVersjon) {
+    void setVurderingVersjon(PleietrengendeSykdomVurderingVersjon vurderingVersjon) {
         this.vurderingVersjon = vurderingVersjon;
     }
 

@@ -213,7 +213,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         var vurderingsperioder = utledVurderingsperiode(behandling);
         var manglendeOmsorgenForPerioder = sykdomGrunnlagTjeneste.hentManglendeOmsorgenForPerioder(behandling.getId());
         var utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, vurderingsperioder, manglendeOmsorgenForPerioder);
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlag()), utledetGrunnlag).getDiffPerioder();
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlagsdata()), utledetGrunnlag).getDiffPerioder();
 
         return endringerISøktePerioder.compress()
             .filterValue(Objects::nonNull);

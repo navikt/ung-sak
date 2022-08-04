@@ -17,20 +17,21 @@ import jakarta.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
-@Entity(name = "SykdomVurderinger")
-@Table(name = "SYKDOM_VURDERINGER")
-public class SykdomVurderinger {
+//Døpe om til SykdomPleietrengendeInformasjon
+@Entity(name = "PleietrengendeSykdom")
+@Table(name = "PLEIETRENGENDE_SYKDOM")
+public class PleietrengendeSykdom {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_VURDERINGER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PLEIETRENGENDE_SYKDOM")
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "SYK_PERSON_ID", nullable = false)
-    private SykdomPerson person;
+    @JoinColumn(name = "PLEIETRENGENDE_PERSON_ID", nullable = false)
+    private Person person;
 
-    @OneToMany(mappedBy = "sykdomVurderinger") //TODO: cascades? , cascade = {CascadeType.PERSIST, CascadeType.REFRESH}
-    private List<SykdomVurdering> vurderinger = new ArrayList<>();
+    @OneToMany(mappedBy = "pleietrengendeSykdom") //TODO: cascades? , cascade = {CascadeType.PERSIST, CascadeType.REFRESH}
+    private List<PleietrengendeSykdomVurdering> vurderinger = new ArrayList<>();
 
     @DiffIgnore
     @Column(name = "OPPRETTET_AV", nullable = false, updatable=false)
@@ -40,12 +41,12 @@ public class SykdomVurderinger {
     @Column(name = "OPPRETTET_TID", nullable = false, updatable=false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
-    SykdomVurderinger() {
+    PleietrengendeSykdom() {
         // hibernate
     }
 
-    public SykdomVurderinger(
-            SykdomPerson person,
+    public PleietrengendeSykdom(
+            Person person,
             String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
         this.person = person;
@@ -58,11 +59,11 @@ public class SykdomVurderinger {
         return id;
     }
 
-    public SykdomPerson getPerson() {
+    public Person getPerson() {
         return person;
     }
 
-    public void setPerson(SykdomPerson person) {
+    public void setPerson(Person person) {
         this.person = person;
     }
 
@@ -74,7 +75,7 @@ public class SykdomVurderinger {
         return opprettetTidspunkt;
     }
 
-    public SykdomVurdering getSisteVurdering() {
+    public PleietrengendeSykdomVurdering getSisteVurdering() {
         return vurderinger.stream().max(Comparator.naturalOrder()).orElse(null);
     }
 }

@@ -19,7 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontro
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.YtelsespesifikkForeslåVedtak;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
@@ -67,8 +67,8 @@ public class PleiepengerYtelsespesifikkForeslåVedtak implements Ytelsespesifikk
         }
         var lås = behandlingRepository.taSkriveLås(behandling);
 
-        SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagTjeneste.hentGrunnlag(behandling.getUuid());
-        boolean harUbesluttedeSykdomsVurderinger = sykdomGrunnlagBehandling.getGrunnlag().getVurderinger()
+        MedisinskGrunnlag medisinskGrunnlag = sykdomGrunnlagTjeneste.hentGrunnlag(behandling.getUuid());
+        boolean harUbesluttedeSykdomsVurderinger = medisinskGrunnlag.getGrunnlagsdata().getVurderinger()
             .stream()
             .anyMatch(v -> !v.isBesluttet());
 

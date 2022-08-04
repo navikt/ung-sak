@@ -21,7 +21,7 @@ class SykdomUtilsTest {
 
     @Test
     void tilTidslinjeHåndtererEnVerdi() {
-        final List<SykdomVurderingVersjon> versjoner = Arrays.asList(
+        final List<PleietrengendeSykdomVurderingVersjon> versjoner = Arrays.asList(
             createSykdomVurderingOgVersjonMock(
                 1L,
                 new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 5)),
@@ -29,13 +29,13 @@ class SykdomUtilsTest {
             )
         );
 
-        final NavigableSet<LocalDateSegment<SykdomVurderingVersjon>> segments = SykdomUtils.tilTidslinje(versjoner).toSegments();
+        final NavigableSet<LocalDateSegment<PleietrengendeSykdomVurderingVersjon>> segments = SykdomUtils.tilTidslinje(versjoner).toSegments();
         assertThat(segments).hasSize(2);
     }
 
     @Test
     void tilTidslinjeVelgerPrioritertVersjonOgSlårSammenPerioderMedSammeVerdi() {
-        final List<SykdomVurderingVersjon> versjoner = Arrays.asList(
+        final List<PleietrengendeSykdomVurderingVersjon> versjoner = Arrays.asList(
             createSykdomVurderingOgVersjonMock(
                 1L,
                 new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 5)),
@@ -46,7 +46,7 @@ class SykdomUtilsTest {
                 new Periode(LocalDate.of(2020, 1, 14), LocalDate.of(2020, 1, 17)),
                 new Periode(LocalDate.of(2020, 1, 18), LocalDate.of(2020, 1, 29)))
         );
-        final NavigableSet<LocalDateSegment<SykdomVurderingVersjon>> segments = new TreeSet<>(SykdomUtils.tilTidslinje(versjoner).toSegments());
+        final NavigableSet<LocalDateSegment<PleietrengendeSykdomVurderingVersjon>> segments = new TreeSet<>(SykdomUtils.tilTidslinje(versjoner).toSegments());
 
         assertThat(segments).hasSize(3);
         verify(segments.pollFirst(), LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 5), 1);
@@ -54,14 +54,14 @@ class SykdomUtilsTest {
         verify(segments.pollFirst(), LocalDate.of(2020, 1, 14), LocalDate.of(2020, 1, 29), 2);
     }
 
-    private void verify(LocalDateSegment<SykdomVurderingVersjon> ds, LocalDate fom, LocalDate tom, long rangering) {
+    private void verify(LocalDateSegment<PleietrengendeSykdomVurderingVersjon> ds, LocalDate fom, LocalDate tom, long rangering) {
         assertThat(ds.getValue().getSykdomVurdering().getRangering()).isEqualTo(rangering);
         assertThat(ds.getFom()).isEqualTo(fom);
         assertThat(ds.getTom()).isEqualTo(tom);
     }
 
-    private SykdomVurderingVersjon createSykdomVurderingOgVersjonMock(long rangering, Periode... perioder) {
-        return new SykdomVurderingVersjon(
+    private PleietrengendeSykdomVurderingVersjon createSykdomVurderingOgVersjonMock(long rangering, Periode... perioder) {
+        return new PleietrengendeSykdomVurderingVersjon(
             createSykdomVurderingMock(rangering),
             "",
             Resultat.OPPFYLT,
@@ -77,8 +77,8 @@ class SykdomUtilsTest {
         );
     }
 
-    private SykdomVurdering createSykdomVurderingMock(long rangering) {
-        var s = new SykdomVurdering(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, Collections.emptyList(), "", LocalDateTime.now());
+    private PleietrengendeSykdomVurdering createSykdomVurderingMock(long rangering) {
+        var s = new PleietrengendeSykdomVurdering(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, Collections.emptyList(), "", LocalDateTime.now());
         s.setRangering(Long.valueOf(rangering));
         return s;
     }

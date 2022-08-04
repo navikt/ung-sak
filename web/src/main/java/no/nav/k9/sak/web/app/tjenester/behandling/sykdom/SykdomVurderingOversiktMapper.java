@@ -21,8 +21,8 @@ import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingOversiktElement;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste.SykdomVurderingerOgPerioder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 
 public class SykdomVurderingOversiktMapper {
@@ -66,14 +66,14 @@ public class SykdomVurderingOversiktMapper {
         return TidslinjeUtil.values(elements.compress());
     }
 
-    private LocalDateTimeline<SykdomVurderingOversiktElement> vurderingerTilElement(LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje, UUID behandlingUuid) {
+    private LocalDateTimeline<SykdomVurderingOversiktElement> vurderingerTilElement(LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> vurderingerTidslinje, UUID behandlingUuid) {
         return vurderingerTidslinje.map(vurdering -> {
             final String sykdomVurderingId = "" + vurdering.getValue().getSykdomVurdering().getId();
             return List.of(new LocalDateSegment<SykdomVurderingOversiktElement>(vurdering.getLocalDateInterval(), new SykdomVurderingOversiktElement(
                     sykdomVurderingId,
                     vurdering.getValue().getResultat(),
                     new Periode(vurdering.getFom(), vurdering.getTom()),
-                    behandlingUuid.equals(vurdering.getValue().getEndretBehandlingUuid()),
+                    behandlingUuid.equals(vurdering.getValue().getEndretForSøkersBehandlingUuid()),
                     Arrays.asList(linkForGetVurdering(behandlingUuid.toString(), sykdomVurderingId), linkForEndreVurdering(behandlingUuid.toString()))
                 )));
         });

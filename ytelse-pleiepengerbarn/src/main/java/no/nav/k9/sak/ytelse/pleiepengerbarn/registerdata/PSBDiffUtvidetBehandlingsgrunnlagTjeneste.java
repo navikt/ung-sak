@@ -14,7 +14,7 @@ import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.domene.registerinnhenting.DiffUtvidetBehandlingsgrunnlagTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlagsdata;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
@@ -28,12 +28,12 @@ public class PSBDiffUtvidetBehandlingsgrunnlagTjeneste implements DiffUtvidetBeh
     @Override
     public void leggTilSnapshot(BehandlingReferanse ref, EndringsresultatSnapshot snapshot) {
         var uuid = UUID.randomUUID();
-        snapshot.leggTil(EndringsresultatSnapshot.medSnapshot(SykdomGrunnlag.class, uuid)); // For å tvinge frem at det alltid er endring
+        snapshot.leggTil(EndringsresultatSnapshot.medSnapshot(MedisinskGrunnlagsdata.class, uuid)); // For å tvinge frem at det alltid er endring
     }
 
     @Override
     public void leggTilDiffResultat(BehandlingReferanse ref, EndringsresultatDiff idDiff, EndringsresultatDiff sporedeEndringerDiff) {
-        idDiff.hentDelresultat(SykdomGrunnlag.class)
+        idDiff.hentDelresultat(MedisinskGrunnlagsdata.class)
             .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> diffSykdom(ref)));
     }
 

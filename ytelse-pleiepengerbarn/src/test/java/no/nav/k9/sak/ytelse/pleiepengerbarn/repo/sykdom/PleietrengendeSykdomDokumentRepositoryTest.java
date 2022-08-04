@@ -26,7 +26,7 @@ import no.nav.k9.sak.typer.JournalpostId;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class SykdomDokumentRepositoryTest {
+class PleietrengendeSykdomDokumentRepositoryTest {
     @Inject
     private SykdomDokumentRepository repo;
 
@@ -39,19 +39,19 @@ class SykdomDokumentRepositoryTest {
         final JournalpostId journalpostId2 = new JournalpostId("journalpostId2");
 
         final AktørId pleietrengendeAktørId = new AktørId("lala");
-        final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
-        final SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
+        final PleietrengendeSykdomDokumentInformasjon informasjon = new PleietrengendeSykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
+        final PleietrengendeSykdomDokument dokument = new PleietrengendeSykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
         repo.lagre(dokument, pleietrengendeAktørId);
 
-        final List<SykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
+        final List<PleietrengendeSykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
         assertThat(dokumenter.size()).isEqualTo(1);
         assertThat(repo.hentDokument(dokumenter.get(0).getId(), pleietrengendeAktørId).isPresent());
 
         final AktørId annenPleietrengendeAktørId = new AktørId("annetBarn");
         assertThat(repo.hentDokument(dokumenter.get(0).getId(), annenPleietrengendeAktørId).isEmpty());
-        final SykdomDokumentInformasjon informasjon2 = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
-        final SykdomDokument dokument2 = new SykdomDokument(journalpostId2, null, informasjon2, null, null, null, endretAv, nå);
-        
+        final PleietrengendeSykdomDokumentInformasjon informasjon2 = new PleietrengendeSykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
+        final PleietrengendeSykdomDokument dokument2 = new PleietrengendeSykdomDokument(journalpostId2, null, informasjon2, null, null, null, endretAv, nå);
+
         assertThat(repo.finnesSykdomDokument(journalpostId2, null)).isFalse();
         repo.lagre(dokument2, annenPleietrengendeAktørId);
         assertThat(repo.finnesSykdomDokument(journalpostId2, null)).isTrue();
@@ -67,23 +67,23 @@ class SykdomDokumentRepositoryTest {
         final JournalpostId journalpostId = new JournalpostId("journalpostId");
 
         final AktørId pleietrengendeAktørId = new AktørId("lala");
-        final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
-        SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
+        final PleietrengendeSykdomDokumentInformasjon informasjon = new PleietrengendeSykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
+        PleietrengendeSykdomDokument dokument = new PleietrengendeSykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
         repo.lagre(dokument, pleietrengendeAktørId);
 
-        final List<SykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
+        final List<PleietrengendeSykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
         assertThat(dokumenter.size()).isEqualTo(1);
         assertThat(repo.hentDokument(dokumenter.get(0).getId(), pleietrengendeAktørId).isPresent());
         assertThat(repo.hentAlleDokumenterFor(pleietrengendeAktørId).size()).isEqualTo(1);
 
         dokument = dokumenter.get(0);
-        final SykdomDokumentInformasjon nyInformasjon = new SykdomDokumentInformasjon(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS, false, nå.toLocalDate(), nå, 1L, endretAv, nå);
+        final PleietrengendeSykdomDokumentInformasjon nyInformasjon = new PleietrengendeSykdomDokumentInformasjon(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS, false, nå.toLocalDate(), nå, 1L, endretAv, nå);
         dokument.setInformasjon(nyInformasjon);
 
         repo.oppdater(dokument.getInformasjon());
-        List<SykdomDokument> oppdaterteDokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
+        List<PleietrengendeSykdomDokument> oppdaterteDokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
         assertThat(oppdaterteDokumenter.size()).isEqualTo(1);
-        final SykdomDokumentInformasjon oppdatertInformasjon = oppdaterteDokumenter.get(0).getInformasjon();
+        final PleietrengendeSykdomDokumentInformasjon oppdatertInformasjon = oppdaterteDokumenter.get(0).getInformasjon();
 
         assertThat(oppdatertInformasjon.getVersjon()).isEqualTo(1L);
         assertThat(oppdatertInformasjon.getType()).isEqualTo(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS);
@@ -99,23 +99,23 @@ class SykdomDokumentRepositoryTest {
         final JournalpostId duplikatJournalpostId = new JournalpostId("duplikatJournalpostId");
 
         final AktørId pleietrengendeAktørId = new AktørId("lala");
-        final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
-        SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
+        final PleietrengendeSykdomDokumentInformasjon informasjon = new PleietrengendeSykdomDokumentInformasjon(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
+        PleietrengendeSykdomDokument dokument = new PleietrengendeSykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
         repo.lagre(dokument, pleietrengendeAktørId);
 
-        final List<SykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
+        final List<PleietrengendeSykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
         assertThat(dokumenter.size()).isEqualTo(1);
         assertThat(repo.hentDokument(dokumenter.get(0).getId(), pleietrengendeAktørId).isPresent());
         assertThat(repo.hentAlleDokumenterFor(pleietrengendeAktørId).size()).isEqualTo(1);
 
         dokument = dokumenter.get(0);
 
-        final SykdomDokumentInformasjon duplikatInformasjon = new SykdomDokumentInformasjon(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
+        final PleietrengendeSykdomDokumentInformasjon duplikatInformasjon = new PleietrengendeSykdomDokumentInformasjon(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
         duplikatInformasjon.setDuplikatAvDokument(dokument);
-        SykdomDokument duplikatDokument = new SykdomDokument(duplikatJournalpostId, null, duplikatInformasjon, null, null, null, endretAv, nå);
+        PleietrengendeSykdomDokument duplikatDokument = new PleietrengendeSykdomDokument(duplikatJournalpostId, null, duplikatInformasjon, null, null, null, endretAv, nå);
         repo.lagre(duplikatDokument, pleietrengendeAktørId);
 
-        List<SykdomDokument> oppdaterteDokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
+        List<PleietrengendeSykdomDokument> oppdaterteDokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
         assertThat(oppdaterteDokumenter.size()).isEqualTo(2);
         assertThat(oppdaterteDokumenter.get(1).getDuplikatAvDokument()).isNotNull();
 
@@ -129,7 +129,7 @@ class SykdomDokumentRepositoryTest {
         final LocalDateTime nå = LocalDateTime.now();
         final AktørId pleietrengende = new AktørId(123L);
 
-        SykdomDiagnosekoder diagnosekoder = lagDiagnosekoder(opprettetAv, nå);
+        PleietrengendeSykdomDiagnoser diagnosekoder = lagDiagnosekoder(opprettetAv, nå);
 
         repo.opprettEllerOppdaterDiagnosekoder(diagnosekoder, pleietrengende);
         diagnosekoder = repo.hentDiagnosekoder(pleietrengende);
@@ -137,14 +137,14 @@ class SykdomDokumentRepositoryTest {
         assertThat(diagnosekoder.getVersjon()).isEqualTo(0L);
         assertThat(diagnosekoder.getOpprettetAv()).isEqualTo(opprettetAv);
 
-        List<SykdomDiagnosekode> kodelisteLagret = diagnosekoder.getDiagnosekoder();
+        List<PleietrengendeSykdomDiagnose> kodelisteLagret = diagnosekoder.getDiagnoser();
         assertThat(kodelisteLagret.size()).isEqualTo(2);
         assertThat(kodelisteLagret.get(0).getDiagnosekode()).isEqualTo("testsykdom1");
         assertThat(kodelisteLagret.get(1).getDiagnosekode()).isEqualTo("testsykdom2");
 
         diagnosekoder = kopierDiagnosekoder(diagnosekoder);
         diagnosekoder.leggTilDiagnosekode(
-            new SykdomDiagnosekode(
+            new PleietrengendeSykdomDiagnose(
                 "testsykdom3",
                 opprettetAv,
                 nå.plusHours(1)));
@@ -153,7 +153,7 @@ class SykdomDokumentRepositoryTest {
 
         diagnosekoder = repo.hentDiagnosekoder(pleietrengende);
 
-        kodelisteLagret = diagnosekoder.getDiagnosekoder();
+        kodelisteLagret = diagnosekoder.getDiagnoser();
         assertThat(kodelisteLagret.size()).isEqualTo(3);
         assertThat(kodelisteLagret.get(0).getDiagnosekode()).isEqualTo("testsykdom1");
         assertThat(kodelisteLagret.get(1).getDiagnosekode()).isEqualTo("testsykdom2");
@@ -167,16 +167,16 @@ class SykdomDokumentRepositoryTest {
         final JournalpostId journalpostId = new JournalpostId("journalpostId");
         final LocalDateTime nå = LocalDateTime.now();
         final AktørId pleietrengendeAktørId = new AktørId("lala");
-        final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
+        final PleietrengendeSykdomDokumentInformasjon informasjon = new PleietrengendeSykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
 
-        final SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
+        final PleietrengendeSykdomDokument dokument = new PleietrengendeSykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
         repo.lagre(dokument, pleietrengendeAktørId);
 
-        SykdomDokument lagretDokument = repo.hentAlleDokumenterFor(pleietrengendeAktørId).get(0);
+        PleietrengendeSykdomDokument lagretDokument = repo.hentAlleDokumenterFor(pleietrengendeAktørId).get(0);
 
         assertFalse(repo.harKvittertDokumentForEksisterendeVurderinger(lagretDokument));
 
-        repo.kvitterDokumenterMedOppdatertEksisterendeVurderinger(new SykdomDokumentHarOppdatertEksisterendeVurderinger(lagretDokument, endretAv, nå));
+        repo.kvitterDokumenterMedOppdatertEksisterendeVurderinger(new PleietrengendeSykdomDokumentHarOppdatertVurderinger(lagretDokument, endretAv, nå));
 
         lagretDokument = repo.hentAlleDokumenterFor(pleietrengendeAktørId).get(0);
 
@@ -189,7 +189,7 @@ class SykdomDokumentRepositoryTest {
         final LocalDateTime nå = LocalDateTime.now();
         final AktørId pleietrengende = new AktørId(123L);
 
-        SykdomInnleggelser innleggelser = lagInnleggelser(opprettetAv, nå);
+        PleietrengendeSykdomInnleggelser innleggelser = lagInnleggelser(opprettetAv, nå);
 
         repo.opprettEllerOppdaterInnleggelser(innleggelser, pleietrengende);
         innleggelser = repo.hentInnleggelse(pleietrengende);
@@ -197,7 +197,7 @@ class SykdomDokumentRepositoryTest {
         assertThat(innleggelser.getVersjon()).isEqualTo(0L);
         assertThat(innleggelser.getOpprettetAv()).isEqualTo(opprettetAv);
 
-        List<SykdomInnleggelsePeriode> perioderLagret = innleggelser.getPerioder();
+        List<PleietrengendeSykdomInnleggelsePeriode> perioderLagret = innleggelser.getPerioder();
 
         assertThat(perioderLagret.size()).isEqualTo(2);
         assertThat(perioderLagret.get(0).getInnleggelser()).isEqualTo(innleggelser);
@@ -209,7 +209,7 @@ class SykdomDokumentRepositoryTest {
 
         innleggelser = kopierInnleggelser(innleggelser);
         innleggelser.leggTilPeriode(
-            new SykdomInnleggelsePeriode(
+            new PleietrengendeSykdomInnleggelsePeriode(
                 LocalDate.of(2021, 2, 1),
                 LocalDate.of(2021, 2, 10),
                 opprettetAv,
@@ -241,7 +241,7 @@ class SykdomDokumentRepositoryTest {
         final LocalDateTime nå = LocalDateTime.now();
         final AktørId pleietrengende = new AktørId(123L);
 
-        SykdomDiagnosekoder diagnosekoder = lagDiagnosekoder(opprettetAv, nå);
+        PleietrengendeSykdomDiagnoser diagnosekoder = lagDiagnosekoder(opprettetAv, nå);
 
         repo.opprettEllerOppdaterDiagnosekoder(diagnosekoder, pleietrengende);
         diagnosekoder = repo.hentDiagnosekoder(pleietrengende);
@@ -251,7 +251,7 @@ class SykdomDokumentRepositoryTest {
 
         diagnosekoder = kopierDiagnosekoder(diagnosekoder);
         diagnosekoder.leggTilDiagnosekode(
-            new SykdomDiagnosekode(
+            new PleietrengendeSykdomDiagnose(
                 "testsykdom3",
                 opprettetAv,
                 nå.plusHours(1)));
@@ -262,7 +262,7 @@ class SykdomDokumentRepositoryTest {
 
         diagnosekoder.setVersjon(diagnosekoder.getVersjon()-1);
 
-        SykdomDiagnosekoder finalDiagnosekoder = diagnosekoder;
+        PleietrengendeSykdomDiagnoser finalDiagnosekoder = diagnosekoder;
         Assertions.assertThrows(IllegalStateException.class, () -> repo.opprettEllerOppdaterDiagnosekoder(finalDiagnosekoder, pleietrengende));
     }
 
@@ -272,7 +272,7 @@ class SykdomDokumentRepositoryTest {
         final LocalDateTime nå = LocalDateTime.now();
         final AktørId pleietrengende = new AktørId(123L);
 
-        SykdomInnleggelser innleggelser = lagInnleggelser(opprettetAv, nå);
+        PleietrengendeSykdomInnleggelser innleggelser = lagInnleggelser(opprettetAv, nå);
 
         repo.opprettEllerOppdaterInnleggelser(innleggelser, pleietrengende);
         innleggelser = repo.hentInnleggelse(pleietrengende);
@@ -282,7 +282,7 @@ class SykdomDokumentRepositoryTest {
 
         innleggelser = kopierInnleggelser(innleggelser);
         innleggelser.leggTilPeriode(
-            new SykdomInnleggelsePeriode(
+            new PleietrengendeSykdomInnleggelsePeriode(
                 LocalDate.of(2021, 2, 1),
                 LocalDate.of(2021, 2, 10),
                 opprettetAv,
@@ -294,51 +294,51 @@ class SykdomDokumentRepositoryTest {
 
         innleggelser.setVersjon(innleggelser.getVersjon()-1);
 
-        SykdomInnleggelser finalInnleggelser = innleggelser;
+        PleietrengendeSykdomInnleggelser finalInnleggelser = innleggelser;
         Assertions.assertThrows(IllegalStateException.class, () -> repo.opprettEllerOppdaterInnleggelser(finalInnleggelser, pleietrengende));
     }
 
-    private SykdomDiagnosekoder lagDiagnosekoder(String opprettetAv, LocalDateTime nå) {
-        List<SykdomDiagnosekode> koder = Arrays.asList(
-            new SykdomDiagnosekode("testsykdom1", opprettetAv, nå),
-            new SykdomDiagnosekode("testsykdom2", opprettetAv, nå)
+    private PleietrengendeSykdomDiagnoser lagDiagnosekoder(String opprettetAv, LocalDateTime nå) {
+        List<PleietrengendeSykdomDiagnose> koder = Arrays.asList(
+            new PleietrengendeSykdomDiagnose("testsykdom1", opprettetAv, nå),
+            new PleietrengendeSykdomDiagnose("testsykdom2", opprettetAv, nå)
         );
 
-        return new SykdomDiagnosekoder(null, koder, opprettetAv, nå);
+        return new PleietrengendeSykdomDiagnoser(null, koder, opprettetAv, nå);
     }
 
-    private SykdomDiagnosekoder kopierDiagnosekoder(SykdomDiagnosekoder i) {
-        List<SykdomDiagnosekode> koder = i.getDiagnosekoder()
+    private PleietrengendeSykdomDiagnoser kopierDiagnosekoder(PleietrengendeSykdomDiagnoser i) {
+        List<PleietrengendeSykdomDiagnose> koder = i.getDiagnoser()
             .stream()
-            .map(k -> new SykdomDiagnosekode(k.getDiagnosekode(), k.getOpprettetAv(), k.getOpprettetTidspunkt()))
+            .map(k -> new PleietrengendeSykdomDiagnose(k.getDiagnosekode(), k.getOpprettetAv(), k.getOpprettetTidspunkt()))
             .collect(Collectors.toCollection(ArrayList::new));
 
-        return new SykdomDiagnosekoder(i.getVersjon(), i.getVurderinger(), koder, i.getOpprettetAv(), i.getOpprettetTidspunkt());
+        return new PleietrengendeSykdomDiagnoser(i.getVersjon(), i.getPleietrengendeSykdom(), koder, i.getOpprettetAv(), i.getOpprettetTidspunkt());
     }
 
     @NotNull
-    private SykdomInnleggelser lagInnleggelser(String opprettetAv, LocalDateTime nå) {
-        List<SykdomInnleggelsePeriode> perioder = Arrays.asList(
-            new SykdomInnleggelsePeriode(
+    private PleietrengendeSykdomInnleggelser lagInnleggelser(String opprettetAv, LocalDateTime nå) {
+        List<PleietrengendeSykdomInnleggelsePeriode> perioder = Arrays.asList(
+            new PleietrengendeSykdomInnleggelsePeriode(
                 LocalDate.of(2021, 1, 1),
                 LocalDate.of(2021, 1, 10),
                 opprettetAv,
                 nå),
-            new SykdomInnleggelsePeriode(
+            new PleietrengendeSykdomInnleggelsePeriode(
                 LocalDate.of(2021, 1, 15),
                 LocalDate.of(2021, 1, 20),
                 opprettetAv,
                 nå));
-        final SykdomInnleggelser innleggelser = new SykdomInnleggelser(null, null, perioder, opprettetAv, nå);
+        final PleietrengendeSykdomInnleggelser innleggelser = new PleietrengendeSykdomInnleggelser(null, null, perioder, opprettetAv, nå);
         return innleggelser;
     }
 
-    private SykdomInnleggelser kopierInnleggelser(SykdomInnleggelser i) {
-        List<SykdomInnleggelsePeriode> perioder = i.getPerioder()
+    private PleietrengendeSykdomInnleggelser kopierInnleggelser(PleietrengendeSykdomInnleggelser i) {
+        List<PleietrengendeSykdomInnleggelsePeriode> perioder = i.getPerioder()
             .stream()
-            .map(p -> new SykdomInnleggelsePeriode(p.getFom(), p.getTom(), p.getOpprettetAv(), p.getOpprettetTidspunkt()))
+            .map(p -> new PleietrengendeSykdomInnleggelsePeriode(p.getFom(), p.getTom(), p.getOpprettetAv(), p.getOpprettetTidspunkt()))
             .collect(Collectors.toCollection(ArrayList::new));
 
-        return new SykdomInnleggelser(i.getVersjon(), i.getVurderinger(), perioder, i.getOpprettetAv(), i.getOpprettetTidspunkt());
+        return new PleietrengendeSykdomInnleggelser(i.getVersjon(), i.getPleietrengendeSykdom(), perioder, i.getOpprettetAv(), i.getOpprettetTidspunkt());
     }
 }

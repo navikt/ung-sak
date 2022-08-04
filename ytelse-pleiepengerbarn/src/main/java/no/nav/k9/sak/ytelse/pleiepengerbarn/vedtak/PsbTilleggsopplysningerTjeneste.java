@@ -13,10 +13,10 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.vedtak.observer.Tilleggsopplysning;
 import no.nav.k9.sak.domene.vedtak.observer.YtelseTilleggsopplysningerTjeneste;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomInnleggelser;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
@@ -39,9 +39,9 @@ public class PsbTilleggsopplysningerTjeneste implements YtelseTilleggsopplysning
         var pleietrengendeAktørId = behandling.getFagsak().getPleietrengendeAktørId();
         var sykdomGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandling.getUuid());
 
-        var innleggelsesperioder = sykdomGrunnlagBehandling.map(SykdomGrunnlagBehandling::getGrunnlag)
-            .map(SykdomGrunnlag::getInnleggelser)
-            .map(SykdomInnleggelser::getPerioder)
+        var innleggelsesperioder = sykdomGrunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata)
+            .map(MedisinskGrunnlagsdata::getInnleggelser)
+            .map(PleietrengendeSykdomInnleggelser::getPerioder)
             .orElseGet(Collections::emptyList)
             .stream()
             .map(it -> new Periode(it.getFom(), it.getTom()))
