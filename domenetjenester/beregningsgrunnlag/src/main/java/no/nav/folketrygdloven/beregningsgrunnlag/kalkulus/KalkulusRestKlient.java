@@ -33,6 +33,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.regelinput.KomprimerRegelInputRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.KopiResponse;
@@ -51,6 +52,7 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class KalkulusRestKlient {
@@ -66,6 +68,8 @@ public class KalkulusRestKlient {
     private final ObjectReader grunnlagListReader = kalkulusMapper.readerFor(new TypeReference<List<BeregningsgrunnlagGrunnlagDto>>() {
     });
     private final ObjectReader grunnbeløpReader = kalkulusMapper.readerFor(Grunnbeløp.class);
+    private final ObjectReader saksnummerReader = kalkulusMapper.readerFor(Saksnummer.class);
+
 
     private CloseableHttpClient restClient;
     private URI kalkulusEndpoint;
@@ -81,6 +85,7 @@ public class KalkulusRestKlient {
     private URI kontrollerGrunnbeløp;
 
     private URI migrerAksjonspunkter;
+    private URI komprimerRegelinput;
 
 
     protected KalkulusRestKlient() {
@@ -111,6 +116,8 @@ public class KalkulusRestKlient {
         this.grunnbeløp = toUri("/api/kalkulus/v1/grunnbelop");
         this.kontrollerGrunnbeløp = toUri("/api/kalkulus/v1/kontrollerGregulering");
         this.migrerAksjonspunkter = toUri("/api/kalkulus/v1/migrerAksjonspunkter");
+        this.komprimerRegelinput = toUri("/api/kalkulus/v1/komprimerRegelSporing");
+
     }
 
 
@@ -194,6 +201,15 @@ public class KalkulusRestKlient {
         var endpoint = migrerAksjonspunkter;
         try {
             utfør(endpoint, kalkulusJsonWriter.writeValueAsString(request));
+        } catch (IOException e) {
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
+        }
+    }
+
+    public Saksnummer komprimerRegelinput(KomprimerRegelInputRequest request) {
+        var endpoint = komprimerRegelinput;
+        try {
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), saksnummerReader);
         } catch (IOException e) {
             throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
