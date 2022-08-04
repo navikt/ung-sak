@@ -137,7 +137,7 @@ public class KjøreplanUtleder {
                                                                    KravPrioInput input) {
         List<LocalDateSegment<Set<AksjonPerFagsak>>> segmenter = new ArrayList<>();
 
-        Map<Long, Boolean> trengerÅUtsettePerioder = utledBehovForUtsettelse(input, kravprioritetPåEndringerOgVedtakstatus);
+        Map<Long, Boolean> trengerÅUtsettePerioder = utledBehovForUtsettelse(input, kravprioritetPåEndringerOgVedtakstatus, kravprioForEldsteKrav);
         var toOmsorgspersonerTidslinje = input.getToOmsorgspersonerTidslinje();
 
         LocalDateTimeline<List<InternalKravprioritet>> splittetKravperioderPåInnleggelser = getSplittetKravperioderPåInnleggelser(kravprioForEldsteKrav, toOmsorgspersonerTidslinje);
@@ -215,7 +215,7 @@ public class KjøreplanUtleder {
         return harIkkeHattVedtakSiden(sakOgBehandlinger, periode, utsattePerioderPerBehandling, etterfølgendeBehandlingId);
     }
 
-    private Map<Long, Boolean> utledBehovForUtsettelse(KravPrioInput input, LocalDateTimeline<List<InternalKravprioritet>> kravprioritetPåEndringerOgVedtakstatus) {
+    private Map<Long, Boolean> utledBehovForUtsettelse(KravPrioInput input, LocalDateTimeline<List<InternalKravprioritet>> kravprioritetPåEndringerOgVedtakstatus, LocalDateTimeline<List<InternalKravprioritet>> kravprioForEldsteKrav) {
         Map<Long, Boolean> resultat = new HashMap<>();
 
         var sakOgBehandlinger = input.getSakOgBehandlinger();
@@ -223,7 +223,7 @@ public class KjøreplanUtleder {
 
         for (SakOgBehandlinger sakOgBehandling : sakOgBehandlinger) {
             resultat.put(sakOgBehandling.getFagsak(), harPrioritetIEnPeriodeOgIkkeIEnAnnen(sakOgBehandling.getFagsak(),
-                kravprioritetPåEndringerOgVedtakstatus, input));
+                kravprioritetPåEndringerOgVedtakstatus, kravprioForEldsteKrav, input));
         }
 
         if (harFlereEnnEnSomSkalUtsettes(resultat)) {
@@ -243,7 +243,7 @@ public class KjøreplanUtleder {
         return resultat.entrySet().stream().filter(Map.Entry::getValue).count() > 1;
     }
 
-    private boolean harPrioritetIEnPeriodeOgIkkeIEnAnnen(Long fagsakId, LocalDateTimeline<List<InternalKravprioritet>> ikkeVedtattIkkeUtsatteKrav, KravPrioInput input) {
+    private boolean harPrioritetIEnPeriodeOgIkkeIEnAnnen(Long fagsakId, LocalDateTimeline<List<InternalKravprioritet>> ikkeVedtattIkkeUtsatteKrav, LocalDateTimeline<List<InternalKravprioritet>> kravprioForEldsteKrav, KravPrioInput input) {
         boolean harPrioritetIPeriodeAndreHarKravPå = false;
         boolean harIkkePrioritetIPeriodeAndreHarKravPå = false;
 
@@ -265,10 +265,11 @@ public class KjøreplanUtleder {
             if (unikeSakerMedKrav.stream().noneMatch(it -> Objects.equals(it, fagsakId))) {
                 continue;
             }
-            if (Objects.equals(kravprioritetForPeriode.get(0).getFagsak(), fagsakId)) {
+            var eldsteKravprio = kravprioForEldsteKrav.getSegment(segment.getLocalDateInterval()).getValue();
+            if (Objects.equals(eldsteKravprio.get(0).getFagsak(), fagsakId)) {
                 harPrioritetIPeriodeAndreHarKravPå = true;
             }
-            if (!Objects.equals(kravprioritetForPeriode.get(0).getFagsak(), fagsakId)) {
+            if (!Objects.equals(eldsteKravprio.get(0).getFagsak(), fagsakId)) {
                 harIkkePrioritetIPeriodeAndreHarKravPå = true;
             }
         }
