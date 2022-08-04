@@ -30,7 +30,7 @@ public class FrisinnKalkulatorInputTjeneste extends KalkulatorInputTjeneste {
                                           @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                           VilkårResultatRepository vilkårResultatRepository,
                                           @KonfigVerdi(value = "FRISINN_NYTT_STP_TOGGLE", defaultVerdi = "false", required = false) boolean nyttStpToggle) {
-        super(opptjeningForBeregningTjeneste, inntektsmeldingerRelevantForBeregnings, ytelseGrunnlagMapper, vilkårResultatRepository, false);
+        super(opptjeningForBeregningTjeneste, inntektsmeldingerRelevantForBeregnings, ytelseGrunnlagMapper, vilkårResultatRepository);
         this.nyttStpToggle = nyttStpToggle;
     }
 

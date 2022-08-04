@@ -191,35 +191,19 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: PSB_OPPG_OPPTJENING_PRIORITERING
-      value: "true"
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
       value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
-    - name: TOTRINN_TEMP_DEAKTIVERT
-      value: "true"
-    - name: K9TILBAKE_AKTIVERT
-      value: "true"
-    - name: ENABLE_STONADSTATISTIKK
-      value: "true"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
-    - name: MAP_ALLE_KRAV
-      value: "true"
-    - name: DISABLE_VURDER_TILBAKETREKK
-      value: "true"
-    - name: PSB_INFOTRYGD_MIGRERING
-      value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
       value: "true"
-    - name: PSB_TREKKE_MIGRERT_PERIODE
-      value: "true"
-    - name: ENABLE_DOKUMENTMOTTAK_PPN
-      value: "true"
-    - name: KOMPLETTHET_MARKER_FRAVAER
+
+    # Konfigurasjoner
+    - name: K9TILBAKE_AKTIVERT
       value: "true"
     - name: ENABLE_FERIEPENGER_PAA_TVERS_AV_SAKER_OG_PR_AAR
       value: "false"

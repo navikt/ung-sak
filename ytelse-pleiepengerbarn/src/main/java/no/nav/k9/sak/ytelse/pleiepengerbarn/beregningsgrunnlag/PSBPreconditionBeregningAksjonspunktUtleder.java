@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -52,8 +51,6 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
     private VilkårPeriodeFilterProvider periodeFilterProvider;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private BehandlingRepository behandlingRepository;
-    private boolean toggleMigrering;
-
 
     public PSBPreconditionBeregningAksjonspunktUtleder() {
     }
@@ -66,8 +63,7 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
                                                        BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                                        VilkårPeriodeFilterProvider periodeFilterProvider,
                                                        BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                                       BehandlingRepository behandlingRepository,
-                                                       @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering) {
+                                                       BehandlingRepository behandlingRepository) {
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.oppgittOpptjeningFilter = oppgittOpptjeningFilter;
@@ -75,15 +71,11 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
         this.periodeFilterProvider = periodeFilterProvider;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.behandlingRepository = behandlingRepository;
-        this.toggleMigrering = toggleMigrering;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
     }
 
     @Override
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
-        if (!toggleMigrering) {
-            return Collections.emptyList();
-        }
         var perioderTilVurdering = finnPerioderTilVurdering(param);
         if (perioderTilVurdering.isEmpty()) {
             return Collections.emptyList();

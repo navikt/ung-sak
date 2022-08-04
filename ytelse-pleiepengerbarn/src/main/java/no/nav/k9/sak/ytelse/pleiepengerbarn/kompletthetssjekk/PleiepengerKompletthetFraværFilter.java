@@ -35,7 +35,6 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 public class PleiepengerKompletthetFraværFilter implements KompletthetFraværFilter {
 
     private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
-    private boolean markerFravær;
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
 
     PleiepengerKompletthetFraværFilter() {
@@ -44,10 +43,8 @@ public class PleiepengerKompletthetFraværFilter implements KompletthetFraværFi
 
     @Inject
     public PleiepengerKompletthetFraværFilter(@Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
-                                              @KonfigVerdi(value = "kompletthet.marker.fravaer", defaultVerdi = "false") boolean markerFravær,
                                               PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste) {
         this.søknadsfristTjeneste = søknadsfristTjeneste;
-        this.markerFravær = markerFravær;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
     }
 
@@ -68,9 +65,8 @@ public class PleiepengerKompletthetFraværFilter implements KompletthetFraværFi
         var arbeidIPeriode = new MapArbeid().map(arbeidstidInput);
 
         var harFraværFraArbeidsgiverIPerioden = harFraværFraArbeidsgiverIPerioden(arbeidIPeriode, manglendeVedlegg);
-        if (markerFravær) {
-            manglendeVedlegg.setHarFraværFraArbeidsgiverIPerioden(harFraværFraArbeidsgiverIPerioden);
-        }
+        manglendeVedlegg.setHarFraværFraArbeidsgiverIPerioden(harFraværFraArbeidsgiverIPerioden);
+
         return harFraværFraArbeidsgiverIPerioden;
     }
 

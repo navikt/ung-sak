@@ -38,6 +38,7 @@ import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.KjøreplanUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifikator;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
@@ -56,11 +57,14 @@ public class PleiepengerUttakRestTjeneste {
     public static final String GET_SKULLE_SØKT_OM_PATH = "/behandling/pleiepenger/arbeidstid-mangler";
     public static final String GET_DEBUG_INPUT_PATH = "/behandling/pleiepenger/debug-input";
 
+    public static final String GET_DEBUG_KJØREPLAN_PATH = "/behandling/pleiepenger/debug-kjøreplan";
+
     private UttakTjeneste uttakRestKlient;
     private BehandlingRepository behandlingRepository;
     private ArbeidBrukerBurdeSøktOmUtleder manglendeArbeidstidUtleder;
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
+    private KjøreplanUtleder kjøreplanUtleder;
 
     public PleiepengerUttakRestTjeneste() {
         // for proxying
@@ -71,12 +75,14 @@ public class PleiepengerUttakRestTjeneste {
                                         BehandlingRepository behandlingRepository,
                                         ArbeidBrukerBurdeSøktOmUtleder manglendeArbeidstidUtleder,
                                         MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
-                                        UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository) {
+                                        UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
+                                        KjøreplanUtleder kjøreplanUtleder) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.manglendeArbeidstidUtleder = manglendeArbeidstidUtleder;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
+        this.kjøreplanUtleder = kjøreplanUtleder;
     }
 
     @GET
@@ -148,6 +154,27 @@ public class PleiepengerUttakRestTjeneste {
         return Response.ok(uttaksgrunnlag).build();
     }
 
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path(GET_DEBUG_KJØREPLAN_PATH)
+    @Operation(description = "Henter ut uttaksgrunnlag for behandling", tags = "behandling - pleiepenger/uttak", responses = {
+        @ApiResponse(responseCode = "200", description = "Uttaksgrunnlag", content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    })
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response kjøreplan(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+        var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+
+        var referanse = BehandlingReferanse.fra(behandling);
+        var input = kjøreplanUtleder.utledInput(referanse);
+        var kjøreplan = kjøreplanUtleder.utled(referanse);
+
+        var respons = new DebugKjøreplan(input, kjøreplan.getPlan());
+
+        return Response.ok(respons).build();
+    }
+
     private ArbeidsgiverMedPerioderSomManglerDto mapArbeidsgiver(Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> entry) {
         var arbeidsgiver = entry.getKey().getArbeidsgiver();
         var uttakArbeidsgiver = new UttakArbeidsforhold(arbeidsgiver != null ? arbeidsgiver.getArbeidsgiverOrgnr() : null, arbeidsgiver != null ? arbeidsgiver.getAktørId() : null, entry.getKey().getAktivitetType(), null);
@@ -155,5 +182,6 @@ public class PleiepengerUttakRestTjeneste {
 
         return new ArbeidsgiverMedPerioderSomManglerDto(uttakArbeidsgiver, perioder);
     }
+
 
 }

@@ -25,6 +25,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -40,6 +41,7 @@ import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelsePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
 @Dependent
 public class KjøreplanUtleder {
@@ -67,7 +69,22 @@ public class KjøreplanUtleder {
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
     }
 
+    private LocalDateTimeline<List<InternalKravprioritet>> getSplittetKravperioderPåInnleggelser(LocalDateTimeline<List<InternalKravprioritet>> kravTidslinje, LocalDateTimeline<Boolean> toOmsorgspersonerTidslinje) {
+        return kravTidslinje.combine(toOmsorgspersonerTidslinje, (localDateInterval, leftSegment, rightSegment) -> {
+            if (leftSegment == null) {
+                return null;
+            }
+            return new LocalDateSegment<>(localDateInterval, leftSegment.getValue());
+        }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+    }
+
     public Kjøreplan utled(BehandlingReferanse referanse) {
+        KravPrioInput input = utledInput(referanse);
+
+        return utledKravprioInternt(input);
+    }
+
+    public KravPrioInput utledInput(BehandlingReferanse referanse) {
         var søknadsfristTjeneste = VurderSøknadsfristTjeneste.finnSøknadsfristTjeneste(søknadsfristTjenester, referanse.getFagsakYtelseType());
         var aktuellFagsak = fagsakRepository.finnEksaktFagsak(referanse.getFagsakId());
         final List<SakOgBehandlinger> fagsaker = fagsakRepository.finnFagsakRelatertTil(aktuellFagsak.getYtelseType(), aktuellFagsak.getPleietrengendeAktørId(), null, null, null)
@@ -80,9 +97,7 @@ public class KjøreplanUtleder {
         var toOmsorgspersonerTidslinje = hentTidslinjeMedFlereOmsorgspersoner(behandling); // Inkludere 200% avklaringer?
         var utsattePerioderPerBehandling = utledUtsattePerioderFraBehandling(fagsaker);
 
-        var input = new KravPrioInput(aktuellFagsak.getId(), aktuellFagsak.getSaksnummer(), utsattePerioderPerBehandling, toOmsorgspersonerTidslinje, fagsaker);
-
-        return utledKravprioInternt(input);
+        return new KravPrioInput(aktuellFagsak.getId(), aktuellFagsak.getSaksnummer(), utsattePerioderPerBehandling, toOmsorgspersonerTidslinje, fagsaker);
     }
 
     private HashMap<Long, NavigableSet<DatoIntervallEntitet>> utledUtsattePerioderFraBehandling(List<SakOgBehandlinger> fagsaker) {
@@ -114,7 +129,6 @@ public class KjøreplanUtleder {
 
         var kjøreplansTidslinje = utledKjøreplan(kravprioritetPåEndringerOgVedtakstatus, kravprioForEldsteKrav, input);
 
-
         return new Kjøreplan(input.getAktuellFagsakId(), input.getAktuellSak(), kjøreplansTidslinje, kravprioForEldsteKrav);
     }
 
@@ -126,12 +140,7 @@ public class KjøreplanUtleder {
         Map<Long, Boolean> trengerÅUtsettePerioder = utledBehovForUtsettelse(input, kravprioritetPåEndringerOgVedtakstatus);
         var toOmsorgspersonerTidslinje = input.getToOmsorgspersonerTidslinje();
 
-        var splittetKravperioderPåInnleggelser = kravprioForEldsteKrav.combine(toOmsorgspersonerTidslinje, (localDateInterval, leftSegment, rightSegment) -> {
-            if (leftSegment == null) {
-                return null;
-            }
-            return new LocalDateSegment<>(localDateInterval, leftSegment.getValue());
-        }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+        LocalDateTimeline<List<InternalKravprioritet>> splittetKravperioderPåInnleggelser = getSplittetKravperioderPåInnleggelser(kravprioForEldsteKrav, toOmsorgspersonerTidslinje);
 
         for (LocalDateSegment<List<InternalKravprioritet>> segment : splittetKravperioderPåInnleggelser) {
             var prio = new HashSet<AksjonPerFagsak>();
@@ -213,8 +222,8 @@ public class KjøreplanUtleder {
         var sorterteSaksnummer = sakOgBehandlinger.stream().map(SakOgBehandlinger::getSaksnummer).sorted().collect(Collectors.toCollection(ArrayList::new));
 
         for (SakOgBehandlinger sakOgBehandling : sakOgBehandlinger) {
-            resultat.put(sakOgBehandling.getFagsak(), harPrioritetIEnPeriodeOgIkkeIenAnenn(sakOgBehandling.getFagsak(),
-                kravprioritetPåEndringerOgVedtakstatus.toSegments(), input));
+            resultat.put(sakOgBehandling.getFagsak(), harPrioritetIEnPeriodeOgIkkeIEnAnnen(sakOgBehandling.getFagsak(),
+                kravprioritetPåEndringerOgVedtakstatus, input));
         }
 
         if (harFlereEnnEnSomSkalUtsettes(resultat)) {
@@ -234,7 +243,7 @@ public class KjøreplanUtleder {
         return resultat.entrySet().stream().filter(Map.Entry::getValue).count() > 1;
     }
 
-    private boolean harPrioritetIEnPeriodeOgIkkeIenAnenn(Long fagsakId, NavigableSet<LocalDateSegment<List<InternalKravprioritet>>> ikkeVedtattIkkeUtsatteKrav, KravPrioInput input) {
+    private boolean harPrioritetIEnPeriodeOgIkkeIEnAnnen(Long fagsakId, LocalDateTimeline<List<InternalKravprioritet>> ikkeVedtattIkkeUtsatteKrav, KravPrioInput input) {
         boolean harPrioritetIPeriodeAndreHarKravPå = false;
         boolean harIkkePrioritetIPeriodeAndreHarKravPå = false;
 
@@ -251,6 +260,9 @@ public class KjøreplanUtleder {
             var unikeSakerMedKrav = kravprioritetForPeriode.stream().map(InternalKravprioritet::getFagsak).collect(Collectors.toSet());
             // TODO: Vurdere om det skal utvides med støtte for å kjøre videre ved innleggelse også (utlede antall felt på motorveien)
             if (unikeSakerMedKrav.size() < 2) {
+                continue;
+            }
+            if (unikeSakerMedKrav.stream().noneMatch(it -> Objects.equals(it, fagsakId))) {
                 continue;
             }
             if (Objects.equals(kravprioritetForPeriode.get(0).getFagsak(), fagsakId)) {
@@ -341,11 +353,13 @@ public class KjøreplanUtleder {
 
         final List<PleietrengendeSykdomInnleggelsePeriode> innleggelser = sykdomVurderingTjeneste.hentInnleggelser(behandling).getPerioder();
 
-        return new LocalDateTimeline<>(innleggelser.stream()
+        var tidslinje = new LocalDateTimeline<>(innleggelser.stream()
             .map(i -> new LocalDateSegment<>(i.getFom(), i.getTom(), Boolean.TRUE))
             .collect(Collectors.toList()))
             .combine(sykdomVurderingerOgPerioder,
                 StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        var localDateSegments = Hjelpetidslinjer.utledHullSomMåTettes(tidslinje, new PåTversAvHelgErKantIKantVurderer());
+        return tidslinje.combine(localDateSegments, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }
 
     private InternalKravprioritet tilKravPrio(SakOgBehandlinger sakOgBehandling, List<MottattKrav> mottattDokumenter, Map.Entry<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> kravdokument) {
