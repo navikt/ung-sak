@@ -41,6 +41,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
+import no.nav.folketrygdloven.kalkulus.response.v1.regelinput.Saksnummer;
 import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
@@ -52,7 +53,6 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class KalkulusRestKlient {
@@ -68,7 +68,7 @@ public class KalkulusRestKlient {
     private final ObjectReader grunnlagListReader = kalkulusMapper.readerFor(new TypeReference<List<BeregningsgrunnlagGrunnlagDto>>() {
     });
     private final ObjectReader grunnbeløpReader = kalkulusMapper.readerFor(Grunnbeløp.class);
-    private final ObjectReader saksnummerReader = kalkulusMapper.readerFor(Saksnummer.class);
+    private final ObjectReader saksnummerReader = kalkulusMapper.readerFor(no.nav.folketrygdloven.kalkulus.response.v1.regelinput.Saksnummer.class);
 
 
     private CloseableHttpClient restClient;
@@ -206,10 +206,11 @@ public class KalkulusRestKlient {
         }
     }
 
-    public Saksnummer komprimerRegelinput(KomprimerRegelInputRequest request) {
+    public String komprimerRegelinput(KomprimerRegelInputRequest request) {
         var endpoint = komprimerRegelinput;
         try {
-            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), saksnummerReader);
+            Saksnummer saksnummmer = getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), saksnummerReader);
+            return saksnummmer == null ? null: saksnummmer.getSaksnummer();
         } catch (IOException e) {
             throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
