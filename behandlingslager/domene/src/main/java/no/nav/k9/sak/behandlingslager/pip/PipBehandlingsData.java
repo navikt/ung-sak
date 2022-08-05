@@ -1,6 +1,5 @@
 package no.nav.k9.sak.behandlingslager.pip;
 
-import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -11,7 +10,8 @@ public class PipBehandlingsData {
     private Long fagsakId;
     private String saksnummer;
 
-    public PipBehandlingsData(String behandligStatus, String ansvarligSaksbehandler, BigInteger fagsakId, String fagsakStatus, String saksnummer) {
+    public PipBehandlingsData(String behandligStatus, String ansvarligSaksbehandler, Number fagsakId,
+            String fagsakStatus, String saksnummer) {
         this.behandligStatus = behandligStatus;
         this.saksnummer = saksnummer;
         this.fagsakId = fagsakId.longValue();
@@ -61,10 +61,10 @@ public class PipBehandlingsData {
         }
         PipBehandlingsData other = (PipBehandlingsData) object;
         return Objects.equals(getBehandligStatus(), other.getBehandligStatus())
-            && Objects.equals(getFagsakStatus(), other.getFagsakStatus())
-            && Objects.equals(getFagsakId(), other.getFagsakId())
-            && Objects.equals(getSaksnummer(), other.getSaksnummer())
-            && Objects.equals(getAnsvarligSaksbehandler(), other.getAnsvarligSaksbehandler());
+                && Objects.equals(getFagsakStatus(), other.getFagsakStatus())
+                && Objects.equals(getFagsakId(), other.getFagsakId())
+                && Objects.equals(getSaksnummer(), other.getSaksnummer())
+                && Objects.equals(getAnsvarligSaksbehandler(), other.getAnsvarligSaksbehandler());
     }
 
     @Override
@@ -74,13 +74,14 @@ public class PipBehandlingsData {
 
     @Override
     public String toString() {
-        // tar ikke med ansvarligSaksbehandlinger så ikke lekker sensitive personopplysninger i logg (inkl. stedslokaliserende, enhet)
+        // tar ikke med ansvarligSaksbehandlinger så ikke lekker sensitive
+        // personopplysninger i logg (inkl. stedslokaliserende, enhet)
         return getClass().getSimpleName() + "<"
-            + "behandligStatus=" + behandligStatus + ", "
-            + "saksnummer=" + saksnummer + ", "
-            + "fagsakId=" + fagsakId + ", "
-            + "fagsakStatus=" + fagsakStatus + ", "
-            + ">"; //$NON-NLS-1$
+                + "behandligStatus=" + behandligStatus + ", "
+                + "saksnummer=" + saksnummer + ", "
+                + "fagsakId=" + fagsakId + ", "
+                + "fagsakStatus=" + fagsakStatus + ", "
+                + ">"; //$NON-NLS-1$
     }
 
 }
