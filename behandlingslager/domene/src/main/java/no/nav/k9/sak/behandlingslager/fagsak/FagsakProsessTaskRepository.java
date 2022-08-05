@@ -12,9 +12,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hibernate.jpa.HibernateHints;
+import org.hibernate.jpa.QueryHints;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.type.StandardBasicTypes;
+import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -70,7 +70,7 @@ public class FagsakProsessTaskRepository {
     }
 
     public Optional<FagsakProsessTask> hent(Long prosessTaskId, boolean lås) {
-        TypedQuery<FagsakProsessTask> query = getEntityManager().createQuery("select fpt from FagsakProsessTask fpt where fpt.prosessTaskId=:prosessTaskId",
+        TypedQuery<FagsakProsessTask> query = getEntityManager().createQuery("from FagsakProsessTask fpt where fpt.prosessTaskId=:prosessTaskId",
             FagsakProsessTask.class);
         query.setParameter("prosessTaskId", prosessTaskId);
         if (lås) {
@@ -140,12 +140,12 @@ public class FagsakProsessTaskRepository {
                 ProsessTaskEntitet.class);
 
         query.setParameter("statuses", statusNames)
-            .setParameter("gruppe", gruppeId, StandardBasicTypes.STRING)
+            .setParameter("gruppe", gruppeId, StringType.INSTANCE)
             .setParameter("nesteKjoeringFraOgMed", nesteKjoeringFraOgMed) // max oppløsning på neste_kjoering_etter er sekunder
             .setParameter("nesteKjoeringTilOgMed", nesteKjoeringTilOgMed)
             .setParameter("fagsakId", fagsakId) // NOSONAR
-            .setParameter("behandlingId", behandlingId, StandardBasicTypes.STRING) // NOSONAR
-            .setHint(HibernateHints.HINT_READ_ONLY, "true");
+            .setParameter("behandlingId", behandlingId, StringType.INSTANCE) // NOSONAR
+            .setHint(QueryHints.HINT_READONLY, "true");
 
         List<ProsessTaskEntitet> resultList = query.getResultList();
         return tilProsessTask(resultList);
@@ -275,9 +275,9 @@ public class FagsakProsessTaskRepository {
             }
             // Dersom den ikke er NULL er den kun tillatt dersom den matcher laveste gruppe_sekvensnr for Fagsak i
             // FAGSAK_PROSESS_TASK tabell.
-            TypedQuery<FagsakProsessTask> query = getEntityManager().createQuery("select fpt from FagsakProsessTask fpt " +
-                    "where fpt.fagsakId=:fagsakId and fpt.gruppeSekvensNr is not null " +
-                    "order by fpt.gruppeSekvensNr ",
+            TypedQuery<FagsakProsessTask> query = getEntityManager().createQuery("from FagsakProsessTask fpt " +
+                    "where fpt.fagsakId=:fagsakId and gruppeSekvensNr is not null " +
+                    "order by gruppeSekvensNr ",
                 FagsakProsessTask.class);
             query.setParameter("fagsakId", fagsakId); // NOSONAR
             query.setMaxResults(1);

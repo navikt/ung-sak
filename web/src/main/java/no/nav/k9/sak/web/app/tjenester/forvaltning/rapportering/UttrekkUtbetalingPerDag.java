@@ -7,6 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
+
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
@@ -83,7 +84,7 @@ public class UttrekkUtbetalingPerDag implements RapportGenerator {
             .setParameter("ytelseType", ytelseType.getKode())
             .setParameter("fom", periode.getFomDato())
             .setParameter("tom", periode.getTomDato()) // tar alt overlappende
-            .setHint("jakarta.persistence.query.timeout", 1 * 90 * 1000) // 1:30 min
+            .setHint("javax.persistence.query.timeout", 1 * 90 * 1000) // 1:30 min
         ;
         String path = "utbetaling-per-dag.csv";
 

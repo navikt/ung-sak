@@ -222,7 +222,7 @@ public class OverstyrInputBeregningTjeneste {
             .orElse(0);
         return Optional.of(new OverstyrBeregningAktivitet(
             arbeidsgiver.getArbeidsgiverOrgnr() == null ? null : new OrgNummer(arbeidsgiver.getArbeidsgiverOrgnr()),
-            arbeidsgiver.getArbeidsgiverAktørId() == null ? null : new AktørId(arbeidsgiver.getArbeidsgiverAktørId()),
+            arbeidsgiver.getArbeidsgiverAktørId() == null ? null : new AktørId(arbeidsgiver.getArbeidsgiverAktørId().getAktørId()),
             inntekt,
             refusjonskravFraIM.orElse(null),
             startdatoRefusjon.orElse(null),
