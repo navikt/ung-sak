@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -8,7 +7,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristResultat;
@@ -65,22 +63,14 @@ public class MapTilSøknadsfristDto {
     }
 
     public SøknadsfristTilstandDto mapTilV2(Map<KravDokument, List<VurdertSøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravDokumentListMap, Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultat, LocalDateTimeline<KravDokument> kravrekkefølgeForPerioderIBehandlingen) {
-        var perioderTilVurdering = kravrekkefølgeForPerioderIBehandlingen.mapValue(it -> true).compress();
-
-        var kravstatuser = perioderTilVurdering.stream()
-            .map(segment -> mapPerioderV2(segment.getLocalDateInterval(), kravrekkefølgeForPerioderIBehandlingen, kravDokumentListMap, avklartSøknadsfristResultat))
-            .filter(Objects::nonNull)
-            .flatMap(Collection::stream)
+        var kravstatuser = kravrekkefølgeForPerioderIBehandlingen.stream()
+            .map(segment -> mapPerioderV2(segment, kravDokumentListMap, avklartSøknadsfristResultat))
             .collect(Collectors.toList());
         return new SøknadsfristTilstandDto(kravstatuser);
     }
 
-    private List<KravDokumentStatus> mapPerioderV2(LocalDateInterval interval, LocalDateTimeline<KravDokument> kravrekkefølgeForPerioderIBehandlingen, Map<KravDokument, List<VurdertSøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravDokumentListMap, Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultat) {
-
-        return kravrekkefølgeForPerioderIBehandlingen.intersection(interval)
-            .stream()
-            .map(it -> mapTilKravStatusForPeriode(it, kravDokumentListMap, avklartSøknadsfristResultat))
-            .toList();
+    private KravDokumentStatus mapPerioderV2(LocalDateSegment<KravDokument> segment, Map<KravDokument, List<VurdertSøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravDokumentListMap, Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultat) {
+        return mapTilKravStatusForPeriode(segment, kravDokumentListMap, avklartSøknadsfristResultat);
     }
 
     private KravDokumentStatus mapTilKravStatusForPeriode(LocalDateSegment<KravDokument> segment, Map<KravDokument, List<VurdertSøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravDokumentListMap, Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultat) {
