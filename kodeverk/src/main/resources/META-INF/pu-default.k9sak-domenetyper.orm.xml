@@ -86,11 +86,9 @@
 			<basic name="arbeidsgiverOrgnr" access="FIELD">
 				<column name="arbeidsgiver_orgnr" updatable="false" length="50" />
 			</basic>
-			<embedded name="arbeidsgiverAktørId" access="FIELD">
-				<attribute-override name="aktørId">
-					<column name="arbeidsgiver_aktor_id" updatable="false" length="50" />
-				</attribute-override>
-			</embedded>
+			<basic name="arbeidsgiverAktørId" access="FIELD">
+				<column name="arbeidsgiver_aktor_id" updatable="false" length="50" />
+			</basic>
 		</attributes>
 	</embeddable>
 

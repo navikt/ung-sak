@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Type;
+import org.hibernate.type.descriptor.java.DurationJavaType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -54,14 +56,14 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, Søk
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
+            @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
+            @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
     })
     private DatoIntervallEntitet periode;
 
     @ManyToOne
     @JoinColumn(name = "fravaer_id", nullable = false, updatable = false, unique = true)
-    @JsonIgnore //må ha denne for å unngå sirkulær traversering fra Jackson - ved serialisering av regelsporing
+    @JsonIgnore // må ha denne for å unngå sirkulær traversering fra Jackson - ved serialisering av regelsporing
     private OppgittFravær oppgittFravær;
 
     @Convert(converter = UttakArbeidTypeKodeConverter.class)
@@ -108,7 +110,8 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, Søk
         this.fraværPerDag = fraværPerDag;
     }
 
-    public OppgittFraværPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag, FraværÅrsak fraværÅrsak, SøknadÅrsak søknadÅrsak) {
+    public OppgittFraværPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef,
+                                Duration fraværPerDag, FraværÅrsak fraværÅrsak, SøknadÅrsak søknadÅrsak) {
         this.journalpostId = journalpostId;
         this.arbeidsgiver = arbeidsgiver;
         this.arbeidsforholdRef = arbeidsforholdRef;
@@ -133,7 +136,6 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, Søk
         this.fraværÅrsak = periode.fraværÅrsak;
         this.søknadÅrsak = periode.søknadÅrsak;
     }
-
 
     @Override
     public String getIndexKey() {
