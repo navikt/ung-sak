@@ -17,7 +17,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
@@ -168,7 +167,7 @@ public class SykdomVurderingRepository {
                 "From MedisinskGrunnlag as sgb " +
                     "inner join sgb.grunnlagsdata as sg " +
                     "inner join sg.vurderinger as vv " +
-                    "inner join vv.sykdomVurdering as v " +
+                    "inner join vv.pleietrengendeSykdomVurdering as v " +
                 "where sgb.behandlingUuid = :behandlingUuid " +
                     "and v.id = :vurderingId " +
                     "and sgb.versjon = " +
