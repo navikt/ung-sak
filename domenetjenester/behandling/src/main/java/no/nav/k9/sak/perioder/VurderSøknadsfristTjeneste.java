@@ -1,7 +1,5 @@
 package no.nav.k9.sak.perioder;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,6 +8,7 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.inject.Instance;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -86,21 +85,15 @@ public interface VurderSøknadsfristTjeneste<T extends SøktPeriodeData> {
         var kravdokumenterMedVurdertePerioder = vurderSøknadsfrist(referanse);
 
         for (Map.Entry<KravDokument, List<VurdertSøktPeriode<T>>> entry : kravdokumenterMedVurdertePerioder.entrySet()) {
-            var segments = entry.getValue().stream().map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), entry.getKey())).toList();
-            timeline = timeline.combine(new LocalDateTimeline<>(segments), (localDateInterval, leftSegment, rightSegment) -> {
-                List<KravDokument> kravdokumenter = new ArrayList<>();
-
-                if (leftSegment != null) {
-                    kravdokumenter.addAll(leftSegment.getValue());
-                }
-                if (rightSegment != null) {
-                    kravdokumenter.add(rightSegment.getValue());
-                }
-                Collections.sort(kravdokumenter);
-
-                return new LocalDateSegment<>(localDateInterval, kravdokumenter);
-            }, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            var segments = entry.getValue()
+                .stream()
+                .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), entry.getKey()))
+                .toList();
+            timeline = timeline.combine(new LocalDateTimeline<>(segments), StandardCombinators::allValues, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-        return timeline.compress();
+        return timeline.mapValue(v -> v.stream()
+                .sorted()
+                .toList())
+            .compress();
     }
 }
