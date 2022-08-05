@@ -10,6 +10,7 @@ import jakarta.persistence.CacheRetrieveMode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.LockModeType;
+
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 /**
@@ -18,7 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 @Dependent
 public class BehandlingLåsRepository {
 
-    private static final Map<String, Object> BYPASS_PROPS = Map.of("jakarta.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
+    private static final Map<String, Object> BYPASS_PROPS = Map.of("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
 
     private static final Pattern DIGITS_PATTERN = Pattern.compile("\\d+");
     private EntityManager entityManager;

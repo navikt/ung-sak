@@ -2,16 +2,16 @@ package no.nav.k9.sak.typer;
 
 import java.util.Objects;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.api.IndexKey;
 
 /** En arbeidsgiver (enten virksomhet eller personlig arbeidsgiver). */
@@ -21,8 +21,7 @@ import no.nav.k9.kodeverk.api.IndexKey;
 public class Arbeidsgiver implements IndexKey {
 
     /**
-     * Kun en av denne og {@link #arbeidsgiverAktørId} kan være satt. Sett denne
-     * hvis Arbeidsgiver er en Organisasjon.
+     * Kun en av denne og {@link #arbeidsgiverAktørId} kan være satt. Sett denne hvis Arbeidsgiver er en Organisasjon.
      */
     @JsonProperty(value = "arbeidsgiverOrgnr")
     @Valid
@@ -31,25 +30,19 @@ public class Arbeidsgiver implements IndexKey {
     private String arbeidsgiverOrgnr;
 
     /**
-     * Kun en av denne og {@link #virksomhet} kan være satt. Sett denne hvis
-     * Arbeidsgiver er en Enkelt person.
+     * Kun en av denne og {@link #virksomhet} kan være satt. Sett denne hvis Arbeidsgiver er en Enkelt person.
      */
     @JsonProperty(value = "arbeidsgiverAktørId")
     @Valid
-    @Size(max = 20)
-    @Pattern(regexp = "^\\d+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    private String arbeidsgiverAktørId;
+    private AktørId arbeidsgiverAktørId;
 
     protected Arbeidsgiver() {
         // for JPA
     }
 
-    @JsonCreator
-    public Arbeidsgiver(
-            @JsonProperty(value = "arbeidsgiverOrgnr") @Valid @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String arbeidsgiverOrgnr,
-            @JsonProperty(value = "arbeidsgiverAktørId") @Valid @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") AktørId arbeidsgiverAktørId) {
+    protected Arbeidsgiver(String arbeidsgiverOrgnr, AktørId arbeidsgiverAktørId) {
         this.arbeidsgiverOrgnr = nonEmpty(arbeidsgiverOrgnr);
-        this.arbeidsgiverAktørId = arbeidsgiverAktørId == null ? null : arbeidsgiverAktørId.getAktørId();
+        this.arbeidsgiverAktørId = arbeidsgiverAktørId;
 
         if (this.arbeidsgiverAktørId == null && this.arbeidsgiverOrgnr == null) {
             throw new IllegalArgumentException("Utvikler-feil: arbeidsgiver uten hverken orgnr eller aktørId");
@@ -65,8 +58,8 @@ public class Arbeidsgiver implements IndexKey {
     @Override
     public String getIndexKey() {
         return getAktørId() != null
-                ? "arbeidsgiverAktørId-" + getAktørId()
-                : "virksomhet-" + getOrgnr();
+            ? "arbeidsgiverAktørId-" + getAktørId()
+            : "virksomhet-" + getOrgnr();
     }
 
     public static Arbeidsgiver virksomhet(String arbeidsgiverOrgnr) {
@@ -81,20 +74,17 @@ public class Arbeidsgiver implements IndexKey {
         return new Arbeidsgiver(null, arbeidsgiverAktørId);
     }
 
-    /**
-     * Virksomhets orgnr. Leser bør ta høyde for at dette kan være juridisk orgnr
-     * (istdf. virksomhets orgnr).
-     */
+    /** Virksomhets orgnr. Leser bør ta høyde for at dette kan være juridisk orgnr (istdf. virksomhets orgnr). */
     public String getOrgnr() {
         return arbeidsgiverOrgnr;
     }
 
     /** Hvis arbeidsgiver er en privatperson, returner aktørId for person. */
     public AktørId getAktørId() {
-        return getArbeidsgiverAktørId() == null ? null : new AktørId(getArbeidsgiverAktørId());
+        return arbeidsgiverAktørId;
     }
 
-    public String getArbeidsgiverAktørId() {
+    public AktørId getArbeidsgiverAktørId() {
         return arbeidsgiverAktørId;
     }
 
@@ -103,8 +93,7 @@ public class Arbeidsgiver implements IndexKey {
     }
 
     /**
-     * Returneer ident for arbeidsgiver. Kan være Org nummer eller Aktør id (dersom
-     * arbeidsgiver er en enkelt person -
+     * Returneer ident for arbeidsgiver. Kan være Org nummer eller Aktør id (dersom arbeidsgiver er en enkelt person -
      * f.eks. for Frilans el.)
      */
     public String getIdentifikator() {
@@ -136,7 +125,7 @@ public class Arbeidsgiver implements IndexKey {
             return false;
         Arbeidsgiver that = (Arbeidsgiver) o;
         return Objects.equals(getOrgnr(), that.getOrgnr()) &&
-                Objects.equals(getAktørId(), that.getAktørId());
+            Objects.equals(getAktørId(), that.getAktørId());
     }
 
     @Override
@@ -152,11 +141,9 @@ public class Arbeidsgiver implements IndexKey {
     private static String toString(Arbeidsgiver arb) {
         // litt maskering for feilsøking nå
         if (arb.getErVirksomhet()) {
-            return "Virksomhet<" + arb.getIdentifikator().substring(0, Math.min(arb.getIdentifikator().length(), 3))
-                    + "...>";
+            return "Virksomhet<" + arb.getIdentifikator().substring(0, Math.min(arb.getIdentifikator().length(), 3)) + "...>";
         } else {
-            return "PersonligArbeidsgiver<"
-                    + arb.getIdentifikator().substring(0, Math.min(arb.getIdentifikator().length(), 3)) + "...>";
+            return "PersonligArbeidsgiver<" + arb.getIdentifikator().substring(0, Math.min(arb.getIdentifikator().length(), 3)) + "...>";
         }
     }
 

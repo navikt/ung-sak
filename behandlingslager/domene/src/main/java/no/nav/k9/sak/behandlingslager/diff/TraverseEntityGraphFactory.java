@@ -2,7 +2,7 @@ package no.nav.k9.sak.behandlingslager.diff;
 
 import java.util.function.Function;
 
-import no.nav.k9.sak.behandlingslager.Range;
+import com.vladmihalcea.hibernate.type.range.Range;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
