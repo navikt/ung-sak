@@ -2,7 +2,7 @@ package no.nav.k9.sak.domene.typer.tid;
 
 import java.time.LocalDate;
 
-import com.vladmihalcea.hibernate.type.range.Range;
+import no.nav.k9.sak.behandlingslager.Range;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
