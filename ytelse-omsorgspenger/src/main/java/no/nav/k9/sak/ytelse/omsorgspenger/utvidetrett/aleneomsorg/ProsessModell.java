@@ -4,7 +4,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -31,6 +30,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
+            .medSteg(BehandlingStegType.VURDER_ALDERSVILKÅR_BARN)
             .medSteg(BehandlingStegType.VURDER_OMSORG_FOR)
             .medSteg(BehandlingStegType.MANUELL_VILKÅRSVURDERING)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
@@ -53,6 +53,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
+            .medSteg(BehandlingStegType.VURDER_ALDERSVILKÅR_BARN)
             .medSteg(BehandlingStegType.VURDER_OMSORG_FOR)
             .medSteg(BehandlingStegType.MANUELL_VILKÅRSVURDERING)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)

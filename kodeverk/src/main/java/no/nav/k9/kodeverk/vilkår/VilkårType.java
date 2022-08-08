@@ -67,6 +67,12 @@ public enum VilkårType implements Kodeverdi {
             FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-3 første ledd",
             FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-3 første ledd"),
         Avslagsårsak.SØKER_OVER_HØYESTE_ALDER),
+    ALDERSVILKÅR_BARN("K9_VK_5_3", "Aldersvilkår for barn",
+        Map.of(
+            FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-5 tredje ledd",
+            FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-5 tredje ledd",
+            FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-5 tredje ledd"),
+        Avslagsårsak.BARN_OVER_HØYESTE_ALDER),
     MEDISINSKEVILKÅR_UNDER_18_ÅR("K9_VK_2_a",
         "Medisinske vilkår under 18 år",
         Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-10 første ledd"),

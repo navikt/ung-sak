@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -31,7 +31,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder
 
 @FagsakYtelseTypeRef(FagsakYtelseType.OMSORGSPENGER_AO)
 @BehandlingTypeRef
-@RequestScoped
+@ApplicationScoped
 public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private BehandlingRepository behandlingRepository;
@@ -87,8 +87,10 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
     @Override
     public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
         return Map.of(
-            VilkårType.UTVIDETRETT, utledUtvidetRettAleneomsorg(behandlingId),
-            VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR));
+            VilkårType.ALDERSVILKÅR_BARN, utled(behandlingId, VilkårType.ALDERSVILKÅR_BARN),
+            VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR),
+            VilkårType.UTVIDETRETT, utledUtvidetRettAleneomsorg(behandlingId)
+            );
     }
 
     private NavigableSet<DatoIntervallEntitet> utledUtvidetRettAleneomsorg(Long behandlingId) {
