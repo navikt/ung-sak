@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -111,7 +111,7 @@ class LagreOppgittOpptjening {
                 enkeltTask.setCallIdFraEksisterende();
 
                 var request = oppgittOpptjeningMapperTjeneste.byggRequest(behandling, opptjeningBuilder);
-                var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
+                var payload = JsonObjectMapper.getMapper().writeValueAsString(request);
                 enkeltTask.setPayload(payload);
 
                 prosessTaskRepository.lagre(enkeltTask);
