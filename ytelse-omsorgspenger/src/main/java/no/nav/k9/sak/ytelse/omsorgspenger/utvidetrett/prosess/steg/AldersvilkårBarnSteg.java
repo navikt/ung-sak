@@ -66,6 +66,10 @@ public class AldersvilkårBarnSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+        if (!aldersvilkårLansert){
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
+
         Long behandlingId = kontekst.getBehandlingId();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         Vilkår vilkår = vilkårene.getVilkår(VilkårType.ALDERSVILKÅR_BARN).orElseThrow();
