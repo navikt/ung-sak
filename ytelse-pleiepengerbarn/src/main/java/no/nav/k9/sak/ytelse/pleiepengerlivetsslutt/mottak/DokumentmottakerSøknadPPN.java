@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -110,7 +110,7 @@ class DokumentmottakerSøknadPPN implements Dokumentmottaker {
                 return;
             }
             var enkeltTask = ProsessTaskData.forProsessTask(AsyncAbakusLagreOpptjeningTask.class);
-            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request.get());
+            var payload = JsonObjectMapper.getMapper().writeValueAsString(request.get());
             enkeltTask.setPayload(payload);
 
             enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, dokument.getJournalpostId().getVerdi());

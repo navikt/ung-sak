@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.UuidDto;
 import no.nav.abakus.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdDto;
 import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
@@ -58,7 +58,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 public class AbakusTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(AbakusTjeneste.class);
-    private final ObjectMapper iayMapper = IayGrunnlagJsonMapper.getMapper();
+    private final ObjectMapper iayMapper = JsonObjectMapper.getMapper();
     private final ObjectWriter iayJsonWriter = iayMapper.writerWithDefaultPrettyPrinter();
     private final ObjectReader iayGrunnlagReader = iayMapper.readerFor(InntektArbeidYtelseGrunnlagDto.class);
     private final ObjectReader arbeidsforholdReader = iayMapper.readerFor(ArbeidsforholdDto[].class);
