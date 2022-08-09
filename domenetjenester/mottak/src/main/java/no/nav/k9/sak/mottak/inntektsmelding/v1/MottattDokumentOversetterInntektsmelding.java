@@ -10,13 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.xml.bind.JAXBElement;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.xml.bind.JAXBElement;
 import no.nav.inntektsmelding.xml.kodeliste._2019xxyy.NaturalytelseKodeliste;
 import no.nav.inntektsmelding.xml.kodeliste._2019xxyy.ÅrsakInnsendingKodeliste;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
@@ -116,7 +115,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
                 var arbeidsforholdRef = EksternArbeidsforholdRef.ref(arbeidsforholdId.getValue());
                 builder.medArbeidsforholdId(arbeidsforholdRef);
             }
-            builder.medBeløp(validator.validerRefusjonMaks("arbeidsforhold.beregnetInntekt", arbeidsforholdet.getBeregnetInntekt().getValue().getBeloep().getValue()));
+            builder.medBeløp(validator.validerMaksBeløp("arbeidsforhold.beregnetInntekt", arbeidsforholdet.getBeregnetInntekt().getValue().getBeloep().getValue()));
         } else {
             throw InntektsmeldingFeil.FACTORY.manglendeInformasjon().toException();
         }
@@ -143,7 +142,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
             var refusjon = optionalRefusjon.get();
             BigDecimal refusjonsbeløp = null;
             if (refusjon.getRefusjonsbeloepPrMnd() != null) {
-                refusjonsbeløp = validator.validerRefusjonMaks("refusjon.refusjonsbeloepPrMnd", refusjon.getRefusjonsbeloepPrMnd().getValue());
+                refusjonsbeløp = validator.validerMaksBeløp("refusjon.refusjonsbeloepPrMnd", refusjon.getRefusjonsbeloepPrMnd().getValue());
             }
             if (refusjon.getRefusjonsopphoersdato() != null) {
                 builder.medRefusjon(refusjonsbeløp, refusjon.getRefusjonsopphoersdato().getValue());
@@ -176,7 +175,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         for (NaturalytelseDetaljer detaljer : wrapper.getOpphørelseAvNaturalytelse()) {
             NaturalytelseKodeliste naturalytelse = NaturalytelseKodeliste.fromValue(detaljer.getNaturalytelseType().getValue());
             final NaturalYtelseType ytelseType = NaturalYtelseType.finnForKodeverkEiersKode(naturalytelse.value());
-            beløp.put(ytelseType, detaljer.getBeloepPrMnd().getValue());
+            beløp.put(ytelseType, validator.validerMaksBeløp("naturalYtelse.beløpPerMnd", detaljer.getBeloepPrMnd().getValue()));
             LocalDate bortfallFom = detaljer.getFom().getValue();
             LocalDate naturalytelseTom = bortfallFom.minusDays(1);
             builder.leggTil(new NaturalYtelse(TIDENES_BEGYNNELSE, naturalytelseTom,

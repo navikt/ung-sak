@@ -2,10 +2,8 @@ package no.nav.k9.sak.mottak.inntektsmelding;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
-
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
@@ -20,7 +18,7 @@ public class InntekstsmeldingDokumentValidator implements DokumentValidator {
     @Override
     public void validerDokumenter(Long behandlingId, Collection<MottattDokument> inntektsmeldinger) {
         // TODO hvorfor er ikke validering lik i validerDokument og i validerDokumenter?
-        var mottattBrevkoder = inntektsmeldinger.stream().map(MottattDokument::getType).collect(Collectors.toList());
+        var mottattBrevkoder = inntektsmeldinger.stream().map(MottattDokument::getType).toList();
         int i = 0;
         for (var m : inntektsmeldinger) {
             var brevkode = mottattBrevkoder.get(i++);
