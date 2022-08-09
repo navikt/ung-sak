@@ -57,11 +57,12 @@ public class KomprimerRegelInputTask extends FagsakProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        var saksnummer = prosessTaskData.getSaksnummer();
+        var fagsakId = prosessTaskData.getFagsakId();
         var maksAntalLSakerRaw = prosessTaskData.getPropertyValue(MAX_ANTALL_SAKER);
         var maksAntallSaker = prosessTaskData.getPropertyValue(MAX_ANTALL_SAKER) == null ? null : Integer.valueOf(maksAntalLSakerRaw);
         var lopenr = prosessTaskData.getPropertyValue(LØPENR_SAK) == null ? 1 : Integer.parseInt(prosessTaskData.getPropertyValue(LØPENR_SAK));
-        var nesteSaksnummer = kalkulusSystemRestKlient.komprimerRegelinput(new KomprimerRegelInputRequest(saksnummer));
+        var førsteSak = fagsakRepository.finnEksaktFagsak(fagsakId);
+        var nesteSaksnummer = kalkulusSystemRestKlient.komprimerRegelinput(new KomprimerRegelInputRequest(førsteSak.getSaksnummer().getVerdi()));
         if (nesteSaksnummer != null && (maksAntallSaker == null || lopenr < maksAntallSaker)) {
             var fagsak = fagsakRepository.hentSakGittSaksnummer(new Saksnummer(nesteSaksnummer));
             fagsak.ifPresent(f -> startInputKomprimeringForSak(f, lopenr, maksAntallSaker));
@@ -70,10 +71,8 @@ public class KomprimerRegelInputTask extends FagsakProsessTask {
 
     private void startInputKomprimeringForSak(Fagsak fagsak, Integer lopenr, Integer maksAntallSaker) {
         Objects.requireNonNull(fagsak);
-        var saksnummer = fagsak.getSaksnummer().getVerdi();
         ProsessTaskData nesteTask = ProsessTaskData.forProsessTask(KomprimerRegelInputTask.class);
         nesteTask.setFagsakId(fagsak.getId());
-        nesteTask.setSaksnummer(saksnummer);
         if (maksAntallSaker != null) {
             nesteTask.setProperty(MAX_ANTALL_SAKER, maksAntallSaker.toString());
         }
