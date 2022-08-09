@@ -2,11 +2,8 @@ package no.nav.k9.sak.web.server.jetty;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.sql.DataSource;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -81,16 +78,9 @@ public class JettyDevServer extends JettyServer {
             super.migrerDatabaser();
         } catch (IllegalStateException e) {
             log.info("Migreringer feilet, cleaner og prøver på nytt for lokal db.");
-            DataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN,
-                    getEnvironmentClass(), 1);
-            try {
+            try (var migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN,
+                getEnvironmentClass(), 1)) {
                 DevDatabaseScript.clean(migreringDs);
-            } finally {
-                try {
-                    migreringDs.getConnection().close();
-                } catch (SQLException sqlException) {
-                    log.warn("Klarte ikke stenge connection etter migrering", sqlException);
-                }
             }
             super.migrerDatabaser();
         }

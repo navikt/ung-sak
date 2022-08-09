@@ -127,7 +127,7 @@ public class JettyServer {
             // operasjoner
             initSql = null;
         }
-        try (HikariDataSource migreringDs = (HikariDataSource) DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, environmentClass, 1)) {
+        try (HikariDataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, environmentClass, 1)) {
             DatabaseScript.migrate(migreringDs, initSql);
         }
     }
