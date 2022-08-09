@@ -293,7 +293,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return Response.ok(saksnummerliste).build();
     }
-    
+
     @GET
     @Path("/saker-med-feil2")
     @Produces(MediaType.TEXT_PLAIN)
@@ -311,9 +311,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                         + "  AND d.mottatt_dato >= to_date('2022-05-01', 'YYYY-MM-DD')"
                         + "  AND d.mottatt_dato <= to_date('2022-06-03', 'YYYY-MM-DD')");
         q.setHint("javax.persistence.query.timeout", 5 * 60 * 1000); // 5 minutter
-        
+
         final List<String> saksnumre = new ArrayList<>();
-        
+
         @SuppressWarnings("unchecked")
         final Stream<Object[]> resultStream = q.getResultStream();
         resultStream.forEach(d -> {
@@ -329,12 +329,12 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 throw new RuntimeException(e);
             }
         });
-        
+
         final String saksnummerliste = saksnumre.stream().reduce((a, b) -> a + ", " + b).orElse("");
 
         return Response.ok(saksnummerliste).build();
     }
-    
+
     @GET
     @Path("/saker-med-feil3")
     @Produces(MediaType.TEXT_PLAIN)
@@ -350,9 +350,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                         + ") "
                         + "WHERE d.type = 'PLEIEPENGER_LIVETS_SLUTTFASE_SOKNAD' ");
         q.setHint("javax.persistence.query.timeout", 5 * 60 * 1000); // 5 minutter
-        
+
         final List<String> saksnumre = new ArrayList<>();
-        
+
         @SuppressWarnings("unchecked")
         final Stream<Object[]> resultStream = q.getResultStream();
         resultStream.forEach(d -> {
@@ -368,16 +368,16 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 throw new RuntimeException(e);
             }
         });
-        
+
         final String saksnummerliste = saksnumre.stream().reduce((a, b) -> a + ", " + b).orElse("");
 
         return Response.ok(saksnummerliste).build();
     }
-    
+
     private boolean harTomSøknadsperiode(PleipengerLivetsSluttfase pls) {
         return pls.getSøknadsperiodeList().isEmpty();
     }
-    
+
     private boolean erFraBrukerdialogPsb(Søknad søknad) {
         return søknad.getJournalposter() == null || søknad.getJournalposter().isEmpty();
     }
@@ -625,7 +625,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         var fagsak = fagsakOpt.get();
         loggForvaltningTjeneste(fagsak, "/marker-ugyldig", begrunnelse.getTekst());
 
-        var dokumenter = mottatteDokumentRepository.hentMottatteDokument(fagsak.getId(), List.of(journalpostDto.getJournalpostId()));
+        var dokumenter = mottatteDokumentRepository.hentMottatteDokument(fagsak.getId(), List.of(journalpostDto.getJournalpostId()), DokumentStatus.GYLDIG, DokumentStatus.MOTTATT, DokumentStatus.BEHANDLER);
         if (dokumenter.size() > 1) {
             return Response.status(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Fant flere dokumenter for angitt saksnummer/journalpost - " + dokumenter.size()).build();
         }
