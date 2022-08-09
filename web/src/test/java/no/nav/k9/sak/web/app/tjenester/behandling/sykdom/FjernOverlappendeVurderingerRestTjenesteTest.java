@@ -26,7 +26,7 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomPeriodeMedEndring;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomPeriodeMedEndring;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
@@ -57,7 +57,7 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
 
     @Test
     void overlappIMidtenSkalDeleIntervall() {
-        List<SykdomPeriodeMedEndring> sykdomPeriodeMedEndringer = Arrays.asList(new SykdomPeriodeMedEndring(
+        List<PleietrengendeSykdomPeriodeMedEndring> pleietrengendeSykdomPeriodeMedEndringer = Arrays.asList(new PleietrengendeSykdomPeriodeMedEndring(
             new Periode(LocalDate.of(2021, 1, 5), LocalDate.of(2021, 1, 10)),
             true, false,
             createSykdomVurderingOgVersjonMock(0, 1,
@@ -67,7 +67,7 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 4)),
             new Periode(LocalDate.of(2021, 1, 11), LocalDate.of(2021, 1, 20)));
 
-        tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(sykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
+        tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(pleietrengendeSykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
         verify(repo).lagre(captor.capture());
 
         sjekkPerioder(fasit, captor.getValue());
@@ -75,13 +75,13 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
 
     @Test
     void overlappIMidtenSkalDeleIntervallMultippel() {
-        List<SykdomPeriodeMedEndring> sykdomPeriodeMedEndringer = Arrays.asList(
-            new SykdomPeriodeMedEndring(
+        List<PleietrengendeSykdomPeriodeMedEndring> pleietrengendeSykdomPeriodeMedEndringer = Arrays.asList(
+            new PleietrengendeSykdomPeriodeMedEndring(
                 new Periode(LocalDate.of(2021, 1, 5), LocalDate.of(2021, 1, 10)),
                 true, false,
                 createSykdomVurderingOgVersjonMock(0, 1,
                     new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 20)))),
-            new SykdomPeriodeMedEndring(
+            new PleietrengendeSykdomPeriodeMedEndring(
                 new Periode(LocalDate.of(2021, 2, 5), LocalDate.of(2021, 2, 10)),
                 true, false,
                 createSykdomVurderingOgVersjonMock(0, 1,
@@ -96,7 +96,7 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
             new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 4)),
             new Periode(LocalDate.of(2021, 2, 11), LocalDate.of(2021, 2, 20)));
 
-        tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(sykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
+        tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(pleietrengendeSykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
         verify(repo, times(2)).lagre(captor.capture());
         List<PleietrengendeSykdomVurderingVersjon> faktisk = captor.getAllValues().stream().sorted(Comparator.comparing(p -> p.getPerioder().get(0).getFom())).collect(Collectors.toList());
 
@@ -110,12 +110,12 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
         PleietrengendeSykdomVurderingVersjon vurderingVersjon = createSykdomVurderingOgVersjonMock(0, 1,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 20)));
 
-        List<SykdomPeriodeMedEndring> sykdomPeriodeMedEndringer = Arrays.asList(
-            new SykdomPeriodeMedEndring(
+        List<PleietrengendeSykdomPeriodeMedEndring> pleietrengendeSykdomPeriodeMedEndringer = Arrays.asList(
+            new PleietrengendeSykdomPeriodeMedEndring(
                 new Periode(LocalDate.of(2021, 1, 5), LocalDate.of(2021, 1, 10)),
                 true, false,
                 vurderingVersjon),
-            new SykdomPeriodeMedEndring(
+            new PleietrengendeSykdomPeriodeMedEndring(
                 new Periode(LocalDate.of(2021, 1, 15), LocalDate.of(2021, 1, 19)),
                 true, false,
                 vurderingVersjon)
@@ -126,7 +126,7 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
             new Periode(LocalDate.of(2021, 1, 11), LocalDate.of(2021, 1, 14)),
             new Periode(LocalDate.of(2021, 1, 20), LocalDate.of(2021, 1, 20)));
 
-        tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(sykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
+        tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(pleietrengendeSykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
         verify(repo).lagre(captor.capture());
 
         sjekkPerioder(fasit, captor.getValue());

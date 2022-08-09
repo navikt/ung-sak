@@ -4,7 +4,7 @@ import jakarta.persistence.AttributeConverter;
 
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 
-public class SykdomDokumentTypeConverter implements AttributeConverter<SykdomDokumentType, String> {
+public class PleietrengendeSykdomDokumentTypeConverter implements AttributeConverter<SykdomDokumentType, String> {
     @Override
     public String convertToDatabaseColumn(SykdomDokumentType type) {
         return type.getDatabasekode();

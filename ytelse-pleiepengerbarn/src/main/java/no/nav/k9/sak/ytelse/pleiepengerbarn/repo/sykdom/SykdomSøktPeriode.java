@@ -37,6 +37,7 @@ public class SykdomSøktPeriode {
     }
 
     public void setSykdomGrunnlag(MedisinskGrunnlagsdata medisinskGrunnlagsdata) {
+
         this.medisinskGrunnlagsdata = medisinskGrunnlagsdata;
     }
 

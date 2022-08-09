@@ -3,10 +3,9 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom;
 import java.util.Objects;
 
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 
 
-public class SykdomPeriodeMedEndring {
+public class PleietrengendeSykdomPeriodeMedEndring {
 
     private Periode periode;
 
@@ -17,7 +16,7 @@ public class SykdomPeriodeMedEndring {
     private PleietrengendeSykdomVurderingVersjon gammelVersjon;
 
 
-    public SykdomPeriodeMedEndring(Periode periode, boolean endrerVurderingSammeBehandling, boolean endrerAnnenVurdering, PleietrengendeSykdomVurderingVersjon gammelVersjon) {
+    public PleietrengendeSykdomPeriodeMedEndring(Periode periode, boolean endrerVurderingSammeBehandling, boolean endrerAnnenVurdering, PleietrengendeSykdomVurderingVersjon gammelVersjon) {
         this.periode = Objects.requireNonNull(periode, "periode");
         this.endrerVurderingSammeBehandling = endrerVurderingSammeBehandling;
         this.endrerAnnenVurdering = endrerAnnenVurdering;

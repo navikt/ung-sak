@@ -36,7 +36,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunn
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.SykdomGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.prosess.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
@@ -48,7 +48,7 @@ public class SykdomVurderingTjeneste {
     private final Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     private final SykdomVurderingRepository sykdomVurderingRepository;
-    private final SykdomDokumentRepository sykdomDokumentRepository;
+    private final PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
     private final SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste;
     private final BasisPersonopplysningTjeneste personopplysningTjeneste;
     private final SøknadsperiodeTjeneste søknadsperiodeTjeneste;
@@ -56,14 +56,14 @@ public class SykdomVurderingTjeneste {
     @Inject
     public SykdomVurderingTjeneste(@Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                    SykdomVurderingRepository sykdomVurderingRepository,
-                                   SykdomDokumentRepository sykdomDokumentRepository,
+                                   PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
                                    SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste,
                                    BasisPersonopplysningTjeneste personopplysningTjeneste,
                                    SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
 
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
-        this.sykdomDokumentRepository = sykdomDokumentRepository;
+        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
         this.sykdomGrunnlagTjeneste = sykdomGrunnlagTjeneste;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
@@ -83,8 +83,8 @@ public class SykdomVurderingTjeneste {
             return SykdomAksjonspunkt.bareFalse();
         }
 
-        final boolean harUklassifiserteDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
-        boolean dokumenterUtenUtkvittering = !sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(pleietrengende).isEmpty();
+        final boolean harUklassifiserteDokumenter = pleietrengendeSykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
+        boolean dokumenterUtenUtkvittering = !pleietrengendeSykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(pleietrengende).isEmpty();
 
         final boolean manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring(pleietrengende);
 
@@ -101,7 +101,7 @@ public class SykdomVurderingTjeneste {
         switch (behandling.getFagsakYtelseType()) {
             case PLEIEPENGER_SYKT_BARN -> {
                 if (!utledPerioderTilVurderingMedOmsorgenFor(behandling).isEmpty()) {
-                    manglerDiagnosekode = sykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnoser().isEmpty();
+                    manglerDiagnosekode = pleietrengendeSykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnoser().isEmpty();
                 } else {
                     manglerDiagnosekode = false;
                 }
@@ -145,7 +145,7 @@ public class SykdomVurderingTjeneste {
     }
 
     private boolean manglerGodkjentLegeerklæring(final AktørId pleietrengende) {
-        return sykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).isEmpty();
+        return pleietrengendeSykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).isEmpty();
     }
 
     public SykdomVurderingerOgPerioder hentVurderingerForKontinuerligTilsynOgPleie(Behandling behandling) {
@@ -335,9 +335,9 @@ public class SykdomVurderingTjeneste {
 
     public PleietrengendeSykdomInnleggelser hentInnleggelser(final Behandling behandling) {
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
-            return sykdomDokumentRepository.hentInnleggelse(behandling.getUuid());
+            return pleietrengendeSykdomDokumentRepository.hentInnleggelse(behandling.getUuid());
         } else {
-            return sykdomDokumentRepository.hentInnleggelse(behandling.getFagsak().getPleietrengendeAktørId());
+            return pleietrengendeSykdomDokumentRepository.hentInnleggelse(behandling.getFagsak().getPleietrengendeAktørId());
         }
     }
 

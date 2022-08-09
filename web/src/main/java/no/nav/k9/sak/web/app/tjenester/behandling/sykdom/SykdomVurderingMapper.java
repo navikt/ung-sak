@@ -19,9 +19,9 @@ import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingVersjonDto;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentOversiktMapper;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.PleietrengendeSykdomDokumentOversiktMapper;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomPeriodeMedEndring;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomPeriodeMedEndring;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjonPeriode;
@@ -31,11 +31,11 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste.
 @Dependent
 public class SykdomVurderingMapper {
 
-    private SykdomDokumentOversiktMapper dokumentMapper;
+    private PleietrengendeSykdomDokumentOversiktMapper dokumentMapper;
 
 
     @Inject
-    public SykdomVurderingMapper(SykdomDokumentOversiktMapper dokumentMapper) {
+    public SykdomVurderingMapper(PleietrengendeSykdomDokumentOversiktMapper dokumentMapper) {
         this.dokumentMapper = dokumentMapper;
     }
 
@@ -173,7 +173,7 @@ public class SykdomVurderingMapper {
         }
     }
 
-    public SykdomPeriodeMedEndringDto toSykdomPeriodeMedEndringDto(SykdomPeriodeMedEndring p) {
+    public SykdomPeriodeMedEndringDto toSykdomPeriodeMedEndringDto(PleietrengendeSykdomPeriodeMedEndring p) {
         return new SykdomPeriodeMedEndringDto(p.getPeriode(), p.isEndrerVurderingSammeBehandling(), p.isEndrerAnnenVurdering());
     }
 }

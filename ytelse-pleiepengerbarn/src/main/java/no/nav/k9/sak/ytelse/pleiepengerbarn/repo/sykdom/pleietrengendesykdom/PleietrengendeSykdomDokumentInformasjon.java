@@ -38,7 +38,7 @@ public class PleietrengendeSykdomDokumentInformasjon implements Comparable<Pleie
     private Long versjon;
 
     @Column(name = "TYPE", nullable = false)
-    @Convert(converter = SykdomDokumentTypeConverter.class)
+    @Convert(converter = PleietrengendeSykdomDokumentTypeConverter.class)
     private SykdomDokumentType type;
 
     @Column(name = "har_info_som_ikke_kan_punsjes")

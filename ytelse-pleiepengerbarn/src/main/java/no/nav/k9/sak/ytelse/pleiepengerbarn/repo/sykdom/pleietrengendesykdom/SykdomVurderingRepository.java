@@ -325,12 +325,12 @@ public class SykdomVurderingRepository {
         return PleietrengendeTidslinjeUtils.tilTidslinje(hentSisteVurderingerFor(type, pleietrengende));
     }
 
-    public List<SykdomPeriodeMedEndring> finnEndringer(LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> tidslinje, PleietrengendeSykdomVurderingVersjon nyEndring) {
+    public List<PleietrengendeSykdomPeriodeMedEndring> finnEndringer(LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> tidslinje, PleietrengendeSykdomVurderingVersjon nyEndring) {
         final LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> endret = new LocalDateTimeline<>(nyEndring.getPerioder().stream().map(p -> new LocalDateSegment<PleietrengendeSykdomVurderingVersjon>(p.getFom(), p.getTom(), p.getVurderingVersjon())).collect(Collectors.toList()));
-        return endret.combine(tidslinje, new LocalDateSegmentCombinator<PleietrengendeSykdomVurderingVersjon, PleietrengendeSykdomVurderingVersjon, SykdomPeriodeMedEndring>() {
+        return endret.combine(tidslinje, new LocalDateSegmentCombinator<PleietrengendeSykdomVurderingVersjon, PleietrengendeSykdomVurderingVersjon, PleietrengendeSykdomPeriodeMedEndring>() {
             @Override
-            public LocalDateSegment<SykdomPeriodeMedEndring> combine(LocalDateInterval datoInterval,
-                                                                     LocalDateSegment<PleietrengendeSykdomVurderingVersjon> datoSegment, LocalDateSegment<PleietrengendeSykdomVurderingVersjon> datoSegment2) {
+            public LocalDateSegment<PleietrengendeSykdomPeriodeMedEndring> combine(LocalDateInterval datoInterval,
+                                                                                   LocalDateSegment<PleietrengendeSykdomVurderingVersjon> datoSegment, LocalDateSegment<PleietrengendeSykdomVurderingVersjon> datoSegment2) {
                 if (datoSegment2 == null) {
                     return null;
                 }
@@ -343,7 +343,7 @@ public class SykdomVurderingRepository {
 
                 final boolean endrerVurderingSammeBehandling = nyVersjon.getEndretForSøkersBehandlingUuid().equals(gammelVersjon.getEndretForSøkersBehandlingUuid());
                 final boolean endrerAnnenVurdering = !endrerVurderingSammeBehandling;
-                return new LocalDateSegment<>(datoInterval, new SykdomPeriodeMedEndring(new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()), endrerVurderingSammeBehandling, endrerAnnenVurdering, gammelVersjon));
+                return new LocalDateSegment<>(datoInterval, new PleietrengendeSykdomPeriodeMedEndring(new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()), endrerVurderingSammeBehandling, endrerAnnenVurdering, gammelVersjon));
             }
         }, JoinStyle.LEFT_JOIN).compress().stream().map(l -> l.getValue()).collect(Collectors.toList());
     }

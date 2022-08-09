@@ -15,7 +15,7 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
 import no.nav.k9.sak.kontrakt.person.PersonopplysningPleietrengendeDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -42,7 +42,7 @@ public class PleietrengendeRestTjeneste {
     private BehandlingRepository behandlingRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
     private TpsTjeneste tpsTjeneste;
-    private SykdomDokumentRepository sykdomDokumentRepository;
+    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
 
     public PleietrengendeRestTjeneste() {
         // CDI
@@ -52,11 +52,11 @@ public class PleietrengendeRestTjeneste {
     public PleietrengendeRestTjeneste(BehandlingRepository behandlingRepository,
                                       PersonopplysningTjeneste personopplysningTjeneste,
                                       TpsTjeneste tpsTjeneste,
-                                      SykdomDokumentRepository sykdomDokumentRepository) {
+                                      PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository) {
         this.behandlingRepository = behandlingRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.tpsTjeneste = tpsTjeneste;
-        this.sykdomDokumentRepository = sykdomDokumentRepository;
+        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
     }
 
     @GET
@@ -78,7 +78,7 @@ public class PleietrengendeRestTjeneste {
         if (fnr.isPresent()) {
             personopplysningPleietrengendeDto.setFnr(fnr.get().getIdent());
         }
-        var sykdomDiagnosekoder = sykdomDokumentRepository.hentDiagnosekoder(behandling.getFagsak().getPleietrengendeAktørId());
+        var sykdomDiagnosekoder = pleietrengendeSykdomDokumentRepository.hentDiagnosekoder(behandling.getFagsak().getPleietrengendeAktørId());
         var diagnosekoder = sykdomDiagnosekoder.getDiagnoser().stream().map(diagnosekode -> diagnosekode.getDiagnosekode()).toList();
         personopplysningPleietrengendeDto.setDiagnosekoder(diagnosekoder);
         return personopplysningPleietrengendeDto;

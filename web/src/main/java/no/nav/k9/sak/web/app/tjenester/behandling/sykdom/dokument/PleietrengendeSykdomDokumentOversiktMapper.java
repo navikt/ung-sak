@@ -31,18 +31,18 @@ import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDiagnose;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDiagnoser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelsePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
 
 @Dependent
-public class SykdomDokumentOversiktMapper {
+public class PleietrengendeSykdomDokumentOversiktMapper {
 
-    private SykdomDokumentRepository sykdomDokumentRepository;
+    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
 
     @Inject
-    public SykdomDokumentOversiktMapper(SykdomDokumentRepository sykdomDokumentRepository) {
-        this.sykdomDokumentRepository = sykdomDokumentRepository;
+    public PleietrengendeSykdomDokumentOversiktMapper(PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository) {
+        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
     }
 
 
@@ -60,7 +60,7 @@ public class SykdomDokumentOversiktMapper {
                         d.getMottattTidspunkt(),
                         d.getType() != SykdomDokumentType.UKLASSIFISERT,  // TODO: Sette riktig verdi.
                         (d.getDuplikatAvDokument() != null) ? "" + d.getDuplikatAvDokument().getId() : null,
-                        sykdomDokumentRepository.hentDuplikaterAv(d.getId()).stream().map(dup -> "" + dup.getId()).collect(Collectors.toList()),
+                        pleietrengendeSykdomDokumentRepository.hentDuplikaterAv(d.getId()).stream().map(dup -> "" + dup.getId()).collect(Collectors.toList()),
                         Arrays.asList(
                             linkForGetDokumentinnhold(behandlingUuid, "" + d.getId()),
                             linkForEndreDokument(behandlingUuid, "" + d.getId(), d.getVersjon().toString())
@@ -77,11 +77,11 @@ public class SykdomDokumentOversiktMapper {
     }
 
     private ResourceLink linkForGetDokumentinnhold(String behandlingUuid, String sykdomDokumentId) {
-        return ResourceLink.get(BehandlingDtoUtil.getApiPath(SykdomDokumentRestTjeneste.DOKUMENT_INNHOLD_PATH), "sykdom-dokument-innhold", Map.of(BehandlingUuidDto.NAME, behandlingUuid, SykdomDokumentIdDto.NAME, sykdomDokumentId));
+        return ResourceLink.get(BehandlingDtoUtil.getApiPath(PleietrengendeSykdomDokumentRestTjeneste.DOKUMENT_INNHOLD_PATH), "sykdom-dokument-innhold", Map.of(BehandlingUuidDto.NAME, behandlingUuid, SykdomDokumentIdDto.NAME, sykdomDokumentId));
     }
 
     private ResourceLink linkForEndreDokument(String behandlingUuid, String id, String versjon) {
-        return ResourceLink.post(BehandlingDtoUtil.getApiPath(SykdomDokumentRestTjeneste.DOKUMENT_PATH), "sykdom-dokument-endring", new SykdomDokumentEndringDto(behandlingUuid, id, versjon));
+        return ResourceLink.post(BehandlingDtoUtil.getApiPath(PleietrengendeSykdomDokumentRestTjeneste.DOKUMENT_PATH), "sykdom-dokument-endring", new SykdomDokumentEndringDto(behandlingUuid, id, versjon));
     }
 
     public PleietrengendeSykdomDiagnoser toSykdomDiagnosekoder(SykdomDiagnosekoderDto dto, String brukerId ) {
@@ -100,7 +100,7 @@ public class SykdomDokumentOversiktMapper {
     }
 
     public SykdomDiagnosekoderDto toSykdomDiagnosekoderDto(PleietrengendeSykdomDiagnoser diagnosekoder, Behandling behandling) {
-        final var endreDiagnosekoderLink = ResourceLink.post(BehandlingDtoUtil.getApiPath(SykdomDokumentRestTjeneste.SYKDOM_DIAGNOSEKODER_PATH), "sykdom-diagnosekoder-endring", new SykdomDiagnosekoderDto(behandling.getUuid().toString()));
+        final var endreDiagnosekoderLink = ResourceLink.post(BehandlingDtoUtil.getApiPath(PleietrengendeSykdomDokumentRestTjeneste.SYKDOM_DIAGNOSEKODER_PATH), "sykdom-diagnosekoder-endring", new SykdomDiagnosekoderDto(behandling.getUuid().toString()));
         return new SykdomDiagnosekoderDto(
             behandling.getUuid(),
             (diagnosekoder.getVersjon() != null) ? diagnosekoder.getVersjon().toString() : null,
@@ -137,7 +137,7 @@ public class SykdomDokumentOversiktMapper {
                     p -> new Periode(p.getFom(), p.getTom()))
                 .collect(Collectors.toList()),
             Arrays.asList(ResourceLink.post(
-                BehandlingDtoUtil.getApiPath(SykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH),
+                BehandlingDtoUtil.getApiPath(PleietrengendeSykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH),
                 "sykdom-innleggelse-endring",
                 new SykdomInnleggelseDto(behandling.getUuid().toString()))));
     }
@@ -153,7 +153,7 @@ public class SykdomDokumentOversiktMapper {
                     !aktørId.equals(d.getSøker().getAktørId()),
                     d.getDatert(),
                     behandlingUuid.equals(d.getSøkersBehandlingUuid()),
-                    sykdomDokumentRepository.isDokumentBruktIVurdering(d.getId()),
+                    pleietrengendeSykdomDokumentRepository.isDokumentBruktIVurdering(d.getId()),
                     Arrays.asList(linkForGetDokumentinnhold(behandlingUuid.toString(), "" + d.getId()))
                 )).collect(Collectors.toList());
     }

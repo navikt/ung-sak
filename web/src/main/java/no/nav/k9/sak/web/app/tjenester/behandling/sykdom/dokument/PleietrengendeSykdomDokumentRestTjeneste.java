@@ -64,7 +64,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Ple
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentHarOppdatertVurderinger;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentInformasjon;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
@@ -73,9 +73,9 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-@Path(SykdomDokumentRestTjeneste.BASE_PATH)
+@Path(PleietrengendeSykdomDokumentRestTjeneste.BASE_PATH)
 @Transactional
-public class SykdomDokumentRestTjeneste {
+public class PleietrengendeSykdomDokumentRestTjeneste {
 
     public static final String BASE_PATH = "/behandling/sykdom/dokument";
     private static final String DOKUMENT = "/";
@@ -97,8 +97,8 @@ public class SykdomDokumentRestTjeneste {
     private boolean enableNyttDokument;
 
     private BehandlingRepository behandlingRepository;
-    private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper;
-    private SykdomDokumentRepository sykdomDokumentRepository;
+    private PleietrengendeSykdomDokumentOversiktMapper pleietrengendeSykdomDokumentOversiktMapper;
+    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
@@ -106,22 +106,22 @@ public class SykdomDokumentRestTjeneste {
     private SykdomProsessDriver prosessDriver;
 
 
-    public SykdomDokumentRestTjeneste() {
+    public PleietrengendeSykdomDokumentRestTjeneste() {
     }
 
 
     @Inject
-    public SykdomDokumentRestTjeneste(
+    public PleietrengendeSykdomDokumentRestTjeneste(
         BehandlingRepository behandlingRepository,
-        SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper,
-        SykdomDokumentRepository sykdomDokumentRepository,
+        PleietrengendeSykdomDokumentOversiktMapper pleietrengendeSykdomDokumentOversiktMapper,
+        PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
         SykdomVurderingRepository sykdomVurderingRepository,
         DokumentArkivTjeneste dokumentArkivTjeneste,
         SykdomGrunnlagRepository sykdomGrunnlagRepository,
         @KonfigVerdi(value = "TEST_NYTT_DOKUMENT", defaultVerdi = "false") boolean enableNyttDokument, SykdomProsessDriver prosessDriver) {
-        this.sykdomDokumentOversiktMapper = sykdomDokumentOversiktMapper;
+        this.pleietrengendeSykdomDokumentOversiktMapper = pleietrengendeSykdomDokumentOversiktMapper;
         this.behandlingRepository = behandlingRepository;
-        this.sykdomDokumentRepository = sykdomDokumentRepository;
+        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
@@ -150,8 +150,8 @@ public class SykdomDokumentRestTjeneste {
             BehandlingUuidDto behandlingUuid) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
-        final List<PleietrengendeSykdomDokument> dokumenter = sykdomDokumentRepository.hentDokumenterSomErRelevanteForSykdom(behandling.getFagsak().getPleietrengendeAktørId());
-        return sykdomDokumentOversiktMapper.mapSykdomsdokumenter(behandling.getFagsak().getAktørId(), behandling.getUuid(), dokumenter, Collections.emptySet());
+        final List<PleietrengendeSykdomDokument> dokumenter = pleietrengendeSykdomDokumentRepository.hentDokumenterSomErRelevanteForSykdom(behandling.getFagsak().getPleietrengendeAktørId());
+        return pleietrengendeSykdomDokumentOversiktMapper.mapSykdomsdokumenter(behandling.getFagsak().getAktørId(), behandling.getUuid(), dokumenter, Collections.emptySet());
     }
 
     @GET
@@ -181,8 +181,8 @@ public class SykdomDokumentRestTjeneste {
             return Collections.emptyList();
         }
 
-        final var dokumenter = sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(behandling.getFagsak().getPleietrengendeAktørId());
-        return sykdomDokumentOversiktMapper.mapSykdomsdokumenter(behandling.getFagsak().getAktørId(), behandling.getUuid(), dokumenter, Collections.emptySet());
+        final var dokumenter = pleietrengendeSykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(behandling.getFagsak().getPleietrengendeAktørId());
+        return pleietrengendeSykdomDokumentOversiktMapper.mapSykdomsdokumenter(behandling.getFagsak().getAktørId(), behandling.getUuid(), dokumenter, Collections.emptySet());
     }
 
     @POST
@@ -208,8 +208,8 @@ public class SykdomDokumentRestTjeneste {
         validerOppdatering(behandling, false);
 
         for (String dokumentId : utkvitteringer.getDokumenterSomSkalUtkvitteres()) {
-            final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(dokumentId), behandling.getFagsak().getPleietrengendeAktørId()).get();
-            sykdomDokumentRepository.kvitterDokumenterMedOppdatertEksisterendeVurderinger(new PleietrengendeSykdomDokumentHarOppdatertVurderinger(dokument, getCurrentUserId(), nå));
+            final var dokument = pleietrengendeSykdomDokumentRepository.hentDokument(Long.valueOf(dokumentId), behandling.getFagsak().getPleietrengendeAktørId()).get();
+            pleietrengendeSykdomDokumentRepository.kvitterDokumenterMedOppdatertEksisterendeVurderinger(new PleietrengendeSykdomDokumentHarOppdatertVurderinger(dokument, getCurrentUserId(), nå));
         }
     }
 
@@ -235,12 +235,12 @@ public class SykdomDokumentRestTjeneste {
 
         final PleietrengendeSykdomInnleggelser innleggelser;
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
-            innleggelser = sykdomDokumentRepository.hentInnleggelse(behandling.getUuid());
+            innleggelser = pleietrengendeSykdomDokumentRepository.hentInnleggelse(behandling.getUuid());
         } else {
-            innleggelser = sykdomDokumentRepository.hentInnleggelse(behandling.getFagsak().getPleietrengendeAktørId());
+            innleggelser = pleietrengendeSykdomDokumentRepository.hentInnleggelse(behandling.getFagsak().getPleietrengendeAktørId());
         }
 
-        return sykdomDokumentOversiktMapper.toSykdomInnleggelseDto(innleggelser, behandling);
+        return pleietrengendeSykdomDokumentOversiktMapper.toSykdomInnleggelseDto(innleggelser, behandling);
     }
 
     @POST
@@ -274,9 +274,9 @@ public class SykdomDokumentRestTjeneste {
             return new SykdomInnleggelseOppdateringResultatDto(false); // TODO: Sett riktig verdi.
         }
 
-        final PleietrengendeSykdomInnleggelser innleggelser = sykdomDokumentOversiktMapper.toSykdomInnleggelser(sykdomInnleggelse, SubjectHandler.getSubjectHandler().getUid());
+        final PleietrengendeSykdomInnleggelser innleggelser = pleietrengendeSykdomDokumentOversiktMapper.toSykdomInnleggelser(sykdomInnleggelse, SubjectHandler.getSubjectHandler().getUid());
 
-        sykdomDokumentRepository.opprettEllerOppdaterInnleggelser(innleggelser, behandling.getFagsak().getPleietrengendeAktørId());
+        pleietrengendeSykdomDokumentRepository.opprettEllerOppdaterInnleggelser(innleggelser, behandling.getFagsak().getPleietrengendeAktørId());
 
         return new SykdomInnleggelseOppdateringResultatDto(false); // TODO: Sett riktig verdi.
     }
@@ -309,9 +309,9 @@ public class SykdomDokumentRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
-        final PleietrengendeSykdomDiagnoser diagnosekoder = sykdomDokumentRepository.hentDiagnosekoder(behandling.getFagsak().getPleietrengendeAktørId());
+        final PleietrengendeSykdomDiagnoser diagnosekoder = pleietrengendeSykdomDokumentRepository.hentDiagnosekoder(behandling.getFagsak().getPleietrengendeAktørId());
 
-        return sykdomDokumentOversiktMapper.toSykdomDiagnosekoderDto(diagnosekoder, behandling);
+        return pleietrengendeSykdomDokumentOversiktMapper.toSykdomDiagnosekoderDto(diagnosekoder, behandling);
     }
 
     @POST
@@ -335,8 +335,8 @@ public class SykdomDokumentRestTjeneste {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDiagnosekoderDto.getBehandlingUuid()).orElseThrow();
         validerOppdatering(behandling, false);
 
-        final PleietrengendeSykdomDiagnoser diagnosekoder = sykdomDokumentOversiktMapper.toSykdomDiagnosekoder(sykdomDiagnosekoderDto, SubjectHandler.getSubjectHandler().getUid());
-        sykdomDokumentRepository.opprettEllerOppdaterDiagnosekoder(diagnosekoder, behandling.getFagsak().getPleietrengendeAktørId());
+        final PleietrengendeSykdomDiagnoser diagnosekoder = pleietrengendeSykdomDokumentOversiktMapper.toSykdomDiagnosekoder(sykdomDiagnosekoderDto, SubjectHandler.getSubjectHandler().getUid());
+        pleietrengendeSykdomDokumentRepository.opprettEllerOppdaterDiagnosekoder(diagnosekoder, behandling.getFagsak().getPleietrengendeAktørId());
     }
 
     @GET
@@ -358,8 +358,8 @@ public class SykdomDokumentRestTjeneste {
             BehandlingUuidDto behandlingUuid) {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
-        final List<PleietrengendeSykdomDokument> dokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
-        return sykdomDokumentOversiktMapper.map(behandling.getFagsak().getAktørId(), behandling.getUuid().toString(), dokumenter);
+        final List<PleietrengendeSykdomDokument> dokumenter = pleietrengendeSykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
+        return pleietrengendeSykdomDokumentOversiktMapper.map(behandling.getFagsak().getAktørId(), behandling.getUuid().toString(), dokumenter);
     }
 
     @POST
@@ -382,7 +382,7 @@ public class SykdomDokumentRestTjeneste {
         validerOppdatering(behandling, false);
 
         final Long dokumentId = Long.valueOf(sykdomDokumentEndringDto.getId());
-        final var dokument = sykdomDokumentRepository.hentDokument(dokumentId, behandling.getFagsak().getPleietrengendeAktørId()).get();
+        final var dokument = pleietrengendeSykdomDokumentRepository.hentDokument(dokumentId, behandling.getFagsak().getPleietrengendeAktørId()).get();
         PleietrengendeSykdomDokumentInformasjon gmlInformasjon = dokument.getInformasjon();
         verifiserKanEndreType(sykdomDokumentEndringDto, behandling, gmlInformasjon);
 
@@ -400,7 +400,7 @@ public class SykdomDokumentRestTjeneste {
             LocalDateTime.now()
         ));
 
-        sykdomDokumentRepository.oppdater(dokument.getInformasjon());
+        pleietrengendeSykdomDokumentRepository.oppdater(dokument.getInformasjon());
     }
 
 
@@ -411,7 +411,7 @@ public class SykdomDokumentRestTjeneste {
 
         final Long duplikatAvId = Long.valueOf(sykdomDokumentEndringDto.getDuplikatAvId());
         verifiserKanSettesTilDuplikat(dokumentId, duplikatAvId);
-        final PleietrengendeSykdomDokument duplikatAvDokument = sykdomDokumentRepository.hentDokument(duplikatAvId, behandling.getFagsak().getPleietrengendeAktørId()).get();
+        final PleietrengendeSykdomDokument duplikatAvDokument = pleietrengendeSykdomDokumentRepository.hentDokument(duplikatAvId, behandling.getFagsak().getPleietrengendeAktørId()).get();
 
         if (duplikatAvDokument != null && duplikatAvDokument.getDuplikatAvDokument() != null) {
             throw new FunksjonellException("K9-6701", "Kan ikke sette at et dokument er duplikat av et annet duplikat dokument.");
@@ -424,10 +424,10 @@ public class SykdomDokumentRestTjeneste {
     }
 
     private void verifiserKanSettesTilDuplikat(Long duplikatDokumentId, Long duplikatAvDokumentId) {
-        if (sykdomDokumentRepository.isDokumentBruktIVurdering(duplikatDokumentId)) {
+        if (pleietrengendeSykdomDokumentRepository.isDokumentBruktIVurdering(duplikatDokumentId)) {
             throw new FunksjonellException("K9-6703", "Kan ikke sette som duplikat siden dokumentet har blitt brukt i en vurdering.");
         }
-        if (!sykdomDokumentRepository.hentDuplikaterAv(duplikatDokumentId).isEmpty()) {
+        if (!pleietrengendeSykdomDokumentRepository.hentDuplikaterAv(duplikatDokumentId).isEmpty()) {
             throw new FunksjonellException("K9-6704", "Kan ikke sette som duplikat siden andre dokumenter er duplikat av dette dokumentet.");
         }
     }
@@ -447,7 +447,7 @@ public class SykdomDokumentRestTjeneste {
 
 
     private boolean harMinstEnAnnenGodkjentLegeerklæring(PleietrengendeSykdomDokument pleietrengendeSykdomDokument, final AktørId pleietrengende) {
-        return sykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).stream().anyMatch(d -> !Objects.equals(d.getId(), pleietrengendeSykdomDokument.getId()));
+        return pleietrengendeSykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).stream().anyMatch(d -> !Objects.equals(d.getId(), pleietrengendeSykdomDokument.getId()));
     }
 
     /**
@@ -495,7 +495,7 @@ public class SykdomDokumentRestTjeneste {
                 getCurrentUserId(),
                 nå);
 
-            sykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
+            pleietrengendeSykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
         } else {
             throw new IllegalArgumentException();
         }
@@ -519,7 +519,7 @@ public class SykdomDokumentRestTjeneste {
             @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class)
             SykdomDokumentIdDto dokumentId) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
-        final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(dokumentId.getSykdomDokumentId()), behandling.getFagsak().getPleietrengendeAktørId()).get();
+        final var dokument = pleietrengendeSykdomDokumentRepository.hentDokument(Long.valueOf(dokumentId.getSykdomDokumentId()), behandling.getFagsak().getPleietrengendeAktørId()).get();
         try {
             ResponseBuilder responseBuilder = Response.ok(
                 new ByteArrayInputStream(dokumentArkivTjeneste.hentDokumnet(dokument.getJournalpostId(), dokument.getDokumentInfoId())));

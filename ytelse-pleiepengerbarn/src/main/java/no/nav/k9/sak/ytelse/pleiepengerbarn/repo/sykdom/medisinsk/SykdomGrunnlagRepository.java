@@ -28,7 +28,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Ple
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
 
 @Dependent
@@ -36,17 +36,17 @@ public class SykdomGrunnlagRepository {
 
     private EntityManager entityManager;
     private SykdomVurderingRepository sykdomVurderingRepository;
-    private SykdomDokumentRepository sykdomDokumentRepository;
+    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
 
     SykdomGrunnlagRepository() {
         // CDI
     }
 
     @Inject
-    public SykdomGrunnlagRepository(EntityManager entityManager, SykdomVurderingRepository sykdomVurderingRepository, SykdomDokumentRepository sykdomDokumentRepository) {
+    public SykdomGrunnlagRepository(EntityManager entityManager, SykdomVurderingRepository sykdomVurderingRepository, PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository) {
         this.entityManager = Objects.requireNonNull(entityManager, "entityManager");
         this.sykdomVurderingRepository = Objects.requireNonNull(sykdomVurderingRepository, "sykdomVurderingRepository");
-        this.sykdomDokumentRepository = Objects.requireNonNull(sykdomDokumentRepository, "sykdomDokumentRepository");
+        this.pleietrengendeSykdomDokumentRepository = Objects.requireNonNull(pleietrengendeSykdomDokumentRepository, "sykdomDokumentRepository");
     }
 
     public MedisinskGrunnlagsdata utledGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder, List<Periode> søknadsperioderSomSkalFjernes) {
@@ -67,10 +67,10 @@ public class SykdomGrunnlagRepository {
 
         final List<PleietrengendeSykdomVurderingVersjon> vurderinger = hentVurderinger(pleietrengendeAktørId);
 
-        final PleietrengendeSykdomInnleggelser innleggelser = sykdomDokumentRepository.hentInnleggelseOrNull(pleietrengendeAktørId);
-        final PleietrengendeSykdomDiagnoser diagnosekoder = sykdomDokumentRepository.hentDiagnosekoderOrNull(pleietrengendeAktørId);
+        final PleietrengendeSykdomInnleggelser innleggelser = pleietrengendeSykdomDokumentRepository.hentInnleggelseOrNull(pleietrengendeAktørId);
+        final PleietrengendeSykdomDiagnoser diagnosekoder = pleietrengendeSykdomDokumentRepository.hentDiagnosekoderOrNull(pleietrengendeAktørId);
 
-        final List<PleietrengendeSykdomDokument> sykdomDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId);
+        final List<PleietrengendeSykdomDokument> sykdomDokumenter = pleietrengendeSykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId);
         final List<PleietrengendeSykdomDokument> godkjenteLegeerklæringer = sykdomDokumenter.stream()
                 .filter(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS)
                 .collect(Collectors.toList());

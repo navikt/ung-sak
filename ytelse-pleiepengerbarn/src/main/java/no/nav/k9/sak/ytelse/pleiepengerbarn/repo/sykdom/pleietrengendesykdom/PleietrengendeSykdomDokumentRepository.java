@@ -21,14 +21,14 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 
 @Dependent
-public class SykdomDokumentRepository {
+public class PleietrengendeSykdomDokumentRepository {
 
     private EntityManager entityManager;
     private SykdomVurderingRepository sykdomVurderingRepository;
 
 
     @Inject
-    public SykdomDokumentRepository(EntityManager entityManager, SykdomVurderingRepository sykdomVurderingRepository) {
+    public PleietrengendeSykdomDokumentRepository(EntityManager entityManager, SykdomVurderingRepository sykdomVurderingRepository) {
         this.entityManager = Objects.requireNonNull(entityManager, "entityManager");
         this.sykdomVurderingRepository = Objects.requireNonNull(sykdomVurderingRepository, "sykdomVurderingRepository");
     }
