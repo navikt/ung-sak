@@ -1,11 +1,8 @@
 package no.nav.k9.sak.web.server.jetty;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.sql.DataSource;
 
 import org.eclipse.jetty.jaas.JAASLoginService;
 import org.eclipse.jetty.plus.jndi.EnvEntry;
@@ -32,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import com.zaxxer.hikari.HikariDataSource;
+
 import jakarta.security.auth.message.config.AuthConfigFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,6 +46,7 @@ public class JettyServer {
     private static final Environment ENV = Environment.current();
     private static final Logger log = LoggerFactory.getLogger(JettyServer.class);
     private AppKonfigurasjon appKonfigurasjon;
+
     public JettyServer() {
         this(new JettyWebKonfigurasjon());
     }
@@ -127,16 +127,8 @@ public class JettyServer {
             // operasjoner
             initSql = null;
         }
-        DataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, environmentClass,
-            1);
-        try {
+        try (HikariDataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, environmentClass, 1)) {
             DatabaseScript.migrate(migreringDs, initSql);
-        } finally {
-            try {
-                migreringDs.getConnection().close();
-            } catch (SQLException e) {
-                log.warn("Klarte ikke stenge connection etter migrering", e);
-            }
         }
     }
 
@@ -190,7 +182,7 @@ public class JettyServer {
     }
 
     protected Class<?>[] getJaxRsApplicationClasses() {
-        return new Class<?>[] {
+        return new Class<?>[]{
             no.nav.k9.felles.oidc.OidcApplication.class,
             no.nav.k9.sak.web.app.ApplicationConfig.class,
             no.nav.k9.sak.web.server.InternalApplicationConfig.class,

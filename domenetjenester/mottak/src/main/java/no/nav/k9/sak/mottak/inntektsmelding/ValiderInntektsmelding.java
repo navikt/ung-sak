@@ -21,7 +21,7 @@ public class ValiderInntektsmelding {
         return value;
     }
 
-    public BigDecimal validerRefusjonMaks(String path, BigDecimal value) {
+    public BigDecimal validerMaksBeløp(String path, BigDecimal value) {
         if (value != null && MAX.compareTo(value) <= 0) {
             throw MottattInntektsmeldingException.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s", path, value, MAX));
         }
