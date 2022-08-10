@@ -1,20 +1,17 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess.steg;
 
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_OMSORG_FOR;
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_ALDERSVILKÅR_BARN;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -24,82 +21,75 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.omsorgenfor.OmsorgenForTjeneste;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.omsorgenfor.regelmodell.OmsorgenForVilkårGrunnlag;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aldersvilkår.AldersvilkårBarnTjeneste;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aldersvilkår.regelmodell.AldersvilkårBarnVilkårGrunnlag;
 
-@BehandlingStegRef(value = VURDER_OMSORG_FOR)
-@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
-@FagsakYtelseTypeRef(OMSORGSPENGER_MA)
 @FagsakYtelseTypeRef(OMSORGSPENGER_AO)
+@BehandlingStegRef(value = VURDER_ALDERSVILKÅR_BARN)
 @BehandlingTypeRef
 @ApplicationScoped
-public class VurderOmsorgenForSteg implements BehandlingSteg {
-
-    public static final VilkårType VILKÅRET = VilkårType.OMSORGEN_FOR;
+public class AldersvilkårBarnSteg implements BehandlingSteg {
 
     private BehandlingRepository behandlingRepository;
+    private AldersvilkårBarnTjeneste aldersvilkårBarnTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
-    private OmsorgenForTjeneste omsorgenForTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private boolean aldersvilkårLansert;
 
-    VurderOmsorgenForSteg() {
-        //
+    public AldersvilkårBarnSteg() {
+        //for CDI proxy
     }
 
     @Inject
-    public VurderOmsorgenForSteg(BehandlingRepository behandlingRepository,
-                                 VilkårResultatRepository vilkårResultatRepository,
-                                 OmsorgenForTjeneste omsorgenForTjeneste,
-                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+    public AldersvilkårBarnSteg(BehandlingRepository behandlingRepository,
+                                AldersvilkårBarnTjeneste aldersvilkårBarnTjeneste,
+                                VilkårResultatRepository vilkårResultatRepository,
+                                @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                @KonfigVerdi(value = "OMP_RAMMEVEDTAK_ALDERSVILKAAR", defaultVerdi = "true") boolean aldersvilkårLansert) {
         this.behandlingRepository = behandlingRepository;
+        this.aldersvilkårBarnTjeneste = aldersvilkårBarnTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.omsorgenForTjeneste = omsorgenForTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.aldersvilkårLansert = aldersvilkårLansert;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        if (behandling.erManueltOpprettet() || behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_ALDERSVILKÅR_BARN)) {
-            //skal alltid ha aksjonspunktet ved manuell revurdering slik at saksbehandler kan korrigere
-            //og også hvis aldersvilkåret ble gjort manuelt (har aksjonspunkt)
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR));
+        if (!aldersvilkårLansert){
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
-        FagsakYtelseType fagsakYtelseType = behandling.getFagsakYtelseType();
-        if (fagsakYtelseType == OMSORGSPENGER_AO) {
-            return utførStegAutomatisk(kontekst);
-        }
-        return utførStegManuelt(kontekst);
-    }
 
-    public BehandleStegResultat utførStegAutomatisk(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
-        var vilkår = vilkårene.getVilkår(VilkårType.OMSORGEN_FOR).orElseThrow();
-        List<VilkårPeriode> ikkeVurdertePerioder = vilkår.getPerioder().stream().filter(v -> v.getUtfall() == Utfall.IKKE_VURDERT).toList();
-        LocalDateTimeline<OmsorgenForVilkårGrunnlag> grunnlagsdata = omsorgenForTjeneste.oversettSystemdataTilRegelModellGrunnlag(kontekst.getBehandlingId(), ikkeVurdertePerioder);
-        List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(grunnlagsdata);
-        Vilkårene oppdaterteVilkår = oppdaterVilkårene(kontekst, vilkårene, vilkårData);
+        Vilkår vilkår = vilkårene.getVilkår(VilkårType.ALDERSVILKÅR_BARN).orElseThrow();
+
+        List<VilkårData> vilkårData = new ArrayList<>();
+        for (AldersvilkårBarnVilkårGrunnlag grunnlag : aldersvilkårBarnTjeneste.oversettSystemdataTilRegelModellGrunnlag(behandlingId, vilkår)) {
+            vilkårData.add(aldersvilkårBarnTjeneste.vurder(grunnlag));
+        }
+        Vilkårene oppdaterteVilkår = oppdaterVilkårene(vilkårene, vilkårData, behandlingId);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
 
         List<AksjonspunktDefinisjon> aksjonspunkter = vilkårData.stream().flatMap(vd -> vd.getApDefinisjoner().stream()).distinct().toList();
         return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
     }
 
-    private Vilkårene oppdaterVilkårene(BehandlingskontrollKontekst kontekst, Vilkårene vilkårene, List<VilkårData> vilkårData) {
-        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+    private Vilkårene oppdaterVilkårene(Vilkårene vilkårene, List<VilkårData> vilkårData, long behandingId) {
+
+        Behandling behandling = behandlingRepository.hentBehandling(behandingId);
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
+
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
-        VilkårBuilder vilkårBuilder = builder.hentBuilderFor(VILKÅRET);
+        VilkårBuilder vilkårBuilder = builder.hentBuilderFor(VilkårType.ALDERSVILKÅR_BARN);
 
         for (VilkårData data : vilkårData) {
             oppdaterBehandlingMedVilkårresultat(data, vilkårBuilder);
@@ -120,15 +110,4 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
             .medMerknad(vilkårData.getVilkårUtfallMerknad()));
     }
 
-    public BehandleStegResultat utførStegManuelt(BehandlingskontrollKontekst kontekst) {
-        Long behandlingId = kontekst.getBehandlingId();
-        var vilkårene = vilkårResultatRepository.hent(behandlingId);
-        var vilkår = vilkårene.getVilkår(VilkårType.OMSORGEN_FOR).orElseThrow();
-        if (vilkår.getPerioder().stream().anyMatch(v -> v.getUtfall() == Utfall.IKKE_VURDERT)) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR));
-        } else {
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-
-    }
 }
