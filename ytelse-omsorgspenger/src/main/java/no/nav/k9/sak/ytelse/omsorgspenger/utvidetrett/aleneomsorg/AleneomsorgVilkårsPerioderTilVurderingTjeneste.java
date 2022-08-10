@@ -51,7 +51,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
                                                           VilkårResultatRepository vilkårResultatRepository,
                                                           PersoninfoAdapter personinfoAdapter,
                                                           SøknadRepository søknadRepository,
-                                                          @KonfigVerdi(value = "OMP_RAMMEVEDTAK_ALDERSVILKAAR", defaultVerdi = "false") boolean aldersvilkårLansert) {
+                                                          @KonfigVerdi(value = "OMP_RAMMEVEDTAK_ALDERSVILKAAR", defaultVerdi = "true") boolean aldersvilkårLansert) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personinfoAdapter = personinfoAdapter;
