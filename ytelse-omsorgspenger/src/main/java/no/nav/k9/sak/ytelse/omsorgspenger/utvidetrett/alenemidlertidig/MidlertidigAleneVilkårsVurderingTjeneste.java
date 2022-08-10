@@ -10,7 +10,6 @@ import java.util.TreeSet;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -28,7 +27,6 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder
 public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private UtvidetRettSøknadPerioder søktePerioder;
-    private boolean aldersvilkårLansert;
     private VilkårResultatRepository vilkårResultatRepository;
 
     MidlertidigAleneVilkårsVurderingTjeneste() {
@@ -37,11 +35,9 @@ public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPeriod
 
     @Inject
     public MidlertidigAleneVilkårsVurderingTjeneste(VilkårResultatRepository vilkårResultatRepository,
-                                                    SøknadRepository søknadRepository,
-                                                    @KonfigVerdi(value = "OMP_RAMMEVEDTAK_ALDERSVILKAAR", defaultVerdi = "false") boolean aldersvilkårLansert) {
+                                                    SøknadRepository søknadRepository) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søktePerioder = new UtvidetRettSøknadPerioder(søknadRepository);
-        this.aldersvilkårLansert = aldersvilkårLansert;
     }
 
     @Override
@@ -73,12 +69,6 @@ public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPeriod
 
     @Override
     public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
-        if (aldersvilkårLansert){
-            return Map.of(
-                VilkårType.ALDERSVILKÅR_BARN, utled(behandlingId, VilkårType.ALDERSVILKÅR_BARN),
-                VilkårType.UTVIDETRETT, utled(behandlingId, VilkårType.UTVIDETRETT),
-                VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR));
-        }
         return Map.of(
             VilkårType.UTVIDETRETT, utled(behandlingId, VilkårType.UTVIDETRETT),
             VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR));

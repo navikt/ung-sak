@@ -2,8 +2,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess.steg;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_ALDERSVILKÅR_BARN;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +32,6 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aldersvilkår.Aldersvilkå
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aldersvilkår.regelmodell.AldersvilkårBarnVilkårGrunnlag;
 
 @FagsakYtelseTypeRef(OMSORGSPENGER_AO)
-@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
-@FagsakYtelseTypeRef(OMSORGSPENGER_MA)
 @BehandlingStegRef(value = VURDER_ALDERSVILKÅR_BARN)
 @BehandlingTypeRef
 @ApplicationScoped
@@ -56,7 +52,7 @@ public class AldersvilkårBarnSteg implements BehandlingSteg {
                                 AldersvilkårBarnTjeneste aldersvilkårBarnTjeneste,
                                 VilkårResultatRepository vilkårResultatRepository,
                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                @KonfigVerdi(value = "OMP_RAMMEVEDTAK_ALDERSVILKAAR", defaultVerdi = "false") boolean aldersvilkårLansert) {
+                                @KonfigVerdi(value = "OMP_RAMMEVEDTAK_ALDERSVILKAAR", defaultVerdi = "true") boolean aldersvilkårLansert) {
         this.behandlingRepository = behandlingRepository;
         this.aldersvilkårBarnTjeneste = aldersvilkårBarnTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;

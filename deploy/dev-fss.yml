@@ -193,7 +193,7 @@ spec:
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
       value: "true"
     - name: OMP_RAMMEVEDTAK_ALDERSVILKAAR
-      value: "false"
+      value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
