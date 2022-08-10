@@ -21,20 +21,20 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomSøktPeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdataSøktPeriode;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 @ExtendWith(MockitoExtension.class)
 class RepositoryTestTidslinje {
     @Mock
-    private SykdomVurderingRepository repo;
+    private MedisinskGrunnlagRepository repo;
 
 
     @Test
     void hentAlleSaksnummer() {
-        repo = mock(SykdomVurderingRepository.class);
+        repo = mock(MedisinskGrunnlagRepository.class);
         AktørId pleietrengendeAktør = new AktørId(123L);
         Saksnummer s1 = new Saksnummer("456");
         Saksnummer s2 = new Saksnummer("789");
@@ -43,14 +43,14 @@ class RepositoryTestTidslinje {
 
         when(repo.hentAlleSøktePerioder(s1))
             .thenReturn(Arrays.asList(
-                new SykdomSøktPeriode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15)),
-                new SykdomSøktPeriode(LocalDate.of(2021, 1, 16), LocalDate.of(2021, 1, 20))
+                new MedisinskGrunnlagsdataSøktPeriode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15)),
+                new MedisinskGrunnlagsdataSøktPeriode(LocalDate.of(2021, 1, 16), LocalDate.of(2021, 1, 20))
             ));
 
         when(repo.hentAlleSøktePerioder(s2))
             .thenReturn(Arrays.asList(
-                new SykdomSøktPeriode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 10)),
-                new SykdomSøktPeriode(LocalDate.of(2021, 1, 16), LocalDate.of(2021, 1, 20))
+                new MedisinskGrunnlagsdataSøktPeriode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 10)),
+                new MedisinskGrunnlagsdataSøktPeriode(LocalDate.of(2021, 1, 16), LocalDate.of(2021, 1, 20))
             ));
 
         when(repo.hentSaksnummerForSøktePerioder(pleietrengendeAktør)).thenCallRealMethod();

@@ -1,14 +1,13 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk;
 
 import jakarta.persistence.*;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
 
 import java.time.LocalDate;
 
-@Deprecated
-@Entity(name = "SykdomSøktPeriode")
-@Table(name = "SYKDOM_SOEKT_PERIODE")
-public class SykdomSøktPeriode {
+@Entity(name = "MedisinskGrunnlagsdataSøktPeriode")
+@Table(name = "MEDISINSK_GRUNNLAGSDATA_SOEKT_PERIODE")
+public class MedisinskGrunnlagsdataSøktPeriode {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_SOEKT_PERIODE")
     private Long id;
@@ -23,11 +22,11 @@ public class SykdomSøktPeriode {
     @Column(name = "TOM", nullable = false)
     private LocalDate tom;
 
-    public SykdomSøktPeriode() {
+    public MedisinskGrunnlagsdataSøktPeriode() {
         // Hibernate
     }
 
-    public SykdomSøktPeriode(LocalDate fom, LocalDate tom) {
+    public MedisinskGrunnlagsdataSøktPeriode(LocalDate fom, LocalDate tom) {
         this.fom = fom;
         this.tom = tom;
     }

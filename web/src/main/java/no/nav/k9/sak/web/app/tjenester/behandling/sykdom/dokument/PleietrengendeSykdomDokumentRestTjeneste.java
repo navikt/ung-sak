@@ -65,7 +65,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Ple
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentHarOppdatertVurderinger;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.SykdomGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
@@ -100,7 +100,7 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
     private PleietrengendeSykdomDokumentOversiktMapper pleietrengendeSykdomDokumentOversiktMapper;
     private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
-    private SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
 
     private SykdomProsessDriver prosessDriver;
@@ -117,14 +117,14 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
         PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
         SykdomVurderingRepository sykdomVurderingRepository,
         DokumentArkivTjeneste dokumentArkivTjeneste,
-        SykdomGrunnlagRepository sykdomGrunnlagRepository,
+        MedisinskGrunnlagRepository medisinskGrunnlagRepository,
         @KonfigVerdi(value = "TEST_NYTT_DOKUMENT", defaultVerdi = "false") boolean enableNyttDokument, SykdomProsessDriver prosessDriver) {
         this.pleietrengendeSykdomDokumentOversiktMapper = pleietrengendeSykdomDokumentOversiktMapper;
         this.behandlingRepository = behandlingRepository;
         this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
-        this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
+        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.enableNyttDokument = enableNyttDokument;
         this.prosessDriver = prosessDriver;
     }
@@ -438,7 +438,7 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
         final boolean harBlittSattSomDuplikat = gmlInformasjon.getDuplikatAvDokument() == null && sykdomDokumentEndringDto.getDuplikatAvId() != null;
         final boolean harBlittEndret = harEndretType || harBlittSattSomDuplikat;
         final boolean harIngenAnnenGodkjentLegeerklæring = !harMinstEnAnnenGodkjentLegeerklæring(gmlInformasjon.getDokument(), behandling.getFagsak().getPleietrengendeAktørId());
-        final boolean harTidligereHattRelevantGodkjentLegeerklæring = sykdomGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
+        final boolean harTidligereHattRelevantGodkjentLegeerklæring = medisinskGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
 
         if (varGodkjentLegeerklæring && harBlittEndret && harIngenAnnenGodkjentLegeerklæring && harTidligereHattRelevantGodkjentLegeerklæring) {
             throw new IllegalStateException("Det må minst være én godkjent legeerklæring på barnet når dette var tilfellet for en tidligere behandling.");

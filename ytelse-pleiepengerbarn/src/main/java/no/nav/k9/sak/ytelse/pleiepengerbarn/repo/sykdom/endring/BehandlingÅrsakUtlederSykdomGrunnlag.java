@@ -31,8 +31,8 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.SykdomGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.SykdomGrunnlagTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 
 @ApplicationScoped
@@ -43,8 +43,8 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private SykdomGrunnlagRepository sykdomGrunnlagRepository;
-    private SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste;
+    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
+    private MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
@@ -57,16 +57,16 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
     @Inject
     BehandlingÅrsakUtlederSykdomGrunnlag(BehandlingRepository behandlingRepository,
                                          BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                         SykdomGrunnlagRepository sykdomGrunnlagRepository,
-                                         SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste,
+                                         MedisinskGrunnlagRepository medisinskGrunnlagRepository,
+                                         MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
                                          VilkårResultatRepository vilkårResultatRepository,
                                          ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
                                          EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
-        this.sykdomGrunnlagTjeneste = sykdomGrunnlagTjeneste;
+        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
+        this.medisinskGrunnlagTjeneste = medisinskGrunnlagTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
@@ -110,12 +110,12 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
     }
 
     private boolean harEndringerForSykdom(BehandlingReferanse ref) {
-        var sykdomGrunnlag = sykdomGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
+        var sykdomGrunnlag = medisinskGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
             .map(MedisinskGrunnlag::getGrunnlagsdata);
 
         List<Periode> nyeVurderingsperioder = utledVurderingsperiode(ref);
-        var utledGrunnlag = sykdomGrunnlagTjeneste.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
-        var sykdomGrunnlagSammenlikningsresultat = sykdomGrunnlagTjeneste.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
+        var utledGrunnlag = medisinskGrunnlagTjeneste.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
+        var sykdomGrunnlagSammenlikningsresultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
         return !sykdomGrunnlagSammenlikningsresultat.getDiffPerioder().isEmpty() && skalGiÅrsak(ref, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
     }

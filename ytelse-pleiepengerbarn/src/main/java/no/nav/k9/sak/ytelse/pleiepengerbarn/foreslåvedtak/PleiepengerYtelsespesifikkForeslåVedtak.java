@@ -20,7 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktReposi
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.YtelsespesifikkForeslåVedtak;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.SykdomGrunnlagTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
@@ -32,7 +32,7 @@ public class PleiepengerYtelsespesifikkForeslåVedtak implements Ytelsespesifikk
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private BehandlingRepository behandlingRepository;
-    private SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste;
+    private MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste;
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
     private AksjonspunktRepository aksjonspunktRepository;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
@@ -41,14 +41,14 @@ public class PleiepengerYtelsespesifikkForeslåVedtak implements Ytelsespesifikk
     public PleiepengerYtelsespesifikkForeslåVedtak(SamtidigUttakTjeneste samtidigUttakTjeneste,
                                                    BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                                                    BehandlingRepository behandlingRepository,
-                                                   SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste,
+                                                   MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
                                                    AksjonspunktKontrollRepository aksjonspunktKontrollRepository,
                                                    AksjonspunktRepository aksjonspunktRepository,
                                                    SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.behandlingRepository = behandlingRepository;
-        this.sykdomGrunnlagTjeneste = sykdomGrunnlagTjeneste;
+        this.medisinskGrunnlagTjeneste = medisinskGrunnlagTjeneste;
         this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
@@ -67,7 +67,7 @@ public class PleiepengerYtelsespesifikkForeslåVedtak implements Ytelsespesifikk
         }
         var lås = behandlingRepository.taSkriveLås(behandling);
 
-        MedisinskGrunnlag medisinskGrunnlag = sykdomGrunnlagTjeneste.hentGrunnlag(behandling.getUuid());
+        MedisinskGrunnlag medisinskGrunnlag = medisinskGrunnlagTjeneste.hentGrunnlag(behandling.getUuid());
         boolean harUbesluttedeSykdomsVurderinger = medisinskGrunnlag.getGrunnlagsdata().getVurderinger()
             .stream()
             .anyMatch(v -> !v.isBesluttet());

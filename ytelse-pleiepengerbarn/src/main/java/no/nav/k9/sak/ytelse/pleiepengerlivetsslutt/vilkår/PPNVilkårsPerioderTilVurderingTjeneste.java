@@ -15,7 +15,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.SykdomGrunnlagTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
@@ -38,7 +38,7 @@ public class PPNVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
     public PPNVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE) VilkårUtleder vilkårUtleder,
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   BehandlingRepository behandlingRepository,
-                                                  SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste,
+                                                  MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
                                                   ErEndringPåEtablertTilsynTjeneste etablertTilsynTjeneste,
                                                   EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
@@ -49,7 +49,7 @@ public class PPNVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
             , Map.of(VilkårType.MEDLEMSKAPSVILKÅRET, new MaksSøktePeriode(søknadsperiodeTjeneste))
             , vilkårResultatRepository
             , behandlingRepository
-            , sykdomGrunnlagTjeneste
+            , medisinskGrunnlagTjeneste
             , etablertTilsynTjeneste
             , endringUnntakEtablertTilsynTjeneste
             , revurderingPerioderTjeneste

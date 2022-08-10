@@ -19,7 +19,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomSøktPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDiagnose;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDiagnoser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
@@ -39,7 +38,7 @@ public class MedisinskGrunnlagsdata {
 
     //TODO: Deprekere, hente data rett fra gr_soeknadsperiode i stedet.
     @OneToMany(mappedBy = "medisinskGrunnlagsdata", cascade = CascadeType.ALL)
-    private List<SykdomSøktPeriode> søktePerioder = new ArrayList<>();
+    private List<MedisinskGrunnlagsdataSøktPeriode> søktePerioder = new ArrayList<>();
 
     //TODO: AnvendteVurderinger?
     @OneToMany()
@@ -83,7 +82,7 @@ public class MedisinskGrunnlagsdata {
 
     public MedisinskGrunnlagsdata(
             UUID sykdomGrunnlagUUID,
-            List<SykdomSøktPeriode> søktePerioder,
+            List<MedisinskGrunnlagsdataSøktPeriode> søktePerioder,
             List<PleietrengendeSykdomVurderingVersjon> vurderinger,
             List<PleietrengendeSykdomDokument> godkjenteLegeerklæringer,
             boolean harAndreMedisinskeOpplysninger,
@@ -102,12 +101,12 @@ public class MedisinskGrunnlagsdata {
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
-    private void setSøktePerioder(List<SykdomSøktPeriode> søktePerioder) {
+    private void setSøktePerioder(List<MedisinskGrunnlagsdataSøktPeriode> søktePerioder) {
         this.søktePerioder = søktePerioder;
         søktePerioder.forEach(p -> p.setSykdomGrunnlag(this));
     }
 
-    public List<SykdomSøktPeriode> getSøktePerioder() {
+    public List<MedisinskGrunnlagsdataSøktPeriode> getSøktePerioder() {
         return Collections.unmodifiableList(søktePerioder);
     }
 

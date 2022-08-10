@@ -1,13 +1,10 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -25,9 +22,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomSøktPeriode;
 
 @Dependent
 public class SykdomVurderingRepository {
@@ -111,58 +106,6 @@ public class SykdomVurderingRepository {
         return q.getResultList().stream().findFirst();
     }
 
-    public List<Saksnummer> hentAlleSaksnummer(AktørId pleietrengende) {
-        final TypedQuery<Saksnummer> q = entityManager.createQuery(
-            "SELECT distinct sgb.saksnummer "
-                + "FROM MedisinskGrunnlag as sgb "
-                +   "inner join sgb.pleietrengende as p "
-                + "where p.aktørId = :aktørId"
-                , Saksnummer.class);
-
-        q.setParameter("aktørId", pleietrengende);
-
-        return q.getResultList();
-    }
-
-    public List<SykdomSøktPeriode> hentAlleSøktePerioder(Saksnummer saksnummer) {
-        final TypedQuery<SykdomSøktPeriode> q = entityManager.createQuery(
-            "SELECT ssp " +
-                "FROM MedisinskGrunnlag as sgb " +
-                "   inner join sgb.grunnlagsdata as sg " +
-                "   inner join sg.søktePerioder as ssp " +
-                "where sgb.saksnummer = :saksnummer "
-                , SykdomSøktPeriode.class);
-        q.setParameter("saksnummer", saksnummer);
-
-        return q.getResultList();
-    }
-
-     public LocalDateTimeline<Set<Saksnummer>> hentSaksnummerForSøktePerioder(AktørId pleietrengendeAktørId) {
-        final Collection<Saksnummer> saksnummere = hentAlleSaksnummer(pleietrengendeAktørId);
-        final Collection<LocalDateSegment<Set<Saksnummer>>> segments = new ArrayList<>();
-
-        for (Saksnummer saksnummer : saksnummere) {
-            final Collection<SykdomSøktPeriode> søktePerioder = hentAlleSøktePerioder(saksnummer);
-            for (SykdomSøktPeriode periode : søktePerioder) {
-                Set<Saksnummer> sett = new HashSet<>();
-                sett.add(saksnummer);
-                segments.add(new LocalDateSegment<Set<Saksnummer>>(periode.getFom(), periode.getTom(), sett));
-            }
-        }
-
-        final LocalDateTimeline<Set<Saksnummer>> tidslinje = new LocalDateTimeline<>(segments, new LocalDateSegmentCombinator<Set<Saksnummer>, Set<Saksnummer>, Set<Saksnummer>>() {
-            @Override
-            public LocalDateSegment<Set<Saksnummer>> combine(LocalDateInterval datoInterval, LocalDateSegment<Set<Saksnummer>> datoSegment, LocalDateSegment<Set<Saksnummer>> datoSegment2) {
-                Set<Saksnummer> kombinerteSaksnumre = new HashSet<>(datoSegment.getValue());
-                kombinerteSaksnumre.addAll(datoSegment2.getValue());
-
-                return new LocalDateSegment<>(datoInterval, kombinerteSaksnumre);
-            }
-        });
-
-        return tidslinje.compress();
-    }
-
     public List<PleietrengendeSykdomVurderingVersjon> hentVurderingMedVersjonerForBehandling(UUID behandlingUuid, Long vurderingId) {
         final TypedQuery<PleietrengendeSykdomVurderingVersjon> q = entityManager.createQuery(
                 "SELECT vv " +
@@ -241,13 +184,6 @@ public class SykdomVurderingRepository {
     public PleietrengendeSykdomVurderingVersjon hentVurderingVersjon(Long vurderingVersjonId) {
         return null;
     }
-
-    /*
-    public void lagre(SykdomVurderinger vurderinger) {
-        entityManager.persist(vurderinger);
-        entityManager.flush();
-    }
-    */
 
     public Person hentEllerLagrePerson(AktørId aktørId) {
         return hentEllerLagre(new Person(aktørId, null));

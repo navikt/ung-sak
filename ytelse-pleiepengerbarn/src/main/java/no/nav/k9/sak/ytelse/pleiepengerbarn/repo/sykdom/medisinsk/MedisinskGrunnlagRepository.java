@@ -2,10 +2,13 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -13,7 +16,9 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
@@ -23,7 +28,6 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomSøktPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDiagnoser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
@@ -32,21 +36,73 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Ple
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
 
 @Dependent
-public class SykdomGrunnlagRepository {
+public class MedisinskGrunnlagRepository {
 
     private EntityManager entityManager;
     private SykdomVurderingRepository sykdomVurderingRepository;
     private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
 
-    SykdomGrunnlagRepository() {
+    MedisinskGrunnlagRepository() {
         // CDI
     }
 
     @Inject
-    public SykdomGrunnlagRepository(EntityManager entityManager, SykdomVurderingRepository sykdomVurderingRepository, PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository) {
+    public MedisinskGrunnlagRepository(EntityManager entityManager, SykdomVurderingRepository sykdomVurderingRepository, PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository) {
         this.entityManager = Objects.requireNonNull(entityManager, "entityManager");
         this.sykdomVurderingRepository = Objects.requireNonNull(sykdomVurderingRepository, "sykdomVurderingRepository");
         this.pleietrengendeSykdomDokumentRepository = Objects.requireNonNull(pleietrengendeSykdomDokumentRepository, "sykdomDokumentRepository");
+    }
+
+    public List<Saksnummer> hentAlleSaksnummer(AktørId pleietrengende) {
+        final TypedQuery<Saksnummer> q = entityManager.createQuery(
+            "SELECT distinct sgb.saksnummer "
+                + "FROM MedisinskGrunnlag as sgb "
+                +   "inner join sgb.pleietrengende as p "
+                + "where p.aktørId = :aktørId"
+                , Saksnummer.class);
+
+        q.setParameter("aktørId", pleietrengende);
+
+        return q.getResultList();
+    }
+
+    public List<MedisinskGrunnlagsdataSøktPeriode> hentAlleSøktePerioder(Saksnummer saksnummer) {
+        final TypedQuery<MedisinskGrunnlagsdataSøktPeriode> q = entityManager.createQuery(
+            "SELECT ssp " +
+                "FROM MedisinskGrunnlag as sgb " +
+                "   inner join sgb.grunnlagsdata as sg " +
+                "   inner join sg.søktePerioder as ssp " +
+                "where sgb.saksnummer = :saksnummer "
+                , MedisinskGrunnlagsdataSøktPeriode.class);
+        q.setParameter("saksnummer", saksnummer);
+
+        return q.getResultList();
+    }
+
+    public LocalDateTimeline<Set<Saksnummer>> hentSaksnummerForSøktePerioder(AktørId pleietrengendeAktørId) {
+        final Collection<Saksnummer> saksnummere = hentAlleSaksnummer(pleietrengendeAktørId);
+        final Collection<LocalDateSegment<Set<Saksnummer>>> segments = new ArrayList<>();
+
+        for (Saksnummer saksnummer : saksnummere) {
+            final Collection<MedisinskGrunnlagsdataSøktPeriode> søktePerioder = hentAlleSøktePerioder(saksnummer);
+            for (MedisinskGrunnlagsdataSøktPeriode periode : søktePerioder) {
+                Set<Saksnummer> sett = new HashSet<>();
+                sett.add(saksnummer);
+                segments.add(new LocalDateSegment<Set<Saksnummer>>(periode.getFom(), periode.getTom(), sett));
+            }
+        }
+
+        final LocalDateTimeline<Set<Saksnummer>> tidslinje = new LocalDateTimeline<>(segments, new LocalDateSegmentCombinator<Set<Saksnummer>, Set<Saksnummer>, Set<Saksnummer>>() {
+            @Override
+            public LocalDateSegment<Set<Saksnummer>> combine(LocalDateInterval datoInterval, LocalDateSegment<Set<Saksnummer>> datoSegment, LocalDateSegment<Set<Saksnummer>> datoSegment2) {
+                Set<Saksnummer> kombinerteSaksnumre = new HashSet<>(datoSegment.getValue());
+                kombinerteSaksnumre.addAll(datoSegment2.getValue());
+
+                return new LocalDateSegment<>(datoInterval, kombinerteSaksnumre);
+            }
+        });
+
+        return tidslinje.compress();
     }
 
     public MedisinskGrunnlagsdata utledGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder, List<Periode> søknadsperioderSomSkalFjernes) {
@@ -79,7 +135,7 @@ public class SykdomGrunnlagRepository {
 
         return new MedisinskGrunnlagsdata(
             UUID.randomUUID(),
-            søktePerioder.stream().map(p -> new SykdomSøktPeriode(p.getFom(), p.getTom())).collect(Collectors.toList()),
+            søktePerioder.stream().map(p -> new MedisinskGrunnlagsdataSøktPeriode(p.getFom(), p.getTom())).collect(Collectors.toList()),
             vurderinger,
             godkjenteLegeerklæringer,
             harAndreMedisinskeDokumenter,
