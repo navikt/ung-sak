@@ -8,11 +8,12 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -31,7 +32,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder
 
 @FagsakYtelseTypeRef(FagsakYtelseType.OMSORGSPENGER_AO)
 @BehandlingTypeRef
-@RequestScoped
+@ApplicationScoped
 public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private BehandlingRepository behandlingRepository;
@@ -39,6 +40,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
     private VilkårResultatRepository vilkårResultatRepository;
     private PersoninfoAdapter personinfoAdapter;
     private UtvidetRettSøknadPerioder søktePerioder;
+    private boolean aldersvilkårLansert;
 
     AleneomsorgVilkårsPerioderTilVurderingTjeneste() {
         // for proxy
@@ -48,12 +50,14 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
     public AleneomsorgVilkårsPerioderTilVurderingTjeneste(BehandlingRepository behandlingRepository,
                                                           VilkårResultatRepository vilkårResultatRepository,
                                                           PersoninfoAdapter personinfoAdapter,
-                                                          SøknadRepository søknadRepository) {
+                                                          SøknadRepository søknadRepository,
+                                                          @KonfigVerdi(value = "OMP_RAMMEVEDTAK_ALDERSVILKAAR", defaultVerdi = "false") boolean aldersvilkårLansert) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personinfoAdapter = personinfoAdapter;
         this.søknadRepository = søknadRepository;
         this.søktePerioder = new UtvidetRettSøknadPerioder(søknadRepository);
+        this.aldersvilkårLansert = aldersvilkårLansert;
     }
 
     @Override
@@ -86,9 +90,17 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
 
     @Override
     public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
+        if (aldersvilkårLansert) {
+            return Map.of(
+                VilkårType.ALDERSVILKÅR_BARN, utled(behandlingId, VilkårType.ALDERSVILKÅR_BARN),
+                VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR),
+                VilkårType.UTVIDETRETT, utledUtvidetRettAleneomsorg(behandlingId)
+            );
+        }
         return Map.of(
-            VilkårType.UTVIDETRETT, utledUtvidetRettAleneomsorg(behandlingId),
-            VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR));
+            VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR),
+            VilkårType.UTVIDETRETT, utledUtvidetRettAleneomsorg(behandlingId)
+        );
     }
 
     private NavigableSet<DatoIntervallEntitet> utledUtvidetRettAleneomsorg(Long behandlingId) {
