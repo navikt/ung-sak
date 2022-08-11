@@ -1,9 +1,9 @@
 package no.nav.k9.sak.hendelse.vedtak;
 
+import org.apache.kafka.common.serialization.Serdes;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
-import org.apache.kafka.common.serialization.Serdes;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @Dependent
@@ -15,6 +15,7 @@ class TriggeRevurderingEtterVedtakStreamKafkaProperties {
     private final String password;
     private final Topic<String, String> topic;
     private final String applicationId;
+    private final Boolean lesFraStart;
     private final String trustStorePath;
     private final String trustStorePassword;
 
@@ -23,10 +24,12 @@ class TriggeRevurderingEtterVedtakStreamKafkaProperties {
     TriggeRevurderingEtterVedtakStreamKafkaProperties(@KonfigVerdi("bootstrap.servers") String bootstrapServers,
                                                       @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
                                                       @KonfigVerdi("kafka.fattevedtak.topic") String topicName,
+                                                      @KonfigVerdi(value = "kafka.fattevedtak.lesfrastart", defaultVerdi = "false") Boolean lesFraStart,
                                                       @KonfigVerdi("systembruker.username") String username,
                                                       @KonfigVerdi("systembruker.password") String password,
                                                       @KonfigVerdi(value = "javax.net.ssl.trustStore", required = false) String trustStorePath,
                                                       @KonfigVerdi(value = "javax.net.ssl.trustStorePassword", required = false) String trustStorePassword) {
+        this.lesFraStart = lesFraStart;
         this.trustStorePath = trustStorePath;
         this.trustStorePassword = trustStorePassword;
         this.topic = new Topic<>(topicName, Serdes.String(), Serdes.String());
@@ -66,6 +69,10 @@ class TriggeRevurderingEtterVedtakStreamKafkaProperties {
         return topic.getSerdeKey().getClass();
     }
 
+    Topic<String, String> getTopicConfig() {
+        return topic;
+    }
+
     @SuppressWarnings("resource")
     Class<?> getValueClass() {
         return topic.getSerdeValue().getClass();
@@ -90,5 +97,9 @@ class TriggeRevurderingEtterVedtakStreamKafkaProperties {
 
     String getTrustStorePassword() {
         return trustStorePassword;
+    }
+
+    boolean skalLeseFraStart() {
+        return lesFraStart;
     }
 }

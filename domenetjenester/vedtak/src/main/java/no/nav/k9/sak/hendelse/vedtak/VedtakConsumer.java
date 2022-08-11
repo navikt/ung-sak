@@ -4,9 +4,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Properties;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.config.SaslConfigs;
@@ -20,6 +17,8 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.felles.apptjeneste.AppServiceHandler;
 
 
@@ -41,7 +40,9 @@ public class VedtakConsumer implements AppServiceHandler {
 
         final StreamsBuilder builder = new StreamsBuilder();
 
-        Consumed<String, String> stringStringConsumed = Consumed.with(Topology.AutoOffsetReset.LATEST); // TODO: Endre til NONE etter prodsetting
+        var topicConfig = streamKafkaProperties.getTopicConfig();
+
+        Consumed<String, String> stringStringConsumed = streamKafkaProperties.skalLeseFraStart() ? Consumed.with(Topology.AutoOffsetReset.LATEST) : Consumed.with(topicConfig.getSerdeKey(), topicConfig.getSerdeValue());
         builder.stream(this.topic, stringStringConsumed)
             .foreach(vedtaksHendelseHåndterer::handleMessage);
 
