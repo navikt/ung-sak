@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.prosess;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 public class SykdomAksjonspunkt {
 
