@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.opptjening;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
@@ -14,6 +15,7 @@ import no.nav.k9.sak.inngangsvilkår.RegelResultat;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class PleiepengerHåndtereAutomatiskAvslag implements HåndtereAutomatiskAvslag {
 

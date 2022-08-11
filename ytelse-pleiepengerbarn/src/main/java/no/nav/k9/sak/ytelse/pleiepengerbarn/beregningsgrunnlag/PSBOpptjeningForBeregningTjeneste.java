@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
@@ -39,6 +40,7 @@ import no.nav.k9.sak.typer.Periode;
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
     private final OpptjeningAktivitetVurderingOpptjeningsvilkår vurderOpptjening = new OpptjeningAktivitetVurderingOpptjeningsvilkår();

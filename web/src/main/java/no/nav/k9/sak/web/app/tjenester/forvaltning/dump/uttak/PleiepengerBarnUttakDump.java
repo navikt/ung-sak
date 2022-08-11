@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.uttak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
@@ -25,6 +26,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpFagsak {
 
     private UttakRestKlient restKlient;

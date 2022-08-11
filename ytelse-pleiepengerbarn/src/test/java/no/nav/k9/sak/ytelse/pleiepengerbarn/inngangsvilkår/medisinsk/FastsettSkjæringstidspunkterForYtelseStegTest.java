@@ -26,7 +26,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 
-class PostSykdomOgKontinuerligTilsynStegTest {
+class FastsettSkjæringstidspunkterForYtelseStegTest {
 
     private BehandlingRepositoryProvider mockProvider = mock(BehandlingRepositoryProvider.class); // Brukes ikke, men kan ikke være null
     private BeregningPerioderGrunnlagRepository mockrep = mock(BeregningPerioderGrunnlagRepository.class); // Brukes ikke, men kan ikke være null
@@ -58,7 +58,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         }
     };
     private UnitTestLookupInstanceImpl<VilkårsPerioderTilVurderingTjeneste> instance = new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste);
-    private PostSykdomOgKontinuerligTilsynSteg steg = new PostSykdomOgKontinuerligTilsynSteg(mockProvider, mockrep, instance, mockUtleder);
+    private FastsettSkjæringstidspunkterForYtelseSteg steg = new FastsettSkjæringstidspunkterForYtelseSteg(mockProvider, mockrep, instance, mockUtleder);
 
     @Test
     void skal_justere_utfall_ved_perioder_med_avslag_på_medisinsk() {
