@@ -20,6 +20,7 @@
         <!--Ytelsespesifikke moduler -->
         <module>ytelse-omsorgspenger</module>
         <module>ytelse-pleiepengerbarn</module>
+        <module>ytelse-opplaeringspenger</module>
         <module>ytelse-frisinn</module>
         <module>ytelse-unntaksbehandling</module>
 
@@ -42,7 +43,7 @@
         <felles.version>0.8.8</felles.version>
         <swagger.version>2.2.2</swagger.version>
         <junit.version>5.9.0</junit.version>
-        <k9format.version>6.0.4</k9format.version>
+        <k9format.version>6.0.5</k9format.version>
         <jackson.version>2.13.3</jackson.version>
         <asm.version>9.3</asm.version>
         <kotlin-stdlib.version>1.7.10</kotlin-stdlib.version>
@@ -338,7 +339,11 @@
                 <artifactId>ytelse-omsorgspenger</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>no.nav.k9.sak.ytelse</groupId>
+                <artifactId>ytelse-opplaeringspenger</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
                 <artifactId>soknad-frisinn-jakarta</artifactId>

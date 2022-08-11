@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.POST_VURDER_MEDISINSKVILKÅR;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
@@ -49,8 +50,9 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagReposito
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 @ApplicationScoped
-public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
+public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSteg {
 
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
@@ -58,15 +60,15 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
 
-    PostSykdomOgKontinuerligTilsynSteg() {
+    FastsettSkjæringstidspunkterForYtelseSteg() {
         // CDI
     }
 
     @Inject
-    public PostSykdomOgKontinuerligTilsynSteg(BehandlingRepositoryProvider repositoryProvider,
-                                              BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                              AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap) {
+    public FastsettSkjæringstidspunkterForYtelseSteg(BehandlingRepositoryProvider repositoryProvider,
+                                                     BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
+                                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                                     AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap) {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
