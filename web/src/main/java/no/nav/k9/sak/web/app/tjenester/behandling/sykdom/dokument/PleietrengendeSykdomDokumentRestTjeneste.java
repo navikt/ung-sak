@@ -65,6 +65,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Ple
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentHarOppdatertVurderinger;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
@@ -99,6 +100,7 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
     private BehandlingRepository behandlingRepository;
     private PleietrengendeSykdomDokumentOversiktMapper pleietrengendeSykdomDokumentOversiktMapper;
     private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
+    private PersonRepository personRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
@@ -115,6 +117,7 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
         BehandlingRepository behandlingRepository,
         PleietrengendeSykdomDokumentOversiktMapper pleietrengendeSykdomDokumentOversiktMapper,
         PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
+        PersonRepository personRepository,
         SykdomVurderingRepository sykdomVurderingRepository,
         DokumentArkivTjeneste dokumentArkivTjeneste,
         MedisinskGrunnlagRepository medisinskGrunnlagRepository,
@@ -122,6 +125,7 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
         this.pleietrengendeSykdomDokumentOversiktMapper = pleietrengendeSykdomDokumentOversiktMapper;
         this.behandlingRepository = behandlingRepository;
         this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
+        this.personRepository = personRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
@@ -491,7 +495,7 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
                 informasjon,
                 behandling.getUuid(),
                 behandling.getFagsak().getSaksnummer(),
-                sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
+                personRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
                 getCurrentUserId(),
                 nå);
 

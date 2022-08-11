@@ -19,6 +19,7 @@ import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdom;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
@@ -30,6 +31,9 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Syk
 class PleietrengendeSykdomVurderingRepositoryTest {
     @Inject
     private SykdomVurderingRepository repo;
+    
+    @Inject
+    private PersonRepository personRepo;
 
     @Test
     void lagrePerson() {
@@ -37,7 +41,8 @@ class PleietrengendeSykdomVurderingRepositoryTest {
             new AktørId(123456789L),
             "11111111111"
         );
-        repo.hentEllerLagre(p);
+        personRepo.hentEllerLagre(p);
+        
     }
 
     @Test
@@ -46,7 +51,7 @@ class PleietrengendeSykdomVurderingRepositoryTest {
     }
 
     private void lagreVurdering(AktørId barnAktørId) {
-        final Person barn = repo.hentEllerLagre(new Person(
+        final Person barn = personRepo.hentEllerLagre(new Person(
             barnAktørId,
             barnAktørId.getId()
         ));
@@ -68,7 +73,7 @@ class PleietrengendeSykdomVurderingRepositoryTest {
             );
         vurdering.setRangering(1L);
 
-        final Person mor = repo.hentEllerLagre(new Person(
+        final Person mor = personRepo.hentEllerLagre(new Person(
             new AktørId("222456789"),
             "22211111111"
         ));
@@ -111,7 +116,7 @@ class PleietrengendeSykdomVurderingRepositoryTest {
     @Test
     void lagreVurderingVersjonBesluttet() throws Exception {
         AktørId barnAktørId = new AktørId("023456789");
-        final Person barn = repo.hentEllerLagre(new Person(
+        final Person barn = personRepo.hentEllerLagre(new Person(
             barnAktørId,
             barnAktørId.getId()
         ));
@@ -129,7 +134,7 @@ class PleietrengendeSykdomVurderingRepositoryTest {
         );
         vurdering.setRangering(1L);
 
-        final Person mor = repo.hentEllerLagre(new Person(
+        final Person mor = personRepo.hentEllerLagre(new Person(
             new AktørId("222456789"),
             "22211111111"
         ));

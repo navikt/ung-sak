@@ -52,6 +52,7 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
             null,
             null,
             null,
+            null,
             null);
     }
 

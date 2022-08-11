@@ -28,6 +28,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDiagnoser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
@@ -40,6 +41,7 @@ public class MedisinskGrunnlagRepository {
 
     private EntityManager entityManager;
     private SykdomVurderingRepository sykdomVurderingRepository;
+    private PersonRepository personRepository;
     private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
 
     MedisinskGrunnlagRepository() {
@@ -47,9 +49,14 @@ public class MedisinskGrunnlagRepository {
     }
 
     @Inject
-    public MedisinskGrunnlagRepository(EntityManager entityManager, SykdomVurderingRepository sykdomVurderingRepository, PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository) {
+    public MedisinskGrunnlagRepository(
+           EntityManager entityManager,
+           SykdomVurderingRepository sykdomVurderingRepository,
+           PersonRepository personRepository,
+           PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository) {
         this.entityManager = Objects.requireNonNull(entityManager, "entityManager");
         this.sykdomVurderingRepository = Objects.requireNonNull(sykdomVurderingRepository, "sykdomVurderingRepository");
+        this.personRepository = Objects.requireNonNull(personRepository, "personRepository");
         this.pleietrengendeSykdomDokumentRepository = Objects.requireNonNull(pleietrengendeSykdomDokumentRepository, "sykdomDokumentRepository");
     }
 
@@ -155,8 +162,8 @@ public class MedisinskGrunnlagRepository {
 
         final MedisinskGrunnlagsdata grunnlag = utledGrunnlag(pleietrengendeAktørId, vurderingsperioder, søknadsperioderSomSkalFjernes, grunnlagFraForrigeBehandling);
 
-        final Person søker = sykdomVurderingRepository.hentEllerLagrePerson(søkerAktørId);
-        final Person pleietrengende = sykdomVurderingRepository.hentEllerLagrePerson(pleietrengendeAktørId);
+        final Person søker = personRepository.hentEllerLagrePerson(søkerAktørId);
+        final Person pleietrengende = personRepository.hentEllerLagrePerson(pleietrengendeAktørId);
         final long behandlingsnummer = grunnlagFraForrigeBehandling.map(sgb -> sgb.getBehandlingsnummer() + 1L).orElse(0L);
         final long versjon = forrigeVersjon.map(sgb -> sgb.getVersjon() + 1L).orElse(0L);
         final MedisinskGrunnlag sgb = new MedisinskGrunnlag(grunnlag, søker, pleietrengende, saksnummer, behandlingUuid, behandlingsnummer, versjon, "VL", opprettetTidspunkt);

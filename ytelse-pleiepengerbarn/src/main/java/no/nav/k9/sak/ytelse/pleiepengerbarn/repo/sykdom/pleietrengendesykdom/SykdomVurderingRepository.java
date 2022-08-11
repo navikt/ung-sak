@@ -22,19 +22,21 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
 
 @Dependent
 public class SykdomVurderingRepository {
 
     private EntityManager entityManager;
+    private PersonRepository personRepository;
 
     SykdomVurderingRepository() {
         // CDI
     }
 
     @Inject
-    public SykdomVurderingRepository(EntityManager entityManager) {
+    public SykdomVurderingRepository(EntityManager entityManager, PersonRepository personRepository) {
+        this.personRepository = personRepository;
         Objects.requireNonNull(entityManager, "entityManager");
         this.entityManager = entityManager;
     }
@@ -42,12 +44,12 @@ public class SykdomVurderingRepository {
     /////////////////////////////
 
     public PleietrengendeSykdom hentEllerLagreSykdomVurderinger(AktørId pleietrengende, String opprettetAv, LocalDateTime opprettetTidspunkt) {
-        final var sykdomPerson = hentEllerLagrePerson(pleietrengende);
+        final var sykdomPerson = personRepository.hentEllerLagrePerson(pleietrengende);
         return hentEllerLagre(new PleietrengendeSykdom(sykdomPerson, opprettetAv, opprettetTidspunkt));
     }
 
     public void lagre(PleietrengendeSykdomVurdering vurdering, AktørId pleietrengende) {
-        final var sykdomPerson = hentEllerLagrePerson(pleietrengende);
+        final var sykdomPerson = personRepository.hentEllerLagrePerson(pleietrengende);
         final var sykdomVurderinger = new PleietrengendeSykdom(sykdomPerson, vurdering.getOpprettetAv(), vurdering.getOpprettetTidspunkt());
         lagre(vurdering, sykdomVurderinger);
     }
@@ -185,33 +187,9 @@ public class SykdomVurderingRepository {
         return null;
     }
 
-    public Person hentEllerLagrePerson(AktørId aktørId) {
-        return hentEllerLagre(new Person(aktørId, null));
-    }
-
-    public Person hentEllerLagre(Person person) {
-        final EntityManager innerEntityManager = entityManager.getEntityManagerFactory().createEntityManager();
-        final EntityTransaction transaction = innerEntityManager.getTransaction();
-        transaction.begin();
-        try {
-            final Query q = innerEntityManager.createNativeQuery("INSERT INTO PERSON (ID, AKTOER_ID, NORSK_IDENTITETSNUMMER) VALUES (nextval('SEQ_PERSON'), :aktorId, :norskIdentitetsnummer) ON CONFLICT DO NOTHING");
-            q.setParameter("aktorId", person.getAktørId().getId());
-            q.setParameter("norskIdentitetsnummer", person.getNorskIdentitetsnummer());
-            q.executeUpdate();
-            transaction.commit();
-        } catch (Throwable t) {
-            transaction.rollback();
-            throw t;
-        } finally {
-            innerEntityManager.close();
-        }
-
-        return findPerson(person.getAktørId());
-    }
-
     PleietrengendeSykdom hentEllerLagre(PleietrengendeSykdom pleietrengendeSykdom) {
         if (pleietrengendeSykdom.getPerson().getId() == null) {
-            pleietrengendeSykdom.setPerson(hentEllerLagre(pleietrengendeSykdom.getPerson()));
+            pleietrengendeSykdom.setPerson(personRepository.hentEllerLagre(pleietrengendeSykdom.getPerson()));
         }
 
         final EntityManager innerEntityManager = entityManager.getEntityManagerFactory().createEntityManager();
@@ -245,13 +223,6 @@ public class SykdomVurderingRepository {
 
         return q.getResultList().stream().findFirst();
     }
-
-    private Person findPerson(AktørId aktørId) {
-        final TypedQuery<Person> q = entityManager.createQuery("select p From Person p where p.aktørId = :aktørId", Person.class);
-        q.setParameter("aktørId", aktørId);
-        return q.getResultList().stream().findFirst().orElse(null);
-    }
-
 
     public LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> getVurderingstidslinjeFor(SykdomVurderingType type, UUID behandlingUuid) {
         return PleietrengendeTidslinjeUtils.tilTidslinje(hentBehandlingVurderingerFor(type, behandlingUuid));

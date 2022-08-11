@@ -28,6 +28,7 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.MapTilBrevkode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
@@ -40,16 +41,19 @@ public class SykdomsDokumentVedleggHåndterer {
 
     private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
+    private PersonRepository personRepository;
     private SafTjeneste safTjeneste;
     private Instance<MapTilBrevkode> brevkodeMappere;
 
     @Inject
     public SykdomsDokumentVedleggHåndterer(PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
                                            SykdomVurderingRepository sykdomVurderingRepository,
+                                           PersonRepository personRepository,
                                            SafTjeneste safTjeneste,
                                            @Any Instance<MapTilBrevkode> brevkodeMappere) {
         this.safTjeneste = safTjeneste;
         this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
+        this.personRepository = personRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.brevkodeMappere = brevkodeMappere;
     }
@@ -112,7 +116,7 @@ public class SykdomsDokumentVedleggHåndterer {
                 informasjon,
                 behandling.getUuid(),
                 behandling.getFagsak().getSaksnummer(),
-                sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
+                personRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
                 "VL",
                 mottattidspunkt);
             pleietrengendeSykdomDokumentRepository.lagre(dokument, pleietrengendeAktørId);

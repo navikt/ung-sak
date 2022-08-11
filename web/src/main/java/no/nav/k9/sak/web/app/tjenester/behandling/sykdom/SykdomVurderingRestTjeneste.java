@@ -59,6 +59,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Ple
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomPeriodeMedEndring;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
@@ -89,6 +90,7 @@ public class SykdomVurderingRestTjeneste {
     private SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper = new SykdomVurderingOversiktMapper();
     private SykdomVurderingMapper sykdomVurderingMapper;
     private SykdomVurderingRepository sykdomVurderingRepository;
+    private PersonRepository personRepository;
     private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
     private SykdomVurderingTjeneste sykdomVurderingTjeneste;
 
@@ -101,9 +103,10 @@ public class SykdomVurderingRestTjeneste {
     @Inject
     public SykdomVurderingRestTjeneste(BehandlingRepository behandlingRepository, SykdomVurderingRepository sykdomVurderingRepository,
                                        PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository, SykdomVurderingTjeneste sykdomVurderingTjeneste,
-                                       SykdomVurderingMapper sykdomVurderingMapper, SykdomProsessDriver prosessDriver) {
+                                       SykdomVurderingMapper sykdomVurderingMapper, SykdomProsessDriver prosessDriver, PersonRepository personRepository) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
+        this.personRepository = personRepository;
         this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
         this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
         this.sykdomVurderingMapper = sykdomVurderingMapper;
@@ -328,7 +331,7 @@ public class SykdomVurderingRestTjeneste {
     }
 
     private Sporingsinformasjon lagSporingsinformasjon(final Behandling behandling) {
-        final Person endretForPerson = sykdomVurderingRepository.hentEllerLagrePerson(behandling.getAktørId());
+        final Person endretForPerson = personRepository.hentEllerLagrePerson(behandling.getAktørId());
         return new SykdomVurderingMapper.Sporingsinformasjon(getCurrentUserId(), behandling.getUuid(), behandling.getFagsak().getSaksnummer().getVerdi(), endretForPerson);
     }
 
