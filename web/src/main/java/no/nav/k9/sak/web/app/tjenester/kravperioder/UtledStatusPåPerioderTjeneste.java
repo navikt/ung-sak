@@ -92,7 +92,7 @@ public class UtledStatusPåPerioderTjeneste {
     private List<ÅrsakMedPerioder> utledÅrsakMedPerioder(List<PeriodeMedÅrsaker> perioder) {
         var result = new HashMap<ÅrsakTilVurdering, LocalDateTimeline<Boolean>>();
         var årsakTilVurderingMap = perioder.stream().flatMap(this::tilÅrsakMedPerioder).collect(Collectors.groupingBy(ÅrsakMedPerioder::getÅrsak,
-            Collectors.flatMapping(it -> Stream.of(it.getPerioder()).flatMap(Collection::stream), Collectors.toCollection(TreeSet::new))));
+            Collectors.flatMapping(it -> Stream.of(it.getPerioder()).flatMap(Collection::stream), Collectors.toCollection(TreeSet<Periode>::new))));
 
 
         for (Map.Entry<ÅrsakTilVurdering, TreeSet<Periode>> entry : årsakTilVurderingMap.entrySet()) {
