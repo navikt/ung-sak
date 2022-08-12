@@ -37,8 +37,8 @@ public class OLPSøknadDokumentValidator implements DokumentValidator {
     @Override
     public void validerDokument(MottattDokument mottattDokument) {
         Objects.requireNonNull(mottattDokument);
-        if (!Objects.equals(Brevkode.SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE, mottattDokument.getType())) {
-            throw new IllegalArgumentException("Forventet brevkode: " + Brevkode.SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE + ", fikk: " + mottattDokument.getType());
+        if (!Objects.equals(Brevkode.OPPLÆRINGSPENGER_SOKNAD, mottattDokument.getType())) {
+            throw new IllegalArgumentException("Forventet brevkode: " + Brevkode.OPPLÆRINGSPENGER_SOKNAD + ", fikk: " + mottattDokument.getType());
         }
         var søknad = søknadParser.parseSøknad(mottattDokument);
         new PleiepengerLivetsSluttfaseSøknadValidator().forsikreValidert(søknad);

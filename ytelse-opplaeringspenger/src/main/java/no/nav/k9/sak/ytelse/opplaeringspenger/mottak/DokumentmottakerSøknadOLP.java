@@ -36,8 +36,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.SykdomsDokumentVedleggHåndte
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.felles.type.Journalpost;
+import no.nav.k9.søknad.ytelse.olp.v1.Opplæringspenger;
 import no.nav.k9.søknad.ytelse.pls.v1.PleiepengerLivetsSluttfaseSøknadValidator;
-import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
@@ -100,7 +100,7 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
      */
     private void lagreOppgittOpptjeningFraSøknad(Søknad søknad, Behandling behandling, MottattDokument dokument) {
         try {
-            OpptjeningAktivitet opptjeningAktiviteter = ((PleipengerLivetsSluttfase) søknad.getYtelse()).getOpptjeningAktivitet();
+            OpptjeningAktivitet opptjeningAktiviteter = ((Opplæringspenger) søknad.getYtelse()).getOpptjeningAktivitet();
             var request = oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, opptjeningAktiviteter);
             if (request.map(OppgittOpptjeningMottattRequest::getOppgittOpptjening).isEmpty()) {
                 // Ingenting mer som skal lagres - dokument settes som ferdig

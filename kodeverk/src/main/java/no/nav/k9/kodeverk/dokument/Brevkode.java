@@ -69,6 +69,7 @@ public class Brevkode implements Kodeverdi {
 
     public static final Set<Brevkode> SØKNAD_TYPER = Set.of(
         PLEIEPENGER_BARN_SOKNAD,
+        OPPLÆRINGSPENGER_SOKNAD,
         SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE,
         SØKNAD_UTBETALING_OMS,
         SØKNAD_UTBETALING_OMS_AT,
