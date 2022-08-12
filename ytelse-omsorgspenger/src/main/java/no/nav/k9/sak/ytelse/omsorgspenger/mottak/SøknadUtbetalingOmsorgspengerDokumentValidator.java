@@ -22,6 +22,7 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_AT_KODE)
 @DokumentGruppeRef(Brevkode.FRAVÆRSKORRIGERING_IM_OMS_KODE)
+@DokumentGruppeRef(Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT_KODE)
 public class SøknadUtbetalingOmsorgspengerDokumentValidator implements DokumentValidator {
 
     private SøknadParser søknadParser;
@@ -44,7 +45,11 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
         int i = 0;
         for (Søknad søknad : søknader) {
             var brevkode = mottattBrevkoder.get(i++);
-            List<Brevkode> forventetBrevkoder = List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT, Brevkode.FRAVÆRSKORRIGERING_IM_OMS);
+            List<Brevkode> forventetBrevkoder = List.of(
+                Brevkode.SØKNAD_UTBETALING_OMS,
+                Brevkode.SØKNAD_UTBETALING_OMS_AT,
+                Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT,
+                Brevkode.FRAVÆRSKORRIGERING_IM_OMS);
             if (!forventetBrevkoder.contains(brevkode)) {
                 throw new IllegalArgumentException("Forventet brevkode: " + forventetBrevkoder + ", fikk: " + brevkode);
             }
