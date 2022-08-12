@@ -49,6 +49,7 @@ public class Brevkode implements Kodeverdi {
      */
     public static final Brevkode SØKNAD_UTBETALING_OMS = new Brevkode(SØKNAD_UTBETALING_OMS_KODE, "NAV 09-35.01", SØKNAD_RANGERING);
     public static final Brevkode SØKNAD_UTBETALING_OMS_AT = new Brevkode(SØKNAD_UTBETALING_OMS_AT_KODE, "NAV 09-35.02", SØKNAD_RANGERING);
+    public static final Brevkode PAPIRSØKNAD_UTBETALING_OMS_AT = new Brevkode(SØKNAD_UTBETALING_OMS_AT_KODE, "NAV 09-09.01", SØKNAD_RANGERING);
     public static final Brevkode FRAVÆRSKORRIGERING_IM_OMS = new Brevkode(FRAVÆRSKORRIGERING_IM_OMS_KODE, FRAVÆRSKORRIGERING_IM_OMS_KODE, SØKNAD_RANGERING);
     public static final Brevkode SØKNAD_OMS_UTVIDETRETT_KS = new Brevkode(SØKNAD_OMS_UTVIDETRETT_KS_KODE, "NAV 09-06.05", SØKNAD_RANGERING);
     public static final Brevkode SØKNAD_OMS_UTVIDETRETT_MA = new Brevkode(SØKNAD_OMS_UTVIDETRETT_MA_KODE, "NAV 09-06.07", SØKNAD_RANGERING);
@@ -73,6 +74,7 @@ public class Brevkode implements Kodeverdi {
         SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE,
         SØKNAD_UTBETALING_OMS,
         SØKNAD_UTBETALING_OMS_AT,
+        PAPIRSØKNAD_UTBETALING_OMS_AT,
         SØKNAD_OMS_UTVIDETRETT_KS,
         SØKNAD_OMS_UTVIDETRETT_MA,
         SØKNAD_OMS_UTVIDETRETT_AO,
