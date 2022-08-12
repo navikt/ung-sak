@@ -26,6 +26,7 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysning;
 import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysningRepository;
@@ -72,6 +73,13 @@ public class KompletthetBeregningTjeneste {
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
+    private static boolean erManueltOpprettetRevurdering(Behandling behandling) {
+        return behandling.erRevurdering() && behandling.erManueltOpprettet();
+    }
+
+    private static boolean erManuellRevurderingOgHarTattStillingTilTingPåNytt(Behandling behandling) {
+        return erManueltOpprettetRevurdering(behandling) && behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.ENDELING_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE).map(Aksjonspunkt::erUtført).orElse(false);
+    }
 
     public KompletthetsAksjon utledTilstand(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, false, true);
@@ -93,7 +101,11 @@ public class KompletthetBeregningTjeneste {
 
         var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
 
-        avslåOgAvkortRelevanteKompletthetsvurderinger(kontekst, perioderTilVurdering, grunnlag);
+        if (erManuellRevurderingOgHarTattStillingTilTingPåNytt(behandling)) { // TODO: Vurder om det må sjekkes om alt er tatt stilling til f.eks ny søknad om ny periode som det må etterlyses fra
+            avslåOgAvkortRelevanteKompletthetsvurderinger(kontekst, perioderTilVurdering, grunnlag);
+        } else if (!erManueltOpprettetRevurdering(behandling)) {
+            avslåOgAvkortRelevanteKompletthetsvurderinger(kontekst, perioderTilVurdering, grunnlag);
+        }
 
         var redusertPerioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, true, true);
         var inputMedVurderinger = new VurdererInput(redusertPerioderTilVurdering, innvilgetSøknadsfrist, kompletthetsVurderinger, grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of()), Set.of(Vurdering.KAN_FORTSETTE));
