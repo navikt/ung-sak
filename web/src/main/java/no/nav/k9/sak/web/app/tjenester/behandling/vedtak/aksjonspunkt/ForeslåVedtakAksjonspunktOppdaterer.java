@@ -4,14 +4,13 @@ import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.K9FormidlingKlient;
+import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.VurderBrevTjeneste;
 import no.nav.k9.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto;
 
 @ApplicationScoped
@@ -19,16 +18,16 @@ import no.nav.k9.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto;
 public class ForeslåVedtakAksjonspunktOppdaterer implements AksjonspunktOppdaterer<ForeslaVedtakAksjonspunktDto> {
 
     private VedtaksbrevHåndterer vedtaksbrevHåndterer;
-    private K9FormidlingKlient formidlingKlient;
+    private VurderBrevTjeneste vurderBrevTjeneste;
 
     ForeslåVedtakAksjonspunktOppdaterer() {
         // for CDI proxy
     }
 
     @Inject
-    public ForeslåVedtakAksjonspunktOppdaterer(VedtaksbrevHåndterer vedtaksbrevHåndterer, K9FormidlingKlient formidlingKlient) {
+    public ForeslåVedtakAksjonspunktOppdaterer(VedtaksbrevHåndterer vedtaksbrevHåndterer, VurderBrevTjeneste vurderBrevTjeneste) {
         this.vedtaksbrevHåndterer = vedtaksbrevHåndterer;
-        this.formidlingKlient = formidlingKlient;
+        this.vurderBrevTjeneste = vurderBrevTjeneste;
     }
 
     @Override
@@ -38,7 +37,7 @@ public class ForeslåVedtakAksjonspunktOppdaterer implements AksjonspunktOppdate
 
         OppdateringResultat.Builder builder = OppdateringResultat.builder();
         if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains( behandling.getFagsakYtelseType())) {
-            if (dto.isSkalBrukeOverstyrendeFritekstBrev() || trengerManueltBrev(behandling)) {
+            if (dto.isSkalBrukeOverstyrendeFritekstBrev() || vurderBrevTjeneste.trengerManueltBrev(behandling)) {
                 builder.medTotrinn();
             }
         }
@@ -50,8 +49,4 @@ public class ForeslåVedtakAksjonspunktOppdaterer implements AksjonspunktOppdate
         return builder.build();
     }
 
-    private boolean trengerManueltBrev(Behandling behandling) {
-        InformasjonsbehovListeDto informasjonsbehov = formidlingKlient.hentInformasjonsbehov(behandling.getUuid(), behandling.getFagsakYtelseType());
-        return !informasjonsbehov.getInformasjonsbehov().isEmpty();
-    }
 }

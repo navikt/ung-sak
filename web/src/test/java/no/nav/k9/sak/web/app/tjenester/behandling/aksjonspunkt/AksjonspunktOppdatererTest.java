@@ -12,13 +12,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovDto;
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
@@ -36,6 +35,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.K9FormidlingKlient;
+import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.VurderBrevTjeneste;
 import no.nav.k9.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.k9.sak.domene.vedtak.impl.FatterVedtakAksjonspunkt;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
@@ -59,6 +59,8 @@ public class AksjonspunktOppdatererTest {
     public EntityManager entityManager;
 
     private K9FormidlingKlient formidlingKlient;
+
+    private VurderBrevTjeneste vurderBrevTjeneste;
 
     private BehandlingRepositoryProvider repositoryProvider;
 
@@ -85,6 +87,7 @@ public class AksjonspunktOppdatererTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         formidlingKlient = mock(K9FormidlingKlient.class);
         when(formidlingKlient.hentInformasjonsbehov(any(UUID.class), any(FagsakYtelseType.class))).thenReturn(mockTomtInformasjonsbehov());
+        vurderBrevTjeneste = new VurderBrevTjeneste(formidlingKlient);
     }
 
     @Test
@@ -112,7 +115,7 @@ public class AksjonspunktOppdatererTest {
             }
         };
 
-        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, formidlingKlient);
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, vurderBrevTjeneste);
 
         when(formidlingKlient.hentInformasjonsbehov(any(UUID.class), any(FagsakYtelseType.class))).thenReturn(mockInformasjonsbehovMedKode());
 
@@ -147,7 +150,7 @@ public class AksjonspunktOppdatererTest {
             }
         };
 
-        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, formidlingKlient);
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, vurderBrevTjeneste);
         OppdateringResultat oppdateringResultat = foreslaVedtakAksjonspunktOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
 
         assertThat(behandling.getFagsakYtelseType()).isEqualTo(FagsakYtelseType.PSB);
@@ -174,7 +177,7 @@ public class AksjonspunktOppdatererTest {
             }
         };
 
-        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, formidlingKlient);
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, vurderBrevTjeneste);
 
         foreslaVedtakAksjonspunktOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
         assertThat(behandling.getAnsvarligSaksbehandler()).isEqualTo("hello");
