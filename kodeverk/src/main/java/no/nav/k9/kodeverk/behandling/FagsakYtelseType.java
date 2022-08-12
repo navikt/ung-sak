@@ -113,7 +113,7 @@ public enum FagsakYtelseType implements Kodeverdi {
         }
     },
 
-    OPPLÆRINGSPENGER("OLP", "Opplæringspenger", null, "OMS") {
+    OPPLÆRINGSPENGER("OLP", "Opplæringspenger", "OP", "OMS") {
         @Override
         public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
             requireNonNull(pleietrengendeAktørId, "pleietrengende");
