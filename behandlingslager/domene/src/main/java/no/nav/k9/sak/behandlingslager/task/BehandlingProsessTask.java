@@ -33,7 +33,7 @@ public abstract class BehandlingProsessTask implements ProsessTaskHandler {
             behandlingLåsRepository.taLås(behandlingId);
         }
 
-            prosesser(prosessTaskData);
+        prosesser(prosessTaskData);
     }
 
     protected abstract void prosesser(ProsessTaskData prosessTaskData);
