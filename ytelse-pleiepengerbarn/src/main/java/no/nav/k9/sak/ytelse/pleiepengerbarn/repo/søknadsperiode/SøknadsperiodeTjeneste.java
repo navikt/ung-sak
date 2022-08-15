@@ -33,6 +33,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeD�
 public class SøknadsperiodeTjeneste {
 
     private final BehandlingRepository behandlingRepository;
+    private FagsakRepository fagsakRepository;
     private final SøknadsperiodeRepository søknadsperiodeRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private Instance<MapTilBrevkode> brevkodeMappere;
@@ -40,11 +41,13 @@ public class SøknadsperiodeTjeneste {
 
     @Inject
     public SøknadsperiodeTjeneste(BehandlingRepository behandlingRepository,
+                                  FagsakRepository fagsakRepository,
                                   SøknadsperiodeRepository søknadsperiodeRepository,
                                   MottatteDokumentRepository mottatteDokumentRepository,
                                   @Any Instance<MapTilBrevkode> brevkodeMappere,
                                   HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste) {
         this.behandlingRepository = behandlingRepository;
+        this.fagsakRepository = fagsakRepository;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.brevkodeMappere = brevkodeMappere;

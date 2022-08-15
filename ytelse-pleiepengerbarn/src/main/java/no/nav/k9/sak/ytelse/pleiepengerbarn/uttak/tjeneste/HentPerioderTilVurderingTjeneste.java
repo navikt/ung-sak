@@ -39,7 +39,7 @@ public class HentPerioderTilVurderingTjeneste {
         BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
         var søknadsperioder = TidslinjeUtil.tilTidslinjeKomprimert(finnSykdomsperioder(referanse));
 
-        return fjernTrukkedePerioder(referanse);
+        return fjernTrukkedePerioder(referanse, søknadsperioder);
     }
 
     public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingMedUbesluttet(Behandling behandling, Optional<DatoIntervallEntitet> utvidetPeriodeSomFølgeAvDødsfall) {
@@ -51,7 +51,7 @@ public class HentPerioderTilVurderingTjeneste {
             søknadsperioder = søknadsperioder.combine(new LocalDateSegment<>(utvidetPeriodeSomFølgeAvDødsfall.get().toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        return fjernTrukkedePerioder(referanse);
+        return fjernTrukkedePerioder(referanse, søknadsperioder);
     }
 
     private TreeSet<DatoIntervallEntitet> fjernTrukkedePerioder(BehandlingReferanse referanse, LocalDateTimeline<Boolean> søknadsperioder) {
@@ -62,7 +62,7 @@ public class HentPerioderTilVurderingTjeneste {
     }
 
     private LocalDateTimeline<Boolean> hentTrukkedeKravTidslinje(BehandlingReferanse referanse) {
-        return TidslinjeUtil.toLocalDateTimeline(søknadsperiodeTjeneste.hentKravperioder(referanse.getFagsakId(), referanse.getBehandlingId())
+        return TidslinjeUtil.tilTidslinjeKomprimert(søknadsperiodeTjeneste.hentKravperioder(referanse)
             .stream()
             .filter(SøknadsperiodeTjeneste.Kravperiode::isHarTrukketKrav)
             .map(SøknadsperiodeTjeneste.Kravperiode::getPeriode)
