@@ -297,7 +297,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     @Override
     public NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(Long behandlingId) {
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
-        return søknadsperiodeTjeneste.hentKravperioder(behandling.getFagsakId(), behandlingId)
+        return søknadsperiodeTjeneste.hentKravperioder(BehandlingReferanse.fra(behandling))
             .stream()
             .filter(kp -> kp.isHarTrukketKrav() && kp.getBehandlingId().equals(behandlingId))
             .map(SøknadsperiodeTjeneste.Kravperiode::getPeriode)
