@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
@@ -28,6 +29,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 @GrunnlagRef(MedlemskapAggregat.class)
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 @FagsakYtelseTypeRef(OMSORGSPENGER)
 @FagsakYtelseTypeRef(FRISINN)
 class StartpunktUtlederMedlemskap implements EndringStartpunktUtleder {
