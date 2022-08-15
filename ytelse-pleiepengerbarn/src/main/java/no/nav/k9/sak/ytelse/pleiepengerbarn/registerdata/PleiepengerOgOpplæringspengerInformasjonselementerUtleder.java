@@ -6,6 +6,7 @@ import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_PENSJON
 import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_SAMMENLIGNINGSGRUNNLAG;
 import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.LIGNET_NÆRING;
 import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.YTELSE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
@@ -13,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
-
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -23,9 +23,10 @@ import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
 @BehandlingTypeRef(BehandlingType.REVURDERING)
-class PSBInformasjonselementerUtleder implements InformasjonselementerUtleder {
+class PleiepengerOgOpplæringspengerInformasjonselementerUtleder implements InformasjonselementerUtleder {
 
     private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(
         BehandlingType.FØRSTEGANGSSØKNAD,
