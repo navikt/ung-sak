@@ -10,7 +10,7 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidator;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
-import no.nav.k9.søknad.ytelse.pls.v1.PleiepengerLivetsSluttfaseSøknadValidator;
+import no.nav.k9.søknad.ytelse.olp.v1.OpplæringspengerSøknadValidator;
 
 @ApplicationScoped
 @DokumentGruppeRef(Brevkode.OPPLÆRINGSPENGER_SOKNAD_KODE)
@@ -41,6 +41,6 @@ public class OLPSøknadDokumentValidator implements DokumentValidator {
             throw new IllegalArgumentException("Forventet brevkode: " + Brevkode.OPPLÆRINGSPENGER_SOKNAD + ", fikk: " + mottattDokument.getType());
         }
         var søknad = søknadParser.parseSøknad(mottattDokument);
-        new PleiepengerLivetsSluttfaseSøknadValidator().forsikreValidert(søknad);
+        new OpplæringspengerSøknadValidator().forsikreValidert(søknad);
     }
 }
