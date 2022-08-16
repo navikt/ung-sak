@@ -3,8 +3,10 @@ package no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -111,8 +113,8 @@ public class SøknadsfristRestTjeneste {
         if (leftSegment == null) {
             return null;
         }
-        Collections.sort(leftSegment.getValue());
-        return new LocalDateSegment<>(leftSegment.getLocalDateInterval(), leftSegment.getValue().get(0));
+        var førsteDokument = leftSegment.getValue().stream().min(Comparator.naturalOrder()).orElseThrow();
+        return new LocalDateSegment<>(leftSegment.getLocalDateInterval(), førsteDokument);
     }
 
 }
