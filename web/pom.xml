@@ -125,6 +125,10 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9.sak.ytelse</groupId>
+            <artifactId>ytelse-opplaeringspenger</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.sak.ytelse</groupId>
             <artifactId>ytelse-omsorgspenger</artifactId>
         </dependency>
         <dependency>
