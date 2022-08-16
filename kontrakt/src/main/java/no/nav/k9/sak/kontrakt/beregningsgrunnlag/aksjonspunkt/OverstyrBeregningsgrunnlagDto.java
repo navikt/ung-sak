@@ -25,9 +25,6 @@ import no.nav.k9.sak.typer.Periode;
 @JsonTypeName(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE)
 public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
 
-    @JsonProperty(value = "fakta")
-    @Valid
-    private FaktaBeregningLagreDto fakta;
 
     @JsonProperty(value = "overstyrteAndeler")
     @Valid
@@ -55,16 +52,8 @@ public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
         return true;
     }
 
-    public FaktaBeregningLagreDto getFakta() {
-        return fakta;
-    }
-
     public List<FastsettBeregningsgrunnlagAndelDto> getOverstyrteAndeler() {
         return overstyrteAndeler;
-    }
-
-    public void setFakta(FaktaBeregningLagreDto fakta) {
-        this.fakta = fakta;
     }
 
     public void setOverstyrteAndeler(List<FastsettBeregningsgrunnlagAndelDto> overstyrteAndeler) {

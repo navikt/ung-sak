@@ -1,6 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
 
+import static no.nav.k9.kodeverk.historikk.HistorikkinnslagType.FJERNET_OVERSTYRING;
+
 import java.time.LocalDate;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -73,12 +75,14 @@ public class BeregningsaktivitetOverstyringshåndterer extends AbstractOverstyri
                 oppdaterBeregningsgrunnlagResultat.getBeregningAktivitetEndringer(),
                 oppdaterBeregningsgrunnlagResultat.getSkjæringstidspunkt(),
                 dto.getBegrunnelse());
+            tekstBuilder.medSkjermlenke(SkjermlenkeType.FAKTA_OM_BEREGNING);
+            getHistorikkAdapter().opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.FAKTA_ENDRET); // Lager historikk for fakta siden det er fakta om overstyres
         } else if (dto.skalAvbrytes()) {
-            tekstBuilder.medNavnOgGjeldendeFra(HistorikkEndretFeltType.OVERSTYRING, null, dto.getPeriode().getFom());
-            tekstBuilder.medEndretFelt(HistorikkEndretFeltType.OVERSTYRING, null, HistorikkEndretFeltVerdiType.IKKE_OVERSTYR);
+            tekstBuilder.medHendelse(FJERNET_OVERSTYRING,  dto.getPeriode().getFom());
+            tekstBuilder.medSkjermlenke(SkjermlenkeType.FAKTA_OM_BEREGNING);
+            tekstBuilder.ferdigstillHistorikkinnslagDel();
+            getHistorikkAdapter().opprettHistorikkInnslag(behandling.getId(), FJERNET_OVERSTYRING);
         }
-        tekstBuilder.medSkjermlenke(SkjermlenkeType.FAKTA_OM_BEREGNING);
-        getHistorikkAdapter().opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.FAKTA_ENDRET); // Lager historikk for fakta siden det er fakta om overstyres
     }
 
     @Override

@@ -95,7 +95,7 @@ class MapDtoTilRequest {
             if (dto.skalAvbrytes()) {
                 return OverstyrBeregningsgrunnlagHåndteringDto.avbryt();
             }
-            var mappetDto = new OverstyrBeregningsgrunnlagHåndteringDto(OppdatererDtoMapper.mapTilFaktaOmBeregningLagreDto(overstyrBeregningsgrunnlagDto.getFakta()),
+            var mappetDto = new OverstyrBeregningsgrunnlagHåndteringDto(null,
                 OppdatererDtoMapper.mapFastsettBeregningsgrunnlagPeriodeAndeler(overstyrBeregningsgrunnlagDto.getOverstyrteAndeler()));
             mappetDto.setBegrunnelse(dto.getBegrunnelse());
             return mappetDto;
