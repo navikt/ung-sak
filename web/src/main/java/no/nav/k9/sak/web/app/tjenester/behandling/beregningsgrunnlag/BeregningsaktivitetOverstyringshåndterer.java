@@ -10,6 +10,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrun
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AbstractOverstyringshåndterer;
@@ -71,6 +73,9 @@ public class BeregningsaktivitetOverstyringshåndterer extends AbstractOverstyri
                 oppdaterBeregningsgrunnlagResultat.getBeregningAktivitetEndringer(),
                 oppdaterBeregningsgrunnlagResultat.getSkjæringstidspunkt(),
                 dto.getBegrunnelse());
+        } else if (dto.skalAvbrytes()) {
+            tekstBuilder.medNavnOgGjeldendeFra(HistorikkEndretFeltType.OVERSTYRING, null, dto.getPeriode().getFom());
+            tekstBuilder.medEndretFelt(HistorikkEndretFeltType.OVERSTYRING, null, HistorikkEndretFeltVerdiType.IKKE_OVERSTYR);
         }
         tekstBuilder.medSkjermlenke(SkjermlenkeType.FAKTA_OM_BEREGNING);
         getHistorikkAdapter().opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.FAKTA_ENDRET); // Lager historikk for fakta siden det er fakta om overstyres

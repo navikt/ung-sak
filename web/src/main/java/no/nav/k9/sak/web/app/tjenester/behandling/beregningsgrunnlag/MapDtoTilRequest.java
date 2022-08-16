@@ -1,5 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
+import static no.nav.folketrygdloven.kalkulus.håndtering.v1.overstyring.OverstyrBeregningsaktiviteterDto.avbryt;
+
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.avklaraktiviteter.AvklarAktiviteterHåndteringDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.FaktaOmBeregningHåndteringDto;
@@ -29,9 +31,9 @@ class MapDtoTilRequest {
     /**
      * Mapper aksjonspunktdto til håndteringdto i kalkulus.
      *
-     * @param dto BekreftAksjonspunktDto
+     * @param dto         BekreftAksjonspunktDto
      * @param begrunnelse begrunnelsen for aksjonspunktet. I k9sak lagres kun et aksjonspunkt for alle grunnlag og
-     * det er begrunnelsen på dette aksjonspunktet som skal legges ved på alle aksjonspunktene som sendes til kalkulus
+     *                    det er begrunnelsen på dette aksjonspunktet som skal legges ved på alle aksjonspunktene som sendes til kalkulus
      * @return Dto for håndtering av aksjonspunk i Kalkulus
      */
 
@@ -81,14 +83,18 @@ class MapDtoTilRequest {
     }
 
     public static HåndterBeregningDto mapOverstyring(OverstyringAksjonspunktDto dto) {
-        if (dto instanceof OverstyrBeregningsaktiviteterDto) {
-            OverstyrBeregningsaktiviteterDto overstyrBeregningsaktiviteterDto = (OverstyrBeregningsaktiviteterDto) dto;
+        if (dto instanceof OverstyrBeregningsaktiviteterDto overstyrBeregningsaktiviteterDto) {
+            if (dto.skalAvbrytes()) {
+                return avbryt();
+            }
             var mappetDto = new no.nav.folketrygdloven.kalkulus.håndtering.v1.overstyring.OverstyrBeregningsaktiviteterDto(OppdatererDtoMapper.mapOverstyrBeregningsaktiviteterDto(overstyrBeregningsaktiviteterDto.getBeregningsaktivitetLagreDtoList()));
             mappetDto.setBegrunnelse(dto.getBegrunnelse());
             return mappetDto;
         }
-        if (dto instanceof OverstyrBeregningsgrunnlagDto) {
-            OverstyrBeregningsgrunnlagDto overstyrBeregningsgrunnlagDto = (OverstyrBeregningsgrunnlagDto) dto;
+        if (dto instanceof OverstyrBeregningsgrunnlagDto overstyrBeregningsgrunnlagDto) {
+            if (dto.skalAvbrytes()) {
+                return OverstyrBeregningsgrunnlagHåndteringDto.avbryt();
+            }
             var mappetDto = new OverstyrBeregningsgrunnlagHåndteringDto(OppdatererDtoMapper.mapTilFaktaOmBeregningLagreDto(overstyrBeregningsgrunnlagDto.getFakta()),
                 OppdatererDtoMapper.mapFastsettBeregningsgrunnlagPeriodeAndeler(overstyrBeregningsgrunnlagDto.getOverstyrteAndeler()));
             mappetDto.setBegrunnelse(dto.getBegrunnelse());

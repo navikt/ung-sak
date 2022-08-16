@@ -3,6 +3,7 @@ package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 import java.util.List;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -28,9 +29,8 @@ public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
     @Valid
     private FaktaBeregningLagreDto fakta;
 
-    @JsonProperty(value = "overstyrteAndeler", required = true)
+    @JsonProperty(value = "overstyrteAndeler")
     @Valid
-    @NotNull
     @Size(max = 100)
     private List<FastsettBeregningsgrunnlagAndelDto> overstyrteAndeler;
 
@@ -70,4 +70,10 @@ public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
     public void setOverstyrteAndeler(List<FastsettBeregningsgrunnlagAndelDto> overstyrteAndeler) {
         this.overstyrteAndeler = overstyrteAndeler;
     }
+
+    @AssertTrue
+    public boolean skalVereAvbruttEllerHaVerdier() {
+        return skalAvbrytes() || overstyrteAndeler != null;
+    }
+
 }
