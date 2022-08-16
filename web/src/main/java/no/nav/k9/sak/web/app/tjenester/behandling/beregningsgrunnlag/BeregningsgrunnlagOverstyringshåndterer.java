@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.historikk.HistorikkinnslagType.FAKTA_ENDRET;
 import static no.nav.k9.kodeverk.historikk.HistorikkinnslagType.FJERNET_OVERSTYRING;
 
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AbstractOverstyringshåndterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -61,11 +63,16 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
         var behandlingReferanse = BehandlingReferanse.fra(behandling);
         validerOppdatering(dto.getPeriode().getFom(), behandlingReferanse);
         var oppdaterBeregningsgrunnlagResultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, behandlingReferanse, dto.getPeriode().getFom());
+        var tekstBuilder = getHistorikkAdapter().tekstBuilder();
         oppdaterBeregningsgrunnlagResultat.getBeregningsgrunnlagEndring().ifPresent(
-            endring -> verdierHistorikkTjeneste.lagHistorikkForBeregningsgrunnlagVerdier(behandling.getId(),
-                endring.getBeregningsgrunnlagPeriodeEndringer().get(0), getHistorikkAdapter().tekstBuilder()));
+            endring -> {
+                verdierHistorikkTjeneste.lagHistorikkForBeregningsgrunnlagVerdier(behandling.getId(),
+                    endring.getBeregningsgrunnlagPeriodeEndringer().get(0), tekstBuilder);
+                tekstBuilder.ferdigstillHistorikkinnslagDel();
+                getHistorikkAdapter().opprettHistorikkInnslag(behandling.getId(), FAKTA_ENDRET);
+
+            });
         if (dto.skalAvbrytes()) {
-            var tekstBuilder = getHistorikkAdapter().tekstBuilder();
             tekstBuilder.medHendelse(FJERNET_OVERSTYRING,  dto.getPeriode().getFom());
             tekstBuilder.medSkjermlenke(SkjermlenkeType.FAKTA_OM_BEREGNING);
             tekstBuilder.ferdigstillHistorikkinnslagDel();

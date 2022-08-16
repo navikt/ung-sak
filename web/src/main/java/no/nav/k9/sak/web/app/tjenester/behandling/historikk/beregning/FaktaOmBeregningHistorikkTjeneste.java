@@ -39,8 +39,11 @@ public class FaktaOmBeregningHistorikkTjeneste {
     public void lagHistorikk(Long behandlingId, List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningsgrunnlagResultatList, String begrunnelse) {
         HistorikkInnslagTekstBuilder tekstBuilder = historikkAdapter.tekstBuilder();
         oppdaterBeregningsgrunnlagResultatList.forEach(oppdatering -> byggHistorikkForEndring(behandlingId, oppdatering, tekstBuilder));
-        tekstBuilder.medSkjermlenke(SkjermlenkeType.FAKTA_OM_BEREGNING).medBegrunnelse(begrunnelse);
-        historikkAdapter.opprettHistorikkInnslag(behandlingId, HistorikkinnslagType.FAKTA_ENDRET);
+
+        if (tekstBuilder.antallEndredeFelter() > 0) {
+            tekstBuilder.medSkjermlenke(SkjermlenkeType.FAKTA_OM_BEREGNING).medBegrunnelse(begrunnelse);
+            historikkAdapter.opprettHistorikkInnslag(behandlingId, HistorikkinnslagType.FAKTA_ENDRET);
+        }
     }
 
     private void byggHistorikkForEndring(Long behandlingId, OppdaterBeregningsgrunnlagResultat oppdaterBeregningsgrunnlagResultat, HistorikkInnslagTekstBuilder tekstBuilder) {
