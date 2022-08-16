@@ -88,6 +88,7 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     UTVIDETRETT("UTVIDETRETT", "Utvidet rett"),
     ALENE_OM_OMSORG("ALENE_OM_OMSORG", "Alene om omsorgen"),
     MIDLERTIDIG_ALENE("MIDLERTIDIG_ALENE", "Utvidet rett"),
+    ALDERSVILKÅR_BARN("ALDERSVILKAR_BARN", "Aldersvilkår barn"),
 
     VALG("VALG", "Valg"),
     UDEFINERT("-", "Ikke definert"),
