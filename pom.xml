@@ -564,7 +564,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging</artifactId>
-                <version>3.4.0.Final</version>
+                <version>3.5.0.Final</version>
             </dependency>
 
             <!-- Java11 -->
