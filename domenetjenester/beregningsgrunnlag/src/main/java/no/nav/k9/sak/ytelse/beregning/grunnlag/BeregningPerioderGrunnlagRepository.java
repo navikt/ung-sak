@@ -146,7 +146,7 @@ public class BeregningPerioderGrunnlagRepository {
             .setParameter("behandling_id", behandlingId)
             .setMaxResults(1); // $NON-NLS-1$
 
-        return query.getResultStream().findFirst();
+        return HibernateVerktøy.hentUniktResultat(query);
     }
 
     public Optional<BeregningsgrunnlagPerioderGrunnlag> hentGrunnlag(Long behandlingId) {

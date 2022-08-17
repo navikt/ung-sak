@@ -21,6 +21,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -87,7 +88,7 @@ public class KjøreplanUtleder {
     public KravPrioInput utledInput(BehandlingReferanse referanse) {
         var søknadsfristTjeneste = VurderSøknadsfristTjeneste.finnSøknadsfristTjeneste(søknadsfristTjenester, referanse.getFagsakYtelseType());
         var aktuellFagsak = fagsakRepository.finnEksaktFagsak(referanse.getFagsakId());
-        final List<SakOgBehandlinger> fagsaker = fagsakRepository.finnFagsakRelatertTil(aktuellFagsak.getYtelseType(), aktuellFagsak.getPleietrengendeAktørId(), null, null, null)
+        final List<SakOgBehandlinger> fagsaker = utledRelevanteFagsaker(aktuellFagsak)
             .stream()
             .map(it -> mapTilSakOgBehandling(it, søknadsfristTjeneste))
             .toList();
@@ -98,6 +99,13 @@ public class KjøreplanUtleder {
         var utsattePerioderPerBehandling = utledUtsattePerioderFraBehandling(fagsaker);
 
         return new KravPrioInput(aktuellFagsak.getId(), aktuellFagsak.getSaksnummer(), utsattePerioderPerBehandling, toOmsorgspersonerTidslinje, fagsaker);
+    }
+
+    private List<Fagsak> utledRelevanteFagsaker(Fagsak aktuellFagsak) {
+        if (Objects.equals(aktuellFagsak.getYtelseType(), FagsakYtelseType.OPPLÆRINGSPENGER)) {
+            return List.of(aktuellFagsak);
+        }
+        return fagsakRepository.finnFagsakRelatertTil(aktuellFagsak.getYtelseType(), aktuellFagsak.getPleietrengendeAktørId(), null, null, null);
     }
 
     private HashMap<Long, NavigableSet<DatoIntervallEntitet>> utledUtsattePerioderFraBehandling(List<SakOgBehandlinger> fagsaker) {
