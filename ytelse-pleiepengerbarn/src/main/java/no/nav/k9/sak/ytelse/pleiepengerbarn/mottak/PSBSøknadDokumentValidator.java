@@ -61,7 +61,7 @@ public class PSBSøknadDokumentValidator implements DokumentValidator {
         // Kan ikke hente behandlingId fra mottatt dokument siden dokumentet ikke er knyttet til behandlingen enda
         // Det skjer først når det er gyldig
         var endringsperioder = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(mottattDokument.getFagsakId())
-            .map(this::utledEndrignsperioder)
+            .map(this::utledEndringsperioder)
             .orElse(List.of());
 
         if (!endringsperioder.isEmpty()) {
@@ -71,7 +71,7 @@ public class PSBSøknadDokumentValidator implements DokumentValidator {
         new PleiepengerSyktBarnSøknadValidator().forsikreValidert(søknad, endringsperioder);
     }
 
-    private List<Periode> utledEndrignsperioder(Behandling behandling) {
+    private List<Periode> utledEndringsperioder(Behandling behandling) {
         var endringsperioder = søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId());
         return endringsperioder
             .stream()
