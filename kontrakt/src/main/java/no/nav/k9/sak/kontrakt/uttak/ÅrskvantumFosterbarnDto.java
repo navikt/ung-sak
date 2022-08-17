@@ -28,6 +28,7 @@ public class ÅrskvantumFosterbarnDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty(value = "fosterbarn", required = true)
     @Valid
+    @NotNull
     @Size(max = 100)
     private List<NorskIdentDto> fosterbarn;
 
@@ -44,7 +45,7 @@ public class ÅrskvantumFosterbarnDto extends BekreftetAksjonspunktDto {
         //
     }
 
-    public Boolean getfortsettBehandling() {
+    public boolean getfortsettBehandling() {
         return fortsettBehandling;
     }
 
