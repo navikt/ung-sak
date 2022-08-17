@@ -86,6 +86,7 @@ public class KalkulusRestKlient {
 
     private URI migrerAksjonspunkter;
     private URI komprimerRegelinput;
+    private URI komprimerFlereRegelinput;
 
 
     protected KalkulusRestKlient() {
@@ -117,7 +118,7 @@ public class KalkulusRestKlient {
         this.kontrollerGrunnbeløp = toUri("/api/kalkulus/v1/kontrollerGregulering");
         this.migrerAksjonspunkter = toUri("/api/kalkulus/v1/migrerAksjonspunkter");
         this.komprimerRegelinput = toUri("/api/kalkulus/v1/komprimerRegelSporing");
-
+        this.komprimerFlereRegelinput = toUri("/api/kalkulus/v1/komprimerAntallRegelSporinger");
     }
 
 
@@ -211,6 +212,15 @@ public class KalkulusRestKlient {
         try {
             Saksnummer saksnummmer = getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), saksnummerReader);
             return saksnummmer == null ? null: saksnummmer.getSaksnummer();
+        } catch (IOException e) {
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
+        }
+    }
+
+    public void komprimerFlereRegelinput(KomprimerRegelInputRequest request) {
+        var endpoint = komprimerFlereRegelinput;
+        try {
+            utfør(endpoint, kalkulusJsonWriter.writeValueAsString(request));
         } catch (IOException e) {
             throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
