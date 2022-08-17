@@ -81,7 +81,6 @@ public class BeregningsaktivitetOverstyringshåndterer extends AbstractOverstyri
             tekstBuilder.medHendelse(FJERNET_OVERSTYRING,  dto.getPeriode().getFom());
             tekstBuilder.medSkjermlenke(SkjermlenkeType.FAKTA_OM_BEREGNING);
             tekstBuilder.ferdigstillHistorikkinnslagDel();
-            getHistorikkAdapter().opprettHistorikkInnslag(behandling.getId(), FJERNET_OVERSTYRING);
         }
     }
 

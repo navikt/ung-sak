@@ -51,7 +51,6 @@ public enum HistorikkEndretFeltVerdiType implements Kodeverdi {
     IKKE_NYOPPSTARTET("IKKE_NYOPPSTARTET", "ikke nyoppstartet"),
     BENYTT("BENYTT", "Benytt"),
     IKKE_BENYTT("IKKE_BENYTT", "Ikke benytt"),
-    IKKE_OVERSTYR("IKKE_OVERSTYR", "Ikke overstyr"),
 
     /** Vilkår. */
     VILKAR_IKKE_OPPFYLT("VILKAR_IKKE_OPPFYLT", "Vilkåret er ikke oppfylt"),
