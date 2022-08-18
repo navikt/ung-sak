@@ -21,9 +21,9 @@ import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
+import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktProsessResultat;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktProsessResultat;
 import no.nav.k9.sak.behandling.aksjonspunkt.Overstyringshåndterer;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
@@ -62,8 +62,6 @@ public class AksjonspunktApplikasjonTjeneste {
 
     private AksjonspunktRepository aksjonspunktRepository;
 
-    private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
-
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
 
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
@@ -80,13 +78,11 @@ public class AksjonspunktApplikasjonTjeneste {
     public AksjonspunktApplikasjonTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                            BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                            AksjonspunktRepository aksjonspunktRepository,
-                                           AksjonspunktKontrollRepository aksjonspunktKontrollRepository,
                                            BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
                                            SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                            HistorikkTjenesteAdapter historikkTjenesteAdapter) {
 
         this.aksjonspunktRepository = aksjonspunktRepository;
-        this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
@@ -175,8 +171,6 @@ public class AksjonspunktApplikasjonTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
 
-        avbrytOverstyringer(aksjonspunkterDto, behandling);
-
         AksjonspunktProsessResultat prosessResultat = overstyrVilkårEllerBeregning(aksjonspunkterDto.getOverstyrteAksjonspunktDtoer(), behandling, kontekst);
 
         aksjonspunkterDto.getOverstyrteAksjonspunktDtoer().forEach(dto ->
@@ -195,13 +189,6 @@ public class AksjonspunktApplikasjonTjeneste {
             return;
         }
         fortsettBehandlingen(behandling, kontekst, prosessResultat);// skal ikke reinnhente her, avgjøres i steg?
-    }
-
-    private void avbrytOverstyringer(BekreftetOgOverstyrteAksjonspunkterDto aksjonspunkterDto, Behandling behandling) {
-        aksjonspunkterDto.getOverstyrteAksjonspunktDtoer().stream()
-            .filter(OverstyringAksjonspunktDto::skalAvbrytes)
-            .forEach(dto -> behandling.getAksjonspunktFor(dto.getKode()).ifPresent(aksjonspunktKontrollRepository::setTilAvbrutt));
-
     }
 
     private void fortsettBehandlingen(Behandling behandling, BehandlingskontrollKontekst kontekst, AksjonspunktProsessResultat aksjonspunktProsessResultat) {
@@ -223,9 +210,7 @@ public class AksjonspunktApplikasjonTjeneste {
             @SuppressWarnings("rawtypes")
             Overstyringshåndterer overstyringshåndterer = finnOverstyringshåndterer(dto);
             var aksjonspunktDefinisjon = overstyringshåndterer.aksjonspunktForInstans();
-            if (!dto.skalAvbrytes()) {
-                opprettAksjonspunktForOverstyring(kontekst, behandling, aksjonspunktDefinisjon);
-            }
+            opprettAksjonspunktForOverstyring(kontekst, behandling, aksjonspunktDefinisjon);
             OppdateringResultat oppdateringResultat = overstyringshåndterer.håndterOverstyring(dto, behandling, kontekst);
             aksjonspunktProsessResultat.leggTil(oppdateringResultat);
 
