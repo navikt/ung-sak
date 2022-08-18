@@ -85,7 +85,7 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         final var perioderVurdertISykdom = utledPerioderVurdert(behandlingId, vilkårsPerioderTilVurderingTjeneste);
 
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
-        var oppdatertResultatBuilder = justerVilkårsperioderEtterSykdom(vilkårene, perioderVurdertISykdom, vilkårsPerioderTilVurderingTjeneste);
+        var oppdatertResultatBuilder = justerVilkårsperioderEtterDefinerendeVilkår(vilkårene, perioderVurdertISykdom, vilkårsPerioderTilVurderingTjeneste);
 
         vilkårResultatRepository.lagre(behandlingId, oppdatertResultatBuilder.build());
 
@@ -125,7 +125,7 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         return TidslinjeUtil.tilDatoIntervallEntiteter(timeline.compress());
     }
 
-    VilkårResultatBuilder justerVilkårsperioderEtterSykdom(Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+    VilkårResultatBuilder justerVilkårsperioderEtterDefinerendeVilkår(Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         var avslåttePerioder = finnPerioderMedUtfall(vilkårene, perioderTilVurdering, perioderTilVurderingTjeneste, Utfall.IKKE_OPPFYLT);
         var innvilgedePerioder = finnPerioderMedUtfall(vilkårene, perioderTilVurdering, perioderTilVurderingTjeneste, Utfall.OPPFYLT);
 

@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.vilkår.VilkårType.ALDERSVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.LANGVARIG_SYKDOM;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDLEMSKAPSVILKÅRET;
+import static no.nav.k9.kodeverk.vilkår.VilkårType.NØDVENDIG_OPPLÆRING;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.OPPTJENINGSPERIODEVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.OPPTJENINGSVILKÅRET;
 
@@ -27,6 +28,7 @@ public class InngangsvilkårUtleder implements VilkårUtleder {
     private static final List<VilkårType> YTELSE_VILKÅR = asList(
         ALDERSVILKÅR,
         LANGVARIG_SYKDOM,
+        NØDVENDIG_OPPLÆRING,
         MEDLEMSKAPSVILKÅRET,
         OPPTJENINGSPERIODEVILKÅR,
         OPPTJENINGSVILKÅRET,

@@ -12,12 +12,12 @@ public class MedisinskVilkårGrunnlag implements VilkårGrunnlag {
     private final LocalDate fom;
     private final LocalDate tom;
 
-    private LocalDateTimeline<Void> dokumentertLangvarigSykdomPerioder;
+    private LocalDateTimeline<LangvarigSykdomDokumentasjon> dokumentertLangvarigSykdomPerioder;
 
     public MedisinskVilkårGrunnlag(LocalDate fom, LocalDate tom) {
         this.fom = fom;
         this.tom = tom;
-        this.dokumentertLangvarigSykdomPerioder = new LocalDateTimeline<>(fom, tom, null);
+        this.dokumentertLangvarigSykdomPerioder = null;
     }
 
     public LocalDate getFom() {
@@ -28,11 +28,11 @@ public class MedisinskVilkårGrunnlag implements VilkårGrunnlag {
         return tom;
     }
 
-    public LocalDateTimeline<Void> getDokumentertLangvarigSykdomPerioder() {
+    public LocalDateTimeline<LangvarigSykdomDokumentasjon> getDokumentertLangvarigSykdomPerioder() {
         return dokumentertLangvarigSykdomPerioder;
     }
 
-    public MedisinskVilkårGrunnlag medDokumentertLangvarigSykdomPerioder(LocalDateTimeline<Void> dokumentertLangvarigSykdomPerioder) {
+    public MedisinskVilkårGrunnlag medDokumentertLangvarigSykdomPerioder(LocalDateTimeline<LangvarigSykdomDokumentasjon> dokumentertLangvarigSykdomPerioder) {
         this.dokumentertLangvarigSykdomPerioder = dokumentertLangvarigSykdomPerioder;
         return this;
     }

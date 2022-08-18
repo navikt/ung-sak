@@ -1,10 +1,10 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
-
 import java.util.List;
 import java.util.Objects;
+
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 
 public class MedisinskMellomregningData {
 
@@ -27,11 +27,14 @@ public class MedisinskMellomregningData {
         resultatStruktur.setLangvarigSykdomPerioder(getDokumentasjonStatusLangvarigSykdomPerioder());
     }
 
-    void registrerDokumentasjonLangvarigSykdom(LocalDateTimeline<Void> dokumentertLangvarigSykdom) {
-        dokumentasjonStatusLangvarigSykdomTidslinje = dokumentasjonStatusLangvarigSykdomTidslinje.combine(
-            dokumentertLangvarigSykdom.mapValue(f -> LangvarigSykdomDokumentasjon.DOKUMENTERT),
+    void registrerDokumentasjonLangvarigSykdom(LocalDateTimeline<LangvarigSykdomDokumentasjon> dokumentertLangvarigSykdom) {
+        dokumentasjonStatusLangvarigSykdomTidslinje = dokumentasjonStatusLangvarigSykdomTidslinje.combine(dokumentertLangvarigSykdom,
             StandardCombinators::coalesceRightHandSide,
-            LocalDateTimeline.JoinStyle.LEFT_JOIN);
+            LocalDateTimeline.JoinStyle.CROSS_JOIN);
+    }
+
+    LocalDateTimeline<LangvarigSykdomDokumentasjon> getVurdertTidslinje() {
+        return dokumentasjonStatusLangvarigSykdomTidslinje.compress();
     }
 
     List<LangvarigSykdomPeriode> getDokumentasjonStatusLangvarigSykdomPerioder() {
