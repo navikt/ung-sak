@@ -113,6 +113,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         if (beregningInput.isEmpty()) {
             return new SamletKalkulusResultat(Collections.emptyMap(), Collections.emptyMap());
         }
+        validerNyReferanse(beregningInput);
         var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
         var sakInntektsmeldinger = finnInntektsmeldingForBeregning.finnInntektsmeldinger(referanse, beregningInput);
         var request = beregnRequestTjeneste.lagMedInput(stegType, referanse, beregningInput, iayGrunnlag, sakInntektsmeldinger);
@@ -121,6 +122,12 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             .map(i -> new BgRef(i.getBgReferanse(), i.getSkjæringstidspunkt()))
             .toList();
         return mapFraTilstand(tilstandResponse.getTilstand(), bgReferanser);
+    }
+
+    private void validerNyReferanse(List<BeregnInput> beregningInput) {
+        if (beregningInput.stream().anyMatch(i -> i.getOriginalReferanser().stream().anyMatch(r -> r.equals(i.getBgReferanse())))) {
+            throw new IllegalStateException("Ny referanse skal vere ulik original referanse");
+        }
     }
 
     @Override
