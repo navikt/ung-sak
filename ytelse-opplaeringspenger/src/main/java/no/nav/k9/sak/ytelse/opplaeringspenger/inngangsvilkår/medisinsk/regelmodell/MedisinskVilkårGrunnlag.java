@@ -12,12 +12,12 @@ public class MedisinskVilkårGrunnlag implements VilkårGrunnlag {
     private final LocalDate fom;
     private final LocalDate tom;
 
-    private LocalDateTimeline<Void> dokumentertLivetsSluttfasePerioder;
-    private LocalDateTimeline<Void> innleggelsesPerioder;
+    private LocalDateTimeline<Void> dokumentertLangvarigSykdomPerioder;
 
     public MedisinskVilkårGrunnlag(LocalDate fom, LocalDate tom) {
         this.fom = fom;
         this.tom = tom;
+        this.dokumentertLangvarigSykdomPerioder = new LocalDateTimeline<>(fom, tom, null);
     }
 
     public LocalDate getFom() {
@@ -28,32 +28,21 @@ public class MedisinskVilkårGrunnlag implements VilkårGrunnlag {
         return tom;
     }
 
-    public LocalDateTimeline<Void> getDokumentertLivetsSluttfasePerioder() {
-        return dokumentertLivetsSluttfasePerioder;
+    public LocalDateTimeline<Void> getDokumentertLangvarigSykdomPerioder() {
+        return dokumentertLangvarigSykdomPerioder;
     }
 
-    public LocalDateTimeline<Void> getInnleggelsesPerioder() {
-        return innleggelsesPerioder;
-    }
-
-    public MedisinskVilkårGrunnlag medDokumentertLivetsSluttfasePerioder(LocalDateTimeline<Void> dokumentertLivetsSluttfasePerioder) {
-        this.dokumentertLivetsSluttfasePerioder = dokumentertLivetsSluttfasePerioder;
+    public MedisinskVilkårGrunnlag medDokumentertLangvarigSykdomPerioder(LocalDateTimeline<Void> dokumentertLangvarigSykdomPerioder) {
+        this.dokumentertLangvarigSykdomPerioder = dokumentertLangvarigSykdomPerioder;
         return this;
     }
-
-    public MedisinskVilkårGrunnlag medInnleggelsesPerioder(LocalDateTimeline<Void> innleggelsesPerioder) {
-        this.innleggelsesPerioder = innleggelsesPerioder;
-        return this;
-    }
-
 
     @Override
     public String toString() {
         return "MedisinskvilkårGrunnlag{" +
             "fom=" + fom +
             "tom=" + tom +
-            ", dokumentertLivetsSluttfasePerioder=" + dokumentertLivetsSluttfasePerioder +
-            ", innleggelsesPerioder=" + innleggelsesPerioder +
+            ", dokumentertLangvarigSykdomPerioder=" + dokumentertLangvarigSykdomPerioder +
             '}';
     }
 }

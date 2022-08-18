@@ -1,14 +1,7 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår;
 
 import static java.util.Arrays.asList;
-import static no.nav.k9.kodeverk.vilkår.VilkårType.ALDERSVILKÅR;
-import static no.nav.k9.kodeverk.vilkår.VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
-import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDISINSKEVILKÅR_18_ÅR;
-import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR;
-import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDLEMSKAPSVILKÅRET;
-import static no.nav.k9.kodeverk.vilkår.VilkårType.OMSORGEN_FOR;
-import static no.nav.k9.kodeverk.vilkår.VilkårType.OPPTJENINGSPERIODEVILKÅR;
-import static no.nav.k9.kodeverk.vilkår.VilkårType.OPPTJENINGSVILKÅRET;
+import static no.nav.k9.kodeverk.vilkår.VilkårType.*;
 
 import java.util.List;
 
@@ -27,9 +20,8 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 public class InngangsvilkårUtleder implements VilkårUtleder {
 
     private static final List<VilkårType> YTELSE_VILKÅR = asList(
-        OMSORGEN_FOR,
         ALDERSVILKÅR,
-        MEDISINSKEVILKÅR_UNDER_18_ÅR, MEDISINSKEVILKÅR_18_ÅR, // TODO: Erstatt med korrekt medisinsk vilkår
+        LANGVARIG_SYKDOM,
         MEDLEMSKAPSVILKÅRET,
         OPPTJENINGSPERIODEVILKÅR,
         OPPTJENINGSVILKÅRET,

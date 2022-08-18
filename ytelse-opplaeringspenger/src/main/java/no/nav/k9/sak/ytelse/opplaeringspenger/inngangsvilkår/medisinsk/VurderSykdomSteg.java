@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -47,7 +46,8 @@ import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
+import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.LangvarigSykdomPeriode;
+import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PleiePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
@@ -118,47 +118,25 @@ public class VurderSykdomSteg implements BehandlingSteg {
 
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
 
-        final var perioderUnder18årTidslinje = medOmsorgenFor(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR), vilkårene);
-        final var perioder18årTidslinje = medOmsorgenFor(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR), vilkårene);
 
-        final var perioderUnder18år = kunPerioderMedOmsorgenFor(perioderUnder18årTidslinje, Utfall.OPPFYLT);
-        final var perioder18år = kunPerioderMedOmsorgenFor(perioder18årTidslinje, Utfall.OPPFYLT);
-        final var perioderSamlet = union(perioderUnder18år, perioder18år);
+        final var perioderSamlet = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.LANGVARIG_SYKDOM);
 
-        final var perioderUnder18årUtenOmsorgenFor = kunPerioderMedOmsorgenFor(perioderUnder18årTidslinje, Utfall.IKKE_OPPFYLT);
-        final var perioder18årUtenOmsorgenFor = kunPerioderMedOmsorgenFor(perioder18årTidslinje, Utfall.IKKE_OPPFYLT);
-        final var perioderTilVurderingUtenOmsorgenFor = kunPerioderMedOmsorgenFor(perioderUnder18årTidslinje.union(perioder18årTidslinje, StandardCombinators::coalesceLeftHandSide), Utfall.IKKE_OPPFYLT);
-        // TODO: Fjern søknadsperioder: perioderTilVurderingUtenOmsorgenFor
+        final MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioderSamlet, behandling);
 
-
-        final MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioderSamlet, perioderTilVurderingUtenOmsorgenFor, behandling);
-
-        final boolean finnesKunPerioderMedManglendeOmsorgenFor = perioderSamlet.isEmpty() && !perioderTilVurderingUtenOmsorgenFor.isEmpty();
-        if (!finnesKunPerioderMedManglendeOmsorgenFor && trengerAksjonspunkt(kontekst, behandling)) {
+        final boolean harPerioderTilVurdering = !perioderSamlet.isEmpty();
+        if (!harPerioderTilVurdering && trengerAksjonspunkt(kontekst, behandling)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
         var builder = Vilkårene.builderFraEksisterende(vilkårene);
         builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
-        vurder(kontekst, medisinskGrunnlag, builder, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, perioderUnder18år, perioderUnder18årUtenOmsorgenFor);
-        vurder(kontekst, medisinskGrunnlag, builder, VilkårType.MEDISINSKEVILKÅR_18_ÅR, perioder18år, perioder18årUtenOmsorgenFor);
+        vurder(kontekst, medisinskGrunnlag, builder, VilkårType.LANGVARIG_SYKDOM, perioderSamlet);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private NavigableSet<DatoIntervallEntitet> kunPerioderMedOmsorgenFor(final LocalDateTimeline<Utfall> perioderUnder18årTidslinje, Utfall utfall) {
-        return TidslinjeUtil.tilDatoIntervallEntiteter(perioderUnder18årTidslinje.filterValue(s -> utfall == s));
-    }
-
-    private LocalDateTimeline<Utfall> medOmsorgenFor(NavigableSet<DatoIntervallEntitet> perioder, Vilkårene vilkårene) {
-        final LocalDateTimeline<Boolean> perioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
-        final LocalDateTimeline<VilkårPeriode> omsorgenForTidslinje = vilkårene.getVilkårTimeline(VilkårType.OMSORGEN_FOR);
-
-        return perioderTidslinje.combine(omsorgenForTidslinje, (datoInterval, p, vp) -> new LocalDateSegment<>(datoInterval, vp.getValue().getUtfall()), JoinStyle.LEFT_JOIN).compress();
-    }
-
-    private MedisinskGrunnlag opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, NavigableSet<DatoIntervallEntitet> perioderTilVurderingUtenOmsorgenFor, final Behandling behandling) {
+    private MedisinskGrunnlag opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, final Behandling behandling) {
         return sykdomGrunnlagRepository.utledOgLagreGrunnlag(
             behandling.getFagsak().getSaksnummer(),
             behandling.getUuid(),
@@ -167,7 +145,8 @@ public class VurderSykdomSteg implements BehandlingSteg {
             perioderSamlet.stream()
                 .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
                 .collect(Collectors.toList()),
-            perioderTilVurderingUtenOmsorgenFor.stream()
+            //TODO tom liste her?
+            perioderSamlet.stream()
                 .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
                 .collect(Collectors.toList())
         );
@@ -184,8 +163,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
                         MedisinskGrunnlag medisinskGrunnlag,
                         VilkårResultatBuilder builder,
                         VilkårType vilkåret,
-                        NavigableSet<DatoIntervallEntitet> perioder,
-                        NavigableSet<DatoIntervallEntitet> perioderMedAvslagGrunnetManglendeOmsorg) {
+                        NavigableSet<DatoIntervallEntitet> perioder) {
 
         var vilkårBuilder = builder.hentBuilderFor(vilkåret);
         for (DatoIntervallEntitet periode : perioder) {
@@ -194,42 +172,20 @@ public class VurderSykdomSteg implements BehandlingSteg {
             oppdaterResultatStruktur(kontekst, periode, vilkårData);
         }
 
-        for (var periode : perioderMedAvslagGrunnetManglendeOmsorg) {
-            avslåGrunnetManglendeOmsorg(kontekst, vilkårBuilder, periode);
-        }
-
         builder.leggTil(vilkårBuilder);
-    }
-
-    private void avslåGrunnetManglendeOmsorg(BehandlingskontrollKontekst kontekst,
-                                             VilkårBuilder vilkårBuilder,
-                                             DatoIntervallEntitet periodeMedAvslagGrunnetManglendeOmsorg) {
-
-        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periodeMedAvslagGrunnetManglendeOmsorg.getFomDato(), periodeMedAvslagGrunnetManglendeOmsorg.getTomDato())
-            .medUtfall(Utfall.IKKE_OPPFYLT)
-            .medMerknadParametere(new Properties())
-            .medRegelEvaluering(null)
-            .medRegelInput(null)
-            .medAvslagsårsak(Avslagsårsak.IKKE_DOKUMENTERT_OMSORGEN_FOR)
-            .medMerknad(null));
-
-        final var nåværendeResultat = resultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
-        var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
-        builder.tilbakeStill(periodeMedAvslagGrunnetManglendeOmsorg);
-        resultatRepository.lagreOgFlush(kontekst.getBehandlingId(), builder);
     }
 
     private void oppdaterResultatStruktur(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, VilkårData vilkårData) {
         final var nåværendeResultat = resultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
         var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
         builder.tilbakeStill(periodeTilVurdering);
-        final var vilkårresultat = ((no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat());
+        final var vilkårresultat = ((MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat());
 
-        vilkårresultat.getPleieperioder().forEach(periode -> builder.leggTil(utledPeriode(periode)));
+        vilkårresultat.getLangvarigSykdomPerioder().forEach(periode -> builder.leggTil(utledPeriode(periode)));
         resultatRepository.lagreOgFlush(kontekst.getBehandlingId(), builder);
     }
 
-    private EtablertPleieperiode utledPeriode(PleiePeriode periode) {
+    private EtablertPleieperiode utledPeriode(LangvarigSykdomPeriode periode) {
         return new EtablertPleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), no.nav.k9.kodeverk.medisinsk.Pleiegrad.fraKode(periode.getGrad().name()));
     }
 
@@ -246,7 +202,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
 
         if (vilkårData.getUtfallType().equals(Utfall.OPPFYLT)) {
             final var ekstraVilkårresultat = (MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat();
-            var timeline = new LocalDateTimeline<>(ekstraVilkårresultat.getPleieperioder()
+            var timeline = new LocalDateTimeline<>(ekstraVilkårresultat.getLangvarigSykdomPerioder()
                 .stream()
                 .filter(it -> no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.Pleiegrad.INGEN.equals(it.getGrad()))
                 .filter(it -> periode.overlapper(it.getFraOgMed(), it.getTilOgMed()))
@@ -272,8 +228,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType førsteSteg, BehandlingStegType sisteSteg) {
-        håndterHoppOverBakover(kontekst, modell, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
-        håndterHoppOverBakover(kontekst, modell, VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+        håndterHoppOverBakover(kontekst, modell, VilkårType.LANGVARIG_SYKDOM);
     }
 
     private void håndterHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, VilkårType vilkåret) {

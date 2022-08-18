@@ -70,6 +70,6 @@ public class OLPVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
 
     @Override
     public Set<VilkårType> definerendeVilkår() {
-        return Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR); // TODO: FIKS
+        return Set.of(VilkårType.LANGVARIG_SYKDOM); // TODO: Endre til kursvilkåret
     }
 }

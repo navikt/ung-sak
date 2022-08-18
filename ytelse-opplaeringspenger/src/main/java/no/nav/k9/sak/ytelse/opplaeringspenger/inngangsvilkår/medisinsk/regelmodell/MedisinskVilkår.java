@@ -5,6 +5,7 @@ import no.nav.fpsak.nare.Ruleset;
 import no.nav.fpsak.nare.doc.RuleDocumentation;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.Specification;
+import no.nav.k9.sak.inngangsvilkår.IkkeOppfylt;
 import no.nav.k9.sak.inngangsvilkår.Oppfylt;
 
 @RuleDocumentation(value = MedisinskVilkår.ID, specificationReference = "")
@@ -27,7 +28,9 @@ public class MedisinskVilkår implements RuleService<MedisinskVilkårGrunnlag> {
     @Override
     public Specification<MedisinskMellomregningData> getSpecification() {
         Ruleset<MedisinskMellomregningData> rs = new Ruleset<>();
-        return rs.regel("TODO", new Oppfylt());
+        return rs.hvisRegel(ErLangvarigSyk.ID, "TODO")
+            .hvis(new ErLangvarigSyk(), new Oppfylt())
+            .ellers(new IkkeOppfylt(MedisinskeVilkårAvslagsårsaker.NOE.toRuleReason()));
 
     }
 }
