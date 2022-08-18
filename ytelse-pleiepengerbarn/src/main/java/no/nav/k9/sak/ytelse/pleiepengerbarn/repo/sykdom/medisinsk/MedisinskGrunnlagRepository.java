@@ -99,15 +99,7 @@ public class MedisinskGrunnlagRepository {
             }
         }
 
-        final LocalDateTimeline<Set<Saksnummer>> tidslinje = new LocalDateTimeline<>(segments, new LocalDateSegmentCombinator<Set<Saksnummer>, Set<Saksnummer>, Set<Saksnummer>>() {
-            @Override
-            public LocalDateSegment<Set<Saksnummer>> combine(LocalDateInterval datoInterval, LocalDateSegment<Set<Saksnummer>> datoSegment, LocalDateSegment<Set<Saksnummer>> datoSegment2) {
-                Set<Saksnummer> kombinerteSaksnumre = new HashSet<>(datoSegment.getValue());
-                kombinerteSaksnumre.addAll(datoSegment2.getValue());
-
-                return new LocalDateSegment<>(datoInterval, kombinerteSaksnumre);
-            }
-        });
+        final LocalDateTimeline<Set<Saksnummer>> tidslinje = new LocalDateTimeline<>(segments, TidslinjeUtil::union);
 
         return tidslinje.compress();
     }

@@ -15,10 +15,6 @@ public class PersonRepository {
 
     private EntityManager entityManager;
 
-    PersonRepository() {
-        //CDI
-    }
-
     @Inject
     public PersonRepository(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManagern");
