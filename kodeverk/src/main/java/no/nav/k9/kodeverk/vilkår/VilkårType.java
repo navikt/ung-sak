@@ -134,6 +134,12 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.MANGLENDE_DOKUMENTASJON,
         Avslagsårsak.IKKE_I_LIVETS_SLUTTFASE,
         Avslagsårsak.PLEIETRENGENDE_INNLAGT_I_STEDET_FOR_HJEMME
+    ),LANGVARIG_SYKDOM("K9_VK_17",
+        "Langvarig sykdom",
+        Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "§ 9-13"),
+        Avslagsårsak.MANGLENDE_DOKUMENTASJON,
+        Avslagsårsak.IKKE_I_LIVETS_SLUTTFASE,
+        Avslagsårsak.PLEIETRENGENDE_INNLAGT_I_STEDET_FOR_HJEMME
     ),
     UTVIDETRETT("K9_VK_9_6", "Utvidet rett",
         Map.of(FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-6 1. ledd",
