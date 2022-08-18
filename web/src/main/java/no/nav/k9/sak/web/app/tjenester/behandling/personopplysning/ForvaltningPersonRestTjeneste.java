@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -30,9 +31,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -44,10 +47,17 @@ import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
+import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.kontrakt.person.AktørIdOgFnrDto;
+import no.nav.k9.sak.kontrakt.person.AktørInfoDto;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 
 @ApplicationScoped
@@ -56,14 +66,16 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 public class ForvaltningPersonRestTjeneste {
 
     private TpsTjeneste tpsTjeneste;
+    private FagsakRepository fagsakRepository;
 
     public ForvaltningPersonRestTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public ForvaltningPersonRestTjeneste(TpsTjeneste tpsTjeneste) {
+    public ForvaltningPersonRestTjeneste(TpsTjeneste tpsTjeneste, FagsakRepository fagsakRepository) {
         this.tpsTjeneste = tpsTjeneste;
+        this.fagsakRepository = fagsakRepository;
     }
 
     @POST
@@ -99,6 +111,20 @@ public class ForvaltningPersonRestTjeneste {
 
         var output = dumpResultSetToCsv(path, results).orElseThrow();
         return Response.ok(output.getContent(), MediaType.TEXT_PLAIN_TYPE).build();
+    }
+
+
+    @GET
+    @Operation(description = "Henter saksnumre for en person. Kan for eksempel brukes for å finne ut om k9 er påvirket av 'aktør-splitt'", tags = "aktoer", responses = {
+        @ApiResponse(responseCode = "200", description = "Liste av fagsaker i k9-sak personen er del av.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktørInfoDto.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @Path("/saksnumre-for-person")
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public List<Saksnummer> getAktoerInfo(@NotNull @QueryParam("aktoerId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørIdDto) {
+        var aktørId = aktørIdDto.getAktørId();
+        List<Fagsak> fagsaker = fagsakRepository.hentSakerHvorBrukerHarMinstEnRolle(aktørId);
+        return fagsaker.stream().map(Fagsak::getSaksnummer).distinct().toList();
     }
 
     private static Optional<DumpOutput> dumpResultSetToCsv(String path, List<AktørIdOgFnrDto> results) {
