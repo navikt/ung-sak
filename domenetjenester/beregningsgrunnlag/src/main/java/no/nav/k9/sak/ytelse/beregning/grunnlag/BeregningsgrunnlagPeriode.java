@@ -57,6 +57,18 @@ public class BeregningsgrunnlagPeriode extends BaseEntitet {
         return eksternReferanse;
     }
 
+
+    /**
+     * Eksisterer kun for å fikse saker i produksjon etter feil ved oppgradering til Hibernate 6.
+     *
+     *
+     * @param eksternReferanse Ny ekstern referanse
+     */
+    @Deprecated
+    public void setEksternReferanse(UUID eksternReferanse) {
+        this.eksternReferanse = eksternReferanse;
+    }
+
     public LocalDate getSkjæringstidspunkt() {
         return skjæringstidspunkt;
     }

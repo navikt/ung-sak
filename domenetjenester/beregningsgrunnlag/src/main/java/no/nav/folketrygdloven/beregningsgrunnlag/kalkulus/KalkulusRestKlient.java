@@ -5,9 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -23,6 +20,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.folketrygdloven.kalkulus.mappers.JsonMapper;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
@@ -32,6 +31,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.KopierOgResettBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.regelinput.KomprimerRegelInputRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
@@ -61,7 +61,8 @@ public class KalkulusRestKlient {
     private final ObjectMapper kalkulusMapper = JsonMapper.getMapper();
     private final ObjectWriter kalkulusJsonWriter = kalkulusMapper.writerWithDefaultPrettyPrinter();
     private final ObjectReader tilstandReader = kalkulusMapper.readerFor(TilstandListeResponse.class);
-    private final ObjectReader kopierReader = kalkulusMapper.readerFor(new TypeReference<List<KopiResponse>>() {});
+    private final ObjectReader kopierReader = kalkulusMapper.readerFor(new TypeReference<List<KopiResponse>>() {
+    });
     private final ObjectReader oppdaterListeReader = kalkulusMapper.readerFor(OppdateringListeRespons.class);
     private final ObjectReader dtoListeReader = kalkulusMapper.readerFor(BeregningsgrunnlagListe.class);
     private final ObjectReader behovForGreguleringReader = kalkulusMapper.readerFor(GrunnbeløpReguleringRespons.class);
@@ -87,6 +88,8 @@ public class KalkulusRestKlient {
     private URI migrerAksjonspunkter;
     private URI komprimerRegelinput;
     private URI komprimerFlereRegelinput;
+
+    private URI kopierOgResettEndpoint;
 
 
     protected KalkulusRestKlient() {
@@ -119,6 +122,7 @@ public class KalkulusRestKlient {
         this.migrerAksjonspunkter = toUri("/api/kalkulus/v1/migrerAksjonspunkter");
         this.komprimerRegelinput = toUri("/api/kalkulus/v1/komprimerRegelSporing");
         this.komprimerFlereRegelinput = toUri("/api/kalkulus/v1/komprimerAntallRegelSporinger");
+        this.kopierOgResettEndpoint = toUri("/api/kalkulus/v1//kopierOgResett/bolk");
     }
 
 
@@ -139,6 +143,16 @@ public class KalkulusRestKlient {
             return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), kopierReader);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
+
+    public void kopierOgResettBeregning(KopierOgResettBeregningListeRequest request) {
+        var endpoint = kopierOgResettEndpoint;
+
+        try {
+            utfør(endpoint, kalkulusJsonWriter.writeValueAsString(request));
+        } catch (IOException e) {
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
     }
 
@@ -211,7 +225,7 @@ public class KalkulusRestKlient {
         var endpoint = komprimerRegelinput;
         try {
             Saksnummer saksnummmer = getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), saksnummerReader);
-            return saksnummmer == null ? null: saksnummmer.getSaksnummer();
+            return saksnummmer == null ? null : saksnummmer.getSaksnummer();
         } catch (IOException e) {
             throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
