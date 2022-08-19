@@ -82,7 +82,11 @@ public class GjenopprettUgyldigeReferanserTask implements ProsessTaskHandler {
         var sisteBehandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId()).orElseThrow();
         var perioderTilVurderingTjeneste = FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral.Lookup.find(this.vilkårsPerioderTilVurderingTjeneste, fagsak.getYtelseType()).orElseThrow();
 
-        var nesteBehandling = sisteBehandling;
+
+        var startBehandling = finnStartBehandling(sisteBehandling, perioderTilVurderingTjeneste);
+
+
+        var nesteBehandling = startBehandling;
         var originalBehandling = behandlingRepository.hentBehandling(nesteBehandling.getOriginalBehandlingId().orElseThrow());
         var ugyldigeReferanser = finnUgyldigeReferanserForBehandling(perioderTilVurderingTjeneste, nesteBehandling);
         Behandling forrigeBehandling = null;
@@ -105,6 +109,22 @@ public class GjenopprettUgyldigeReferanserTask implements ProsessTaskHandler {
             ugyldigeReferanser = finnUgyldigeReferanserForBehandling(perioderTilVurderingTjeneste, nesteBehandling);
         }
 
+    }
+
+    private Behandling finnStartBehandling(Behandling sisteBehandling, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+        var startBehandling = sisteBehandling;
+        var startUgyldigeReferanser = finnUgyldigeReferanserForBehandling(perioderTilVurderingTjeneste, startBehandling);
+
+        while (startUgyldigeReferanser.isEmpty() && startBehandling.getOriginalBehandlingId().isPresent()) {
+            startBehandling = behandlingRepository.hentBehandling(startBehandling.getOriginalBehandlingId().orElseThrow());
+            startUgyldigeReferanser = finnUgyldigeReferanserForBehandling(perioderTilVurderingTjeneste, startBehandling);
+        }
+
+        if (startUgyldigeReferanser.isEmpty()) {
+            throw new IllegalStateException("Forventet å finne ugyldige referanser for sak");
+        }
+
+        return startBehandling;
     }
 
     private List<KopierBeregningRequest> gjenopprettIKalkulus(String saksnummer, Fagsak fagsak, Behandling nesteBehandling, Behandling originalBehandling, Map<LocalDate, UUID> ugyldigeReferanser) {
