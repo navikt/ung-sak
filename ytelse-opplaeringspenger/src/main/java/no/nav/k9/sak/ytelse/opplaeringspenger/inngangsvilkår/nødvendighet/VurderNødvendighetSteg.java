@@ -4,12 +4,16 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -28,6 +32,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @BehandlingStegRef(value = BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR)
@@ -59,7 +64,28 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
 
         // TODO: Hent ut resultatet til sykdom
+        var sykdomsVilkåret = vilkårene.getVilkår(VilkårType.LANGVARIG_SYKDOM)
+            .orElseThrow()
+            .getPerioder()
+            .stream()
+            .filter(it -> Objects.equals(Utfall.OPPFYLT, it.getGjeldendeUtfall()))
+            .map(VilkårPeriode::getPeriode)
+            .collect(Collectors.toCollection(TreeSet<DatoIntervallEntitet>::new));
+
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING);
+
+        var sykdomsTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(sykdomsVilkåret);
+        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
+        perioderTilVurdering = tidslinjeTilVurdering.intersection(sykdomsTidslinje)
+            .toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+            .collect(Collectors.toCollection(TreeSet<DatoIntervallEntitet>::new));
+        var avslagsperioder = tidslinjeTilVurdering.disjoint(sykdomsTidslinje)
+            .toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+            .collect(Collectors.toCollection(TreeSet<DatoIntervallEntitet>::new));
 
         var builder = Vilkårene.builderFraEksisterende(vilkårene);
         builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
@@ -68,6 +94,11 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
         for (DatoIntervallEntitet datoIntervallEntitet : perioderTilVurdering) {
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(datoIntervallEntitet)
                 .medUtfall(Utfall.OPPFYLT));
+        }
+        for (DatoIntervallEntitet datoIntervallEntitet : avslagsperioder) {
+            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(datoIntervallEntitet)
+                .medUtfall(Utfall.IKKE_OPPFYLT)
+                .medAvslagsårsak(Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE)); // TODO: Endre til noe mer fornuftig
         }
 
         builder.leggTil(vilkårBuilder);
