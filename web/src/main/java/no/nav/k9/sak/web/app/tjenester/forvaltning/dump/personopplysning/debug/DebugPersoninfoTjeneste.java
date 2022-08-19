@@ -507,14 +507,26 @@ public class DebugPersoninfoTjeneste {
 
         var adressePerioder = mapAdresserHistorikk(person.getBostedsadresse(), person.getKontaktadresse(),
             person.getOppholdsadresse());
-        periodiserAdresse(adressePerioder).stream()
-            .filter(p -> p.getGyldighetsperiode().getTom().isAfter(fom)
-                && p.getGyldighetsperiode().getFom().isBefore(tom))
+
+        dumpinnhold.add("mapped adresse perioder for " + aktørId.getAktørId() + ": " + PdlKallDump.toJson(adressePerioder));
+
+        List<AdressePeriode> periodisertAdresse = periodiserAdresse(adressePerioder);
+        dumpinnhold.add("periodisert adresse for " + aktørId.getAktørId() + ": " + PdlKallDump.toJson(periodisertAdresse));
+
+        List<AdressePeriode> filtrert = periodisertAdresse.stream()
+            .filter(p -> p.getGyldighetsperiode().getTom().isAfter(fom) && p.getGyldighetsperiode().getFom().isBefore(tom))
+            .toList();
+
+        dumpinnhold.add("periodisert og filtrert adresse for " + aktørId.getAktørId() + ": " + PdlKallDump.toJson(filtrert));
+
+        periodisertAdresse.stream()
+            .filter(p -> p.getGyldighetsperiode().getTom().isAfter(fom) && p.getGyldighetsperiode().getFom().isBefore(tom))
             .forEach(personhistorikkBuilder::leggTil);
+
 
         Personhistorikkinfo build = personhistorikkBuilder.build();
 
-        dumpinnhold.add("personhistorikk for " + aktørId.getAktørId() + ": " + PdlKallDump.toJson(person));
+        dumpinnhold.add("personhistorikk for " + aktørId.getAktørId() + ": " + PdlKallDump.toJson(build));
 
         return build;
     }
