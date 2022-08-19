@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.personopplysning;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput.dumpAsCsv;
@@ -118,7 +119,7 @@ public class ForvaltningPersonRestTjeneste {
     @Operation(description = "Henter saksnumre for en person. Kan for eksempel brukes for å finne ut om k9 er påvirket av 'aktør-splitt'", tags = "aktoer", responses = {
         @ApiResponse(responseCode = "200", description = "Liste av fagsaker i k9-sak personen er del av.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktørInfoDto.class)))
     })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
     @Path("/saksnumre-for-person")
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<Saksnummer> getAktoerInfo(@NotNull @QueryParam("aktoerId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørIdDto) {
