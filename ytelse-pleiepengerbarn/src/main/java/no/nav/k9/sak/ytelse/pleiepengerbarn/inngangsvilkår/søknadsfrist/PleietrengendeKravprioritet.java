@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -52,7 +54,7 @@ public class PleietrengendeKravprioritet {
 
     public LocalDateTimeline<List<Kravprioritet>> vurderKravprioritet(Long fagsakId, AktørId pleietrengende, boolean brukUbesluttedeData) {
         Fagsak aktuellFagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
-        final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(aktuellFagsak.getYtelseType(), pleietrengende, null, null, null);
+        final List<Fagsak> fagsaker = utledFagsakerRelevantForKravprio(pleietrengende, aktuellFagsak);
 
         LocalDateTimeline<List<Kravprioritet>> kravprioritetstidslinje = LocalDateTimeline.empty();
         for (Fagsak fagsak : fagsaker) {
@@ -62,6 +64,13 @@ public class PleietrengendeKravprioritet {
         }
 
         return kravprioritetstidslinje.compress();
+    }
+
+    private List<Fagsak> utledFagsakerRelevantForKravprio(AktørId pleietrengende, Fagsak aktuellFagsak) {
+        if (Objects.equals(FagsakYtelseType.OPPLÆRINGSPENGER, aktuellFagsak.getYtelseType())) {
+            return List.of(aktuellFagsak);
+        }
+        return fagsakRepository.finnFagsakRelatertTil(aktuellFagsak.getYtelseType(), pleietrengende, null, null, null);
     }
 
 

@@ -62,7 +62,7 @@ public class KomprimerRegelInputTask extends FagsakProsessTask {
         var maksAntallSaker = prosessTaskData.getPropertyValue(MAX_ANTALL_SAKER) == null ? null : Integer.valueOf(maksAntalLSakerRaw);
         var lopenr = prosessTaskData.getPropertyValue(LØPENR_SAK) == null ? 1 : Integer.parseInt(prosessTaskData.getPropertyValue(LØPENR_SAK));
         var førsteSak = fagsakRepository.finnEksaktFagsak(fagsakId);
-        var nesteSaksnummer = kalkulusSystemRestKlient.komprimerRegelinput(new KomprimerRegelInputRequest(førsteSak.getSaksnummer().getVerdi()));
+        var nesteSaksnummer = kalkulusSystemRestKlient.komprimerRegelinput(new KomprimerRegelInputRequest(førsteSak.getSaksnummer().getVerdi(), 1));
         if (nesteSaksnummer != null && (maksAntallSaker == null || lopenr < maksAntallSaker)) {
             var fagsak = fagsakRepository.hentSakGittSaksnummer(new Saksnummer(nesteSaksnummer));
             fagsak.ifPresent(f -> startInputKomprimeringForSak(f, lopenr, maksAntallSaker));

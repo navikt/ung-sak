@@ -252,7 +252,7 @@ public class PersonInformasjonBuilder {
             return kladd;
         }
 
-        boolean getErOppdatering() {
+        public boolean getErOppdatering() {
             return oppdatering;
         }
     }

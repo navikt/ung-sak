@@ -108,7 +108,7 @@ public class KompletthetBeregningTjeneste {
         }
 
         var redusertPerioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, true, true);
-        var inputMedVurderinger = new VurdererInput(redusertPerioderTilVurdering, innvilgetSøknadsfrist, kompletthetsVurderinger, grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of()), Set.of(Vurdering.KAN_FORTSETTE));
+        var inputMedVurderinger = new VurdererInput(erManueltOpprettetRevurdering(behandling), harIkkeFåttMulighetTilÅTaStillingPåNytt(behandling),redusertPerioderTilVurdering, innvilgetSøknadsfrist, kompletthetsVurderinger, grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of()), Set.of(Vurdering.KAN_FORTSETTE));
         aksjon = kompletthetUtleder.utled(inputMedVurderinger);
 
         if (aksjon.kanFortsette()) {
@@ -147,6 +147,10 @@ public class KompletthetBeregningTjeneste {
         // Manuell avklaring
         log.info("Behandlingen er IKKE komplett, ber om manuell avklaring og avklaring om mulige avslag.");
         return KompletthetsAksjon.manuellAvklaring(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING);
+    }
+
+    private boolean harIkkeFåttMulighetTilÅTaStillingPåNytt(Behandling behandling) {
+        return !behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING);
     }
 
     private NavigableSet<DatoIntervallEntitet> utledPerioderMedSøknadsfristInnvilget(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {

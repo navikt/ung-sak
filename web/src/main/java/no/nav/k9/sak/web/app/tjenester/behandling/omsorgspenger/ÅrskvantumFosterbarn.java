@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -15,6 +16,7 @@ import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.uttak.ÅrskvantumFosterbarnDto;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.Fosterbarn;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.FosterbarnRepository;
@@ -50,38 +52,60 @@ public class ÅrskvantumFosterbarn implements AksjonspunktOppdaterer<Årskvantum
     public OppdateringResultat oppdater(ÅrskvantumFosterbarnDto dto, AksjonspunktOppdaterParameter param) {
         var fortsettBehandling = dto.getfortsettBehandling();
         Long behandlingId = param.getBehandlingId();
+        Set<AktørId> fosterbarnRegistrertAllerede = fosterbarnRepository.hentHvisEksisterer(behandlingId).stream()
+            .flatMap(g -> g.getFosterbarna().getFosterbarn().stream())
+            .map(Fosterbarn::getAktørId)
+            .collect(Collectors.toSet());
+        Set<AktørId> fosterbarnOppdatert = dto.getFosterbarn().stream()
+            .map(f -> tpsTjeneste.hentAktørForFnr(new PersonIdent(f.getFnr())).orElseThrow())
+            .collect(Collectors.toSet());
+
+        valider(fortsettBehandling, fosterbarnRegistrertAllerede, fosterbarnOppdatert);
+
+        fosterbarnRepository.lagreOgFlush(behandlingId, new Fosterbarna(fosterbarnOppdatert.stream().map(Fosterbarn::new).collect(Collectors.toSet())));
+        opprettHistorikkInnslag(dto, behandlingId, lagHistorikkinnslagTekstEndringFosterbarn(fosterbarnRegistrertAllerede, fosterbarnOppdatert));
 
         if (fortsettBehandling) {
-            //Bekreft uttaksplan og fortsett behandling
-            opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FASTSATT_UTTAK, "Fortsett uten endring, ingen fosterbarn er korrekt");
             årskvantumTjeneste.bekreftUttaksplan(behandlingId);
-            return OppdateringResultat.nyttResultat(); //skulle her ønske å overstyre Aksjonspunktets tilbakehopp
+            return OppdateringResultat.nyttResultat();
         } else {
-            // Oppretter fosterbarn kun dersom eksplisitt angitt av GUI
-            if (dto.getFosterbarn() != null) {
-                var fosterbarn = dto.getFosterbarn().stream()
-                    .map(barn -> tpsTjeneste.hentAktørForFnr(new PersonIdent(barn.getFnr())).orElseThrow(() -> new IllegalArgumentException("Finner ikke fnr")))
-                    .map(aktørId -> new Fosterbarn(aktørId))
-                    .collect(Collectors.toSet());
-                fosterbarnRepository.lagreOgFlush(param.getBehandlingId(), new Fosterbarna(fosterbarn));
-            }
-
-            // kjør steget på nytt, aka hent nye fosterbarn fra k9
-            opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FAKTA_ENDRET, "Fosterbarn er lagt til");
-
+            // må kjøre registerinnhenting på nytt, siden det er endring i personer på saken
             OppdateringResultat resultat = OppdateringResultat.nyttResultat();
             resultat.rekjørSteg();
-            //må til innhent registeropplysninger for å få med barn over 12 år når hvis det er lag til kronisk syk-rammevedtak
             resultat.setSteg(BehandlingStegType.INNHENT_REGISTEROPP);
             return resultat;
         }
-
     }
 
-    private void opprettHistorikkInnslag(ÅrskvantumFosterbarnDto dto, Long behandlingId, HistorikkinnslagType historikkinnslagType, String valg) {
+    private String lagHistorikkinnslagTekstEndringFosterbarn(Set<AktørId> fosterbarnRegistrertAllerede, Set<AktørId> fosterbarnOppdatert) {
+        int antallNye = fosterbarnOppdatert.stream().filter(fb -> !fosterbarnRegistrertAllerede.contains(fb)).toList().size();
+        int antallFjernet = fosterbarnRegistrertAllerede.stream().filter(fb -> !fosterbarnOppdatert.contains(fb)).toList().size();
+        if (antallNye > 0 && antallFjernet > 0){
+            return "La til " + antallNye + " fosterbarn og fjernet " + antallFjernet + " fosterbarn";
+        }
+        if (antallNye > 0){
+            return "La til " + antallNye + " fosterbarn";
+        }
+        if (antallFjernet > 0) {
+            return "Fjernet " + antallFjernet + " fosterbarn";
+        }
+        return "Fortsetter uten endring. Det er korrekt at ingen fosterbarn er registrert.";
+    }
+
+    private static void valider(boolean fortsettBehandling, Set<AktørId> fosterbarnRegistrertAllerede, Set<AktørId> fosterbarnOppdatert) {
+        boolean harEndring = !fosterbarnRegistrertAllerede.equals(fosterbarnOppdatert);
+        if (fortsettBehandling && harEndring) {
+            throw new IllegalArgumentException("Ugyldig input, kan ikke velge fortsett behandling og sende endring i listen av barn");
+        }
+        if (!fortsettBehandling && !harEndring) {
+            throw new IllegalArgumentException("Ugyldig input, kan ikke ha fortsettBehandling=false og ikke ikke ha endring i listen av barn");
+        }
+    }
+
+    private void opprettHistorikkInnslag(ÅrskvantumFosterbarnDto dto, Long behandlingId, String valg) {
         HistorikkInnslagTekstBuilder builder = historikkTjenesteAdapter.tekstBuilder();
         builder.medEndretFelt(HistorikkEndretFeltType.VALG, null, valg);
         builder.medBegrunnelse(dto.getBegrunnelse());
-        historikkTjenesteAdapter.opprettHistorikkInnslag(behandlingId, historikkinnslagType);
+        historikkTjenesteAdapter.opprettHistorikkInnslag(behandlingId, HistorikkinnslagType.FAKTA_ENDRET);
     }
 }

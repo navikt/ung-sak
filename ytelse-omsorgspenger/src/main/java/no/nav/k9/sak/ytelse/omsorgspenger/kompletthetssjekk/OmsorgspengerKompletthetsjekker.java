@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -113,7 +114,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         return mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(ref.getFagsakId())
             .stream()
             .filter(it -> it.getBehandlingId() != null && it.getBehandlingId().equals(ref.getBehandlingId()))
-            .anyMatch(it -> Brevkode.SØKNAD_UTBETALING_OMS_AT.equals(it.getType()));
+            .anyMatch(it -> Set.of(Brevkode.SØKNAD_UTBETALING_OMS_AT, Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT).contains(it.getType()));
     }
 
     private boolean harIkkeSøknadsperiode(BehandlingReferanse ref) {

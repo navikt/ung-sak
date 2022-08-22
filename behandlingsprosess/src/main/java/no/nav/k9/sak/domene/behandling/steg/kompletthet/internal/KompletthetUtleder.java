@@ -36,6 +36,8 @@ class KompletthetUtleder {
             .stream()
             .allMatch(it -> it.getValue().isEmpty());
 
+        kanFortsette = kanFortsette && !(input.erManueltOpprettetRevurdering() && input.harIkkeFåttMulighetTilÅTaStillingPåNytt());
+
         if (kanFortsette) {
             return KompletthetsAksjon.fortsett();
         }
