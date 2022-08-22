@@ -42,7 +42,7 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
  */
 @ApplicationScoped
 @ProsessTask(GjenopprettUgyldigeReferanserForBehandlingTask.TASKTYPE)
-@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class GjenopprettUgyldigeReferanserForBehandlingTask implements ProsessTaskHandler {
 
     public static final String TASKTYPE = "beregning.gjenopprettReferanserForBehandling";
@@ -130,7 +130,8 @@ public class GjenopprettUgyldigeReferanserForBehandlingTask implements ProsessTa
             YtelseTyperKalkulusStøtterKontrakt.fraKode(fagsak.getYtelseType().getKode()),
             StegType.FAST_BERGRUNN,
             kopierBeregningRequests,
-            originalBehandling.getAvsluttetDato());
+            originalBehandling.getAvsluttetDato(),
+            nesteBehandling.getAvsluttetDato());
         kalkulusSystemRestKlient.kopierOgResettBeregning(request);
     }
 

@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -73,6 +74,7 @@ public class GjenopprettUgyldigeReferanserTask implements ProsessTaskHandler {
         var ugyldigeReferanser = finnUgyldigeReferanserForBehandling(perioderTilVurderingTjeneste, nesteBehandling);
         Behandling forrigeBehandling = null;
 
+        var gruppe = new ProsessTaskGruppe();
         // Looper i omvendt kronologisk rekkefølge. Nøkkelordene "forrige" og "neste" refererer til iterasjonens rekkefølge og ikke kronologisk rekkefølge
         while (!ugyldigeReferanser.isEmpty()) {
 
@@ -81,12 +83,16 @@ public class GjenopprettUgyldigeReferanserTask implements ProsessTaskHandler {
             gjenopprettTaskData.setBehandling(fagsak.getId(), nesteBehandling.getId());
             // setter neste behandling id i task til forrigebehandlingId siden vi looper omvendt kronologisk her
             gjenopprettTaskData.setProperty(GjenopprettUgyldigeReferanserForBehandlingTask.NESTE_BEHANDLING_ID, forrigeBehandling == null ? null : String.valueOf(forrigeBehandling.getId()));
-            prosessTaskTjeneste.lagre(gjenopprettTaskData);
+            gruppe.addNesteSekvensiell(gjenopprettTaskData);
+
 
             // Oppdaterer for neste iterasjon
             forrigeBehandling = nesteBehandling;
             nesteBehandling = nesteBehandling.getOriginalBehandlingId().map(behandlingRepository::hentBehandling).orElseThrow();
             ugyldigeReferanser = finnUgyldigeReferanserForBehandling(perioderTilVurderingTjeneste, nesteBehandling);
+        }
+        if (!gruppe.getTasks().isEmpty()) {
+            prosessTaskTjeneste.lagre(gruppe);
         }
 
     }
