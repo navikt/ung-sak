@@ -19,7 +19,6 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "BeregningsgrunnlagPeriode")
 @Table(name = "BG_PERIODE")
-@Immutable
 public class BeregningsgrunnlagPeriode extends BaseEntitet {
 
     @Id

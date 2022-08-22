@@ -142,8 +142,8 @@ public class GjenopprettUgyldigeReferanserForBehandlingTask implements ProsessTa
         return finnLikeReferanser(vurderteEksternReferanserMap, originaleVurderteReferanser);
     }
 
-    private void oppdaterInitiellVersjonForNesteBehandling(Behandling forrigeBehandling, List<KopierBeregningRequest> kopierBeregningRequests) {
-        var grunnlagInitiellVersjonOpt = beregningPerioderGrunnlagRepository.getInitiellVersjon(forrigeBehandling.getId());
+    private void oppdaterInitiellVersjonForNesteBehandling(Behandling nesteBehandling, List<KopierBeregningRequest> kopierBeregningRequests) {
+        var grunnlagInitiellVersjonOpt = beregningPerioderGrunnlagRepository.getInitiellVersjon(nesteBehandling.getId());
         if (grunnlagInitiellVersjonOpt.isPresent()) {
             var initiellVersjon = grunnlagInitiellVersjonOpt.get();
             initiellVersjon.getGrunnlagPerioder()
@@ -156,6 +156,7 @@ public class GjenopprettUgyldigeReferanserForBehandlingTask implements ProsessTa
         if (nyReferanse.isPresent()) {
             p.setEksternReferanse(nyReferanse.get());
             entityManager.persist(p);
+            entityManager.flush();
         }
     }
 
