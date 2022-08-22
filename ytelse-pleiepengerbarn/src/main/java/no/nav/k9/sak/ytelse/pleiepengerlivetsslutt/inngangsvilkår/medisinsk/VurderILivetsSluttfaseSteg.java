@@ -52,6 +52,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.LivetsSluttfaseDokumentasjon;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
@@ -70,6 +71,8 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
     private VilkårResultatRepository vilkårResultatRepository;
     private SykdomVurderingTjeneste sykdomVurderingTjeneste;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
+
 
     VurderILivetsSluttfaseSteg() {
         // CDI
@@ -80,7 +83,8 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
                                       PleiebehovResultatRepository resultatRepository,
                                       @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                       SykdomVurderingTjeneste sykdomVurderingTjeneste,
-                                      SykdomGrunnlagRepository sykdomGrunnlagRepository) {
+                                      SykdomGrunnlagRepository sykdomGrunnlagRepository,
+                                      SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.resultatRepository = resultatRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
@@ -88,12 +92,23 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandlingId = kontekst.getBehandlingId();
         final Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+
+        if (søknadsperiodeTjeneste.utledFullstendigPeriode(kontekst.getBehandlingId()).isEmpty()) {
+            if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)) {
+                behandling.getAksjonspunktFor(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)
+                    .avbryt();
+                behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+            }
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
+
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var perioder = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.I_LIVETS_SLUTTFASE);
 
@@ -167,7 +182,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
                 .map(it -> new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), it.getLivetsSluttfaseDokumentasjon()))
                 .toList());
             var fullstendigAvslagsTidslinje = new LocalDateTimeline<>(timeline.toSegments());
-            
+
             timeline = timeline.disjoint(Hjelpetidslinjer.lagTidslinjeMedKunHelger(timeline));
             var tidslinjeMedHullSomMangler = Hjelpetidslinjer.utledHullSomMåTettes(timeline, new PåTversAvHelgErKantIKantVurderer());
             timeline = timeline.combine(tidslinjeMedHullSomMangler, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);

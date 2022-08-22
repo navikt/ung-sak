@@ -186,6 +186,7 @@ public class PdlKallDump implements DebugDumpBehandling {
         }
 
         if (informasjonBuilder.harIkkeFåttAdresseHistorikk(personinfo.getAktørId())) {
+            dumpinnhold.add("Har ikke fått adressehistorikk for " + personinfo.getAktørId() + "legger til " + toJson(personinfo.getAdresseInfoList()) + " for periode " + periode);
             for (Adresseinfo adresse : personinfo.getAdresseInfoList()) {
                 PersonInformasjonBuilder.AdresseBuilder adresseBuilder = informasjonBuilder.getAdresseBuilder(personinfo.getAktørId(), periode, adresse.getGjeldendePostadresseType());
                 informasjonBuilder.leggTil(adresseBuilder
@@ -213,6 +214,9 @@ public class PdlKallDump implements DebugDumpBehandling {
                 brukFødselsdatoHvisEtter(adresse.getGyldighetsperiode().getFom(), personinfo.getFødselsdato()), adresse.getGyldighetsperiode().getTom());
             final PersonInformasjonBuilder.AdresseBuilder adresseBuilder = informasjonBuilder.getAdresseBuilder(aktørId, periode,
                 adresse.getAdresse().getAdresseType());
+
+            dumpinnhold.add("adressebuilder for " + aktørId + " oppdatering=" + adresseBuilder.getErOppdatering() + " periode=" + periode + " type=" +adresse.getAdresse().getAdresseType() + " adresse=" +adresse.getAdresse().getAdresselinje1());
+
             adresseBuilder.medPeriode(periode)
                 .medAdresselinje1(adresse.getAdresse().getAdresselinje1())
                 .medAdresselinje2(adresse.getAdresse().getAdresselinje2())
