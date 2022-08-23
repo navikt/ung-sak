@@ -206,6 +206,8 @@ spec:
       value: "true"
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
       value: "true"
+    - name: YTELSE_OLP_AKTIVERT
+      value: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

@@ -4,8 +4,8 @@ import java.time.LocalDate;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -20,15 +20,17 @@ public class OLPSøknadMottaker implements SøknadMottakTjeneste<OLPSøknadInnse
 
     private SaksnummerRepository saksnummerRepository;
     private FagsakTjeneste fagsakTjeneste;
+    private boolean ytelseAktivert;
 
     protected OLPSøknadMottaker() {
         // for proxy
     }
 
     @Inject
-    public OLPSøknadMottaker(SaksnummerRepository saksnummerRepository, FagsakTjeneste fagsakTjeneste) {
+    public OLPSøknadMottaker(SaksnummerRepository saksnummerRepository, FagsakTjeneste fagsakTjeneste, @KonfigVerdi(value = "ytelse.olp.aktivert", required = false) boolean ytelseAktivert) {
         this.saksnummerRepository = saksnummerRepository;
         this.fagsakTjeneste = fagsakTjeneste;
+        this.ytelseAktivert = ytelseAktivert;
     }
 
     @Override
@@ -44,11 +46,12 @@ public class OLPSøknadMottaker implements SøknadMottakTjeneste<OLPSøknadInnse
             throw new IllegalArgumentException("Fagsak kan ikke være mer enn 5 år inn i fremtiden.");
         }
 
-        /*
-         * Flere fagsaker kommer trolig til å komme tilbake igjen etter at alle sakene har blitt flyttet fra Infotrygd. Merk at sjekken
-         * da må gjøres på tvers av alle søkere på den samme pleietrengende for at bruddet i tidslinjen skal gi mening.
-         */
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, null, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
+        if (!ytelseAktivert) {
+            throw new IllegalArgumentException("Ytelsen er ikke aktivert");
+        }
+
+        // TODO: Pluss minus 9 måneder, vurder om er dekkende
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, null, startDato.minusMonths(9), sluttDato.plusMonths(9));
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
