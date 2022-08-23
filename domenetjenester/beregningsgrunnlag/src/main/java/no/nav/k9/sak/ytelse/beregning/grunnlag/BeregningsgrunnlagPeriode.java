@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "BeregningsgrunnlagPeriode")
 @Table(name = "BG_PERIODE")
+// @Immutable Legges tilbake etter ferdig kjøring av GjenopprettUgyldigeReferanserTask
 public class BeregningsgrunnlagPeriode extends BaseEntitet {
 
     @Id

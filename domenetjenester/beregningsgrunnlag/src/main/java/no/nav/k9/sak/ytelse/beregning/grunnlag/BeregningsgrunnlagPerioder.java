@@ -31,7 +31,8 @@ class BeregningsgrunnlagPerioder extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BG_PERIODER")
     private Long id;
 
-    @JoinColumn(name = "bg_grunnlag_id", nullable = false)
+    // @Immutable Legges tilbake etter ferdig kjøring av GjenopprettUgyldigeReferanserTask
+    @JoinColumn(name = "bg_grunnlag_id", nullable = false, updatable = true ) // settes til false etter av GjenopprettUgyldigeReferanserTask
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<BeregningsgrunnlagPeriode> grunnlagPerioder = new ArrayList<>();
 
