@@ -2,7 +2,9 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -11,6 +13,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
@@ -23,6 +26,7 @@ import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
@@ -125,7 +129,7 @@ public class HentDataTilUttakTjeneste {
         var opptjeningsresultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
         var fagsak = behandling.getFagsak();
         var fagsakPeriode = fagsak.getPeriode();
-        var relaterteFagsaker = fagsakRepository.finnFagsakRelatertTil(behandling.getFagsakYtelseType(),
+        Set<Saksnummer> relaterteFagsaker = Objects.equals(fagsak.getYtelseType(), FagsakYtelseType.OPPLÆRINGSPENGER) ? Set.of() : fagsakRepository.finnFagsakRelatertTil(behandling.getFagsakYtelseType(),
                 fagsak.getPleietrengendeAktørId(),
                 null,
                 fagsakPeriode.getFomDato().minusWeeks(25),

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
@@ -27,6 +28,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -60,6 +62,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements VurderOmVedtakPåvirkerSakerTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste.class);
@@ -121,7 +124,12 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         Behandling vedtattBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
 
         AktørId pleietrengende = vedtattBehandling.getFagsak().getPleietrengendeAktørId();
-        List<Saksnummer> alleSaksnummer = medisinskGrunnlagRepository.hentAlleSaksnummer(pleietrengende);
+        List<Saksnummer> alleSaksnummer = medisinskGrunnlagRepository.hentAlleSaksnummer(pleietrengende)
+            .stream()
+            .filter(it -> ytelsesSpesifiktFilter(fagsak.getYtelseType(), it))
+            .toList(); // Denne henter på tvers av saker, og kan trigge
+        // Bør her filtrere ut PPN for OLP / PSB
+        // Bør her filtrere ut OLP + PSB for PPN
 
         List<SakMedPeriode> resultat = new ArrayList<>();
 
@@ -146,9 +154,9 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                     if (!skalRevurdereYtelsePgaEndringAnnenSak.isEmpty()) {
                         //Er kun støtte p.t. for å oppgi en årsak pr sak. Må velge 'endring i ytelse'-årsak da denne (i motsetning til feriepenger-årsak) gir opphav til vilkårsperioder i revurderingen. Feriepengene vil uansett blir reberegnet
                         LocalDateTimeline<Boolean> perioderSkalRevurdereYtelse = tettHull(perioderTilVurderingTjeneste, skalRevurdereYtelsePgaEndringAnnenSak);
-                        resultat.add(new SakMedPeriode(kandidatsaksnummer, TidslinjeUtil.tilDatoIntervallEntiteter(perioderSkalRevurdereYtelse), BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON));
+                        resultat.add(new SakMedPeriode(kandidatsaksnummer, kandidatFagsak.getYtelseType(), TidslinjeUtil.tilDatoIntervallEntiteter(perioderSkalRevurdereYtelse), BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON));
                     } else {
-                        resultat.add(new SakMedPeriode(kandidatsaksnummer, TidslinjeUtil.tilDatoIntervallEntiteter(skalReberegneFeriepenger), BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK));
+                        resultat.add(new SakMedPeriode(kandidatsaksnummer, kandidatFagsak.getYtelseType(), TidslinjeUtil.tilDatoIntervallEntiteter(skalReberegneFeriepenger), BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK));
                     }
                     if (enableFeriepengerPåTversAvSaker) {
                         log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}, feriepenger={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty(), skalReberegneFeriepenger);
@@ -162,11 +170,24 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
 
         if (!utsattBehandlingAvPeriode.isEmpty()) {
             var perioderSomErUtsatt = utsattBehandlingAvPeriode.stream().map(UtsattPeriode::getPeriode).collect(Collectors.toCollection(TreeSet::new));
-            resultat.add(new SakMedPeriode(fagsak.getSaksnummer(), perioderSomErUtsatt, BehandlingÅrsakType.RE_GJENOPPTAR_UTSATT_BEHANDLING));
+            resultat.add(new SakMedPeriode(fagsak.getSaksnummer(), fagsak.getYtelseType(), perioderSomErUtsatt, BehandlingÅrsakType.RE_GJENOPPTAR_UTSATT_BEHANDLING));
             log.info("Sak='{}' har utsatte perioder som må behandles", fagsak.getSaksnummer());
         }
 
         return resultat;
+    }
+
+    private boolean ytelsesSpesifiktFilter(FagsakYtelseType ytelseType, Saksnummer kandidatsaksnummer) {
+        if (Set.of(OPPLÆRINGSPENGER, PLEIEPENGER_SYKT_BARN).contains(ytelseType)) {
+            var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
+
+            return Set.of(OPPLÆRINGSPENGER, PLEIEPENGER_SYKT_BARN).contains(fagsak.getYtelseType());
+        } else if (Objects.equals(PLEIEPENGER_NÆRSTÅENDE, ytelseType)) {
+            var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
+
+            return Objects.equals(PLEIEPENGER_NÆRSTÅENDE, fagsak.getYtelseType());
+        }
+        return true;
     }
 
     private LocalDateTimeline<Boolean> tettHull(VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, LocalDateTimeline<Boolean> skalRevurderes) {

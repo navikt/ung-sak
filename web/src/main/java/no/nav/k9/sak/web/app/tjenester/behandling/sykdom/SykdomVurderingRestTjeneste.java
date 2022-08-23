@@ -262,6 +262,7 @@ public class SykdomVurderingRestTjeneste {
                 sykdomVurderingTjeneste.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
             case TO_OMSORGSPERSONER -> sykdomVurderingTjeneste.hentVurderingerForToOmsorgspersoner(behandling);
             case LIVETS_SLUTTFASE -> sykdomVurderingTjeneste.hentVurderingerForILivetsSluttfase(behandling);
+            case LANGVARIG_SYKDOM -> sykdomVurderingTjeneste.hentVurderingerForLangvarigSykdom(behandling);
         };
 
         return sykdomVurderingMapper.map(behandling.getFagsak().getAktørId(), behandling.getUuid(), versjoner, alleDokumenter, sykdomUtlededePerioder);
