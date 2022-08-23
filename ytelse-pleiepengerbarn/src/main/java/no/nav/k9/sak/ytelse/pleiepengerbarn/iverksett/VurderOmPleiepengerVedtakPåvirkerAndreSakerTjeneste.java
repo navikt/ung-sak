@@ -28,6 +28,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -123,7 +124,12 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         Behandling vedtattBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
 
         AktørId pleietrengende = vedtattBehandling.getFagsak().getPleietrengendeAktørId();
-        List<Saksnummer> alleSaksnummer = sykdomVurderingRepository.hentAlleSaksnummer(pleietrengende); // Denne henter på tvers av saker, og kan trigge
+        List<Saksnummer> alleSaksnummer = sykdomVurderingRepository.hentAlleSaksnummer(pleietrengende)
+            .stream()
+            .filter(it -> ytelsesSpesifiktFilter(fagsak.getYtelseType(), it))
+            .toList(); // Denne henter på tvers av saker, og kan trigge
+        // Bør her filtrere ut PPN for OLP / PSB
+        // Bør her filtrere ut OLP + PSB for PPN
 
         List<SakMedPeriode> resultat = new ArrayList<>();
 
@@ -169,6 +175,19 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         }
 
         return resultat;
+    }
+
+    private boolean ytelsesSpesifiktFilter(FagsakYtelseType ytelseType, Saksnummer kandidatsaksnummer) {
+        if (Set.of(OPPLÆRINGSPENGER, PLEIEPENGER_SYKT_BARN).contains(ytelseType)) {
+            var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
+
+            return Set.of(OPPLÆRINGSPENGER, PLEIEPENGER_SYKT_BARN).contains(fagsak.getYtelseType());
+        } else if (Objects.equals(PLEIEPENGER_NÆRSTÅENDE, ytelseType)) {
+            var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
+
+            return Objects.equals(PLEIEPENGER_NÆRSTÅENDE, fagsak.getYtelseType());
+        }
+        return true;
     }
 
     private LocalDateTimeline<Boolean> tettHull(VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, LocalDateTimeline<Boolean> skalRevurderes) {
