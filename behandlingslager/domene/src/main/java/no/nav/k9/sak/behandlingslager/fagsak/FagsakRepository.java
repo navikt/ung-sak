@@ -84,6 +84,21 @@ public class FagsakRepository {
         return query.getResultList();
     }
 
+    public List<Fagsak> hentSakerHvorBrukerHarMinstEnRolle(AktørId aktørId) {
+        TypedQuery<Fagsak> query = entityManager
+            .createQuery("""
+                    from Fagsak f
+                      where (f.brukerAktørId=:aktørId or pleietrengendeAktørId=:aktørId or relatertPersonAktørId=:aktørId)
+                       and f.skalTilInfotrygd=:ikkestengt
+                       and f.ytelseType in (:ytelseTyper)
+                    """,
+                Fagsak.class);
+        query.setParameter("aktørId", aktørId); // NOSONAR
+        query.setParameter("ikkestengt", false); // NOSONAR
+        query.setParameter("ytelseTyper", FagsakYtelseType.kodeMap().values()); // søk bare opp støtte ytelsetyper
+        return query.getResultList();
+    }
+
     public Optional<Journalpost> hentJournalpost(JournalpostId journalpostId) {
         TypedQuery<Journalpost> query = entityManager.createQuery("from Journalpost where journalpostId=:journalpost",
             Journalpost.class);

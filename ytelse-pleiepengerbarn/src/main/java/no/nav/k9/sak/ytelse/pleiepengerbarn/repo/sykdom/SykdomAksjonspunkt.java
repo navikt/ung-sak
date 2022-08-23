@@ -10,7 +10,7 @@ public class SykdomAksjonspunkt {
     private final boolean manglerVurderingAvILivetsSluttfase;
     private final boolean harDataSomIkkeHarBlittTattMedIBehandling;
     private final boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
-
+    private final boolean manglerVurderingAvLangvarigSykdom;
 
     public SykdomAksjonspunkt(boolean harUklassifiserteDokumenter,
                               boolean manglerDiagnosekode,
@@ -19,7 +19,8 @@ public class SykdomAksjonspunkt {
                               boolean manglerVurderingAvToOmsorgspersoner,
                               boolean manglerVurderingAvILivetsSluttfase,
                               boolean harDataSomIkkeHarBlittTattMedIBehandling,
-                              boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger) {
+                              boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger,
+                              boolean manglerVurderingAvLangvarigSykdom) {
         this.harUklassifiserteDokumenter = harUklassifiserteDokumenter;
         this.manglerDiagnosekode = manglerDiagnosekode;
         this.manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring;
@@ -28,8 +29,8 @@ public class SykdomAksjonspunkt {
         this.manglerVurderingAvILivetsSluttfase = manglerVurderingAvILivetsSluttfase;
         this.harDataSomIkkeHarBlittTattMedIBehandling = harDataSomIkkeHarBlittTattMedIBehandling;
         this.nyttDokumentHarIkkekontrollertEksisterendeVurderinger = nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
+        this.manglerVurderingAvLangvarigSykdom = manglerVurderingAvLangvarigSykdom;
     }
-
 
     public boolean isKanLøseAksjonspunkt() {
         /*
@@ -42,7 +43,8 @@ public class SykdomAksjonspunkt {
             !manglerVurderingAvKontinuerligTilsynOgPleie &&
             !manglerVurderingAvToOmsorgspersoner &&
             !manglerVurderingAvILivetsSluttfase &&
-            !nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
+            !nyttDokumentHarIkkekontrollertEksisterendeVurderinger &&
+            !manglerVurderingAvLangvarigSykdom;
     }
 
     public boolean isHarUklassifiserteDokumenter() {
@@ -77,8 +79,13 @@ public class SykdomAksjonspunkt {
         return nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
     }
 
+    public boolean isManglerVurderingAvLangvarigSykdom() {
+        return manglerVurderingAvLangvarigSykdom;
+    }
+
     public static SykdomAksjonspunkt bareFalse() {
         return new SykdomAksjonspunkt(
+            false,
             false,
             false,
             false,

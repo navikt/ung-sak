@@ -37,7 +37,7 @@ import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.felles.type.Journalpost;
 import no.nav.k9.søknad.ytelse.olp.v1.Opplæringspenger;
-import no.nav.k9.søknad.ytelse.pls.v1.PleiepengerLivetsSluttfaseSøknadValidator;
+import no.nav.k9.søknad.ytelse.olp.v1.OpplæringspengerSøknadValidator;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
@@ -125,7 +125,7 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
     }
 
     private void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {
-        new PleiepengerLivetsSluttfaseSøknadValidator().forsikreValidert(søknad);
+        new OpplæringspengerSøknadValidator().forsikreValidert(søknad);
         søknadOversetter.persister(søknad, journalpostId, behandling);
 
         for (Journalpost journalpost : søknad.getJournalposter()) {

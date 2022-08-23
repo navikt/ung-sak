@@ -3,7 +3,8 @@ package no.nav.k9.sak.kontrakt.sykdom;
 public enum SykdomVurderingType {
     KONTINUERLIG_TILSYN_OG_PLEIE("KTP"),
     TO_OMSORGSPERSONER("TOO"),
-    LIVETS_SLUTTFASE("SLU");
+    LIVETS_SLUTTFASE("SLU"),
+    LANGVARIG_SYKDOM("LAS");
 
     private final String kode;
 

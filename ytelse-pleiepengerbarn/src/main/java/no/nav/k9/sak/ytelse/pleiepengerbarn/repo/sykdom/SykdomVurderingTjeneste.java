@@ -32,6 +32,13 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 
@@ -41,23 +48,25 @@ public class SykdomVurderingTjeneste {
     private final Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     private final SykdomVurderingRepository sykdomVurderingRepository;
-    private final SykdomDokumentRepository sykdomDokumentRepository;
-    private final SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste;
+    private final PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
+    private final MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste;
+    private final MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private final BasisPersonopplysningTjeneste personopplysningTjeneste;
     private final SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     @Inject
     public SykdomVurderingTjeneste(@Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                    SykdomVurderingRepository sykdomVurderingRepository,
-                                   SykdomDokumentRepository sykdomDokumentRepository,
-                                   SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste,
-                                   BasisPersonopplysningTjeneste personopplysningTjeneste,
+                                   PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
+                                   MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
+                                   MedisinskGrunnlagRepository medisinskGrunnlagRepository, BasisPersonopplysningTjeneste personopplysningTjeneste,
                                    SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
 
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
-        this.sykdomDokumentRepository = sykdomDokumentRepository;
-        this.sykdomGrunnlagTjeneste = sykdomGrunnlagTjeneste;
+        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
+        this.medisinskGrunnlagTjeneste = medisinskGrunnlagTjeneste;
+        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
@@ -76,31 +85,33 @@ public class SykdomVurderingTjeneste {
             return SykdomAksjonspunkt.bareFalse();
         }
 
-        final boolean harUklassifiserteDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
-        boolean dokumenterUtenUtkvittering = !sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(pleietrengende).isEmpty();
+        final boolean harUklassifiserteDokumenter = pleietrengendeSykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
+        boolean dokumenterUtenUtkvittering = !pleietrengendeSykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(pleietrengende).isEmpty();
 
         final boolean manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring(pleietrengende);
 
         final boolean eksisterendeVurderinger = !sykdomVurderingRepository.hentSisteVurderingerFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, pleietrengende).isEmpty();
         final boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger = dokumenterUtenUtkvittering && eksisterendeVurderinger;
 
-        final boolean harDataSomIkkeHarBlittTattMedIBehandling = sykdomGrunnlagTjeneste.harDataSomIkkeHarBlittTattMedIBehandling(behandling);
+        final boolean harDataSomIkkeHarBlittTattMedIBehandling = medisinskGrunnlagTjeneste.harDataSomIkkeHarBlittTattMedIBehandling(behandling);
 
         boolean manglerDiagnosekode;
         boolean manglerVurderingAvKontinuerligTilsynOgPleie;
         boolean manglerVurderingAvToOmsorgspersoner;
         boolean manglerVurderingAvILivetsSluttfase;
+        boolean manglerVurderingAvLangvarigSykdom;
 
         switch (behandling.getFagsakYtelseType()) {
             case PLEIEPENGER_SYKT_BARN -> {
                 if (!utledPerioderTilVurderingMedOmsorgenFor(behandling).isEmpty()) {
-                    manglerDiagnosekode = sykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnoser().isEmpty();
+                    manglerDiagnosekode = pleietrengendeSykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnoser().isEmpty();
                 } else {
                     manglerDiagnosekode = false;
                 }
                 manglerVurderingAvKontinuerligTilsynOgPleie = !hentVurderingerForKontinuerligTilsynOgPleie(behandling).getResterendeVurderingsperioder().isEmpty();
                 manglerVurderingAvToOmsorgspersoner = !hentVurderingerForToOmsorgspersoner(behandling).getResterendeVurderingsperioder().isEmpty();
                 manglerVurderingAvILivetsSluttfase = false;
+                manglerVurderingAvLangvarigSykdom = false;
 
                 boolean harUbesluttedeVurderinger = harUbesluttedeVurderinger(behandling);
 
@@ -112,7 +123,15 @@ public class SykdomVurderingTjeneste {
                 manglerDiagnosekode = false;
                 manglerVurderingAvToOmsorgspersoner = false;
                 manglerVurderingAvKontinuerligTilsynOgPleie = false;
+                manglerVurderingAvLangvarigSykdom = false;
                 manglerVurderingAvILivetsSluttfase = !hentVurderingerForILivetsSluttfase(behandling).getResterendeVurderingsperioder().isEmpty();
+            }
+            case OPPLÆRINGSPENGER -> {
+                manglerDiagnosekode = false;
+                manglerVurderingAvToOmsorgspersoner = false;
+                manglerVurderingAvKontinuerligTilsynOgPleie = false;
+                manglerVurderingAvILivetsSluttfase = false;
+                manglerVurderingAvLangvarigSykdom = !hentVurderingerForLangvarigSykdom(behandling).getResterendeVurderingsperioder().isEmpty();
             }
             default ->
                 throw new IllegalArgumentException("Ikke-støttet ytelstype: " + behandling.getFagsakYtelseType());
@@ -126,11 +145,12 @@ public class SykdomVurderingTjeneste {
             manglerVurderingAvToOmsorgspersoner,
             manglerVurderingAvILivetsSluttfase,
             harDataSomIkkeHarBlittTattMedIBehandling,
-            nyttDokumentHarIkkekontrollertEksisterendeVurderinger);
+            nyttDokumentHarIkkekontrollertEksisterendeVurderinger,
+            manglerVurderingAvLangvarigSykdom);
     }
 
     private boolean harUbesluttedeVurderinger(Behandling behandling) {
-        MedisinskGrunnlag medisinskGrunnlag = sykdomGrunnlagTjeneste.hentGrunnlag(behandling.getUuid());
+        MedisinskGrunnlag medisinskGrunnlag = medisinskGrunnlagTjeneste.hentGrunnlag(behandling.getUuid());
 
         return medisinskGrunnlag.getGrunnlagsdata().getVurderinger()
             .stream()
@@ -138,7 +158,7 @@ public class SykdomVurderingTjeneste {
     }
 
     private boolean manglerGodkjentLegeerklæring(final AktørId pleietrengende) {
-        return sykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).isEmpty();
+        return pleietrengendeSykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).isEmpty();
     }
 
     public SykdomVurderingerOgPerioder hentVurderingerForKontinuerligTilsynOgPleie(Behandling behandling) {
@@ -151,6 +171,10 @@ public class SykdomVurderingTjeneste {
 
     public SykdomVurderingerOgPerioder hentVurderingerForILivetsSluttfase(Behandling behandling) {
         return utledPerioderPPN(behandling);
+    }
+
+    public SykdomVurderingerOgPerioder hentVurderingerForLangvarigSykdom(Behandling behandling) {
+        return utledPerioder(SykdomVurderingType.LANGVARIG_SYKDOM, behandling);
     }
 
     private LocalDateTimeline<Boolean> hentInnleggelseUnder18årTidslinje(Behandling behandling) {
@@ -184,7 +208,7 @@ public class SykdomVurderingTjeneste {
 
     public SykdomVurderingerOgPerioder utledPerioderPPN(Behandling behandling) {
         LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> vurderinger = hentVurderinger(SykdomVurderingType.LIVETS_SLUTTFASE, behandling);
-        LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
+        LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = medisinskGrunnlagRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
 
         List<Periode> perioderKreverVurdering = behandledeSøknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).toList();
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
@@ -228,12 +252,12 @@ public class SykdomVurderingTjeneste {
         final LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> eksisterendeVurderinger = hentVurderinger(sykdomVurderingType, behandling);
         //TODO: Dette er "søknadsperioder" fra sykdomsgrunnlaget. Det skjærer litt med søknadsperiodene vi nå henter rett fra kilden, hvor vi filtrere på trukkede perioder. Bedre navn?
         // Er det evt nå redundant, pga direkte henting fra søknadsperioder, og kan/bør fjernes?
-        final LocalDateTimeline<Set<Saksnummer>> søknadsperioderPåPleietrengende = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
+        final LocalDateTimeline<Set<Saksnummer>> søknadsperioderPåPleietrengende = medisinskGrunnlagRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
         final LocalDateTimeline<Boolean> søknadsperioderTilSøker = søknadsperioderPåPleietrengende.filterValue(s -> s.contains(saksnummer)).mapValue(s -> Boolean.TRUE);
 
         final LocalDateTimeline<Boolean> innleggelseUnder18årTidslinje = hentInnleggelseUnder18årTidslinje(behandling);
         final LocalDateTimeline<Boolean> manglerGodkjentLegeerklæringTidslinje = utledManglerGodkjentLegeerklæringTidslinje(behandling.getFagsak().getPleietrengendeAktørId());
-        final LocalDateTimeline<VilkårPeriode> utenOmsorgenForTidslinje = sykdomGrunnlagTjeneste.hentManglendeOmsorgenForTidslinje(behandling.getId());
+        final LocalDateTimeline<VilkårPeriode> utenOmsorgenForTidslinje = medisinskGrunnlagTjeneste.hentManglendeOmsorgenForTidslinje(behandling.getId());
 
         LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = TidslinjeUtil.toBooleanTimeline(søknadsperioderPåPleietrengende)
             .disjoint(eksisterendeVurderinger)
@@ -313,7 +337,7 @@ public class SykdomVurderingTjeneste {
         final LocalDateTimeline<Boolean> perioderTilVurderingTidslinje = new LocalDateTimeline<Boolean>(perioderTilVurdering.stream()
             .map(p -> new LocalDateSegment<Boolean>(p.getFomDato(), p.getTomDato(), Boolean.TRUE))
             .collect(Collectors.toList()));
-        final LocalDateTimeline<VilkårPeriode> omsorgenForTidslinje = sykdomGrunnlagTjeneste.hentOmsorgenForTidslinje(behandling.getId()).filterValue(vp -> vp.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT);
+        final LocalDateTimeline<VilkårPeriode> omsorgenForTidslinje = medisinskGrunnlagTjeneste.hentOmsorgenForTidslinje(behandling.getId()).filterValue(vp -> vp.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT);
 
         return TidslinjeUtil.kunPerioderSomIkkeFinnesI(perioderTilVurderingTidslinje, omsorgenForTidslinje);
     }
@@ -328,9 +352,9 @@ public class SykdomVurderingTjeneste {
 
     public PleietrengendeSykdomInnleggelser hentInnleggelser(final Behandling behandling) {
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
-            return sykdomDokumentRepository.hentInnleggelse(behandling.getUuid());
+            return pleietrengendeSykdomDokumentRepository.hentInnleggelse(behandling.getUuid());
         } else {
-            return sykdomDokumentRepository.hentInnleggelse(behandling.getFagsak().getPleietrengendeAktørId());
+            return pleietrengendeSykdomDokumentRepository.hentInnleggelse(behandling.getFagsak().getPleietrengendeAktørId());
         }
     }
 

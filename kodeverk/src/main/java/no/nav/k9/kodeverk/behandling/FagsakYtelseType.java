@@ -157,6 +157,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     public static final FagsakYtelseType ES = ENGANGSTØNAD;
     public static final FagsakYtelseType PSB = PLEIEPENGER_SYKT_BARN;
     public static final FagsakYtelseType PPN = PLEIEPENGER_NÆRSTÅENDE;
+    public static final FagsakYtelseType OLP = OPPLÆRINGSPENGER;
     public static final FagsakYtelseType OMP = OMSORGSPENGER;
     public static final FagsakYtelseType FP = FORELDREPENGER;
     public static final FagsakYtelseType SVP = SVANGERSKAPSPENGER;
@@ -260,6 +261,17 @@ public enum FagsakYtelseType implements Kodeverdi {
             OMSORGSPENGER,
             OPPLÆRINGSPENGER,
             FRISINN),
+        OPPLÆRINGSPENGER, Set.of(SYKEPENGER,
+            SVANGERSKAPSPENGER,
+            FORELDREPENGER,
+            DAGPENGER,
+            ENSLIG_FORSØRGER,
+            PÅRØRENDESYKDOM,
+            PLEIEPENGER_SYKT_BARN,
+            PLEIEPENGER_NÆRSTÅENDE,
+            OMSORGSPENGER,
+            OPPLÆRINGSPENGER,
+            FRISINN),
         PLEIEPENGER_NÆRSTÅENDE, Set.of(SYKEPENGER,
             SVANGERSKAPSPENGER,
             FORELDREPENGER,
@@ -295,6 +307,11 @@ public enum FagsakYtelseType implements Kodeverdi {
             PLEIEPENGER_NÆRSTÅENDE,
             OMSORGSPENGER,
             OPPLÆRINGSPENGER),
+        OPPLÆRINGSPENGER, Set.of(
+            PLEIEPENGER_SYKT_BARN,
+            PLEIEPENGER_NÆRSTÅENDE,
+            OMSORGSPENGER,
+            OPPLÆRINGSPENGER),
         OMSORGSPENGER, Set.of(
             PLEIEPENGER_NÆRSTÅENDE,
             PLEIEPENGER_SYKT_BARN,
@@ -308,6 +325,9 @@ public enum FagsakYtelseType implements Kodeverdi {
             FORELDREPENGER),
         PLEIEPENGER_NÆRSTÅENDE, Set.of(
             SYKEPENGER),
+        OPPLÆRINGSPENGER, Set.of(
+            SYKEPENGER,
+            FORELDREPENGER),
         OMSORGSPENGER, Set.of(
             SYKEPENGER,
             FORELDREPENGER)
