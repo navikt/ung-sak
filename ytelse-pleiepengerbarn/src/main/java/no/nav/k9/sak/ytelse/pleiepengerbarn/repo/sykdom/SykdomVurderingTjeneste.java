@@ -90,6 +90,7 @@ public class SykdomVurderingTjeneste {
         boolean manglerVurderingAvKontinuerligTilsynOgPleie;
         boolean manglerVurderingAvToOmsorgspersoner;
         boolean manglerVurderingAvILivetsSluttfase;
+        boolean manglerVurderingAvLangvarigSykdom;
 
         switch (behandling.getFagsakYtelseType()) {
             case PLEIEPENGER_SYKT_BARN -> {
@@ -101,6 +102,7 @@ public class SykdomVurderingTjeneste {
                 manglerVurderingAvKontinuerligTilsynOgPleie = !hentVurderingerForKontinuerligTilsynOgPleie(behandling).getResterendeVurderingsperioder().isEmpty();
                 manglerVurderingAvToOmsorgspersoner = !hentVurderingerForToOmsorgspersoner(behandling).getResterendeVurderingsperioder().isEmpty();
                 manglerVurderingAvILivetsSluttfase = false;
+                manglerVurderingAvLangvarigSykdom = false;
 
                 boolean harUbesluttedeVurderinger = harUbesluttedeVurderinger(behandling);
 
@@ -112,7 +114,15 @@ public class SykdomVurderingTjeneste {
                 manglerDiagnosekode = false;
                 manglerVurderingAvToOmsorgspersoner = false;
                 manglerVurderingAvKontinuerligTilsynOgPleie = false;
+                manglerVurderingAvLangvarigSykdom = false;
                 manglerVurderingAvILivetsSluttfase = !hentVurderingerForILivetsSluttfase(behandling).getResterendeVurderingsperioder().isEmpty();
+            }
+            case OPPLÆRINGSPENGER -> {
+                manglerDiagnosekode = false;
+                manglerVurderingAvToOmsorgspersoner = false;
+                manglerVurderingAvKontinuerligTilsynOgPleie = false;
+                manglerVurderingAvILivetsSluttfase = false;
+                manglerVurderingAvLangvarigSykdom = !hentVurderingerForLangvarigSykdom(behandling).getResterendeVurderingsperioder().isEmpty();
             }
             default ->
                 throw new IllegalArgumentException("Ikke-støttet ytelstype: " + behandling.getFagsakYtelseType());
@@ -126,7 +136,8 @@ public class SykdomVurderingTjeneste {
             manglerVurderingAvToOmsorgspersoner,
             manglerVurderingAvILivetsSluttfase,
             harDataSomIkkeHarBlittTattMedIBehandling,
-            nyttDokumentHarIkkekontrollertEksisterendeVurderinger);
+            nyttDokumentHarIkkekontrollertEksisterendeVurderinger,
+            manglerVurderingAvLangvarigSykdom);
     }
 
     private boolean harUbesluttedeVurderinger(Behandling behandling) {
@@ -151,6 +162,10 @@ public class SykdomVurderingTjeneste {
 
     public SykdomVurderingerOgPerioder hentVurderingerForILivetsSluttfase(Behandling behandling) {
         return utledPerioderPPN(behandling);
+    }
+
+    public SykdomVurderingerOgPerioder hentVurderingerForLangvarigSykdom(Behandling behandling) {
+        return utledPerioder(SykdomVurderingType.LANGVARIG_SYKDOM, behandling);
     }
 
     private LocalDateTimeline<Boolean> hentInnleggelseUnder18årTidslinje(Behandling behandling) {

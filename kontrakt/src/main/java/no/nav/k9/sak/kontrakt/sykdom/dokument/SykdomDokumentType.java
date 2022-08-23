@@ -9,34 +9,35 @@ public enum SykdomDokumentType {
     LEGEERKLÆRING_SYKEHUS("LEGEERKLÆRING_SYKEHUS", "L", true),
     MEDISINSKE_OPPLYSNINGER("MEDISINSKE_OPPLYSNINGER", "M", true),
     ANNET("ANNET", "A", false),
-    UKLASSIFISERT("UKLASSIFISERT", "U", false);
-    
-    
+    UKLASSIFISERT("UKLASSIFISERT", "U", false),
+    LEGEERKLÆRING_ANNEN("LEGEERKLÆRING_ANNEN", "LA", true);
+
+
     @JsonValue
     private final String apikode;
-    
+
     @JsonIgnore
     private final String databasekode;
-    
+
     @JsonIgnore
     private final boolean relevantForSykdom;
-    
-    
+
+
     SykdomDokumentType(String apikode, String databasekode, boolean relevantForSykdom) {
         this.apikode = apikode;
         this.databasekode = databasekode;
         this.relevantForSykdom = relevantForSykdom;
     }
-    
-    
+
+
     public boolean isRelevantForSykdom() {
         return relevantForSykdom;
     }
-    
+
     public String getDatabasekode() {
         return databasekode;
     }
-    
+
     @JsonCreator(mode = Mode.DELEGATING)
     public static SykdomDokumentType fraApikode(String s) {
         for (var type : values()) {

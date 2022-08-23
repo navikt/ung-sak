@@ -169,6 +169,7 @@ public class MapInputTilUttakTjeneste {
         return switch (behandling.getFagsakYtelseType()) {
             case PLEIEPENGER_SYKT_BARN -> YtelseType.PSB;
             case PLEIEPENGER_NÆRSTÅENDE -> YtelseType.PLS;
+            case OPPLÆRINGSPENGER -> YtelseType.OLP;
             default ->
                 throw new IllegalStateException("Ikke støttet ytelse for uttak Pleiepenger: " + behandling.getFagsakYtelseType());
         };
