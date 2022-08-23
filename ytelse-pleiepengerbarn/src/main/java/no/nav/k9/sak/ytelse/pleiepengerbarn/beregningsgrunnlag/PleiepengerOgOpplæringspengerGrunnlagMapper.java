@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
@@ -14,6 +15,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.AktivitetDto;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.OpplæringspengerGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedUtbetalingsgradDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerNærståendeGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerSyktBarnGrunnlag;
@@ -35,17 +37,18 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 @ApplicationScoped
-public class PleiepengerGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<YtelsespesifiktGrunnlagDto> {
+public class PleiepengerOgOpplæringspengerGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<YtelsespesifiktGrunnlagDto> {
 
     private UttakTjeneste uttakRestKlient;
 
-    public PleiepengerGrunnlagMapper() {
+    public PleiepengerOgOpplæringspengerGrunnlagMapper() {
         // for proxy
     }
 
     @Inject
-    public PleiepengerGrunnlagMapper(UttakTjeneste uttakRestKlient) {
+    public PleiepengerOgOpplæringspengerGrunnlagMapper(UttakTjeneste uttakRestKlient) {
         this.uttakRestKlient = uttakRestKlient;
     }
 
@@ -74,6 +77,7 @@ public class PleiepengerGrunnlagMapper implements BeregningsgrunnlagYtelsespesif
         return switch (ref.getFagsakYtelseType()) {
             case PLEIEPENGER_SYKT_BARN -> new PleiepengerSyktBarnGrunnlag(utbetalingsgrader);
             case PLEIEPENGER_NÆRSTÅENDE -> new PleiepengerNærståendeGrunnlag(utbetalingsgrader);
+            case OPPLÆRINGSPENGER -> new OpplæringspengerGrunnlag(utbetalingsgrader);
             default -> throw new IllegalStateException("Ikke støttet ytelse for kalkulus Pleiepenger: " + ref.getFagsakYtelseType());
         };
     }

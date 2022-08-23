@@ -134,7 +134,9 @@ public class PleiepengerUttakRestTjeneste {
         var mangler = manglendeArbeidstidUtleder.utledMangler(BehandlingReferanse.fra(behandling));
         return new ManglendeArbeidstidDto(mangler.entrySet()
             .stream()
-            .map(this::mapArbeidsgiver).collect(Collectors.toList()));
+            .filter(it -> !it.getValue().isEmpty())
+            .map(this::mapArbeidsgiver)
+            .collect(Collectors.toList()));
     }
 
     @GET

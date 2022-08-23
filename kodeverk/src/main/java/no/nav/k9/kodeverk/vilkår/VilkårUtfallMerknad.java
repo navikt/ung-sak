@@ -75,6 +75,7 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
 
     VM_9002("9002", "Kan ikke automatisk innvilge omsorgen for vilkåret"),
     VM_9013("9013", "Kan ikke automatisk innvilge alene om omsorgen vilkåret"),
+    VM_9015("9015", "Kan ikke automatisk innvilge aldersvilkåret for barn"),
 
     UDEFINERT("-", "Ikke definert"),
 

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
-import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -54,6 +54,7 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_AT_KODE)
 @DokumentGruppeRef(Brevkode.FRAVÆRSKORRIGERING_IM_OMS_KODE)
+@DokumentGruppeRef(Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT_KODE)
 public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private SøknadRepository søknadRepository;
@@ -135,7 +136,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             }
 
             var enkeltTask = ProsessTaskData.forProsessTask(AsyncAbakusLagreOpptjeningTask.class);
-            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request.get());
+            var payload = JsonObjectMapper.getMapper().writeValueAsString(request.get());
             enkeltTask.setPayload(payload);
 
             enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, dokument.getJournalpostId().getVerdi());

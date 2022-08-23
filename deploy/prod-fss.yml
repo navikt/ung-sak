@@ -193,6 +193,8 @@ spec:
     # Feature-flag
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
       value: "false"
+    - name: OMP_RAMMEVEDTAK_ALDERSVILKAAR
+      value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
@@ -201,6 +203,8 @@ spec:
       value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
       value: "true"
+    - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
+      value: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

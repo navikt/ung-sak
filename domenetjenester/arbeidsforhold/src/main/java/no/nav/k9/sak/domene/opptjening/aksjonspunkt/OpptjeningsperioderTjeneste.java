@@ -79,16 +79,16 @@ public class OpptjeningsperioderTjeneste {
         var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId());
         var oppgittOpptjening = oppgittOpptjeningFilter.hentOppgittOpptjening(ref.getBehandlingId(), grunnlag, skjæringstidspunkt).orElse(null);
 
-        var ytelseFilter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato());
         var mapArbeidOpptjening = OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner();
-        var tidslinjePerYtelse = utledYtelsesTidslinjerForValideringAvPermisjoner(ytelseFilter);
+        var tidslinjePerYtelse = utledYtelsesTidslinjerForValideringAvPermisjoner(new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)));
         for (var yrkesaktivitet : yrkesaktivitetFilter.getYrkesaktiviteter()) {
             var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(ref, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjeningPeriode, vilkårsPeriode, tidslinjePerYtelse);
             perioder.addAll(opptjeningsperioder);
         }
 
         perioder.addAll(mapOppgittOpptjening(mapArbeidOpptjening, oppgittOpptjening, vurderOpptjening, ref));
-        perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(ref, vurderOpptjening, true, ytelseFilter));
+        var ytelseFilterVenstreSide = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato());
+        perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(ref, vurderOpptjening, true, ytelseFilterVenstreSide));
         lagOpptjeningsperiodeForFrilansAktivitet(ref, oppgittOpptjening, vurderOpptjening, grunnlag, perioder, opptjeningPeriode,
             mapArbeidOpptjening).ifPresent(perioder::add);
 
