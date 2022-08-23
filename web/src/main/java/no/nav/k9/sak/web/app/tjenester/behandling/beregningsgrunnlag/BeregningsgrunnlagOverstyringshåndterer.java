@@ -1,5 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.historikk.HistorikkinnslagType.FAKTA_ENDRET;
+import static no.nav.k9.kodeverk.historikk.HistorikkinnslagType.FJERNET_OVERSTYRING;
+
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -9,6 +12,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AbstractOverstyringshåndterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -18,6 +25,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.OverstyrBeregningsgrunnlagDto;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
@@ -55,17 +63,22 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
         var behandlingReferanse = BehandlingReferanse.fra(behandling);
         validerOppdatering(dto.getPeriode().getFom(), behandlingReferanse);
         var oppdaterBeregningsgrunnlagResultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, behandlingReferanse, dto.getPeriode().getFom());
+        var tekstBuilder = getHistorikkAdapter().tekstBuilder();
         oppdaterBeregningsgrunnlagResultat.getBeregningsgrunnlagEndring().ifPresent(
-            endring -> verdierHistorikkTjeneste.lagHistorikkForBeregningsgrunnlagVerdier(behandling.getId(),
-                endring.getBeregningsgrunnlagPeriodeEndringer().get(0), getHistorikkAdapter().tekstBuilder()));
-        OppdateringResultat.Builder builder = OppdateringResultat.builder();
-        fjernOverstyrtAksjonspunkt(behandling)
-            .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
-        return builder.build();
-    }
+            endring -> {
+                verdierHistorikkTjeneste.lagHistorikkForBeregningsgrunnlagVerdier(behandling.getId(),
+                    endring.getBeregningsgrunnlagPeriodeEndringer().get(0), tekstBuilder);
+                tekstBuilder.ferdigstillHistorikkinnslagDel();
+                getHistorikkAdapter().opprettHistorikkInnslag(behandling.getId(), FAKTA_ENDRET);
 
-    private Optional<Aksjonspunkt> fjernOverstyrtAksjonspunkt(Behandling behandling) {
-        return behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VURDER_FAKTA_FOR_ATFL_SN);
+            });
+        if (dto.skalAvbrytes()) {
+            tekstBuilder.medHendelse(FJERNET_OVERSTYRING,  dto.getPeriode().getFom());
+            tekstBuilder.medSkjermlenke(SkjermlenkeType.FAKTA_OM_BEREGNING);
+            tekstBuilder.ferdigstillHistorikkinnslagDel();
+        }
+        OppdateringResultat.Builder builder = OppdateringResultat.builder();
+        return builder.build();
     }
 
     @Override

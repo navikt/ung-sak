@@ -21,15 +21,16 @@ import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
+import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktProsessResultat;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktProsessResultat;
 import no.nav.k9.sak.behandling.aksjonspunkt.Overstyringshåndterer;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -169,6 +170,7 @@ public class AksjonspunktApplikasjonTjeneste {
     public void overstyrAksjonspunkter(BekreftetOgOverstyrteAksjonspunkterDto aksjonspunkterDto, Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
+
         AksjonspunktProsessResultat prosessResultat = overstyrVilkårEllerBeregning(aksjonspunkterDto.getOverstyrteAksjonspunktDtoer(), behandling, kontekst);
 
         aksjonspunkterDto.getOverstyrteAksjonspunktDtoer().forEach(dto ->
@@ -385,6 +387,7 @@ public class AksjonspunktApplikasjonTjeneste {
             return (Overstyringshåndterer<V>) minInstans;
         }
     }
+
 
     private void settToTrinnPåOverstyrtAksjonspunktHvisEndring(Behandling behandling, OverstyringAksjonspunktDto dto,
                                                                boolean resultatKreverTotrinn) {

@@ -65,11 +65,13 @@ public enum HistorikkinnslagType implements Kodeverdi {
     FAKTA_ENDRET("FAKTA_ENDRET", "Fakta endret", HistorikkinnslagMal.MAL_TYPE_5),
     BYTT_ENHET("BYTT_ENHET", "Bytt enhet", HistorikkinnslagMal.MAL_TYPE_5),
 
+
     // Mal Type 6
     NY_INFO_FRA_TPS("NY_INFO_FRA_TPS", "Ny info fra TPS", HistorikkinnslagMal.MAL_TYPE_6),
 
     // Mal Type 7
     OVERSTYRT("OVERSTYRT", "Overstyrt", HistorikkinnslagMal.MAL_TYPE_7),
+    FJERNET_OVERSTYRING("FJERNET_OVERSTYRING", "Overstyring er avbrutt gjeldende fra ", HistorikkinnslagMal.MAL_TYPE_7),
 
     // Mal Type 8
     OPPTJENING("OPPTJENING", "Behandlet opptjeningsperiode", HistorikkinnslagMal.MAL_TYPE_8),
