@@ -29,6 +29,8 @@ public class BeregningsaktivitetHistorikkTjeneste {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
     }
 
+
+
     public void lagHistorikkForSkjæringstidspunkt(Long behandlingId,
                                                   HistorikkInnslagTekstBuilder tekstBuilder,
                                                   List<BeregningAktivitetEndring> beregningAktivitetEndringer,

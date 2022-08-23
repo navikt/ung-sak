@@ -3,6 +3,7 @@ package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 import java.util.List;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -24,13 +25,9 @@ import no.nav.k9.sak.typer.Periode;
 @JsonTypeName(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE)
 public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
 
-    @JsonProperty(value = "fakta")
-    @Valid
-    private FaktaBeregningLagreDto fakta;
 
-    @JsonProperty(value = "overstyrteAndeler", required = true)
+    @JsonProperty(value = "overstyrteAndeler")
     @Valid
-    @NotNull
     @Size(max = 100)
     private List<FastsettBeregningsgrunnlagAndelDto> overstyrteAndeler;
 
@@ -55,19 +52,17 @@ public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
         return true;
     }
 
-    public FaktaBeregningLagreDto getFakta() {
-        return fakta;
-    }
-
     public List<FastsettBeregningsgrunnlagAndelDto> getOverstyrteAndeler() {
         return overstyrteAndeler;
-    }
-
-    public void setFakta(FaktaBeregningLagreDto fakta) {
-        this.fakta = fakta;
     }
 
     public void setOverstyrteAndeler(List<FastsettBeregningsgrunnlagAndelDto> overstyrteAndeler) {
         this.overstyrteAndeler = overstyrteAndeler;
     }
+
+    @AssertTrue
+    public boolean skalVereAvbruttEllerHaVerdier() {
+        return skalAvbrytes() || overstyrteAndeler != null;
+    }
+
 }
