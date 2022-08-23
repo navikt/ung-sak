@@ -128,7 +128,7 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
     }
 
     private NavigableSet<DatoIntervallEntitet> finnPerioderTilVurdering(AksjonspunktUtlederInput param) {
-        var periodeFilter = periodeFilterProvider.getFilter(param.getRef(), false);
+        var periodeFilter = periodeFilterProvider.getFilter(param.getRef());
         periodeFilter.ignorerForlengelseperioder();
         periodeFilter.ignorerAvslåttePerioderInkludertKompletthet();
         return beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(param.getRef(), periodeFilter);

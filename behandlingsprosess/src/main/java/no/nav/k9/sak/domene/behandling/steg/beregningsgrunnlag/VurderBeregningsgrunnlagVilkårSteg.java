@@ -65,7 +65,7 @@ public class VurderBeregningsgrunnlagVilkårSteg implements BeregningsgrunnlagSt
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var ref = BehandlingReferanse.fra(behandling);
-        var periodeTilVurderingFilter = vilkårPeriodeFilterProvider.getFilter(ref, true);
+        var periodeTilVurderingFilter = vilkårPeriodeFilterProvider.getFilter(ref);
         periodeTilVurderingFilter.ignorerForlengelseperioder();
         beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, periodeTilVurderingFilter)
             .forEach(periode -> beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, periode));

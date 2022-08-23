@@ -35,6 +35,7 @@ import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
+import no.nav.k9.sak.vilkår.EndringIUttakPeriodeUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
@@ -42,8 +43,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Endringsstatus;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 
 public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
@@ -62,7 +61,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
-    private UttakTjeneste uttakTjeneste;
+    private EndringIUttakPeriodeUtleder endringIUttakPeriodeUtleder;
 
     public PleiepengerVilkårsPerioderTilVurderingTjeneste() {
     }
@@ -78,7 +77,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
                                                           RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                           SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                                           UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                                          UttakTjeneste uttakTjeneste) {
+                                                          PleiepengerEndringIUttakPeriodeUtleder endringIUttakPeriodeUtleder) {
         this.vilkårUtleder = vilkårUtleder;
         this.vilkårsPeriodisering = vilkårsPeriodisering;
         this.behandlingRepository = behandlingRepository;
@@ -89,7 +88,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
-        this.uttakTjeneste = uttakTjeneste;
+        this.endringIUttakPeriodeUtleder = endringIUttakPeriodeUtleder;
 
         søktePerioder = new SøktePerioder(søknadsperiodeTjeneste);
     }
@@ -258,18 +257,9 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     }
 
     private LocalDateTimeline<Boolean> uttaksendringerSidenForrigeBehandling(BehandlingReferanse referanse) {
-        final Uttaksplan uttaksplan = uttakTjeneste.hentUttaksplan(referanse.getBehandlingUuid(), false);
-        if (uttaksplan == null) {
-            return LocalDateTimeline.empty();
-        }
-
-        final List<LocalDateSegment<Boolean>> segments = uttaksplan.getPerioder()
-            .entrySet()
-            .stream()
-            .filter(entry -> entry.getValue().getEndringsstatus() != Endringsstatus.UENDRET)
-            .map(entry -> new LocalDateSegment<Boolean>(entry.getKey().getFom(), entry.getKey().getTom(), Boolean.TRUE))
+        var segments = endringIUttakPeriodeUtleder.utled(referanse).stream()
+            .map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), Boolean.TRUE))
             .toList();
-
         return new LocalDateTimeline<>(segments);
     }
 

@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 
 /** Beregningsgrunnlag referanse + Skjæringstidspunkt. For intern referanser til beregningsgrunnlag i denne modulen. */
 public class BgRef implements Comparable<BgRef> {
-    private UUID ref;
-    private LocalDate stp;
+    private final UUID ref;
+    private final LocalDate stp;
     private boolean erGenerert;
 
     public BgRef(UUID bgRef, LocalDate stp) {

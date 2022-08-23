@@ -11,6 +11,8 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -23,35 +25,40 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagReposito
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 
-class HentReferanserTjeneste {
+@Dependent
+public class BeregningsgrunnlagReferanserTjeneste {
 
-    private final BeregningPerioderGrunnlagRepository grunnlagRepository;
-    private final VilkårResultatRepository vilkårResultatRepository;
+    private BeregningPerioderGrunnlagRepository grunnlagRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
 
-    HentReferanserTjeneste(BeregningPerioderGrunnlagRepository grunnlagRepository,
-                                  VilkårResultatRepository vilkårResultatRepository) {
+    public BeregningsgrunnlagReferanserTjeneste() {
+    }
+
+    @Inject
+    BeregningsgrunnlagReferanserTjeneste(BeregningPerioderGrunnlagRepository grunnlagRepository,
+                                         VilkårResultatRepository vilkårResultatRepository) {
         this.grunnlagRepository = grunnlagRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
 
-    /** Henter referanser for skjæringstidspunkter
-     *
+    /**
+     * Henter referanser for skjæringstidspunkter
+     * <p>
      * Dersom kreverEksisterendeReferanse er satt til true forventes det at referansen finnes fra før for alle skjæringstidspunkt.
-     *
+     * <p>
      * Dersom skalLageNyVedLikSomInitiell er satt til true lages det nye referanser dersom den eksisterende referansen er initiell (kopiert fra original behandling)
      *
-     *
-     * @param behandlingId BehandlingId
-     * @param skjæringstidspunkter Skjæringstidspunkter
+     * @param behandlingId                BehandlingId
+     * @param skjæringstidspunkter        Skjæringstidspunkter
      * @param kreverEksisterendeReferanse Kreves det at eksisterende referanse finnes
      * @param skalLageNyVedLikSomInitiell Skal det lages ny ved initiell referanse
      * @return Liste med referanser
      */
     List<BgRef> finnReferanseEllerLagNy(Long behandlingId,
-                                                Collection<LocalDate> skjæringstidspunkter,
-                                                boolean kreverEksisterendeReferanse,
-                                                boolean skalLageNyVedLikSomInitiell) {
+                                        Collection<LocalDate> skjæringstidspunkter,
+                                        boolean kreverEksisterendeReferanse,
+                                        boolean skalLageNyVedLikSomInitiell) {
         var refs = new ArrayList<>(finnBeregningsgrunnlagsReferanseFor(behandlingId, skjæringstidspunkter, kreverEksisterendeReferanse, skalLageNyVedLikSomInitiell));
 
         // generer refs som ikke eksisterer
@@ -70,15 +77,15 @@ class HentReferanserTjeneste {
     }
 
 
-    /** Mapper eksisterende referanser i inneværende behandling mot referanser i originalbehandlingen.
-     *
+    /**
+     * Mapper eksisterende referanser i inneværende behandling mot referanser i originalbehandlingen.
+     * <p>
      * Mappes fra referanse til liste fordi originalbehandling han ha flere vilkårsperioder som overlapper med vilkårsperiode fra
      * inneværende behandling.
      *
-     *
-     * @param ref Behandlingreferanse for denne behandlingen
+     * @param ref             Behandlingreferanse for denne behandlingen
      * @param vilkårsperioder Liste med aktuelle vilkårsperioder
-     * @param bgReferanser Referanser fra denne behandlingen
+     * @param bgReferanser    Referanser fra denne behandlingen
      * @return Map fra referanse i denne behandlingen til liste av referanser i original behandling
      */
     Map<UUID, Map<LocalDate, UUID>> finnMapTilOriginaleReferanserUtenAvslag(BehandlingReferanse ref,
@@ -100,8 +107,8 @@ class HentReferanserTjeneste {
                                                                                  Optional<Vilkårene> originalVilkår) {
         return vilkårsperioder.stream()
             .collect(Collectors.toMap(
-            p -> finnReferanseFraPeriode(bgReferanser, p).getRef(),
-            p  -> finnReferanserUtenAvslagSomOverlapperPeriode(p, originaltGrunnlag, originalVilkår)));
+                p -> finnReferanseFraPeriode(bgReferanser, p).getRef(),
+                p -> finnReferanserUtenAvslagSomOverlapperPeriode(p, originaltGrunnlag, originalVilkår)));
     }
 
     private Map<LocalDate, UUID> finnReferanserUtenAvslagSomOverlapperPeriode(DatoIntervallEntitet vilkårsperiode,
@@ -127,7 +134,7 @@ class HentReferanserTjeneste {
         return bgReferanser.stream().filter(bgRef -> bgRef.getStp().equals(p.getFomDato())).findFirst().orElseThrow();
     }
 
-    List<BgRef> finnBeregningsgrunnlagsReferanseFor(Long behandlingId,
+    public List<BgRef> finnBeregningsgrunnlagsReferanseFor(Long behandlingId,
                                                     Collection<LocalDate> skjæringstidspunkter,
                                                     boolean kreverEksisterendeReferanse,
                                                     boolean skalLageNyVedLikSomInitiell) {
@@ -161,18 +168,19 @@ class HentReferanserTjeneste {
         for (var stp : new TreeSet<>(skjæringstidspunkter)) {
             var beregningsgrunnlagPeriodeOpt = grunnlag.finnGrunnlagFor(stp);
             var grunnlagReferanse = beregningsgrunnlagPeriodeOpt.map(BeregningsgrunnlagPeriode::getEksternReferanse);
-            if (grunnlagReferanse.isPresent() && skalLageNyVedLikSomInitiell) {
-                if (grunnlagInitiellVersjon.isPresent()) {
-                    var initReferanse = grunnlagInitiellVersjon.get().finnGrunnlagFor(stp).map(BeregningsgrunnlagPeriode::getEksternReferanse);
-                    if (initReferanse.isPresent() && grunnlagReferanse.get().equals(initReferanse.get())) {
-                        grunnlagReferanse = Optional.empty();
-                    }
-                }
+            var initReferanse = grunnlagInitiellVersjon.flatMap(gr -> gr.finnGrunnlagFor(stp).map(BeregningsgrunnlagPeriode::getEksternReferanse));
+            var erLikInitiell = erReferanseLikInitiell(grunnlagReferanse, initReferanse);
+            if (erLikInitiell && skalLageNyVedLikSomInitiell) {
+                grunnlagReferanse = Optional.empty();
             }
 
             resultater.add(new BgRef(grunnlagReferanse.orElse(null), stp));
         }
         return List.copyOf(resultater);
+    }
+
+    private boolean erReferanseLikInitiell(Optional<UUID> grunnlagReferanse, Optional<UUID> initReferanse) {
+        return grunnlagReferanse.isPresent() && initReferanse.isPresent() && grunnlagReferanse.get().equals(initReferanse.get());
     }
 
 

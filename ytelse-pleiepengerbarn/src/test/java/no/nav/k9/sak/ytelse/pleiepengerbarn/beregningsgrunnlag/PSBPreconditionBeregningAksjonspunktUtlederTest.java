@@ -102,11 +102,11 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
 
 
         var filter = mock(VilkårPeriodeFilter.class);
-        when(filterProvider.getFilter(BehandlingReferanse.fra(behandling), false))
+        when(filterProvider.getFilter(BehandlingReferanse.fra(behandling)))
             .thenReturn(filter);
-        when(filterProvider.getFilter(BehandlingReferanse.fra(behandlingManueltOpprettet), false))
+        when(filterProvider.getFilter(BehandlingReferanse.fra(behandlingManueltOpprettet)))
             .thenReturn(filter);
-        when(filterProvider.getFilter(BehandlingReferanse.fra(revurderingIkkeManueltOpprettet), false))
+        when(filterProvider.getFilter(BehandlingReferanse.fra(revurderingIkkeManueltOpprettet)))
             .thenReturn(filter);
         when(perioderTilVurderingTjeneste.utledPerioderTilVurdering(any(BehandlingReferanse.class), any(VilkårPeriodeFilter.class)))
             .thenReturn(new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)))));

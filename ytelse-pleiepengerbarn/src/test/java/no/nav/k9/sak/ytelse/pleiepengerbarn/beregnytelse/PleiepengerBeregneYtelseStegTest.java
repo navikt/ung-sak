@@ -101,8 +101,12 @@ public class PleiepengerBeregneYtelseStegTest {
             new UnitTestLookupInstanceImpl<>(kalkulusTjeneste),
             repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository,
             new VilkårTjeneste(behandlingRepository,
-                null, null, repositoryProvider.getVilkårResultatRepository(), repositoryProvider.getFagsakRepository()),
-            new VilkårPeriodeFilterProvider(repositoryProvider.getFagsakRepository(), repositoryProvider.getVilkårResultatRepository(), new UnitTestLookupInstanceImpl<>(null)));
+                null,
+                null,
+                null,
+                repositoryProvider.getVilkårResultatRepository(),
+                repositoryProvider.getFagsakRepository()),
+            new VilkårPeriodeFilterProvider(repositoryProvider.getFagsakRepository(), repositoryProvider.getVilkårResultatRepository(), new UnitTestLookupInstanceImpl<>(null), new UnitTestLookupInstanceImpl<>(null)));
         beregningsresultat = BeregningsresultatEntitet.builder()
             .medRegelInput("regelInput")
             .medRegelSporing("regelSporing")
@@ -112,7 +116,7 @@ public class PleiepengerBeregneYtelseStegTest {
             uttakTjeneste,
             new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste),
             new UnitTestLookupInstanceImpl<>(finnFeriepengepåvirkendeFagsakerTjeneste),
-                hentAndelserSomKanGiFeriepengerTjeneste,
+            hentAndelserSomKanGiFeriepengerTjeneste,
             true
         );
     }
@@ -201,7 +205,7 @@ public class PleiepengerBeregneYtelseStegTest {
         var periode = new LukketPeriode(stp, stp.plusDays(2));
         var uttaksplan = new Uttaksplan(Map.of(periode, new UttaksperiodeInfo(no.nav.pleiepengerbarn.uttak.kontrakter.Utfall.OPPFYLT,
             BigDecimal.valueOf(100), List.of(), BigDecimal.valueOf(100), null, Set.of(), Map.of(), BigDecimal.valueOf(100), null, Set.of(), behandling.getUuid().toString(), AnnenPart.ALENE, null, null, null, false, new Utenlandsopphold(null,
-        UtenlandsoppholdÅrsak.INGEN))), List.of());
+            UtenlandsoppholdÅrsak.INGEN))), List.of());
 
         uttakTjeneste.lagreUttakResultatPerioder(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), uttaksplan);
     }

@@ -20,19 +20,27 @@ public class VilkårPeriodeFilterProvider {
     private final FagsakRepository fagsakRepository;
     private final VilkårResultatRepository vilkårResultatRepository;
     private final Instance<ForlengelseTjeneste> forlengelseTjenester;
+    private final Instance<EndringIUttakPeriodeUtleder> endringIUttakPeriodeUtledere;
 
 
     @Inject
     public VilkårPeriodeFilterProvider(FagsakRepository fagsakRepository,
                                        VilkårResultatRepository vilkårResultatRepository,
-                                       @Any Instance<ForlengelseTjeneste> forlengelseTjenester) {
+                                       @Any Instance<ForlengelseTjeneste> forlengelseTjenester,
+                                       @Any Instance<EndringIUttakPeriodeUtleder> endringIUttakPeriodeUtledere) {
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.forlengelseTjenester = forlengelseTjenester;
+        this.endringIUttakPeriodeUtledere = endringIUttakPeriodeUtledere;
     }
 
-    public VilkårPeriodeFilter getFilter(BehandlingReferanse referanse, boolean skalMarkereForlengelser) {
-        return new VilkårPeriodeFilter(skalMarkereForlengelser, referanse, fagsakRepository, vilkårResultatRepository, getForlengelsetjeneste(referanse.getFagsakYtelseType(), referanse.getBehandlingType()));
+    public VilkårPeriodeFilter getFilter(BehandlingReferanse referanse) {
+        return new VilkårPeriodeFilter(
+            referanse,
+            fagsakRepository,
+            vilkårResultatRepository,
+            getForlengelsetjeneste(referanse.getFagsakYtelseType(), referanse.getBehandlingType()),
+            EndringIUttakPeriodeUtleder.finnTjeneste(endringIUttakPeriodeUtledere, referanse.getFagsakYtelseType()));
     };
 
     private ForlengelseTjeneste getForlengelsetjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {

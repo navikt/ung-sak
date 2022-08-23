@@ -88,7 +88,7 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
 
     private void validerOppdatering(LocalDate stp,
                                     BehandlingReferanse ref) {
-        var filter = vilkårPeriodeFilterProvider.getFilter(ref, false);
+        var filter = vilkårPeriodeFilterProvider.getFilter(ref);
         filter.ignorerForlengelseperioder();
         var perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, filter);
         var erTilVurdering = perioderSomSkalKunneVurderes.stream().anyMatch(p -> p.getFomDato().equals(stp));

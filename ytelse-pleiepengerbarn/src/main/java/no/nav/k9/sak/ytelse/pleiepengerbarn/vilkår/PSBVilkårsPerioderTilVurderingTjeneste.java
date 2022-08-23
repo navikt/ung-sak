@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.Map;
@@ -46,7 +47,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
                                                   PersoninfoAdapter personinfoAdapter,
                                                   SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                                   UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                                  UttakTjeneste uttakTjeneste) {
+                                                  @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PleiepengerEndringIUttakPeriodeUtleder endringIUttakPeriodeUtleder) {
 
         super(vilkårUtleder
             , Map.of(VilkårType.MEDLEMSKAPSVILKÅRET, new MaksSøktePeriode(søknadsperiodeTjeneste),
@@ -60,7 +61,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
             , revurderingPerioderTjeneste
             , søknadsperiodeTjeneste
             , utsattBehandlingAvPeriodeRepository
-            , uttakTjeneste
+            , endringIUttakPeriodeUtleder
         );
     }
 
