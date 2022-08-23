@@ -131,7 +131,7 @@ public class GjenopprettUgyldigeReferanserForBehandlingTask implements ProsessTa
             StegType.FAST_BERGRUNN,
             kopierBeregningRequests,
             originalBehandling.getAvsluttetDato(),
-            nesteBehandling.getAvsluttetDato());
+            nesteBehandling.getAvsluttetDato() != null ? nesteBehandling.getAvsluttetDato() : nesteBehandling.getEndretTidspunkt());
         kalkulusSystemRestKlient.kopierOgResettBeregning(request);
     }
 
