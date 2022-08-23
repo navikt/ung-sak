@@ -54,10 +54,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBu
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
@@ -74,7 +74,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private SykdomVurderingTjeneste sykdomVurderingTjeneste;
-    private SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     VurderSykdomOgKontinuerligTilsynSteg() {
@@ -86,7 +86,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                                                 PleiebehovResultatRepository resultatRepository,
                                                 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                 SykdomVurderingTjeneste sykdomVurderingTjeneste,
-                                                SykdomGrunnlagRepository sykdomGrunnlagRepository,
+                                                MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                                 SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
@@ -94,7 +94,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         this.resultatRepository = resultatRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
-        this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
+        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
 
@@ -160,7 +160,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     }
 
     private MedisinskGrunnlag opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, NavigableSet<DatoIntervallEntitet> perioderTilVurderingUtenOmsorgenFor, final Behandling behandling) {
-        return sykdomGrunnlagRepository.utledOgLagreGrunnlag(
+        return medisinskGrunnlagRepository.utledOgLagreGrunnlag(
             behandling.getFagsak().getSaksnummer(),
             behandling.getUuid(),
             behandling.getAktørId(),

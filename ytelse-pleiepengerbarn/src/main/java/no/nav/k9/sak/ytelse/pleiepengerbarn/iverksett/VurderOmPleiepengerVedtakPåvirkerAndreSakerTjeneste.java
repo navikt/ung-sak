@@ -51,9 +51,9 @@ import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.FeriepengerAvvikTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
@@ -70,9 +70,9 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-    private SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
-    private SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste;
+    private MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste;
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
@@ -90,9 +90,9 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     public VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste(BehandlingRepository behandlingRepository,
                                                                FagsakRepository fagsakRepository,
                                                                VilkårResultatRepository vilkårResultatRepository,
-                                                               SykdomGrunnlagRepository sykdomGrunnlagRepository,
+                                                               MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                                                SykdomVurderingRepository sykdomVurderingRepository,
-                                                               SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste,
+                                                               MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
                                                                ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
                                                                EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                                                SamtidigUttakTjeneste samtidigUttakTjeneste,
@@ -104,9 +104,9 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
+        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
-        this.sykdomGrunnlagTjeneste = sykdomGrunnlagTjeneste;
+        this.medisinskGrunnlagTjeneste = medisinskGrunnlagTjeneste;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
@@ -124,7 +124,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         Behandling vedtattBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
 
         AktørId pleietrengende = vedtattBehandling.getFagsak().getPleietrengendeAktørId();
-        List<Saksnummer> alleSaksnummer = sykdomVurderingRepository.hentAlleSaksnummer(pleietrengende)
+        List<Saksnummer> alleSaksnummer = medisinskGrunnlagRepository.hentAlleSaksnummer(pleietrengende)
             .stream()
             .filter(it -> ytelsesSpesifiktFilter(fagsak.getYtelseType(), it))
             .toList(); // Denne henter på tvers av saker, og kan trigge
@@ -229,12 +229,12 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         if (erUnderBehandlingOgIkkeKommetTilSykdom(sisteBehandlingPåKandidat)) {
             return LocalDateTimeline.empty();
         }
-        var kandidatSykdomBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(sisteBehandlingPåKandidat.getUuid()).orElseThrow();
+        var kandidatSykdomBehandling = medisinskGrunnlagRepository.hentGrunnlagForBehandling(sisteBehandlingPåKandidat.getUuid()).orElseThrow();
         var behandling = behandlingRepository.hentBehandlingHvisFinnes(kandidatSykdomBehandling.getBehandlingUuid()).orElseThrow();
         var vurderingsperioder = utledVurderingsperiode(behandling);
-        var manglendeOmsorgenForPerioder = sykdomGrunnlagTjeneste.hentManglendeOmsorgenForPerioder(behandling.getId());
-        var utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, vurderingsperioder, manglendeOmsorgenForPerioder);
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlagsdata()), utledetGrunnlag).getDiffPerioder();
+        var manglendeOmsorgenForPerioder = medisinskGrunnlagTjeneste.hentManglendeOmsorgenForPerioder(behandling.getId());
+        var utledetGrunnlag = medisinskGrunnlagRepository.utledGrunnlag(kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, vurderingsperioder, manglendeOmsorgenForPerioder);
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = medisinskGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlagsdata()), utledetGrunnlag).getDiffPerioder();
 
         return endringerISøktePerioder.compress()
             .filterValue(Objects::nonNull);

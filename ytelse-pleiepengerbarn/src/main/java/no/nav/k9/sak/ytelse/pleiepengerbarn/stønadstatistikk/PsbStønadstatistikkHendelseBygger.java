@@ -50,10 +50,10 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforh
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold.Builder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.MapFraUttaksplan;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.OmsorgenForDtoMapper;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleietrengendeSykdomDiagnose;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlagsdata;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDiagnose;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk.StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse;
 import no.nav.pleiepengerbarn.uttak.kontrakter.GraderingMotTilsyn;
@@ -71,7 +71,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     private StønadstatistikkPeriodetidslinjebygger stønadstatistikkPeriodetidslinjebygger;
     private BehandlingRepository behandlingRepository;
     private AktørTjeneste aktørTjeneste;
-    private SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste;
+    private MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private OmsorgenForDtoMapper omsorgenForDtoMapper;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
@@ -81,14 +81,14 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
     public PsbStønadstatistikkHendelseBygger(StønadstatistikkPeriodetidslinjebygger stønadstatistikkPeriodetidslinjebygger,
             BehandlingRepository behandlingRepository,
             AktørTjeneste aktørTjeneste,
-            SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste,
+            MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
             BehandlingVedtakRepository behandlingVedtakRepository,
             OmsorgenForDtoMapper omsorgenForDtoMapper,
             SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.stønadstatistikkPeriodetidslinjebygger = stønadstatistikkPeriodetidslinjebygger;
         this.behandlingRepository = behandlingRepository;
         this.aktørTjeneste = aktørTjeneste;
-        this.sykdomGrunnlagTjeneste = sykdomGrunnlagTjeneste;
+        this.medisinskGrunnlagTjeneste = medisinskGrunnlagTjeneste;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.omsorgenForDtoMapper = omsorgenForDtoMapper;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
@@ -106,7 +106,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
 
         final PersonIdent søker = aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getAktørId()).get();
         final PersonIdent pleietrengende= aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getPleietrengendeAktørId()).get();
-        final Optional<MedisinskGrunnlag> grunnlagOpt = sykdomGrunnlagTjeneste.hentGrunnlagHvisEksisterer(behandlingUuid);
+        final Optional<MedisinskGrunnlag> grunnlagOpt = medisinskGrunnlagTjeneste.hentGrunnlagHvisEksisterer(behandlingUuid);
         if (grunnlagOpt.isEmpty()) {
             final NavigableSet<DatoIntervallEntitet> søknadsperioder = søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId());
             if (!søknadsperioder.isEmpty()) {
