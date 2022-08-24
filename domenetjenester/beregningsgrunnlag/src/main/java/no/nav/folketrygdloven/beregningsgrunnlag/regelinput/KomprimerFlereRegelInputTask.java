@@ -45,20 +45,19 @@ public class KomprimerFlereRegelInputTask implements ProsessTaskHandler {
 
     public void doTask(ProsessTaskData prosessTaskData) {
         var maksAntalLTaskerRaw = prosessTaskData.getPropertyValue(MAX_ANTALL_REKURSIVE_TASKER);
-        var maksAntallTasker = prosessTaskData.getPropertyValue(MAX_ANTALL_REKURSIVE_TASKER) == null ? null : Integer.valueOf(maksAntalLTaskerRaw);
-        var antallRaderPrTask = Integer.valueOf(prosessTaskData.getPropertyValue(ANTALL_RADER_PR_TASK));
+        var maksAntallTasker = Integer.parseInt(maksAntalLTaskerRaw);
+        var antallRaderPrTask = Integer.parseInt(prosessTaskData.getPropertyValue(ANTALL_RADER_PR_TASK));
         var lopenr = prosessTaskData.getPropertyValue(LØPENR_TASK) == null ? 1 : Integer.parseInt(prosessTaskData.getPropertyValue(LØPENR_TASK));
-        kalkulusSystemRestKlient.komprimerFlereRegelinput(new KomprimerRegelInputRequest(null, antallRaderPrTask));
-        if ((maksAntallTasker == null || lopenr < maksAntallTasker)) {
-            startInputKomprimering(lopenr, maksAntallTasker);
+        var antallHashet = kalkulusSystemRestKlient.komprimerFlereRegelinput(new KomprimerRegelInputRequest(null, antallRaderPrTask));
+        if (antallHashet > 0 && (lopenr < maksAntallTasker)) {
+            startInputKomprimering(lopenr, maksAntallTasker, antallRaderPrTask);
         }
     }
 
-    private void startInputKomprimering(Integer lopenr, Integer maksAntallSaker) {
+    private void startInputKomprimering(Integer lopenr, Integer maksAntallSaker, Integer antallRaderPrTask) {
         ProsessTaskData nesteTask = ProsessTaskData.forProsessTask(KomprimerFlereRegelInputTask.class);
-        if (maksAntallSaker != null) {
-            nesteTask.setProperty(MAX_ANTALL_REKURSIVE_TASKER, maksAntallSaker.toString());
-        }
+        nesteTask.setProperty(ANTALL_RADER_PR_TASK, antallRaderPrTask.toString());
+        nesteTask.setProperty(MAX_ANTALL_REKURSIVE_TASKER, maksAntallSaker.toString());
         int nesteLopenr = lopenr + 1;
         nesteTask.setProperty(LØPENR_TASK, Integer.toString(nesteLopenr));
         prosessTaskTjeneste.lagre(nesteTask);
