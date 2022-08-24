@@ -56,6 +56,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
+import no.nav.folketrygdloven.beregningsgrunnlag.forvaltning.GjenopprettUgyldigeReferanserTask;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
@@ -672,6 +673,31 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         }
 
     }
+
+    @POST
+    @Path("/gjenopprett-referanser")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Operation(description = "Gjenoppretter referanser der revurdering har endret initiell versjon.", summary = ("Gjenoppretter referanser der revurdering har endret initiell versjon."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = DRIFT)
+    public void gjenopprettReferanser(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid OpprettManuellRevurdering opprettManuellRevurdering) {
+        var alleSaksnummer = Objects.requireNonNull(opprettManuellRevurdering.getSaksnumre(), "saksnumre");
+        var saknumre = new LinkedHashSet<>(Arrays.asList(alleSaksnummer.split("\\s+")));
+
+        int idx = 0;
+        for (var s : saknumre) {
+            var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(s), false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + s));
+            loggForvaltningTjeneste(fagsak, "/gjenopprett-referanser", "kjører gjenoppretting av referanser");
+
+            var taskData = ProsessTaskData.forProsessTask(GjenopprettUgyldigeReferanserTask.class);
+            taskData.setSaksnummer(fagsak.getSaksnummer().getVerdi());
+            taskData.setNesteKjøringEtter(LocalDateTime.now().plus(5000L * idx, ChronoUnit.MILLIS)); // sprer utover hvert 5 sek.
+            // lagrer direkte til ProsessTaskTjeneste så vi ikke går via FagsakProsessTask (siden den bestemmer rekkefølge). Får unik callId per task
+            prosessTaskRepository.lagre(taskData);
+            idx++;
+        }
+
+    }
+
 
     private void loggForvaltningTjeneste(Fagsak fagsak, String tjeneste, String begrunnelse) {
         /*
