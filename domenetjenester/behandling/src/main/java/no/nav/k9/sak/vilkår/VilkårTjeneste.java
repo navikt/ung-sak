@@ -48,6 +48,7 @@ public class VilkårTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private Instance<ForlengelseTjeneste> forlengelseTjenester;
+    private Instance<EndringIUttakPeriodeUtleder> endringIUttakPeriodeUtledere;
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private FagsakRepository fagsakRepository;
@@ -60,10 +61,12 @@ public class VilkårTjeneste {
     public VilkårTjeneste(BehandlingRepository behandlingRepository,
                           @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                           @Any Instance<ForlengelseTjeneste> forlengelseTjenester,
+                          @Any Instance<EndringIUttakPeriodeUtleder> endringIUttakPeriodeUtledere,
                           VilkårResultatRepository vilkårResultatRepository,
                           FagsakRepository fagsakRepository) {
         this.behandlingRepository = behandlingRepository;
         this.forlengelseTjenester = forlengelseTjenester;
+        this.endringIUttakPeriodeUtledere = endringIUttakPeriodeUtledere;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårsPerioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.fagsakRepository = fagsakRepository;
@@ -200,7 +203,10 @@ public class VilkårTjeneste {
                                                                         boolean skalIgnorereAvslåttePerioder,
                                                                         boolean skalIgnorereAvslagPåKompletthet,
                                                                         boolean skalIgnorerePerioderFraInfotrygd) {
-        var vilkårPeriodeFilter = new VilkårPeriodeFilter(false, ref, fagsakRepository, vilkårResultatRepository, getForlengelsetjeneste(ref.getFagsakYtelseType(), ref.getBehandlingType()));
+        var vilkårPeriodeFilter = new VilkårPeriodeFilter(ref, fagsakRepository,
+            vilkårResultatRepository,
+            getForlengelsetjeneste(ref.getFagsakYtelseType(), ref.getBehandlingType()),
+            EndringIUttakPeriodeUtleder.finnTjeneste(endringIUttakPeriodeUtledere, ref.getFagsakYtelseType()));
         if (skalIgnorereAvslåttePerioder && skalIgnorereAvslagPåKompletthet) {
             vilkårPeriodeFilter.ignorerAvslåttePerioderInkludertKompletthet();
         }
@@ -279,7 +285,7 @@ public class VilkårTjeneste {
             timeline = timeline.crossJoin(utfallTimeline.compress(), StandardCombinators::allValues);
         }
 
-        var samletUtfall = timeline.mapValue(v -> VilkårUtfallSamlet.fra(v))
+        var samletUtfall = timeline.mapValue(VilkårUtfallSamlet::fra)
             .filterValue(v -> v.getUnderliggendeVilkårUtfall().stream().map(VilkårUtfall::getVilkårType).collect(Collectors.toSet()).containsAll(alleForventedeVilkårTyper));
         log.info("forventendeVilkårTyper={}, maksPeriode={}, timelinePerVilkår={}, samletUtfall={}", alleForventedeVilkårTyper, maksPeriode, timelinePerVilkår, samletUtfall);
 
@@ -294,7 +300,7 @@ public class VilkårTjeneste {
             timeline = timeline.crossJoin(utfallTimeline.compress(), StandardCombinators::allValues);
         }
 
-        var resultat = timeline.mapValue(v -> VilkårUtfallSamlet.fra(v))
+        var resultat = timeline.mapValue(VilkårUtfallSamlet::fra)
             .filterValue(v -> v.getUnderliggendeVilkårUtfall().stream().map(VilkårUtfall::getVilkårType).collect(Collectors.toSet()).containsAll(minimumVilkår));
         return resultat;
     }

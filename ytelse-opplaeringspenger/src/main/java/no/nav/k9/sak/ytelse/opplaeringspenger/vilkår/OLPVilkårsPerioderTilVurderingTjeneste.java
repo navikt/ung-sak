@@ -19,8 +19,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtab
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.MaksSøktePeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleiepengerEndringIUttakPeriodeUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleiepengerVilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
 
@@ -44,7 +44,7 @@ public class OLPVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
                                                   EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-                                                  UttakTjeneste uttakTjeneste,
+                                                  @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER) PleiepengerEndringIUttakPeriodeUtleder endringIUttakPeriodeUtleder,
                                                   UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository) {
 
         super(vilkårUtleder
@@ -57,7 +57,7 @@ public class OLPVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
             , revurderingPerioderTjeneste
             , søknadsperiodeTjeneste
             , utsattBehandlingAvPeriodeRepository
-            , uttakTjeneste
+            , endringIUttakPeriodeUtleder
         );
     }
 

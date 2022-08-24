@@ -12,7 +12,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -51,16 +50,18 @@ public class BeregningStegTjeneste {
     }
 
     public void fortsettBeregningInkludertForlengelser(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
-        fortsettBeregning(ref, stegType, resultatCallback, vilkårPeriodeFilterProvider.getFilter(ref, true));
+        fortsettBeregning(ref, stegType, resultatCallback, vilkårPeriodeFilterProvider.getFilter(ref));
     }
 
     public void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
-        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref, true);
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
             periodeFilter.ignorerForlengelseperioder();
         fortsettBeregning(ref, stegType, resultatCallback, periodeFilter);
     }
 
-    private void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback, VilkårPeriodeFilter periodeFilter) {
+    private void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType,
+                                   FortsettBeregningResultatCallback resultatCallback,
+                                   VilkårPeriodeFilter periodeFilter) {
         periodeFilter.ignorerAvslåttePerioderInkludertKompletthet();
         var perioderTilVurdering = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
 

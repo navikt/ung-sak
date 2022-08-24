@@ -4,7 +4,6 @@ package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -19,7 +18,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.AvklarteAktiviteterDtoer;
@@ -93,7 +91,7 @@ public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<Avkla
 
     private void validerOppdatering(LocalDate stp,
                                     BehandlingReferanse ref) {
-        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref, false);
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
         var perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, periodeFilter);
         var erTilVurdering = perioderSomSkalKunneVurderes.stream().anyMatch(p -> p.getFomDato().equals(stp));
         if (!erTilVurdering) {

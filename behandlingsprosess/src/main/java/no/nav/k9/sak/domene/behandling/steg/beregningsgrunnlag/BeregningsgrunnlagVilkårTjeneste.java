@@ -71,7 +71,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
 
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         for (var periode : forlengelseperioder) {
-            var eksisteredeVurdering = vedtattUtfallPåVilkåret.finnPeriodeForSkjæringstidspunkt(periode.getPeriode().getFomDato());
+            var eksisteredeVurdering = vedtattUtfallPåVilkåret.finnPeriodeForSkjæringstidspunkt(periode.getSkjæringstidspunkt());
             var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getPeriode())
                 .forlengelseAv(eksisteredeVurdering);
             vilkårBuilder.leggTil(vilkårPeriodeBuilder);
