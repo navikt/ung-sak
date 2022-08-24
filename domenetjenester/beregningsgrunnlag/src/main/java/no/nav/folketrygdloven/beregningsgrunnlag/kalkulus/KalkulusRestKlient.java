@@ -231,10 +231,10 @@ public class KalkulusRestKlient {
         }
     }
 
-    public void komprimerFlereRegelinput(KomprimerRegelInputRequest request) {
+    public int komprimerFlereRegelinput(KomprimerRegelInputRequest request) {
         var endpoint = komprimerFlereRegelinput;
         try {
-            utfør(endpoint, kalkulusJsonWriter.writeValueAsString(request));
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), JsonMapper.getMapper().readerFor(Integer.class));
         } catch (IOException e) {
             throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
