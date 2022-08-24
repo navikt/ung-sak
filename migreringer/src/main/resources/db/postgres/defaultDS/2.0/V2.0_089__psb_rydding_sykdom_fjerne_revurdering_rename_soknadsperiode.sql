@@ -1,0 +1,3 @@
+alter index if exists sykdom_soekt_periode_pkey rename to medisinsk_grunnlagsdata_soekt_periode_pkey;
+alter table if exists sykdom_soekt_periode rename constraint fk_sykdom_soekt_periode_01 to fk_medisinsk_grunnlagsdata_soekt_periode_01;
+alter table if exists SYKDOM_SOEKT_PERIODE rename to MEDISINSK_GRUNNLAGSDATA_SOEKT_PERIODE;

@@ -10,4 +10,7 @@ public interface OverstyringAksjonspunkt {
     boolean getErVilkarOk();
 
     Periode getPeriode();
+
+    boolean skalAvbrytes();
+
 }

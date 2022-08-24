@@ -17,7 +17,7 @@ import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjenest
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
@@ -38,7 +38,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
     public PSBVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) VilkårUtleder vilkårUtleder,
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   BehandlingRepository behandlingRepository,
-                                                  SykdomGrunnlagTjeneste sykdomGrunnlagTjeneste,
+                                                  MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
                                                   ErEndringPåEtablertTilsynTjeneste etablertTilsynTjeneste,
                                                   EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                                   BasisPersonopplysningTjeneste basisPersonopplysningsTjeneste,
@@ -54,7 +54,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
                 VilkårType.MEDISINSKEVILKÅR_18_ÅR, PleietrengendeAlderPeriode.overEllerLik18(basisPersonopplysningsTjeneste, behandlingRepository, personinfoAdapter, søknadsperiodeTjeneste, true))
             , vilkårResultatRepository
             , behandlingRepository
-            , sykdomGrunnlagTjeneste
+            , medisinskGrunnlagTjeneste
             , etablertTilsynTjeneste
             , endringUnntakEtablertTilsynTjeneste
             , revurderingPerioderTjeneste

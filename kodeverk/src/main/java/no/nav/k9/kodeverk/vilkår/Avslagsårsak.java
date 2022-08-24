@@ -29,6 +29,7 @@ public enum Avslagsårsak implements Kodeverdi {
             Map.of(FagsakYtelseType.FP, "21-3,21-7",
                 FagsakYtelseType.OMP, "21-3, 9-5",
                 FagsakYtelseType.PPN, "21-3, 9-13",
+                FagsakYtelseType.OPPLÆRINGSPENGER, "21-3, 9-14",
                 FagsakYtelseType.PSB, "21-3, 9-10")),
     SØKER_ER_IKKE_MEDLEM("1020", "Søker er ikke medlem",
             Map.of(FagsakYtelseType.FP, "14-2",
@@ -100,6 +101,10 @@ public enum Avslagsårsak implements Kodeverdi {
         Map.of(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "9-13")),
     IKKE_I_LIVETS_SLUTTFASE("1081", "Ikke i livets sluttfase",
         Map.of(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "9-13")),
+    IKKE_NØDVENDIG("1101", "Ikke nødvendig for omsorgen av pleietrengende",
+        Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "9-14")),
+    IKKE_GODKJENT_INSTITUSJON("1102", "Institusjonen er ikke godkjent",
+        Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "9-14")),
 
     SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",
             Map.of(FagsakYtelseType.PSB, "9-3 1. ledd")),

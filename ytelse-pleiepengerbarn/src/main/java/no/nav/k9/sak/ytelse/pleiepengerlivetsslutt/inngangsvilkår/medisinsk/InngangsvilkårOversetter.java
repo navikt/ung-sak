@@ -5,9 +5,9 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlagsdata;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.MedisinskGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeTidslinjeUtils;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårGrunnlag;
 
 public class InngangsvilkårOversetter {
@@ -16,7 +16,7 @@ public class InngangsvilkårOversetter {
         var grunnlag = medisinskGrunnlag.getGrunnlagsdata();
         final var vilkårsGrunnlag = new MedisinskVilkårGrunnlag(periode.getFomDato(), periode.getTomDato());
 
-        var tidslinjeHarDokumentertLivetsSluttfase = SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.LIVETS_SLUTTFASE).filterValue(v -> v.getResultat() == Resultat.OPPFYLT).mapValue(v -> (Void) null);
+        var tidslinjeHarDokumentertLivetsSluttfase = PleietrengendeTidslinjeUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.LIVETS_SLUTTFASE).filterValue(v -> v.getResultat() == Resultat.OPPFYLT).mapValue(v -> (Void) null);
         var tidslinjeInnleggelse = mapRelevanteInnleggelsesperioder(grunnlag);
 
         vilkårsGrunnlag

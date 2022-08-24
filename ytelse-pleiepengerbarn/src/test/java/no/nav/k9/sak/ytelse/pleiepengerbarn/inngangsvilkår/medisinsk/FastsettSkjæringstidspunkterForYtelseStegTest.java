@@ -82,7 +82,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -123,7 +123,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -167,7 +167,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
             .medUtfall(Utfall.IKKE_OPPFYLT));
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -207,7 +207,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -246,7 +246,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -284,7 +284,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -326,7 +326,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
