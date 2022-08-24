@@ -19,7 +19,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
@@ -40,17 +39,19 @@ public class KalkulatorInputTjeneste {
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
     private VilkårResultatRepository vilkårResultatRepository;
+    private Instance<SigruninntekterForBeregningFilter> sigrunInntektFilter;
 
     @Inject
     public KalkulatorInputTjeneste(@Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                    @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
                                    @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
-                                   VilkårResultatRepository vilkårResultatRepository
-    ) {
+                                   VilkårResultatRepository vilkårResultatRepository,
+                                   @Any Instance<SigruninntekterForBeregningFilter> sigrunInntektFilter) {
         this.opptjeningForBeregningTjeneste = Objects.requireNonNull(opptjeningForBeregningTjeneste, "opptjeningForBeregningTjeneste");
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.sigrunInntektFilter = sigrunInntektFilter;
     }
 
     protected KalkulatorInputTjeneste() {
@@ -122,8 +123,16 @@ public class KalkulatorInputTjeneste {
         OpptjeningForBeregningTjeneste tjeneste = finnOpptjeningForBeregningTjeneste(referanse);
         var imTjeneste = finnInntektsmeldingForBeregningTjeneste(referanse);
 
+        var sigrunFilter = SigruninntekterForBeregningFilter.finnTjeneste(sigrunInntektFilter, referanse.getFagsakYtelseType());
+
         var oppgittOpptjening = tjeneste.finnOppgittOpptjening(referanse, iayGrunnlag, stp).orElse(null);
-        var grunnlagDto = mapIAYTilKalkulus(referanse, vilkårsperiode, iayGrunnlag, sakInntektsmeldinger, oppgittOpptjening, imTjeneste);
+        var grunnlagDto = mapIAYTilKalkulus(referanse,
+            vilkårsperiode,
+            iayGrunnlag,
+            sakInntektsmeldinger,
+            oppgittOpptjening,
+            imTjeneste,
+            sigrunFilter);
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode);
 
         if (opptjeningAktiviteter.isEmpty() && !erInaktiv(vilkårsMerknad)) {
@@ -132,7 +141,7 @@ public class KalkulatorInputTjeneste {
 
         var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter, vilkårsMerknad);
 
-        KalkulatorInputDto kalkulatorInputDto = new KalkulatorInputDto(grunnlagDto, opptjeningAktiviteterDto, stp);
+        var kalkulatorInputDto = new KalkulatorInputDto(grunnlagDto, opptjeningAktiviteterDto, stp);
 
         kalkulatorInputDto.medYtelsespesifiktGrunnlag(ytelseGrunnlag);
 
@@ -156,8 +165,14 @@ public class KalkulatorInputTjeneste {
                                                                InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag,
                                                                Collection<Inntektsmelding> inntektsmeldinger,
                                                                OppgittOpptjening oppgittOpptjening,
-                                                               InntektsmeldingerRelevantForBeregning imTjeneste) {
-        return new TilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, inntektsmeldinger, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening, imTjeneste, referanse);
+                                                               InntektsmeldingerRelevantForBeregning imTjeneste,
+                                                               SigruninntekterForBeregningFilter sigrunFilter) {
+        return new TilKalkulusMapper(imTjeneste, sigrunFilter).mapTilDto(inntektArbeidYtelseGrunnlag,
+            inntektsmeldinger,
+            referanse.getAktørId(),
+            vilkårsperiode,
+            oppgittOpptjening,
+            referanse);
     }
 
 
