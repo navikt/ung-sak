@@ -97,6 +97,9 @@ public class AleneomsorgVilkårsvurderingSteg implements BehandlingSteg {
 
         Vilkår vilkår = vilkårene.getVilkår(VILKÅRET).orElseThrow();
         List<VilkårPeriode> ikkeVurdertePerioder = vilkår.getPerioder().stream().filter(v -> v.getUtfall() == Utfall.IKKE_VURDERT).toList();
+        if (ikkeVurdertePerioder.isEmpty()){
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
         LocalDateTimeline<AleneomsorgVilkårGrunnlag> grunnlagsdata = aleneomsorgTjeneste.oversettSystemdataTilRegelModellGrunnlag(kontekst.getBehandlingId(), ikkeVurdertePerioder);
         List<VilkårData> vilkårData = aleneomsorgTjeneste.vurderPerioder(grunnlagsdata);
         Vilkårene oppdaterteVilkår = oppdaterVilkårene(vilkårene, vilkårData);
