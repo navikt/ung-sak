@@ -178,20 +178,8 @@ public class ÅrskvantumTjeneste {
             : omsluttende(vilkårsperioder);
         PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), informasjonsperiode).orElseThrow();
         PersonopplysningEntitet søkerPersonopplysninger = personopplysninger.getSøker();
-        var barna = personopplysninger.getSøkersRelasjoner()
-            .stream()
-            .filter(relasjon -> relasjon.getRelasjonsrolle() == RelasjonsRolleType.BARN)
-            .filter(relasjon -> !tpsTjeneste.hentFnrForAktør(relasjon.getTilAktørId()).erFdatNummer())
-            .map(barnRelasjon -> personopplysninger.getPersonopplysning(barnRelasjon.getTilAktørId()))
-            .map(barnPersonopplysninger -> mapBarn(personopplysninger, søkerPersonopplysninger, barnPersonopplysninger))
-            .toList();
-        var fosterbarna = fosterbarnRepository.hentHvisEksisterer(behandling.getId())
-            .map(grunnlag -> grunnlag.getFosterbarna().getFosterbarn().stream()
-                .map(fosterbarn -> innhentPersonopplysningForBarn(fosterbarn.getAktørId()))
-                .map(personinfo -> mapFosterbarn(personinfo, behandling.getFagsak().getPeriode()))
-                .collect(Collectors.toSet())
-            ).orElse(Set.of());
-        var alleBarna = Stream.concat(barna.stream(), fosterbarna.stream()).collect(Collectors.toSet());
+
+        var alleBarna = hentOgMapBarn(personopplysninger, behandling);
 
         return new ÅrskvantumGrunnlag(ref.getSaksnummer().getVerdi(),
             ref.getBehandlingUuid().toString(),
@@ -240,8 +228,11 @@ public class ÅrskvantumTjeneste {
         return årskvantumKlient.hentUtbetalingGrunnlag(inputTilBeregning);
     }
 
-    public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, LukketPeriode periode) {
-        return årskvantumKlient.hentRammevedtak(personIdent, periode);
+    public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, LukketPeriode periode, Behandling behandling) {
+        var ref = BehandlingReferanse.fra(behandling);
+        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom())).orElseThrow();
+        var alleBarna = hentOgMapBarn(personopplysninger, behandling).stream().map(barn -> barn.getPersonIdent()).toList();
+        return årskvantumKlient.hentRammevedtak(personIdent, alleBarna, periode);
     }
 
     public ÅrskvantumUttrekk hentUttrekk() {
@@ -371,6 +362,23 @@ public class ÅrskvantumTjeneste {
             return ArbeidsforholdStatus.AVSLUTTET; // TODO: sett ikke eksisterende
         }
         return ArbeidsforholdStatus.AKTIVT;
+    }
+
+    private Set<Barn> hentOgMapBarn(PersonopplysningerAggregat personopplysninger, Behandling behandling) {
+        var barna = personopplysninger.getSøkersRelasjoner()
+            .stream()
+            .filter(relasjon -> relasjon.getRelasjonsrolle() == RelasjonsRolleType.BARN)
+            .filter(relasjon -> !tpsTjeneste.hentFnrForAktør(relasjon.getTilAktørId()).erFdatNummer())
+            .map(barnRelasjon -> personopplysninger.getPersonopplysning(barnRelasjon.getTilAktørId()))
+            .map(barnPersonopplysninger -> mapBarn(personopplysninger, personopplysninger.getSøker(), barnPersonopplysninger))
+            .toList();
+        var fosterbarna = fosterbarnRepository.hentHvisEksisterer(behandling.getId())
+            .map(grunnlag -> grunnlag.getFosterbarna().getFosterbarn().stream()
+                .map(fosterbarn -> innhentPersonopplysningForBarn(fosterbarn.getAktørId()))
+                .map(personinfo -> mapFosterbarn(personinfo, behandling.getFagsak().getPeriode()))
+                .collect(Collectors.toSet())
+            ).orElse(Set.of());
+        return Stream.concat(barna.stream(), fosterbarna.stream()).collect(Collectors.toSet());
     }
 
     private Personinfo innhentPersonopplysningForBarn(AktørId aktørId) {
