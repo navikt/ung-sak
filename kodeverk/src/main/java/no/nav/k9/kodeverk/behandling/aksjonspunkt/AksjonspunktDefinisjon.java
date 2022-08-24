@@ -307,7 +307,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, ENTRINN, FORBLI, null),
     VURDER_ALDERSVILKÅR_BARN(AksjonspunktKodeDefinisjon.VURDER_ALDERSVILKÅR_BARN,
         AksjonspunktType.MANUELL, "Vurder aldersvilkår barn", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_ALDERSVILKÅR_BARN, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.PUNKT_FOR_ALDERSVILKÅR_BARN, ENTRINN, FORBLI, null),
+        UTEN_VILKÅR, SkjermlenkeType.PUNKT_FOR_ALDERSVILKÅR_BARN, TOTRINN, FORBLI, null),
     OVERSTYR_BEREGNING_INPUT(AksjonspunktKodeDefinisjon.OVERSTYR_BEREGNING_INPUT,
         AksjonspunktType.MANUELL, "Overstyr input beregning", BehandlingStatus.UTREDES, BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.OVERSTYR_INPUT_BEREGNING, TOTRINN),
