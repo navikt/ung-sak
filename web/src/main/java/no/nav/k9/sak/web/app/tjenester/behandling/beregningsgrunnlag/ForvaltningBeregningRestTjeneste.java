@@ -11,9 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -28,8 +26,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -56,7 +52,6 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -71,14 +66,12 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.Beregningsgrunnla
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRestTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 
 @ApplicationScoped
 @Transactional
@@ -99,9 +92,7 @@ public class ForvaltningBeregningRestTjeneste {
     private BeregningsgrunnlagYtelseKalkulator forvaltningBeregning;
     private AksjonspunktRepository aksjonspunktRepository;
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
-    private KalkulusRestKlient kalkulusRestKlient;
     private KalkulusRestKlient kalkulusSystemRestKlient;
-    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
 
 
@@ -116,10 +107,9 @@ public class ForvaltningBeregningRestTjeneste {
                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                             FagsakTjeneste fagsakTjeneste, AksjonspunktRepository aksjonspunktRepository,
                                             BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
-                                            KalkulusRestKlient kalkulusRestKlient,
                                             SystemUserOidcRestClient systemUserOidcRestClient,
                                             @KonfigVerdi(value = "ftkalkulus.url") URI endpoint,
-                                            @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste, BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
+                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
         this.forvaltningBeregning = forvaltningBeregning;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
@@ -128,10 +118,8 @@ public class ForvaltningBeregningRestTjeneste {
         this.fagsakTjeneste = fagsakTjeneste;
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
-        this.kalkulusRestKlient = kalkulusRestKlient;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.kalkulusSystemRestKlient = new KalkulusRestKlient(systemUserOidcRestClient, endpoint);
-        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
     @GET
@@ -253,37 +241,19 @@ public class ForvaltningBeregningRestTjeneste {
         for (var s : saknumre) {
             var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(s), false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + s));
 
-            var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(this.vilkårsPerioderTilVurderingTjeneste, fagsak.getYtelseType(), BehandlingType.REVURDERING);
-
             var sisteRevurdering = behandlingRepository.hentSisteBehandlingAvBehandlingTypeForFagsakId(fagsak.getId(), BehandlingType.REVURDERING);
             sisteRevurdering.ifPresent(behandling -> logger.info("Fant siste behandling for sak " + s + " med id " + behandling.getId()));
             var taskerForFagsak = ferdigeGjenopprettinger.stream().filter(it -> it.getFagsakId().equals(fagsak.getId())).toList();
             logger.info("Fant følgende tasker for fagsak: " + taskerForFagsak);
 
-            if (sisteRevurdering.isPresent() && ferdigeGjenopprettinger.stream().noneMatch(t -> sisteRevurdering.get().getId().equals(Long.valueOf(t.getBehandlingId())))) {
-                var ikkeVurdert = finnIkkeVurdertePerioder(perioderTilVurderingTjeneste, sisteRevurdering);
-                logger.info("Ikke vurderte peridoer: " + ikkeVurdert);
-
-
-                var originalPerioderTilVurdering = finnVurdertePerioderIOriginalBehandling(perioderTilVurderingTjeneste, sisteRevurdering);
-
-                logger.info("Originale perioder til vurdering " + originalPerioderTilVurdering);
-
-                var ikkeVurdertIRevurderingMenVurdertIOriginal = ikkeVurdert.stream().filter(originalPerioderTilVurdering::contains).toList();
-                var initiellVersjonRevurdering = beregningPerioderGrunnlagRepository.getInitiellVersjon(sisteRevurdering.get().getId());
-                var uvurderteInitiellePerioder = initiellVersjonRevurdering.stream().flatMap(it -> it.getGrunnlagPerioder().stream())
-                    .filter(p -> ikkeVurdertIRevurderingMenVurdertIOriginal.stream().anyMatch(it -> it.getFomDato().equals(p.getSkjæringstidspunkt())))
-                    .toList();
-                logger.info("Uvurderte initielle referanser: " + uvurderteInitiellePerioder.stream().map(BeregningsgrunnlagPeriode::getEksternReferanse).toList());
-
-                var originaltGrunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(sisteRevurdering.get().getId());
-
-                logger.info("Originale referanser: " + originaltGrunnlag.stream().flatMap(it -> it.getGrunnlagPerioder().stream())
-                    .map(BeregningsgrunnlagPeriode::getEksternReferanse).toList());
-
-                boolean harUgyldigInitiellReferanse = harUgyldigInitiellReferanse(uvurderteInitiellePerioder, originaltGrunnlag);
-
-
+            if (sisteRevurdering.isPresent() && taskerForFagsak.stream().noneMatch(t -> sisteRevurdering.get().getId().equals(Long.valueOf(t.getBehandlingId())))) {
+                var revurderingId = sisteRevurdering.get().getId();
+                var initiellePerioderRevurdering = beregningPerioderGrunnlagRepository.getInitiellVersjon(revurderingId).stream()
+                    .flatMap(gr -> gr.getGrunnlagPerioder().stream()).toList();
+                var perioderOriginalBehandling = beregningPerioderGrunnlagRepository.hentGrunnlag(sisteRevurdering.get().getOriginalBehandlingId().orElseThrow()).stream()
+                    .flatMap(gr -> gr.getGrunnlagPerioder().stream()).toList();
+                boolean harUgyldigInitiellReferanse = initiellePerioderRevurdering.stream()
+                    .anyMatch(it -> !finnMathcendeReferanse(perioderOriginalBehandling, it).equals(it.getEksternReferanse()));
                 if (harUgyldigInitiellReferanse) {
                     result.append(s).append("\n");
                 }
@@ -294,25 +264,8 @@ public class ForvaltningBeregningRestTjeneste {
 
     }
 
-    private boolean harUgyldigInitiellReferanse(List<BeregningsgrunnlagPeriode> uvurderteInitiellePerioder, Optional<BeregningsgrunnlagPerioderGrunnlag> originaltGrunnlag) {
-        return originaltGrunnlag.stream()
-            .flatMap(gr -> gr.getGrunnlagPerioder().stream())
-            .anyMatch(it -> !finnInitiellReferanse(uvurderteInitiellePerioder, it).equals(it.getEksternReferanse()));
-    }
-
-    private NavigableSet<DatoIntervallEntitet> finnVurdertePerioderIOriginalBehandling(VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, Optional<Behandling> sisteRevurdering) {
-        var originalBehandlingId = sisteRevurdering.get().getOriginalBehandlingId().orElseThrow();
-        return perioderTilVurderingTjeneste.utled(originalBehandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-    }
-
-    private List<DatoIntervallEntitet> finnIkkeVurdertePerioder(VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, Optional<Behandling> sisteRevurdering) {
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(sisteRevurdering.get().getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        var fullstendigPeriode = perioderTilVurderingTjeneste.utledFullstendigePerioder(sisteRevurdering.get().getId());
-        return fullstendigPeriode.stream().filter(p -> !perioderTilVurdering.contains(p)).toList();
-    }
-
-    private UUID finnInitiellReferanse(List<BeregningsgrunnlagPeriode> uvurderteInitiellePerioder, BeregningsgrunnlagPeriode it) {
-        return uvurderteInitiellePerioder.stream()
+    private UUID finnMathcendeReferanse(List<BeregningsgrunnlagPeriode> perioder, BeregningsgrunnlagPeriode it) {
+        return perioder.stream()
             .filter(it2 -> it2.getSkjæringstidspunkt().equals(it.getSkjæringstidspunkt()))
             .findFirst().orElseThrow().getEksternReferanse();
     }
