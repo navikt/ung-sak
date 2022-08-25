@@ -5,14 +5,7 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -40,21 +33,15 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.MessageBodyReader;
-import jakarta.ws.rs.ext.Provider;
 import no.nav.folketrygdloven.beregningsgrunnlag.forvaltning.GjenopprettUgyldigeReferanserForBehandlingTask;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelseKalkulator;
@@ -65,8 +52,6 @@ import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjo
 import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktRequest;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -86,7 +71,6 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.Beregningsgrunnla
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -253,22 +237,18 @@ public class ForvaltningBeregningRestTjeneste {
     @POST
     @Path("/gjenopprett-referanser-feil")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     @Operation(description = "Gjenoppretter referanser der revurdering har endret initiell versjon.",
         summary = ("Gjenoppretter referanser der revurdering har endret initiell versjon."),
-        tags = "beregning",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer saksnummer",
-                content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = List.class), schema = @Schema(implementation = SaksnummerDto.class)), mediaType = MediaType.APPLICATION_JSON))
-        })
+        tags = "beregning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public Response finnFeilVedGjenoppretting(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid Saksliste saksliste) {
+    public Response finnFeilVedGjenoppretting(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid ForvaltningMidlertidigDriftRestTjeneste.OpprettManuellRevurdering saksliste) {
         var alleSaksnummer = Objects.requireNonNull(saksliste.getSaksnumre(), "saksnumre");
         var saknumre = new LinkedHashSet<>(Arrays.asList(alleSaksnummer.split("\\s+")));
 
         var ferdigeGjenopprettinger = prosessTaskRepository.finnAlle(GjenopprettUgyldigeReferanserForBehandlingTask.TASKTYPE, ProsessTaskStatus.FERDIG);
 
-        var result = new ArrayList<SaksnummerDto>();
+        StringBuilder result = new StringBuilder();
 
         for (var s : saknumre) {
             var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(s), false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + s));
@@ -290,12 +270,12 @@ public class ForvaltningBeregningRestTjeneste {
 
 
                 if (harUgyldigInitiellReferanse) {
-                    result.add(new SaksnummerDto(new Saksnummer(s)));
+                    result.append(s).append("\n");
                 }
             }
         }
 
-        return Response.ok(result).build();
+        return Response.ok(result.toString()).build();
 
     }
 
@@ -346,56 +326,5 @@ public class ForvaltningBeregningRestTjeneste {
         return !vilkårPeriode.overlapper(fagsakPeriode);
     }
 
-
-    public static class Saksliste implements AbacDto {
-
-        @NotNull
-        @Pattern(regexp = "^[\\p{Alnum}\\s]+$", message = "OpprettManuellRevurdering [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-        private String saksnumre;
-
-        public Saksliste() {
-            // empty ctor
-        }
-
-        public Saksliste(@NotNull String saksnumre) {
-            this.saksnumre = saksnumre;
-        }
-
-        @NotNull
-        public String getSaksnumre() {
-            return saksnumre;
-        }
-
-        @Override
-        public AbacDataAttributter abacAttributter() {
-            return AbacDataAttributter.opprett();
-        }
-
-        @Provider
-        public static class SakslisteMessageBodyReader implements MessageBodyReader<Saksliste> {
-
-            @Override
-            public boolean isReadable(Class<?> type, Type genericType,
-                                      Annotation[] annotations, MediaType mediaType) {
-                return (type == ForvaltningMidlertidigDriftRestTjeneste.OpprettManuellRevurdering.class);
-            }
-
-            @Override
-            public Saksliste readFrom(Class<Saksliste> type, Type genericType,
-                                      Annotation[] annotations, MediaType mediaType,
-                                      MultivaluedMap<String, String> httpHeaders,
-                                      InputStream inputStream)
-                throws IOException, WebApplicationException {
-                var sb = new StringBuilder(200);
-                try (BufferedReader br = new BufferedReader(
-                    new InputStreamReader(inputStream))) {
-                    sb.append(br.readLine()).append('\n');
-                }
-
-                return new Saksliste(sb.toString());
-
-            }
-        }
-    }
 
 }
