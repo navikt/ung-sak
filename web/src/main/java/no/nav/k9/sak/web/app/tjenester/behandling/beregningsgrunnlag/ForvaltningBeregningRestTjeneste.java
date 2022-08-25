@@ -256,16 +256,31 @@ public class ForvaltningBeregningRestTjeneste {
             var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(this.vilkårsPerioderTilVurderingTjeneste, fagsak.getYtelseType(), BehandlingType.REVURDERING);
 
             var sisteRevurdering = behandlingRepository.hentSisteBehandlingAvBehandlingTypeForFagsakId(fagsak.getId(), BehandlingType.REVURDERING);
+            sisteRevurdering.ifPresent(behandling -> logger.info("Fant siste behandling for sak " + s + " med id " + behandling.getId()));
+            var taskerForFagsak = ferdigeGjenopprettinger.stream().filter(it -> it.getFagsakId().equals(fagsak.getId())).toList();
+            logger.info("Fant følgende tasker for fagsak: " + taskerForFagsak);
 
             if (sisteRevurdering.isPresent() && ferdigeGjenopprettinger.stream().noneMatch(t -> sisteRevurdering.get().getId().equals(Long.valueOf(t.getBehandlingId())))) {
                 var ikkeVurdert = finnIkkeVurdertePerioder(perioderTilVurderingTjeneste, sisteRevurdering);
+                logger.info("Ikke vurderte peridoer: " + ikkeVurdert);
+
+
                 var originalPerioderTilVurdering = finnVurdertePerioderIOriginalBehandling(perioderTilVurderingTjeneste, sisteRevurdering);
+
+                logger.info("Originale perioder til vurdering " + originalPerioderTilVurdering);
+
                 var ikkeVurdertIRevurderingMenVurdertIOriginal = ikkeVurdert.stream().filter(originalPerioderTilVurdering::contains).toList();
                 var initiellVersjonRevurdering = beregningPerioderGrunnlagRepository.getInitiellVersjon(sisteRevurdering.get().getId());
                 var uvurderteInitiellePerioder = initiellVersjonRevurdering.stream().flatMap(it -> it.getGrunnlagPerioder().stream())
                     .filter(p -> ikkeVurdertIRevurderingMenVurdertIOriginal.stream().anyMatch(it -> it.getFomDato().equals(p.getSkjæringstidspunkt())))
                     .toList();
+                logger.info("Uvurderte initielle referanser: " + uvurderteInitiellePerioder.stream().map(BeregningsgrunnlagPeriode::getEksternReferanse).toList());
+
                 var originaltGrunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(sisteRevurdering.get().getId());
+
+                logger.info("Originale referanser: " + originaltGrunnlag.stream().flatMap(it -> it.getGrunnlagPerioder().stream())
+                    .map(BeregningsgrunnlagPeriode::getEksternReferanse).toList());
+
                 boolean harUgyldigInitiellReferanse = harUgyldigInitiellReferanse(uvurderteInitiellePerioder, originaltGrunnlag);
 
 
