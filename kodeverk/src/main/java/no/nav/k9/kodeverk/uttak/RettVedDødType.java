@@ -1,19 +1,24 @@
 package no.nav.k9.kodeverk.uttak;
 
-import com.fasterxml.jackson.annotation.*;
-import no.nav.k9.kodeverk.api.Kodeverdi;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum RettVedDødType implements Kodeverdi {
 
     RETT_6_UKER("RETT_6_UKER", "Rett til 6 uker"),
-    RETT_12_UKER("RETT_12_UKER", "Rett til 12 uker");
+    RETT_12_UKER("RETT_12_UKER", "Rett til 3 måneder");
 
     private static final Map<String, RettVedDødType> KODER = new LinkedHashMap<>();
 

@@ -65,7 +65,7 @@ public class AvklarAldersvilkårBarn implements AksjonspunktOppdaterer<AvklarAld
 
     private Utfall hentUtfall(LocalDateTimeline<VilkårPeriode> originalVilkårTidslinje) {
         List<Utfall> utfallene = originalVilkårTidslinje.stream().map(v -> v.getValue().getGjeldendeUtfall()).distinct().toList();
-        if (utfallene.size() != 1){
+        if (utfallene.size() != 1) {
             throw new IllegalArgumentException("Forventet kun en type utfall, men fikk " + utfallene.size());
         }
         return utfallene.get(0);
@@ -81,12 +81,16 @@ public class AvklarAldersvilkårBarn implements AksjonspunktOppdaterer<AvklarAld
     private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, Utfall orginaltUtfall, Utfall nyVerdi, String begrunnelse) {
         HistorikkEndretFeltType historikkEndretFeltType = HistorikkEndretFeltType.ALDERSVILKÅR_BARN;
         historikkAdapter.tekstBuilder()
-            .medEndretFelt(historikkEndretFeltType, orginaltUtfall, nyVerdi);
+            .medEndretFelt(historikkEndretFeltType, håndterIkkeRelevanteTyperForHistorikkinnslag(orginaltUtfall), håndterIkkeRelevanteTyperForHistorikkinnslag(nyVerdi));
 
         boolean erBegrunnelseForAksjonspunktEndret = param.erBegrunnelseEndret();
         historikkAdapter.tekstBuilder()
             .medBegrunnelse(begrunnelse, erBegrunnelseForAksjonspunktEndret)
             .medSkjermlenke(skjermlenkeType);
+    }
+
+    private static Utfall håndterIkkeRelevanteTyperForHistorikkinnslag(Utfall utfall) {
+        return utfall == Utfall.IKKE_VURDERT || utfall == Utfall.UDEFINERT ? null : utfall;
     }
 
 }
