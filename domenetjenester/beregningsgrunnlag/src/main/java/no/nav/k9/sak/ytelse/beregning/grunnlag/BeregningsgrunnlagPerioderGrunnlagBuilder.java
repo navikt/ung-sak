@@ -138,4 +138,12 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
         return this;
     }
 
+    BeregningsgrunnlagPerioderGrunnlagBuilder leggTilNæringsinntektPeriode(NæringsinntektPeriode periode) {
+        validerState();
+        Objects.requireNonNull(periode);
+        kladd.deaktiverNæringsinntektPeriode(periode.getSkjæringstidspunkt());
+        kladd.leggTil(periode);
+        return this;
+    }
+
 }
