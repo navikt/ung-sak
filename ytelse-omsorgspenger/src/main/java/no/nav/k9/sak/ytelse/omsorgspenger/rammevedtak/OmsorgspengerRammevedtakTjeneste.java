@@ -34,7 +34,7 @@ public class OmsorgspengerRammevedtakTjeneste {
         PersonIdent personIdent = aktørTjeneste.hentPersonIdentForAktørId(behandling.getAktørId()).orElseThrow();
 
         DatoIntervallEntitet fagsakperiode = behandling.getFagsak().getPeriode();
-        return årskvantumTjeneste.hentRammevedtak(personIdent, new LukketPeriode(fagsakperiode.getFomDato(), fagsakperiode.getTomDato()));
+        return årskvantumTjeneste.hentRammevedtak(personIdent, new LukketPeriode(fagsakperiode.getFomDato(), fagsakperiode.getTomDato()), behandling);
     }
 
 }
