@@ -231,8 +231,8 @@ public class ÅrskvantumTjeneste {
     public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, LukketPeriode periode, Behandling behandling) {
         var ref = BehandlingReferanse.fra(behandling);
         PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom())).orElseThrow();
-        var alleBarna = hentOgMapBarn(personopplysninger, behandling).stream().map(barn -> barn.getPersonIdent()).toList();
-        return årskvantumKlient.hentRammevedtak(personIdent, alleBarna, periode);
+        var alleBarnasFnr = hentOgMapBarn(personopplysninger, behandling).stream().map(barn -> PersonIdent.fra(barn.getPersonIdent())).toList();
+        return årskvantumKlient.hentRammevedtak(personIdent, alleBarnasFnr, periode);
     }
 
     public ÅrskvantumUttrekk hentUttrekk() {

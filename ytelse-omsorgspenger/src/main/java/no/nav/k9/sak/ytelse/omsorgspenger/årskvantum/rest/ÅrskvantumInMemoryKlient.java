@@ -73,7 +73,7 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, List<String> barn, LukketPeriode periode) {
+    public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, List<PersonIdent> barnFnr, LukketPeriode periode) {
         return null;
     }
 

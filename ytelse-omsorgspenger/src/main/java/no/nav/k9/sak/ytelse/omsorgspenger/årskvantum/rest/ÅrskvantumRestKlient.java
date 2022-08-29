@@ -187,9 +187,10 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, List<String> barn, LukketPeriode periode) {
+    public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, List<PersonIdent> barnFnr, LukketPeriode periode) {
         try {
-            var request = new RammevedtakRequest(personIdent.getIdent(), barn, periode);
+            var barnasFnr = barnFnr.stream().map(barn -> barn.getIdent()).toList();
+            var request = new RammevedtakRequest(personIdent.getIdent(), barnasFnr, periode);
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/hentRammevedtak");
             return restKlient.post(endpoint, request, RammevedtakResponse.class);
         } catch (Exception e) {
