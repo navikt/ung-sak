@@ -19,7 +19,7 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "BeregningsgrunnlagPeriode")
 @Table(name = "BG_PERIODE")
-// @Immutable Legges tilbake etter ferdig kjøring av GjenopprettUgyldigeReferanserTask
+@Immutable
 public class BeregningsgrunnlagPeriode extends BaseEntitet {
 
     @Id
@@ -55,18 +55,6 @@ public class BeregningsgrunnlagPeriode extends BaseEntitet {
 
     public UUID getEksternReferanse() {
         return eksternReferanse;
-    }
-
-
-    /**
-     * Eksisterer kun for å fikse saker i produksjon etter feil ved oppgradering til Hibernate 6.
-     *
-     *
-     * @param eksternReferanse Ny ekstern referanse
-     */
-    @Deprecated
-    public void setEksternReferanse(UUID eksternReferanse) {
-        this.eksternReferanse = eksternReferanse;
     }
 
     public LocalDate getSkjæringstidspunkt() {
