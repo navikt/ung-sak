@@ -18,14 +18,11 @@ public class AldersvilkårBarnVilkårGrunnlag implements VilkårGrunnlag {
         Objects.requireNonNull(fødselsdatoBarn);
         Objects.requireNonNull(fagsakYtelseType);
         Objects.requireNonNull(vilkårsperiode);
-        if (fødselsdatoBarn.isEmpty()){
-            throw new IllegalArgumentException("Trenger fødselsdato for minst ett barn");
-        }
         this.fødselsdatoBarn = fødselsdatoBarn;
         this.fagsakYtelseType = fagsakYtelseType;
         this.vilkårsperiode = vilkårsperiode;
-
     }
+
     public List<LocalDate> getFødselsdatoBarn() {
         return fødselsdatoBarn;
     }

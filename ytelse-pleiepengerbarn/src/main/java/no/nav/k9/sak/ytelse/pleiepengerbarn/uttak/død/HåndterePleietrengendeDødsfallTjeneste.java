@@ -5,6 +5,7 @@ import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPe
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode.MAKSÅR;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -92,8 +93,8 @@ public class HåndterePleietrengendeDødsfallTjeneste {
             return;
         }
 
-        int antallUker = utledAntallUker(rettVedDød);
-        var sisteDagPgaDødsfall = dødsdato.plusWeeks(antallUker);
+        var utvidelseAvPeriode = utledUtvidelse(rettVedDød);
+        var sisteDagPgaDødsfall = dødsdato.plus(utvidelseAvPeriode.getAntall(), utvidelseAvPeriode.getEnhet());
 
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato, sisteDagPgaDødsfall);
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
@@ -134,8 +135,8 @@ public class HåndterePleietrengendeDødsfallTjeneste {
             return Optional.empty();
         }
 
-        int antallUker = utledAntallUker(rettVedDød);
-        var sisteDagPgaDødsfall = dødsdato.plusWeeks(antallUker);
+        var utvidelseAvPeriode = utledUtvidelse(rettVedDød);
+        var sisteDagPgaDødsfall = dødsdato.plus(utvidelseAvPeriode.getAntall(), utvidelseAvPeriode.getEnhet());
 
         return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato, sisteDagPgaDødsfall));
     }
@@ -210,10 +211,10 @@ public class HåndterePleietrengendeDødsfallTjeneste {
         return over18Periode.map(it -> Objects.equals(it.getUtfall(), Utfall.IKKE_OPPFYLT)).orElse(false);
     }
 
-    private int utledAntallUker(RettVedDødType rettVedDød) {
+    private UtvidelseAvPeriode utledUtvidelse(RettVedDødType rettVedDød) {
         return switch (rettVedDød) {
-            case RETT_6_UKER -> 6;
-            case RETT_12_UKER -> 12;
+            case RETT_6_UKER -> new UtvidelseAvPeriode(6, ChronoUnit.WEEKS);
+            case RETT_12_UKER -> new UtvidelseAvPeriode(3, ChronoUnit.MONTHS);
         };
     }
 }

@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.PRECONDITION_BERE
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,9 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilter;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 
@@ -59,6 +63,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private BeregningsgrunnlagTjeneste kalkulusTjeneste;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private boolean sigrunFilterEnabled;
+    private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
 
     protected VurderPreconditionBeregningSteg() {
@@ -75,7 +80,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                            BeregningsgrunnlagTjeneste kalkulusTjeneste,
                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                           @KonfigVerdi(value = "SIGRUN_INNTEKT_FILTER_ENABLED", defaultVerdi = "false") boolean sigrunFilterEnabled) {
+                                           @KonfigVerdi(value = "SIGRUN_INNTEKT_FILTER_ENABLED", defaultVerdi = "false") boolean sigrunFilterEnabled,
+                                           VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
@@ -86,6 +92,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.sigrunFilterEnabled = sigrunFilterEnabled;
+        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
     }
 
     @Override
@@ -155,16 +162,21 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     }
 
     private void avslåBeregningVedBehov(BehandlingskontrollKontekst kontekst, Behandling behandling, BehandlingReferanse referanse) {
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(referanse).ignorerForlengelseperioder();
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         var vilkåret = vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET)
             .orElseThrow();
-        var vurdertePerioder = vurdertePerioder(VilkårType.OPPTJENINGSVILKÅRET, referanse);
+        var vurdertePerioderIOpptjening = vurdertePerioder(VilkårType.OPPTJENINGSVILKÅRET, referanse);
+
+        var perioderTilVurderingIBeregning = periodeFilter.filtrerPerioder(vurdertePerioderIOpptjening, VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+            .stream().map(PeriodeTilVurdering::getPeriode).toList();
+
         var opptjeningForBeregningTjeneste = finnOpptjeningForBeregningTjeneste(behandling);
         var grunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
         var avslåttePerioder = vilkåret.getPerioder()
             .stream()
-            .filter(it -> vurdertePerioder.contains(it.getPeriode()))
+            .filter(it -> perioderTilVurderingIBeregning.contains(it.getPeriode()))
             .filter(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()) || (ikkeInnvilgetEtter847(it) && ingenBeregningsAktiviteter(opptjeningForBeregningTjeneste, it, grunnlag, referanse)))
             .collect(Collectors.toList());
 

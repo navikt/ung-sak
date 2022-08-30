@@ -38,7 +38,7 @@ public interface ÅrskvantumKlient {
 
     ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(ÅrskvantumGrunnlag årskvantumGrunnlag);
 
-    RammevedtakResponse hentRammevedtak(PersonIdent personIdent, LukketPeriode periode);
+    RammevedtakResponse hentRammevedtak(PersonIdent personIdent, List<PersonIdent> barnFnr, LukketPeriode periode);
 
     ÅrskvantumUttrekk hentUttrekk();
 }

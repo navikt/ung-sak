@@ -20,9 +20,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.integrasjon.pdl.Bostedsadresse;
 import no.nav.k9.felles.integrasjon.pdl.BostedsadresseResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.DeltBostedResponseProjection;
@@ -245,24 +242,17 @@ public class DebugPersoninfoTjeneste {
             : " " + object2.toString().trim().toUpperCase();
     }
 
-    static List<AdressePeriode> periodiserAdresse(List<AdressePeriode> perioder) {
-        Map<AdresseType, List<AdressePeriode>> gruppert = perioder.stream()
-            .collect(Collectors.groupingBy(a -> forSortering(a.getAdresse().getAdresseType())));
-        Map<AdresseType, LocalDateTimeline<AdressePeriode.Adresse>> tidsserier = gruppert
-            .entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> new LocalDateTimeline<>(e.getValue().stream()
-                .map(a -> new LocalDateSegment<>(a.getGyldighetsperiode().getFom(), a.getGyldighetsperiode().getTom(), a)).toList(), DebugPersoninfoTjeneste::prioriterSisteOpplysning)
-                .mapValue(AdressePeriode::getAdresse)));
-
-        return tidsserier.values().stream()
-            .flatMap(ts -> ts.toSegments().stream())
-            .map(segment -> new AdressePeriode(Gyldighetsperiode.innenfor(segment.getFom(), segment.getTom()), segment.getValue()))
-            .toList();
-    }
-
-    public static LocalDateSegment<AdressePeriode> prioriterSisteOpplysning(LocalDateInterval dateInterval, LocalDateSegment<AdressePeriode> lhs, LocalDateSegment<AdressePeriode> rhs) {
-        boolean lhsNyest = lhs.getValue().getGyldighetsperiode().getFom().isAfter(rhs.getValue().getGyldighetsperiode().getFom());
-        return new LocalDateSegment<>(dateInterval, lhsNyest ? lhs.getValue() : rhs.getValue());
+    private static List<AdressePeriode> periodiserAdresse(List<AdressePeriode> perioder) {
+        var adresseTypePerioder = perioder.stream()
+            .collect(Collectors.groupingBy(ap -> forSortering(ap.getAdresse().getAdresseType()),
+                Collectors.mapping(AdressePeriode::getGyldighetsperiode, Collectors.toList())));
+        return perioder.stream()
+            .map(p -> new AdressePeriode(
+                finnFraPerioder(adresseTypePerioder.get(forSortering(p.getAdresse().getAdresseType())),
+                    p.getGyldighetsperiode()),
+                p.getAdresse()))
+            .filter(a -> !a.getGyldighetsperiode().getFom().isAfter(a.getGyldighetsperiode().getTom()))
+            .collect(Collectors.toList());
     }
 
     private static AdresseType forSortering(AdresseType type) {
@@ -551,8 +541,8 @@ public class DebugPersoninfoTjeneste {
             .collect(Collectors.toList());
     }
 
-    static List<AdressePeriode> mapAdresserHistorikk(List<Bostedsadresse> bostedsadresser,
-                                                     List<Kontaktadresse> kontaktadresser, List<Oppholdsadresse> oppholdsadresser) {
+    private List<AdressePeriode> mapAdresserHistorikk(List<Bostedsadresse> bostedsadresser,
+                                                      List<Kontaktadresse> kontaktadresser, List<Oppholdsadresse> oppholdsadresser) {
         List<AdressePeriode> adresser = new ArrayList<>();
         bostedsadresser.stream().sorted(Comparator.comparing(it -> fomNullAble(it.getGyldigFraOgMed()))).forEachOrdered(b -> {
             var periode = periodeFraDates(b.getGyldigFraOgMed(), b.getGyldigTilOgMed());
@@ -578,12 +568,12 @@ public class DebugPersoninfoTjeneste {
         return adresser;
     }
 
-    private static LocalDate fomNullAble(Date gyldigFraOgMed) {
+    private LocalDate fomNullAble(Date gyldigFraOgMed) {
         return gyldigFraOgMed == null ? Tid.TIDENES_BEGYNNELSE : LocalDate.ofInstant(gyldigFraOgMed.toInstant(), ZoneId.systemDefault());
     }
 
-    private static List<Adresseinfo> mapAdresser(List<Bostedsadresse> bostedsadresser, List<Kontaktadresse> kontaktadresser,
-                                                 List<Oppholdsadresse> oppholdsadresser) {
+    private List<Adresseinfo> mapAdresser(List<Bostedsadresse> bostedsadresser, List<Kontaktadresse> kontaktadresser,
+                                          List<Oppholdsadresse> oppholdsadresser) {
         List<Adresseinfo> resultat = new ArrayList<>();
         bostedsadresser.stream().map(Bostedsadresse::getVegadresse)
             .map(a -> mapVegadresse(AdresseType.BOSTEDSADRESSE, a)).filter(Objects::nonNull).forEach(resultat::add);
@@ -608,9 +598,9 @@ public class DebugPersoninfoTjeneste {
 
         kontaktadresser.stream().map(Kontaktadresse::getVegadresse).map(a -> mapVegadresse(AdresseType.POSTADRESSE, a))
             .filter(Objects::nonNull).forEach(resultat::add);
-        kontaktadresser.stream().map(Kontaktadresse::getPostboksadresse).map(DebugPersoninfoTjeneste::mapPostboksadresse)
+        kontaktadresser.stream().map(Kontaktadresse::getPostboksadresse).map(this::mapPostboksadresse)
             .filter(Objects::nonNull).forEach(resultat::add);
-        kontaktadresser.stream().map(Kontaktadresse::getPostadresseIFrittFormat).map(DebugPersoninfoTjeneste::mapFriAdresseNorsk)
+        kontaktadresser.stream().map(Kontaktadresse::getPostadresseIFrittFormat).map(this::mapFriAdresseNorsk)
             .filter(Objects::nonNull).forEach(resultat::add);
         kontaktadresser.stream().map(Kontaktadresse::getUtenlandskAdresse)
             .map(a -> mapUtenlandskadresse(AdresseType.POSTADRESSE_UTLAND, a)).filter(Objects::nonNull)
@@ -623,7 +613,7 @@ public class DebugPersoninfoTjeneste {
         return resultat;
     }
 
-    private static Adresseinfo mapVegadresse(AdresseType type, Vegadresse vegadresse) {
+    private Adresseinfo mapVegadresse(AdresseType type, Vegadresse vegadresse) {
         if (vegadresse == null)
             return null;
         String postnummer = Optional.ofNullable(vegadresse.getPostnummer()).orElse(HARDKODET_POSTNR);
@@ -637,7 +627,7 @@ public class DebugPersoninfoTjeneste {
             .build();
     }
 
-    private static Adresseinfo mapMatrikkeladresse(AdresseType type, Matrikkeladresse matrikkeladresse) {
+    private Adresseinfo mapMatrikkeladresse(AdresseType type, Matrikkeladresse matrikkeladresse) {
         if (matrikkeladresse == null)
             return null;
         String postnummer = Optional.ofNullable(matrikkeladresse.getPostnummer()).orElse(HARDKODET_POSTNR);
@@ -653,7 +643,7 @@ public class DebugPersoninfoTjeneste {
             .build();
     }
 
-    private static Adresseinfo mapPostboksadresse(Postboksadresse postboksadresse) {
+    private Adresseinfo mapPostboksadresse(Postboksadresse postboksadresse) {
         if (postboksadresse == null)
             return null;
         String postnummer = Optional.ofNullable(postboksadresse.getPostnummer()).orElse(HARDKODET_POSTNR);
@@ -668,7 +658,7 @@ public class DebugPersoninfoTjeneste {
             .build();
     }
 
-    private static Adresseinfo mapFriAdresseNorsk(PostadresseIFrittFormat postadresse) {
+    private Adresseinfo mapFriAdresseNorsk(PostadresseIFrittFormat postadresse) {
         if (postadresse == null)
             return null;
         String postnummer = Optional.ofNullable(postadresse.getPostnummer()).orElse(HARDKODET_POSTNR);

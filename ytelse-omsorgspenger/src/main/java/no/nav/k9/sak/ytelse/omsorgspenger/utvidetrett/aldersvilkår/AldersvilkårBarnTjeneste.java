@@ -10,6 +10,7 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -40,11 +41,22 @@ public class AldersvilkårBarnTjeneste {
         List<AldersvilkårBarnVilkårGrunnlag> grunnlagene = new ArrayList<>();
         for (VilkårPeriode vilkårPeriode : vilkår.getPerioder()) {
             DatoIntervallEntitet periode = vilkårPeriode.getPeriode();
-            List<PersonopplysningEntitet> barna = personopplysningTjeneste.hentPersonopplysninger(behandlingReferanse, periode.getFomDato()).getBarna();
-            List<LocalDate> barnasFødselsdatoer = barna.stream().map(PersonopplysningEntitet::getFødselsdato).toList();
+            List<LocalDate> barnasFødselsdatoer = hentFødselsdatoForAktuelleBarn(behandlingReferanse, behandling, periode);
             grunnlagene.add(new AldersvilkårBarnVilkårGrunnlag(barnasFødselsdatoer, behandling.getFagsakYtelseType(), periode));
         }
         return grunnlagene;
+    }
+
+    private List<LocalDate> hentFødselsdatoForAktuelleBarn(BehandlingReferanse behandlingReferanse, Behandling behandling, DatoIntervallEntitet periode) {
+        PersonopplysningerAggregat aggregat = personopplysningTjeneste.hentPersonopplysninger(behandlingReferanse, periode.getFomDato());
+        return switch (behandlingReferanse.getFagsakYtelseType()) {
+            case OMSORGSPENGER_MA -> aggregat.getBarna().stream().map(PersonopplysningEntitet::getFødselsdato).toList();
+            case OMSORGSPENGER_KS, OMSORGSPENGER_AO ->
+                List.of(aggregat.getPersonopplysning(behandling.getFagsak().getPleietrengendeAktørId()).getFødselsdato());
+            default ->
+                throw new IllegalArgumentException("Ikke-støttet ytelse-type: " + behandlingReferanse.getFagsakYtelseType());
+        };
+
     }
 
     public VilkårData vurder(AldersvilkårBarnVilkårGrunnlag grunnlag) {

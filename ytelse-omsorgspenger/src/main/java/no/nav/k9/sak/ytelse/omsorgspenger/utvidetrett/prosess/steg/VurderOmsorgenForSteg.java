@@ -6,12 +6,16 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
 
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -23,14 +27,19 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.omsorgenfor.OmsorgenForTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.omsorgenfor.regelmodell.OmsorgenForVilkårGrunnlag;
 
@@ -43,9 +52,12 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.omsorgenfor.regelmodell.Om
 public class VurderOmsorgenForSteg implements BehandlingSteg {
 
     public static final VilkårType VILKÅRET = VilkårType.OMSORGEN_FOR;
+    public static final AksjonspunktDefinisjon AKTUELT_AKSJONSPUNKT = AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR;
 
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private SøknadRepository søknadRepository;
+    private VilkårTjeneste vilkårTjeneste;
     private OmsorgenForTjeneste omsorgenForTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
@@ -56,17 +68,36 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     @Inject
     public VurderOmsorgenForSteg(BehandlingRepository behandlingRepository,
                                  VilkårResultatRepository vilkårResultatRepository,
+                                 SøknadRepository søknadRepository, VilkårTjeneste vilkårTjeneste,
                                  OmsorgenForTjeneste omsorgenForTjeneste,
                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.søknadRepository = søknadRepository;
+        this.vilkårTjeneste = vilkårTjeneste;
         this.omsorgenForTjeneste = omsorgenForTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        Long behandlingId = kontekst.getBehandlingId();
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        Fagsak fagsak = behandling.getFagsak();
+        var søknad = søknadRepository.hentSøknad(behandling);
+        var vilkårene = vilkårResultatRepository.hent(behandlingId);
+        var vilkårTimeline = vilkårene.getVilkårTimeline(VILKÅRET);
+        var søknadsperiode = søknad.getSøknadsperiode();
+        var intersectTimeline = vilkårTimeline.intersection(new LocalDateInterval(søknadsperiode.getFomDato(), fagsak.getPeriode().getTomDato()));
+
+        boolean noenAndreVilkårErHeltAvslått = vilkårTjeneste.erNoenVilkårHeltAvslått(behandlingId, VILKÅRET, intersectTimeline.getMinLocalDate(), intersectTimeline.getMaxLocalDate());
+        if (noenAndreVilkårErHeltAvslått) {
+            vilkårTjeneste.settVilkårutfallTilIkkeVurdert(behandlingId, VILKÅRET, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(vilkårTimeline.getMinLocalDate(), vilkårTimeline.getMaxLocalDate()))));
+            behandling.getAksjonspunktMedDefinisjonOptional(AKTUELT_AKSJONSPUNKT).ifPresent(Aksjonspunkt::avbryt);
+            behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
+
         if (behandling.erManueltOpprettet() || behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_ALDERSVILKÅR_BARN)) {
             //skal alltid ha aksjonspunktet ved manuell revurdering slik at saksbehandler kan korrigere
             //og også hvis aldersvilkåret ble gjort manuelt (har aksjonspunkt)
