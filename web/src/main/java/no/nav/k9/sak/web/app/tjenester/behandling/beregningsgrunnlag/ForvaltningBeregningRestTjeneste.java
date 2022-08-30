@@ -6,14 +6,10 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CR
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -38,7 +34,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import no.nav.folketrygdloven.beregningsgrunnlag.forvaltning.GjenopprettUgyldigeReferanserForBehandlingTask;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelseKalkulator;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
@@ -49,13 +44,8 @@ import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjo
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
@@ -68,10 +58,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRestTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
 
 @ApplicationScoped
 @Transactional
@@ -84,8 +71,6 @@ public class ForvaltningBeregningRestTjeneste {
 
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private BehandlingRepository behandlingRepository;
-    private ProsessTaskTjeneste prosessTaskRepository;
-    private FagsakTjeneste fagsakTjeneste;
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
@@ -93,7 +78,6 @@ public class ForvaltningBeregningRestTjeneste {
     private AksjonspunktRepository aksjonspunktRepository;
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     private KalkulusRestKlient kalkulusSystemRestKlient;
-    private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
 
 
     public ForvaltningBeregningRestTjeneste() {
@@ -102,23 +86,18 @@ public class ForvaltningBeregningRestTjeneste {
     @Inject
     public ForvaltningBeregningRestTjeneste(BeregningsgrunnlagYtelseKalkulator forvaltningBeregning,
                                             BehandlingRepository behandlingRepository,
-                                            ProsessTaskTjeneste prosessTaskRepository,
                                             InntektArbeidYtelseTjeneste iayTjeneste,
                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                            FagsakTjeneste fagsakTjeneste, AksjonspunktRepository aksjonspunktRepository,
+                                            AksjonspunktRepository aksjonspunktRepository,
                                             BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
                                             SystemUserOidcRestClient systemUserOidcRestClient,
-                                            @KonfigVerdi(value = "ftkalkulus.url") URI endpoint,
-                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
+                                            @KonfigVerdi(value = "ftkalkulus.url") URI endpoint) {
         this.forvaltningBeregning = forvaltningBeregning;
         this.behandlingRepository = behandlingRepository;
-        this.prosessTaskRepository = prosessTaskRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
-        this.fagsakTjeneste = fagsakTjeneste;
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
-        this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.kalkulusSystemRestKlient = new KalkulusRestKlient(systemUserOidcRestClient, endpoint);
     }
 
@@ -219,55 +198,6 @@ public class ForvaltningBeregningRestTjeneste {
         MigrerAksjonspunktListeRequest migrerAksjonspunktListeRequest = new MigrerAksjonspunktListeRequest(aksjonspunktData, migrerAksjonspunktDto.getAksjonspunktKode());
         kalkulusSystemRestKlient.migrerAksjonspunkter(migrerAksjonspunktListeRequest);
         return Response.ok().build();
-    }
-
-
-    @POST
-    @Path("/gjenopprett-referanser-feil")
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.TEXT_PLAIN)
-    @Operation(description = "Gjenoppretter referanser der revurdering har endret initiell versjon.",
-        summary = ("Gjenoppretter referanser der revurdering har endret initiell versjon."),
-        tags = "beregning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public Response finnFeilVedGjenoppretting(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid ForvaltningMidlertidigDriftRestTjeneste.OpprettManuellRevurdering saksliste) {
-        var alleSaksnummer = Objects.requireNonNull(saksliste.getSaksnumre(), "saksnumre");
-        var saknumre = new LinkedHashSet<>(Arrays.asList(alleSaksnummer.split("\\s+")));
-
-        var ferdigeGjenopprettinger = prosessTaskRepository.finnAlle(GjenopprettUgyldigeReferanserForBehandlingTask.TASKTYPE, ProsessTaskStatus.FERDIG);
-
-        StringBuilder result = new StringBuilder();
-
-        for (var s : saknumre) {
-            var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(s), false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + s));
-
-            var sisteRevurdering = behandlingRepository.hentSisteBehandlingAvBehandlingTypeForFagsakId(fagsak.getId(), BehandlingType.REVURDERING);
-            sisteRevurdering.ifPresent(behandling -> logger.info("Fant siste behandling for sak " + s + " med id " + behandling.getId()));
-            var taskerForFagsak = ferdigeGjenopprettinger.stream().filter(it -> it.getFagsakId().equals(fagsak.getId())).toList();
-            logger.info("Fant følgende tasker for fagsak: " + taskerForFagsak);
-
-            if (sisteRevurdering.isPresent() && taskerForFagsak.stream().noneMatch(t -> sisteRevurdering.get().getId().equals(Long.valueOf(t.getBehandlingId())))) {
-                var revurderingId = sisteRevurdering.get().getId();
-                var initiellePerioderRevurdering = beregningPerioderGrunnlagRepository.getInitiellVersjon(revurderingId).stream()
-                    .flatMap(gr -> gr.getGrunnlagPerioder().stream()).toList();
-                var perioderOriginalBehandling = beregningPerioderGrunnlagRepository.hentGrunnlag(sisteRevurdering.get().getOriginalBehandlingId().orElseThrow()).stream()
-                    .flatMap(gr -> gr.getGrunnlagPerioder().stream()).toList();
-                boolean harUgyldigInitiellReferanse = initiellePerioderRevurdering.stream()
-                    .anyMatch(it -> !finnMathcendeReferanse(perioderOriginalBehandling, it).equals(it.getEksternReferanse()));
-                if (harUgyldigInitiellReferanse) {
-                    result.append(s).append("\n");
-                }
-            }
-        }
-
-        return Response.ok(result.toString()).build();
-
-    }
-
-    private UUID finnMathcendeReferanse(List<BeregningsgrunnlagPeriode> perioder, BeregningsgrunnlagPeriode it) {
-        return perioder.stream()
-            .filter(it2 -> it2.getSkjæringstidspunkt().equals(it.getSkjæringstidspunkt()))
-            .findFirst().orElseThrow().getEksternReferanse();
     }
 
     private MigrerAksjonspunktRequest lagAksjonspunktData(Behandling behandling, Aksjonspunkt aksjonspunkt) {
