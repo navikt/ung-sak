@@ -3,6 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 import java.time.LocalDate;
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -13,6 +14,7 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagReposito
 import no.nav.k9.sak.ytelse.beregning.grunnlag.NæringsinntektPeriode;
 
 
+@ApplicationScoped
 public class NæringsinntektFilter {
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;

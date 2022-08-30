@@ -16,7 +16,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
-@Entity(name = "BeregningsgrunnlagPeriode")
+@Entity(name = "NæringsinntektPeriode")
 @Table(name = "BG_NAERING_INNTEKT_PERIODE")
 @Immutable
 public class NæringsinntektPeriode extends BaseEntitet {
