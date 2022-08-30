@@ -12,10 +12,6 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 
 public interface SigruninntekterForBeregningFilter {
 
-    static SigruninntekterForBeregningFilter finnTjeneste(Instance<SigruninntekterForBeregningFilter> instances, FagsakYtelseType ytelseType) {
-        return FagsakYtelseTypeRef.Lookup.find(SigruninntekterForBeregningFilter.class, instances, ytelseType)
-            .orElse(new FinnInntekterFraForrigeRegisterinnhenting());
-    }
 
     List<Inntekt> finnInntekter(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate skjæringstidspunkt);
 

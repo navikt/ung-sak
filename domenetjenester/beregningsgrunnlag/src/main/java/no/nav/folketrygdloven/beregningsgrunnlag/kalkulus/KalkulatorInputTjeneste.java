@@ -39,19 +39,19 @@ public class KalkulatorInputTjeneste {
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
     private VilkårResultatRepository vilkårResultatRepository;
-    private Instance<SigruninntekterForBeregningFilter> sigrunInntektFilter;
+    private NæringsinntektFilter næringsinntektFilter;
 
     @Inject
     public KalkulatorInputTjeneste(@Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                    @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
                                    @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                    VilkårResultatRepository vilkårResultatRepository,
-                                   @Any Instance<SigruninntekterForBeregningFilter> sigrunInntektFilter) {
+                                   @Any NæringsinntektFilter næringsinntektFilter) {
         this.opptjeningForBeregningTjeneste = Objects.requireNonNull(opptjeningForBeregningTjeneste, "opptjeningForBeregningTjeneste");
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.sigrunInntektFilter = sigrunInntektFilter;
+        this.næringsinntektFilter = næringsinntektFilter;
     }
 
     protected KalkulatorInputTjeneste() {
@@ -81,7 +81,8 @@ public class KalkulatorInputTjeneste {
                 sakInntektsmeldinger,
                 ytelsesGrunnlag,
                 vilkårsperiode,
-                vilkårsMerknad);
+                vilkårsMerknad
+            );
         };
     }
 
@@ -123,7 +124,6 @@ public class KalkulatorInputTjeneste {
         OpptjeningForBeregningTjeneste tjeneste = finnOpptjeningForBeregningTjeneste(referanse);
         var imTjeneste = finnInntektsmeldingForBeregningTjeneste(referanse);
 
-        var sigrunFilter = SigruninntekterForBeregningFilter.finnTjeneste(sigrunInntektFilter, referanse.getFagsakYtelseType());
 
         var oppgittOpptjening = tjeneste.finnOppgittOpptjening(referanse, iayGrunnlag, stp).orElse(null);
         var grunnlagDto = mapIAYTilKalkulus(referanse,
@@ -132,7 +132,7 @@ public class KalkulatorInputTjeneste {
             sakInntektsmeldinger,
             oppgittOpptjening,
             imTjeneste,
-            sigrunFilter);
+            næringsinntektFilter);
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode);
 
         if (opptjeningAktiviteter.isEmpty() && !erInaktiv(vilkårsMerknad)) {
@@ -166,8 +166,8 @@ public class KalkulatorInputTjeneste {
                                                                Collection<Inntektsmelding> inntektsmeldinger,
                                                                OppgittOpptjening oppgittOpptjening,
                                                                InntektsmeldingerRelevantForBeregning imTjeneste,
-                                                               SigruninntekterForBeregningFilter sigrunFilter) {
-        return new TilKalkulusMapper(imTjeneste, sigrunFilter).mapTilDto(inntektArbeidYtelseGrunnlag,
+                                                               NæringsinntektFilter næringsinntektFilter) {
+        return new TilKalkulusMapper(imTjeneste, næringsinntektFilter).mapTilDto(inntektArbeidYtelseGrunnlag,
             inntektsmeldinger,
             referanse.getAktørId(),
             vilkårsperiode,

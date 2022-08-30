@@ -208,6 +208,8 @@ spec:
       value: "true"
     - name: YTELSE_OLP_AKTIVERT
       value: "true"
+    - name: SIGRUN_INNTEKT_FILTER_ENABLED
+      value: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

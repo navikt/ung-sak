@@ -52,6 +52,14 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
         return this;
     }
 
+    BeregningsgrunnlagPerioderGrunnlagBuilder deaktiverNæringsinntektPeriode(LocalDate skjæringstidspunkt) {
+        validerState();
+        Objects.requireNonNull(skjæringstidspunkt);
+        kladd.deaktiverNæringsinntektPeriode(skjæringstidspunkt);
+        return this;
+    }
+
+
 
     Optional<BeregningsgrunnlagPeriode> hentTidligere(LocalDate skjæringstidspunkt) {
         validerState();
