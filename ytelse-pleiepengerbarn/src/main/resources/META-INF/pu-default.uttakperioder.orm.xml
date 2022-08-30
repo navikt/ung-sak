@@ -15,6 +15,7 @@
 	<sequence-generator name="SEQ_UP_BEREDSKAP_PERIODE" allocation-size="50" sequence-name="SEQ_UP_BEREDSKAP_PERIODE" />
 	<sequence-generator name="SEQ_UP_NATTEVAAK_PERIODE" allocation-size="50" sequence-name="SEQ_UP_NATTEVAAK_PERIODE" />
 	<sequence-generator name="SEQ_UP_ARBEID_PERIODE" allocation-size="50" sequence-name="SEQ_UP_ARBEID_PERIODE" />
+	<sequence-generator name="SEQ_UP_KURS_PERIODE" allocation-size="50" sequence-name="SEQ_UP_KURS_PERIODE" />
 	<sequence-generator name="SEQ_PSB_GR_UNNTAK_ETABLERT_TILSYN" allocation-size="50" sequence-name="SEQ_PSB_GR_UNNTAK_ETABLERT_TILSYN" />
 	<sequence-generator name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE" allocation-size="50" sequence-name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE" />
 	<sequence-generator name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN" allocation-size="50" sequence-name="SEQ_PSB_UNNTAK_ETABLERT_TILSYN" />
