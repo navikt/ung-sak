@@ -15,6 +15,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -60,6 +61,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     private VilkårTjeneste vilkårTjeneste;
     private OmsorgenForTjeneste omsorgenForTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private boolean automatiserForKS;
 
     VurderOmsorgenForSteg() {
         //
@@ -70,13 +72,16 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
                                  VilkårResultatRepository vilkårResultatRepository,
                                  SøknadRepository søknadRepository, VilkårTjeneste vilkårTjeneste,
                                  OmsorgenForTjeneste omsorgenForTjeneste,
-                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                 @KonfigVerdi(value = "OMP_RAMMEVEDTAK_KS_AUTOMATISK_OMSORGENFOR", defaultVerdi = "true") boolean automatiserForKS) {
+
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadRepository = søknadRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.omsorgenForTjeneste = omsorgenForTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.automatiserForKS = automatiserForKS;
     }
 
     @Override
@@ -104,7 +109,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR));
         }
         FagsakYtelseType fagsakYtelseType = behandling.getFagsakYtelseType();
-        if (fagsakYtelseType == OMSORGSPENGER_AO) {
+        if (fagsakYtelseType == OMSORGSPENGER_AO || fagsakYtelseType == OMSORGSPENGER_KS && automatiserForKS) {
             return utførStegAutomatisk(kontekst);
         }
         return utførStegManuelt(kontekst);
