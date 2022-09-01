@@ -242,7 +242,7 @@ public class PersoninfoTjeneste {
             : " " + object2.toString().trim().toUpperCase();
     }
 
-    private static List<AdressePeriode> periodiserAdresse(List<AdressePeriode> perioder) {
+    static List<AdressePeriode> periodiserAdresse(List<AdressePeriode> perioder) {
         var adresseTypePerioder = perioder.stream()
             .collect(Collectors.groupingBy(ap -> forSortering(ap.getAdresse().getAdresseType()),
                 Collectors.mapping(AdressePeriode::getGyldighetsperiode, Collectors.toList())));
@@ -507,7 +507,7 @@ public class PersoninfoTjeneste {
             .collect(Collectors.toList());
     }
 
-    private List<AdressePeriode> mapAdresserHistorikk(List<Bostedsadresse> bostedsadresser,
+    static List<AdressePeriode> mapAdresserHistorikk(List<Bostedsadresse> bostedsadresser,
                                                       List<Kontaktadresse> kontaktadresser, List<Oppholdsadresse> oppholdsadresser) {
         List<AdressePeriode> adresser = new ArrayList<>();
         bostedsadresser.stream().sorted(Comparator.comparing(it -> fomNullAble(it.getGyldigFraOgMed()))).forEachOrdered(b -> {
@@ -518,28 +518,35 @@ public class PersoninfoTjeneste {
             var periode2 = flyttedato.isBefore(periode.getFom())
                 ? Gyldighetsperiode.innenfor(flyttedato, periode.getTom())
                 : periode;
-            mapAdresser(List.of(b), List.of(), List.of())
+            mapBostedadresser(List.of(b))
                 .forEach(a -> adresser.add(mapAdresseinfoTilAdressePeriode(periode2, a)));
         });
         kontaktadresser.stream().sorted(Comparator.comparing(it -> fomNullAble(it.getGyldigFraOgMed()))).forEachOrdered(k -> {
             var periode = periodeFraDates(k.getGyldigFraOgMed(), k.getGyldigTilOgMed());
-            mapAdresser(List.of(), List.of(k), List.of())
+            mapKontaktadresser(List.of(k))
                 .forEach(a -> adresser.add(mapAdresseinfoTilAdressePeriode(periode, a)));
         });
         oppholdsadresser.stream().sorted(Comparator.comparing(it -> fomNullAble(it.getGyldigFraOgMed()))).forEachOrdered(o -> {
             var periode = periodeFraDates(o.getGyldigFraOgMed(), o.getGyldigTilOgMed());
-            mapAdresser(List.of(), List.of(), List.of(o))
+            mapOppholdsadresser(List.of(o))
                 .forEach(a -> adresser.add(mapAdresseinfoTilAdressePeriode(periode, a)));
         });
         return adresser;
     }
 
-    private LocalDate fomNullAble(Date gyldigFraOgMed) {
+    private static LocalDate fomNullAble(Date gyldigFraOgMed) {
         return gyldigFraOgMed == null ? Tid.TIDENES_BEGYNNELSE : LocalDate.ofInstant(gyldigFraOgMed.toInstant(), ZoneId.systemDefault());
     }
 
-    private List<Adresseinfo> mapAdresser(List<Bostedsadresse> bostedsadresser, List<Kontaktadresse> kontaktadresser,
-                                          List<Oppholdsadresse> oppholdsadresser) {
+    private List<Adresseinfo> mapAdresser(List<Bostedsadresse> bostedsadresse, List<Kontaktadresse> kontaktadresse, List<Oppholdsadresse> oppholdsadresse) {
+        List<Adresseinfo> resultat = new ArrayList<>();
+        resultat.addAll(mapBostedadresser(bostedsadresse));
+        resultat.addAll(mapOppholdsadresser(oppholdsadresse));
+        resultat.addAll(mapKontaktadresser(kontaktadresse));
+        return resultat;
+    }
+
+    private static List<Adresseinfo> mapBostedadresser(List<Bostedsadresse> bostedsadresser) {
         List<Adresseinfo> resultat = new ArrayList<>();
         bostedsadresser.stream().map(Bostedsadresse::getVegadresse)
             .map(a -> mapVegadresse(AdresseType.BOSTEDSADRESSE, a)).filter(Objects::nonNull).forEach(resultat::add);
@@ -551,7 +558,14 @@ public class PersoninfoTjeneste {
         bostedsadresser.stream().map(Bostedsadresse::getUtenlandskAdresse)
             .map(a -> mapUtenlandskadresse(AdresseType.BOSTEDSADRESSE, a)).filter(Objects::nonNull)
             .forEach(resultat::add);
+        if (resultat.isEmpty()) {
+            resultat.add(mapUkjentadresse(null));
+        }
+        return resultat;
+    }
 
+    private static List<Adresseinfo> mapOppholdsadresser(List<Oppholdsadresse> oppholdsadresser) {
+        List<Adresseinfo> resultat = new ArrayList<>();
         oppholdsadresser.stream().map(Oppholdsadresse::getVegadresse)
             .map(a -> mapVegadresse(AdresseType.MIDLERTIDIG_POSTADRESSE_NORGE, a)).filter(Objects::nonNull)
             .forEach(resultat::add);
@@ -561,25 +575,26 @@ public class PersoninfoTjeneste {
         oppholdsadresser.stream().map(Oppholdsadresse::getUtenlandskAdresse)
             .map(a -> mapUtenlandskadresse(AdresseType.MIDLERTIDIG_POSTADRESSE_UTLAND, a)).filter(Objects::nonNull)
             .forEach(resultat::add);
+        return resultat;
+    }
 
+    private static List<Adresseinfo> mapKontaktadresser(List<Kontaktadresse> kontaktadresser) {
+        List<Adresseinfo> resultat = new ArrayList<>();
         kontaktadresser.stream().map(Kontaktadresse::getVegadresse).map(a -> mapVegadresse(AdresseType.POSTADRESSE, a))
             .filter(Objects::nonNull).forEach(resultat::add);
-        kontaktadresser.stream().map(Kontaktadresse::getPostboksadresse).map(this::mapPostboksadresse)
+        kontaktadresser.stream().map(Kontaktadresse::getPostboksadresse).map(PersoninfoTjeneste::mapPostboksadresse)
             .filter(Objects::nonNull).forEach(resultat::add);
-        kontaktadresser.stream().map(Kontaktadresse::getPostadresseIFrittFormat).map(this::mapFriAdresseNorsk)
+        kontaktadresser.stream().map(Kontaktadresse::getPostadresseIFrittFormat).map(PersoninfoTjeneste::mapFriAdresseNorsk)
             .filter(Objects::nonNull).forEach(resultat::add);
         kontaktadresser.stream().map(Kontaktadresse::getUtenlandskAdresse)
             .map(a -> mapUtenlandskadresse(AdresseType.POSTADRESSE_UTLAND, a)).filter(Objects::nonNull)
             .forEach(resultat::add);
         kontaktadresser.stream().map(Kontaktadresse::getUtenlandskAdresseIFrittFormat)
             .map(PersoninfoTjeneste::mapFriAdresseUtland).filter(Objects::nonNull).forEach(resultat::add);
-        if (resultat.isEmpty()) {
-            resultat.add(mapUkjentadresse(null));
-        }
         return resultat;
     }
 
-    private Adresseinfo mapVegadresse(AdresseType type, Vegadresse vegadresse) {
+    private static Adresseinfo mapVegadresse(AdresseType type, Vegadresse vegadresse) {
         if (vegadresse == null)
             return null;
         String postnummer = Optional.ofNullable(vegadresse.getPostnummer()).orElse(HARDKODET_POSTNR);
@@ -593,7 +608,7 @@ public class PersoninfoTjeneste {
             .build();
     }
 
-    private Adresseinfo mapMatrikkeladresse(AdresseType type, Matrikkeladresse matrikkeladresse) {
+    private static Adresseinfo mapMatrikkeladresse(AdresseType type, Matrikkeladresse matrikkeladresse) {
         if (matrikkeladresse == null)
             return null;
         String postnummer = Optional.ofNullable(matrikkeladresse.getPostnummer()).orElse(HARDKODET_POSTNR);
@@ -609,7 +624,7 @@ public class PersoninfoTjeneste {
             .build();
     }
 
-    private Adresseinfo mapPostboksadresse(Postboksadresse postboksadresse) {
+    private static Adresseinfo mapPostboksadresse(Postboksadresse postboksadresse) {
         if (postboksadresse == null)
             return null;
         String postnummer = Optional.ofNullable(postboksadresse.getPostnummer()).orElse(HARDKODET_POSTNR);
@@ -624,7 +639,7 @@ public class PersoninfoTjeneste {
             .build();
     }
 
-    private Adresseinfo mapFriAdresseNorsk(PostadresseIFrittFormat postadresse) {
+    private static Adresseinfo mapFriAdresseNorsk(PostadresseIFrittFormat postadresse) {
         if (postadresse == null)
             return null;
         String postnummer = Optional.ofNullable(postadresse.getPostnummer()).orElse(HARDKODET_POSTNR);
