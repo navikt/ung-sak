@@ -194,6 +194,8 @@ spec:
       value: "true"
     - name: OMP_RAMMEVEDTAK_ALDERSVILKAAR
       value: "true"
+    - name: OMP_RAMMEVEDTAK_KS_AUTOMATISK_OMSORGENFOR
+      value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
