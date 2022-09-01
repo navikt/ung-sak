@@ -195,6 +195,8 @@ spec:
       value: "false"
     - name: OMP_RAMMEVEDTAK_ALDERSVILKAAR
       value: "false"
+    - name: OMP_RAMMEVEDTAK_KS_AUTOMATISK_OMSORGENFOR
+      value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
