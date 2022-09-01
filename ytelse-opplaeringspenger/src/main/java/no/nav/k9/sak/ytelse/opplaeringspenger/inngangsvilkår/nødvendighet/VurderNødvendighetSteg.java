@@ -4,6 +4,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
@@ -13,9 +14,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
@@ -87,9 +90,9 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
             .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             .collect(Collectors.toCollection(TreeSet<DatoIntervallEntitet>::new));
 
-        var builder = Vilkårene.builderFraEksisterende(vilkårene);
-        builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
-        var vilkårBuilder = builder.hentBuilderFor(VilkårType.NØDVENDIG_OPPLÆRING);
+        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);
+        vilkårResultatBuilder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.NØDVENDIG_OPPLÆRING);
 
         for (DatoIntervallEntitet datoIntervallEntitet : perioderTilVurdering) {
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(datoIntervallEntitet)
@@ -101,10 +104,11 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
                 .medAvslagsårsak(Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE)); // TODO: Endre til noe mer fornuftig
         }
 
-        builder.leggTil(vilkårBuilder);
-        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårResultatBuilder.build());
 
-        return BehandleStegResultat.utførtUtenAksjonspunkter();
+        return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(
+            AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_INSTITUSJON_OG_NØDVENDIGHET)));
     }
 
     @Override

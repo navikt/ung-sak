@@ -116,6 +116,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE = "9007";
     public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART = "9008";
 
+    // OLP
+    public static final String VURDER_INSTITUSJON_OG_NØDVENDIGHET = "9300";
 
     // OMS
     public static final String AVKLAR_OMSORGEN_FOR_KODE = "9002";
