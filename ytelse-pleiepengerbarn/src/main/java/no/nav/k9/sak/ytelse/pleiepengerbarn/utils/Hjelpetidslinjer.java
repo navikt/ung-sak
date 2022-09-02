@@ -4,6 +4,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -68,6 +69,58 @@ public final class Hjelpetidslinjer {
             sisteTom = sisteTom.minusDays(sisteTom.getDayOfWeek().getValue());
         }
         return sisteTom;
+    }
+    
+    /**
+     * Lager en ukestidslinje for mandag-fredag for oppgitt intervall.
+     * 
+     * @param fom Fra-og-med-datoen man skal generere ukestidslinje for.
+     * @param tom Til-og-med-datoen man skal generere ukestidslinje for.
+     * 
+     * @return En tidslinje med et segment per uke. Hvert segment har maksimumsperioden
+     *          mandag til fredag -- og kan være kortere i hver ende hvis ikke
+     *          {@code fom} er en mandag og/eller {@code tom} er en fredag. 
+     */
+    public static LocalDateTimeline<Boolean> lagUkestidslinjeForMandagTilFredag(LocalDate fom, LocalDate tom) {
+        Objects.requireNonNull(fom, "fom");
+        Objects.requireNonNull(tom, "tom");
+        if (fom.isAfter(tom)) {
+            throw new IllegalArgumentException("fom kan ikke være etter tom.");
+        }
+        
+        LocalDate nesteFom = fom;
+        if (nesteFom.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            nesteFom = nesteFom.plusDays(2);
+        }
+        if (nesteFom.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            nesteFom = nesteFom.plusDays(1);
+        }
+        if (tom.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            tom = tom.minusDays(1);
+        }
+        if (tom.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            tom = tom.minusDays(2);
+        }
+        
+        List<LocalDateSegment<Boolean>> ukesegmenter = new ArrayList<>();
+        LocalDate førsteTom = nesteFom.plusDays(DayOfWeek.FRIDAY.getValue() - nesteFom.getDayOfWeek().getValue());
+        if (førsteTom.isAfter(tom)) {
+            if (nesteFom.isAfter(tom)) {
+                // Kun helgeperiode.
+                return LocalDateTimeline.empty();
+            }
+            return new LocalDateTimeline<Boolean>(nesteFom, tom, Boolean.TRUE);
+        }
+        ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, førsteTom, Boolean.TRUE));
+        nesteFom = førsteTom.plusDays(3);
+        while (!nesteFom.isAfter(tom) && !nesteFom.plusDays(4).isAfter(tom)) {
+            ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, nesteFom.plusDays(4), Boolean.TRUE));
+            nesteFom = nesteFom.plusDays(7); 
+        }
+        if (!nesteFom.isAfter(tom)) { // dvs nesteFom.plusDays(4).isAfter(tom))
+            ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, tom, Boolean.TRUE));
+        }
+        return new LocalDateTimeline<Boolean>(ukesegmenter);
     }
     
     public static <T> LocalDateTimeline<T> utledHullSomMåTettes(LocalDateTimeline<T> tidslinjen, KantIKantVurderer kantIKantVurderer) {

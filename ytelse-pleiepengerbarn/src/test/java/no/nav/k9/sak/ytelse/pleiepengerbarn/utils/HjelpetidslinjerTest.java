@@ -112,6 +112,100 @@ public class HjelpetidslinjerTest {
             LocalDate.of(2022, 8, 27), LocalDate.of(2022, 8, 28)
         );
     }
+    
+    
+    @Test
+    public void ukestidslinjeTom() {
+        final LocalDate fom = LocalDate.of(2022, 8, 6);
+        final LocalDate tom = LocalDate.of(2022, 8, 7);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
+        assertThat(resultat).isEmpty();
+    }
+    
+    @Test
+    public void ukestidslinjeSkalIkkeHaMedLørdagISlutten() {
+        final LocalDate fom = LocalDate.of(2022, 8, 2);
+        final LocalDate tom = LocalDate.of(2022, 8, 6);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
+        assertTidslinjeInneholder(resultat,
+                LocalDate.of(2022, 8, 2), LocalDate.of(2022, 8, 5) 
+                );
+    }
+    
+    @Test
+    public void ukestidslinjeMandagTilTorsdag() {
+        final LocalDate fom = LocalDate.of(2022, 8, 1);
+        final LocalDate tom = LocalDate.of(2022, 8, 4);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
+        assertTidslinjeInneholder(resultat,
+                LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 4) 
+                );
+    }
+    
+    @Test
+    public void ukestidslinjeMandagTilTorsdagNesteUke() {
+        final LocalDate fom = LocalDate.of(2022, 8, 1);
+        final LocalDate tom = LocalDate.of(2022, 8, 12);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
+        assertTidslinjeInneholder(resultat,
+                LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 5),
+                LocalDate.of(2022, 8, 8), LocalDate.of(2022, 8, 12)
+                );
+    }
+    
+    @Test
+    public void ukestidslinjeSkalIkkeHaMedSøndagISlutten() {
+        final LocalDate fom = LocalDate.of(2022, 8, 2);
+        final LocalDate tom = LocalDate.of(2022, 8, 7);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
+        assertTidslinjeInneholder(resultat,
+                LocalDate.of(2022, 8, 2), LocalDate.of(2022, 8, 5) 
+                );
+    }
+    
+    @Test
+    public void ukestidslinjeMandagTilFredag() {
+        final LocalDate fom = LocalDate.of(2022, 8, 1);
+        final LocalDate tom = LocalDate.of(2022, 8, 5);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
+        assertTidslinjeInneholder(resultat,
+                LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 5) 
+                );
+    }
+    
+    @Test
+    public void ukestidslinjeSøndagTilFredag() {
+        final LocalDate fom = LocalDate.of(2022, 7, 31);
+        final LocalDate tom = LocalDate.of(2022, 8, 5);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
+        assertTidslinjeInneholder(resultat,
+                LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 5) 
+                );
+    }
+    
+    @Test
+    public void ukestidslinjeMandagTilMandag() {
+        final LocalDate fom = LocalDate.of(2022, 8, 1);
+        final LocalDate tom = LocalDate.of(2022, 8, 8);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
+        assertTidslinjeInneholder(resultat,
+                LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 5),
+                LocalDate.of(2022, 8, 8), LocalDate.of(2022, 8, 8)
+                );
+    }
+    
+    @Test
+    public void ukestidslinjeTirsdagOgTreUkerTilOnsdag() {
+        final LocalDate fom = LocalDate.of(2022, 8, 2);
+        final LocalDate tom = LocalDate.of(2022, 8, 24);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
+        assertTidslinjeInneholder(resultat,
+                LocalDate.of(2022, 8, 2), LocalDate.of(2022, 8, 5),
+                LocalDate.of(2022, 8, 8), LocalDate.of(2022, 8, 12),
+                LocalDate.of(2022, 8, 15), LocalDate.of(2022, 8, 19),
+                LocalDate.of(2022, 8, 22), LocalDate.of(2022, 8, 24)
+                );
+    }
 
     private <V> void assertTidslinjeInneholder(LocalDateTimeline<V> resultat, LocalDate... datoer) {
         System.out.println(resultat);
