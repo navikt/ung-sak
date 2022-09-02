@@ -53,6 +53,17 @@ public class HjelpetidslinjerTest {
             LocalDate.of(2022, 7, 30), LocalDate.of(2022, 7, 31)
         );
     }
+    
+    @Test
+    public void helgetidslinjeMedStartPåSøndagOgSluttPåLørdag() {
+        final LocalDate fom = LocalDate.of(2022, 8, 7);
+        final LocalDate tom = LocalDate.of(2022, 8, 13);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagTidslinjeMedKunHelger(new LocalDateTimeline<>(fom, tom, Boolean.TRUE));
+        assertTidslinjeInneholder(resultat,
+            LocalDate.of(2022, 8, 6), LocalDate.of(2022, 8, 7),
+            LocalDate.of(2022, 8, 13), LocalDate.of(2022, 8, 14)
+        );
+    }
 
     @Test
     public void helgetidslinjeMedLangPeriode() {
