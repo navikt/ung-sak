@@ -145,11 +145,11 @@ public class HjelpetidslinjerTest {
     @Test
     public void ukestidslinjeMandagTilTorsdagNesteUke() {
         final LocalDate fom = LocalDate.of(2022, 8, 1);
-        final LocalDate tom = LocalDate.of(2022, 8, 12);
+        final LocalDate tom = LocalDate.of(2022, 8, 11);
         final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
         assertTidslinjeInneholder(resultat,
                 LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 5),
-                LocalDate.of(2022, 8, 8), LocalDate.of(2022, 8, 12)
+                LocalDate.of(2022, 8, 8), LocalDate.of(2022, 8, 11)
                 );
     }
     
