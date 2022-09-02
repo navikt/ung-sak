@@ -208,7 +208,6 @@ public class HjelpetidslinjerTest {
     }
 
     private <V> void assertTidslinjeInneholder(LocalDateTimeline<V> resultat, LocalDate... datoer) {
-        System.out.println(resultat);
         final var segments = resultat.toSegments();
         assertThat(segments.size()).isEqualTo(datoer.length / 2);
         int index = 0;
