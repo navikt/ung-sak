@@ -26,9 +26,9 @@ class OmsorspengerFraværPeriodeSammenslåerTest {
 
     @Test
     void skal_slå_sammen_perioder_som_ligger_inntil_hverandre_og_har_samme_innhold() {
-        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
-        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
-        FraværPeriode fp3 = new FraværPeriode(ons, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
+        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
+        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
+        FraværPeriode fp3 = new FraværPeriode(ons, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
 
         List<FraværPeriode> resultat = OmsorspengerFraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2, fp3));
         assertThat(resultat).hasSize(1);
@@ -41,8 +41,8 @@ class OmsorspengerFraværPeriodeSammenslåerTest {
 
     @Test
     void skal_ikke_slå_sammen_perioder_som_ikke_ligger_inntil_hverandre() {
-        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
-        FraværPeriode fp2 = new FraværPeriode(ons, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
+        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
+        FraværPeriode fp2 = new FraværPeriode(ons, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
 
         List<FraværPeriode> resultat = OmsorspengerFraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2));
         assertThat(resultat).containsOnly(fp1, fp2);
@@ -50,8 +50,8 @@ class OmsorspengerFraværPeriodeSammenslåerTest {
 
     @Test
     void skal_ikke_slå_sammen_perioder_som_har_ulik_duration() {
-        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
-        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(1), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
+        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
+        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(1), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
 
         List<FraværPeriode> resultat = OmsorspengerFraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2));
         assertThat(resultat).containsOnly(fp1, fp2);
@@ -59,8 +59,8 @@ class OmsorspengerFraværPeriodeSammenslåerTest {
 
     @Test
     void skal_ikke_slå_sammen_perioder_som_har_ulik_årsak() {
-        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), FraværÅrsak.SMITTEVERNHENSYN, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
-        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
+        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), null, FraværÅrsak.SMITTEVERNHENSYN, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
+        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
 
         List<FraværPeriode> resultat = OmsorspengerFraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2));
         assertThat(resultat).containsOnly(fp1, fp2);
@@ -68,8 +68,8 @@ class OmsorspengerFraværPeriodeSammenslåerTest {
 
     @Test
     void skal_ikke_slå_sammen_perioder_som_har_ulik_aktivitet() {
-        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER), null, null);
-        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
+        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER), null, null);
+        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
 
         List<FraværPeriode> resultat = OmsorspengerFraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2));
         assertThat(resultat).containsOnly(fp1, fp2);
@@ -77,8 +77,8 @@ class OmsorspengerFraværPeriodeSammenslåerTest {
 
     @Test
     void skal_ikke_slå_sammen_perioder_som_har_ulik_arbeidsgiver() {
-        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.ARBEIDSTAKER), Organisasjonsnummer.of("222222222"), null);
-        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.ARBEIDSTAKER), Organisasjonsnummer.of("111222111"), null);
+        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.ARBEIDSTAKER), Organisasjonsnummer.of("222222222"), null);
+        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.ARBEIDSTAKER), Organisasjonsnummer.of("111222111"), null);
 
         List<FraværPeriode> resultat = OmsorspengerFraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2));
         assertThat(resultat).containsOnly(fp1, fp2);
@@ -86,8 +86,8 @@ class OmsorspengerFraværPeriodeSammenslåerTest {
 
     @Test
     void skal_ikke_slå_sammen_perioder_som_har_ulikt_arbeidsforhold() {
-        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.ARBEIDSTAKER), Organisasjonsnummer.of("111222111"), "1");
-        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.ARBEIDSTAKER), Organisasjonsnummer.of("111222111"), "2");
+        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.ARBEIDSTAKER), Organisasjonsnummer.of("111222111"), "1");
+        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.ARBEIDSTAKER), Organisasjonsnummer.of("111222111"), "2");
 
         List<FraværPeriode> resultat = OmsorspengerFraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2));
         assertThat(resultat).containsOnly(fp1, fp2);
@@ -95,9 +95,9 @@ class OmsorspengerFraværPeriodeSammenslåerTest {
 
     @Test
     void skal_ikke_slå_sammen_helgdager_med_arbeidsdager() {
-        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), FraværÅrsak.SMITTEVERNHENSYN, null, List.of(AktivitetFravær.FRILANSER), null, null);
-        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(1), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
-        FraværPeriode fp3 = new FraværPeriode(lør, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
+        FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), null, FraværÅrsak.SMITTEVERNHENSYN, null, List.of(AktivitetFravær.FRILANSER), null, null);
+        FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(1), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
+        FraværPeriode fp3 = new FraværPeriode(lør, Duration.ofHours(4), null, FraværÅrsak.ORDINÆRT_FRAVÆR, null, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET), null, null);
 
         List<FraværPeriode> resultat = OmsorspengerFraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2, fp3));
         assertThat(resultat).containsOnly(fp1, fp2);
