@@ -52,7 +52,7 @@ public final class Hjelpetidslinjer {
             førsteFom = førsteFom.minusDays(2);
         }
         if (førsteFom.getDayOfWeek() != DayOfWeek.SATURDAY) {
-            førsteFom.plusDays(DayOfWeek.SUNDAY.getValue() - førsteFom.getDayOfWeek().getValue() + 1);
+            førsteFom = førsteFom.plusDays(DayOfWeek.SUNDAY.getValue() - førsteFom.getDayOfWeek().getValue() + 1);
         }
         return førsteFom;
     }
