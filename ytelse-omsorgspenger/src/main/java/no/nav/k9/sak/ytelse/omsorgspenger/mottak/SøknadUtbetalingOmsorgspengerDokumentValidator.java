@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
@@ -16,7 +15,7 @@ import no.nav.k9.sak.mottak.dokumentmottak.DokumentValideringException;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
+import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadValidator;
 
 @ApplicationScoped
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
@@ -53,28 +52,13 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
             if (!forventetBrevkoder.contains(brevkode)) {
                 throw new IllegalArgumentException("Forventet brevkode: " + forventetBrevkoder + ", fikk: " + brevkode);
             }
-            validerInnhold(søknad);
+            new OmsorgspengerUtbetalingSøknadValidator().forsikreValidert(søknad);
         }
     }
 
     @Override
     public void validerDokument(MottattDokument mottattDokument) {
         validerDokumenter(null, Set.of(mottattDokument));
-    }
-
-    private void validerInnhold(Søknad søknad) {
-        OmsorgspengerUtbetaling ytelse = søknad.getYtelse();
-        defaultValidering(ytelse);
-    }
-
-    private void defaultValidering(OmsorgspengerUtbetaling ytelse) {
-        List<no.nav.k9.søknad.felles.Feil> feil = ytelse.getValidator().valider(ytelse);
-        if (!feil.isEmpty()) {
-            // kaster DokumentValideringException pga håndtering i SaksbehandlingDokumentmottakTjeneste
-            throw valideringsfeil(feil.stream()
-                .map(f -> "kode=" + f.getFeilkode() + " for " + f.getFelt() + ": " + f.getFeilmelding())
-                .reduce((a, b) -> a + "; " + b).orElseThrow());
-        }
     }
 
     private static void validerHarInnhold(Collection<MottattDokument> dokumenter) {
