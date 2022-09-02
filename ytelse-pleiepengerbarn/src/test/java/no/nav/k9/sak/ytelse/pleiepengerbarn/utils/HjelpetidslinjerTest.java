@@ -28,7 +28,9 @@ public class HjelpetidslinjerTest {
             new LocalDateSegment<>(fredag, fredag, true),
             new LocalDateSegment<>(mandag, mandag, true) )
         ));
-        assertThat(resultat).isEmpty();
+        assertTidslinjeInneholder(resultat,
+            LocalDate.of(2022, 8, 6), LocalDate.of(2022, 8, 7)
+        );
     }
 
     @Test
