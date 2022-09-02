@@ -508,7 +508,7 @@ public class PersoninfoTjeneste {
     }
 
     static List<AdressePeriode> mapAdresserHistorikk(List<Bostedsadresse> bostedsadresser,
-                                                      List<Kontaktadresse> kontaktadresser, List<Oppholdsadresse> oppholdsadresser) {
+                                                     List<Kontaktadresse> kontaktadresser, List<Oppholdsadresse> oppholdsadresser) {
         List<AdressePeriode> adresser = new ArrayList<>();
         bostedsadresser.stream().sorted(Comparator.comparing(it -> fomNullAble(it.getGyldigFraOgMed()))).forEachOrdered(b -> {
             var periode = periodeFraDates(b.getGyldigFraOgMed(), b.getGyldigTilOgMed());
@@ -518,7 +518,7 @@ public class PersoninfoTjeneste {
             var periode2 = flyttedato.isBefore(periode.getFom())
                 ? Gyldighetsperiode.innenfor(flyttedato, periode.getTom())
                 : periode;
-            mapBostedadresser(List.of(b))
+            mapBostedadresserUkjentHvisMangler(List.of(b))
                 .forEach(a -> adresser.add(mapAdresseinfoTilAdressePeriode(periode2, a)));
         });
         kontaktadresser.stream().sorted(Comparator.comparing(it -> fomNullAble(it.getGyldigFraOgMed()))).forEachOrdered(k -> {
@@ -543,7 +543,18 @@ public class PersoninfoTjeneste {
         resultat.addAll(mapBostedadresser(bostedsadresse));
         resultat.addAll(mapOppholdsadresser(oppholdsadresse));
         resultat.addAll(mapKontaktadresser(kontaktadresse));
+        if (resultat.isEmpty()) {
+            resultat.add(mapUkjentadresse(null));
+        }
         return resultat;
+    }
+
+    private static List<Adresseinfo> mapBostedadresserUkjentHvisMangler(List<Bostedsadresse> bostedsadresser) {
+        List<Adresseinfo> resultat = mapBostedadresser(bostedsadresser);
+        if (!resultat.isEmpty()) {
+            return resultat;
+        }
+        return List.of(mapUkjentadresse(null));
     }
 
     private static List<Adresseinfo> mapBostedadresser(List<Bostedsadresse> bostedsadresser) {
@@ -558,9 +569,6 @@ public class PersoninfoTjeneste {
         bostedsadresser.stream().map(Bostedsadresse::getUtenlandskAdresse)
             .map(a -> mapUtenlandskadresse(AdresseType.BOSTEDSADRESSE, a)).filter(Objects::nonNull)
             .forEach(resultat::add);
-        if (resultat.isEmpty()) {
-            resultat.add(mapUkjentadresse(null));
-        }
         return resultat;
     }
 
