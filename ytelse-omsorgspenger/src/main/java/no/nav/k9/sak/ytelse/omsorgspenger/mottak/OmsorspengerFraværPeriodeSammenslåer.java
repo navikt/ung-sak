@@ -38,7 +38,7 @@ public class OmsorspengerFraværPeriodeSammenslåer {
         for (FraværPeriode fp : søknadsperioder) {
             var perioderMinusHelgdager = fjernHelgdager(fp.getPeriode());
             for (Periode periode : perioderMinusHelgdager) {
-                fraværsPerioderUtenHelgdager.add(new FraværPeriode(periode, fp.getDuration(), fp.getÅrsak(), fp.getSøknadÅrsak(), fp.getAktivitetFravær(), fp.getArbeidsgiverOrgNr(), fp.getArbeidsforholdId()));
+                fraværsPerioderUtenHelgdager.add(new FraværPeriode(periode, fp.getDuration(), fp.getDelvisFravær(), fp.getÅrsak(), fp.getSøknadÅrsak(), fp.getAktivitetFravær(), fp.getArbeidsgiverOrgNr(), fp.getArbeidsforholdId()));
             }
         }
         return fraværsPerioderUtenHelgdager;
@@ -59,6 +59,7 @@ public class OmsorspengerFraværPeriodeSammenslåer {
 
             if (periodenLiggerInntilForrigePeriode &&
                 Optional.ofNullable(søknadPeriode.getDuration()).equals(Optional.ofNullable(sammenslåttPeriode.getDuration())) &&
+                Optional.ofNullable(søknadPeriode.getDelvisFravær()).equals(Optional.ofNullable(sammenslåttPeriode.getDelvisFravær())) &&
                 søknadPeriode.getÅrsak().equals(sammenslåttPeriode.getÅrsak()) &&
                 søknadPeriode.getAktivitetFravær().equals(sammenslåttPeriode.getAktivitetFravær()) &&
                 Objects.equals(søknadPeriode.getArbeidsgiverOrgNr(), sammenslåttPeriode.getArbeidsgiverOrgNr()) &&
@@ -70,6 +71,7 @@ public class OmsorspengerFraværPeriodeSammenslåer {
                         sammenslåttPeriode.getPeriode().getFraOgMed(),
                         søknadPeriode.getPeriode().getTilOgMed()),
                     søknadPeriode.getDuration(),
+                    søknadPeriode.getDelvisFravær(),
                     søknadPeriode.getÅrsak(),
                     søknadPeriode.getSøknadÅrsak(),
                     søknadPeriode.getAktivitetFravær(),

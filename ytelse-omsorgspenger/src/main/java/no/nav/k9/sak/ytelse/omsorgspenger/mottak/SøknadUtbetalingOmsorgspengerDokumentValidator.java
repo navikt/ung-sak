@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
@@ -17,6 +17,7 @@ import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
+import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadValidator;
 
 @ApplicationScoped
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
@@ -26,14 +27,16 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 public class SøknadUtbetalingOmsorgspengerDokumentValidator implements DokumentValidator {
 
     private SøknadParser søknadParser;
+    private boolean ordentligValidering;
 
     SøknadUtbetalingOmsorgspengerDokumentValidator() {
         // for CDI proxy
     }
 
     @Inject
-    public SøknadUtbetalingOmsorgspengerDokumentValidator(SøknadParser søknadParser) {
+    public SøknadUtbetalingOmsorgspengerDokumentValidator(SøknadParser søknadParser, @KonfigVerdi(value = "OMP_ORDENTLIG_VALIDERING_MOTTAK", defaultVerdi = "true") boolean ordentligValidering) {
         this.søknadParser = søknadParser;
+        this.ordentligValidering = ordentligValidering;
     }
 
     @Override
@@ -53,7 +56,11 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
             if (!forventetBrevkoder.contains(brevkode)) {
                 throw new IllegalArgumentException("Forventet brevkode: " + forventetBrevkoder + ", fikk: " + brevkode);
             }
-            validerInnhold(søknad);
+            if (ordentligValidering) {
+                new OmsorgspengerUtbetalingSøknadValidator().forsikreValidert(søknad);
+            } else {
+                validerInnhold(søknad);
+            }
         }
     }
 
