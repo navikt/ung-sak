@@ -113,7 +113,7 @@ public final class Hjelpetidslinjer {
         }
         ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, førsteTom, Boolean.TRUE));
         nesteFom = førsteTom.plusDays(3);
-        while (!nesteFom.isAfter(tom) && !nesteFom.plusDays(4).isAfter(tom)) {
+        while (!nesteFom.plusDays(4).isAfter(tom)) {
             ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, nesteFom.plusDays(4), Boolean.TRUE));
             nesteFom = nesteFom.plusDays(7); 
         }
