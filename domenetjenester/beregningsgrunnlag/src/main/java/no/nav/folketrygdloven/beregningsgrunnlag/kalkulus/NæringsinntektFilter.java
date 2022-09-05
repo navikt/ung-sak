@@ -27,9 +27,12 @@ public class NæringsinntektFilter {
     }
 
     @Inject
-    public NæringsinntektFilter(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
+    public NæringsinntektFilter(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
+                                OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
+        this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
     }
 
     public List<Inntekt> finnInntekter(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag forrigeInnhentet, LocalDate skjæringstidspunkt) {
