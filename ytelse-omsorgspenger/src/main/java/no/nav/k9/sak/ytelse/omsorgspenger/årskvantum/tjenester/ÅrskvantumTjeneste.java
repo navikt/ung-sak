@@ -173,10 +173,7 @@ public class ÅrskvantumTjeneste {
                 + ",\tfagsakFravær=" + fagsakFravær);
         }
 
-        DatoIntervallEntitet informasjonsperiode = vilkårsperioder.isEmpty() //vilkårsperioder er tom hvis hele kravet er trekt
-            ? omsluttende(oppgittFravær.stream().map(OppgittFraværPeriode::getPeriode).toList())
-            : omsluttende(vilkårsperioder);
-        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), informasjonsperiode).orElseThrow();
+        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), hentInformasjonsperiode(vilkårsperioder, oppgittFravær)).orElseThrow();
         PersonopplysningEntitet søkerPersonopplysninger = personopplysninger.getSøker();
 
         var alleBarna = hentOgMapBarn(personopplysninger, behandling);
@@ -230,9 +227,19 @@ public class ÅrskvantumTjeneste {
 
     public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, LukketPeriode periode, Behandling behandling) {
         var ref = BehandlingReferanse.fra(behandling);
-        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom())).orElseThrow();
+
+        var vilkårsperioder = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.OPPTJENINGSVILKÅRET);
+        var oppgittFravær = grunnlagRepository.hentSammenslåtteFraværPerioder(ref.getBehandlingId());
+
+        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), hentInformasjonsperiode(vilkårsperioder, oppgittFravær)).orElseThrow();
         var alleBarnasFnr = hentOgMapBarn(personopplysninger, behandling).stream().map(barn -> PersonIdent.fra(barn.getPersonIdent())).toList();
         return årskvantumKlient.hentRammevedtak(personIdent, alleBarnasFnr, periode);
+    }
+
+    private DatoIntervallEntitet hentInformasjonsperiode(Set<DatoIntervallEntitet> vilkårsperioder, Set<OppgittFraværPeriode> oppgittFravær) {
+        return vilkårsperioder.isEmpty() //vilkårsperioder er tom hvis hele kravet er trekt
+            ? omsluttende(oppgittFravær.stream().map(OppgittFraværPeriode::getPeriode).toList())
+            : omsluttende(vilkårsperioder);
     }
 
     public ÅrskvantumUttrekk hentUttrekk() {
