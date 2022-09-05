@@ -25,7 +25,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -93,9 +92,9 @@ public class InfotrygdMigreringTjeneste {
             aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE));
         }
 
-        var grunnlagsperioderPrAktør = infotrygdService.finnGrunnlagsperioderForAndreAktører(
+        var grunnlagsperioderPrAktør = infotrygdService.finnGrunnlagsperioderForPleietrengende(
             ref.getPleietrengendeAktørId(),
-            ref.getAktørId(),
+            Optional.of(ref.getAktørId()),
             LocalDate.now().minusYears(1),
             Set.of("PN", GAMMEL_ORDNING_KODE));
 
@@ -179,6 +178,17 @@ public class InfotrygdMigreringTjeneste {
      */
     public void finnOgOpprettMigrertePerioder(Long behandlingId, AktørId aktørId, Long fagsakId) {
 
+        var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
+
+        var grunnlagsperioderPrAktør = infotrygdService.finnGrunnlagsperioderForPleietrengende(
+            fagsak.getPleietrengendeAktørId(),
+            Optional.empty(),
+            LocalDate.now().minusYears(1),
+            Set.of("PN"));
+
+        var infotrygdperioderForAktørOgPleietrengende = grunnlagsperioderPrAktør.getOrDefault(aktørId, List.of())
+            .stream().map(IntervallMedBehandlingstema::intervall).collect(Collectors.toList());
+
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var eksisterendeInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(fagsakId);
 
@@ -187,9 +197,9 @@ public class InfotrygdMigreringTjeneste {
             .filter(fomDato -> eksisterendeInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).anyMatch(fomDato::equals))
             .collect(Collectors.toSet());
 
-        var datoerForOverlapp = finnDatoerForOverlapp(perioderTilVurdering, behandlingId, aktørId);
+        var datoerForOverlapp = finnDatoerForOverlapp(perioderTilVurdering, behandlingId, aktørId, infotrygdperioderForAktørOgPleietrengende);
         var alleSøknadsperioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandlingId);
-        validerIngenTrukketPeriode(behandlingId, aktørId, eksisterendeInfotrygdMigreringer, alleSøknadsperioder);
+        validerIngenTrukketPeriode(behandlingId, aktørId, eksisterendeInfotrygdMigreringer, alleSøknadsperioder, infotrygdperioderForAktørOgPleietrengende);
 
         var utledetInfotrygdmigreringTilVurdering = new HashSet<LocalDate>();
         utledetInfotrygdmigreringTilVurdering.addAll(datoerForOverlapp);
@@ -214,8 +224,11 @@ public class InfotrygdMigreringTjeneste {
         fagsakRepository.deaktiverInfotrygdmigrering(m.getFagsakId(), m.getSkjæringstidspunkt());
     }
 
-    private void validerIngenTrukketPeriode(Long behandlingId, AktørId aktørId, List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer, NavigableSet<DatoIntervallEntitet> alleSøknadsperioder) {
-        var anvistePerioder = finnPerioderMedPSBFraInfotrygd(behandlingId, aktørId);
+    private void validerIngenTrukketPeriode(Long behandlingId, AktørId aktørId,
+                                            List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer,
+                                            NavigableSet<DatoIntervallEntitet> alleSøknadsperioder,
+                                            List<DatoIntervallEntitet> infotrygdperioderForAktørOgPleietrengende) {
+        var anvistePerioder = finnPerioderMedPSBFraInfotrygd(behandlingId, aktørId, infotrygdperioderForAktørOgPleietrengende);
         var migreringUtenSøknad = eksisterendeInfotrygdMigreringer.stream()
             .map(SakInfotrygdMigrering::getSkjæringstidspunkt)
             .filter(migrertStp -> alleSøknadsperioder.stream().noneMatch(periode -> periode.inkluderer(migrertStp)) &&
@@ -237,21 +250,24 @@ public class InfotrygdMigreringTjeneste {
         fagsakRepository.opprettInfotrygdmigrering(fagsakId, skjæringstidspunkt);
     }
 
-    private Set<LocalDate> finnDatoerForOverlapp(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Long behandlingId, AktørId aktørId) {
-        List<DatoIntervallEntitet> anvistePerioder = finnPerioderMedPSBFraInfotrygd(behandlingId, aktørId);
+    private Set<LocalDate> finnDatoerForOverlapp(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Long behandlingId, AktørId aktørId, List<DatoIntervallEntitet> infotrygdperioderForAktørOgPleietrengende) {
+        List<DatoIntervallEntitet> anvistePerioder = finnPerioderMedPSBFraInfotrygd(behandlingId, aktørId, infotrygdperioderForAktørOgPleietrengende);
         var stpForMigrering = new HashSet<LocalDate>();
         stpForMigrering.addAll(finnSkjæringstidspunktForOverlapp(perioderTilVurdering, anvistePerioder));
         stpForMigrering.addAll(finnSkjæringstidspunktForKantIKant(perioderTilVurdering, anvistePerioder));
         return stpForMigrering;
     }
 
-    private List<DatoIntervallEntitet> finnPerioderMedPSBFraInfotrygd(Long behandlingId, AktørId aktørId) {
+    private List<DatoIntervallEntitet> finnPerioderMedPSBFraInfotrygd(Long behandlingId,
+                                                                      AktørId aktørId,
+                                                                      List<DatoIntervallEntitet> infotrygdperioderForAktørOgPleietrengende) {
         YtelseFilter ytelseFilter = finnPSBInfotryd(behandlingId, aktørId);
         var anvistePerioder = ytelseFilter.getFiltrertYtelser()
             .stream()
             .filter(y -> y.getYtelseAnvist() != null)
             .flatMap(y -> y.getYtelseAnvist().stream())
             .map(y -> DatoIntervallEntitet.fraOgMedTilOgMed(y.getAnvistFOM(), y.getAnvistTOM()))
+            .filter(p -> infotrygdperioderForAktørOgPleietrengende.stream().anyMatch(p::overlapper))
             .toList();
         return anvistePerioder;
     }
