@@ -106,13 +106,15 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
                     return compareStpDistanse;
                 }
                 return kravdok2.getInnsendingsTidspunkt().compareTo(kravdok1.getInnsendingsTidspunkt());
-            })
-            .orElseThrow();
-        var journalpostId = sistMottatteSøknadNærmestStp.getKey().getJournalpostId();
+            });
 
-        return oppgitteOpptjeninger.stream()
-            .filter(jp -> jp.getJournalpostId().equals(journalpostId))
-            .findFirst();
+        return sistMottatteSøknadNærmestStp.flatMap(sistMottatt -> {
+            var journalpostId = sistMottatt.getKey().getJournalpostId();
+            return oppgitteOpptjeninger.stream()
+                .filter(jp -> jp.getJournalpostId().equals(journalpostId))
+                .findFirst();
+        });
+
     }
 
     private long distanseTilStp(List<SøktPeriode<Søknadsperiode>> søktePerioder, LocalDate skjæringstidspunkt) {
