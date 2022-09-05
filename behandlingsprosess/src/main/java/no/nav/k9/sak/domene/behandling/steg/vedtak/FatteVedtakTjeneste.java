@@ -12,9 +12,12 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -37,6 +40,8 @@ public class FatteVedtakTjeneste {
     private OppgaveTjeneste oppgaveTjeneste;
     private TotrinnTjeneste totrinnTjeneste;
     private BehandlingVedtakTjeneste behandlingVedtakTjeneste;
+    private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
+    private boolean sigrunFilterEnabled;
 
     FatteVedtakTjeneste() {
         // for CDI proxy
@@ -46,11 +51,16 @@ public class FatteVedtakTjeneste {
     public FatteVedtakTjeneste(VedtakTjeneste vedtakTjeneste,
                                OppgaveTjeneste oppgaveTjeneste,
                                TotrinnTjeneste totrinnTjeneste,
-                               BehandlingVedtakTjeneste behandlingVedtakTjeneste) {
+                               BehandlingVedtakTjeneste behandlingVedtakTjeneste,
+                               BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
+                               @KonfigVerdi(value = "SIGRUN_INNTEKT_FILTER_ENABLED", defaultVerdi = "false") boolean sigrunFilterEnabled
+                               ) {
         this.vedtakTjeneste = vedtakTjeneste;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.totrinnTjeneste = totrinnTjeneste;
         this.behandlingVedtakTjeneste = behandlingVedtakTjeneste;
+        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
+        this.sigrunFilterEnabled = sigrunFilterEnabled;
     }
 
     public BehandleStegResultat fattVedtak(BehandlingskontrollKontekst kontekst, Behandling behandling) {
@@ -75,6 +85,10 @@ public class FatteVedtakTjeneste {
         behandlingVedtakTjeneste.opprettBehandlingVedtak(kontekst, behandling);
 
         opprettLagretVedtak(behandling);
+
+        if (sigrunFilterEnabled) {
+            beregningsgrunnlagTjeneste.fastsettNæringsinntektPerioderDersomRelevant(BehandlingReferanse.fra(behandling));
+        }
 
         // Ingen nye aksjonspunkt herfra
         return BehandleStegResultat.utførtUtenAksjonspunkter();

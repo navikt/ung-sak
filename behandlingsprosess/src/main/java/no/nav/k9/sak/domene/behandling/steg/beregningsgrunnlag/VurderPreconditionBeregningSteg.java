@@ -5,7 +5,6 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.PRECONDITION_BERE
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.NavigableSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,7 +14,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -42,7 +40,6 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
-import no.nav.k9.sak.vilkår.VilkårPeriodeFilter;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
@@ -62,7 +59,6 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private BeregningsgrunnlagTjeneste kalkulusTjeneste;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
-    private boolean sigrunFilterEnabled;
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
 
@@ -80,7 +76,6 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                            BeregningsgrunnlagTjeneste kalkulusTjeneste,
                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                           @KonfigVerdi(value = "SIGRUN_INNTEKT_FILTER_ENABLED", defaultVerdi = "false") boolean sigrunFilterEnabled,
                                            VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
@@ -91,7 +86,6 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
-        this.sigrunFilterEnabled = sigrunFilterEnabled;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
     }
 
@@ -114,11 +108,6 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
 
         // 5. kopierer input overstyringer for migrering fra infotrygd
         kopierInputOverstyring(behandling);
-
-        // 6. fastsetter næringsinntektperioder for perioder med oppgitt selvstendig næring
-        if (sigrunFilterEnabled) {
-            kalkulusTjeneste.fastsettNæringsinntektPerioder(referanse);
-        }
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(finnAksjonspunkter(behandling));
     }

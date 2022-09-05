@@ -317,12 +317,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     public List<BeregningsgrunnlagKobling> hentKoblingerForPerioder(BehandlingReferanse ref) {
         var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
         var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
-        var skjæringstidspunkter = vilkår.getPerioder()
-            .stream()
-            .map(VilkårPeriode::getSkjæringstidspunkt)
-            .sorted()
-            .distinct()
-            .collect(Collectors.toList());
+        var skjæringstidspunkter = finnSkjæringstidspunkter(vilkår);
         var referanser = beregningsgrunnlagReferanserTjeneste.finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkter, false, false);
         var forlengelsePerioder = finnForlengelseperioder(ref, vilkår);
         return referanser.stream()
@@ -340,12 +335,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             return Collections.emptyList();
         }
         var vilkår = vilkårOpt.orElseThrow();
-        var skjæringstidspunkter = vilkår.getPerioder()
-            .stream()
-            .map(VilkårPeriode::getSkjæringstidspunkt)
-            .sorted()
-            .distinct()
-            .collect(Collectors.toList());
+        var skjæringstidspunkter = finnSkjæringstidspunkter(vilkår);
         var referanser = beregningsgrunnlagReferanserTjeneste.finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkter, false, false);
         var forlengelsePerioder = finnForlengelseperioder(ref, vilkår);
         return referanser.stream()
@@ -408,28 +398,68 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         grunnlagRepository.gjenopprettInitiell(ref.getBehandlingId());
     }
 
-    public void fastsettNæringsinntektPerioder(BehandlingReferanse ref) {
+    /** Fastsetter næringsinntekter som ble brukt til å fatte vedtak for å støtte § 8-35 andre ledd (TSF-2701)
+     *
+     *  Lagrer ned referanse til hvilket iAy-grunnlag som ble brukt for hvert skjæringstidspunkt i beregning dersom bruker er selvstendig næringsdrivende.
+     *
+     *  Fra lovteksten:
+     *  Jf § 8-35 andre ledd er Det er de ferdiglignede inntektene som foreligger på vedtakstidspunktet som brukes.
+     *  Dette avviker fra prinsippet om at det er opplysningene som foreligger på sykmeldingstidspunktet som skal anvendes.
+     *  Årsaken til at prinsippet fravikes er at Arbeids- og velferdsetaten ikke har opplysninger om dato for skatteoppgjøret til den enkelte
+     *
+     * Vi behandler et vedtak for SN som førstegangsvedtak dersom forrige søknad for stp ikke hadde opplysning om næring
+     *
+     * @param ref Behandlingreferanse
+     */
+    public void fastsettNæringsinntektPerioderDersomRelevant(BehandlingReferanse ref) {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
         var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId());
+        var skjæringstidspunkter = finnSkjæringstidspunkterForBeregning(ref);
+        var næringsinntektPerioder = finnEksisterendeNæringsinntektPerioder(ref);
+        var perioder = finnPerioderSomSkalBeholdes(ref, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, næringsinntektPerioder);
+        // Vi behandler et vedtak for SN som førstegangsvedtak dersom forrige søknad for stp ikke hadde opplysning om næring
+        var nyeSkjæringstidspunktForSN = finnSTPMedFørstegangsvedtakForNæring(ref, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, næringsinntektPerioder);
+        perioder.addAll(nyeSkjæringstidspunktForSN);
+        grunnlagRepository.lagreNæringsinntektPeriode(ref.getBehandlingId(), perioder);
+    }
+
+    private List<NæringsinntektPeriode> finnSTPMedFørstegangsvedtakForNæring(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, OppgittOpptjeningFilter oppgittOpptjeningFilter, List<LocalDate> skjæringstidspunkter, List<NæringsinntektPeriode> næringsinntektPerioder) {
+        return skjæringstidspunkter.stream().filter(stp -> erSelvstendigNæringsdrivende(ref, iayGrunnlag, oppgittOpptjeningFilter, stp))
+            .filter(stp -> næringsinntektPerioder.stream().noneMatch(p -> p.getSkjæringstidspunkt().equals(stp)))
+            .map(stp -> new NæringsinntektPeriode(iayGrunnlag.getEksternReferanse(), stp))
+            .collect(Collectors.toList());
+    }
+
+    private List<NæringsinntektPeriode> finnEksisterendeNæringsinntektPerioder(BehandlingReferanse ref) {
+        var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+        var næringsinntektPerioder = grunnlagOpt.map(BeregningsgrunnlagPerioderGrunnlag::getNæringsinntektPerioder).orElse(Collections.emptyList());
+        return næringsinntektPerioder;
+    }
+
+    private List<LocalDate> finnSkjæringstidspunkterForBeregning(BehandlingReferanse ref) {
         var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
         var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
-        var skjæringstidspunkter = vilkår.getPerioder()
+        return finnSkjæringstidspunkter(vilkår);
+    }
+
+    private List<LocalDate> finnSkjæringstidspunkter(Vilkår vilkår) {
+        return vilkår.getPerioder()
             .stream()
             .map(VilkårPeriode::getSkjæringstidspunkt)
             .sorted()
             .distinct()
             .collect(Collectors.toList());
-        var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
-        var næringsinntektPerioder = grunnlagOpt.map(BeregningsgrunnlagPerioderGrunnlag::getNæringsinntektPerioder).orElse(Collections.emptyList());
-        var perioder = næringsinntektPerioder.stream()
+    }
+
+    private ArrayList<NæringsinntektPeriode> finnPerioderSomSkalBeholdes(BehandlingReferanse ref,
+                                                                         InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                         OppgittOpptjeningFilter oppgittOpptjeningFilter,
+                                                                         List<LocalDate> skjæringstidspunkter,
+                                                                         List<NæringsinntektPeriode> næringsinntektPerioder) {
+        return næringsinntektPerioder.stream()
             .filter(p -> skjæringstidspunkter.contains(p.getSkjæringstidspunkt()))
             .filter(p -> erSelvstendigNæringsdrivende(ref, iayGrunnlag, oppgittOpptjeningFilter, p.getSkjæringstidspunkt()))
             .collect(Collectors.toCollection(ArrayList::new));
-        skjæringstidspunkter.stream().filter(stp -> erSelvstendigNæringsdrivende(ref, iayGrunnlag, oppgittOpptjeningFilter, stp))
-            .filter(stp -> næringsinntektPerioder.stream().noneMatch(p -> p.getSkjæringstidspunkt().equals(stp)))
-            .map(stp -> new NæringsinntektPeriode(iayGrunnlag.getEksternReferanse(), stp))
-            .forEach(perioder::add);
-        grunnlagRepository.lagreNæringsinntektPeriode(ref.getBehandlingId(), perioder);
     }
 
     private boolean erSelvstendigNæringsdrivende(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, OppgittOpptjeningFilter oppgittOpptjeningFilter, LocalDate stp) {
