@@ -71,4 +71,8 @@ public class VurdertOpplæring extends BaseEntitet {
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }
+
+    public Boolean getNødvendigOpplæring() {
+        return nødvendigOpplæring;
+    }
 }

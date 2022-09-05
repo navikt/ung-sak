@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -30,8 +31,10 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
     public OppdateringResultat oppdater(VurderNødvendighetDto dto, AksjonspunktOppdaterParameter param) {
         VurdertOpplæringGrunnlag grunnlag = mapDtoTilGrunnlag(param.getBehandlingId(), dto);
         vurdertOpplæringRepository.lagreOgFlush(param.getBehandlingId(), grunnlag);
-        //TODO skal vi vurdere om oppgitte perioder stemmer med perioder fra søknaden?
-        return OppdateringResultat.nyttResultat();
+        OppdateringResultat resultat = OppdateringResultat.nyttResultat();
+        resultat.setSteg(BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR);
+        resultat.rekjørSteg();
+        return resultat;
     }
 
     private VurdertOpplæringGrunnlag mapDtoTilGrunnlag(Long behandlingId, VurderNødvendighetDto dto) {

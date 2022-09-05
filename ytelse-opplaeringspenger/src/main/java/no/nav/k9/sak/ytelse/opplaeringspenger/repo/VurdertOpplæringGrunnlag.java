@@ -57,6 +57,10 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
         return vurdertOpplæring;
     }
 
+    public Boolean getGodkjentInstitusjon() {
+        return godkjentInstitusjon;
+    }
+
     public void setAktiv(Boolean aktiv) {
         this.aktiv = aktiv;
     }

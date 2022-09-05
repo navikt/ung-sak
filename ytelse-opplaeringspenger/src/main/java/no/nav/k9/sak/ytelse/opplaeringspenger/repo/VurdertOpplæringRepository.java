@@ -26,6 +26,10 @@ public class VurdertOpplæringRepository {
         this.entityManager = entityManager;
     }
 
+    public Optional<VurdertOpplæringGrunnlag> hentAktivtGrunnlagForBehandling(Long behandlingId) {
+        return getAktivtGrunnlag(behandlingId);
+    }
+
     public void lagreOgFlush(Long behandlingId, VurdertOpplæringGrunnlag nyttGrunnlag) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         Objects.requireNonNull(nyttGrunnlag, "nyttGrunnlag");
