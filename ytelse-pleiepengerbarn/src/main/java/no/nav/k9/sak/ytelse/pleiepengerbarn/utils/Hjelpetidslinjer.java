@@ -4,11 +4,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -17,47 +15,61 @@ public final class Hjelpetidslinjer {
     private Hjelpetidslinjer() {
     }
 
+    /**
+     * Lager en tidslinje der man kun har med helger ut fra tidslinjen som er oppgitt.
+     * 
+     * @param tidslinje Tidslinjen som brukes for å hente helger for.
+     * @return En tidslinje med helger der man tar med alle helger som ligger inni
+     *          eller kant-i-kant med minst én periode i tidslinjen. Dette betyr
+     *          at man kan få helger på utsiden av tidslinjen (i hver ende).
+     */
     public static LocalDateTimeline<Boolean> lagTidslinjeMedKunHelger(LocalDateTimeline<?> tidslinje) {
-        List<LocalDateSegment<Boolean>> helgesegmenter = new ArrayList<>();
-
-        for (LocalDateSegment<?> segment : tidslinje.toSegments()) {
-            var min = segment.getFom();
-            var max = finnNærmeste(DayOfWeek.MONDAY, segment.getTom());
-            LocalDate next = min;
-
-            while (next.isBefore(max)) {
-                if (Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).contains(next.getDayOfWeek()) && min.isEqual(next)) {
-                    next = finnNeste(max, next);
-                    helgesegmenter.add(new LocalDateSegment<>(min, next, true));
+        final List<LocalDateSegment<Boolean>> helgesegmenter = new ArrayList<>();
+        LocalDate sisteHelg = null; 
+        for (LocalDateSegment<?> s : tidslinje) {
+            final LocalDate førsteFom = lørdagenFørHelgEllerMandag(s.getFom());
+            final LocalDate sisteTom = søndagenEtterHelgEllerFredag(s.getTom());
+            
+            LocalDate fom = førsteFom;
+            while (fom.isBefore(sisteTom)) {
+                if (sisteHelg != null && sisteHelg.equals(fom)) {
+                    fom = fom.plusDays(7);
+                    continue;
                 }
-                var start = finnNærmeste(DayOfWeek.SATURDAY, next);
-                next = finnNeste(max, start);
-                if (start.isBefore(max)) {
-                    helgesegmenter.add(new LocalDateSegment<>(start, next, true));
-                }
+                helgesegmenter.add(new LocalDateSegment<>(fom, fom.plusDays(1), Boolean.TRUE));
+                sisteHelg = fom;
+                fom = fom.plusDays(7);
             }
-
         }
-        return new LocalDateTimeline<>(helgesegmenter, StandardCombinators::coalesceRightHandSide);
+        return new LocalDateTimeline<>(helgesegmenter);
+    }
+    
+    private static LocalDate lørdagenFørHelgEllerMandag(LocalDate dato) {
+        LocalDate førsteFom = dato;
+        if (førsteFom.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            førsteFom = førsteFom.minusDays(1);
+        } else if (førsteFom.getDayOfWeek() == DayOfWeek.MONDAY) {
+            førsteFom = førsteFom.minusDays(2);
+        }
+        if (førsteFom.getDayOfWeek() != DayOfWeek.SATURDAY) {
+            førsteFom = førsteFom.plusDays(DayOfWeek.SUNDAY.getValue() - førsteFom.getDayOfWeek().getValue() + 1);
+        }
+        return førsteFom;
     }
 
-    private static LocalDate finnNeste(LocalDate max, LocalDate start) {
-        LocalDate next;
-        next = finnNærmeste(DayOfWeek.SUNDAY, start);
-        if (next.isAfter(max)) {
-            next = max;
+    private static LocalDate søndagenEtterHelgEllerFredag(LocalDate dato) {
+        LocalDate sisteTom = dato;
+        if (sisteTom.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            sisteTom = sisteTom.plusDays(1);
+        } else if (sisteTom.getDayOfWeek() == DayOfWeek.FRIDAY) {
+            sisteTom = sisteTom.plusDays(2);
         }
-        return next;
-    }
-
-    private static LocalDate finnNærmeste(DayOfWeek target, LocalDate date) {
-        var dayOfWeek = date.getDayOfWeek();
-        if (target.equals(dayOfWeek)) {
-            return date;
+        if (sisteTom.getDayOfWeek() != DayOfWeek.SUNDAY) {
+            sisteTom = sisteTom.minusDays(sisteTom.getDayOfWeek().getValue());
         }
-        return finnNærmeste(target, date.plusDays(1));
+        return sisteTom;
     }
-
+    
     public static <T> LocalDateTimeline<T> utledHullSomMåTettes(LocalDateTimeline<T> tidslinjen, KantIKantVurderer kantIKantVurderer) {
         var segmenter = tidslinjen.compress().toSegments();
 
