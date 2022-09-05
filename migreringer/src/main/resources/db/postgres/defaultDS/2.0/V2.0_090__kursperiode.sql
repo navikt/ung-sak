@@ -5,6 +5,7 @@ create table if not exists UP_KURS_PERIODE
     FOM              DATE                                   NOT NULL,
     TOM              DATE                                   NOT NULL,
     INSTITUSJON      VARCHAR(100)                          ,
+    BESKRIVELSE      VARCHAR(4000)                         ,
     VERSJON          BIGINT       DEFAULT 0                 NOT NULL,
     OPPRETTET_AV     VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
     OPPRETTET_TID    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,

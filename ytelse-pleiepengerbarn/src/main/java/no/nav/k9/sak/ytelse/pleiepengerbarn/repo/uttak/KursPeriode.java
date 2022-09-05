@@ -41,6 +41,9 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
     @Column(name = "institusjon")
     private String institusjon;
 
+    @Column(name = "beskrivelse")
+    private String beskrivelse;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -48,18 +51,20 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
     KursPeriode() {
     }
 
-    public KursPeriode(DatoIntervallEntitet periode, String institusjon) {
+    public KursPeriode(DatoIntervallEntitet periode, String institusjon, String beskrivelse) {
         this.periode = periode;
         this.institusjon = institusjon;
+        this.beskrivelse = beskrivelse;
     }
 
-    public KursPeriode(LocalDate fom, LocalDate tom, String institusjon) {
-        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), institusjon);
+    public KursPeriode(LocalDate fom, LocalDate tom, String institusjon, String beskrivelse) {
+        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), institusjon, beskrivelse);
     }
 
     public KursPeriode(KursPeriode it) {
         this.periode = it.periode;
         this.institusjon = it.institusjon;
+        this.beskrivelse = it.beskrivelse;
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -70,23 +75,28 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
         return institusjon;
     }
 
+    public String getBeskrivelse() {
+        return beskrivelse;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         KursPeriode that = (KursPeriode) o;
         return Objects.equals(periode, that.periode)
-            && Objects.equals(institusjon, that.institusjon);
+            && Objects.equals(institusjon, that.institusjon)
+            && Objects.equals(beskrivelse, that.beskrivelse);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, institusjon);
+        return Objects.hash(periode, institusjon, beskrivelse);
     }
 
     @Override
     public String getIndexKey() {
-        return IndexKeyComposer.createKey(institusjon, periode);
+        return IndexKeyComposer.createKey(institusjon, periode, beskrivelse);
     }
 
     @Override
@@ -94,6 +104,7 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
         return "KursPeriode{" +
             "periode=" + periode +
             ", institusjon=" + institusjon +
+            ", beskrivelse=" + beskrivelse +
             '}';
     }
 }

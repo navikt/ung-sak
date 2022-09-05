@@ -80,7 +80,8 @@ class SøknadOversetter {
         KursPeriode kursPeriode = new KursPeriode(
             kurs.getPeriode().getFraOgMed(),
             kurs.getPeriode().getTilOgMed(),
-            kurs.getHolder());
+            kurs.getHolder(),
+            kurs.getFormål());
         return Collections.singletonList(kursPeriode);
     }
 
