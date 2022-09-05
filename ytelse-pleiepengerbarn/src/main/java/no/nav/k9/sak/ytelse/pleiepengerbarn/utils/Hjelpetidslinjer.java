@@ -88,6 +88,58 @@ public final class Hjelpetidslinjer {
             throw new IllegalArgumentException("fom kan ikke være etter tom.");
         }
         
+        LocalDate nesteFom = fjernHelgFraFomDato(fom);
+        final LocalDate sisteTom = fjernHelgFraTomDato(tom);
+        
+        final LocalDate førsteTom = nesteFom.plusDays(DayOfWeek.FRIDAY.getValue() - nesteFom.getDayOfWeek().getValue());
+        if (førsteTom.isAfter(sisteTom)) {
+            return resultatHvisMindreEnnEnUke(nesteFom, sisteTom);
+        }
+        
+        final List<LocalDateSegment<Boolean>> ukesegmenter = new ArrayList<>();
+        
+        // Legger til den første uken der nesteFom ikke nødvendigvis er mandag:
+        ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, førsteTom, Boolean.TRUE));
+        
+        final int dagerIEnUke = 7;
+        final int dagerFraFredagTilMandag = 3;
+        
+        // Hopper over helgen:
+        nesteFom = førsteTom.plusDays(dagerFraFredagTilMandag);
+        
+        // Legg til fulle uker:
+        while (!nesteFom.plusDays(dagerIEnUke - dagerFraFredagTilMandag).isAfter(sisteTom)) {
+            ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, nesteFom.plusDays(4), Boolean.TRUE));
+            nesteFom = nesteFom.plusDays(dagerIEnUke); // Hopper til neste mandag.
+        }
+        
+        // Håndter den siste ikke-fulle uken:
+        if (!nesteFom.isAfter(sisteTom)) {
+            ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, sisteTom, Boolean.TRUE));
+        }
+        
+        return new LocalDateTimeline<Boolean>(ukesegmenter);
+    }
+    
+    private static LocalDateTimeline<Boolean> resultatHvisMindreEnnEnUke(LocalDate nesteFom,LocalDate sisteTom) {
+        if (nesteFom.isAfter(sisteTom)) {
+            // Kun helgeperiode.
+            return LocalDateTimeline.empty();
+        }
+        return new LocalDateTimeline<Boolean>(nesteFom, sisteTom, Boolean.TRUE);
+    }
+
+    private static LocalDate fjernHelgFraTomDato(LocalDate tom) {
+        if (tom.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            tom = tom.minusDays(1);
+        }
+        if (tom.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            tom = tom.minusDays(2);
+        }
+        return tom;
+    }
+
+    private static LocalDate fjernHelgFraFomDato(LocalDate fom) {
         LocalDate nesteFom = fom;
         if (nesteFom.getDayOfWeek() == DayOfWeek.SATURDAY) {
             nesteFom = nesteFom.plusDays(2);
@@ -95,32 +147,7 @@ public final class Hjelpetidslinjer {
         if (nesteFom.getDayOfWeek() == DayOfWeek.SUNDAY) {
             nesteFom = nesteFom.plusDays(1);
         }
-        if (tom.getDayOfWeek() == DayOfWeek.SATURDAY) {
-            tom = tom.minusDays(1);
-        }
-        if (tom.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            tom = tom.minusDays(2);
-        }
-        
-        List<LocalDateSegment<Boolean>> ukesegmenter = new ArrayList<>();
-        LocalDate førsteTom = nesteFom.plusDays(DayOfWeek.FRIDAY.getValue() - nesteFom.getDayOfWeek().getValue());
-        if (førsteTom.isAfter(tom)) {
-            if (nesteFom.isAfter(tom)) {
-                // Kun helgeperiode.
-                return LocalDateTimeline.empty();
-            }
-            return new LocalDateTimeline<Boolean>(nesteFom, tom, Boolean.TRUE);
-        }
-        ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, førsteTom, Boolean.TRUE));
-        nesteFom = førsteTom.plusDays(3);
-        while (!nesteFom.plusDays(4).isAfter(tom)) {
-            ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, nesteFom.plusDays(4), Boolean.TRUE));
-            nesteFom = nesteFom.plusDays(7); 
-        }
-        if (!nesteFom.isAfter(tom)) { // dvs nesteFom.plusDays(4).isAfter(tom))
-            ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, tom, Boolean.TRUE));
-        }
-        return new LocalDateTimeline<Boolean>(ukesegmenter);
+        return nesteFom;
     }
     
     public static <T> LocalDateTimeline<T> utledHullSomMåTettes(LocalDateTimeline<T> tidslinjen, KantIKantVurderer kantIKantVurderer) {
