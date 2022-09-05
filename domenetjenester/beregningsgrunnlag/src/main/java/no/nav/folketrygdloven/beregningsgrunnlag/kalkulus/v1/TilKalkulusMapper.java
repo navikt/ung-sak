@@ -1,6 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.NæringsinntektFilter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter.OpptjeningPeriode;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
@@ -103,15 +105,25 @@ public class TilKalkulusMapper {
 
     public static final String KODEVERDI_UNDEFINED = "-";
 
-    public TilKalkulusMapper() {
+    private final InntektsmeldingerRelevantForBeregning imTjeneste;
+    private final NæringsinntektFilter næringsinntektFilter;
+
+    public TilKalkulusMapper(InntektsmeldingerRelevantForBeregning imTjeneste, NæringsinntektFilter sigrunFilter) {
+        this.imTjeneste = imTjeneste;
+        this.næringsinntektFilter = sigrunFilter;
     }
 
-    public static List<Inntekt> finnRelevanteInntekter(InntektFilter inntektFilter) {
+
+    public List<Inntekt> finnRelevanteInntekter(InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                BehandlingReferanse referanse,
+                                                LocalDate skjæringstidspunktBeregning) {
+        var inntektFilter = new InntektFilter(iayGrunnlag.getAktørInntektFraRegister(referanse.getAktørId())).før(skjæringstidspunktBeregning);
         return new ArrayList<>() {
             {
                 addAll(inntektFilter.getAlleInntektSammenligningsgrunnlag());
                 addAll(inntektFilter.getAlleInntektBeregningsgrunnlag());
-                addAll(inntektFilter.getAlleInntektBeregnetSkatt());
+                addAll(næringsinntektFilter.finnInntekter(referanse, iayGrunnlag, skjæringstidspunktBeregning));
+
             }
         };
     }
@@ -159,7 +171,10 @@ public class TilKalkulusMapper {
         return frilansoppdrag -> new OppgittFrilansInntekt(mapPeriode(frilansoppdrag.getPeriode()), frilansoppdrag.getInntekt());
     }
 
-    private static InntektsmeldingerDto mapTilDto(InntektsmeldingerRelevantForBeregning imTjeneste, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode, BehandlingReferanse referanse) {
+    private static InntektsmeldingerDto mapTilDto(InntektsmeldingerRelevantForBeregning imTjeneste,
+                                                  Collection<Inntektsmelding> sakInntektsmeldinger,
+                                                  DatoIntervallEntitet vilkårsPeriode,
+                                                  BehandlingReferanse referanse) {
         // TODO: Skal vi ta hensyn til endringer i refusjonskrav så må dette konstrueres fra alle inntektsmeldingene som overlapper med perioden
         // Da denne informasjonen ikke er periodisert for IM for OMP så må det mappes fra inntektsmeldingene i kronologisk rekkefølge
         var inntektsmeldinger = imTjeneste.begrensSakInntektsmeldinger(referanse, sakInntektsmeldinger, vilkårsPeriode);
@@ -285,6 +300,7 @@ public class TilKalkulusMapper {
     }
 
     public static InntekterDto mapInntektDto(List<Inntekt> alleInntektBeregningsgrunnlag) {
+
         List<UtbetalingDto> utbetalingDtoer = alleInntektBeregningsgrunnlag.stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList());
         if (!utbetalingDtoer.isEmpty()) {
             return new InntekterDto(utbetalingDtoer);
@@ -407,16 +423,15 @@ public class TilKalkulusMapper {
                                                     AktørId aktørId,
                                                     DatoIntervallEntitet vilkårsPeriode,
                                                     OppgittOpptjening oppgittOpptjening,
-                                                    InntektsmeldingerRelevantForBeregning imTjeneste, BehandlingReferanse referanse) {
+                                                    BehandlingReferanse referanse) {
 
         var skjæringstidspunktBeregning = vilkårsPeriode.getFomDato();
-        var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(skjæringstidspunktBeregning);
         var ytelseFilter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId));
         var yrkesaktivitetFilter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId));
 
         var yrkesaktiviteterForBeregning = new ArrayList<>(yrkesaktivitetFilter.getYrkesaktiviteter());
         yrkesaktiviteterForBeregning.addAll(yrkesaktivitetFilter.getFrilansOppdrag());
-        var alleRelevanteInntekter = finnRelevanteInntekter(inntektFilter);
+        var alleRelevanteInntekter = finnRelevanteInntekter(grunnlag, referanse, skjæringstidspunktBeregning);
         var inntektArbeidYtelseGrunnlagDto = new InntektArbeidYtelseGrunnlagDto();
 
         inntektArbeidYtelseGrunnlagDto.medArbeidDto(mapArbeidDto(yrkesaktiviteterForBeregning, vilkårsPeriode));
