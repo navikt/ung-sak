@@ -88,9 +88,13 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     // Kode for lansering av ny prioriering - START
     Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravDokumenterMedFravær) {
         var stp = vilkårsperiode.getFomDato();
+        var oppgitteOpptjeninger = iayGrunnlag.getOppgittOpptjeningAggregat()
+            .map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger)
+            .orElse(List.of());
         var sistMottatteSøknadNærmestStp = kravDokumenterMedFravær.entrySet()
             .stream()
             .filter(it -> !it.getValue().isEmpty())
+            .filter(it -> oppgitteOpptjeninger.stream().anyMatch(jp -> jp.getJournalpostId().equals(it.getKey().getJournalpostId())))
             .min((e1, e2) -> {
                 var kravdok1 = e1.getKey();
                 var kravdok2 = e2.getKey();
@@ -102,16 +106,15 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
                     return compareStpDistanse;
                 }
                 return kravdok2.getInnsendingsTidspunkt().compareTo(kravdok1.getInnsendingsTidspunkt());
-            })
-            .orElseThrow();
-        var journalpostId = sistMottatteSøknadNærmestStp.getKey().getJournalpostId();
+            });
 
-        var oppgitteOpptjeninger = iayGrunnlag.getOppgittOpptjeningAggregat()
-            .map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger)
-            .orElse(List.of());
-        return oppgitteOpptjeninger.stream()
-            .filter(jp -> jp.getJournalpostId().equals(journalpostId))
-            .findFirst();
+        return sistMottatteSøknadNærmestStp.flatMap(sistMottatt -> {
+            var journalpostId = sistMottatt.getKey().getJournalpostId();
+            return oppgitteOpptjeninger.stream()
+                .filter(jp -> jp.getJournalpostId().equals(journalpostId))
+                .findFirst();
+        });
+
     }
 
     private long distanseTilStp(List<SøktPeriode<Søknadsperiode>> søktePerioder, LocalDate skjæringstidspunkt) {
