@@ -191,8 +191,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
-      value: "false"
     - name: OMP_ORDENTLIG_VALIDERING_MOTTAK
       value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
