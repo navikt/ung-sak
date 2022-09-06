@@ -32,6 +32,7 @@ import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.olp.v1.Opplæringspenger;
 import no.nav.k9.søknad.ytelse.olp.v1.kurs.Kurs;
+import no.nav.k9.søknad.ytelse.olp.v1.kurs.KursPeriodeMedReisetid;
 import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie;
 
 @Dependent
@@ -76,13 +77,16 @@ class SøknadOversetter {
     }
 
     private List<KursPeriode> mapKurs(Kurs kurs) {
-        //TODO endre på dette når kurs kan inneholde flere perioder
-        KursPeriode kursPeriode = new KursPeriode(
-            kurs.getPeriode().getFraOgMed(),
-            kurs.getPeriode().getTilOgMed(),
-            kurs.getHolder(),
-            kurs.getFormål());
-        return Collections.singletonList(kursPeriode);
+        List<KursPeriodeMedReisetid> kursPerioderMedReisetid = kurs.getKursperioder();
+        return kursPerioderMedReisetid.stream().map(kursPeriodeMedReisetid ->
+            new KursPeriode(
+                kursPeriodeMedReisetid.getPeriode().getFraOgMed(),
+                kursPeriodeMedReisetid.getPeriode().getTilOgMed(),
+                kurs.getHolder(),
+                kurs.getFormål(),
+                kursPeriodeMedReisetid.getAvreise(),
+                kursPeriodeMedReisetid.getHjemkomst()))
+            .collect(Collectors.toList());
     }
 
     private List<UtenlandsoppholdPeriode> mapUtenlandsopphold(Utenlandsopphold utenlandsopphold) {

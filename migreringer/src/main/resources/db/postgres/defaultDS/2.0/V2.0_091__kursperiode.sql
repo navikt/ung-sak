@@ -4,6 +4,8 @@ create table if not exists UP_KURS_PERIODE
     HOLDER_ID        BIGINT REFERENCES UP_SOEKNAD_PERIODER (id),
     FOM              DATE                                   NOT NULL,
     TOM              DATE                                   NOT NULL,
+    AVREISE          DATE                                   NOT NULL,
+    HJEMKOMST        DATE                                   NOT NULL,
     INSTITUSJON      VARCHAR(100)                          ,
     BESKRIVELSE      VARCHAR(4000)                         ,
     VERSJON          BIGINT       DEFAULT 0                 NOT NULL,
