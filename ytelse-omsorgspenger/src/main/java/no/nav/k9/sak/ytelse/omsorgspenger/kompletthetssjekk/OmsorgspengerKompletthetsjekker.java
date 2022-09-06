@@ -92,9 +92,6 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
             if (harSøknadSomArbeidstaker(ref)) {
                 LOGGER.info("Behandling {} er ikke komplett - Søknad arbeidstaker uten tilhørende IM", ref.getBehandlingId());
                 return settPåVent(ref, Venteårsak.AVV_IM_MOT_SØKNAD_AT, 14);
-            } else {
-                LOGGER.info("Behandling {} er ikke komplett - IM fra {} arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size());
-                return settPåVent(ref, Venteårsak.AVV_IM_MOT_AAREG, 3);
             }
         }
         if (ingenSøknadsperioder(ref)) {
