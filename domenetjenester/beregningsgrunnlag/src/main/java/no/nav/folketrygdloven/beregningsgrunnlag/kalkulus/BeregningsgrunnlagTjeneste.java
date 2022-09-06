@@ -1,6 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,6 +42,10 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
@@ -49,6 +54,7 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagReposito
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.NæringsinntektPeriode;
 
 @Dependent
 public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
@@ -60,16 +66,22 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     private final BeregningsgrunnlagReferanserTjeneste beregningsgrunnlagReferanserTjeneste;
     private final VilkårTjeneste vilkårTjeneste;
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
+    private final InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private final OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
 
     @Inject
     public BeregningsgrunnlagTjeneste(@Any Instance<KalkulusApiTjeneste> kalkulusTjenester,
                                       VilkårResultatRepository vilkårResultatRepository,
                                       BeregningPerioderGrunnlagRepository grunnlagRepository,
                                       VilkårTjeneste vilkårTjeneste,
-                                      VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
+                                      VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
+                                      InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                      OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
         this.kalkulusTjenester = kalkulusTjenester;
         this.grunnlagRepository = grunnlagRepository;
         this.vilkårTjeneste = vilkårTjeneste;
+        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+        this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
         this.beregningsgrunnlagReferanserTjeneste = new BeregningsgrunnlagReferanserTjeneste(grunnlagRepository, vilkårResultatRepository);
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
     }
@@ -223,16 +235,18 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                                              List<BgRef> bgReferanser) {
         var perioder = vilkårsperioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
         var originalReferanserMap = beregningsgrunnlagReferanserTjeneste.finnMapTilOriginaleReferanserUtenAvslag(referanse, perioder, bgReferanser);
+        var grunnlag = grunnlagRepository.hentGrunnlag(referanse.getBehandlingId());
         return bgReferanser.stream().map(e -> {
             var bgRef = e.getRef();
             var stp = e.getStp();
             var vilkårsperiode = vilkårsperioder.stream().filter(p -> p.getPeriode().getFomDato().equals(stp)).findFirst().orElseThrow();
-            Optional<InputOverstyringPeriode> inputOverstyring = finnInputOverstyring(referanse, stp);
+            var inputOverstyring = finnInputOverstyring(stp, grunnlag);
             return new BeregnInput(bgRef,
                 vilkårsperiode.getPeriode(),
                 vilkårsperiode.erForlengelse(),
                 originalReferanserMap.get(bgRef),
-                inputOverstyring.orElse(null));
+                inputOverstyring.orElse(null)
+            );
         }).collect(Collectors.toList());
     }
 
@@ -303,12 +317,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     public List<BeregningsgrunnlagKobling> hentKoblingerForPerioder(BehandlingReferanse ref) {
         var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
         var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
-        var skjæringstidspunkter = vilkår.getPerioder()
-            .stream()
-            .map(VilkårPeriode::getSkjæringstidspunkt)
-            .sorted()
-            .distinct()
-            .collect(Collectors.toList());
+        var skjæringstidspunkter = finnSkjæringstidspunkter(vilkår);
         var referanser = beregningsgrunnlagReferanserTjeneste.finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkter, false, false);
         var forlengelsePerioder = finnForlengelseperioder(ref, vilkår);
         return referanser.stream()
@@ -326,12 +335,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             return Collections.emptyList();
         }
         var vilkår = vilkårOpt.orElseThrow();
-        var skjæringstidspunkter = vilkår.getPerioder()
-            .stream()
-            .map(VilkårPeriode::getSkjæringstidspunkt)
-            .sorted()
-            .distinct()
-            .collect(Collectors.toList());
+        var skjæringstidspunkter = finnSkjæringstidspunkter(vilkår);
         var referanser = beregningsgrunnlagReferanserTjeneste.finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkter, false, false);
         var forlengelsePerioder = finnForlengelseperioder(ref, vilkår);
         return referanser.stream()
@@ -394,6 +398,76 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         grunnlagRepository.gjenopprettInitiell(ref.getBehandlingId());
     }
 
+    /** Fastsetter næringsinntekter som ble brukt til å fatte vedtak for å støtte § 8-35 andre ledd (TSF-2701)
+     *
+     *  Lagrer ned referanse til hvilket iAy-grunnlag som ble brukt for hvert skjæringstidspunkt i beregning dersom bruker er selvstendig næringsdrivende.
+     *
+     *  Fra lovteksten:
+     *  Jf § 8-35 andre ledd er Det er de ferdiglignede inntektene som foreligger på vedtakstidspunktet som brukes.
+     *  Dette avviker fra prinsippet om at det er opplysningene som foreligger på sykmeldingstidspunktet som skal anvendes.
+     *  Årsaken til at prinsippet fravikes er at Arbeids- og velferdsetaten ikke har opplysninger om dato for skatteoppgjøret til den enkelte
+     *
+     * Vi behandler et vedtak for SN som førstegangsvedtak dersom forrige søknad for stp ikke hadde opplysning om næring
+     *
+     * @param ref Behandlingreferanse
+     */
+    public void fastsettNæringsinntektPerioderDersomRelevant(BehandlingReferanse ref) {
+        var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
+        var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId());
+        var skjæringstidspunkter = finnSkjæringstidspunkterForBeregning(ref);
+        var næringsinntektPerioder = finnEksisterendeNæringsinntektPerioder(ref);
+        var perioder = finnPerioderSomSkalBeholdes(ref, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, næringsinntektPerioder);
+        // Vi behandler et vedtak for SN som førstegangsvedtak dersom forrige søknad for stp ikke hadde opplysning om næring
+        var nyeSkjæringstidspunktForSN = finnSTPMedFørstegangsvedtakForNæring(ref, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, næringsinntektPerioder);
+        perioder.addAll(nyeSkjæringstidspunktForSN);
+        grunnlagRepository.lagreNæringsinntektPeriode(ref.getBehandlingId(), perioder);
+    }
+
+    private List<NæringsinntektPeriode> finnSTPMedFørstegangsvedtakForNæring(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, OppgittOpptjeningFilter oppgittOpptjeningFilter, List<LocalDate> skjæringstidspunkter, List<NæringsinntektPeriode> næringsinntektPerioder) {
+        return skjæringstidspunkter.stream().filter(stp -> erSelvstendigNæringsdrivende(ref, iayGrunnlag, oppgittOpptjeningFilter, stp))
+            .filter(stp -> næringsinntektPerioder.stream().noneMatch(p -> p.getSkjæringstidspunkt().equals(stp)))
+            .map(stp -> new NæringsinntektPeriode(iayGrunnlag.getEksternReferanse(), stp))
+            .collect(Collectors.toList());
+    }
+
+    private List<NæringsinntektPeriode> finnEksisterendeNæringsinntektPerioder(BehandlingReferanse ref) {
+        var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+        var næringsinntektPerioder = grunnlagOpt.map(BeregningsgrunnlagPerioderGrunnlag::getNæringsinntektPerioder).orElse(Collections.emptyList());
+        return næringsinntektPerioder;
+    }
+
+    private List<LocalDate> finnSkjæringstidspunkterForBeregning(BehandlingReferanse ref) {
+        var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
+        var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
+        return finnSkjæringstidspunkter(vilkår);
+    }
+
+    private List<LocalDate> finnSkjæringstidspunkter(Vilkår vilkår) {
+        return vilkår.getPerioder()
+            .stream()
+            .map(VilkårPeriode::getSkjæringstidspunkt)
+            .sorted()
+            .distinct()
+            .collect(Collectors.toList());
+    }
+
+    private ArrayList<NæringsinntektPeriode> finnPerioderSomSkalBeholdes(BehandlingReferanse ref,
+                                                                         InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                         OppgittOpptjeningFilter oppgittOpptjeningFilter,
+                                                                         List<LocalDate> skjæringstidspunkter,
+                                                                         List<NæringsinntektPeriode> næringsinntektPerioder) {
+        return næringsinntektPerioder.stream()
+            .filter(p -> skjæringstidspunkter.contains(p.getSkjæringstidspunkt()))
+            .filter(p -> erSelvstendigNæringsdrivende(ref, iayGrunnlag, oppgittOpptjeningFilter, p.getSkjæringstidspunkt()))
+            .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private boolean erSelvstendigNæringsdrivende(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, OppgittOpptjeningFilter oppgittOpptjeningFilter, LocalDate stp) {
+        return oppgittOpptjeningFilter.hentOppgittOpptjening(ref.getBehandlingId(), iayGrunnlag, stp).stream()
+            .flatMap(oo -> oo.getEgenNæring().stream())
+            .anyMatch(e -> e.getPeriode().inkluderer(stp.minusDays(1)));
+    }
+
     private boolean harBeregningsgrunnlagOgStp(BeregningsgrunnlagPrReferanse<BeregningsgrunnlagDto> bg) {
         if (bg.getBeregningsgrunnlag() == null) {
             return false;
@@ -405,12 +479,11 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         return true;
     }
 
-    private Optional<InputOverstyringPeriode> finnInputOverstyring(BehandlingReferanse referanse, LocalDate stp) {
-        Optional<InputOverstyringPeriode> inputOverstyring = grunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).stream()
+    private Optional<InputOverstyringPeriode> finnInputOverstyring(LocalDate stp, Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlag) {
+        return grunnlag.stream()
             .flatMap(gr -> gr.getInputOverstyringPerioder().stream())
             .filter(p -> p.getSkjæringstidspunkt().equals(stp))
             .findFirst();
-        return inputOverstyring;
     }
 
     private boolean erIkkeInitiellVersjon(Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon, BgRef it) {

@@ -44,6 +44,8 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -106,7 +108,13 @@ public class PleiepengerBeregneYtelseStegTest {
                 null,
                 repositoryProvider.getVilkårResultatRepository(),
                 repositoryProvider.getFagsakRepository()),
-            new VilkårPeriodeFilterProvider(repositoryProvider.getFagsakRepository(), repositoryProvider.getVilkårResultatRepository(), new UnitTestLookupInstanceImpl<>(null), new UnitTestLookupInstanceImpl<>(null)));
+            new VilkårPeriodeFilterProvider(
+                repositoryProvider.getFagsakRepository(),
+                repositoryProvider.getVilkårResultatRepository(),
+                new UnitTestLookupInstanceImpl<>(null),
+                new UnitTestLookupInstanceImpl<>(null)),
+            new AbakusInMemoryInntektArbeidYtelseTjeneste(),
+            new OppgittOpptjeningFilterProvider(new UnitTestLookupInstanceImpl<>(null), behandlingRepository));
         beregningsresultat = BeregningsresultatEntitet.builder()
             .medRegelInput("regelInput")
             .medRegelSporing("regelSporing")
