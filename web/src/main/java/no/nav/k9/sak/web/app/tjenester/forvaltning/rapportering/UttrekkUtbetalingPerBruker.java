@@ -17,14 +17,16 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 public class UttrekkUtbetalingPerBruker implements RapportGenerator {
 
     private EntityManager entityManager;
+    private DriftLesetilgangVurderer lesetilgangVurderer;
 
     UttrekkUtbetalingPerBruker() {
         //
     }
 
     @Inject
-    public UttrekkUtbetalingPerBruker(EntityManager entityManager) {
+    public UttrekkUtbetalingPerBruker(EntityManager entityManager, DriftLesetilgangVurderer lesetilgangVurderer) {
         this.entityManager = entityManager;
+        this.lesetilgangVurderer = lesetilgangVurderer;
     }
 
     @SuppressWarnings("unchecked")
@@ -81,7 +83,8 @@ public class UttrekkUtbetalingPerBruker implements RapportGenerator {
         String path = "utbetaling-per-bruker.csv";
 
         try (Stream<Tuple> stream = query.getResultStream()) {
-            return CsvOutput.dumpResultSetToCsv(path, stream)
+            return CsvOutput.dumpResultSetToCsv(path,
+                    stream.filter(r -> lesetilgangVurderer.harTilgang(String.valueOf(r.get(0)))))
                 .map(v -> List.of(v)).orElse(List.of());
         }
 
