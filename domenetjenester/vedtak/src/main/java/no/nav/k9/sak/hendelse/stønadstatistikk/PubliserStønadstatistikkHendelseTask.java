@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -48,6 +49,9 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
         final String value = StønadstatistikkSerializer.toJson(hendelse);
 
         logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}'", key);
+        if (Environment.current().isLocal()){
+            logger.info("Hendelse: {}", key);
+        }
 
         meldingProducer.send(key, value);
     }

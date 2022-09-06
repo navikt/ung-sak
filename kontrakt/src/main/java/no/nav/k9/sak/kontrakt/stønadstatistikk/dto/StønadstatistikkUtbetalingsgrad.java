@@ -3,65 +3,85 @@ package no.nav.k9.sak.kontrakt.stønadstatistikk.dto;
 import java.math.BigDecimal;
 import java.time.Duration;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class StønadstatistikkUtbetalingsgrad {
-    
+
     @JsonProperty(value = "aktivitetStatus", required = true)
     @Valid
     private String aktivitetStatus;
-    
+
     @JsonProperty(value = "arbeidsforhold", required = true)
     @NotNull
     @Valid
     private StønadstatistikkArbeidsforhold arbeidsforhold;
-    
+
     @JsonProperty(value = "normalArbeidstid", required = true)
     @NotNull
     @Valid
     private Duration normalArbeidstid;
-    
+
     @JsonProperty(value = "faktiskArbeidstid", required = true)
     @NotNull
     @Valid
     private Duration faktiskArbeidstid;
-    
+
     @JsonProperty(value = "utbetalingsgrad", required = true)
     @NotNull
     @Valid
     private BigDecimal utbetalingsgrad;
-    
+
     @JsonProperty(value = "dagsats", required = true)
     @NotNull
     @Valid
     private int dagsats;
-    
+
     @JsonProperty(value = "brukerErMottaker", required = true)
     @NotNull
     @Valid
     private boolean brukerErMottaker;
 
-    
-    protected StønadstatistikkUtbetalingsgrad() {
-        
+
+    public static StønadstatistikkUtbetalingsgrad forOmsorgspenger(String aktivitetStatus,
+                                                                   StønadstatistikkArbeidsforhold arbeidsforhold,
+                                                                   BigDecimal utbetalingsgrad,
+                                                                   int dagsats,
+                                                                   boolean brukerErMottaker) {
+        StønadstatistikkUtbetalingsgrad su = new StønadstatistikkUtbetalingsgrad();
+
+        su.aktivitetStatus = aktivitetStatus;
+        su.arbeidsforhold = arbeidsforhold;
+        su.utbetalingsgrad = utbetalingsgrad;
+        su.dagsats = dagsats;
+        su.brukerErMottaker = brukerErMottaker;
+
+        //FIXME disse verdiene kan være misvisende
+        su.normalArbeidstid = Duration.ofHours(7).plusMinutes(30);
+        su.faktiskArbeidstid = Duration.ZERO;
+        return su;
     }
-    
+
+    protected StønadstatistikkUtbetalingsgrad() {
+
+
+    }
+
     public StønadstatistikkUtbetalingsgrad(String aktivitetStatus,
-            StønadstatistikkArbeidsforhold arbeidsforhold,
-            Duration normalArbeidstid,
-            Duration faktiskArbeidstid,
-            BigDecimal utbetalingsgrad,
-            int dagsats,
-            boolean brukerErMottaker) {
+                                           StønadstatistikkArbeidsforhold arbeidsforhold,
+                                           Duration normalArbeidstid,
+                                           Duration faktiskArbeidstid,
+                                           BigDecimal utbetalingsgrad,
+                                           int dagsats,
+                                           boolean brukerErMottaker) {
         this.aktivitetStatus = aktivitetStatus;
         this.arbeidsforhold = arbeidsforhold;
         this.normalArbeidstid = normalArbeidstid;
@@ -94,7 +114,7 @@ public class StønadstatistikkUtbetalingsgrad {
     public int getDagsats() {
         return dagsats;
     }
-    
+
     public boolean isBrukerErMottaker() {
         return brukerErMottaker;
     }
