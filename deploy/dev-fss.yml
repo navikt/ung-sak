@@ -192,10 +192,6 @@ spec:
     # Feature-flag
     - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
       value: "true"
-    - name: OMP_RAMMEVEDTAK_ALDERSVILKAAR
-      value: "true"
-    - name: OMP_RAMMEVEDTAK_KS_AUTOMATISK_OMSORGENFOR
-      value: "true"
     - name: OMP_ORDENTLIG_VALIDERING_MOTTAK
       value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
