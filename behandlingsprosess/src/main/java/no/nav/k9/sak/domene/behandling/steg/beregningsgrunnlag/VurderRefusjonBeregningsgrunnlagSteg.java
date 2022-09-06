@@ -104,7 +104,9 @@ public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagS
     }
 
     private Set<PeriodeTilVurdering> finnPerioderSomVurderesGrunnetEndretUttak(BehandlingReferanse ref) {
-        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref).ignorerAvslåttePerioderInkludertKompletthet();
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref)
+            .ignorerAvslåttePerioderInkludertKompletthet()
+            .markerEndringIUttak();
         var allePerioder = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
         var endretUttakPerioder = allePerioder.stream()
             .filter(PeriodeTilVurdering::erForlengelse)
