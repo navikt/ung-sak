@@ -92,7 +92,11 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
             if (harSøknadSomArbeidstaker(ref)) {
                 LOGGER.info("Behandling {} er ikke komplett - Søknad arbeidstaker uten tilhørende IM", ref.getBehandlingId());
                 return settPåVent(ref, Venteårsak.AVV_IM_MOT_SØKNAD_AT, 14);
+            } else if (harInntektsmelding(ref)){
+                LOGGER.info("Behandling {} er ikke komplett - IM fra {} arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size());
+                return settPåVent(ref, Venteårsak.AVV_IM_MOT_AAREG, 3);
             }
+            //kommer hit hvis vi mangler IM og har bare søknad SN/FL. Da venter vi ikke på IM
         }
         if (ingenSøknadsperioder(ref)) {
             // Gjelder både behandlinger som er førstegangs og som er forlengelse
@@ -112,6 +116,13 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
             .stream()
             .filter(it -> it.getBehandlingId() != null && it.getBehandlingId().equals(ref.getBehandlingId()))
             .anyMatch(it -> Set.of(Brevkode.SØKNAD_UTBETALING_OMS_AT, Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT).contains(it.getType()));
+    }
+
+    private boolean harInntektsmelding(BehandlingReferanse ref) {
+        return mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(ref.getFagsakId())
+            .stream()
+            .filter(it -> it.getBehandlingId() != null && it.getBehandlingId().equals(ref.getBehandlingId()))
+            .anyMatch(it -> Set.of(Brevkode.INNTEKTSMELDING, Brevkode.FRAVÆRSKORRIGERING_IM_OMS).contains(it.getType()));
     }
 
     private boolean harIkkeSøknadsperiode(BehandlingReferanse ref) {
