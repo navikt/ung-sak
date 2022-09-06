@@ -21,7 +21,15 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforh
 class MapFraÅrskvantumResultat {
 
     //styrer om vilkår mappes direkte på UttakResultatPeriode, eller i UttakAktivitet
-    private static final Set<Vilkår> VILKÅR_PR_AKTIVITET = Set.of(Vilkår.ARBEIDSFORHOLD, Vilkår.NYOPPSTARTET_HOS_ARBEIDSGIVER); //TODO komplett liste?
+    private static final Set<Vilkår> VILKÅR_PR_AKTIVITET = Set.of(
+        Vilkår.ARBEIDSFORHOLD,
+        Vilkår.NYOPPSTARTET_HOS_ARBEIDSGIVER,
+        Vilkår.SMITTEVERN,  //ulike regler for refusjon/direkte utbetaling. Kan få avslag for direkte ubetaling. Teoretisk pr arbeidsforhold
+        Vilkår.ANDRE_SKAL_DEKKE_DAGENE, // PR ARBEIDSFORHOLD, GJELDER KUN SØKNAD
+        Vilkår.FREMTIDIG_KRAV
+        //FRAVÆR_FRA_ARBEID
+
+    );
 
     public static LocalDateTimeline<UttakResultatPeriode> getTimeline(List<Aktivitet> aktiviteter) {
         List<LocalDateSegment<UttakResultatPeriode>> segmenter = new ArrayList<>();
