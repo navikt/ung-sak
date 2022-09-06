@@ -72,7 +72,7 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
             //snarvei for å unngå å hente rammevedtak
             return barn;
         }
-        List<Rammevedtak> rammevedtak = omsorgspengerRammevedtakTjeneste.hentRammevedtak(new BehandlingUuidDto(behandling.getUuid())).getRammevedtak();
+        List<Rammevedtak> rammevedtak = omsorgspengerRammevedtakTjeneste.hentRammevedtak(new BehandlingUuidDto(behandling.getUuid()), barn).getRammevedtak();
         return barn.stream()
             .filter(barnet -> barnetRelevantForSaken(opplysningsperioden, rammevedtak, barnet))
             .toList();
