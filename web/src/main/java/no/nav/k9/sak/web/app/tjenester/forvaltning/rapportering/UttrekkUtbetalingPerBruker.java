@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -84,7 +85,12 @@ public class UttrekkUtbetalingPerBruker implements RapportGenerator {
 
         try (Stream<Tuple> stream = query.getResultStream()) {
             return CsvOutput.dumpResultSetToCsv(path,
-                    stream.filter(r -> lesetilgangVurderer.harTilgang(String.valueOf(r.get(0)))))
+                    stream.filter(r -> {
+                        String saksnummer = String.valueOf(r.get(0));
+                        String aktørId = Objects.toString(r.get(1), null);
+                        String fnr = Objects.toString(r.get(2), null);
+                        return lesetilgangVurderer.harTilgang(saksnummer, fnr, aktørId);
+                    }))
                 .map(v -> List.of(v)).orElse(List.of());
         }
 

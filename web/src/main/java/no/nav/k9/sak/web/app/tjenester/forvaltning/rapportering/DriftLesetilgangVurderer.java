@@ -31,13 +31,27 @@ public class DriftLesetilgangVurderer {
     }
 
     public boolean harTilgang(String saksnummer) {
+        return harTilgang(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.SAKSNUMMER, new Saksnummer(saksnummer)));
+    }
+
+    public boolean harTilgang(String saksnummer, String fnr, String aktørId) {
+        AbacDataAttributter dataAttributter = AbacDataAttributter.opprett()
+            .leggTil(StandardAbacAttributtType.SAKSNUMMER, new Saksnummer(saksnummer));
+
+        if (fnr != null) dataAttributter.leggTil(StandardAbacAttributtType.FNR, fnr);
+        if (aktørId != null) dataAttributter.leggTil(StandardAbacAttributtType.AKTØR_ID, aktørId);
+
+        return harTilgang(dataAttributter);
+    }
+
+    private boolean harTilgang(AbacDataAttributter dataAttributter) {
         final AbacAttributtSamling attributter = AbacAttributtSamling.medJwtToken(tokenProvider.getToken().getToken());
         attributter.setActionType(BeskyttetRessursActionAttributt.READ);
         attributter.setResource(DRIFT);
 
         // Package private:
         //attributter.setAction(restApiPath);
-        attributter.leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.SAKSNUMMER, new Saksnummer(saksnummer)));
+        attributter.leggTil(dataAttributter);
 
         final Tilgangsbeslutning beslutning = pep.vurderTilgang(attributter);
         return beslutning.fikkTilgang();
