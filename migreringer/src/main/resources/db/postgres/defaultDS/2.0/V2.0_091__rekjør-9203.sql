@@ -7,8 +7,6 @@ select nextval('seq_prosess_task'), 'behandlingskontroll.tilbakeTilStart',
                                                                                      inner join aksjonspunkt a on b.id = a.behandling_id
 where a.aksjonspunkt_def = '9203'
   and a.aksjonspunkt_status = 'OPPR'
-  and a.opprettet_tid > '2022-09-06 09:47:00.000'
-  and a.opprettet_tid < '2022-09-07 09:33:00.000'
-  and a.endret_tid < '2022-09-07 09:33:00.000';
-;
-commit;
+  and a.opprettet_tid > '2022-09-06 07:47:00.000'
+  and a.opprettet_tid < '2022-09-07 07:33:00.000'
+  and (a.endret_tid is null OR a.endret_tid < '2022-09-07 07:33:00.000');
