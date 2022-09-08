@@ -95,6 +95,41 @@ public class HjelpetidslinjerTest {
             LocalDate.of(2022, 8, 27), LocalDate.of(2022, 8, 28)
         );
     }
+    
+    @Test
+    public void helgetidslinjeMedSammenhengendePeriodeSomStarterPåFredag() {
+        final LocalDateTimeline<Boolean> tidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 4), Boolean.TRUE),
+            new LocalDateSegment<>(LocalDate.of(2022, 8, 5), LocalDate.of(2022, 8, 12), Boolean.TRUE)
+        ));
+
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagTidslinjeMedKunHelger(tidslinje);
+        System.out.println(resultat);
+        assertTidslinjeInneholder(resultat,
+            LocalDate.of(2022, 7, 30), LocalDate.of(2022, 7, 31),
+            LocalDate.of(2022, 8, 6), LocalDate.of(2022, 8, 7),
+            LocalDate.of(2022, 8, 13), LocalDate.of(2022, 8, 14)
+        );
+    }
+    
+    @Test
+    public void helgetidslinjeSomStarterPåTorsdag() {
+        final LocalDateTimeline<Boolean> tidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 3), Boolean.TRUE),
+            new LocalDateSegment<>(LocalDate.of(2022, 8, 4), LocalDate.of(2022, 8, 11), Boolean.TRUE),
+            new LocalDateSegment<>(LocalDate.of(2022, 8, 15), LocalDate.of(2022, 8, 19), Boolean.TRUE),
+            new LocalDateSegment<>(LocalDate.of(2022, 8, 22), LocalDate.of(2022, 8, 26), Boolean.TRUE)
+        ));
+
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagTidslinjeMedKunHelger(tidslinje);
+        assertTidslinjeInneholder(resultat,
+            LocalDate.of(2022, 7, 30), LocalDate.of(2022, 7, 31),
+            LocalDate.of(2022, 8, 6), LocalDate.of(2022, 8, 7),
+            LocalDate.of(2022, 8, 13), LocalDate.of(2022, 8, 14),
+            LocalDate.of(2022, 8, 20), LocalDate.of(2022, 8, 21),
+            LocalDate.of(2022, 8, 27), LocalDate.of(2022, 8, 28)
+        );
+    }
 
     @Test
     public void helgetidslinjeMedFlerePerioderKantIKant() {
