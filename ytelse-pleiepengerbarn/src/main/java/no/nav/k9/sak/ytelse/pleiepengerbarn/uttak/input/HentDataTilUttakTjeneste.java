@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -13,8 +14,9 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -32,14 +34,19 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVur
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynSmører;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.PeriodeMedVarighet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelsePeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeDødsfallTjeneste;
@@ -51,6 +58,8 @@ public class HentDataTilUttakTjeneste {
     private FagsakRepository fagsakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private PleiebehovResultatRepository pleiebehovResultatRepository;
+    private SykdomVurderingTjeneste sykdomVurderingTjeneste;
+    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
     private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
@@ -66,10 +75,13 @@ public class HentDataTilUttakTjeneste {
     private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
     private HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
+    private LocalDate ukesmøringOmsorgstilbudFomDato;
 
     @Inject
     public HentDataTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
                                     PleiebehovResultatRepository pleiebehovResultatRepository,
+                                    SykdomVurderingTjeneste sykdomVurderingTjeneste,
+                                    PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
                                     PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
                                     UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
                                     PersonopplysningTjeneste personopplysningTjeneste,
@@ -85,9 +97,12 @@ public class HentDataTilUttakTjeneste {
                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                     HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste,
                                     HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste,
-                                    UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository) {
+                                    UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
+                                    @KonfigVerdi(value = "UKESMOERING_OMSORGSTILBUD_FOM_DATO", defaultVerdi = "", required = false) String ukesmøringOmsorgstilbudFomDatoString) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
+        this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
+        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
@@ -104,6 +119,12 @@ public class HentDataTilUttakTjeneste {
         this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
         this.hentPerioderTilVurderingTjeneste = hentPerioderTilVurderingTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
+        
+        if (ukesmøringOmsorgstilbudFomDatoString == null || ukesmøringOmsorgstilbudFomDatoString.trim().isEmpty()) {
+            this.ukesmøringOmsorgstilbudFomDato = null;
+        } else {
+            this.ukesmøringOmsorgstilbudFomDato = LocalDate.parse(ukesmøringOmsorgstilbudFomDatoString);
+        }
     }
 
     public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
@@ -140,20 +161,14 @@ public class HentDataTilUttakTjeneste {
 
         var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
 
-        final List<EtablertTilsynPeriode> etablertTilsynPerioder;
-        if (brukUbesluttedeData) {
-            etablertTilsynPerioder = fjernInnleggelsesperioderFra(etablertTilsynTjeneste.utledGrunnlagForTilsynstidlinje(referanse).getPerioder(), pleiebehov);
-        } else {
-            etablertTilsynPerioder = fjernInnleggelsesperioderFra(etablertTilsynRepository.hentHvisEksisterer(referanse.getBehandlingId())
-                .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
-                .map(EtablertTilsyn::getPerioder)
-                .orElse(List.of()), pleiebehov);
-        }
+        var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId())
+                .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
+        
+        final List<PeriodeMedVarighet> etablertTilsynPerioder = hentOgSmørEtablertTilsynPerioder(referanse, brukUbesluttedeData, unntakEtablertTilsynForPleietrengende);        
+        
         final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getFagsakId(), referanse.getPleietrengendeAktørId(), brukUbesluttedeData);
         var rettVedDød = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
 
-        var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId())
-            .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
         var perioderFraSøknad = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(referanse);
 
         var utsattePerioder = utsattBehandlingAvPeriodeRepository.hentGrunnlag(referanse.getBehandlingId());
@@ -180,12 +195,77 @@ public class HentDataTilUttakTjeneste {
             .medUtsattePerioder(utsattePerioder.orElse(null));
     }
 
-    private List<EtablertTilsynPeriode> fjernInnleggelsesperioderFra(List<EtablertTilsynPeriode> perioder, Optional<PleiebehovResultat> pleiebehov) {
-        /*
-         * TODO: Dette bør heller håndteres i pleiepenger-barn-uttak.
-         */
+    private List<PeriodeMedVarighet> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse,
+            boolean brukUbesluttedeData,
+            Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende) {
 
-        if (pleiebehov.isEmpty() || perioder.isEmpty() || pleiebehov.get().getPleieperioder().getPerioder().isEmpty()) {
+        final List<EtablertTilsynPeriode> etablertTilsynPerioderFraGrunnlag = hentEtablertTilsynForPleietrengendeUtenInnleggelse(referanse, brukUbesluttedeData);
+        final List<PeriodeMedVarighet> ikkeSmurteEtablertTilsynPerioder = etablertTilsynPerioderFraGrunnlag.stream()
+                .map(p -> new PeriodeMedVarighet(p.getPeriode(), p.getVarighet()))
+                .collect(Collectors.toList());
+        
+        if (ukesmøringOmsorgstilbudFomDato == null) {
+            return ikkeSmurteEtablertTilsynPerioder;
+        }
+        
+        final List<PeriodeMedVarighet> smurteEtablertTilsynPerioder = smørEtablertTilsyn(referanse, unntakEtablertTilsynForPleietrengende, etablertTilsynPerioderFraGrunnlag);
+        final LocalDateTimeline<PeriodeMedVarighet> etablertTilsynPerioderTidslinje = håndterSmøringFraFeatureToggleDato(ikkeSmurteEtablertTilsynPerioder, smurteEtablertTilsynPerioder);
+        
+        return toPeriodeMedVarighetList(etablertTilsynPerioderTidslinje);
+    }
+
+    private LocalDateTimeline<PeriodeMedVarighet> håndterSmøringFraFeatureToggleDato(
+            final List<PeriodeMedVarighet> ikkeSmurteEtablertTilsynPerioder,
+            final List<PeriodeMedVarighet> smurteEtablertTilsynPerioder) {
+        
+        final LocalDateTimeline<PeriodeMedVarighet> ikkeSmurtTidslinje = toPeriodeMedVarighetTidslinje(ikkeSmurteEtablertTilsynPerioder);
+        LocalDateTimeline<PeriodeMedVarighet> smurtTidslinje = toPeriodeMedVarighetTidslinje(smurteEtablertTilsynPerioder);
+        smurtTidslinje = smurtTidslinje.intersection(DatoIntervallEntitet.fraOgMed(ukesmøringOmsorgstilbudFomDato).toLocalDateInterval());
+        
+        return ikkeSmurtTidslinje.union(smurtTidslinje, StandardCombinators::coalesceRightHandSide);
+    }
+
+    private List<PeriodeMedVarighet> smørEtablertTilsyn(BehandlingReferanse referanse,
+            Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende,
+            final List<EtablertTilsynPeriode> etablertTilsynPerioderFraGrunnlag) {
+        final List<PeriodeMedVarighet> smurteEtablertTilsynPerioder;
+        final LocalDateTimeline<Boolean> sykdomsperioderPåPleietrengende = sykdomVurderingTjeneste.hentPsbOppfyltePerioderPåPleietrengende(referanse.getPleietrengendeAktørId());
+        if (ukesmøringOmsorgstilbudFomDato != null && !etablertTilsynPerioderFraGrunnlag.isEmpty() && !sykdomsperioderPåPleietrengende.isEmpty()) {
+            smurteEtablertTilsynPerioder = EtablertTilsynSmører.smørEtablertTilsyn(sykdomsperioderPåPleietrengende, etablertTilsynPerioderFraGrunnlag, unntakEtablertTilsynForPleietrengende);
+        } else {
+            smurteEtablertTilsynPerioder = List.of();
+        }
+        return smurteEtablertTilsynPerioder;
+    }
+
+    private List<PeriodeMedVarighet> toPeriodeMedVarighetList(
+            final LocalDateTimeline<PeriodeMedVarighet> etablertTilsynPerioderTidslinje) {
+        return etablertTilsynPerioderTidslinje.stream().map(s -> new PeriodeMedVarighet(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue().getVarighet())).collect(Collectors.toList());
+    }
+
+    private LocalDateTimeline<PeriodeMedVarighet> toPeriodeMedVarighetTidslinje(
+            final List<PeriodeMedVarighet> ikkeSmurteEtablertTilsynPerioder) {
+        return new LocalDateTimeline<>(
+            ikkeSmurteEtablertTilsynPerioder.stream().map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p)).collect(Collectors.toList())
+        );
+    }
+
+    private List<EtablertTilsynPeriode> hentEtablertTilsynForPleietrengendeUtenInnleggelse(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
+        List<EtablertTilsynPeriode> etablertTilsynPerioderFraGrunnlag;
+        final List<PleietrengendeSykdomInnleggelsePeriode> innleggelser = pleietrengendeSykdomDokumentRepository.hentInnleggelse(referanse.getPleietrengendeAktørId()).getPerioder();
+        if (brukUbesluttedeData) {
+            etablertTilsynPerioderFraGrunnlag = fjernInnleggelsesperioderFra(etablertTilsynTjeneste.utledGrunnlagForTilsynstidlinje(referanse).getPerioder(), innleggelser);
+        } else {
+            etablertTilsynPerioderFraGrunnlag = fjernInnleggelsesperioderFra(etablertTilsynRepository.hentHvisEksisterer(referanse.getBehandlingId())
+                .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
+                .map(EtablertTilsyn::getPerioder)
+                .orElse(List.of()), innleggelser);
+        }
+        return etablertTilsynPerioderFraGrunnlag;
+    }
+
+    private List<EtablertTilsynPeriode> fjernInnleggelsesperioderFra(List<EtablertTilsynPeriode> perioder, List<PleietrengendeSykdomInnleggelsePeriode> innleggelser) {
+        if (innleggelser.isEmpty() || perioder.isEmpty()) {
             return perioder;
         }
 
@@ -196,14 +276,10 @@ public class HentDataTilUttakTjeneste {
                 p
             ))
             .collect(Collectors.toList()));
-        final LocalDateTimeline<Boolean> innleggelseTidslinje = new LocalDateTimeline<>(pleiebehov.get()
-            .getPleieperioder()
-            .getPerioder()
-            .stream()
-            .filter(p -> p.getGrad() == Pleiegrad.INNLEGGELSE)
-            .map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), Boolean.TRUE))
+        
+        final LocalDateTimeline<Boolean> innleggelseTidslinje = new LocalDateTimeline<>(innleggelser.stream()
+            .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), Boolean.TRUE))
             .collect(Collectors.toList()));
-
 
         return TidslinjeUtil.kunPerioderSomIkkeFinnesI(etablertTilsynTidslinje, innleggelseTidslinje)
             .stream()
