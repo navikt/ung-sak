@@ -87,6 +87,10 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
         return inputOverstyringPerioder;
     }
 
+    NæringsinntektPerioder getNæringsinntektHolder() {
+        return næringsinntektPerioder;
+    }
+
     public List<BeregningsgrunnlagPeriode> getGrunnlagPerioder() {
         if (grunnlagPerioder == null) {
             return List.of();

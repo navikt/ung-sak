@@ -34,6 +34,7 @@ public class VilkårPeriodeFilter {
     private boolean skalIgnorereAvslagPåKompletthet;
     private boolean skalIgnorerePerioderFraInfotrygd;
     private boolean skalIgnorereForlengelser;
+    private boolean skalMarkereEndringIUttak;
 
 
     VilkårPeriodeFilter(BehandlingReferanse behandlingReferanse,
@@ -55,7 +56,9 @@ public class VilkårPeriodeFilter {
         var vilkår = hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         var filtrertePerioder = filtrer(vilkårType, sakInfotrygdMigreringer, vilkår, perioder);
         markerForlengelser(vilkårType, filtrertePerioder);
-        markerEndringIUttak(filtrertePerioder);
+        if (skalMarkereEndringIUttak) {
+            markerEndringIUttak(filtrertePerioder);
+        }
         return Collections.unmodifiableNavigableSet(filtrertePerioder);
     }
 
@@ -143,5 +146,11 @@ public class VilkårPeriodeFilter {
         this.skalIgnorerePerioderFraInfotrygd = true;
         return this;
     }
+
+    public VilkårPeriodeFilter markerEndringIUttak() {
+        this.skalMarkereEndringIUttak = true;
+        return this;
+    }
+
 
 }
