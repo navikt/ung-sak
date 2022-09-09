@@ -1,13 +1,17 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -32,7 +36,11 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkårDto;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilter;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOpptjeningsvilkårDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -44,6 +52,8 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
     private OpptjeningAktivitetVurderingOpptjeningsvilkår vurderForOpptjeningsvilkår;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
+    private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
     AvklarOpptjeningsvilkåretOppdaterer() {
         // for CDI proxy
@@ -52,11 +62,15 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
     @Inject
     public AvklarOpptjeningsvilkåretOppdaterer(HistorikkTjenesteAdapter historikkAdapter,
                                                InntektArbeidYtelseTjeneste iayTjeneste,
-                                               OpptjeningsperioderTjeneste opptjeningsperioderTjeneste) {
+                                               OpptjeningsperioderTjeneste opptjeningsperioderTjeneste,
+                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
+                                               VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
 
         this.historikkAdapter = historikkAdapter;
         this.iayTjeneste = iayTjeneste;
         this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
+        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.vurderForOpptjeningsvilkår = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
     }
 
@@ -65,7 +79,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         var builder = param.getVilkårResultatBuilder();
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET);
 
-        List<Tuple<VilkårPeriodeVurderingDto, Periode>> perioder = sammenkoblePerioder(dto);
+        List<Tuple<VilkårPeriodeVurderingDto, Periode>> perioder = sammenkoblePerioder(dto, param.getRef());
 
         for (Tuple<VilkårPeriodeVurderingDto, Periode> periode : perioder) {
             var vilkårPeriodeVurdering = periode.getElement1();
@@ -101,11 +115,12 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         return tilVerdiHistorikk;
     }
 
-    private List<Tuple<VilkårPeriodeVurderingDto, Periode>> sammenkoblePerioder(AvklarOpptjeningsvilkårDto dto) {
+    private List<Tuple<VilkårPeriodeVurderingDto, Periode>> sammenkoblePerioder(AvklarOpptjeningsvilkårDto dto, BehandlingReferanse ref) {
         var vilkårPeriodeVurderinger = dto.getVilkårPeriodeVurderinger();
         var opptjeningPerioder = dto.getOpptjeningPerioder();
-
+        var perioderTilVurdering = finnPerioderTilVurderingUtenForlengelse(ref);
         var sammenkobledePerioder = vilkårPeriodeVurderinger.stream()
+            .filter(p -> perioderTilVurdering.stream().anyMatch(vp -> vp.getFomDato().equals(p.getPeriode().getFom())))
             .map(vilkårPeriodeVurderingDto -> new Tuple<>(vilkårPeriodeVurderingDto, finnTilhørendeOpptjeningsperiode(opptjeningPerioder, vilkårPeriodeVurderingDto.getPeriode())))
             .collect(Collectors.toList());
 
@@ -114,7 +129,16 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         return sammenkobledePerioder;
     }
 
-    private void validerKonsistens(List<Tuple<VilkårPeriodeVurderingDto, Periode>> sammenkobledePerioder) {
+    private Set<DatoIntervallEntitet> finnPerioderTilVurderingUtenForlengelse(BehandlingReferanse ref) {
+        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(this.vilkårsPerioderTilVurderingTjeneste, ref.getFagsakYtelseType(), ref.getBehandlingType());
+        var ufiltrertePerioder = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref).ignorerForlengelseperioder();
+        var perioderTilVurdering = periodeFilter.filtrerPerioder(ufiltrertePerioder, VilkårType.OPPTJENINGSVILKÅRET)
+            .stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet());
+        return perioderTilVurdering;
+    }
+
+    private static void validerKonsistens(List<Tuple<VilkårPeriodeVurderingDto, Periode>> sammenkobledePerioder) {
         if (sammenkobledePerioder.stream().anyMatch(it -> Objects.isNull(it.getElement2()))) {
             var perioderMedMangler = sammenkobledePerioder.stream()
                 .filter(it -> Objects.isNull(it.getElement2()))
@@ -126,7 +150,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         }
     }
 
-    private Periode finnTilhørendeOpptjeningsperiode(List<Periode> opptjeningPerioder, Periode periode) {
+    private static Periode finnTilhørendeOpptjeningsperiode(List<Periode> opptjeningPerioder, Periode periode) {
         var sisteDagIOpptjeningsperioden = periode.getFom().minusDays(1);
         return opptjeningPerioder.stream().filter(it -> Objects.equals(it.getTom(), sisteDagIOpptjeningsperioden)).findAny().orElse(null);
     }

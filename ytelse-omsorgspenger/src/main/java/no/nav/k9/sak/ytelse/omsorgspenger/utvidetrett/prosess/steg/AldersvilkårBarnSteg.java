@@ -10,7 +10,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -41,7 +40,6 @@ public class AldersvilkårBarnSteg implements BehandlingSteg {
     private AldersvilkårBarnTjeneste aldersvilkårBarnTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
-    private boolean aldersvilkårLansert;
 
     public AldersvilkårBarnSteg() {
         //for CDI proxy
@@ -51,21 +49,15 @@ public class AldersvilkårBarnSteg implements BehandlingSteg {
     public AldersvilkårBarnSteg(BehandlingRepository behandlingRepository,
                                 AldersvilkårBarnTjeneste aldersvilkårBarnTjeneste,
                                 VilkårResultatRepository vilkårResultatRepository,
-                                @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                @KonfigVerdi(value = "OMP_RAMMEVEDTAK_ALDERSVILKAAR", defaultVerdi = "true") boolean aldersvilkårLansert) {
+                                @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.aldersvilkårBarnTjeneste = aldersvilkårBarnTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
-        this.aldersvilkårLansert = aldersvilkårLansert;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        if (!aldersvilkårLansert){
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-
         Long behandlingId = kontekst.getBehandlingId();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         Vilkår vilkår = vilkårene.getVilkår(VilkårType.ALDERSVILKÅR_BARN).orElseThrow();

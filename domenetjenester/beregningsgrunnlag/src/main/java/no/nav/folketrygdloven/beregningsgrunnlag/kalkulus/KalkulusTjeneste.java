@@ -116,7 +116,10 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         validerNyReferanse(beregningInput);
         var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
         var sakInntektsmeldinger = finnInntektsmeldingForBeregning.finnInntektsmeldinger(referanse, beregningInput);
-        var request = beregnRequestTjeneste.lagMedInput(stegType, referanse, beregningInput, iayGrunnlag, sakInntektsmeldinger);
+        var request = beregnRequestTjeneste.lagMedInput(stegType,
+            referanse,
+            beregningInput,
+            iayGrunnlag, sakInntektsmeldinger);
         TilstandListeResponse tilstandResponse = restTjeneste.beregn(request);
         var bgReferanser = beregningInput.stream()
             .map(i -> new BgRef(i.getBgReferanse(), i.getSkjæringstidspunkt()))
@@ -187,7 +190,12 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
         var vilkår = vilkårResultatRepository.hent(referanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
         var bergnInputListe = bgReferanser.stream().map(r -> BeregnInput.forAksjonspunktOppdatering(r.getRef(), vilkår.finnPeriodeForSkjæringstidspunkt(r.getStp()).getPeriode())).toList();
-        var request = beregnRequestTjeneste.lagForAksjonspunktOppdateringMedInput(requestListe, referanse, bergnInputListe, iayGrunnlag, sakInntektsmeldinger);
+        var request = beregnRequestTjeneste.lagForAksjonspunktOppdateringMedInput(
+            requestListe,
+            referanse,
+            bergnInputListe,
+            iayGrunnlag,
+            sakInntektsmeldinger);
         return restTjeneste.oppdaterBeregningListe(request);
     }
 

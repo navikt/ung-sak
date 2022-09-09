@@ -26,12 +26,15 @@ public class PSBOppgittOpptjeningFilterTest {
 
     JournalpostId jpId1 = new JournalpostId("1");
     JournalpostId jpId2 = new JournalpostId("2");
+    JournalpostId jpId3 = new JournalpostId("3");
 
     LocalDateTime innsendingstidspunkt1 = LocalDate.now().atStartOfDay();
     LocalDateTime innsendingstidspunkt2 = LocalDate.now().atStartOfDay().plusDays(1);
+    LocalDateTime innsendingstidspunkt3 = LocalDate.now().atStartOfDay().plusDays(2);
 
     KravDokument kravdok1 = new KravDokument(jpId1, innsendingstidspunkt1, KravDokumentType.SØKNAD);
     KravDokument kravdok2 = new KravDokument(jpId2, innsendingstidspunkt2, KravDokumentType.SØKNAD);
+    KravDokument kravdok3 = new KravDokument(jpId3, innsendingstidspunkt3, KravDokumentType.SØKNAD);
 
     Arbeidsgiver arbeidsgiver1 = Arbeidsgiver.virksomhet("123123123");
     Arbeidsgiver arbeidsgiver2 = Arbeidsgiver.virksomhet("234234234");
@@ -98,6 +101,37 @@ public class PSBOppgittOpptjeningFilterTest {
         Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravDokumenterMedFravær = Map.of(
             kravdok1, List.of(byggSøktPeriode(fraværFom1, fraværTom1)),
             kravdok2, List.of(byggSøktPeriode(fraværFom2, fraværTom2))
+        );
+
+        OppgittOpptjeningBuilder opptjeningBuilder1 = lagOpptjeningBuilderSN(kravdok1, arbeidsgiver1);
+        OppgittOpptjeningBuilder opptjeningBuilder2 = lagOpptjeningBuilderSN(kravdok2, arbeidsgiver2);
+        var iayGrunnlag = byggIayGrunnlag(List.of(opptjeningBuilder1, opptjeningBuilder2));
+
+        // Act
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, kravDokumenterMedFravær);
+
+        // Assert
+        assertThat(resultat).isPresent();
+        assertThat(resultat.get().getEgenNæring().get(0).getOrgnr()).isEqualTo(arbeidsgiver2.getOrgnr());
+    }
+
+
+    @Test
+    public void skal_hente_sist_mottatt_søknad_som_oppgav_opptjening() {
+        // Arrange
+        var fraværFom1 = LocalDate.now();
+        var fraværTom1 = LocalDate.now().plusDays(10);
+        var fraværFom2 = fraværFom1;
+        var fraværTom2 = fraværTom1;
+        var fraværFom3 = fraværFom1;
+        var fraværTom3 = fraværTom1;
+
+        var vilkårPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom1, fraværTom1);
+
+        Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravDokumenterMedFravær = Map.of(
+            kravdok1, List.of(byggSøktPeriode(fraværFom1, fraværTom1)),
+            kravdok2, List.of(byggSøktPeriode(fraværFom2, fraværTom2)),
+            kravdok3, List.of(byggSøktPeriode(fraværFom3, fraværTom3))
         );
 
         OppgittOpptjeningBuilder opptjeningBuilder1 = lagOpptjeningBuilderSN(kravdok1, arbeidsgiver1);

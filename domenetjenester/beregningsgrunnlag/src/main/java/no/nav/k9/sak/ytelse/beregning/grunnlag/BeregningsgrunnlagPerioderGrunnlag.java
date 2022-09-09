@@ -48,6 +48,12 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
     @JoinColumn(name = "bg_ovst_input_id", nullable = false, updatable = false)
     private InputOverstyringPerioder inputOverstyringPerioder;
 
+    @ChangeTracked
+    @ManyToOne
+    @JoinColumn(name = "bg_naering_inntekt_id", nullable = false, updatable = false)
+    private NæringsinntektPerioder næringsinntektPerioder;
+
+
     @Column(name = "aktiv", nullable = false, updatable = true)
     private boolean aktiv = true;
 
@@ -62,6 +68,7 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
         this.grunnlagPerioder = eksisterende.grunnlagPerioder != null ? new BeregningsgrunnlagPerioder(eksisterende.grunnlagPerioder) : null;
         this.kompletthetPerioder = eksisterende.kompletthetPerioder != null ? new KompletthetPerioder(eksisterende.kompletthetPerioder) : null;
         this.inputOverstyringPerioder = eksisterende.inputOverstyringPerioder != null ? new InputOverstyringPerioder(eksisterende.inputOverstyringPerioder) : null;
+        this.næringsinntektPerioder = eksisterende.næringsinntektPerioder != null ? new NæringsinntektPerioder(eksisterende.næringsinntektPerioder) : null;
     }
 
     void setBehandlingId(Long behandlingId) {
@@ -78,6 +85,10 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
 
     InputOverstyringPerioder getInputOverstyringHolder() {
         return inputOverstyringPerioder;
+    }
+
+    NæringsinntektPerioder getNæringsinntektHolder() {
+        return næringsinntektPerioder;
     }
 
     public List<BeregningsgrunnlagPeriode> getGrunnlagPerioder() {
@@ -100,6 +111,14 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
         }
         return inputOverstyringPerioder.getInputOverstyringPerioder();
     }
+
+    public List<NæringsinntektPeriode> getNæringsinntektPerioder() {
+        if (næringsinntektPerioder == null) {
+            return List.of();
+        }
+        return næringsinntektPerioder.getNæringsinntektPerioder();
+    }
+
 
     public Optional<BeregningsgrunnlagPeriode> finnGrunnlagFor(LocalDate skjæringstidspunkt) {
         return getGrunnlagPerioder().stream().filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt)).findFirst();
@@ -131,6 +150,13 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
         }
     }
 
+    void deaktiverNæringsinntektPeriode(LocalDate skjæringstidspunkt) {
+        Objects.requireNonNull(skjæringstidspunkt);
+        if (this.næringsinntektPerioder != null) {
+            this.næringsinntektPerioder.deaktiver(skjæringstidspunkt);
+        }
+    }
+
     void leggTil(BeregningsgrunnlagPeriode periode) {
         Objects.requireNonNull(periode);
         if (this.grunnlagPerioder == null) {
@@ -153,6 +179,14 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
             this.inputOverstyringPerioder = new InputOverstyringPerioder();
         }
         this.inputOverstyringPerioder.leggTil(periode);
+    }
+
+    void leggTil(NæringsinntektPeriode periode) {
+        Objects.requireNonNull(periode);
+        if (this.næringsinntektPerioder == null) {
+            this.næringsinntektPerioder = new NæringsinntektPerioder();
+        }
+        this.næringsinntektPerioder.leggTil(periode);
     }
 
 

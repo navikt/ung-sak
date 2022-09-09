@@ -190,11 +190,7 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
-      value: "true"
-    - name: OMP_RAMMEVEDTAK_ALDERSVILKAAR
-      value: "true"
-    - name: OMP_RAMMEVEDTAK_KS_AUTOMATISK_OMSORGENFOR
+    - name: OMP_ORDENTLIG_VALIDERING_MOTTAK
       value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "true"
@@ -210,6 +206,10 @@ spec:
       value: "true"
     - name: YTELSE_OLP_AKTIVERT
       value: "true"
+    - name: SIGRUN_INNTEKT_FILTER_ENABLED
+      value: "true"
+    - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
+      value: "2022-09-19"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

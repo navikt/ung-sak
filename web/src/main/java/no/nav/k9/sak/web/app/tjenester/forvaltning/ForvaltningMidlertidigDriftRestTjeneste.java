@@ -57,14 +57,10 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.k9.felles.sikkerhet.abac.Pep;
-import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.k9.felles.sikkerhet.abac.Tilgangsbeslutning;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -91,12 +87,12 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tasks.OpprettManuellRevurderingTask;
 import no.nav.k9.sak.web.app.tjenester.behandling.SjekkProsessering;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering.DriftLesetilgangVurderer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadMottaker;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
-import no.nav.k9.sikkerhet.oidc.token.bruker.BrukerTokenProvider;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
@@ -130,9 +126,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
     private SjekkProsessering sjekkProsessering;
 
-    private Pep pep;
-    private BrukerTokenProvider tokenProvider;
     private StønadstatistikkService stønadstatistikkService;
+
+    private DriftLesetilgangVurderer lesetilgangVurderer;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
@@ -148,9 +144,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    BehandlingRepository behandlingRepository,
                                                    SjekkProsessering sjekkProsessering,
                                                    EntityManager entityManager,
-                                                   Pep pep,
-                                                   BrukerTokenProvider tokenProvider,
-                                                   StønadstatistikkService stønadstatistikkService) {
+                                                   StønadstatistikkService stønadstatistikkService,
+                                                   DriftLesetilgangVurderer lesetilgangVurderer) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
@@ -161,9 +156,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.behandlingRepository = behandlingRepository;
         this.sjekkProsessering = sjekkProsessering;
         this.entityManager = entityManager;
-        this.pep = pep;
-        this.tokenProvider = tokenProvider;
         this.stønadstatistikkService = stønadstatistikkService;
+        this.lesetilgangVurderer = lesetilgangVurderer;
     }
 
     /**
@@ -423,7 +417,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         @SuppressWarnings("unchecked") final List<Object[]> result = q.getResultList();
         final String restApiPath = "/starttidspunkt-aapen-behandling";
         final String resultatString = result.stream()
-            .filter(a -> harLesetilgang(a[0].toString(), restApiPath))
+            .filter(a -> lesetilgangVurderer.harTilgang(a[0].toString()))
             .map(a -> a[0].toString() + ";" + a[1].toString() + ";" + (a[2] != null ? a[2].toString() : ""))
             .reduce((a, b) -> a + "\n" + b)
             .orElse("");
@@ -455,7 +449,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         @SuppressWarnings("unchecked") final List<Object[]> result = q.getResultList();
         final String restApiPath = "/aapne-psb-med-soknad";
         final String resultatString = result.stream()
-            .filter(a -> harLesetilgang(a[0].toString(), restApiPath))
+            .filter(a -> lesetilgangVurderer.harTilgang(a[0].toString()))
             .map(a -> a[0].toString() + ";" + a[1].toString() + ";" + a[2].toString() + ";" + a[3].toString())
             .reduce((a, b) -> a + "\n" + b)
             .orElse("");
@@ -585,19 +579,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             .reduce((a, b) -> a + "\n" + b)
             .orElse("");
         return Response.ok(resultatString).build();
-    }
-
-    private final boolean harLesetilgang(String saksnummer, String restApiPath) {
-        final AbacAttributtSamling attributter = AbacAttributtSamling.medJwtToken(tokenProvider.getToken().getToken());
-        attributter.setActionType(BeskyttetRessursActionAttributt.READ);
-        attributter.setResource(DRIFT);
-
-        // Package private:
-        //attributter.setAction(restApiPath);
-        attributter.leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.SAKSNUMMER, new Saksnummer(saksnummer)));
-
-        final Tilgangsbeslutning beslutning = pep.vurderTilgang(attributter);
-        return beslutning.fikkTilgang();
     }
 
     @POST
