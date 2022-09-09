@@ -43,6 +43,46 @@ public class HjelpetidslinjerTest {
             LocalDate.of(2022, 8, 6), LocalDate.of(2022, 8, 7)
         );
     }
+    
+    @Test
+    public void helgetidslinjeFungererMedFomAlleDager() {
+        for (int fomUkedag=2; fomUkedag <= 7; fomUkedag++) {
+            final LocalDate fom = LocalDate.of(2022, 8, fomUkedag);
+            final LocalDate tom = LocalDate.of(2022, 8, 7);
+            final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagTidslinjeMedKunHelger(new LocalDateTimeline<>(fom, tom, Boolean.TRUE));
+            assertTidslinjeInneholder(resultat,
+                LocalDate.of(2022, 8, 6), LocalDate.of(2022, 8, 7)
+            );
+        }
+        
+        final LocalDate fom = LocalDate.of(2022, 8, 1);
+        final LocalDate tom = LocalDate.of(2022, 8, 7);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagTidslinjeMedKunHelger(new LocalDateTimeline<>(fom, tom, Boolean.TRUE));
+        assertTidslinjeInneholder(resultat,
+            LocalDate.of(2022, 7, 30), LocalDate.of(2022, 7, 31),
+            LocalDate.of(2022, 8, 6), LocalDate.of(2022, 8, 7)
+        );
+    }
+    
+    @Test
+    public void helgetidslinjeFungererMedTomAlleDager() {
+        for (int i=5; i <= 11; i++) {
+            final LocalDate fom = LocalDate.of(2022, 8, 5);
+            final LocalDate tom = LocalDate.of(2022, 8, i);
+            final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagTidslinjeMedKunHelger(new LocalDateTimeline<>(fom, tom, Boolean.TRUE));
+            assertTidslinjeInneholder(resultat,
+                LocalDate.of(2022, 8, 6), LocalDate.of(2022, 8, 7)
+            );
+        }
+        
+        final LocalDate fom = LocalDate.of(2022, 8, 5);
+        final LocalDate tom = LocalDate.of(2022, 8, 12);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagTidslinjeMedKunHelger(new LocalDateTimeline<>(fom, tom, Boolean.TRUE));
+        assertTidslinjeInneholder(resultat,
+            LocalDate.of(2022, 8, 6), LocalDate.of(2022, 8, 7),
+            LocalDate.of(2022, 8, 13), LocalDate.of(2022, 8, 14)
+        );
+    }
 
     @Test
     public void helgetidslinjeMedTorsdag() {
@@ -199,6 +239,26 @@ public class HjelpetidslinjerTest {
     }
     
     @Test
+    public void ukestidslinjeSkalIkkeHaMedLørdagIStarten() {
+        final LocalDate fom = LocalDate.of(2022, 8, 6);
+        final LocalDate tom = LocalDate.of(2022, 8, 14);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
+        assertTidslinjeInneholder(resultat,
+                LocalDate.of(2022, 8, 8), LocalDate.of(2022, 8, 12) 
+                );
+    }
+    
+    @Test
+    public void ukestidslinjeSkalIkkeHaMedSøndagIStarten() {
+        final LocalDate fom = LocalDate.of(2022, 8, 7);
+        final LocalDate tom = LocalDate.of(2022, 8, 14);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
+        assertTidslinjeInneholder(resultat,
+                LocalDate.of(2022, 8, 8), LocalDate.of(2022, 8, 12) 
+                );
+    }
+    
+    @Test
     public void ukestidslinjeMandagTilFredag() {
         final LocalDate fom = LocalDate.of(2022, 8, 1);
         final LocalDate tom = LocalDate.of(2022, 8, 5);
@@ -225,6 +285,17 @@ public class HjelpetidslinjerTest {
         final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
         assertTidslinjeInneholder(resultat,
                 LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 5),
+                LocalDate.of(2022, 8, 8), LocalDate.of(2022, 8, 8)
+                );
+    }
+    
+    @Test
+    public void ukestidslinjeFredagTilMandag() {
+        final LocalDate fom = LocalDate.of(2022, 8, 5);
+        final LocalDate tom = LocalDate.of(2022, 8, 8);
+        final LocalDateTimeline<Boolean> resultat = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(fom, tom);
+        assertTidslinjeInneholder(resultat,
+                LocalDate.of(2022, 8, 5), LocalDate.of(2022, 8, 5),
                 LocalDate.of(2022, 8, 8), LocalDate.of(2022, 8, 8)
                 );
     }
