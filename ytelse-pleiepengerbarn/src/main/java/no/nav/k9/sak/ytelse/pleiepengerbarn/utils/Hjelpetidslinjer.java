@@ -4,6 +4,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -68,6 +69,85 @@ public final class Hjelpetidslinjer {
             sisteTom = sisteTom.minusDays(sisteTom.getDayOfWeek().getValue());
         }
         return sisteTom;
+    }
+    
+    /**
+     * Lager en ukestidslinje for mandag-fredag for oppgitt intervall.
+     * 
+     * @param fom Fra-og-med-datoen man skal generere ukestidslinje for.
+     * @param tom Til-og-med-datoen man skal generere ukestidslinje for.
+     * 
+     * @return En tidslinje med et segment per uke. Hvert segment har maksimumsperioden
+     *          mandag til fredag -- og kan være kortere i hver ende hvis ikke
+     *          {@code fom} er en mandag og/eller {@code tom} er en fredag. 
+     */
+    public static LocalDateTimeline<Boolean> lagUkestidslinjeForMandagTilFredag(LocalDate fom, LocalDate tom) {
+        Objects.requireNonNull(fom, "fom");
+        Objects.requireNonNull(tom, "tom");
+        if (fom.isAfter(tom)) {
+            throw new IllegalArgumentException("fom kan ikke være etter tom.");
+        }
+        
+        LocalDate nesteFom = fjernHelgFraFomDato(fom);
+        final LocalDate sisteTom = fjernHelgFraTomDato(tom);
+        
+        final LocalDate førsteTom = nesteFom.plusDays(DayOfWeek.FRIDAY.getValue() - nesteFom.getDayOfWeek().getValue());
+        if (førsteTom.isAfter(sisteTom)) {
+            return resultatHvisMindreEnnEnUke(nesteFom, sisteTom);
+        }
+        
+        final List<LocalDateSegment<Boolean>> ukesegmenter = new ArrayList<>();
+        
+        // Legger til den første uken der nesteFom ikke nødvendigvis er mandag:
+        ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, førsteTom, Boolean.TRUE));
+        
+        final int dagerIEnUke = 7;
+        final int dagerFraFredagTilMandag = 3;
+        
+        // Hopper over helgen:
+        nesteFom = førsteTom.plusDays(dagerFraFredagTilMandag);
+        
+        // Legg til fulle uker:
+        while (!nesteFom.plusDays(dagerIEnUke - dagerFraFredagTilMandag).isAfter(sisteTom)) {
+            ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, nesteFom.plusDays(4), Boolean.TRUE));
+            nesteFom = nesteFom.plusDays(dagerIEnUke); // Hopper til neste mandag.
+        }
+        
+        // Håndter den siste ikke-fulle uken:
+        if (!nesteFom.isAfter(sisteTom)) {
+            ukesegmenter.add(new LocalDateSegment<Boolean>(nesteFom, sisteTom, Boolean.TRUE));
+        }
+        
+        return new LocalDateTimeline<Boolean>(ukesegmenter);
+    }
+    
+    private static LocalDateTimeline<Boolean> resultatHvisMindreEnnEnUke(LocalDate nesteFom,LocalDate sisteTom) {
+        if (nesteFom.isAfter(sisteTom)) {
+            // Kun helgeperiode.
+            return LocalDateTimeline.empty();
+        }
+        return new LocalDateTimeline<Boolean>(nesteFom, sisteTom, Boolean.TRUE);
+    }
+
+    private static LocalDate fjernHelgFraTomDato(LocalDate tom) {
+        if (tom.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            tom = tom.minusDays(1);
+        }
+        if (tom.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            tom = tom.minusDays(2);
+        }
+        return tom;
+    }
+
+    private static LocalDate fjernHelgFraFomDato(LocalDate fom) {
+        LocalDate nesteFom = fom;
+        if (nesteFom.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            nesteFom = nesteFom.plusDays(2);
+        }
+        if (nesteFom.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            nesteFom = nesteFom.plusDays(1);
+        }
+        return nesteFom;
     }
     
     public static <T> LocalDateTimeline<T> utledHullSomMåTettes(LocalDateTimeline<T> tidslinjen, KantIKantVurderer kantIKantVurderer) {
