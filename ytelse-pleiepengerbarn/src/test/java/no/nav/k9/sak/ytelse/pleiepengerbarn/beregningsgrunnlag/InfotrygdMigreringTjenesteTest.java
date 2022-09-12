@@ -7,7 +7,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +86,7 @@ class InfotrygdMigreringTjenesteTest {
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
         when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
             .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
-        when(infotrygdService.finnGrunnlagsperioderForPleietrengende(any(), any(), any(), any())).thenReturn(Collections.emptyMap());
+        when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any())).thenReturn(Collections.emptyMap());
         when(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .thenReturn(new PåTversAvHelgErKantIKantVurderer());
 
@@ -336,7 +338,7 @@ class InfotrygdMigreringTjenesteTest {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)));
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
 
-        when(infotrygdService.finnGrunnlagsperioderForPleietrengende(any(), any(), any(), any()))
+        when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any()))
             .thenReturn(Map.of(AktørId.dummy(),
                 List.of(new IntervallMedBehandlingstema(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), "PN"))));
 
@@ -351,7 +353,7 @@ class InfotrygdMigreringTjenesteTest {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)));
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
 
-        when(infotrygdService.finnGrunnlagsperioderForPleietrengende(any(), any(), any(), any()))
+        when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any()))
             .thenReturn(Map.of(AktørId.dummy(),
                 List.of(new IntervallMedBehandlingstema(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), "PB"))));
 
@@ -362,7 +364,7 @@ class InfotrygdMigreringTjenesteTest {
     void skal_ikke_gi_aksjonspunt_når_annen_part_har_overlappende_periode_i_infotrygd_som_er_søkt_om() {
         lagUtenInfotrygdPsbYtelse();
         var annenPartAktørId = new AktørId(345L);
-        when(infotrygdService.finnGrunnlagsperioderForPleietrengende(any(), any(), any(), any()))
+        when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any()))
             .thenReturn(Map.of(annenPartAktørId,
                 List.of(new IntervallMedBehandlingstema(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), "PN"))));
         var annenPartfagsak = Fagsak.opprettNy(FagsakYtelseType.PSB, annenPartAktørId, new Saksnummer("456"), STP, STP.plusDays(10));
@@ -447,10 +449,6 @@ class InfotrygdMigreringTjenesteTest {
             .medAktørId(fagsak.getAktørId());
         iayBuilder.leggTilAktørYtelse(aktørYtelseBuilder);
         iayTjeneste.lagreIayAggregat(behandling.getId(), iayBuilder);
-
-        when(infotrygdService.finnGrunnlagsperioderForPleietrengende(any(), any(), any(), any()))
-            .thenReturn(Map.of(fagsak.getAktørId(), List.of(new IntervallMedBehandlingstema(periode, "PN"))));
-
     }
 
 
@@ -477,11 +475,6 @@ class InfotrygdMigreringTjenesteTest {
         aktørYtelseBuilder.medAktørId(fagsak.getAktørId());
         iayBuilder.leggTilAktørYtelse(aktørYtelseBuilder);
         iayTjeneste.lagreIayAggregat(behandling.getId(), iayBuilder);
-
-
-        when(infotrygdService.finnGrunnlagsperioderForPleietrengende(any(), any(), any(), any()))
-            .thenReturn(Map.of(fagsak.getAktørId(), perioder.stream().map(p -> new IntervallMedBehandlingstema(p, "PN")).toList()));
-
     }
 
 }

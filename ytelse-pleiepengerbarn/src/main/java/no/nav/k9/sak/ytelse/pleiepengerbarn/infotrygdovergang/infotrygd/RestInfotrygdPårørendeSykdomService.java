@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -34,11 +33,10 @@ public class RestInfotrygdPårørendeSykdomService implements InfotrygdPårøren
     }
 
     @Override
-    public Map<String, List<PeriodeMedBehandlingstema>> hentRelevanteGrunnlagsperioderPrSøkerident(InfotrygdPårørendeSykdomRequest request,
-                                                                                                   Optional<PersonIdent> ekskludertSøkerIdent) {
+    public Map<String, List<PeriodeMedBehandlingstema>> hentRelevanteGrunnlagsperioderPrSøkeridentForAndreSøkere(InfotrygdPårørendeSykdomRequest request, PersonIdent ekskludertPersonIdent) {
         var vedtakPleietrengende = hentRelevantePleietrengendeVedtakIInfotrygd(request);
         var fnrSoekere = vedtakPleietrengende.stream().map(VedtakPleietrengende::getSoekerFnr).distinct()
-            .filter(fnr -> ekskludertSøkerIdent.map(p -> !fnr.equals(p.getIdent())).orElse(true))
+            .filter(fnr -> !fnr.equals(ekskludertPersonIdent.getIdent()))
             .collect(Collectors.toList());
         if (!fnrSoekere.isEmpty()) {
             log.info("Antall andre parter i infotrygd: " + fnrSoekere.size());
@@ -62,15 +60,11 @@ public class RestInfotrygdPårørendeSykdomService implements InfotrygdPårøren
     }
 
     private List<VedtakPleietrengende> hentRelevantePleietrengendeVedtakIInfotrygd(InfotrygdPårørendeSykdomRequest request) {
-        var vedtakRequest = new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer()));
-        return getVedtakPleietrengende(vedtakRequest, request.getRelevanteBehandlingstemaer());
-    }
+        List<VedtakPleietrengende> response = client.getVedtakForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer())));
 
-    private List<VedtakPleietrengende> getVedtakPleietrengende(PersonRequest vedtakRequest, Set<String> relevanteBehandlingstemaer) {
-        List<VedtakPleietrengende> response = client.getVedtakForPleietrengende(vedtakRequest);
         List<VedtakPleietrengende> vedtak = new ArrayList<>();
         for (VedtakPleietrengende vp : response) {
-            var relevanteSaker = vp.getVedtak().stream().filter(s -> erRelevant(s, relevanteBehandlingstemaer))
+            var relevanteSaker = vp.getVedtak().stream().filter(s -> erRelevant(s, request.getRelevanteBehandlingstemaer()))
                 .collect(Collectors.toList());
             if (!relevanteSaker.isEmpty()) {
                 var relevantVedtak = new VedtakPleietrengende.Builder().soekerFnr(vp.getSoekerFnr())
