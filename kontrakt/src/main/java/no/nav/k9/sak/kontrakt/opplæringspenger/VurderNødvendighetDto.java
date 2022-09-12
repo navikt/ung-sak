@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
@@ -21,6 +23,8 @@ public class VurderNødvendighetDto extends BekreftetAksjonspunktDto {
     private boolean godkjentInstitusjon;
 
     @JsonProperty(value = "perioder")
+    @Valid
+    @Size(min = 1)
     private List<VurderNødvendighetPeriodeDto> perioder;
 
     public VurderNødvendighetDto() {
