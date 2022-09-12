@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang.infotrygd;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -30,22 +29,21 @@ public class InfotrygdServiceImpl implements InfotrygdService {
         this.personIdentTjeneste = personIdentTjeneste;
     }
 
-
     @Override
-    public Map<AktørId, List<IntervallMedBehandlingstema>> finnGrunnlagsperioderForPleietrengende(AktørId pleietrengedeAktørId,
-                                                                                                  Optional<AktørId> ekskludertSøker,
-                                                                                                  LocalDate fom,
-                                                                                                  Set<String> relevanteInfotrygdBehandlingstemaer) {
+    public Map<AktørId, List<IntervallMedBehandlingstema>> finnGrunnlagsperioderForAndreAktører(AktørId pleietrengedeAktørId,
+                                                                                                AktørId ekskludertAktør,
+                                                                                                LocalDate fom,
+                                                                                                Set<String> relevanteInfotrygdBehandlingstemaer) {
 
         var personIdent = personIdentTjeneste.hentFnrForAktør(pleietrengedeAktørId);
-        var ekskludertSøkerIdent = ekskludertSøker.map(personIdentTjeneste::hentFnrForAktør);
+        var ekskludertPersonIdent = personIdentTjeneste.hentFnrForAktør(ekskludertAktør);
 
-        var perioderPrIdent = pårørendeSykdomService.hentRelevanteGrunnlagsperioderPrSøkerident(InfotrygdPårørendeSykdomRequest.builder()
+        var perioderPrIdent = pårørendeSykdomService.hentRelevanteGrunnlagsperioderPrSøkeridentForAndreSøkere(InfotrygdPårørendeSykdomRequest.builder()
                 .fødselsnummer(personIdent.getIdent())
                 .fraOgMed(fom)
                 .relevanteBehandlingstemaer(relevanteInfotrygdBehandlingstemaer)
                 .build(),
-            ekskludertSøkerIdent);
+            ekskludertPersonIdent);
 
         return perioderPrIdent.entrySet().stream()
             .filter(e -> personIdentTjeneste.hentAktørForFnr(new PersonIdent(e.getKey())).isPresent())
