@@ -12,6 +12,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
@@ -60,6 +61,10 @@ public class HentEtablertTilsynTjeneste {
     List<PeriodeMedVarighet> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse,
             Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende,
             boolean brukUbesluttedeData) {
+        
+        if (referanse.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+            return List.of();
+        }
 
         final LocalDateTimeline<Duration> etablertTilsynForPleietrengende = hentEtablertTilsynForPleietrengende(referanse, brukUbesluttedeData);
         final List<PleietrengendeSykdomInnleggelsePeriode> innleggelser = pleietrengendeSykdomDokumentRepository.hentInnleggelse(referanse.getPleietrengendeAktørId()).getPerioder();

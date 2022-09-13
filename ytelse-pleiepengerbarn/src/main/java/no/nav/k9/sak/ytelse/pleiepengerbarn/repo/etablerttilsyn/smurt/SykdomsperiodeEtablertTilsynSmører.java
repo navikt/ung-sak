@@ -30,6 +30,9 @@ public class SykdomsperiodeEtablertTilsynSmører {
     
     
     private static LocalDateTimeline<Boolean> toSykdomsuketidslinje(LocalDateTimeline<Boolean> sykdomstidslinje) {
+        if (sykdomstidslinje.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
         LocalDateTimeline<Boolean> sykdomsukestidslinje = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(sykdomstidslinje.getMinLocalDate(), sykdomstidslinje.getMaxLocalDate());
         sykdomsukestidslinje = sykdomstidslinje.intersection(sykdomsukestidslinje).compress();
         return sykdomsukestidslinje;
