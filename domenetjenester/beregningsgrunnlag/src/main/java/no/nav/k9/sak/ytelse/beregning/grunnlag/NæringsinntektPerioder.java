@@ -27,7 +27,7 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 class NæringsinntektPerioder extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BG_NAERING_INNTEKT_PERIOOER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BG_NAERING_INNTEKT_PERIODER")
     private Long id;
 
     @Immutable
