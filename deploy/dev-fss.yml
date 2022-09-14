@@ -208,6 +208,8 @@ spec:
       value: "true"
     - name: SIGRUN_INNTEKT_FILTER_ENABLED
       value: "true"
+    - name: FILTRER_TILSTOTENDE_PERIODE
+      value: "true"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2022-09-19"
 

@@ -34,6 +34,12 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
 public class UtledStatusPåPerioderTjeneste {
 
+    private Boolean filtrereUtTilstøtendePeriode;
+
+    public UtledStatusPåPerioderTjeneste(Boolean filtrereUtTilstøtendePeriode) {
+        this.filtrereUtTilstøtendePeriode = filtrereUtTilstøtendePeriode;
+    }
+
     public StatusForPerioderPåBehandling utled(Behandling behandling,
                                                KantIKantVurderer kantIKantVurderer,
                                                Set<KravDokument> kravdokumenter,
@@ -61,6 +67,7 @@ public class UtledStatusPåPerioderTjeneste {
 
         var endringFraBrukerTidslinje = mergeTidslinjer(endringFraBruker, kantIKantVurderer, this::mergeSegmentsAndreDokumenter);
         tidslinje = tidslinje.combine(endringFraBrukerTidslinje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        tidslinje = tidslinje.filterValue(this::harIkkeBareBerørtPeriode);
 
         var endringFraAndreParter = new LocalDateTimeline<>(revurderingPerioderFraAndreParter.stream()
             .map(entry -> new LocalDateSegment<>(entry.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.mapFra(entry.getÅrsak())))))
@@ -87,6 +94,14 @@ public class UtledStatusPåPerioderTjeneste {
             .collect(Collectors.toCollection(TreeSet::new));
 
         return new StatusForPerioderPåBehandling(perioderTilVurderingSet, perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode));
+    }
+
+    private boolean harIkkeBareBerørtPeriode(ÅrsakerTilVurdering it) {
+        if (!filtrereUtTilstøtendePeriode) {
+            return true;
+        }
+        var årsaker = it.getÅrsaker();
+        return !årsaker.isEmpty() && !(årsaker.size() == 1 && årsaker.contains(ÅrsakTilVurdering.REVURDERER_BERØRT_PERIODE));
     }
 
     private List<ÅrsakMedPerioder> utledÅrsakMedPerioder(List<PeriodeMedÅrsaker> perioder) {
