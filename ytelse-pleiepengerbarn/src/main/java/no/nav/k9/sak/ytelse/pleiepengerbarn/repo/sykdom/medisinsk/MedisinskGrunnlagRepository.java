@@ -170,10 +170,12 @@ public class MedisinskGrunnlagRepository {
         final LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> ktpVurderinger = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, pleietrengende);
         final LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> tooVurderinger = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.TO_OMSORGSPERSONER, pleietrengende);
         final LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> sluVurderinger = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.LIVETS_SLUTTFASE, pleietrengende);
+        final LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> lasVurderinger = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.LANGVARIG_SYKDOM, pleietrengende);
 
         final List<PleietrengendeSykdomVurderingVersjon> vurderinger = ktpVurderinger.stream().map(LocalDateSegment::getValue).distinct().collect(Collectors.toCollection(ArrayList::new));
         vurderinger.addAll(tooVurderinger.stream().map(LocalDateSegment::getValue).distinct().collect(Collectors.toList()));
         vurderinger.addAll(sluVurderinger.stream().map(LocalDateSegment::getValue).distinct().collect(Collectors.toList()));
+        vurderinger.addAll(lasVurderinger.stream().map(LocalDateSegment::getValue).distinct().collect(Collectors.toList()));
         return vurderinger;
     }
 

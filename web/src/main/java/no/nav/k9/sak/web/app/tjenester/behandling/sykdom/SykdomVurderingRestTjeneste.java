@@ -393,7 +393,7 @@ public class SykdomVurderingRestTjeneste {
         switch (fagsakYtelseType) {
             case PLEIEPENGER_SYKT_BARN ->
                 sikreAtOppdateringIkkeKrysser18årsdag(behandling, sykdomVurderingOpprettelse.getPerioder());
-            case PLEIEPENGER_NÆRSTÅENDE -> ingenValidering();
+            case PLEIEPENGER_NÆRSTÅENDE, OPPLÆRINGSPENGER -> ingenValidering();
             default -> throw new IllegalStateException("Ikke-støttet ytelsetype: " + fagsakYtelseType);
         }
 
@@ -402,6 +402,8 @@ public class SykdomVurderingRestTjeneste {
                 validerSykdomvurderingTyper(sykdomVurderingOpprettelse, Set.of(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, SykdomVurderingType.TO_OMSORGSPERSONER));
             case PLEIEPENGER_NÆRSTÅENDE ->
                 validerSykdomvurderingTyper(sykdomVurderingOpprettelse, Set.of(SykdomVurderingType.LIVETS_SLUTTFASE));
+            case OPPLÆRINGSPENGER ->
+                validerSykdomvurderingTyper(sykdomVurderingOpprettelse, Set.of(SykdomVurderingType.LANGVARIG_SYKDOM));
             default -> throw new IllegalStateException("Ikke-støttet ytelsetype: " + fagsakYtelseType);
         }
 
