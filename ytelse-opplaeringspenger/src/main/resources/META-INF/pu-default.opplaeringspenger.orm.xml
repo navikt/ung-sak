@@ -5,7 +5,7 @@
                  version="3.0">
 
     <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING" />
-    <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING_GRUNNLAG" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING_GRUNNLAG" />
+    <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING_GRUNNLAG" allocation-size="50" sequence-name="SEQ_GR_OPPLAERING" />
 
     <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring" />
     <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag" />

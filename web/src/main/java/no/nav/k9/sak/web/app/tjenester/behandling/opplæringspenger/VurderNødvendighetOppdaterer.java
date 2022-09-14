@@ -41,7 +41,7 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
     private VurdertOpplæringGrunnlag mapDtoTilGrunnlag(Long behandlingId, VurderNødvendighetDto dto) {
         List<VurdertOpplæring> vurdertOpplæring = dto.getPerioder()
             .stream()
-            .map(periodeDto -> new VurdertOpplæring(null, periodeDto.getFom(), periodeDto.getTom(), periodeDto.isNødvendigOpplæring()))
+            .map(periodeDto -> new VurdertOpplæring(periodeDto.getFom(), periodeDto.getTom(), periodeDto.isNødvendigOpplæring()))
             .toList();
         return new VurdertOpplæringGrunnlag(behandlingId, dto.isGodkjentInstitusjon(), vurdertOpplæring, dto.getBegrunnelse());
     }

@@ -8,17 +8,18 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "VurdertOpplæringGrunnlag")
-@Table(name = "olp_vurdert_opplaering_grunnlag")
+@Table(name = "GR_OPPLAERING")
 public class VurdertOpplæringGrunnlag extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OLP_VURDERT_OPPLAERING_GRUNNLAG")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_OPPLAERING")
     private Long id;
 
     @Column(name = "behandling_id", updatable = false, nullable = false)
@@ -30,7 +31,8 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
     @Column(name = "godkjent_institusjon", nullable = false)
     private Boolean godkjentInstitusjon = false;
 
-    @OneToMany(mappedBy = "vurdertOpplæringGrunnlag", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinColumn(name = "holder_id", nullable = false)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private List<VurdertOpplæring> vurdertOpplæring;
 
     @Column(name = "begrunnelse")
@@ -48,7 +50,7 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
         this.godkjentInstitusjon = godkjentInstitusjon;
         this.vurdertOpplæring = vurdertOpplæringList
             .stream()
-            .map(vurdertOpplæring -> new VurdertOpplæring(vurdertOpplæring).medGrunnlag(this))
+            .map(vurdertOpplæring -> new VurdertOpplæring(vurdertOpplæring))
             .toList();
         this.begrunnelse = begrunnelse;
     }
@@ -59,6 +61,10 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
 
     public Boolean getGodkjentInstitusjon() {
         return godkjentInstitusjon;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
     }
 
     public void setAktiv(Boolean aktiv) {

@@ -1,4 +1,4 @@
-create table if not exists OLP_VURDERT_OPPLAERING_GRUNNLAG
+create table if not exists GR_OPPLAERING
 (
     ID                      BIGINT                                 NOT NULL PRIMARY KEY,
     BEHANDLING_ID           BIGINT                                 NOT NULL,
@@ -10,15 +10,15 @@ create table if not exists OLP_VURDERT_OPPLAERING_GRUNNLAG
     OPPRETTET_TID           TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
     ENDRET_AV               VARCHAR(20),
     ENDRET_TID              TIMESTAMP(3),
-    constraint FK_OLP_VURDERT_OPPLAERING_GRUNNLAG_1
+    constraint FK_GR_OPPLAERING_1
         foreign key (BEHANDLING_ID) references BEHANDLING
 );
-create sequence if not exists SEQ_OLP_VURDERT_OPPLAERING_GRUNNLAG increment by 50 minvalue 1000000;
+create sequence if not exists SEQ_GR_OPPLAERING increment by 50 minvalue 1000000;
 
 create table if not exists OLP_VURDERT_OPPLAERING
 (
     ID                      BIGINT                                 NOT NULL PRIMARY KEY,
-    OLP_VURDERT_OPPLAERING_GRUNNLAG_ID BIGINT                      NOT NULL,
+    HOLDER_ID               BIGINT                                 NOT NULL,
     FOM                     DATE                                   NOT NULL,
     TOM                     DATE                                   NOT NULL,
     NOEDVENDIG_OPPLAERING   BOOLEAN      DEFAULT false             NOT NULL,
@@ -28,6 +28,6 @@ create table if not exists OLP_VURDERT_OPPLAERING
     ENDRET_AV               VARCHAR(20),
     ENDRET_TID              TIMESTAMP(3),
     constraint FK_OLP_VURDERT_OPPLAERING_1
-        foreign key (OLP_VURDERT_OPPLAERING_GRUNNLAG_ID) references OLP_VURDERT_OPPLAERING_GRUNNLAG
+        foreign key (HOLDER_ID) references GR_OPPLAERING
 );
 create sequence if not exists SEQ_OLP_VURDERT_OPPLAERING increment by 50 minvalue 1000000;

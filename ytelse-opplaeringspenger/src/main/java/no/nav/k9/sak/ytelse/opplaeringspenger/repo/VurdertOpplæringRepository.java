@@ -47,7 +47,7 @@ public class VurdertOpplæringRepository {
 
             nyttGrunnlag.setVurdertOpplæring(vurdertOpplæringTidslinje
                 .stream()
-                .map(datoSegment -> new VurdertOpplæring(datoSegment.getValue()).medGrunnlag(nyttGrunnlag).medPeriode(datoSegment.getFom(), datoSegment.getTom()))
+                .map(datoSegment -> new VurdertOpplæring(datoSegment.getValue()).medPeriode(datoSegment.getFom(), datoSegment.getTom()))
                 .collect(Collectors.toList()));
         });
 
