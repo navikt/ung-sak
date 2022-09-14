@@ -34,6 +34,12 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
 public class UtledStatusPåPerioderTjeneste {
 
+    private Boolean filtrereUtTilstøtendePeriode;
+
+    public UtledStatusPåPerioderTjeneste(Boolean filtrereUtTilstøtendePeriode) {
+        this.filtrereUtTilstøtendePeriode = filtrereUtTilstøtendePeriode;
+    }
+
     public StatusForPerioderPåBehandling utled(Behandling behandling,
                                                KantIKantVurderer kantIKantVurderer,
                                                Set<KravDokument> kravdokumenter,
@@ -61,6 +67,7 @@ public class UtledStatusPåPerioderTjeneste {
 
         var endringFraBrukerTidslinje = mergeTidslinjer(endringFraBruker, kantIKantVurderer, this::mergeSegmentsAndreDokumenter);
         tidslinje = tidslinje.combine(endringFraBrukerTidslinje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        tidslinje = tidslinje.filterValue(this::harIkkeBareBerørtPeriode);
 
         var endringFraAndreParter = new LocalDateTimeline<>(revurderingPerioderFraAndreParter.stream()
             .map(entry -> new LocalDateSegment<>(entry.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.mapFra(entry.getÅrsak())))))
@@ -81,12 +88,29 @@ public class UtledStatusPåPerioderTjeneste {
 
         var årsakMedPerioder = utledÅrsakMedPerioder(perioder);
 
-        var perioderTilVurderingSet = perioderTilVurderingKombinert
-            .stream()
-            .map(it -> new Periode(it.getFom(), it.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new));
+        var perioderTilVurderingSet = utledPerioderTilVurdering(perioderTilVurderingKombinert, årsakMedPerioder);
 
         return new StatusForPerioderPåBehandling(perioderTilVurderingSet, perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode));
+    }
+
+    private Set<Periode> utledPerioderTilVurdering(LocalDateTimeline<Boolean> perioderTilVurderingKombinert, List<ÅrsakMedPerioder> årsakMedPerioder) {
+        if (!filtrereUtTilstøtendePeriode) {
+            return perioderTilVurderingKombinert
+                .stream()
+                .map(it -> new Periode(it.getFom(), it.getTom()))
+                .collect(Collectors.toCollection(TreeSet::new));
+        }
+        var segmenter = årsakMedPerioder.stream().map(ÅrsakMedPerioder::getPerioder).flatMap(Collection::stream).map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), true)).toList();
+        var timeline = new LocalDateTimeline<>(segmenter, StandardCombinators::coalesceRightHandSide);
+        return timeline.compress().stream().map(it -> new Periode(it.getFom(), it.getTom())).collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private boolean harIkkeBareBerørtPeriode(ÅrsakerTilVurdering it) {
+        if (!filtrereUtTilstøtendePeriode) {
+            return true;
+        }
+        var årsaker = it.getÅrsaker();
+        return !årsaker.isEmpty() && !(årsaker.size() == 1 && årsaker.contains(ÅrsakTilVurdering.REVURDERER_BERØRT_PERIODE));
     }
 
     private List<ÅrsakMedPerioder> utledÅrsakMedPerioder(List<PeriodeMedÅrsaker> perioder) {

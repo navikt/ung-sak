@@ -37,6 +37,7 @@ public enum BehandlingStegType implements Kodeverdi {
     FORDEL_BEREGNINGSGRUNNLAG("FORDEL_BERGRUNN", "Fordel beregningsgrunnlag", UTREDES),
     FORESLÅ_BEHANDLINGSRESULTAT("FORBRES", "Foreslå behandlingsresultat", UTREDES),
     FORESLÅ_BEREGNINGSGRUNNLAG("FORS_BERGRUNN", "Foreslå beregningsgrunnlag", UTREDES),
+    FORESLÅ_BEREGNINGSGRUNNLAG_2("FORS_BERGRUNN_2", "Foreslå beregningsgrunnlag del 2", UTREDES),
     VURDER_MANUELT_BREV("VURDER_MANUELT_BREV", "Vurder manuelt brev", UTREDES),
     FORESLÅ_VEDTAK("FORVEDSTEG", "Foreslå vedtak", UTREDES),
     HINDRE_TILBAKETREKK("BERYT_OPPDRAG", "Hindre tilbaketrekk", UTREDES),

@@ -15,6 +15,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -196,6 +197,20 @@ public class SykdomVurderingTjeneste {
             .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), Boolean.TRUE))
             .toList())
             .compress();
+    }
+    
+    public LocalDateTimeline<Boolean> hentPsbOppfyltePerioderPåPleietrengende(AktørId pleietrengendeAktørId) {
+        final var innleggelseSegments = pleietrengendeSykdomDokumentRepository.hentInnleggelse(pleietrengendeAktørId)
+                .getPerioder()
+                .stream()
+                .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), Boolean.TRUE))
+                .collect(Collectors.toList());
+        final var innleggelseTidslinje = new LocalDateTimeline<>(innleggelseSegments);
+        final var ktpVurderingerTidslinje =  sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, pleietrengendeAktørId)
+                .filterValue(v -> v.getResultat() == Resultat.OPPFYLT)
+                .mapValue(v -> Boolean.TRUE);
+
+        return innleggelseTidslinje.union(ktpVurderingerTidslinje, StandardCombinators::coalesceLeftHandSide).compress();
     }
 
     private List<Periode> hentKontinuerligTilsynOgPleiePerioder(Behandling behandling) {
