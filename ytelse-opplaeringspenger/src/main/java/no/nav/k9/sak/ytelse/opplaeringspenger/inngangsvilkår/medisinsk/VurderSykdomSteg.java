@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -51,10 +50,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBu
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
@@ -93,12 +92,6 @@ public class VurderSykdomSteg implements BehandlingSteg {
         this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
-    }
-
-    private static <T> NavigableSet<T> union(NavigableSet<T> s1, NavigableSet<T> s2) {
-        final var resultat = new TreeSet<>(s1);
-        resultat.addAll(s2);
-        return resultat;
     }
 
     @Override
