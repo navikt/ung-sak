@@ -88,12 +88,21 @@ public class UtledStatusPåPerioderTjeneste {
 
         var årsakMedPerioder = utledÅrsakMedPerioder(perioder);
 
-        var perioderTilVurderingSet = perioderTilVurderingKombinert
-            .stream()
-            .map(it -> new Periode(it.getFom(), it.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new));
+        var perioderTilVurderingSet = utledPerioderTilVurdering(perioderTilVurderingKombinert, årsakMedPerioder);
 
         return new StatusForPerioderPåBehandling(perioderTilVurderingSet, perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode));
+    }
+
+    private Set<Periode> utledPerioderTilVurdering(LocalDateTimeline<Boolean> perioderTilVurderingKombinert, List<ÅrsakMedPerioder> årsakMedPerioder) {
+        if (!filtrereUtTilstøtendePeriode) {
+            return perioderTilVurderingKombinert
+                .stream()
+                .map(it -> new Periode(it.getFom(), it.getTom()))
+                .collect(Collectors.toCollection(TreeSet::new));
+        }
+        var segmenter = årsakMedPerioder.stream().map(ÅrsakMedPerioder::getPerioder).flatMap(Collection::stream).map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), true)).toList();
+        var timeline = new LocalDateTimeline<>(segmenter, StandardCombinators::coalesceRightHandSide);
+        return timeline.compress().stream().map(it -> new Periode(it.getFom(), it.getTom())).collect(Collectors.toCollection(TreeSet::new));
     }
 
     private boolean harIkkeBareBerørtPeriode(ÅrsakerTilVurdering it) {
