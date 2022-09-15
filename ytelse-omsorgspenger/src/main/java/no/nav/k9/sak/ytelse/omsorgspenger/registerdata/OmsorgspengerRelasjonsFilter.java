@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.registerdata;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -107,9 +108,11 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
     }
 
     private boolean gjelderForBarnet(Personinfo barn, UtvidetRett utvidetRett) {
-        String fnrGjelderFor = utvidetRett.getUtvidetRettFor();
-        if (PersonIdent.erGyldigFnr(fnrGjelderFor)) {
-            AktørId gjelderFor = aktørTjeneste.hentAktørIdForPersonIdent(new PersonIdent(fnrGjelderFor)).orElseThrow();
+        String personGjelderFor = utvidetRett.getUtvidetRettFor();
+        if ( (personGjelderFor.length() == 6) && (personGjelderFor.substring(0, 6).equals(barn.getFødselsdato().format(DateTimeFormatter.ofPattern("ddMMyy")))) ) {
+            return true;
+        } else if (PersonIdent.erGyldigFnr(personGjelderFor)) {
+            AktørId gjelderFor = aktørTjeneste.hentAktørIdForPersonIdent(new PersonIdent(personGjelderFor)).orElseThrow();
             return barn.getAktørId().equals(gjelderFor);
         } else {
             return false;
