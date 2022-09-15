@@ -109,7 +109,7 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
 
     private boolean gjelderForBarnet(Personinfo barn, UtvidetRett utvidetRett) {
         String personGjelderFor = utvidetRett.getUtvidetRettFor();
-        if ( (personGjelderFor.length() == 6) && (personGjelderFor.substring(0, 6).equals(barn.getFødselsdato().format(DateTimeFormatter.ofPattern("ddMMyy")))) ) {
+        if ( (personGjelderFor.length() == 6) && (personGjelderFor.equals(barn.getFødselsdato().format(DateTimeFormatter.ofPattern("ddMMyy")))) ) {
             return true;
         } else if (PersonIdent.erGyldigFnr(personGjelderFor)) {
             AktørId gjelderFor = aktørTjeneste.hentAktørIdForPersonIdent(new PersonIdent(personGjelderFor)).orElseThrow();
