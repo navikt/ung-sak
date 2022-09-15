@@ -22,6 +22,7 @@ public enum Vedtaksbrev implements Kodeverdi {
 
     AUTOMATISK("AUTOMATISK", "Automatisk generert vedtaksbrev"),
     FRITEKST("FRITEKST", "Fritekstbrev"),
+    REDIGERT("REDIGERT", "Redigert automatisk vedtaksbrev"),
     INGEN("INGEN", "Ingen vedtaksbrev"),
     UDEFINERT("-", "Udefinert"),
     ;
