@@ -20,6 +20,7 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 public class VurderNødvendighetDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty(value = "institusjon")
+    @Valid
     private VurderInstitusjonDto institusjon;
 
     @JsonProperty(value = "perioder")
