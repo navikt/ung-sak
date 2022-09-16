@@ -40,6 +40,8 @@ import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
@@ -100,21 +102,21 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
         Optional<VurdertOpplæringGrunnlag> vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(kontekst.getBehandlingId());
 
         if (vurdertOpplæringGrunnlag.isPresent()) {
-            //boolean godkjentInstitusjon = vurdertOpplæringGrunnlag.get().getGodkjentInstitusjon();
-            boolean godkjentInstitusjon = true; //TODO finn dette fra grunnlaget
-            if (!godkjentInstitusjon) {
-                // Institusjon er ikke godkjent - alle perioder blir avslått
-                leggTilVilkårResultat(vilkårBuilder, tidslinjeTilVurdering, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
-                return BehandleStegResultat.utførtUtenAksjonspunkter();
-            } else {
-                // Vi må sjekke om opplæringen er vurdert som nødvendig
-                List<VurdertOpplæring> vurdertOpplæringList = vurdertOpplæringGrunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring();
+            List<VurdertOpplæring> vurdertOpplæringList = vurdertOpplæringGrunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring();
+            VurdertInstitusjonHolder vurdertInstitusjonHolder = vurdertOpplæringGrunnlag.get().getVurdertInstitusjonHolder();
 
-                NavigableSet<DatoIntervallEntitet> nødvendigOpplæringPerioder = new TreeSet<>();
-                NavigableSet<DatoIntervallEntitet> ikkeNødvendigOpplæringPerioder = new TreeSet<>();
+            NavigableSet<DatoIntervallEntitet> ikkeGodkjentInstitusjonPerioder = new TreeSet<>();
+            NavigableSet<DatoIntervallEntitet> nødvendigOpplæringPerioder = new TreeSet<>();
+            NavigableSet<DatoIntervallEntitet> ikkeNødvendigOpplæringPerioder = new TreeSet<>();
 
-                for (VurdertOpplæring vurdertOpplæring : vurdertOpplæringList) {
-                    DatoIntervallEntitet datoIntervallEntitet = vurdertOpplæring.getPeriode();
+            for (VurdertOpplæring vurdertOpplæring : vurdertOpplæringList) {
+                DatoIntervallEntitet datoIntervallEntitet = vurdertOpplæring.getPeriode();
+
+                boolean godkjentInstitusjon = vurdertInstitusjonHolder.finnVurdertInstitusjon(vurdertOpplæring.getInstitusjon())
+                    .map(VurdertInstitusjon::getGodkjent)
+                    .orElse(false);
+
+                if (godkjentInstitusjon) {
                     boolean nødvendigOpplæring = vurdertOpplæring.getNødvendigOpplæring();
 
                     if (nødvendigOpplæring) {
@@ -122,19 +124,28 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
                     } else {
                         ikkeNødvendigOpplæringPerioder.add(datoIntervallEntitet);
                     }
+                } else {
+                    ikkeGodkjentInstitusjonPerioder.add(datoIntervallEntitet);
                 }
-
-                LocalDateTimeline<Boolean> nødvendigOpplæringTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(nødvendigOpplæringPerioder)
-                    .intersection(tidslinjeTilVurdering);
-
-                LocalDateTimeline<Boolean> ikkeNødvendigOpplæringTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(ikkeNødvendigOpplæringPerioder)
-                    .intersection(tidslinjeTilVurdering);
-
-                leggTilVilkårResultat(vilkårBuilder, nødvendigOpplæringTidslinje, Utfall.OPPFYLT, Avslagsårsak.UDEFINERT);
-                leggTilVilkårResultat(vilkårBuilder, ikkeNødvendigOpplæringTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_NØDVENDIG);
-
-                tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(nødvendigOpplæringTidslinje).disjoint(ikkeNødvendigOpplæringTidslinje);
             }
+
+            LocalDateTimeline<Boolean> ikkeGodkjentInstitusjonTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(ikkeGodkjentInstitusjonPerioder)
+                .intersection(tidslinjeTilVurdering);
+
+            LocalDateTimeline<Boolean> nødvendigOpplæringTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(nødvendigOpplæringPerioder)
+                .intersection(tidslinjeTilVurdering);
+
+            LocalDateTimeline<Boolean> ikkeNødvendigOpplæringTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(ikkeNødvendigOpplæringPerioder)
+                .intersection(tidslinjeTilVurdering);
+
+            leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentInstitusjonTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
+            leggTilVilkårResultat(vilkårBuilder, nødvendigOpplæringTidslinje, Utfall.OPPFYLT, Avslagsårsak.UDEFINERT);
+            leggTilVilkårResultat(vilkårBuilder, ikkeNødvendigOpplæringTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_NØDVENDIG);
+
+            tidslinjeTilVurdering = tidslinjeTilVurdering
+                .disjoint(nødvendigOpplæringTidslinje)
+                .disjoint(ikkeNødvendigOpplæringTidslinje)
+                .disjoint(ikkeGodkjentInstitusjonTidslinje);
         }
 
         vilkårResultatBuilder.leggTil(vilkårBuilder);

@@ -50,4 +50,8 @@ public class VurdertInstitusjonHolder extends BaseEntitet {
     public List<VurdertInstitusjon> getVurdertInstitusjon() {
         return vurdertInstitusjon.stream().toList();
     }
+
+    public Optional<VurdertInstitusjon> finnVurdertInstitusjon(String institusjon) {
+        return vurdertInstitusjon.stream().filter(vi -> vi.getInstitusjon().equals(institusjon)).findFirst();
+    }
 }
