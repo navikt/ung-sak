@@ -4,10 +4,16 @@
                  xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
                  version="3.0">
 
+    <sequence-generator name="SEQ_GR_OPPLAERING" allocation-size="50" sequence-name="SEQ_GR_OPPLAERING" />
     <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING" />
-    <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING_GRUNNLAG" allocation-size="50" sequence-name="SEQ_GR_OPPLAERING" />
+    <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING_HOLDER" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING_HOLDER" />
+    <sequence-generator name="SEQ_OLP_VURDERT_INSTITUSJON" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_INSTITUSJON" />
+    <sequence-generator name="SEQ_OLP_VURDERT_INSTITUSJON_HOLDER" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_INSTITUSJON_HOLDER" />
 
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring" />
     <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder" />
 
 </entity-mappings>

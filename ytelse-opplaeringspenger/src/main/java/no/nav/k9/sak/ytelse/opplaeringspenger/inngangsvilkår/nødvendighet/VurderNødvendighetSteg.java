@@ -100,14 +100,15 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
         Optional<VurdertOpplæringGrunnlag> vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(kontekst.getBehandlingId());
 
         if (vurdertOpplæringGrunnlag.isPresent()) {
-            boolean godkjentInstitusjon = vurdertOpplæringGrunnlag.get().getGodkjentInstitusjon();
+            //boolean godkjentInstitusjon = vurdertOpplæringGrunnlag.get().getGodkjentInstitusjon();
+            boolean godkjentInstitusjon = true; //TODO finn dette fra grunnlaget
             if (!godkjentInstitusjon) {
                 // Institusjon er ikke godkjent - alle perioder blir avslått
                 leggTilVilkårResultat(vilkårBuilder, tidslinjeTilVurdering, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
                 return BehandleStegResultat.utførtUtenAksjonspunkter();
             } else {
                 // Vi må sjekke om opplæringen er vurdert som nødvendig
-                List<VurdertOpplæring> vurdertOpplæringList = vurdertOpplæringGrunnlag.get().getVurdertOpplæring();
+                List<VurdertOpplæring> vurdertOpplæringList = vurdertOpplæringGrunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring();
 
                 NavigableSet<DatoIntervallEntitet> nødvendigOpplæringPerioder = new TreeSet<>();
                 NavigableSet<DatoIntervallEntitet> ikkeNødvendigOpplæringPerioder = new TreeSet<>();

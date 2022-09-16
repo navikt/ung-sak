@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger;
 
+import java.util.Collections;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -10,6 +11,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderNødvendighetDto;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
@@ -39,10 +41,13 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
     }
 
     private VurdertOpplæringGrunnlag mapDtoTilGrunnlag(Long behandlingId, VurderNødvendighetDto dto) {
+        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon(dto.getInstitusjon().getInstitusjon(), dto.getInstitusjon().isGodkjent(), dto.getBegrunnelse());
         List<VurdertOpplæring> vurdertOpplæring = dto.getPerioder()
             .stream()
-            .map(periodeDto -> new VurdertOpplæring(periodeDto.getFom(), periodeDto.getTom(), periodeDto.isNødvendigOpplæring()))
+            .map(periodeDto -> new VurdertOpplæring(periodeDto.getFom(), periodeDto.getTom(), periodeDto.isNødvendigOpplæring(), dto.getBegrunnelse(), vurdertInstitusjon.getInstitusjon()))
             .toList();
-        return new VurdertOpplæringGrunnlag(behandlingId, dto.isGodkjentInstitusjon(), vurdertOpplæring, dto.getBegrunnelse());
+        return new VurdertOpplæringGrunnlag(behandlingId,  dto.getBegrunnelse())
+            .medVurdertOpplæring(vurdertOpplæring)
+            .medVurdertInstitusjon(Collections.singletonList(vurdertInstitusjon));
     }
 }

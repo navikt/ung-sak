@@ -2,14 +2,15 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
+import org.hibernate.annotations.Immutable;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -28,12 +29,15 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
     @Column(name = "aktiv", nullable = false)
     private Boolean aktiv = true;
 
-    @Column(name = "godkjent_institusjon", nullable = false)
-    private Boolean godkjentInstitusjon = false;
+    @ManyToOne
+    @Immutable
+    @JoinColumn(name = "vurdert_institusjon_holder_id", nullable = false, updatable = false, unique = true)
+    private VurdertInstitusjonHolder vurdertInstitusjonHolder;
 
-    @JoinColumn(name = "holder_id", nullable = false)
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
-    private List<VurdertOpplæring> vurdertOpplæring;
+    @ManyToOne
+    @Immutable
+    @JoinColumn(name = "vurdert_opplaering_holder_id", nullable = false, updatable = false, unique = true)
+    private VurdertOpplæringHolder vurdertOpplæringHolder;
 
     @Column(name = "begrunnelse")
     private String begrunnelse;
@@ -45,22 +49,25 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
     public VurdertOpplæringGrunnlag() {
     }
 
-    public VurdertOpplæringGrunnlag(Long behandlingId, Boolean godkjentInstitusjon, List<VurdertOpplæring> vurdertOpplæringList, String begrunnelse) {
+    public VurdertOpplæringGrunnlag(Long behandlingId, String begrunnelse) {
         this.behandlingId = behandlingId;
-        this.godkjentInstitusjon = godkjentInstitusjon;
-        this.vurdertOpplæring = vurdertOpplæringList
-            .stream()
-            .map(vurdertOpplæring -> new VurdertOpplæring(vurdertOpplæring))
-            .toList();
         this.begrunnelse = begrunnelse;
     }
 
-    public List<VurdertOpplæring> getVurdertOpplæring() {
-        return vurdertOpplæring;
+    public VurdertInstitusjonHolder getVurdertInstitusjonHolder() {
+        return vurdertInstitusjonHolder;
     }
 
-    public Boolean getGodkjentInstitusjon() {
-        return godkjentInstitusjon;
+    public VurdertOpplæringHolder getVurdertOpplæringHolder() {
+        return vurdertOpplæringHolder;
+    }
+
+    public void setVurdertInstitusjonHolder(VurdertInstitusjonHolder vurdertInstitusjonHolder) {
+        this.vurdertInstitusjonHolder = vurdertInstitusjonHolder;
+    }
+
+    public void setVurdertOpplæringHolder(VurdertOpplæringHolder vurdertOpplæringHolder) {
+        this.vurdertOpplæringHolder = vurdertOpplæringHolder;
     }
 
     public String getBegrunnelse() {
@@ -71,7 +78,13 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
         this.aktiv = aktiv;
     }
 
-    public void setVurdertOpplæring(List<VurdertOpplæring> vurdertOpplæring) {
-        this.vurdertOpplæring = vurdertOpplæring;
+    public VurdertOpplæringGrunnlag medVurdertOpplæring(List<VurdertOpplæring> vurdertOpplæring) {
+        this.vurdertOpplæringHolder = new VurdertOpplæringHolder(vurdertOpplæring);
+        return this;
+    }
+
+    public VurdertOpplæringGrunnlag medVurdertInstitusjon(List<VurdertInstitusjon> vurdertInstitusjon) {
+        this.vurdertInstitusjonHolder = new VurdertInstitusjonHolder(vurdertInstitusjon);
+        return this;
     }
 }

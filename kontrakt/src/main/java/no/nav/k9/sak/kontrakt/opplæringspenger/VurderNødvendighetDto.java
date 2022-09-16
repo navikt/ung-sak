@@ -19,8 +19,8 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_INSTITUSJON_OG_NØDVENDIGHET)
 public class VurderNødvendighetDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value = "godkjentInstitusjon")
-    private boolean godkjentInstitusjon;
+    @JsonProperty(value = "institusjon")
+    private VurderInstitusjonDto institusjon;
 
     @JsonProperty(value = "perioder")
     @Valid
@@ -30,13 +30,13 @@ public class VurderNødvendighetDto extends BekreftetAksjonspunktDto {
     public VurderNødvendighetDto() {
     }
 
-    public VurderNødvendighetDto(boolean godkjentInstitusjon, List<VurderNødvendighetPeriodeDto> perioder) {
-        this.godkjentInstitusjon = godkjentInstitusjon;
+    public VurderNødvendighetDto(VurderInstitusjonDto institusjon, List<VurderNødvendighetPeriodeDto> perioder) {
+        this.institusjon = institusjon;
         this.perioder = perioder;
     }
 
-    public boolean isGodkjentInstitusjon() {
-        return godkjentInstitusjon;
+    public VurderInstitusjonDto getInstitusjon() {
+        return institusjon;
     }
 
     public List<VurderNødvendighetPeriodeDto> getPerioder() {

@@ -33,6 +33,7 @@ public class VurdertOpplæringRepository {
     public void lagreOgFlush(Long behandlingId, VurdertOpplæringGrunnlag nyttGrunnlag) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         Objects.requireNonNull(nyttGrunnlag, "nyttGrunnlag");
+        //TODO flere nullsjekker?
 
         final Optional<VurdertOpplæringGrunnlag> aktivtGrunnlag = getAktivtGrunnlag(behandlingId);
 
@@ -41,18 +42,61 @@ public class VurdertOpplæringRepository {
             entityManager.persist(grunnlag);
             entityManager.flush();
 
-            LocalDateTimeline<VurdertOpplæring> vurdertOpplæringTidslinje = utledKombinertTidslinje(
-                aktivtGrunnlag.get().getVurdertOpplæring(),
-                nyttGrunnlag.getVurdertOpplæring());
+            leggTilVurdertInstitusjonINyttGrunnlag(grunnlag, nyttGrunnlag);
+            leggTilVurdertOpplæringINyttGrunnlag(grunnlag, nyttGrunnlag);
+        });
 
-            nyttGrunnlag.setVurdertOpplæring(vurdertOpplæringTidslinje
+        entityManager.persist(nyttGrunnlag.getVurdertInstitusjonHolder());
+        entityManager.persist(nyttGrunnlag.getVurdertOpplæringHolder());
+        entityManager.persist(nyttGrunnlag);
+        entityManager.flush();
+    }
+
+    private void leggTilVurdertInstitusjonINyttGrunnlag(VurdertOpplæringGrunnlag aktivtGrunnlag, VurdertOpplæringGrunnlag nyttGrunnlag) {
+        VurdertInstitusjon nyVurdertInstitusjon = nyttGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().get(0);
+        if (trengerNyVurdertInstitusjonHolder(aktivtGrunnlag, nyVurdertInstitusjon)) {
+            List<VurdertInstitusjon> nyVurdertInstitusjonList = aktivtGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().stream()
+                .filter(eksisterendeVurdertInstitusjon -> !eksisterendeVurdertInstitusjon.getInstitusjon().equals(nyVurdertInstitusjon.getInstitusjon()))
+                .map(VurdertInstitusjon::new)
+                .collect(Collectors.toList());
+
+            nyVurdertInstitusjonList.add(nyVurdertInstitusjon);
+
+            nyttGrunnlag.medVurdertInstitusjon(nyVurdertInstitusjonList);
+        } else {
+            nyttGrunnlag.setVurdertInstitusjonHolder(aktivtGrunnlag.getVurdertInstitusjonHolder());
+        }
+    }
+
+    private void leggTilVurdertOpplæringINyttGrunnlag(VurdertOpplæringGrunnlag aktivtGrunnlag, VurdertOpplæringGrunnlag nyttGrunnlag) {
+        List<VurdertOpplæring> nyVurdertOpplæring = nyttGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring();
+        if (trengerNyVurdertOpplæringHolder(aktivtGrunnlag, nyVurdertOpplæring)) {
+            LocalDateTimeline<VurdertOpplæring> vurdertOpplæringTidslinje = utledKombinertTidslinje(
+                aktivtGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring(),
+                nyVurdertOpplæring);
+
+            nyttGrunnlag.medVurdertOpplæring(vurdertOpplæringTidslinje
                 .stream()
                 .map(datoSegment -> new VurdertOpplæring(datoSegment.getValue()).medPeriode(datoSegment.getFom(), datoSegment.getTom()))
                 .collect(Collectors.toList()));
-        });
+        } else {
+            nyttGrunnlag.setVurdertOpplæringHolder(aktivtGrunnlag.getVurdertOpplæringHolder());
+        }
+    }
 
-        entityManager.persist(nyttGrunnlag);
-        entityManager.flush();
+    private boolean trengerNyVurdertOpplæringHolder(VurdertOpplæringGrunnlag aktivtGrunnlag, List<VurdertOpplæring> nyVurdertOpplæring) {
+        for (VurdertOpplæring nyVO : nyVurdertOpplæring) {
+            if (aktivtGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring().stream()
+                .noneMatch(oldVO -> oldVO.equals(nyVO))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean trengerNyVurdertInstitusjonHolder(VurdertOpplæringGrunnlag aktivtGrunnlag, VurdertInstitusjon nyVurdertInstitusjon) {
+        return aktivtGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().stream()
+            .noneMatch(oldVurdertInstitusjon -> oldVurdertInstitusjon.equals(nyVurdertInstitusjon));
     }
 
     private Optional<VurdertOpplæringGrunnlag> getAktivtGrunnlag(Long behandlingId) {
