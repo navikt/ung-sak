@@ -81,6 +81,10 @@ public class VurdertOpplæring extends BaseEntitet {
         return institusjon;
     }
 
+    public String getBegrunnelse() {
+        return begrunnelse;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -88,7 +92,8 @@ public class VurdertOpplæring extends BaseEntitet {
         VurdertOpplæring that = (VurdertOpplæring) o;
         return Objects.equals(periode, that.periode)
             && Objects.equals(nødvendigOpplæring, that.nødvendigOpplæring)
-            && Objects.equals(institusjon, that.institusjon);
+            && Objects.equals(institusjon, that.institusjon)
+            && Objects.equals(begrunnelse, that.begrunnelse);
     }
 
     @Override

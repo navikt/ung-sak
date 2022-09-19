@@ -24,12 +24,18 @@ public class VurderInstitusjonDto {
     @JsonProperty(value = "godkjent")
     private boolean godkjent;
 
+    @JsonProperty("begrunnelse")
+    @Size(max = 4000)
+    @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String begrunnelse;
+
     public VurderInstitusjonDto() {
     }
 
-    public VurderInstitusjonDto(String institusjon, boolean godkjent) {
+    public VurderInstitusjonDto(String institusjon, boolean godkjent, String begrunnelse) {
         this.institusjon = institusjon;
         this.godkjent = godkjent;
+        this.begrunnelse = begrunnelse;
     }
 
     public String getInstitusjon() {
@@ -38,5 +44,9 @@ public class VurderInstitusjonDto {
 
     public boolean isGodkjent() {
         return godkjent;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
     }
 }

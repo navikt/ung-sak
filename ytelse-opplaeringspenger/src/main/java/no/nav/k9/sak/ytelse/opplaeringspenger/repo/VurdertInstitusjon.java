@@ -68,7 +68,8 @@ public class VurdertInstitusjon extends BaseEntitet {
         if (o == null || getClass() != o.getClass()) return false;
         VurdertInstitusjon that = (VurdertInstitusjon) o;
         return Objects.equals(institusjon, that.institusjon)
-            && Objects.equals(godkjent, that.godkjent);
+            && Objects.equals(godkjent, that.godkjent)
+            && Objects.equals(begrunnelse, that.begrunnelse);
     }
 
     @Override
