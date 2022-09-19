@@ -43,7 +43,7 @@
         <felles.version>0.8.11</felles.version>
         <swagger.version>2.2.2</swagger.version>
         <junit.version>5.9.0</junit.version>
-        <k9format.version>6.1.5</k9format.version>
+        <k9format.version>6.1.6</k9format.version>
         <jackson.version>2.13.4</jackson.version>
         <asm.version>9.3</asm.version>
         <kotlin-stdlib.version>1.7.10</kotlin-stdlib.version>
@@ -685,7 +685,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.2</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

@@ -98,8 +98,6 @@ class MapOppgittOpptjening {
         private static OppgittOpptjeningDto map(OppgittOpptjening oppgittOpptjening) {
             if (oppgittOpptjening == null)
                 return null;
-            if (!oppgittOpptjening.harOpptjening())
-                return null;
 
             JournalpostId journalpostId = oppgittOpptjening.getJournalpostId() != null
                 ? new JournalpostId(oppgittOpptjening.getJournalpostId().getVerdi())
