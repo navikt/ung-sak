@@ -119,7 +119,56 @@ public class VurderNødvendighetStegTest {
         assertThat(vilkår.getPerioder().get(0).getTom()).isEqualTo(søknadsperiode.getTom());
     }
 
-    //TODO flere tester
+    @Test
+    public void skalReturnereUtenAksjonspunktNårOpplæringIkkeErGodkjent() {
+        Fagsak fagsak = behandling.getFagsak();
+        BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
+            behandlingRepository.taSkriveLås(behandling));
+        setupPerioderTilVurdering(kontekst);
+
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), "fordi");
+        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Xavier Institute", true, "noe");
+        grunnlag.medVurdertInstitusjon(Collections.singletonList(vurdertInstitusjon));
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), false, "test", vurdertInstitusjon.getInstitusjon());
+        grunnlag.medVurdertOpplæring(Collections.singletonList(vurdertOpplæring));
+        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+
+        BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
+        assertThat(resultat).isNotNull();
+        assertThat(resultat.getAksjonspunktResultater()).isEmpty();
+        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(1);
+        assertThat(vilkår.getPerioder().get(0).getUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
+        assertThat(vilkår.getPerioder().get(0).getFom()).isEqualTo(søknadsperiode.getFom());
+        assertThat(vilkår.getPerioder().get(0).getTom()).isEqualTo(søknadsperiode.getTom());
+    }
+
+    @Test
+    public void skalReturnereAksjonspunktNårVurderingIkkeErKomplett() {
+        Fagsak fagsak = behandling.getFagsak();
+        BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
+            behandlingRepository.taSkriveLås(behandling));
+        setupPerioderTilVurdering(kontekst);
+
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), "fordi");
+        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Karoline Spiseri og Pub", true, "noe");
+        grunnlag.medVurdertInstitusjon(Collections.singletonList(vurdertInstitusjon));
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "test", vurdertInstitusjon.getInstitusjon());
+        grunnlag.medVurdertOpplæring(Collections.singletonList(vurdertOpplæring));
+        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+
+        BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
+        assertThat(resultat).isNotNull();
+        assertThat(resultat.getAksjonspunktResultater()).hasSize(1);
+        assertThat(resultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.VURDER_INSTITUSJON_OG_NØDVENDIGHET);
+        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(1);
+        assertThat(vilkår.getPerioder().get(0).getUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
+        assertThat(vilkår.getPerioder().get(0).getFom()).isEqualTo(søknadsperiode.getFom());
+        assertThat(vilkår.getPerioder().get(0).getTom()).isEqualTo(søknadsperiode.getTom());
+    }
 
     private void setupPerioderTilVurdering(BehandlingskontrollKontekst kontekst) {
         when(perioderTilVurderingTjenesteMock.utled(kontekst.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING))
