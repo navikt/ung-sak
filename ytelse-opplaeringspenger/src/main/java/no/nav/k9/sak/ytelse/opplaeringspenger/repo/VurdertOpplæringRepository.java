@@ -33,18 +33,20 @@ public class VurdertOpplæringRepository {
     public void lagreOgFlush(Long behandlingId, VurdertOpplæringGrunnlag nyttGrunnlag) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         Objects.requireNonNull(nyttGrunnlag, "nyttGrunnlag");
-        //TODO flere nullsjekker?
+        Objects.requireNonNull(nyttGrunnlag.getVurdertOpplæringHolder(), "nyttGrunnlag.vurdertOpplæringHolder");
+        Objects.requireNonNull(nyttGrunnlag.getVurdertInstitusjonHolder(), "nyttGrunnlag.vurdertInstitusjonHolder");
 
-        final Optional<VurdertOpplæringGrunnlag> aktivtGrunnlag = getAktivtGrunnlag(behandlingId);
+        final VurdertOpplæringGrunnlag aktivtGrunnlag = getAktivtGrunnlag(behandlingId).orElse(null);
 
-        aktivtGrunnlag.ifPresent(grunnlag -> {
-            grunnlag.setAktiv(false);
-            entityManager.persist(grunnlag);
+        if (aktivtGrunnlag != null) {
+            aktivtGrunnlag.setAktiv(false);
+            entityManager.persist(aktivtGrunnlag);
             entityManager.flush();
 
-            leggTilVurdertInstitusjonINyttGrunnlag(grunnlag, nyttGrunnlag);
-            leggTilVurdertOpplæringINyttGrunnlag(grunnlag, nyttGrunnlag);
-        });
+            VurdertInstitusjonHolder vurdertInstitusjonHolder = hentVurdertInstitusjonHolderTilNyttGrunnlag(aktivtGrunnlag, nyttGrunnlag);
+            VurdertOpplæringHolder vurdertOpplæringHolder = hentVurdertOpplæringHolderTilNyttGrunnlag(aktivtGrunnlag, nyttGrunnlag);
+            nyttGrunnlag = new VurdertOpplæringGrunnlag(nyttGrunnlag, vurdertInstitusjonHolder, vurdertOpplæringHolder);
+        }
 
         entityManager.persist(nyttGrunnlag.getVurdertInstitusjonHolder());
         entityManager.persist(nyttGrunnlag.getVurdertOpplæringHolder());
@@ -52,7 +54,7 @@ public class VurdertOpplæringRepository {
         entityManager.flush();
     }
 
-    private void leggTilVurdertInstitusjonINyttGrunnlag(VurdertOpplæringGrunnlag aktivtGrunnlag, VurdertOpplæringGrunnlag nyttGrunnlag) {
+    private VurdertInstitusjonHolder hentVurdertInstitusjonHolderTilNyttGrunnlag(VurdertOpplæringGrunnlag aktivtGrunnlag, VurdertOpplæringGrunnlag nyttGrunnlag) {
         VurdertInstitusjon nyVurdertInstitusjon = nyttGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().get(0);
         if (trengerNyVurdertInstitusjonHolder(aktivtGrunnlag, nyVurdertInstitusjon)) {
             List<VurdertInstitusjon> nyVurdertInstitusjonList = aktivtGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().stream()
@@ -62,25 +64,25 @@ public class VurdertOpplæringRepository {
 
             nyVurdertInstitusjonList.add(nyVurdertInstitusjon);
 
-            nyttGrunnlag.medVurdertInstitusjon(nyVurdertInstitusjonList);
+            return new VurdertInstitusjonHolder(nyVurdertInstitusjonList);
         } else {
-            nyttGrunnlag.setVurdertInstitusjonHolder(aktivtGrunnlag.getVurdertInstitusjonHolder());
+            return aktivtGrunnlag.getVurdertInstitusjonHolder();
         }
     }
 
-    private void leggTilVurdertOpplæringINyttGrunnlag(VurdertOpplæringGrunnlag aktivtGrunnlag, VurdertOpplæringGrunnlag nyttGrunnlag) {
+    private VurdertOpplæringHolder hentVurdertOpplæringHolderTilNyttGrunnlag(VurdertOpplæringGrunnlag aktivtGrunnlag, VurdertOpplæringGrunnlag nyttGrunnlag) {
         List<VurdertOpplæring> nyVurdertOpplæring = nyttGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring();
         if (trengerNyVurdertOpplæringHolder(aktivtGrunnlag, nyVurdertOpplæring)) {
             LocalDateTimeline<VurdertOpplæring> vurdertOpplæringTidslinje = utledKombinertTidslinje(
                 aktivtGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring(),
                 nyVurdertOpplæring);
 
-            nyttGrunnlag.medVurdertOpplæring(vurdertOpplæringTidslinje
+            return new VurdertOpplæringHolder(vurdertOpplæringTidslinje
                 .stream()
                 .map(datoSegment -> new VurdertOpplæring(datoSegment.getValue()).medPeriode(datoSegment.getFom(), datoSegment.getTom()))
                 .collect(Collectors.toList()));
         } else {
-            nyttGrunnlag.setVurdertOpplæringHolder(aktivtGrunnlag.getVurdertOpplæringHolder());
+            return aktivtGrunnlag.getVurdertOpplæringHolder();
         }
     }
 

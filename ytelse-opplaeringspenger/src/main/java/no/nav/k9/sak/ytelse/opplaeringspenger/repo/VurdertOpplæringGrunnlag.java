@@ -49,9 +49,18 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
     public VurdertOpplæringGrunnlag() {
     }
 
-    public VurdertOpplæringGrunnlag(Long behandlingId, String begrunnelse) {
+    public VurdertOpplæringGrunnlag(Long behandlingId, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder, String begrunnelse) {
         this.behandlingId = behandlingId;
+        this.vurdertInstitusjonHolder = vurdertInstitusjonHolder;
+        this.vurdertOpplæringHolder = vurdertOpplæringHolder;
         this.begrunnelse = begrunnelse;
+    }
+
+    public VurdertOpplæringGrunnlag(VurdertOpplæringGrunnlag grunnlag, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder) {
+        this.behandlingId = grunnlag.behandlingId;
+        this.begrunnelse = grunnlag.begrunnelse;
+        this.vurdertInstitusjonHolder = vurdertInstitusjonHolder;
+        this.vurdertOpplæringHolder = vurdertOpplæringHolder;
     }
 
     public VurdertInstitusjonHolder getVurdertInstitusjonHolder() {
@@ -62,12 +71,8 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
         return vurdertOpplæringHolder;
     }
 
-    public void setVurdertInstitusjonHolder(VurdertInstitusjonHolder vurdertInstitusjonHolder) {
-        this.vurdertInstitusjonHolder = vurdertInstitusjonHolder;
-    }
-
-    public void setVurdertOpplæringHolder(VurdertOpplæringHolder vurdertOpplæringHolder) {
-        this.vurdertOpplæringHolder = vurdertOpplæringHolder;
+    public Long getBehandlingId() {
+        return behandlingId;
     }
 
     public String getBegrunnelse() {
@@ -76,15 +81,5 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
 
     protected void setAktiv(Boolean aktiv) {
         this.aktiv = aktiv;
-    }
-
-    public VurdertOpplæringGrunnlag medVurdertOpplæring(List<VurdertOpplæring> vurdertOpplæring) {
-        this.vurdertOpplæringHolder = new VurdertOpplæringHolder(vurdertOpplæring);
-        return this;
-    }
-
-    public VurdertOpplæringGrunnlag medVurdertInstitusjon(List<VurdertInstitusjon> vurdertInstitusjon) {
-        this.vurdertInstitusjonHolder = new VurdertInstitusjonHolder(vurdertInstitusjon);
-        return this;
     }
 }

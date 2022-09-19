@@ -34,8 +34,10 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 
 @CdiDbAwareTest
@@ -101,11 +103,12 @@ public class VurderNødvendighetStegTest {
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), "fordi");
         VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Ås barnehage avdeling Vågebytoppen", true, "noe");
-        grunnlag.medVurdertInstitusjon(Collections.singletonList(vurdertInstitusjon));
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), true, "", vurdertInstitusjon.getInstitusjon());
-        grunnlag.medVurdertOpplæring(Collections.singletonList(vurdertOpplæring));
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
+            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
+            new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
+            "fordi");
         when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
@@ -126,11 +129,12 @@ public class VurderNødvendighetStegTest {
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), "fordi");
         VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Xavier Institute", true, "noe");
-        grunnlag.medVurdertInstitusjon(Collections.singletonList(vurdertInstitusjon));
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), false, "test", vurdertInstitusjon.getInstitusjon());
-        grunnlag.medVurdertOpplæring(Collections.singletonList(vurdertOpplæring));
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
+            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
+            new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
+            "fordi");
         when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
@@ -151,11 +155,12 @@ public class VurderNødvendighetStegTest {
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), "fordi");
         VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Karoline Spiseri og Pub", true, "noe");
-        grunnlag.medVurdertInstitusjon(Collections.singletonList(vurdertInstitusjon));
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "test", vurdertInstitusjon.getInstitusjon());
-        grunnlag.medVurdertOpplæring(Collections.singletonList(vurdertOpplæring));
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
+            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
+            new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
+            "fordi");
         when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);

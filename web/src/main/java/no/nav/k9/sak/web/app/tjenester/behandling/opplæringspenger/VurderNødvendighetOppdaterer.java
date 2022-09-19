@@ -12,8 +12,10 @@ import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderNødvendighetDto;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 
 @ApplicationScoped
@@ -46,8 +48,9 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
             .stream()
             .map(periodeDto -> new VurdertOpplæring(periodeDto.getFom(), periodeDto.getTom(), periodeDto.isNødvendigOpplæring(), periodeDto.getBegrunnelse(), vurdertInstitusjon.getInstitusjon()))
             .toList();
-        return new VurdertOpplæringGrunnlag(behandlingId,  dto.getBegrunnelse())
-            .medVurdertOpplæring(vurdertOpplæring)
-            .medVurdertInstitusjon(Collections.singletonList(vurdertInstitusjon));
+        return new VurdertOpplæringGrunnlag(behandlingId,
+            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
+            new VurdertOpplæringHolder(vurdertOpplæring),
+            dto.getBegrunnelse());
     }
 }
