@@ -74,7 +74,7 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
         return begrunnelse;
     }
 
-    public void setAktiv(Boolean aktiv) {
+    protected void setAktiv(Boolean aktiv) {
         this.aktiv = aktiv;
     }
 
