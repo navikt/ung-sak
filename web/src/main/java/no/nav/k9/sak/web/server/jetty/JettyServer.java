@@ -108,8 +108,8 @@ public class JettyServer {
 
     protected void konfigurerSikkerhet() {
         var factory = new DefaultAuthConfigFactory();
-        var enabledAzureAd = ENV.getProperty("app.auth.schema.azuread.enabled", Boolean.class, false);
-        var azureAdDomain = ENV.getProperty("app.auth.schema.azuread.domain", String.class, "").replace("\"", "");
+        var enabledAzureAd = Boolean.parseBoolean(Environment.current().getProperty("app.auth.schema.azuread.enabled", String.class, "false").replace("\"", ""));
+        var azureAdDomain = Environment.current().getProperty("app.auth.schema.azuread.domain", String.class, "").replace("\"", "");
         log.info("AzureAD-status :: enabled={}, domain={}", enabledAzureAd, azureAdDomain);
 
         OidcAuthModule serverAuthModule = enabledAzureAd ? azureAdEnabledAuthModule(azureAdDomain) : new OidcAuthModule();
