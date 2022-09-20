@@ -36,10 +36,7 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
     public OppdateringResultat oppdater(VurderNødvendighetDto dto, AksjonspunktOppdaterParameter param) {
         VurdertOpplæringGrunnlag grunnlag = mapDtoTilGrunnlag(param.getBehandlingId(), dto);
         vurdertOpplæringRepository.lagreOgFlush(param.getBehandlingId(), grunnlag);
-        OppdateringResultat resultat = OppdateringResultat.nyttResultat();
-        resultat.setSteg(BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR);
-        resultat.rekjørSteg();
-        return resultat;
+        return OppdateringResultat.nyttResultat();
     }
 
     private VurdertOpplæringGrunnlag mapDtoTilGrunnlag(Long behandlingId, VurderNødvendighetDto dto) {
