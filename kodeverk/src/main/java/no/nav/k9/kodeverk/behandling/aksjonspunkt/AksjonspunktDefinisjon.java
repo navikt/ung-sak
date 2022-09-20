@@ -338,6 +338,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         "En annen sak tilknyttet barnet må behandles frem til uttak, eller besluttes, før denne saken kan behandles videre.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK_V2, VurderingspunktType.UT, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST),
 
+    // Gruppe: 93xx - Opplæringspenger
+    VURDER_INSTITUSJON_OG_NØDVENDIGHET(AksjonspunktKodeDefinisjon.VURDER_INSTITUSJON_OG_NØDVENDIGHET, AksjonspunktType.MANUELL,
+        "Vurder om opplæringen er nødvendig og om institusjonen er godkjent", BehandlingStatus.UTREDES,
+        BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UDEFINERT, ENTRINN, TILBAKE, AVBRYTES),
 
     // Gruppe : 999x
     AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",
