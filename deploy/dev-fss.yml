@@ -50,6 +50,14 @@ spec:
       - mountPath: /var/run/secrets/nais.io/vault
         kvPath: /kv/preprod/fss/k9-sak/k9saksbehandling
   sidecar: true
+  azure:
+    application:
+      enabled: true
+      replyURLs:
+        - "https://k9.dev.intern.nav.no/k9/sak/cb"
+      claims:
+        extra:
+          - "NAVident"
   env:
     - name: TZ
       value: "Europe/Oslo"
@@ -100,6 +108,8 @@ spec:
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
       value: https://app-q1.adeo.no
+    - name: LOADBALANCER_ALTERNATIVE_URL
+      value: https://k9.dev.intern.nav.no
 
     # LDAP
     - name: LDAP_URL
@@ -122,8 +132,12 @@ spec:
       value: http://infotrygd-hendelse-api.default/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.teamforeldrepenger/fpabakus
+    - name: FPABAKUS_SCOPE
+      value: api://dev-fss.teamforeldrepenger.fpabakus/.default
     - name: FTKALKULUS_URL
       value: http://ftkalkulus.k9saksbehandling/ftkalkulus
+    - name: FTKALKULUS_SCOPE
+      value: api://dev-fss.k9saksbehandling.ftkalkulus/.default
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
@@ -134,10 +148,16 @@ spec:
       value: https://app-q1.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
       value: https://oppgave-q1.nais.preprod.local/api/v1/oppgaver
+    - name: OPPGAVE_RS_SCOPE
+      value: api://dev-fss.oppgavehandtering.oppgave/.default
     - name: MEDL2_RS_URL
       value: https://medlemskap-medl-api.dev.intern.nav.no/api/v1/medlemskapsunntak
+    - name: MEDL2_RS_SCOPE
+      value: api://dev-fss:team-rocket:medlemskap-medl-api
     - name: PDL_BASE_URL
-      value: http://pdl-api.default/graphql
+      value: http://pdl-api.pdl/graphql
+    - name: PDL_SCOPE
+      value: api://dev-fss.pdl.pdl-api/.default
     - name: ORGANISASJON_RS_URL
       value: https://modapp-q1.adeo.no/ereg/api/v1/organisasjon
     - name: K9_FORMIDLING_DOKUMENTDATA_URL
@@ -148,6 +168,8 @@ spec:
       value: http://k9-tilbake.k9saksbehandling/k9/tilbake/api
     - name: K9_FORMIDLING_URL
       value: http://k9-formidling.k9saksbehandling/k9/formidling
+    - name: K9_FORMIDLING_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-formidling/.default
     - name : K9_PUNSJ_URL
       value: https://k9-punsj.dev.adeo.no/api
     - name: INFOTRYGD_BS_BASE_URI
@@ -170,8 +192,14 @@ spec:
     # Graphql services
     - name: SAF_BASE_URL
       value: http://saf-q1.teamdokumenthandtering
+    - name: SAF_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.saf/.default
 
     # Sikkerhet:
+    - name: APP_AUTH_SCHEMA_AZUREAD_ENABLED
+      value: "true"
+    - name: APP_AUTH_SCHEMA_AZUREAD_DOMAIN
+      value: "k9.dev.intern.nav.no"
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
     - name: OIDC_OPENAM_HOST_URL

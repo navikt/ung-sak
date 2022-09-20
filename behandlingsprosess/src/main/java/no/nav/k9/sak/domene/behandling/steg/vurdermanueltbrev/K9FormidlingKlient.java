@@ -7,13 +7,14 @@ import java.util.UUID;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.UriBuilder;
-
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 @Dependent
+@ScopedRestIntegration(scopeKey = "k9.formidling.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-formidling/.default")
 public class K9FormidlingKlient {
     private OidcRestClient restClient;
     private URI uriInformasjonsbehov;

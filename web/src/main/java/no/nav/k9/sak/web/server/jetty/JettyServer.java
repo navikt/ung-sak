@@ -108,14 +108,22 @@ public class JettyServer {
 
     protected void konfigurerSikkerhet() {
         var factory = new DefaultAuthConfigFactory();
+        var enabledAzureAd = Environment.current().getProperty("app.auth.schema.azuread.enabled", Boolean.class, false);
+        var azureAdDomain = Environment.current().getProperty("app.auth.schema.azuread.domain", String.class, "");
 
-        factory.registerConfigProvider(new JaspiAuthConfigProvider(new OidcAuthModule()),
+        OidcAuthModule serverAuthModule = enabledAzureAd ? azureAdEnabledAuthModule(azureAdDomain) : new OidcAuthModule();
+        factory.registerConfigProvider(new JaspiAuthConfigProvider(serverAuthModule),
             "HttpServlet",
             "server " + appKonfigurasjon.getContextPath(),
             "OIDC Authentication");
 
         AuthConfigFactory.setFactory(factory);
+    }
 
+    private OidcAuthModule azureAdEnabledAuthModule(String azureAdDomain) {
+        var oidcAuthModule = new OidcAuthModule();
+        oidcAuthModule.enableAzureAd(azureAdDomain);
+        return oidcAuthModule;
     }
 
     protected void migrerDatabaser() throws IOException {

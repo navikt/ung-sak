@@ -51,10 +51,12 @@ import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
+import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
+@ScopedRestIntegration(scopeKey = "fpabakus.scope", defaultScope = "api://prod-fss.teamforeldrepenger.fpabakus/.default")
 public class AbakusTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(AbakusTjeneste.class);
