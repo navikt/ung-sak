@@ -50,6 +50,9 @@ public class VedtaksHendelseHåndterer {
         log.debug("Mottatt ytelse-vedtatt hendelse med key='{}', payload={}", key, payload);
         var vh = JsonObjectMapper.fromJson(payload, Ytelse.class);
         var fagsakYtelseType = mapYtelse(vh);
+        if (fagsakYtelseType.erK9Ytelse()) {
+            return;
+        }
 
         log.info("Mottatt ytelse-vedtatt hendelse med ytelse='{}' saksnummer='{}', sjekker behovet for revurdering", fagsakYtelseType, vh.getSaksnummer());
         var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste.finnTjenesteHvisStøttet(fagsakYtelseType);
