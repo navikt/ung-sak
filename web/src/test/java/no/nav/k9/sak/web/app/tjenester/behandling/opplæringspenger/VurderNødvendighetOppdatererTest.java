@@ -61,8 +61,6 @@ public class VurderNødvendighetOppdatererTest {
 
         OppdateringResultat resultat = lagreGrunnlag(dto);
         assertThat(resultat).isNotNull();
-        assertThat(resultat.getNesteSteg()).isEqualTo(BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR);
-        assertThat(resultat.getSkalRekjøreSteg()).isTrue();
 
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
         assertThat(grunnlag).isPresent();
