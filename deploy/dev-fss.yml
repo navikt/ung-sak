@@ -143,7 +143,7 @@ spec:
     - name: ABAC_PDP_ENDPOINT_URL
       value: http://abac-k9.default/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
-      value: https://app-q1.adeo.no/k9/oppdrag/api
+      value: /k9/oppdrag/api
     - name: ARBEIDSFORDELING_RS_URL
       value: https://app-q1.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
