@@ -110,6 +110,7 @@ public class JettyServer {
         var factory = new DefaultAuthConfigFactory();
         var enabledAzureAd = ENV.getProperty("app.auth.schema.azuread.enabled", Boolean.class, false);
         var azureAdDomain = ENV.getProperty("app.auth.schema.azuread.domain", String.class, "").replace("\"", "");
+        log.info("AzureAD-status :: enabled={}, domain={}", enabledAzureAd, azureAdDomain);
 
         OidcAuthModule serverAuthModule = enabledAzureAd ? azureAdEnabledAuthModule(azureAdDomain) : new OidcAuthModule();
         factory.registerConfigProvider(new JaspiAuthConfigProvider(serverAuthModule),
