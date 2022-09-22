@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -409,16 +408,16 @@ public class ÅrskvantumTjeneste {
         var tidslinjeSammeBosted = AdresseSammenligner.sammeBostedsadresse(søkersAdresser, barnetsAdresser);
 
         PersonIdent personIdentBarn = tpsTjeneste.hentFnrForAktør(personinfoBarn.getAktørId());
-        var sammeBostedPerioder = (erKode6Eller7(personIdentBarn)) ? utledSammeBostedPerioder(personinfoBarn.getFødselsdato(), fagsakPeriode) : tilLukketPeriode(tidslinjeSammeBosted);
+        var sammeBostedPerioder = (erKode6(personIdentBarn)) ? utledSammeBostedPerioder(personinfoBarn.getFødselsdato(), fagsakPeriode) : tilLukketPeriode(tidslinjeSammeBosted);
 
         return new Barn(personIdentBarn.getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), tilLukketPeriode(tidslinjeDeltBosted), sammeBostedPerioder, BarnType.VANLIG);
     }
 
-    private boolean erKode6Eller7(PersonIdent personIdentBarn) {
+    private boolean erKode6(PersonIdent personIdentBarn) {
         var kode = tpsTjeneste.hentDiskresjonskodeForAktør(personIdentBarn);
         if (kode.isPresent()) {
             var diskresjonskode = Diskresjonskode.fraKode(kode.get());
-            return (Diskresjonskode.KODE6.equals(diskresjonskode) || Diskresjonskode.KODE7.equals(diskresjonskode));
+            return (Diskresjonskode.KODE6.equals(diskresjonskode));
         }
         return false;
     }
