@@ -439,7 +439,7 @@ public class ÅrskvantumTjeneste {
     private List<LukketPeriode> utledSammeBostedPerioder(LocalDate barnFødselsdato, DatoIntervallEntitet fagsakPeriode) {
         LocalDateTimeline<Boolean> erBarn = new LocalDateTimeline<>(barnFødselsdato, barnFødselsdato.plusYears(18).withMonth(12).withDayOfMonth(31), true);
         LocalDateTimeline<Boolean> harFagsak = new LocalDateTimeline<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), true);
-        LocalDateTimeline<Boolean> harFagsakOgErBarn = erBarn.combine(harFagsak, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.INNER_JOIN);
+        LocalDateTimeline<Boolean> harFagsakOgErBarn = erBarn.intersection(harFagsak, StandardCombinators::alwaysTrueForMatch);
         return harFagsakOgErBarn.stream()
             .map(segment -> new LukketPeriode(segment.getFom(), segment.getTom()))
             .toList();
