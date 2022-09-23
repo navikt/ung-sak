@@ -200,7 +200,7 @@ spec:
     - name: SAF_BASE_URL
       value: http://saf-q1.teamdokumenthandtering
     - name: SAF_SCOPE
-      value: api://dev-fss.teamdokumenthandtering.saf/.default
+      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
 
     # Sikkerhet:
     - name: APP_AUTH_SCHEMA_AZUREAD_ENABLED
