@@ -3,9 +3,9 @@ package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,6 +45,7 @@ import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
+import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -384,7 +385,7 @@ public class ÅrskvantumTjeneste {
             .filter(relasjon -> relasjon.getRelasjonsrolle() == RelasjonsRolleType.BARN)
             .filter(relasjon -> !tpsTjeneste.hentFnrForAktør(relasjon.getTilAktørId()).erFdatNummer())
             .map(barnRelasjon -> personopplysninger.getPersonopplysning(barnRelasjon.getTilAktørId()))
-            .map(barnPersonopplysninger -> mapBarn(personopplysninger, personopplysninger.getSøker(), barnPersonopplysninger))
+            .map(barnPersonopplysninger -> mapBarn(personopplysninger, personopplysninger.getSøker(), barnPersonopplysninger, behandling.getFagsak().getPeriode()))
             .toList();
         var fosterbarna = fosterbarnRepository.hentHvisEksisterer(behandling.getId())
             .map(grunnlag -> grunnlag.getFosterbarna().getFosterbarn().stream()
@@ -399,7 +400,7 @@ public class ÅrskvantumTjeneste {
         return tpsTjeneste.hentBrukerForAktør(aktørId).orElseThrow(() -> new IllegalStateException("Finner ikke ident for aktørid"));
     }
 
-    private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(PersonopplysningerAggregat personopplysningerAggregat, PersonopplysningEntitet personinfoSøker, PersonopplysningEntitet personinfoBarn) {
+    private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(PersonopplysningerAggregat personopplysningerAggregat, PersonopplysningEntitet personinfoSøker, PersonopplysningEntitet personinfoBarn, DatoIntervallEntitet fagsakPeriode) {
         List<PersonAdresseEntitet> søkersAdresser = personopplysningerAggregat.getAdresserFor(personinfoSøker.getAktørId());
         List<PersonAdresseEntitet> barnetsAdresser = personopplysningerAggregat.getAdresserFor(personinfoBarn.getAktørId());
 
@@ -407,7 +408,18 @@ public class ÅrskvantumTjeneste {
         var tidslinjeSammeBosted = AdresseSammenligner.sammeBostedsadresse(søkersAdresser, barnetsAdresser);
 
         PersonIdent personIdentBarn = tpsTjeneste.hentFnrForAktør(personinfoBarn.getAktørId());
-        return new Barn(personIdentBarn.getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), tilLukketPeriode(tidslinjeDeltBosted), tilLukketPeriode(tidslinjeSammeBosted), BarnType.VANLIG);
+        var sammeBostedPerioder = (erKode6(personIdentBarn)) ? utledSammeBostedPerioder(personinfoBarn.getFødselsdato(), fagsakPeriode) : tilLukketPeriode(tidslinjeSammeBosted);
+
+        return new Barn(personIdentBarn.getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), tilLukketPeriode(tidslinjeDeltBosted), sammeBostedPerioder, BarnType.VANLIG);
+    }
+
+    private boolean erKode6(PersonIdent personIdentBarn) {
+        var kode = tpsTjeneste.hentDiskresjonskodeForAktør(personIdentBarn);
+        if (kode.isPresent()) {
+            var diskresjonskode = Diskresjonskode.fraKode(kode.get());
+            return (Diskresjonskode.KODE6.equals(diskresjonskode));
+        }
+        return false;
     }
 
     private static List<LukketPeriode> tilLukketPeriode(LocalDateTimeline<Boolean> tidslinje) {
@@ -419,14 +431,18 @@ public class ÅrskvantumTjeneste {
 
     private Barn mapFosterbarn(Personinfo personinfo, DatoIntervallEntitet fagsakPeriode) {
         //midlertidig løsning, skal helst ha reell start-dato. Ønsket fikset ved at vi informasjon om fosterbarn fra register
-        LocalDateTimeline<Boolean> erBarn = new LocalDateTimeline<>(personinfo.getFødselsdato(), personinfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31), true);
-        LocalDateTimeline<Boolean> harFagsak = new LocalDateTimeline<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), true);
-        LocalDateTimeline<Boolean> harFagsakOgErBarn = erBarn.combine(harFagsak, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.INNER_JOIN);
-        List<LukketPeriode> sammeBostedPerioder = harFagsakOgErBarn.stream()
-            .map(segment -> new LukketPeriode(segment.getFom(), segment.getTom()))
-            .toList();
+        var sammeBostedPerioder = utledSammeBostedPerioder(personinfo.getFødselsdato(), fagsakPeriode);
 
         return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), List.of(), sammeBostedPerioder, BarnType.FOSTERBARN);
+    }
+
+    private List<LukketPeriode> utledSammeBostedPerioder(LocalDate barnFødselsdato, DatoIntervallEntitet fagsakPeriode) {
+        LocalDateTimeline<Boolean> erBarn = new LocalDateTimeline<>(barnFødselsdato, barnFødselsdato.plusYears(18).withMonth(12).withDayOfMonth(31), true);
+        LocalDateTimeline<Boolean> harFagsak = new LocalDateTimeline<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), true);
+        LocalDateTimeline<Boolean> harFagsakOgErBarn = erBarn.intersection(harFagsak, StandardCombinators::alwaysTrueForMatch);
+        return harFagsakOgErBarn.stream()
+            .map(segment -> new LukketPeriode(segment.getFom(), segment.getTom()))
+            .toList();
     }
 
     private Optional<UUID> hentBehandlingUuid(JournalpostId journalpostId, Map<JournalpostId, MottattDokument> mottatteDokumenter) {
