@@ -160,7 +160,7 @@ spec:
     - name: MEDL2_RS_URL
       value: https://medlemskap-medl-api.dev.intern.nav.no/api/v1/medlemskapsunntak
     - name: MEDL2_RS_SCOPE
-      value: api://dev-fss:team-rocket:medlemskap-medl-api
+      value: api://dev-fss.team-rocket.medlemskap-medl-api/.default
     - name: PDL_BASE_URL
       value: http://pdl-api.pdl/graphql
     - name: PDL_SCOPE
@@ -202,7 +202,7 @@ spec:
     - name: SAF_BASE_URL
       value: http://saf-q1.teamdokumenthandtering
     - name: SAF_SCOPE
-      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
+      value: api://dev-fss.teamdokumenthandtering.saf/.default
 
     # Sikkerhet:
     - name: APP_AUTH_SCHEMA_AZUREAD_ENABLED
