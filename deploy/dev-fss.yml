@@ -53,6 +53,7 @@ spec:
   azure:
     application:
       enabled: true
+      singlePageApplication: true
       replyURLs:
         - "https://k9.dev.intern.nav.no/k9/sak/cb"
       claims:
