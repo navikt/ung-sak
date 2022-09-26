@@ -11,7 +11,7 @@ import no.nav.k9.sak.inngangsvilkår.Oppfylt;
 @RuleDocumentation(value = MedisinskVilkår.ID, specificationReference = "")
 public class MedisinskVilkår implements RuleService<MedisinskVilkårGrunnlag> {
 
-    public static final String ID = "OLP_VK 9.16";
+    public static final String ID = "OLP_VK 9.16.5";
 
     @Override
     public Evaluation evaluer(MedisinskVilkårGrunnlag grunnlag, Object resultatStruktur) {

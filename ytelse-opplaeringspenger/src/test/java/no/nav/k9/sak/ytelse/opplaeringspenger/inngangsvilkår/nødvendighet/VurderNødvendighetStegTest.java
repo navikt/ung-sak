@@ -6,6 +6,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.TreeSet;
@@ -17,6 +18,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -27,6 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -91,9 +94,11 @@ public class VurderNødvendighetStegTest {
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
         assertThat(vilkår.getPerioder()).hasSize(1);
-        assertThat(vilkår.getPerioder().get(0).getUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
-        assertThat(vilkår.getPerioder().get(0).getFom()).isEqualTo(søknadsperiode.getFom());
-        assertThat(vilkår.getPerioder().get(0).getTom()).isEqualTo(søknadsperiode.getTom());
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.IKKE_VURDERT,
+            søknadsperiode.getFom(),
+            søknadsperiode.getTom(),
+            null);
     }
 
     @Test
@@ -117,9 +122,11 @@ public class VurderNødvendighetStegTest {
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
         assertThat(vilkår.getPerioder()).hasSize(1);
-        assertThat(vilkår.getPerioder().get(0).getUtfall()).isEqualTo(Utfall.OPPFYLT);
-        assertThat(vilkår.getPerioder().get(0).getFom()).isEqualTo(søknadsperiode.getFom());
-        assertThat(vilkår.getPerioder().get(0).getTom()).isEqualTo(søknadsperiode.getTom());
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.OPPFYLT,
+            søknadsperiode.getFom(),
+            søknadsperiode.getTom(),
+            null);
     }
 
     @Test
@@ -143,9 +150,73 @@ public class VurderNødvendighetStegTest {
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
         assertThat(vilkår.getPerioder()).hasSize(1);
-        assertThat(vilkår.getPerioder().get(0).getUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
-        assertThat(vilkår.getPerioder().get(0).getFom()).isEqualTo(søknadsperiode.getFom());
-        assertThat(vilkår.getPerioder().get(0).getTom()).isEqualTo(søknadsperiode.getTom());
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.IKKE_OPPFYLT,
+            søknadsperiode.getFom(),
+            søknadsperiode.getTom(),
+            Avslagsårsak.IKKE_NØDVENDIG);
+    }
+
+    @Test
+    public void skalReturnereUtenAksjonspunktNårInstitusjonIkkeErGodkjent() {
+        Fagsak fagsak = behandling.getFagsak();
+        BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
+            behandlingRepository.taSkriveLås(behandling));
+        setupPerioderTilVurdering(kontekst);
+
+        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Riskhospitalet", false, "noe");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), false, "test", vurdertInstitusjon.getInstitusjon());
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
+            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
+            new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
+            "fordi");
+        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+
+        BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
+        assertThat(resultat).isNotNull();
+        assertThat(resultat.getAksjonspunktResultater()).isEmpty();
+        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(1);
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.IKKE_OPPFYLT,
+            søknadsperiode.getFom(),
+            søknadsperiode.getTom(),
+            Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
+    }
+
+    @Test
+    public void skalReturnereUtenAksjonspunktNårOpplæringErPeriodevisGodkjentOgIkkeGodkjent() {
+        Fagsak fagsak = behandling.getFagsak();
+        BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
+            behandlingRepository.taSkriveLås(behandling));
+        setupPerioderTilVurdering(kontekst);
+
+        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Sjøengen Kro", true, "noe");
+        VurdertOpplæring vurdertOpplæring1 = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "test", vurdertInstitusjon.getInstitusjon());
+        VurdertOpplæring vurdertOpplæring2 = new VurdertOpplæring(søknadsperiode.getTom(), søknadsperiode.getTom(), false, "tast", vurdertInstitusjon.getInstitusjon());
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
+            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
+            new VurdertOpplæringHolder(Arrays.asList(vurdertOpplæring1, vurdertOpplæring2)),
+            "fordi");
+        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+
+        BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
+        assertThat(resultat).isNotNull();
+        assertThat(resultat.getAksjonspunktResultater()).isEmpty();
+        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(2);
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.OPPFYLT,
+            søknadsperiode.getFom(),
+            søknadsperiode.getTom().minusDays(1),
+            null);
+        assertVilkårPeriode(vilkår.getPerioder().get(1),
+            Utfall.IKKE_OPPFYLT,
+            søknadsperiode.getTom(),
+            søknadsperiode.getTom(),
+            Avslagsårsak.IKKE_NØDVENDIG);
     }
 
     @Test
@@ -170,9 +241,18 @@ public class VurderNødvendighetStegTest {
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
         assertThat(vilkår.getPerioder()).hasSize(1);
-        assertThat(vilkår.getPerioder().get(0).getUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
-        assertThat(vilkår.getPerioder().get(0).getFom()).isEqualTo(søknadsperiode.getFom());
-        assertThat(vilkår.getPerioder().get(0).getTom()).isEqualTo(søknadsperiode.getTom());
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.IKKE_VURDERT,
+            søknadsperiode.getFom(),
+            søknadsperiode.getTom(),
+            null);
+    }
+
+    private void assertVilkårPeriode(VilkårPeriode vilkårPeriode, Utfall utfall, LocalDate fom, LocalDate tom, Avslagsårsak avslagsårsak) {
+        assertThat(vilkårPeriode.getUtfall()).isEqualTo(utfall);
+        assertThat(vilkårPeriode.getFom()).isEqualTo(fom);
+        assertThat(vilkårPeriode.getTom()).isEqualTo(tom);
+        assertThat(vilkårPeriode.getAvslagsårsak()).isEqualTo(avslagsårsak);
     }
 
     private void setupPerioderTilVurdering(BehandlingskontrollKontekst kontekst) {

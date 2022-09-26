@@ -40,9 +40,6 @@ import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 
@@ -57,6 +54,7 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private VurdertOpplæringRepository vurdertOpplæringRepository;
+    private final NødvendighetVilkårTjeneste nødvendighetVilkårTjeneste = new NødvendighetVilkårTjeneste();
 
     VurderNødvendighetSteg() {
         // CDI
@@ -102,50 +100,11 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
         Optional<VurdertOpplæringGrunnlag> vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(kontekst.getBehandlingId());
 
         if (vurdertOpplæringGrunnlag.isPresent()) {
-            List<VurdertOpplæring> vurdertOpplæringList = vurdertOpplæringGrunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring();
-            VurdertInstitusjonHolder vurdertInstitusjonHolder = vurdertOpplæringGrunnlag.get().getVurdertInstitusjonHolder();
-
-            NavigableSet<DatoIntervallEntitet> ikkeGodkjentInstitusjonPerioder = new TreeSet<>();
-            NavigableSet<DatoIntervallEntitet> nødvendigOpplæringPerioder = new TreeSet<>();
-            NavigableSet<DatoIntervallEntitet> ikkeNødvendigOpplæringPerioder = new TreeSet<>();
-
-            for (VurdertOpplæring vurdertOpplæring : vurdertOpplæringList) {
-                DatoIntervallEntitet datoIntervallEntitet = vurdertOpplæring.getPeriode();
-
-                boolean godkjentInstitusjon = vurdertInstitusjonHolder.finnVurdertInstitusjon(vurdertOpplæring.getInstitusjon())
-                    .map(VurdertInstitusjon::getGodkjent)
-                    .orElse(false);
-
-                if (godkjentInstitusjon) {
-                    boolean nødvendigOpplæring = vurdertOpplæring.getNødvendigOpplæring();
-
-                    if (nødvendigOpplæring) {
-                        nødvendigOpplæringPerioder.add(datoIntervallEntitet);
-                    } else {
-                        ikkeNødvendigOpplæringPerioder.add(datoIntervallEntitet);
-                    }
-                } else {
-                    ikkeGodkjentInstitusjonPerioder.add(datoIntervallEntitet);
-                }
-            }
-
-            LocalDateTimeline<Boolean> ikkeGodkjentInstitusjonTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(ikkeGodkjentInstitusjonPerioder)
-                .intersection(tidslinjeTilVurdering);
-
-            LocalDateTimeline<Boolean> nødvendigOpplæringTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(nødvendigOpplæringPerioder)
-                .intersection(tidslinjeTilVurdering);
-
-            LocalDateTimeline<Boolean> ikkeNødvendigOpplæringTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(ikkeNødvendigOpplæringPerioder)
-                .intersection(tidslinjeTilVurdering);
-
-            leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentInstitusjonTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
-            leggTilVilkårResultat(vilkårBuilder, nødvendigOpplæringTidslinje, Utfall.OPPFYLT, Avslagsårsak.UDEFINERT);
-            leggTilVilkårResultat(vilkårBuilder, ikkeNødvendigOpplæringTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_NØDVENDIG);
+            NavigableSet<DatoIntervallEntitet> vurdertePerioder =
+                nødvendighetVilkårTjeneste.vurderPerioder(vilkårBuilder, vurdertOpplæringGrunnlag.get(), tidslinjeTilVurdering);
 
             tidslinjeTilVurdering = tidslinjeTilVurdering
-                .disjoint(nødvendigOpplæringTidslinje)
-                .disjoint(ikkeNødvendigOpplæringTidslinje)
-                .disjoint(ikkeGodkjentInstitusjonTidslinje);
+                .disjoint(TidslinjeUtil.tilTidslinjeKomprimert(vurdertePerioder));
         }
 
         vilkårResultatBuilder.leggTil(vilkårBuilder);

@@ -12,7 +12,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Ple
 
 public class InngangsvilkårOversetter {
 
-    public MedisinskVilkårGrunnlag oversettTilRegelModellMedisinsk(VilkårType vilkåret, Long behandlingId, DatoIntervallEntitet periode, MedisinskGrunnlag sykdomGrunnlagBehandling) {
+    public MedisinskVilkårGrunnlag oversettTilRegelModellMedisinsk(DatoIntervallEntitet periode, MedisinskGrunnlag sykdomGrunnlagBehandling) {
 
         var vilkårTidslinje = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(), LangvarigSykdomDokumentasjon.DOKUMENTERT);
 
@@ -23,9 +23,7 @@ public class InngangsvilkårOversetter {
 
         var relevantTidslinjeLangvarigSykdom = vilkårTidslinje.intersection(tidslinjeLangvarigSykdom);
 
-        final var vilkårsGrunnlag = new MedisinskVilkårGrunnlag(periode.getFomDato(), periode.getTomDato());
-        vilkårsGrunnlag.medDokumentertLangvarigSykdomPerioder(relevantTidslinjeLangvarigSykdom);
-        return vilkårsGrunnlag;
+        return new MedisinskVilkårGrunnlag(periode.getFomDato(), periode.getTomDato(), relevantTidslinjeLangvarigSykdom);
     }
 
 }
