@@ -4,26 +4,35 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
@@ -48,16 +57,20 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     private BehandlingRepository behandlingRepository;
     private UtvidetRettKlient utvidetRettKlient;
 
+    private VilkårResultatRepository vilkårResultatRepository;
+
     protected UtvidetRettIverksettTask() {
     }
 
     @Inject
     public UtvidetRettIverksettTask(VilkårTjeneste vilkårTjeneste,
                                     BehandlingRepository behandlingRepository,
-                                    UtvidetRettKlient utvidetRettKlient) {
+                                    UtvidetRettKlient utvidetRettKlient,
+                                    VilkårResultatRepository vilkårResultatRepository) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.utvidetRettKlient = utvidetRettKlient;
+        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     @Override
@@ -66,6 +79,8 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         logContext(behandling);
+
+        ryddBortTomtAldersvilkår(behandlingId);
 
         var samletVilkårsresultat = vilkårTjeneste.samletVilkårsresultat(behandlingId);
 
@@ -83,6 +98,42 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             utvidetRettKlient.avslått(iverksett);
         } else {
             throw new IllegalStateException("Forventet ikke behandling med behandlingResultatType=[" + utfall + "]");
+        }
+    }
+
+    private void ryddBortTomtAldersvilkår(Long behandlingId) {
+        //TODO fjern denne metoden når alle åpne behandlinger på OMP_AO har vært gjennom aldersvilkåret
+
+        Vilkårene vilkårene = vilkårResultatRepository.hent(behandlingId);
+        Map<VilkårType, LocalDateTimeline<VilkårPeriode>> vilkårTidslinjer = vilkårene.getVilkårTidslinjer(DatoIntervallEntitet.fra(LocalDate.MIN, LocalDate.MAX));
+        if (vilkårTidslinjer.get(VilkårType.ALDERSVILKÅR_BARN) != null && vilkårTidslinjer.get(VilkårType.ALDERSVILKÅR_BARN).isEmpty()) {
+            VilkårResultatBuilder builder = Vilkårene.builder();
+            //har ikke, og ønsker ikke egentlig, funksjonalitet for å slette vilkår.
+            //bygger derfor vilkårresultat på nytt, bare uten aldersvilkåret
+            for (Vilkår vilkår : vilkårene.getVilkårene()) {
+                if (vilkår.getVilkårType() != VilkårType.ALDERSVILKÅR_BARN) {
+                    VilkårBuilder vilkårBuilder = builder.hentBuilderFor(vilkår.getVilkårType());
+                    for (VilkårPeriode vilkårPeriode : vilkår.getPerioder()) {
+                        VilkårPeriodeBuilder periodeBuilder = new VilkårPeriodeBuilder()
+                            .medPeriode(vilkårPeriode.getPeriode())
+                            .medAvslagsårsak(vilkårPeriode.getAvslagsårsak())
+                            .medBegrunnelse(vilkårPeriode.getBegrunnelse())
+                            .medMerknad(vilkårPeriode.getMerknad())
+                            .medMerknadParametere(vilkårPeriode.getMerknadParametere())
+                            .medRegelInput(vilkårPeriode.getRegelInput())
+                            .medRegelEvaluering(vilkårPeriode.getRegelEvaluering());
+                        if (vilkårPeriode.getErManueltVurdert()) {
+                            periodeBuilder.medUtfallManuell(vilkårPeriode.getUtfall());
+                        } else {
+                            periodeBuilder.medUtfall(vilkårPeriode.getUtfall());
+                        }
+                        periodeBuilder.medUtfallOverstyrt(vilkårPeriode.getOverstyrtUtfall());
+                        vilkårBuilder.leggTil(periodeBuilder);
+                    }
+                }
+            }
+            log.info("Ryddet bort tomt vilkår ALDERSVILKÅR_BARN");
+            vilkårResultatRepository.lagre(behandlingId, builder.build());
         }
     }
 
