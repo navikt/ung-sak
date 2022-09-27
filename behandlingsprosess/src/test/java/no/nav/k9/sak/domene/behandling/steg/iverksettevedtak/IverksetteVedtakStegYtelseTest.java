@@ -96,7 +96,7 @@ public class IverksetteVedtakStegYtelseTest {
         historikkRepository = repositoryProvider.getHistorikkRepository();
 
 
-        opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService));
+        opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService, true));
         iverksetteVedtakSteg = new IverksetteVedtakSteg(repositoryProvider,
             opprettProsessTaskIverksett,
             vurderBehandlingerUnderIverksettelse);
