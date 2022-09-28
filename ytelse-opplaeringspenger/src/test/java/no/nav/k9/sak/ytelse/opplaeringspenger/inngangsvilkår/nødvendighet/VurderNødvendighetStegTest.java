@@ -65,6 +65,7 @@ public class VurderNødvendighetStegTest {
     private Behandling behandling;
     private VurderNødvendighetSteg vurderNødvendighetSteg;
     private Periode søknadsperiode;
+    private TestScenarioBuilder scenario;
 
     @BeforeEach
     public void setup(){
@@ -72,16 +73,26 @@ public class VurderNødvendighetStegTest {
         vurdertOpplæringRepository = mock(VurdertOpplæringRepository.class);
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         vurderNødvendighetSteg = new VurderNødvendighetSteg(repositoryProvider, perioderTilVurderingTjenesteMock, vurdertOpplæringRepository);
-        TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OPPLÆRINGSPENGER);
-        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT);
-        scenario.leggTilVilkår(VilkårType.NØDVENDIG_OPPLÆRING, Utfall.IKKE_VURDERT);
-        behandling = scenario.lagre(repositoryProvider);
         LocalDate now = LocalDate.now();
         søknadsperiode = new Periode(now.minusMonths(3), now);
+        scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OPPLÆRINGSPENGER);
+        scenario.leggTilVilkår(VilkårType.NØDVENDIG_OPPLÆRING, Utfall.IKKE_VURDERT);
+    }
+
+    private void setupBehandlingMedSykdomsvilkår(Utfall utfall, Periode periode) {
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, utfall, periode);
+        behandling = scenario.lagre(repositoryProvider);
+    }
+
+    private void setupPerioderTilVurdering(BehandlingskontrollKontekst kontekst) {
+        when(perioderTilVurderingTjenesteMock.utled(kontekst.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING))
+            .thenReturn(new TreeSet<>(Collections.singletonList(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFom(), søknadsperiode.getTom()))));
     }
 
     @Test
     public void skalReturnereAksjonspunktNårOpplæringIkkeErVurdert() {
+        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
@@ -103,6 +114,8 @@ public class VurderNødvendighetStegTest {
 
     @Test
     public void skalReturnereUtenAksjonspunktNårOpplæringOgInstitusjonErGodkjent() {
+        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
@@ -131,6 +144,8 @@ public class VurderNødvendighetStegTest {
 
     @Test
     public void skalReturnereUtenAksjonspunktNårOpplæringIkkeErGodkjent() {
+        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
@@ -159,6 +174,8 @@ public class VurderNødvendighetStegTest {
 
     @Test
     public void skalReturnereUtenAksjonspunktNårInstitusjonIkkeErGodkjent() {
+        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
@@ -187,6 +204,8 @@ public class VurderNødvendighetStegTest {
 
     @Test
     public void skalReturnereUtenAksjonspunktNårOpplæringErPeriodevisGodkjentOgIkkeGodkjent() {
+        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
@@ -221,6 +240,8 @@ public class VurderNødvendighetStegTest {
 
     @Test
     public void skalReturnereAksjonspunktNårVurderingIkkeErKomplett() {
+        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
@@ -248,15 +269,66 @@ public class VurderNødvendighetStegTest {
             null);
     }
 
+    @Test
+    public void skalReturnereUtenAksjonspunktNårSykdomsvilkårIkkeErOppfylt() {
+        setupBehandlingMedSykdomsvilkår(Utfall.IKKE_OPPFYLT, søknadsperiode);
+
+        Fagsak fagsak = behandling.getFagsak();
+        BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
+            behandlingRepository.taSkriveLås(behandling));
+        setupPerioderTilVurdering(kontekst);
+
+        BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
+        assertThat(resultat).isNotNull();
+        assertThat(resultat.getAksjonspunktResultater()).isEmpty();
+        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(1);
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.IKKE_OPPFYLT,
+            søknadsperiode.getFom(),
+            søknadsperiode.getTom(),
+            Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE);
+    }
+
+    @Test
+    public void skalReturnereUtenAksjonspunktNårSykdomsvilkårErDelvisOppfyltOgOpplæringErGodkjent() {
+        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusMonths(1)));
+
+        Fagsak fagsak = behandling.getFagsak();
+        BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
+            behandlingRepository.taSkriveLås(behandling));
+        setupPerioderTilVurdering(kontekst);
+
+        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("der", true, "noe");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusMonths(1), true, "", vurdertInstitusjon.getInstitusjon());
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
+            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
+            new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
+            "fordi");
+        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+
+        BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
+        assertThat(resultat.getAksjonspunktResultater()).isEmpty();
+        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(2);
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.OPPFYLT,
+            søknadsperiode.getFom(),
+            søknadsperiode.getTom().minusMonths(1),
+            null);
+        assertVilkårPeriode(vilkår.getPerioder().get(1),
+            Utfall.IKKE_OPPFYLT,
+            søknadsperiode.getTom().minusMonths(1).plusDays(1),
+            søknadsperiode.getTom(),
+            Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE);
+    }
+
     private void assertVilkårPeriode(VilkårPeriode vilkårPeriode, Utfall utfall, LocalDate fom, LocalDate tom, Avslagsårsak avslagsårsak) {
         assertThat(vilkårPeriode.getUtfall()).isEqualTo(utfall);
         assertThat(vilkårPeriode.getFom()).isEqualTo(fom);
         assertThat(vilkårPeriode.getTom()).isEqualTo(tom);
         assertThat(vilkårPeriode.getAvslagsårsak()).isEqualTo(avslagsårsak);
-    }
-
-    private void setupPerioderTilVurdering(BehandlingskontrollKontekst kontekst) {
-        when(perioderTilVurderingTjenesteMock.utled(kontekst.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING))
-            .thenReturn(new TreeSet<>(Collections.singletonList(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFom(), søknadsperiode.getTom()))));
     }
 }

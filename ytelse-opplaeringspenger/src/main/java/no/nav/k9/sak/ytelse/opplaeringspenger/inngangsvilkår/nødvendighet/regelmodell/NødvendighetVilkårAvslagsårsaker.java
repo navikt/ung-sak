@@ -2,11 +2,12 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.reg
 
 import no.nav.fpsak.nare.evaluation.RuleReasonRef;
 import no.nav.fpsak.nare.evaluation.RuleReasonRefImpl;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 
 enum NødvendighetVilkårAvslagsårsaker {
-    //TODO hent fra Avlagsårsak (unngå duplisering)
-    IKKE_NØDVENDIG("1101", "Ikke nødvendig for omsorgen av pleietrengende"),
-    IKKE_GODKJENT_INSTITUSJON("1102", "Institusjonen er ikke godkjent");
+    IKKE_NØDVENDIG(Avslagsårsak.IKKE_NØDVENDIG.getKode(), Avslagsårsak.IKKE_NØDVENDIG.getNavn()),
+    IKKE_GODKJENT_INSTITUSJON(Avslagsårsak.IKKE_GODKJENT_INSTITUSJON.getKode(), Avslagsårsak.IKKE_GODKJENT_INSTITUSJON.getNavn()),
+    IKKE_GODKJENT_SYKDOMSVILKÅR(Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE.getKode(), Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE.getNavn());
 
     private final String kode;
     private final String årsak;
@@ -25,6 +26,6 @@ enum NødvendighetVilkårAvslagsårsaker {
     }
 
     RuleReasonRef toRuleReason() {
-        return new RuleReasonRefImpl(kode, årsak); //TODO deprecated
+        return new RuleReasonRefImpl(kode, årsak);
     }
 }

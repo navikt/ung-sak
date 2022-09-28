@@ -31,20 +31,51 @@ public class NødvendighetVilkårTjeneste {
      * Vurderer perioder mot vilkårsreglene og oppdaterer builder med resultatet. Returnerer de vurderte periodene.
      *
      * @param vilkårBuilder             Vilkårbuilder
-     * @param vurdertOpplæringGrunnlag  Vurdert opplæring
+     * @param vurdertOpplæringGrunnlag  Vurdert opplæring @Nullable
      * @param tidslinjeTilVurdering     Tidslinje til vurdering
+     * @param sykdomsTidslinje          Tidslinje med godkjent sykdomsvilkår
      * @return                          Sett med de vurderte periodene
      */
-    public NavigableSet<DatoIntervallEntitet> vurderPerioder(VilkårBuilder vilkårBuilder, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+    public NavigableSet<DatoIntervallEntitet> vurderPerioder(VilkårBuilder vilkårBuilder, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering, LocalDateTimeline<Boolean> sykdomsTidslinje) {
         Objects.requireNonNull(vilkårBuilder);
-        Objects.requireNonNull(vurdertOpplæringGrunnlag);
-
-        List<VurdertOpplæring> vurdertOpplæringList = vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring();
-        VurdertInstitusjonHolder vurdertInstitusjonHolder = vurdertOpplæringGrunnlag.getVurdertInstitusjonHolder();
+        Objects.requireNonNull(tidslinjeTilVurdering);
+        Objects.requireNonNull(sykdomsTidslinje);
 
         NavigableSet<DatoIntervallEntitet> godkjentInstitusjonPerioder = new TreeSet<>();
         NavigableSet<DatoIntervallEntitet> nødvendigOpplæringPerioder = new TreeSet<>();
         NavigableSet<DatoIntervallEntitet> vurdertePerioder = new TreeSet<>();
+
+        if (vurdertOpplæringGrunnlag != null) {
+            samlePerioderMedVurdertOpplæring(vurdertOpplæringGrunnlag, godkjentInstitusjonPerioder, nødvendigOpplæringPerioder, vurdertePerioder);
+        }
+
+        LocalDateTimeline<Boolean> godkjentInstitusjonTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(godkjentInstitusjonPerioder)
+            .intersection(tidslinjeTilVurdering);
+
+        LocalDateTimeline<Boolean> nødvendigOpplæringTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(nødvendigOpplæringPerioder)
+            .intersection(tidslinjeTilVurdering);
+
+        var perioderUtenGodkjentSykdomsvilkår = TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeTilVurdering.disjoint(sykdomsTidslinje));
+        vurdertePerioder.addAll(perioderUtenGodkjentSykdomsvilkår); //TODO bør jeg kaste exception hvis dette gjør at jeg får overlappende perioder? (vil uansett feile i neste blokk)
+
+        LocalDateTimeline<Boolean> relevanteVurdertePerioderTidslinje = new LocalDateTimeline<>(vurdertePerioder.stream()
+            .map(vurdertPeriode -> new LocalDateSegment<>(vurdertPeriode.getFomDato(), vurdertPeriode.getTomDato(), true))
+            .toList())
+            .intersection(tidslinjeTilVurdering);
+
+        vurdertePerioder = TidslinjeUtil.tilDatoIntervallEntiteter(relevanteVurdertePerioderTidslinje);
+
+        vurderPerioder(vilkårBuilder, vurdertePerioder, nødvendigOpplæringTidslinje, godkjentInstitusjonTidslinje, sykdomsTidslinje);
+
+        return vurdertePerioder;
+    }
+
+    private void samlePerioderMedVurdertOpplæring(VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag,
+                                                  NavigableSet<DatoIntervallEntitet> godkjentInstitusjonPerioder,
+                                                  NavigableSet<DatoIntervallEntitet> nødvendigOpplæringPerioder,
+                                                  NavigableSet<DatoIntervallEntitet> vurdertePerioder) {
+        List<VurdertOpplæring> vurdertOpplæringList = vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring();
+        VurdertInstitusjonHolder vurdertInstitusjonHolder = vurdertOpplæringGrunnlag.getVurdertInstitusjonHolder();
 
         for (VurdertOpplæring vurdertOpplæring : vurdertOpplæringList) {
             DatoIntervallEntitet datoIntervallEntitet = vurdertOpplæring.getPeriode();
@@ -65,30 +96,14 @@ public class NødvendighetVilkårTjeneste {
 
             vurdertePerioder.add(datoIntervallEntitet);
         }
-
-        LocalDateTimeline<Boolean> godkjentInstitusjonTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(godkjentInstitusjonPerioder)
-            .intersection(tidslinjeTilVurdering);
-
-        LocalDateTimeline<Boolean> nødvendigOpplæringTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(nødvendigOpplæringPerioder)
-            .intersection(tidslinjeTilVurdering);
-
-        LocalDateTimeline<Boolean> relevanteVurdertePerioderTidslinje = new LocalDateTimeline<>(vurdertePerioder.stream()
-            .map(vurdertPeriode -> new LocalDateSegment<>(vurdertPeriode.getFomDato(), vurdertPeriode.getTomDato(), true))
-            .toList())
-            .intersection(tidslinjeTilVurdering);
-
-        vurdertePerioder = TidslinjeUtil.tilDatoIntervallEntiteter(relevanteVurdertePerioderTidslinje);
-
-        vurderPerioder(vilkårBuilder, vurdertePerioder, nødvendigOpplæringTidslinje, godkjentInstitusjonTidslinje);
-
-        return vurdertePerioder;
     }
 
     private void vurderPerioder(VilkårBuilder vilkårBuilder, NavigableSet<DatoIntervallEntitet> vurdertePerioder,
                                 LocalDateTimeline<Boolean> nødvendigOpplæringTidslinje,
-                                LocalDateTimeline<Boolean> godkjentInstitusjonTidslinje) {
+                                LocalDateTimeline<Boolean> godkjentInstitusjonTidslinje,
+                                LocalDateTimeline<Boolean> godkjentSykdomsvilkårTidslinje) {
         for (DatoIntervallEntitet periode : vurdertePerioder) {
-            VilkårData vilkårData = vurderPeriode(periode, nødvendigOpplæringTidslinje, godkjentInstitusjonTidslinje);
+            VilkårData vilkårData = vurderPeriode(periode, nødvendigOpplæringTidslinje, godkjentInstitusjonTidslinje, godkjentSykdomsvilkårTidslinje);
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vilkårData.getPeriode())
                 .medUtfall(vilkårData.getUtfallType())
                 .medRegelEvaluering(vilkårData.getRegelEvaluering())
@@ -98,9 +113,10 @@ public class NødvendighetVilkårTjeneste {
     }
 
     private VilkårData vurderPeriode(DatoIntervallEntitet periodeTilVurdering,
-                                    LocalDateTimeline<Boolean> nødvendigOpplæringTidslinje,
-                                    LocalDateTimeline<Boolean> godkjentInstitusjonTidslinje) {
-        NødvendighetVilkårGrunnlag vilkårGrunnlag = vilkårOversetter.oversettTilRegelModell(periodeTilVurdering, nødvendigOpplæringTidslinje, godkjentInstitusjonTidslinje);
+                                     LocalDateTimeline<Boolean> nødvendigOpplæringTidslinje,
+                                     LocalDateTimeline<Boolean> godkjentInstitusjonTidslinje,
+                                     LocalDateTimeline<Boolean> godkjkentSykdomsvilkårTidslinje) {
+        NødvendighetVilkårGrunnlag vilkårGrunnlag = vilkårOversetter.oversettTilRegelModell(periodeTilVurdering, nødvendigOpplæringTidslinje, godkjentInstitusjonTidslinje, godkjkentSykdomsvilkårTidslinje);
         NødvendighetVilkårResultat resultat = new NødvendighetVilkårResultat();
 
         final Evaluation evaluation = new NødvendighetVilkår().evaluer(vilkårGrunnlag, resultat);
