@@ -23,6 +23,7 @@ public enum AndelKilde implements Kodeverdi {
     SAKSBEHANDLER_KOFAKBER("SAKSBEHANDLER_KOFAKBER", "Saksbehandler kontroller fakta"),
     SAKSBEHANDLER_FORDELING("SAKSBEHANDLER_FORDELING", "Saksbehandler fordeling"),
     PROSESS_PERIODISERING("PROSESS_PERIODISERING", "Prosess for periodisering"),
+    PROSESS_PERIODISERING_TILKOMMET_INNTEKT("PROSESS_PERIODISERING_TILKOMMET_INNTEKT", "Prosess for periodisering ved tilkommet inntekt"),
     PROSESS_OMFORDELING("PROSESS_OMFORDELING", "Saksbehandler for omfordeling"),
     PROSESS_START("PROSESS_START", "Start")
     ;
