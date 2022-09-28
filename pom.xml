@@ -41,7 +41,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>0.9.31</felles.version>
-        <swagger.version>2.2.2</swagger.version>
+        <swagger.version>2.2.3</swagger.version>
         <junit.version>5.9.0</junit.version>
         <k9format.version>6.1.9</k9format.version>
         <jackson.version>2.13.4</jackson.version>
