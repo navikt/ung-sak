@@ -100,7 +100,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN),
     VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE(
         AksjonspunktKodeDefinisjon.VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE, AksjonspunktType.MANUELL,
-        "Vurder varig endret/nyoppstartet næring selvstendig næringsdrivende", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG,
+        "Vurder varig endret/nyoppstartet næring selvstendig næringsdrivende", BehandlingStatus.UTREDES, BehandlingStegType.FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG,
         VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN),
     FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE(
         AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE_KODE, AksjonspunktType.MANUELL,
@@ -118,7 +118,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN),
     FASTSETT_BEREGNINGSGRUNNLAG_FOR_SN_NY_I_ARBEIDSLIVET(
         AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_FOR_SN_NY_I_ARBEIDSLIVET_KODE, AksjonspunktType.MANUELL,
-        "Fastsett beregningsgrunnlag for SN som er ny i arbeidslivet", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, VurderingspunktType.UT,
+        "Fastsett beregningsgrunnlag for SN som er ny i arbeidslivet", BehandlingStatus.UTREDES, BehandlingStegType.FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN),
     VURDER_GRADERING_UTEN_BEREGNINGSGRUNNLAG(
         AksjonspunktKodeDefinisjon.VURDER_GRADERING_UTEN_BEREGNINGSGRUNNLAG_KODE, AksjonspunktType.MANUELL,

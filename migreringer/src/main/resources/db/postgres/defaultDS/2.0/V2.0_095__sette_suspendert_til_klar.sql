@@ -1,0 +1,5 @@
+UPDATE PROSESS_TASK
+SET STATUS = 'KLAR'
+WHERE STATUS = 'SUSPENDERT'
+  AND ID = 23922566
+  AND TASK_TYPE = 'lagre.inntektsmeldinger.til.abakus';

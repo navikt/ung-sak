@@ -40,10 +40,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>0.9.31</felles.version>
-        <swagger.version>2.2.2</swagger.version>
+        <felles.version>0.9.32</felles.version>
+        <swagger.version>2.2.3</swagger.version>
         <junit.version>5.9.0</junit.version>
-        <k9format.version>6.1.6</k9format.version>
+        <k9format.version>6.1.11</k9format.version>
         <jackson.version>2.13.4</jackson.version>
         <asm.version>9.3</asm.version>
         <kotlin-stdlib.version>1.7.10</kotlin-stdlib.version>
@@ -436,7 +436,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.11.1</version>
+                <version>2.11.2</version>
             </dependency>
             <dependency>
                 <groupId>org.jasypt</groupId>

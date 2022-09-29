@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg;
 
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG_2;
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG;
 
 import java.util.List;
 
@@ -19,21 +19,21 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningStegTjen
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagSteg;
 
 @FagsakYtelseTypeRef
-@BehandlingStegRef(value = FORESLÅ_BEREGNINGSGRUNNLAG_2)
+@BehandlingStegRef(value = FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG)
 @BehandlingTypeRef
 @ApplicationScoped
-public class ForeslåBeregningsgrunnlag2Steg implements BeregningsgrunnlagSteg {
+public class FortsettForeslåBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
     private BeregningStegTjeneste beregningStegTjeneste;
 
-    protected ForeslåBeregningsgrunnlag2Steg() {
+    protected FortsettForeslåBeregningsgrunnlagSteg() {
         // for CDI proxy
     }
 
     @Inject
-    public ForeslåBeregningsgrunnlag2Steg(BehandlingRepository behandlingRepository,
-                                          BeregningStegTjeneste beregningStegTjeneste) {
+    public FortsettForeslåBeregningsgrunnlagSteg(BehandlingRepository behandlingRepository,
+                                                 BeregningStegTjeneste beregningStegTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.beregningStegTjeneste = beregningStegTjeneste;
     }
@@ -43,7 +43,7 @@ public class ForeslåBeregningsgrunnlag2Steg implements BeregningsgrunnlagSteg {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
 
-        List<AksjonspunktResultat> aksjonspunktResultater = beregningStegTjeneste.fortsettBeregning(ref, FORESLÅ_BEREGNINGSGRUNNLAG_2);
+        List<AksjonspunktResultat> aksjonspunktResultater = beregningStegTjeneste.fortsettBeregning(ref, FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG);
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
     }

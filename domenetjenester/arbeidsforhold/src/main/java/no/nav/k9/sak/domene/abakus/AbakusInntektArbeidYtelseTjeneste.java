@@ -143,6 +143,38 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return dto;
     }
 
+
+    /**
+     *  Ikke bruk denne dersom du har tilgang til behandling. Skal kun benyttes i spesielle situasjoner der man må hente på grunnlagsid.
+     *
+     * @param fagsak                          Fagsak
+     * @param inntektArbeidYtelseGrunnlagUuid grunnlag-uuid
+     * @return iay-grunnlag
+     */
+    @Override
+    public InntektArbeidYtelseGrunnlag hentGrunnlagForGrunnlagId(Fagsak fagsak, UUID inntektArbeidYtelseGrunnlagUuid) {
+        var dto = requestCache.getGrunnlag(inntektArbeidYtelseGrunnlagUuid);
+        if (dto == null) {
+            var request = initRequest(fagsak, inntektArbeidYtelseGrunnlagUuid);
+            var grunnlaget = hentOgMapGrunnlag(request, fagsak.getAktørId());
+            if (grunnlaget == null || grunnlaget.getEksternReferanse() == null || !grunnlaget.getEksternReferanse().equals(inntektArbeidYtelseGrunnlagUuid)) {
+                throw new IllegalStateException("Fant ikke grunnlag med referanse=" + inntektArbeidYtelseGrunnlagUuid);
+            }
+            return grunnlaget;
+        }
+        return dto;
+    }
+
+    private InntektArbeidYtelseGrunnlagRequest initRequest(Fagsak fagsak, UUID inntektArbeidYtelseGrunnlagUuid) {
+        var request = new InntektArbeidYtelseGrunnlagRequest(new AktørIdPersonident(fagsak.getAktørId().getId()));
+        request.medSaksnummer(fagsak.getSaksnummer().getVerdi());
+        request.medYtelseType(YtelseType.fraKode(fagsak.getYtelseType().getKode()));
+        request.forGrunnlag(inntektArbeidYtelseGrunnlagUuid);
+        request.medDataset(Arrays.asList(Dataset.values()));
+        return request;
+    }
+
+
     private InntektArbeidYtelseGrunnlagRequest initRequest(Behandling behandling, UUID inntektArbeidYtelseGrunnlagUuid) {
         var request = new InntektArbeidYtelseGrunnlagRequest(new AktørIdPersonident(behandling.getAktørId().getId()));
         request.medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
