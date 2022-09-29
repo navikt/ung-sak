@@ -239,6 +239,43 @@ public class VurderNødvendighetStegTest {
     }
 
     @Test
+    public void skalReturnereUtenAksjonspunktNårInstitusjonErPeriodevisGodkjentOgIkkeGodkjent() {
+        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+
+        Fagsak fagsak = behandling.getFagsak();
+        BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
+            behandlingRepository.taSkriveLås(behandling));
+        setupPerioderTilVurdering(kontekst);
+
+        VurdertInstitusjon vurdertInstitusjon1 = new VurdertInstitusjon("Apexklinikken", true, "noe");
+        VurdertInstitusjon vurdertInstitusjon2 = new VurdertInstitusjon("Kampen Pub", false, "noe annet");
+        VurdertOpplæring vurdertOpplæring1 = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "test", vurdertInstitusjon1.getInstitusjon());
+        VurdertOpplæring vurdertOpplæring2 = new VurdertOpplæring(søknadsperiode.getTom(), søknadsperiode.getTom(), true, "tast", vurdertInstitusjon2.getInstitusjon());
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
+            new VurdertInstitusjonHolder(Arrays.asList(vurdertInstitusjon1, vurdertInstitusjon2)),
+            new VurdertOpplæringHolder(Arrays.asList(vurdertOpplæring1, vurdertOpplæring2)),
+            "fordi");
+        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+
+        BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
+        assertThat(resultat).isNotNull();
+        assertThat(resultat.getAksjonspunktResultater()).isEmpty();
+        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(2);
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.OPPFYLT,
+            søknadsperiode.getFom(),
+            søknadsperiode.getTom().minusDays(1),
+            null);
+        assertVilkårPeriode(vilkår.getPerioder().get(1),
+            Utfall.IKKE_OPPFYLT,
+            søknadsperiode.getTom(),
+            søknadsperiode.getTom(),
+            Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
+    }
+
+    @Test
     public void skalReturnereAksjonspunktNårVurderingIkkeErKomplett() {
         setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
 
@@ -323,6 +360,36 @@ public class VurderNødvendighetStegTest {
             søknadsperiode.getTom().minusMonths(1).plusDays(1),
             søknadsperiode.getTom(),
             Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE);
+    }
+
+    @Test
+    public void skalIkkeLagreVilkårPeriodeUtenforSøknadsperiode() {
+        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+
+        Fagsak fagsak = behandling.getFagsak();
+        BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
+            behandlingRepository.taSkriveLås(behandling));
+        setupPerioderTilVurdering(kontekst);
+
+        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Scandic Helsfyr", true, "noe");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom().minusWeeks(1), søknadsperiode.getTom().plusWeeks(1), true, "", vurdertInstitusjon.getInstitusjon());
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
+            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
+            new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
+            "fordi");
+        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+
+        BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
+        assertThat(resultat).isNotNull();
+        assertThat(resultat.getAksjonspunktResultater()).isEmpty();
+        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(1);
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.OPPFYLT,
+            søknadsperiode.getFom(),
+            søknadsperiode.getTom(),
+            null);
     }
 
     private void assertVilkårPeriode(VilkårPeriode vilkårPeriode, Utfall utfall, LocalDate fom, LocalDate tom, Avslagsårsak avslagsårsak) {
