@@ -98,11 +98,11 @@ public class NødvendighetVilkårTjeneste {
         }
     }
 
-    private void vurderPerioder(VilkårBuilder vilkårBuilder, NavigableSet<DatoIntervallEntitet> vurdertePerioder,
+    private void vurderPerioder(VilkårBuilder vilkårBuilder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
                                 LocalDateTimeline<Boolean> nødvendigOpplæringTidslinje,
                                 LocalDateTimeline<Boolean> godkjentInstitusjonTidslinje,
                                 LocalDateTimeline<Boolean> godkjentSykdomsvilkårTidslinje) {
-        for (DatoIntervallEntitet periode : vurdertePerioder) {
+        for (DatoIntervallEntitet periode : perioderTilVurdering) {
             VilkårData vilkårData = vurderPeriode(periode, nødvendigOpplæringTidslinje, godkjentInstitusjonTidslinje, godkjentSykdomsvilkårTidslinje);
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vilkårData.getPeriode())
                 .medUtfall(vilkårData.getUtfallType())
