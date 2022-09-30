@@ -81,6 +81,7 @@ public class PleiepengerYtelsespesifikkForeslåVedtak implements Ytelsespesifikk
             } else if (sykdomAP.map(Aksjonspunkt::isToTrinnsBehandling).map(it -> !it).orElse(false)) {
                 Aksjonspunkt aksjonspunkt = sykdomAP.get();
                 aksjonspunktRepository.setToTrinnsBehandlingKreves(aksjonspunkt);
+                aksjonspunktKontrollRepository.setTilUtført(aksjonspunkt, aksjonspunkt.getBegrunnelse());
                 behandlingRepository.lagre(behandling, lås);
             }
         } else if (sykdomAP.map(Aksjonspunkt::isToTrinnsBehandling).orElse(false)) {

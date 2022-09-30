@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -61,12 +62,13 @@ public class KroniskSykManuellVilkårsvurderingSteg implements BehandlingSteg {
         var vilkårene = vilkårTjeneste.hentVilkårResultat(behandlingId);
 
         var vilkårTimeline = vilkårene.getVilkårTimeline(vilkårType);
-        var intersectTimeline = vilkårTimeline.intersection(new LocalDateInterval(søknad.getMottattDato(), fagsak.getPeriode().getTomDato()));
+        var søknadsperiode = søknad.getSøknadsperiode();
+        var intersectTimeline = vilkårTimeline.intersection(new LocalDateInterval(søknadsperiode.getFomDato(), fagsak.getPeriode().getTomDato()));
 
         if (vilkårTjeneste.erNoenVilkårHeltAvslått(behandlingId, vilkårType, intersectTimeline.getMinLocalDate(), intersectTimeline.getMaxLocalDate())) {
             vilkårTjeneste.settVilkårutfallTilIkkeVurdert(behandlingId, vilkårType,
                 new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(vilkårTimeline.getMinLocalDate(), vilkårTimeline.getMaxLocalDate()))));
-            behandling.getAksjonspunktMedDefinisjonOptional(aksjonspunktDef).ifPresent(a -> a.avbryt());
+            behandling.getAksjonspunktMedDefinisjonOptional(aksjonspunktDef).ifPresent(Aksjonspunkt::avbryt);
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }

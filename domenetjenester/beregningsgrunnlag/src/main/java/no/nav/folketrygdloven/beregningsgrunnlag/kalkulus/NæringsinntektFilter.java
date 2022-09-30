@@ -6,6 +6,7 @@ import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -22,6 +23,7 @@ public class NæringsinntektFilter {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
+    private FagsakRepository fagsakRepository;
 
     public NæringsinntektFilter() {
     }
@@ -29,10 +31,12 @@ public class NæringsinntektFilter {
     @Inject
     public NæringsinntektFilter(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                 BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
+                                OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider,
+                                FagsakRepository fagsakRepository) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
+        this.fagsakRepository = fagsakRepository;
     }
 
     public List<Inntekt> finnInntekter(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag forrigeInnhentet, LocalDate skjæringstidspunkt) {
@@ -48,8 +52,9 @@ public class NæringsinntektFilter {
                 .flatMap(gr -> gr.getNæringsinntektPerioder().stream())
                 .filter(p -> p.getSkjæringstidspunkt().equals(skjæringstidspunkt))
                 .findFirst();
+            var fagsak = fagsakRepository.finnEksaktFagsak(behandlingReferanse.getFagsakId());
             return næringsinntektPeriode.map(NæringsinntektPeriode::getIayReferanse)
-                .map(iayRef -> inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingReferanse.getBehandlingId(), iayRef))
+                .map(iayRef -> inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(fagsak, iayRef))
                 .orElse(forrigeInnhentet);
         }
         return forrigeInnhentet;

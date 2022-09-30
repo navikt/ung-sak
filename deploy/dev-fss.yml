@@ -58,6 +58,12 @@ spec:
       claims:
         extra:
           - "NAVident"
+    accessPolicy:
+      inbound:
+        rules:
+        - application: k9-sak
+          namespace: k9saksbehandling
+          cluster: dev-fss
   env:
     - name: TZ
       value: "Europe/Oslo"
@@ -153,7 +159,7 @@ spec:
     - name: MEDL2_RS_URL
       value: https://medlemskap-medl-api.dev.intern.nav.no/api/v1/medlemskapsunntak
     - name: MEDL2_RS_SCOPE
-      value: api://dev-fss:team-rocket:medlemskap-medl-api
+      value: api://dev-fss.team-rocket.medlemskap-medl-api/.default
     - name: PDL_BASE_URL
       value: http://pdl-api.pdl/graphql
     - name: PDL_SCOPE
@@ -181,7 +187,9 @@ spec:
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
-      value: http://k9-aarskvantum.default
+      value: http://k9-aarskvantum.k9saksbehandling
+    - name: K9_OMS_AARSKVANTUM_SCOPE
+      value: 2068f5ff-804c-41bd-ba58-280d150b51c2/.default
     - name: K9_OMS_UTVIDETRETT_URL
       value: https://omsorgsdager.dev.intern.nav.no/api
 
@@ -200,6 +208,8 @@ spec:
       value: "true"
     - name: APP_AUTH_SCHEMA_AZUREAD_DOMAIN
       value: "k9.dev.intern.nav.no"
+    - name: AZURE_OPENID_CONFIG_ADDITIONAL_SCOPES
+      value: "api://dev-fss.k9saksbehandling.k9-tilbake/.default api://dev-fss.k9saksbehandling.k9-klage/.default"
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
     - name: OIDC_OPENAM_HOST_URL

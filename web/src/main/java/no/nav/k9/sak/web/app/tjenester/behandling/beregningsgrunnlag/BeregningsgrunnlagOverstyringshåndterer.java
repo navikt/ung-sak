@@ -69,6 +69,7 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
                 verdierHistorikkTjeneste.lagHistorikkForBeregningsgrunnlagVerdier(behandling.getId(),
                     endring.getBeregningsgrunnlagPeriodeEndringer().get(0), tekstBuilder);
                 tekstBuilder.ferdigstillHistorikkinnslagDel();
+                tekstBuilder.medBegrunnelse(dto.getBegrunnelse());
                 getHistorikkAdapter().opprettHistorikkInnslag(behandling.getId(), FAKTA_ENDRET);
 
             });
