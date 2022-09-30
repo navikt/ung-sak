@@ -1,22 +1,58 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
 
 import java.util.List;
+import java.util.NavigableSet;
+import java.util.Objects;
+import java.util.TreeSet;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.regelmodell.InstitusjonVurdering;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.regelmodell.OpplæringVurdering;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.regelmodell.NødvendighetVilkårGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.regelmodell.SykdomVurdering;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 
 public class NødvendighetVilkårOversetter {
 
-    public NødvendighetVilkårGrunnlag oversettTilRegelModell(DatoIntervallEntitet periode,
-                                                             LocalDateTimeline<Boolean> nødvendigOpplæringTidslinje,
-                                                             LocalDateTimeline<Boolean> godkjentInstitusjonTidslinje,
-                                                             LocalDateTimeline<Boolean> godkjentSykdomsvilkårTidslinje) {
+    public NødvendighetVilkårGrunnlag oversettTilRegelModell(DatoIntervallEntitet periodeTilVurdering, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> sykdomsTidslinje) {
+        Objects.requireNonNull(periodeTilVurdering);
+        Objects.requireNonNull(sykdomsTidslinje);
+
+        NavigableSet<DatoIntervallEntitet> godkjentInstitusjonPerioder = new TreeSet<>();
+        NavigableSet<DatoIntervallEntitet> nødvendigOpplæringPerioder = new TreeSet<>();
+
+        if (vurdertOpplæringGrunnlag != null) {
+            List<VurdertOpplæring> vurdertOpplæringList = vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring();
+            VurdertInstitusjonHolder vurdertInstitusjonHolder = vurdertOpplæringGrunnlag.getVurdertInstitusjonHolder();
+
+            for (VurdertOpplæring vurdertOpplæring : vurdertOpplæringList) {
+                DatoIntervallEntitet datoIntervallEntitet = vurdertOpplæring.getPeriode();
+
+                boolean godkjentInstitusjon = vurdertInstitusjonHolder.finnVurdertInstitusjon(vurdertOpplæring.getInstitusjon())
+                    .map(VurdertInstitusjon::getGodkjent)
+                    .orElse(false);
+
+                if (godkjentInstitusjon) {
+                    godkjentInstitusjonPerioder.add(datoIntervallEntitet);
+                }
+
+                boolean nødvendigOpplæring = vurdertOpplæring.getNødvendigOpplæring();
+
+                if (nødvendigOpplæring) {
+                    nødvendigOpplæringPerioder.add(datoIntervallEntitet);
+                }
+            }
+        }
+
+        LocalDateTimeline<Boolean> nødvendigOpplæringTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(nødvendigOpplæringPerioder);
+        LocalDateTimeline<Boolean> godkjentInstitusjonTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(godkjentInstitusjonPerioder);
 
         LocalDateTimeline<OpplæringVurdering> nødvendigOpplæringVurderingTidslinje = nødvendigOpplæringTidslinje
             .map(segment -> List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), OpplæringVurdering.NØDVENDIG)));
@@ -24,24 +60,24 @@ public class NødvendighetVilkårOversetter {
         LocalDateTimeline<InstitusjonVurdering> godkjentInstitusjonVurderingTidslinje = godkjentInstitusjonTidslinje
             .map(segment -> List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), InstitusjonVurdering.GODKJENT)));
 
-        LocalDateTimeline<SykdomVurdering> godkjentSykdomVurderingTidslinje = godkjentSykdomsvilkårTidslinje
+        LocalDateTimeline<SykdomVurdering> godkjentSykdomVurderingTidslinje = sykdomsTidslinje
             .map(segment -> List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), SykdomVurdering.GODKJENT)));
 
-        LocalDateTimeline<OpplæringVurdering> opplæringVurderingTidslinje = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(), OpplæringVurdering.IKKE_NØDVENDIG)
+        LocalDateTimeline<OpplæringVurdering> opplæringVurderingTidslinje = new LocalDateTimeline<>(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato(), OpplæringVurdering.IKKE_NØDVENDIG)
             .combine(nødvendigOpplæringVurderingTidslinje,
                 StandardCombinators::coalesceRightHandSide,
                 LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        LocalDateTimeline<InstitusjonVurdering> institusjonVurderingTidslinje = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(), InstitusjonVurdering.IKKE_GODKJENT)
+        LocalDateTimeline<InstitusjonVurdering> institusjonVurderingTidslinje = new LocalDateTimeline<>(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato(), InstitusjonVurdering.IKKE_GODKJENT)
             .combine(godkjentInstitusjonVurderingTidslinje,
                 StandardCombinators::coalesceRightHandSide,
                 LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        LocalDateTimeline<SykdomVurdering> sykdomVurderingTidslinje = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(), SykdomVurdering.IKKE_GODKJENT)
+        LocalDateTimeline<SykdomVurdering> sykdomVurderingTidslinje = new LocalDateTimeline<>(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato(), SykdomVurdering.IKKE_GODKJENT)
             .combine(godkjentSykdomVurderingTidslinje,
                 StandardCombinators::coalesceRightHandSide,
                 LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        return new NødvendighetVilkårGrunnlag(periode.getFomDato(), periode.getTomDato(), opplæringVurderingTidslinje, institusjonVurderingTidslinje, sykdomVurderingTidslinje);
+        return new NødvendighetVilkårGrunnlag(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato(), opplæringVurderingTidslinje, institusjonVurderingTidslinje, sykdomVurderingTidslinje);
     }
 }
