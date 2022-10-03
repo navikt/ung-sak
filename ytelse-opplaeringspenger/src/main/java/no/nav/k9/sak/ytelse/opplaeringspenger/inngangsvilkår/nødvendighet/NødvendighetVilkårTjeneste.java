@@ -39,28 +39,7 @@ public class NødvendighetVilkårTjeneste {
         Objects.requireNonNull(tidslinjeTilVurdering);
         Objects.requireNonNull(sykdomsTidslinje);
 
-        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = new TreeSet<>();
-
-        if (vurdertOpplæringGrunnlag != null) {
-            for (VurdertOpplæring vurdertOpplæring : vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring()) {
-                perioderTilVurdering.add(vurdertOpplæring.getPeriode());
-            }
-        }
-
-        LocalDateTimeline<Boolean> perioderTilVurderingTidslinje = new LocalDateTimeline<>(perioderTilVurdering.stream()
-            .map(periode -> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), true))
-            .toList())
-            .intersection(tidslinjeTilVurdering);
-
-        LocalDateTimeline<Boolean> tidslinjeTilVurderingMedSykdom = perioderTilVurderingTidslinje.intersection(sykdomsTidslinje);
-        LocalDateTimeline<Boolean> tidslinjeTilVurderingUtenSykdom = perioderTilVurderingTidslinje.disjoint(sykdomsTidslinje);
-        LocalDateTimeline<Boolean> tidslinjeTilVurderingUtenSykdomOgUtenVurdertOpplæring = tidslinjeTilVurdering.disjoint(sykdomsTidslinje).disjoint(perioderTilVurderingTidslinje);
-
-        perioderTilVurderingTidslinje = tidslinjeTilVurderingMedSykdom
-            .union(tidslinjeTilVurderingUtenSykdom, StandardCombinators::coalesceRightHandSide)
-            .union(tidslinjeTilVurderingUtenSykdomOgUtenVurdertOpplæring, StandardCombinators::coalesceRightHandSide);
-
-        perioderTilVurdering = TidslinjeUtil.tilDatoIntervallEntiteter(perioderTilVurderingTidslinje);
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = finnPerioderTilVurdering(vurdertOpplæringGrunnlag, tidslinjeTilVurdering, sykdomsTidslinje);
 
         perioderTilVurdering.forEach(periode -> {
             final VilkårData vilkårData = vurderPeriode(periode, vurdertOpplæringGrunnlag, sykdomsTidslinje);
@@ -83,5 +62,33 @@ public class NødvendighetVilkårTjeneste {
         final VilkårData vilkårData = utfallOversetter.oversett(VilkårType.NØDVENDIG_OPPLÆRING, evaluation, vilkårGrunnlag, periodeTilVurdering);
         vilkårData.setEkstraVilkårresultat(resultat);
         return vilkårData;
+    }
+
+    private NavigableSet<DatoIntervallEntitet> finnPerioderTilVurdering(VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering, LocalDateTimeline<Boolean> sykdomsTidslinje) {
+        Objects.requireNonNull(tidslinjeTilVurdering);
+        Objects.requireNonNull(sykdomsTidslinje);
+
+        NavigableSet<DatoIntervallEntitet> perioderTilVurderingFraGrunnlag = new TreeSet<>();
+
+        if (vurdertOpplæringGrunnlag != null) {
+            for (VurdertOpplæring vurdertOpplæring : vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring()) {
+                perioderTilVurderingFraGrunnlag.add(vurdertOpplæring.getPeriode());
+            }
+        }
+
+        LocalDateTimeline<Boolean> perioderTilVurderingTidslinje = new LocalDateTimeline<>(perioderTilVurderingFraGrunnlag.stream()
+            .map(periode -> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), true))
+            .toList())
+            .intersection(tidslinjeTilVurdering);
+
+        LocalDateTimeline<Boolean> tidslinjeTilVurderingMedSykdom = perioderTilVurderingTidslinje.intersection(sykdomsTidslinje);
+        LocalDateTimeline<Boolean> tidslinjeTilVurderingUtenSykdom = perioderTilVurderingTidslinje.disjoint(sykdomsTidslinje);
+        LocalDateTimeline<Boolean> tidslinjeTilVurderingUtenSykdomOgUtenVurdertOpplæring = tidslinjeTilVurdering.disjoint(sykdomsTidslinje).disjoint(perioderTilVurderingTidslinje);
+
+        perioderTilVurderingTidslinje = tidslinjeTilVurderingMedSykdom
+            .union(tidslinjeTilVurderingUtenSykdom, StandardCombinators::coalesceRightHandSide)
+            .union(tidslinjeTilVurderingUtenSykdomOgUtenVurdertOpplæring, StandardCombinators::coalesceRightHandSide);
+
+        return TidslinjeUtil.tilDatoIntervallEntiteter(perioderTilVurderingTidslinje);
     }
 }
