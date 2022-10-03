@@ -54,7 +54,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
 
     RE_HENDELSE_FØDSEL("RE-HENDELSE-FØDSEL", "Melding om registrert fødsel i folkeregisteret"),
     RE_HENDELSE_DØD_FORELDER("RE-HENDELSE-DØD-F", "Melding om registrert død på forelder i folkeregisteret"),
-    RE_HENDELSE_DØD_BARN("RE-HENDELSE-DØD-B", "Melding om registrert død på barn i folkeregisteret"),
+    RE_HENDELSE_DØD_BARN("RE-HENDELSE-DØD-B", "Melding om registrert død på pleietrengende i folkeregisteret"),
     RE_HENDELSE_DØDFØDSEL("RE-HENDELSE-DØDFØD", "Melding om registrert dødfødsel i folkeregisteret"),
 
     RE_REGISTEROPPLYSNING("RE-REGISTEROPPL", "Nye registeropplysninger"),
