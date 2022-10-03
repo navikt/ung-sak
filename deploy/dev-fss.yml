@@ -189,7 +189,7 @@ spec:
     - name: K9_OMS_AARSKVANTUM_URL
       value: http://k9-aarskvantum.k9saksbehandling
     - name: K9_OMS_AARSKVANTUM_SCOPE
-      value: api://dev-fss.k9saksbehandling.k9-aarskvantum/.default
+      value: 2068f5ff-804c-41bd-ba58-280d150b51c2/.default
     - name: K9_OMS_UTVIDETRETT_URL
       value: https://omsorgsdager.dev.intern.nav.no/api
 

@@ -42,11 +42,11 @@
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>0.9.32</felles.version>
         <swagger.version>2.2.3</swagger.version>
-        <junit.version>5.9.0</junit.version>
+        <junit.version>5.9.1</junit.version>
         <k9format.version>6.1.11</k9format.version>
         <jackson.version>2.13.4</jackson.version>
         <asm.version>9.3</asm.version>
-        <kotlin-stdlib.version>1.7.10</kotlin-stdlib.version>
+        <kotlin-stdlib.version>1.7.20</kotlin-stdlib.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -479,7 +479,7 @@
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
-                <version>4.0.0</version>
+                <version>4.0.1</version>
             </dependency>
             <!-- lagt her for å sikre dependencyConvergence -->
             <dependency>
