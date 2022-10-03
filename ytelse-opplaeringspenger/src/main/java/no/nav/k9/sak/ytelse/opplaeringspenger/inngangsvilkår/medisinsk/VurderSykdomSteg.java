@@ -108,12 +108,12 @@ public class VurderSykdomSteg implements BehandlingSteg {
 
         final var perioderSamlet = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.LANGVARIG_SYKDOM);
 
+        final MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioderSamlet, behandling);
+
         final boolean harPerioderTilVurdering = !perioderSamlet.isEmpty();
         if (harPerioderTilVurdering && trengerAksjonspunkt(kontekst, behandling)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
-
-        final MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioderSamlet, behandling);
 
         Vilkårene vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
