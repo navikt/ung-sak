@@ -13,17 +13,14 @@ public class NødvendighetVilkårGrunnlag implements VilkårGrunnlag {
     private final LocalDate tom;
     private final LocalDateTimeline<OpplæringVurdering> vurdertOpplæringPerioder;
     private final LocalDateTimeline<InstitusjonVurdering> vurdertInstitusjonPerioder;
-    private final LocalDateTimeline<SykdomVurdering> vurdertSykdomPerioder;
 
     public NødvendighetVilkårGrunnlag(LocalDate fom, LocalDate tom,
                                       LocalDateTimeline<OpplæringVurdering> vurdertOpplæringPerioder,
-                                      LocalDateTimeline<InstitusjonVurdering> vurdertInstitusjonPerioder,
-                                      LocalDateTimeline<SykdomVurdering> vurdertSykdomPerioder) {
+                                      LocalDateTimeline<InstitusjonVurdering> vurdertInstitusjonPerioder) {
         this.fom = fom;
         this.tom = tom;
         this.vurdertOpplæringPerioder = vurdertOpplæringPerioder;
         this.vurdertInstitusjonPerioder = vurdertInstitusjonPerioder;
-        this.vurdertSykdomPerioder = vurdertSykdomPerioder;
     }
 
     public LocalDate getFom() {
@@ -40,9 +37,5 @@ public class NødvendighetVilkårGrunnlag implements VilkårGrunnlag {
 
     public LocalDateTimeline<InstitusjonVurdering> getVurdertInstitusjonPerioder() {
         return vurdertInstitusjonPerioder;
-    }
-
-    public LocalDateTimeline<SykdomVurdering> getVurdertSykdomPerioder() {
-        return vurdertSykdomPerioder;
     }
 }

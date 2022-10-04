@@ -6,7 +6,6 @@ public class NødvendighetVilkårResultat {
 
     private List<NødvendigOpplæringPeriode> nødvendigOpplæringPerioder;
     private List<GodkjentInstitusjonPeriode> godkjentInstitusjonPerioder;
-    private List<GodkjentSykdomsvilkårPeriode> godkjentSykdomPerioder;
 
     public List<NødvendigOpplæringPeriode> getNødvendigOpplæringPerioder() {
         return nødvendigOpplæringPerioder;
@@ -22,13 +21,5 @@ public class NødvendighetVilkårResultat {
 
     public void setGodkjentInstitusjonPerioder(List<GodkjentInstitusjonPeriode> godkjentInstitusjonPerioder) {
         this.godkjentInstitusjonPerioder = godkjentInstitusjonPerioder;
-    }
-
-    public List<GodkjentSykdomsvilkårPeriode> getGodkjentSykdomPerioder() {
-        return godkjentSykdomPerioder;
-    }
-
-    public void setGodkjentSykdomPerioder(List<GodkjentSykdomsvilkårPeriode> godkjentSykdomPerioder) {
-        this.godkjentSykdomPerioder = godkjentSykdomPerioder;
     }
 }
