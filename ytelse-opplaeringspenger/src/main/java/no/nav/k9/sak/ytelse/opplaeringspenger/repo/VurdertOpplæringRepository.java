@@ -30,6 +30,11 @@ public class VurdertOpplæringRepository {
         return getAktivtGrunnlag(behandlingId);
     }
 
+    public void kopierGrunnlagFraEksisterendeBehandling(Long originalBehandlingId, Long nyBehandlingId) {
+        Optional<VurdertOpplæringGrunnlag> aktivtGrunnlagFraForrigeBehandling = getAktivtGrunnlag(originalBehandlingId);
+        aktivtGrunnlagFraForrigeBehandling.ifPresent(grunnlag -> lagreOgFlush(nyBehandlingId, new VurdertOpplæringGrunnlag(nyBehandlingId, grunnlag)));
+    }
+
     public void lagreOgFlush(Long behandlingId, VurdertOpplæringGrunnlag nyttGrunnlag) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         Objects.requireNonNull(nyttGrunnlag, "nyttGrunnlag");
