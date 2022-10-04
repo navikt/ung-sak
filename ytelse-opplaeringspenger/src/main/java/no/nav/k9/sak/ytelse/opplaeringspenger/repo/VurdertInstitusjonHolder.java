@@ -34,7 +34,7 @@ public class VurdertInstitusjonHolder extends BaseEntitet {
     @BatchSize(size = 20)
     @JoinColumn(name = "holder_id", nullable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
-    private Set<VurdertInstitusjon> vurdertInstitusjon;
+    private Set<VurdertInstitusjon> vurdertInstitusjon = new LinkedHashSet<>();
 
     @Version
     @Column(name = "versjon", nullable = false)

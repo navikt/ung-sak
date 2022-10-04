@@ -22,30 +22,29 @@ public class NødvendighetVilkårOversetter {
 
     public NødvendighetVilkårGrunnlag oversettTilRegelModell(DatoIntervallEntitet periodeTilVurdering, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag) {
         Objects.requireNonNull(periodeTilVurdering);
+        Objects.requireNonNull(vurdertOpplæringGrunnlag);
 
         NavigableSet<DatoIntervallEntitet> godkjentInstitusjonPerioder = new TreeSet<>();
         NavigableSet<DatoIntervallEntitet> nødvendigOpplæringPerioder = new TreeSet<>();
 
-        if (vurdertOpplæringGrunnlag != null) {
-            List<VurdertOpplæring> vurdertOpplæringList = vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring();
-            VurdertInstitusjonHolder vurdertInstitusjonHolder = vurdertOpplæringGrunnlag.getVurdertInstitusjonHolder();
+        List<VurdertOpplæring> vurdertOpplæringList = vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring();
+        VurdertInstitusjonHolder vurdertInstitusjonHolder = vurdertOpplæringGrunnlag.getVurdertInstitusjonHolder();
 
-            for (VurdertOpplæring vurdertOpplæring : vurdertOpplæringList) {
-                DatoIntervallEntitet datoIntervallEntitet = vurdertOpplæring.getPeriode();
+        for (VurdertOpplæring vurdertOpplæring : vurdertOpplæringList) {
+            DatoIntervallEntitet datoIntervallEntitet = vurdertOpplæring.getPeriode();
 
-                boolean godkjentInstitusjon = vurdertInstitusjonHolder.finnVurdertInstitusjon(vurdertOpplæring.getInstitusjon())
-                    .map(VurdertInstitusjon::getGodkjent)
-                    .orElse(false);
+            boolean godkjentInstitusjon = vurdertInstitusjonHolder.finnVurdertInstitusjon(vurdertOpplæring.getInstitusjon())
+                .map(VurdertInstitusjon::getGodkjent)
+                .orElse(false);
 
-                if (godkjentInstitusjon) {
-                    godkjentInstitusjonPerioder.add(datoIntervallEntitet);
-                }
+            if (godkjentInstitusjon) {
+                godkjentInstitusjonPerioder.add(datoIntervallEntitet);
+            }
 
-                boolean nødvendigOpplæring = vurdertOpplæring.getNødvendigOpplæring();
+            boolean nødvendigOpplæring = vurdertOpplæring.getNødvendigOpplæring();
 
-                if (nødvendigOpplæring) {
-                    nødvendigOpplæringPerioder.add(datoIntervallEntitet);
-                }
+            if (nødvendigOpplæring) {
+                nødvendigOpplæringPerioder.add(datoIntervallEntitet);
             }
         }
 

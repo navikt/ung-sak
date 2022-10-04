@@ -89,4 +89,11 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
     protected void setAktiv(Boolean aktiv) {
         this.aktiv = aktiv;
     }
+
+    public static VurdertOpplæringGrunnlag lagTomtGrunnlag() {
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag();
+        grunnlag.vurdertInstitusjonHolder = new VurdertInstitusjonHolder();
+        grunnlag.vurdertOpplæringHolder = new VurdertOpplæringHolder();
+        return grunnlag;
+    }
 }

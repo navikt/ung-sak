@@ -7,7 +7,6 @@ import java.util.TreeSet;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -29,15 +28,16 @@ public class NødvendighetVilkårTjeneste {
      * Vurderer perioder mot vilkårsreglene og oppdaterer builder med resultatet. Returnerer de vurderte periodene.
      *
      * @param vilkårBuilder             Vilkårbuilder
-     * @param vurdertOpplæringGrunnlag  Vurdert opplæring @Nullable
+     * @param vurdertOpplæringGrunnlag  Vurdert opplæring
      * @param tidslinjeTilVurdering     Tidslinje til vurdering
      * @return                          Sett med de vurderte periodene
      */
     public NavigableSet<DatoIntervallEntitet> vurderPerioder(VilkårBuilder vilkårBuilder, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
         Objects.requireNonNull(vilkårBuilder);
+        Objects.requireNonNull(vurdertOpplæringGrunnlag);
         Objects.requireNonNull(tidslinjeTilVurdering);
 
-        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = finnPerioderTilVurdering(vurdertOpplæringGrunnlag, tidslinjeTilVurdering);
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = finnPerioderTilVurderingFraGrunnlag(vurdertOpplæringGrunnlag, tidslinjeTilVurdering);
 
         perioderTilVurdering.forEach(periode -> {
             final VilkårData vilkårData = vurderPeriode(periode, vurdertOpplæringGrunnlag);
@@ -62,13 +62,11 @@ public class NødvendighetVilkårTjeneste {
         return vilkårData;
     }
 
-    private NavigableSet<DatoIntervallEntitet> finnPerioderTilVurdering(VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+    private NavigableSet<DatoIntervallEntitet> finnPerioderTilVurderingFraGrunnlag(VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
         NavigableSet<DatoIntervallEntitet> perioderTilVurderingFraGrunnlag = new TreeSet<>();
 
-        if (vurdertOpplæringGrunnlag != null) {
-            for (VurdertOpplæring vurdertOpplæring : vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring()) {
-                perioderTilVurderingFraGrunnlag.add(vurdertOpplæring.getPeriode());
-            }
+        for (VurdertOpplæring vurdertOpplæring : vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring()) {
+            perioderTilVurderingFraGrunnlag.add(vurdertOpplæring.getPeriode());
         }
 
         LocalDateTimeline<Boolean> perioderTilVurderingTidslinje = new LocalDateTimeline<>(perioderTilVurderingFraGrunnlag.stream()
