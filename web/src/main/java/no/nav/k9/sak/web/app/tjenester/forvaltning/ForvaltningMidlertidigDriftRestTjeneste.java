@@ -364,6 +364,46 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return Response.ok(saksnummerliste).build();
     }
+    
+    @GET
+    @Path("/saker-med-feil4")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response hentSakerMedFeil4() {
+        final Query q = entityManager.createNativeQuery(
+            "SELECT convert_from(lo_get(d.payload), 'UTF-8') as payload, f.saksnummer "
+                + "FROM MOTTATT_DOKUMENT d INNER JOIN Behandling b ON ( "
+                + "  b.id = d.behandling_id "
+                + ") INNER JOIN Fagsak f ON ( "
+                + "  f.id = b.fagsak_id "
+                + ") "
+                + "WHERE d.type = 'PLEIEPENGER_SOKNAD' "
+                + "  AND d.mottatt_dato >= to_date('2022-09-22', 'YYYY-MM-DD')"
+                + "  AND d.mottatt_dato <= to_date('2022-09-30', 'YYYY-MM-DD')");
+        q.setHint("javax.persistence.query.timeout", 5 * 60 * 1000); // 5 minutter
+
+        final List<String> saksnumre = new ArrayList<>();
+
+        @SuppressWarnings("unchecked") final Stream<Object[]> resultStream = q.getResultStream();
+        resultStream.forEach(d -> {
+            try {
+                final Object[] result = (Object[]) d;
+                final String soknadJson = (String) result[0];
+                final String saksnummer = (String) result[1];
+                final Søknad soknad = JsonUtils.fromString(soknadJson, Søknad.class);
+                if (erFraBrukerdialogPsb(soknad) && harOmsorgstilbud(soknad.getYtelse())) {
+                    saksnumre.add(saksnummer);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        final String saksnummerliste = saksnumre.stream().reduce((a, b) -> a + ", " + b).orElse("");
+
+        return Response.ok(saksnummerliste).build();
+    }
 
     private boolean harTomSøknadsperiode(PleipengerLivetsSluttfase pls) {
         return pls.getSøknadsperiodeList().isEmpty();
@@ -371,6 +411,19 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
     private boolean erFraBrukerdialogPsb(Søknad søknad) {
         return søknad.getJournalposter() == null || søknad.getJournalposter().isEmpty();
+    }
+    
+    private boolean harOmsorgstilbud(PleiepengerSyktBarn ytelse) {
+        if (ytelse.getTilsynsordning() == null) {
+            return false;
+        }
+        if (ytelse.getTilsynsordning().getPerioder() == null) {
+            return false;
+        }
+        return ytelse.getTilsynsordning().getPerioder()
+                .entrySet()
+                .stream()
+                .anyMatch(p -> !p.getValue().getEtablertTilsynTimerPerDag().isZero());
     }
 
     private boolean harReellPeriodeMedNullNormal(PleiepengerSyktBarn soknad) {
