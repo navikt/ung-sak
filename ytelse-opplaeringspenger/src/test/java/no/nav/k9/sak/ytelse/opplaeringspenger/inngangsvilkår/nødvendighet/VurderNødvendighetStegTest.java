@@ -56,12 +56,14 @@ public class VurderNødvendighetStegTest {
     private BehandlingRepository behandlingRepository;
 
     @Inject
+    private VurdertOpplæringRepository vurdertOpplæringRepository;
+
+    @Inject
     @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteBean;
 
     private BehandlingRepositoryProvider repositoryProvider;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteMock;
-    private VurdertOpplæringRepository vurdertOpplæringRepository;
     private Behandling behandling;
     private VurderNødvendighetSteg vurderNødvendighetSteg;
     private Periode søknadsperiode;
@@ -70,7 +72,6 @@ public class VurderNødvendighetStegTest {
     @BeforeEach
     public void setup(){
         perioderTilVurderingTjenesteMock = spy(perioderTilVurderingTjenesteBean);
-        vurdertOpplæringRepository = mock(VurdertOpplæringRepository.class);
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         vurderNødvendighetSteg = new VurderNødvendighetSteg(repositoryProvider, perioderTilVurderingTjenesteMock, vurdertOpplæringRepository);
         LocalDate now = LocalDate.now();
@@ -87,6 +88,10 @@ public class VurderNødvendighetStegTest {
     private void setupPerioderTilVurdering(BehandlingskontrollKontekst kontekst) {
         when(perioderTilVurderingTjenesteMock.utled(kontekst.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING))
             .thenReturn(new TreeSet<>(Collections.singletonList(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFom(), søknadsperiode.getTom()))));
+    }
+
+    private void lagreGrunnlag(VurdertOpplæringGrunnlag grunnlag, Behandling behandling) {
+        vurdertOpplæringRepository.lagreOgFlush(behandling.getId(), grunnlag);
     }
 
     @Test
@@ -127,7 +132,7 @@ public class VurderNødvendighetStegTest {
             new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
             new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
             "fordi");
-        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+        lagreGrunnlag(grunnlag, behandling);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
@@ -157,7 +162,7 @@ public class VurderNødvendighetStegTest {
             new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
             new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
             "fordi");
-        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+        lagreGrunnlag(grunnlag, behandling);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
@@ -187,7 +192,7 @@ public class VurderNødvendighetStegTest {
             new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
             new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
             "fordi");
-        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+        lagreGrunnlag(grunnlag, behandling);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
@@ -218,7 +223,7 @@ public class VurderNødvendighetStegTest {
             new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
             new VurdertOpplæringHolder(Arrays.asList(vurdertOpplæring1, vurdertOpplæring2)),
             "fordi");
-        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+        lagreGrunnlag(grunnlag, behandling);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
@@ -255,7 +260,7 @@ public class VurderNødvendighetStegTest {
             new VurdertInstitusjonHolder(Arrays.asList(vurdertInstitusjon1, vurdertInstitusjon2)),
             new VurdertOpplæringHolder(Arrays.asList(vurdertOpplæring1, vurdertOpplæring2)),
             "fordi");
-        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+        lagreGrunnlag(grunnlag, behandling);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
@@ -290,7 +295,7 @@ public class VurderNødvendighetStegTest {
             new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
             new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
             "fordi");
-        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+        lagreGrunnlag(grunnlag, behandling);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
@@ -343,7 +348,7 @@ public class VurderNødvendighetStegTest {
             new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
             new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
             "fordi");
-        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+        lagreGrunnlag(grunnlag, behandling);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat.getAksjonspunktResultater()).isEmpty();
@@ -377,7 +382,7 @@ public class VurderNødvendighetStegTest {
             new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
             new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
             "fordi");
-        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+        lagreGrunnlag(grunnlag, behandling);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat.getAksjonspunktResultater()).isEmpty();
@@ -411,7 +416,7 @@ public class VurderNødvendighetStegTest {
             new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
             new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
             "fordi");
-        when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId())).thenReturn(Optional.of(grunnlag));
+        lagreGrunnlag(grunnlag, behandling);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
