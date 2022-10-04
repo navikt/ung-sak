@@ -42,8 +42,9 @@ public class OMPKompletthetFraværFilter implements KompletthetFraværFilter {
 
         Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> fraværPrAktivitet = trekkUtFraværTjeneste.fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(behandling);
 
-        LocalDateTimeline<OppgittFraværHolder> fraværTidslinjeHosArbeidsgiver = fraværPrAktivitet.get(new AktivitetTypeArbeidsgiver(UttakArbeidType.ARBEIDSTAKER, manglendeVedlegg.getArbeidsgiver()));
-        return fraværTidslinjeHosArbeidsgiver != null && fraværTidslinjeHosArbeidsgiver.intersection(vilkårsperiode.toLocalDateInterval())
+        LocalDateTimeline<OppgittFraværHolder> fraværTidslinjeHosArbeidsgiver = fraværPrAktivitet.getOrDefault(new AktivitetTypeArbeidsgiver(UttakArbeidType.ARBEIDSTAKER, manglendeVedlegg.getArbeidsgiver()), LocalDateTimeline.empty());
+
+        return fraværTidslinjeHosArbeidsgiver.intersection(vilkårsperiode.toLocalDateInterval())
             .stream()
             .map(LocalDateSegment::getValue)
             .anyMatch(OppgittFraværHolder::søknadGjelder);

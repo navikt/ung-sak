@@ -74,7 +74,8 @@ public class PleiepengerKompletthetFraværFilter implements KompletthetFraværFi
     private boolean harFraværFraArbeidsgiverIPerioden(List<Arbeid> arbeidIPeriode, ManglendeVedlegg at) {
         return arbeidIPeriode.stream()
             .filter(it -> UttakArbeidType.ARBEIDSTAKER.equals(UttakArbeidType.fraKode(it.getArbeidsforhold().getType())))
-            .anyMatch(it -> Objects.equals(at.getArbeidsgiver(), utledIdentifikator(it)) && harFravær(it.getPerioder()));
+            .filter(it -> Objects.equals(at.getArbeidsgiver(), utledIdentifikator(it)))
+            .anyMatch(it -> harFravær(it.getPerioder()));
     }
 
     private Arbeidsgiver utledIdentifikator(Arbeid it) {
