@@ -1,7 +1,5 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.regelmodell;
 
-import java.util.Objects;
-
 import no.nav.fpsak.nare.RuleService;
 import no.nav.fpsak.nare.Ruleset;
 import no.nav.fpsak.nare.doc.RuleDocumentation;
@@ -16,14 +14,10 @@ public class NødvendighetVilkår implements RuleService<NødvendighetVilkårGru
     public static final String ID = "OLP_VK 9.14.1";
 
     @Override
-    public Evaluation evaluer(NødvendighetVilkårGrunnlag grunnlag, Object resultatStruktur) {
+    public Evaluation evaluer(NødvendighetVilkårGrunnlag grunnlag) {
         final NødvendighetMellomregningData mellomregningData = new NødvendighetMellomregningData(grunnlag);
 
-        final Evaluation evaluate = getSpecification().evaluate(mellomregningData);
-
-        oppdaterResultat((NødvendighetVilkårResultat) resultatStruktur, mellomregningData);
-
-        return evaluate;
+        return getSpecification().evaluate(mellomregningData);
     }
 
     @SuppressWarnings("unchecked")
@@ -36,11 +30,5 @@ public class NødvendighetVilkår implements RuleService<NødvendighetVilkårGru
                     .hvis(new ErNødvendigOpplæring(), new Oppfylt())
                     .ellers(new IkkeOppfylt(NødvendighetVilkårAvslagsårsaker.IKKE_NØDVENDIG.toRuleReason())))
             .ellers(new IkkeOppfylt(NødvendighetVilkårAvslagsårsaker.IKKE_GODKJENT_INSTITUSJON.toRuleReason()));
-    }
-
-    private void oppdaterResultat(NødvendighetVilkårResultat resultat, NødvendighetMellomregningData mellomregningData) {
-        Objects.requireNonNull(resultat);
-        resultat.setNødvendigOpplæringPerioder(mellomregningData.getOpplæringVurderingPerioder());
-        resultat.setGodkjentInstitusjonPerioder(mellomregningData.getInstitusjonVurderingPerioder());
     }
 }
