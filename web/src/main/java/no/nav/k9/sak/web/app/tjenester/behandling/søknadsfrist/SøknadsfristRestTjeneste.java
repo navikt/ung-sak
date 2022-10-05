@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -153,10 +152,7 @@ public class SøknadsfristRestTjeneste {
 
         return arbeidsgiverKravDokument.values()
             .stream()
-            .filter(Objects::nonNull)
-            .map(kravDokuments -> kravDokuments.stream().min(Comparator.naturalOrder()))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
+            .map(kravDokuments -> kravDokuments.stream().min(Comparator.naturalOrder()).orElseThrow())
             .collect(Collectors.toList());
     }
 
