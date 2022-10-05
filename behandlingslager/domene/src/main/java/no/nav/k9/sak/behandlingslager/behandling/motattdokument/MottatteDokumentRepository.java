@@ -22,7 +22,7 @@ import no.nav.k9.sak.typer.JournalpostId;
 @Dependent
 public class MottatteDokumentRepository {
 
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     @Inject
     public MottatteDokumentRepository(EntityManager entityManager) {

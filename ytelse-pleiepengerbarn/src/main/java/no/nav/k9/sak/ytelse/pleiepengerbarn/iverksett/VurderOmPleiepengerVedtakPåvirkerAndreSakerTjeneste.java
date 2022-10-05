@@ -22,6 +22,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
+import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -121,7 +122,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     @Override
     public List<SakMedPeriode> utledSakerMedPerioderSomErKanVærePåvirket(Ytelse vedtakHendelse) {
         var fagsak = fagsakRepository.hentSakGittSaksnummer(new Saksnummer(vedtakHendelse.getSaksnummer())).orElseThrow();
-        Behandling vedtattBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+        Behandling vedtattBehandling = behandlingRepository.hentBehandling(((YtelseV1)vedtakHendelse).getVedtakReferanse());
 
         AktørId pleietrengende = vedtattBehandling.getFagsak().getPleietrengendeAktørId();
         List<Saksnummer> alleSaksnummer = medisinskGrunnlagRepository.hentAlleSaksnummer(pleietrengende)

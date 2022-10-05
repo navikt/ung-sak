@@ -226,8 +226,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: OMP_ORDENTLIG_VALIDERING_MOTTAK
-      value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN

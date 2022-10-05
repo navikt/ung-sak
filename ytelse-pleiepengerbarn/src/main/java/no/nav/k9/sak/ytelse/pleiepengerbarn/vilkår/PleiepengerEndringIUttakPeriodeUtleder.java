@@ -10,7 +10,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.EndringIUttakPeriodeUtleder;
@@ -56,7 +55,5 @@ public class PleiepengerEndringIUttakPeriodeUtleder implements EndringIUttakPeri
             .filter(entry -> entry.getValue().getEndringsstatus() != Endringsstatus.UENDRET)
             .map(entry -> DatoIntervallEntitet.fraOgMedTilOgMed(entry.getKey().getFom(), entry.getKey().getTom()))
             .collect(Collectors.toCollection(TreeSet::new));
-
     }
-
 }
