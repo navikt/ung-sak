@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.regelmodell;
 
-import java.util.List;
 import java.util.Objects;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -29,19 +28,5 @@ public class NødvendighetMellomregningData {
 
     public LocalDateTimeline<InstitusjonVurdering> getInstitusjonVurderingTidslinje() {
         return institusjonVurderingTidslinje.compress();
-    }
-
-    List<NødvendigOpplæringPeriode> getOpplæringVurderingPerioder() {
-        return opplæringVurderingTidslinje.compress()
-            .stream()
-            .map(segment -> new NødvendigOpplæringPeriode(segment.getFom(), segment.getTom(), segment.getValue()))
-            .toList();
-    }
-
-    List<GodkjentInstitusjonPeriode> getInstitusjonVurderingPerioder() {
-        return institusjonVurderingTidslinje.compress()
-            .stream()
-            .map(segment -> new GodkjentInstitusjonPeriode(segment.getFom(), segment.getTom(), segment.getValue()))
-            .toList();
     }
 }
