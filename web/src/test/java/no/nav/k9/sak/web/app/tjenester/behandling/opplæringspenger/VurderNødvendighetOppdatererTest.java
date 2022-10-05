@@ -1,8 +1,10 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -108,6 +110,34 @@ public class VurderNødvendighetOppdatererTest {
         assertThat(vurdertOpplæring2.getPeriode().getFomDato()).isEqualTo(now.minusMonths(1));
         assertThat(vurdertOpplæring2.getPeriode().getTomDato()).isEqualTo(now);
         assertThat(vurdertOpplæring2.getBegrunnelse()).isEqualTo(periodeDto2.getBegrunnelse());
+    }
+
+    @Test
+    public void skalIkkeLagreVurdertOpplæringGrunnlagMedOverlappendePerioder() {
+        final VurderNødvendighetPeriodeDto periodeDto1 = new VurderNødvendighetPeriodeDto(true, now.minusMonths(2), now, "test");
+        final VurderNødvendighetPeriodeDto periodeDto2 = new VurderNødvendighetPeriodeDto(false, now.minusMonths(1), now, "test");
+        final VurderInstitusjonDto institusjonDto = new VurderInstitusjonDto("livets skole", true, "ja");
+        final VurderNødvendighetDto dto = new VurderNødvendighetDto(institusjonDto, Arrays.asList(periodeDto1, periodeDto2));
+
+        assertThrows(IllegalArgumentException.class, () ->
+            lagreGrunnlag(dto)
+        );
+        Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
+        assertThat(grunnlag).isEmpty();
+    }
+
+    @Test
+    public void skalIkkeLagreVurdertOpplæringGrunnlagMedDuplisertePerioder() {
+        final VurderNødvendighetPeriodeDto periodeDto1 = new VurderNødvendighetPeriodeDto(true, now.minusMonths(2), now, "test");
+        final VurderNødvendighetPeriodeDto periodeDto2 = new VurderNødvendighetPeriodeDto(false, now.minusMonths(2), now, "test");
+        final VurderInstitusjonDto institusjonDto = new VurderInstitusjonDto("livets skole", true, "ja");
+        final VurderNødvendighetDto dto = new VurderNødvendighetDto(institusjonDto, Arrays.asList(periodeDto1, periodeDto2));
+
+        assertThrows(IllegalArgumentException.class, () ->
+            lagreGrunnlag(dto)
+        );
+        Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
+        assertThat(grunnlag).isEmpty();
     }
 
     private OppdateringResultat lagreGrunnlag(VurderNødvendighetDto dto) {
