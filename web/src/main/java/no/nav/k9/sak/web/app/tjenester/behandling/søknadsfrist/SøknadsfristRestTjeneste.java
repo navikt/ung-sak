@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -145,13 +146,17 @@ public class SøknadsfristRestTjeneste {
             .filter(it -> Objects.equals(KravDokumentType.INNTEKTSMELDING, it.getType()))
             .forEach(im -> {
                 var arbeidsgiver = vurderteKravDokumenter.get(im).stream().map(VurdertSøktPeriode::getArbeidsgiver).findFirst().orElseThrow();
-                arbeidsgiverKravDokument.put(arbeidsgiver, arbeidsgiverKravDokument.getOrDefault(arbeidsgiver, new ArrayList<>()));
+                var kravdokumenter = arbeidsgiverKravDokument.getOrDefault(arbeidsgiver, new ArrayList<>());
+                kravdokumenter.add(im);
+                arbeidsgiverKravDokument.put(arbeidsgiver, kravdokumenter);
             });
 
         return arbeidsgiverKravDokument.values()
             .stream()
             .filter(Objects::nonNull)
-            .map(kravDokuments -> kravDokuments.stream().min(Comparator.naturalOrder()).orElseThrow())
+            .map(kravDokuments -> kravDokuments.stream().min(Comparator.naturalOrder()))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
             .collect(Collectors.toList());
     }
 
