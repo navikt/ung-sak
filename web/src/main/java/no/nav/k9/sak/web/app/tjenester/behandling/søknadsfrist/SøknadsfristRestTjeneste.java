@@ -150,6 +150,7 @@ public class SøknadsfristRestTjeneste {
 
         return arbeidsgiverKravDokument.values()
             .stream()
+            .filter(Objects::nonNull)
             .map(kravDokuments -> kravDokuments.stream().min(Comparator.naturalOrder()).orElseThrow())
             .collect(Collectors.toList());
     }
