@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.mottak;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -18,12 +19,13 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.MapSøknadUttakPerioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.SøknadPersisterer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.FeriePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase;
-import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
+import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie;
 import no.nav.k9.søknad.ytelse.psb.v1.Uttak;
 
 @Dependent
@@ -53,7 +55,7 @@ class SøknadOversetter {
             arbeidPerioder,
             List.of(),
             List.of(),
-            List.of(),
+            mapFerie(søknadsperioder, ytelse.getLovbestemtFerie()),
             List.of(),
             List.of());
 
@@ -65,6 +67,38 @@ class SøknadOversetter {
         søknadPersisterer.lagreSøknadsperioder(søknadsperioder, ytelse.getTrekkKravPerioder(), journalpostId, behandlingId);
         søknadPersisterer.lagreUttak(perioderFraSøknad, behandlingId);
         søknadPersisterer.oppdaterFagsakperiode(maksSøknadsperiode, fagsakId);
+    }
+
+    private Collection<FeriePeriode> mapFerie(List<Periode> søknadsperioder, LovbestemtFerie input) {
+        LocalDateTimeline<Boolean> ferieTidslinje = toFerieTidslinje(input.getPerioder());
+
+        /*
+         * XXX: Dette er en hack. Vi bør endre til at man for søknadsperioder alltid sender inn en komplett liste med både ferieperioder
+         *      man skal ha ... og hvilke som skal fjernes.
+         */
+        ferieTidslinje = ferieTidslinje.combine(toFerieTidslinje(søknadsperioder, false), StandardCombinators::coalesceLeftHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
+        return ferieTidslinje
+            .compress()
+            .stream()
+            .map(s -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue()))
+            .collect(Collectors.toList());
+    }
+
+    private LocalDateTimeline<Boolean> toFerieTidslinje(Map<Periode, LovbestemtFerie.LovbestemtFeriePeriodeInfo> perioder) {
+        return new LocalDateTimeline<>(perioder.entrySet()
+            .stream()
+            .map(entry -> new LocalDateSegment<>(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), entry.getValue() == null || entry.getValue().isSkalHaFerie()))
+            .collect(Collectors.toList())
+        );
+    }
+
+    private LocalDateTimeline<Boolean> toFerieTidslinje(Collection<Periode> perioder, boolean skalHaFerie) {
+        return new LocalDateTimeline<>(perioder
+            .stream()
+            .map(entry -> new LocalDateSegment<>(entry.getFraOgMed(), entry.getTilOgMed(), skalHaFerie))
+            .collect(Collectors.toList())
+        );
     }
 
     private List<Periode> hentAlleSøknadsperioder(PleipengerLivetsSluttfase ytelse) {
