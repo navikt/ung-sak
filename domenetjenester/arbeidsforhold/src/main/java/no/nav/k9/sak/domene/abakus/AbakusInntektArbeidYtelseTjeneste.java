@@ -12,13 +12,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Default;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Default;
+import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
@@ -310,9 +309,9 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     public void lagreArbeidsforhold(Long behandlingId, AktørId aktørId, ArbeidsforholdInformasjonBuilder informasjonBuilder) {
         Objects.requireNonNull(informasjonBuilder, "informasjonBuilder"); // NOSONAR
 
-        InntektArbeidYtelseGrunnlagBuilder builder = opprettGrunnlagBuilderFor(behandlingId);
-        builder.medInformasjon(informasjonBuilder.build());
-        konverterOgLagre(behandlingId, builder.build());
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        var eksisterendeGrunnlag = Optional.ofNullable(hentGrunnlagHvisEksisterer(behandling));
+        konverterOgLagre(behandlingId, eksisterendeGrunnlag.flatMap(InntektArbeidYtelseGrunnlag::getSaksbehandletVersjon).orElse(null), informasjonBuilder.build());
     }
 
     @Override
