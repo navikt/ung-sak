@@ -23,7 +23,9 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentInstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentInstitusjonRepository;
 
@@ -49,7 +51,7 @@ public class OpplæringsinstitusjonRestTjeneste {
         @ApiResponse(responseCode = "204", description = "Opplæringsinstitusjon ikke funnet")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public Response hentMedNavn(@NotNull @QueryParam("navn") String navn) {
+    public Response hentMedNavn(@NotNull @QueryParam("navn") @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) String navn) {
         Optional<GodkjentInstitusjon> godkjentInstitusjon = godkjentInstitusjonRepository.hentMedNavn(navn);
         if (godkjentInstitusjon.isEmpty()) {
             return Response.noContent().build();
@@ -64,7 +66,7 @@ public class OpplæringsinstitusjonRestTjeneste {
         @ApiResponse(responseCode = "204", description = "Opplæringsinstitusjon ikke funnet")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public Response hentAktivMedNavn(@NotNull @QueryParam("navn") String navn) {
+    public Response hentAktivMedNavn(@NotNull @QueryParam("navn") @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) String navn) {
         Optional<GodkjentInstitusjon> godkjentInstitusjon = godkjentInstitusjonRepository.hentMedNavn(navn);
         if (godkjentInstitusjon.isEmpty() || !erAktiv(godkjentInstitusjon.get())) {
             return Response.noContent().build();
@@ -103,7 +105,7 @@ public class OpplæringsinstitusjonRestTjeneste {
         @ApiResponse(responseCode = "200", description = "Returnerer om opplæringsinstitusjon er aktiv", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Boolean.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public Boolean erAktiv(@NotNull @QueryParam("navn") String navn) {
+    public Boolean erAktiv(@NotNull @QueryParam("navn") @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) String navn) {
         Optional<GodkjentInstitusjon> godkjentInstitusjon = godkjentInstitusjonRepository.hentMedNavn(navn);
         return godkjentInstitusjon.isPresent() && erAktiv(godkjentInstitusjon.get());
     }
