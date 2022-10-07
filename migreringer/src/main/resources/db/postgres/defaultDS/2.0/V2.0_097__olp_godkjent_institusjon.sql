@@ -11,6 +11,7 @@ create table if not exists GODKJENTE_OPPLAERINGSINSTITUSJONER
     ENDRET_AV               VARCHAR(20),
     ENDRET_TID              TIMESTAMP(3)
 );
+comment on table GODKJENTE_OPPLAERINGSINSTITUSJONER is 'Et register over forhåndsgodkjente opplæringsinstitusjoner til bruk i behandling av søknad om opplæringspenger';
 create sequence if not exists SEQ_GODKJENTE_OPPLAERINGSINSTITUSJONER increment by 50 minvalue 1000000;
 create unique index UIDX_GODKJENTE_OPPLAERINGSINSTITUSJONER_1 ON GODKJENTE_OPPLAERINGSINSTITUSJONER (NAVN);
 create unique index UIDX_GODKJENTE_OPPLAERINGSINSTITUSJONER_2 ON GODKJENTE_OPPLAERINGSINSTITUSJONER (UUID);
