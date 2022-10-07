@@ -41,7 +41,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunn
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
 
 
@@ -96,9 +95,9 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     @Override
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         var perioder = utledPeriode(behandlingId, vilkårType);
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
-        if (vilkårene.isPresent()) {
-            return utledVilkårsPerioderFraPerioderTilVurdering(behandlingId, vilkårene.get(), perioder);
+        var vilkåret = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
+        if (vilkåret.isPresent()) {
+            return utledVilkårsPerioderFraPerioderTilVurdering(behandlingId, vilkåret.get(), perioder);
         }
         return utledPeriode(behandlingId, vilkårType);
     }

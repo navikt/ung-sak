@@ -75,7 +75,7 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
     @Override
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         var optVilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
-        if (optVilkårene.isPresent()) {
+        if (optVilkårene.isPresent() && optVilkårene.get().getVilkår(vilkårType).isPresent())  {
             var vilkårTidslinje = optVilkårene.get().getVilkårTimeline(vilkårType);
             if (vilkårTidslinje.isEmpty()) {
                 return Collections.emptyNavigableSet();
