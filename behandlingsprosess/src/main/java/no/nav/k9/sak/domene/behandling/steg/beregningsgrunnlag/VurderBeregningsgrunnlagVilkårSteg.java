@@ -66,7 +66,7 @@ public class VurderBeregningsgrunnlagVilkårSteg implements BeregningsgrunnlagSt
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var ref = BehandlingReferanse.fra(behandling);
         var periodeTilVurderingFilter = vilkårPeriodeFilterProvider.getFilter(ref);
-        periodeTilVurderingFilter.ignorerForlengelseperioder();
+        periodeTilVurderingFilter.ignorerForlengelseperioder().ignorerAvslåtteUnntattForLavtBeregningsgrunnlag();
         beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, periodeTilVurderingFilter)
             .forEach(periode -> beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, periode));
     }
