@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.opplæringsinstitusjon;
+package no.nav.k9.sak.kontrakt.opplæringspenger;
 
 import java.util.Objects;
 import java.util.UUID;

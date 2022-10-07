@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.opplæringsinstitusjon;
+package no.nav.k9.sak.kontrakt.opplæringspenger;
 
 import java.time.LocalDate;
 import java.util.UUID;
