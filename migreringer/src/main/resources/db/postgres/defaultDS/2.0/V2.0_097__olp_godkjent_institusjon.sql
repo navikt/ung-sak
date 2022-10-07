@@ -1,6 +1,7 @@
-create table if not exists OLP_GODKJENT_INSTITUSJON
+create table if not exists GODKJENTE_OPPLAERINGSINSTITUSJONER
 (
     ID                      BIGINT                                 NOT NULL PRIMARY KEY,
+    UUID                    UUID                                   NOT NULL,
     NAVN                    VARCHAR(100)                           NOT NULL,
     FOM                     DATE                                   ,
     TOM                     DATE                                   ,
@@ -10,5 +11,6 @@ create table if not exists OLP_GODKJENT_INSTITUSJON
     ENDRET_AV               VARCHAR(20),
     ENDRET_TID              TIMESTAMP(3)
 );
-create sequence if not exists SEQ_OLP_GODKJENT_INSTITUSJON increment by 50 minvalue 1000000;
-create unique index UIDX_OLP_GODKJENT_INSTITUSJON_1 ON OLP_GODKJENT_INSTITUSJON (NAVN);
+create sequence if not exists SEQ_GODKJENTE_OPPLAERINGSINSTITUSJONER increment by 50 minvalue 1000000;
+create unique index UIDX_GODKJENTE_OPPLAERINGSINSTITUSJONER_1 ON GODKJENTE_OPPLAERINGSINSTITUSJONER (NAVN);
+create unique index UIDX_GODKJENTE_OPPLAERINGSINSTITUSJONER_2 ON GODKJENTE_OPPLAERINGSINSTITUSJONER (UUID);
