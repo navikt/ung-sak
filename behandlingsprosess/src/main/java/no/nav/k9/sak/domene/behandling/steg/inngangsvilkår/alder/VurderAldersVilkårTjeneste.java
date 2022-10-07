@@ -11,27 +11,26 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class VurderAldersVilkårTjeneste {
 
     public void vurderPerioder(VilkårBuilder vilkårBuilder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LocalDate fødselsdato, LocalDate dødsdato) {
-        var maksdato = fødselsdato.plusYears(70);
-        var avslagsDatoPgaDød = (dødsdato != null) ? dødsdato.plusDays(1) : null;
-        if (avslagsDatoPgaDød != null && maksdato.isAfter(avslagsDatoPgaDød)) {
-            maksdato = avslagsDatoPgaDød;
+        var maksdato = fødselsdato.plusYears(70).minusDays(1);
+        if (dødsdato != null && maksdato.isAfter(dødsdato)) {
+            maksdato = dødsdato;
         }
         var regelInput = "{ 'fødselsdato': '" + fødselsdato + ", 'dødsdato': '" + dødsdato + "', ', 'maksdato': '" + maksdato + "' }";
 
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            vurderPeriode(vilkårBuilder, maksdato, avslagsDatoPgaDød, regelInput, periode);
+            vurderPeriode(vilkårBuilder, maksdato, dødsdato, regelInput, periode);
         }
     }
 
     private void vurderPeriode(VilkårBuilder vilkårBuilder, LocalDate maksdato, LocalDate dødsdato, String regelInput, DatoIntervallEntitet periode) {
         if (periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, maksdato)) && !periode.getFomDato().equals(maksdato)) {
-            var builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), maksdato.minusDays(1)));
+            var builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), maksdato));
             builder.medUtfall(Utfall.OPPFYLT)
                 .medRegelInput(regelInput);
 
             vilkårBuilder.leggTil(builder);
 
-            builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, periode.getTomDato()));
+            builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(maksdato.plusDays(1), periode.getTomDato()));
             builder.medUtfall(Utfall.IKKE_OPPFYLT)
                 .medAvslagsårsak(utledAvslagsårsak(maksdato, dødsdato))
                 .medRegelInput(regelInput);
