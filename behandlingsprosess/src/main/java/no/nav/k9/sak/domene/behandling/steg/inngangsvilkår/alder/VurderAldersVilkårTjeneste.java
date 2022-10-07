@@ -12,13 +12,14 @@ public class VurderAldersVilkårTjeneste {
 
     public void vurderPerioder(VilkårBuilder vilkårBuilder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LocalDate fødselsdato, LocalDate dødsdato) {
         var maksdato = fødselsdato.plusYears(70);
-        if (dødsdato != null && maksdato.isAfter(dødsdato)) {
-            maksdato = dødsdato;
+        var avslagsDatoPgaDød = (dødsdato != null) ? dødsdato.plusDays(1) : null;
+        if (avslagsDatoPgaDød != null && maksdato.isAfter(avslagsDatoPgaDød)) {
+            maksdato = avslagsDatoPgaDød;
         }
         var regelInput = "{ 'fødselsdato': '" + fødselsdato + ", 'dødsdato': '" + dødsdato + "', ', 'maksdato': '" + maksdato + "' }";
 
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            vurderPeriode(vilkårBuilder, maksdato, dødsdato, regelInput, periode);
+            vurderPeriode(vilkårBuilder, maksdato, avslagsDatoPgaDød, regelInput, periode);
         }
     }
 
