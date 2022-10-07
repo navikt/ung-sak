@@ -13,7 +13,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -40,7 +39,6 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
     private VilkårResultatRepository vilkårResultatRepository;
     private PersoninfoAdapter personinfoAdapter;
     private UtvidetRettSøknadPerioder søktePerioder;
-    private boolean aldersvilkårLansert;
 
     AleneomsorgVilkårsPerioderTilVurderingTjeneste() {
         // for proxy
@@ -50,14 +48,12 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
     public AleneomsorgVilkårsPerioderTilVurderingTjeneste(BehandlingRepository behandlingRepository,
                                                           VilkårResultatRepository vilkårResultatRepository,
                                                           PersoninfoAdapter personinfoAdapter,
-                                                          SøknadRepository søknadRepository,
-                                                          @KonfigVerdi(value = "OMP_RAMMEVEDTAK_ALDERSVILKAAR", defaultVerdi = "true") boolean aldersvilkårLansert) {
+                                                          SøknadRepository søknadRepository) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personinfoAdapter = personinfoAdapter;
         this.søknadRepository = søknadRepository;
         this.søktePerioder = new UtvidetRettSøknadPerioder(søknadRepository);
-        this.aldersvilkårLansert = aldersvilkårLansert;
     }
 
     @Override
@@ -78,7 +74,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
     @Override
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         var optVilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
-        if (optVilkårene.isPresent()) {
+        if (optVilkårene.isPresent() && optVilkårene.get().getVilkår(vilkårType).isPresent()) {
             var vilkårTidslinje = optVilkårene.get().getVilkårTimeline(vilkårType);
             return TidslinjeUtil.tilDatoIntervallEntiteter(vilkårTidslinje);
         } else {
@@ -90,17 +86,10 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
 
     @Override
     public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
-        if (aldersvilkårLansert) {
-            return Map.of(
-                VilkårType.ALDERSVILKÅR_BARN, utled(behandlingId, VilkårType.ALDERSVILKÅR_BARN),
-                VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR),
-                VilkårType.UTVIDETRETT, utledUtvidetRettAleneomsorg(behandlingId)
-            );
-        }
         return Map.of(
+            VilkårType.ALDERSVILKÅR_BARN, utled(behandlingId, VilkårType.ALDERSVILKÅR_BARN),
             VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR),
-            VilkårType.UTVIDETRETT, utledUtvidetRettAleneomsorg(behandlingId)
-        );
+            VilkårType.UTVIDETRETT, utledUtvidetRettAleneomsorg(behandlingId));
     }
 
     private NavigableSet<DatoIntervallEntitet> utledUtvidetRettAleneomsorg(Long behandlingId) {
