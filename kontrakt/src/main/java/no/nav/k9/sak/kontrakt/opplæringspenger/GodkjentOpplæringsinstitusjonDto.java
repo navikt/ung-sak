@@ -34,4 +34,20 @@ public class GodkjentOpplæringsinstitusjonDto {
         this.fomDato = fomDato;
         this.tomDato = tomDato;
     }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public String getNavn() {
+        return navn;
+    }
+
+    public LocalDate getFomDato() {
+        return fomDato;
+    }
+
+    public LocalDate getTomDato() {
+        return tomDato;
+    }
 }

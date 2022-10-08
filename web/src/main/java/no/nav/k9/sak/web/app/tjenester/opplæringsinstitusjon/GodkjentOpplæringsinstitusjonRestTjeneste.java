@@ -30,8 +30,8 @@ import no.nav.k9.sak.kontrakt.opplæringspenger.GodkjentOpplæringsinstitusjonDt
 import no.nav.k9.sak.kontrakt.opplæringspenger.GodkjentOpplæringsinstitusjonIdDto;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
+import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.GodkjentOpplæringsinstitusjonTjeneste;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjon;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjonRepository;
 
 @ApplicationScoped
 @Transactional
@@ -39,14 +39,14 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjo
 @Produces(MediaType.APPLICATION_JSON)
 public class GodkjentOpplæringsinstitusjonRestTjeneste {
 
-    private GodkjentOpplæringsinstitusjonRepository godkjentOpplæringsinstitusjonRepository;
+    private GodkjentOpplæringsinstitusjonTjeneste godkjentOpplæringsinstitusjonTjeneste;
 
     public GodkjentOpplæringsinstitusjonRestTjeneste() {
     }
 
     @Inject
-    public GodkjentOpplæringsinstitusjonRestTjeneste(GodkjentOpplæringsinstitusjonRepository godkjentOpplæringsinstitusjonRepository) {
-        this.godkjentOpplæringsinstitusjonRepository = godkjentOpplæringsinstitusjonRepository;
+    public GodkjentOpplæringsinstitusjonRestTjeneste(GodkjentOpplæringsinstitusjonTjeneste godkjentOpplæringsinstitusjonTjeneste) {
+        this.godkjentOpplæringsinstitusjonTjeneste = godkjentOpplæringsinstitusjonTjeneste;
     }
 
     @GET
@@ -55,28 +55,28 @@ public class GodkjentOpplæringsinstitusjonRestTjeneste {
         @ApiResponse(responseCode = "204", description = "Opplæringsinstitusjon ikke funnet")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public Response hentMedNavn(@NotNull @QueryParam("id") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) GodkjentOpplæringsinstitusjonIdDto id) {
-        Optional<GodkjentOpplæringsinstitusjon> godkjentInstitusjon = godkjentOpplæringsinstitusjonRepository.hentMedUuid(id.getUuid());
-        if (godkjentInstitusjon.isEmpty()) {
-            return Response.noContent().build();
+    public Response hentMedUuid(@NotNull @QueryParam("id") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) GodkjentOpplæringsinstitusjonIdDto id) {
+        Optional<GodkjentOpplæringsinstitusjon> institusjon = godkjentOpplæringsinstitusjonTjeneste.hentMedUuid(id.getUuid());
+        if (institusjon.isPresent()) {
+            return Response.ok(mapTilDto(institusjon.get())).build();
         }
-        return Response.ok(mapTilDto(godkjentInstitusjon.get())).build();
+        return Response.noContent().build();
     }
 
     @GET
     @Path("/aktiv")
-    @Operation(description = "Hent aktiv opplæringsinstitusjon med uuid", tags = "opplæringsinstitusjon", responses = {
+    @Operation(description = "Hent aktiv opplæringsinstitusjon med uuid for oppgitt periode", tags = "opplæringsinstitusjon", responses = {
         @ApiResponse(responseCode = "200", description = "Returnerer aktiv opplæringsinstitusjon", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GodkjentOpplæringsinstitusjonDto.class))),
         @ApiResponse(responseCode = "204", description = "Opplæringsinstitusjon ikke funnet")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public Response hentAktivMedNavn(@NotNull @QueryParam("id") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) GodkjentOpplæringsinstitusjonIdDto id,
+    public Response hentAktivMedUuid(@NotNull @QueryParam("id") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) GodkjentOpplæringsinstitusjonIdDto id,
                                      @NotNull @QueryParam("aktivPeriode") @Parameter(description = "Format: YYYY-MM-DD/YYYY-MM-DD") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) Periode aktivPeriode) {
-        Optional<GodkjentOpplæringsinstitusjon> godkjentInstitusjon = godkjentOpplæringsinstitusjonRepository.hentMedUuid(id.getUuid());
-        if (godkjentInstitusjon.isEmpty() || !erAktiv(godkjentInstitusjon.get(), aktivPeriode)) {
-            return Response.noContent().build();
+        Optional<GodkjentOpplæringsinstitusjon> aktivInstitusjon = godkjentOpplæringsinstitusjonTjeneste.hentAktivMedUuid(id.getUuid(), aktivPeriode);
+        if (aktivInstitusjon.isPresent()) {
+            return Response.ok(mapTilDto(aktivInstitusjon.get())).build();
         }
-        return Response.ok(mapTilDto(godkjentInstitusjon.get())).build();
+        return Response.noContent().build();
     }
 
     @GET
@@ -86,44 +86,37 @@ public class GodkjentOpplæringsinstitusjonRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response hentAlle() {
-        List<GodkjentOpplæringsinstitusjon> godkjenteInstitusjoner = godkjentOpplæringsinstitusjonRepository.hentAlle();
-        return Response.ok(mapTilDto(godkjenteInstitusjoner)).build();
+        List<GodkjentOpplæringsinstitusjon> alle = godkjentOpplæringsinstitusjonTjeneste.hentAlle();
+        return Response.ok(mapTilDto(alle)).build();
     }
 
     @GET
     @Path("/aktive")
-    @Operation(description = "Hent aktive opplæringsinstitusjoner", tags = "opplæringsinstitusjon", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer aktive opplæringsinstitusjoner", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = List.class), schema = @Schema(implementation = GodkjentOpplæringsinstitusjonDto.class))))
+    @Operation(description = "Hent aktive opplæringsinstitusjoner for oppgitt periode", tags = "opplæringsinstitusjon", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer aktive opplæringsinstitusjoner for oppgitt periode", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = List.class), schema = @Schema(implementation = GodkjentOpplæringsinstitusjonDto.class))))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response hentAktive(@NotNull @QueryParam("aktivPeriode") @Parameter(description = "Format: YYYY-MM-DD/YYYY-MM-DD") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) Periode aktivPeriode) {
-        List<GodkjentOpplæringsinstitusjon> alle = godkjentOpplæringsinstitusjonRepository.hentAlle();
-        List<GodkjentOpplæringsinstitusjon> aktive = alle.stream()
-            .filter(godkjentOpplæringsinstitusjon -> erAktiv(godkjentOpplæringsinstitusjon, aktivPeriode))
-            .collect(Collectors.toList());
+        List<GodkjentOpplæringsinstitusjon> aktive = godkjentOpplæringsinstitusjonTjeneste.hentAktive(aktivPeriode);
         return Response.ok(mapTilDto(aktive)).build();
     }
 
     @GET
     @Path("/erAktiv")
-    @Operation(description = "Sjekk om opplæringsinstitusjon er aktiv", tags = "opplæringsinstitusjon", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer om opplæringsinstitusjon er aktiv", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Boolean.class)))
+    @Operation(description = "Sjekk om opplæringsinstitusjon er aktiv i oppgitt periode", tags = "opplæringsinstitusjon", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer om opplæringsinstitusjon er aktiv i oppgitt periode", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Boolean.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Boolean erAktiv(@NotNull @QueryParam("id") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) GodkjentOpplæringsinstitusjonIdDto id,
                            @NotNull @QueryParam("aktivPeriode") @Parameter(description = "Format: YYYY-MM-DD/YYYY-MM-DD") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) Periode aktivPeriode) {
-        Optional<GodkjentOpplæringsinstitusjon> godkjentInstitusjon = godkjentOpplæringsinstitusjonRepository.hentMedUuid(id.getUuid());
-        return godkjentInstitusjon.isPresent() && erAktiv(godkjentInstitusjon.get(), aktivPeriode);
-    }
-
-    private boolean erAktiv(GodkjentOpplæringsinstitusjon godkjentOpplæringsInstitusjon, Periode periode) {
-        Periode aktivPeriode = new Periode(godkjentOpplæringsInstitusjon.getFomDato(), godkjentOpplæringsInstitusjon.getTomDato());
-        return aktivPeriode.overlaps(periode);
+        Optional<GodkjentOpplæringsinstitusjon> aktivInstitusjon = godkjentOpplæringsinstitusjonTjeneste.hentAktivMedUuid(id.getUuid(), aktivPeriode);
+        return aktivInstitusjon.isPresent();
     }
 
     private List<GodkjentOpplæringsinstitusjonDto> mapTilDto(List<GodkjentOpplæringsinstitusjon> godkjenteOpplæringsinstitusjoner) {
         return godkjenteOpplæringsinstitusjoner.stream().map(this::mapTilDto).collect(Collectors.toList());
     }
+
     private GodkjentOpplæringsinstitusjonDto mapTilDto(GodkjentOpplæringsinstitusjon godkjentOpplæringsInstitusjon) {
         return new GodkjentOpplæringsinstitusjonDto(godkjentOpplæringsInstitusjon.getUuid(), godkjentOpplæringsInstitusjon.getNavn(), godkjentOpplæringsInstitusjon.getFomDato(), godkjentOpplæringsInstitusjon.getTomDato());
     }

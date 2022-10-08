@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
+package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjon;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjonRepository;
 
 @CdiDbAwareTest
 public class GodkjentOpplæringsinstitusjonRepositoryTest {
