@@ -21,12 +21,14 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
+import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
@@ -43,7 +45,7 @@ public class LosRestTjeneste {
 
     private LosSystemUserKlient losKlient;
 
-    private HistorikkRepository historikkRepository;
+    private HistorikkTjenesteAdapter historikkTjenesteAdapter;
 
     private BehandlingRepository behandlingRepository;
 
@@ -54,11 +56,11 @@ public class LosRestTjeneste {
     @Inject
     public LosRestTjeneste(
         LosSystemUserKlient losKlient,
-        HistorikkRepository historikkRepository,
+        HistorikkTjenesteAdapter historikkTjenesteAdapter,
         BehandlingRepository behandlingRepository
     ) {
         this.losKlient = losKlient;
-        this.historikkRepository = historikkRepository;
+        this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.behandlingRepository = behandlingRepository;
     }
 
@@ -91,17 +93,13 @@ public class LosRestTjeneste {
     }
 
     private void lagHistorikkinnslag(MerknadEndretDto merknad, HistorikkinnslagType historikkinnslagType) {
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setAktør(HistorikkAktør.SAKSBEHANDLER);
-        historikkinnslag.setBehandling(behandlingRepository.hentBehandling(merknad.behandlingUuid()));
-        historikkinnslag.setType(historikkinnslagType);
-
-        new HistorikkInnslagTekstBuilder()
-            .medBegrunnelse(merknad.fritekst())
+        historikkTjenesteAdapter.tekstBuilder()
+            .medSkjermlenke(SkjermlenkeType.UDEFINERT)
             .medHendelse(historikkinnslagType, String.join(",", merknad.merknadKoder()))
-            .build(historikkinnslag);
+            .medBegrunnelse(merknad.fritekst());
 
-        historikkRepository.lagre(historikkinnslag);
+        Long behandlingId = behandlingRepository.hentBehandling(merknad.behandlingUuid()).getId();
+        historikkTjenesteAdapter.opprettHistorikkInnslag(behandlingId, HistorikkinnslagType.FAKTA_ENDRET);
     }
 
     private static String getCurrentUserId() {
