@@ -91,13 +91,13 @@ public class BeregningPerioderGrunnlagRepository {
         }
     }
 
-    public void lagreNæringsinntektPeriode(Long behandlingId, List<NæringsinntektPeriode> perioder) {
+    public void lagrePGIPeriode(Long behandlingId, List<PGIPeriode> perioder) {
         var grunnlagOptional = hentGrunnlag(behandlingId);
         var aktivtGrunnlag = grunnlagOptional.orElse(new BeregningsgrunnlagPerioderGrunnlag());
 
         var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(aktivtGrunnlag);
-        for (NæringsinntektPeriode periode : perioder) {
-            builder.leggTilNæringsinntektPeriode(periode);
+        for (PGIPeriode periode : perioder) {
+            builder.leggTilSigruninntektPeriode(periode);
         }
 
         var differ = differ();
@@ -196,8 +196,8 @@ public class BeregningPerioderGrunnlagRepository {
         if (oppdatertGrunnlag.getInputOverstyringHolder() != null) {
             entityManager.persist(oppdatertGrunnlag.getInputOverstyringHolder());
         }
-        if (oppdatertGrunnlag.getNæringsinntektHolder() != null) {
-            entityManager.persist(oppdatertGrunnlag.getNæringsinntektHolder());
+        if (oppdatertGrunnlag.getPGIHolder() != null) {
+            entityManager.persist(oppdatertGrunnlag.getPGIHolder());
         }
         entityManager.persist(oppdatertGrunnlag);
         entityManager.flush();

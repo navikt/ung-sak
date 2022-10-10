@@ -130,10 +130,10 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
         return this;
     }
 
-    BeregningsgrunnlagPerioderGrunnlagBuilder leggTilNæringsinntektPeriode(NæringsinntektPeriode periode) {
+    BeregningsgrunnlagPerioderGrunnlagBuilder leggTilSigruninntektPeriode(PGIPeriode periode) {
         validerState();
         Objects.requireNonNull(periode);
-        kladd.deaktiverNæringsinntektPeriode(periode.getSkjæringstidspunkt());
+        kladd.deaktiverSigruninntektPeriode(periode.getSkjæringstidspunkt());
         kladd.leggTil(periode);
         return this;
     }

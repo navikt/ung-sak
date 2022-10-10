@@ -10,21 +10,21 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 
 @ApplicationScoped
-@ProsessTask(FastsettNæringsinntektperioderTask.TASKTYPE)
+@ProsessTask(FastsettPGIPerioderTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
-public class FastsettNæringsinntektperioderTask extends BehandlingProsessTask {
+public class FastsettPGIPerioderTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "iverksetteVedtak.fastsettNæringsinntekt";
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
 
 
-    FastsettNæringsinntektperioderTask() {
+    FastsettPGIPerioderTask() {
         // for CDI proxy
     }
 
     @Inject
-    public FastsettNæringsinntektperioderTask(BehandlingRepositoryProvider repositoryProvider,
-                                              BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste) {
+    public FastsettPGIPerioderTask(BehandlingRepositoryProvider repositoryProvider,
+                                   BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste) {
         super(repositoryProvider.getBehandlingLåsRepository());
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
     }
@@ -32,6 +32,6 @@ public class FastsettNæringsinntektperioderTask extends BehandlingProsessTask {
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
         var behandlingId = prosessTaskData.getBehandlingId();
-        beregningsgrunnlagTjeneste.fastsettNæringsinntektPerioderDersomRelevant(Long.valueOf(behandlingId));
+        beregningsgrunnlagTjeneste.fastsettPGIDersomRelevant(Long.valueOf(behandlingId));
     }
 }

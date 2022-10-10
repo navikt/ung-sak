@@ -16,13 +16,13 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
-@Entity(name = "NæringsinntektPeriode")
-@Table(name = "BG_NAERING_INNTEKT_PERIODE")
+@Entity(name = "PGIPeriode")
+@Table(name = "BG_PGI_PERIODE")
 @Immutable
-public class NæringsinntektPeriode extends BaseEntitet {
+public class PGIPeriode extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BG_NAERING_INNTEKT_PERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BG_PGI_PERIODE")
     private Long id;
 
     @Column(name = "iay_referanse", nullable = false)
@@ -35,15 +35,15 @@ public class NæringsinntektPeriode extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public NæringsinntektPeriode() {
+    public PGIPeriode() {
     }
 
-    NæringsinntektPeriode(NæringsinntektPeriode grunnlagPeriode) {
+    PGIPeriode(PGIPeriode grunnlagPeriode) {
         this.skjæringstidspunkt = grunnlagPeriode.skjæringstidspunkt;
         this.iayReferanse = grunnlagPeriode.iayReferanse;
     }
 
-    public NæringsinntektPeriode(UUID iayReferanse, LocalDate skjæringstidspunkt) {
+    public PGIPeriode(UUID iayReferanse, LocalDate skjæringstidspunkt) {
         this.iayReferanse = Objects.requireNonNull(iayReferanse);
         this.skjæringstidspunkt = Objects.requireNonNull(skjæringstidspunkt);
     }
@@ -65,7 +65,7 @@ public class NæringsinntektPeriode extends BaseEntitet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        NæringsinntektPeriode that = (NæringsinntektPeriode) o;
+        PGIPeriode that = (PGIPeriode) o;
         return Objects.equals(iayReferanse, that.iayReferanse) &&
             Objects.equals(skjæringstidspunkt, that.skjæringstidspunkt);
     }
@@ -77,7 +77,7 @@ public class NæringsinntektPeriode extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "BeregningsgrunnlagPeriode{" +
+        return "PGIPeriode{" +
             "id=" + id +
             ", iayReferanse=" + iayReferanse +
             ", skjæringstidspunkt=" + skjæringstidspunkt +
