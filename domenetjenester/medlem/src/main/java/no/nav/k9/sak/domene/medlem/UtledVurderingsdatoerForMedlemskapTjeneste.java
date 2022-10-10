@@ -124,7 +124,7 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         datoer.addAll(utledVurderingsdatoerForMedlemskap(behandlingId, endringssjekker).keySet());
 
         // ønsker bare å se på datoer etter skjæringstidspunktet
-        return new Vurderingsdatoer(datoer.stream()
+        return new Vurderingsdatoer(perioderTilVurdering.getPerioderTilVurdering(), datoer.stream()
             .filter(entry -> entry.isAfter(tidligsteStp.get().minusDays(1)))
             .sorted().collect(Collectors.toCollection(TreeSet::new)), perioderTilVurdering.getForlengelseTilVurdering());
     }
