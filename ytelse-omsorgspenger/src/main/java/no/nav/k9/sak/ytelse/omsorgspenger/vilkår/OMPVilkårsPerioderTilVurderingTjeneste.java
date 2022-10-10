@@ -80,8 +80,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.prosessTriggereRepository = prosessTriggereRepository;
 
-        var maksSøktePeriode = new MaksSøktePeriode(omsorgspengerGrunnlagRepository);
-        vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, maksSøktePeriode);
+        vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, søktePerioder);
         vilkårsPeriodisering.put(VilkårType.OPPTJENINGSVILKÅRET, søktePerioder);
         vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, søktePerioder);
     }
