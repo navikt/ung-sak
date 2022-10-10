@@ -1,18 +1,24 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.NaturalId;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
 @Entity(name = "GodkjentOpplæringsinstitusjon")
 @Table(name = "GODKJENTE_OPPLAERINGSINSTITUSJONER")
@@ -29,20 +35,25 @@ public class GodkjentOpplæringsinstitusjon extends BaseEntitet {
     @Column(name = "navn", nullable = false)
     private String navn;
 
-    @Column(name = "fom")
-    private LocalDate fomDato;
-
-    @Column(name = "tom")
-    private LocalDate tomDato;
+    @ChangeTracked
+    @BatchSize(size = 20)
+    @JoinColumn(name = "institusjon_id", nullable = false)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
+    private List<GodkjentOpplæringsinstitusjonPeriode> perioder;
 
     public GodkjentOpplæringsinstitusjon() {
+    }
+
+    public GodkjentOpplæringsinstitusjon(UUID uuid, String navn, List<GodkjentOpplæringsinstitusjonPeriode> perioder) {
+        this.uuid = uuid;
+        this.navn = navn;
+        this.perioder = perioder;
     }
 
     public GodkjentOpplæringsinstitusjon(UUID uuid, String navn, LocalDate fomDato, LocalDate tomDato) {
         this.uuid = uuid;
         this.navn = navn;
-        this.fomDato = fomDato;
-        this.tomDato = tomDato;
+        this.perioder = List.of(new GodkjentOpplæringsinstitusjonPeriode(fomDato, tomDato));
     }
 
     public UUID getUuid() {
@@ -53,12 +64,8 @@ public class GodkjentOpplæringsinstitusjon extends BaseEntitet {
         return navn;
     }
 
-    public LocalDate getFomDato() {
-        return fomDato;
-    }
-
-    public LocalDate getTomDato() {
-        return tomDato;
+    public List<GodkjentOpplæringsinstitusjonPeriode> getPerioder() {
+        return perioder;
     }
 
     @Override
@@ -68,13 +75,12 @@ public class GodkjentOpplæringsinstitusjon extends BaseEntitet {
         GodkjentOpplæringsinstitusjon that = (GodkjentOpplæringsinstitusjon) o;
         return Objects.equals(uuid, that.uuid)
             && Objects.equals(navn, that.navn)
-            && Objects.equals(fomDato, that.fomDato)
-            && Objects.equals(tomDato, that.tomDato);
+            && Objects.equals(perioder, that.perioder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, navn, fomDato, tomDato);
+        return Objects.hash(uuid, navn, perioder);
     }
 
     @Override
@@ -82,8 +88,7 @@ public class GodkjentOpplæringsinstitusjon extends BaseEntitet {
         return "GodkjentInstitusjon{" +
             "uuid=" + uuid +
             ", navn=" + navn +
-            ", fomDato=" + fomDato +
-            ", tomDato=" + tomDato +
+            ", perioder=" + perioder +
             '}';
     }
 }

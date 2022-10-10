@@ -3,13 +3,17 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjon;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjonPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjonRepository;
 
 @ApplicationScoped
@@ -53,7 +57,11 @@ public class GodkjentOpplæringsinstitusjonTjeneste {
     }
 
     private boolean erAktiv(GodkjentOpplæringsinstitusjon godkjentOpplæringsInstitusjon, Periode periode) {
-        Periode aktivPeriode = new Periode(godkjentOpplæringsInstitusjon.getFomDato(), godkjentOpplæringsInstitusjon.getTomDato());
-        return aktivPeriode.overlaps(periode);
+        var tidslinje = new LocalDateTimeline<>(periode.getFom(), periode.getTom(), true);
+        var aktivTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(
+            godkjentOpplæringsInstitusjon.getPerioder().stream()
+                .map(GodkjentOpplæringsinstitusjonPeriode::getPeriode)
+                .collect(Collectors.toCollection(TreeSet::new)));
+        return tidslinje.disjoint(aktivTidslinje).isEmpty();
     }
 }

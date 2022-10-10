@@ -24,22 +24,29 @@ public class GodkjentOpplæringsinstitusjonRepositoryTest {
 
     @Test
     public void skalHenteMedUuid() {
-        GodkjentOpplæringsinstitusjon godkjentOpplæringsInstitusjon = new GodkjentOpplæringsinstitusjon(UUID.randomUUID(), "navn", LocalDate.now(), LocalDate.now().plusYears(99));
+        LocalDate idag = LocalDate.now();
+        UUID uuid = UUID.randomUUID();
+        GodkjentOpplæringsinstitusjonPeriode periode = new GodkjentOpplæringsinstitusjonPeriode(idag, idag.plusYears(99));
+        GodkjentOpplæringsinstitusjon godkjentOpplæringsInstitusjon = new GodkjentOpplæringsinstitusjon(uuid, "navn", List.of(periode));
         entityManager.persist(godkjentOpplæringsInstitusjon);
         entityManager.flush();
 
         Optional<GodkjentOpplæringsinstitusjon> resultat = godkjentOpplæringsinstitusjonRepository.hentMedUuid(godkjentOpplæringsInstitusjon.getUuid());
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().getUuid()).isEqualTo(godkjentOpplæringsInstitusjon.getUuid());
-        assertThat(resultat.get().getNavn()).isEqualTo(godkjentOpplæringsInstitusjon.getNavn());
-        assertThat(resultat.get().getFomDato()).isEqualTo(godkjentOpplæringsInstitusjon.getFomDato());
-        assertThat(resultat.get().getTomDato()).isEqualTo(godkjentOpplæringsInstitusjon.getTomDato());
+        assertThat(resultat.get().getUuid()).isEqualTo(uuid);
+        assertThat(resultat.get().getNavn()).isEqualTo("navn");
+        assertThat(resultat.get().getPerioder()).hasSize(1);
+        assertThat(resultat.get().getPerioder().get(0).getPeriode().getFomDato()).isEqualTo(idag);
+        assertThat(resultat.get().getPerioder().get(0).getPeriode().getTomDato()).isEqualTo(idag.plusYears(99));
     }
 
     @Test
     public void skalHenteAlle() {
-        GodkjentOpplæringsinstitusjon godkjentOpplæringsinstitusjon1 = new GodkjentOpplæringsinstitusjon(UUID.randomUUID(), "en", LocalDate.now(), LocalDate.now().plusYears(99));
-        GodkjentOpplæringsinstitusjon godkjentOpplæringsinstitusjon2 = new GodkjentOpplæringsinstitusjon(UUID.randomUUID(), "to", null, null);
+        LocalDate idag = LocalDate.now();
+        GodkjentOpplæringsinstitusjonPeriode periode1 = new GodkjentOpplæringsinstitusjonPeriode(idag, idag.plusYears(99));
+        GodkjentOpplæringsinstitusjonPeriode periode2 = new GodkjentOpplæringsinstitusjonPeriode(idag, idag.plusYears(99));
+        GodkjentOpplæringsinstitusjon godkjentOpplæringsinstitusjon1 = new GodkjentOpplæringsinstitusjon(UUID.randomUUID(), "en", List.of(periode1));
+        GodkjentOpplæringsinstitusjon godkjentOpplæringsinstitusjon2 = new GodkjentOpplæringsinstitusjon(UUID.randomUUID(), "to", List.of(periode2));
         entityManager.persist(godkjentOpplæringsinstitusjon1);
         entityManager.persist(godkjentOpplæringsinstitusjon2);
         entityManager.flush();

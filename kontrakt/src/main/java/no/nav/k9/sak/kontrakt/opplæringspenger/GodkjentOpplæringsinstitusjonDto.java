@@ -1,12 +1,15 @@
 package no.nav.k9.sak.kontrakt.opplæringspenger;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -19,20 +22,22 @@ public class GodkjentOpplæringsinstitusjonDto {
     @JsonProperty(value = "navn")
     private String navn;
 
-    @JsonProperty(value = "fomDato")
-    private LocalDate fomDato;
-
-    @JsonProperty(value = "tomDato")
-    private LocalDate tomDato;
+    @JsonProperty(value = "perioder")
+    private List<Periode> perioder;
 
     public GodkjentOpplæringsinstitusjonDto() {
+    }
+
+    public GodkjentOpplæringsinstitusjonDto(UUID uuid, String navn, List<Periode> perioder) {
+        this.uuid = uuid;
+        this.navn = navn;
+        this.perioder = perioder;
     }
 
     public GodkjentOpplæringsinstitusjonDto(UUID uuid, String navn, LocalDate fomDato, LocalDate tomDato) {
         this.uuid = uuid;
         this.navn = navn;
-        this.fomDato = fomDato;
-        this.tomDato = tomDato;
+        this.perioder = List.of(new Periode(fomDato, tomDato));
     }
 
     public UUID getUuid() {
@@ -43,11 +48,7 @@ public class GodkjentOpplæringsinstitusjonDto {
         return navn;
     }
 
-    public LocalDate getFomDato() {
-        return fomDato;
-    }
-
-    public LocalDate getTomDato() {
-        return tomDato;
+    public List<Periode> getPerioder() {
+        return perioder;
     }
 }

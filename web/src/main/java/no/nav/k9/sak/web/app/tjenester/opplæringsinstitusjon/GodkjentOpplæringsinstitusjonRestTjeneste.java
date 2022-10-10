@@ -32,6 +32,7 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.GodkjentOpplæringsinstitusjonTjeneste;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjon;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjonPeriode;
 
 @ApplicationScoped
 @Transactional
@@ -118,6 +119,14 @@ public class GodkjentOpplæringsinstitusjonRestTjeneste {
     }
 
     private GodkjentOpplæringsinstitusjonDto mapTilDto(GodkjentOpplæringsinstitusjon godkjentOpplæringsInstitusjon) {
-        return new GodkjentOpplæringsinstitusjonDto(godkjentOpplæringsInstitusjon.getUuid(), godkjentOpplæringsInstitusjon.getNavn(), godkjentOpplæringsInstitusjon.getFomDato(), godkjentOpplæringsInstitusjon.getTomDato());
+        return new GodkjentOpplæringsinstitusjonDto(godkjentOpplæringsInstitusjon.getUuid(), godkjentOpplæringsInstitusjon.getNavn(), mapTilPerioder(godkjentOpplæringsInstitusjon.getPerioder()));
+    }
+
+    private List<Periode> mapTilPerioder(List<GodkjentOpplæringsinstitusjonPeriode> godkjentOpplæringsinstitusjonPerioder) {
+        return godkjentOpplæringsinstitusjonPerioder.stream().map(this::mapTilPeriode).collect(Collectors.toList());
+    }
+
+    private Periode mapTilPeriode(GodkjentOpplæringsinstitusjonPeriode godkjentOpplæringsinstitusjonPeriode) {
+        return new Periode(godkjentOpplæringsinstitusjonPeriode.getPeriode().getFomDato(), godkjentOpplæringsinstitusjonPeriode.getPeriode().getTomDato());
     }
 }

@@ -19,6 +19,7 @@ import no.nav.k9.sak.kontrakt.opplæringspenger.GodkjentOpplæringsinstitusjonId
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.GodkjentOpplæringsinstitusjonTjeneste;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjon;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjonPeriode;
 
 public class GodkjentOpplæringsinstitusjonRestTjenesteTest {
 
@@ -35,7 +36,8 @@ public class GodkjentOpplæringsinstitusjonRestTjenesteTest {
     @Test
     public void skalHenteMedUuid() {
         UUID uuid = UUID.randomUUID();
-        GodkjentOpplæringsinstitusjon entity = new GodkjentOpplæringsinstitusjon(uuid, "navn", null, null);
+        GodkjentOpplæringsinstitusjonPeriode periode = new GodkjentOpplæringsinstitusjonPeriode(null, null);
+        GodkjentOpplæringsinstitusjon entity = new GodkjentOpplæringsinstitusjon(uuid, "navn", List.of(periode));
         when(godkjentOpplæringsinstitusjonTjeneste.hentMedUuid(uuid)).thenReturn(Optional.of(entity));
 
         Response response = restTjeneste.hentMedUuid(new GodkjentOpplæringsinstitusjonIdDto(uuid));
@@ -45,8 +47,9 @@ public class GodkjentOpplæringsinstitusjonRestTjenesteTest {
         assertThat(result).isNotNull();
         assertThat(result.getUuid()).isEqualTo(entity.getUuid());
         assertThat(result.getNavn()).isEqualTo(entity.getNavn());
-        assertThat(result.getFomDato()).isEqualTo(entity.getFomDato());
-        assertThat(result.getTomDato()).isEqualTo(entity.getTomDato());
+        assertThat(result.getPerioder()).hasSize(1);
+        assertThat(result.getPerioder().get(0).getFom()).isEqualTo(periode.getPeriode().getFomDato());
+        assertThat(result.getPerioder().get(0).getTom()).isEqualTo(periode.getPeriode().getTomDato());
     }
 
     @Test
@@ -74,7 +77,8 @@ public class GodkjentOpplæringsinstitusjonRestTjenesteTest {
     public void skalHenteAktivMedUuid() {
         UUID uuid = UUID.randomUUID();
         Periode idag = new Periode(LocalDate.now(), LocalDate.now());
-        GodkjentOpplæringsinstitusjon entity = new GodkjentOpplæringsinstitusjon(uuid, "navn", idag.getFom(), idag.getTom());
+        GodkjentOpplæringsinstitusjonPeriode periode = new GodkjentOpplæringsinstitusjonPeriode(idag.getFom(), idag.getTom());
+        GodkjentOpplæringsinstitusjon entity = new GodkjentOpplæringsinstitusjon(uuid, "navn", List.of(periode));
         when(godkjentOpplæringsinstitusjonTjeneste.hentAktivMedUuid(uuid, idag)).thenReturn(Optional.of(entity));
 
         Response response = restTjeneste.hentAktivMedUuid(new GodkjentOpplæringsinstitusjonIdDto(uuid), idag);
@@ -84,8 +88,9 @@ public class GodkjentOpplæringsinstitusjonRestTjenesteTest {
         assertThat(result).isNotNull();
         assertThat(result.getUuid()).isEqualTo(entity.getUuid());
         assertThat(result.getNavn()).isEqualTo(entity.getNavn());
-        assertThat(result.getFomDato()).isEqualTo(entity.getFomDato());
-        assertThat(result.getTomDato()).isEqualTo(entity.getTomDato());
+        assertThat(result.getPerioder()).hasSize(1);
+        assertThat(result.getPerioder().get(0).getFom()).isEqualTo(periode.getPeriode().getFomDato());
+        assertThat(result.getPerioder().get(0).getTom()).isEqualTo(periode.getPeriode().getTomDato());
     }
 
     @Test
