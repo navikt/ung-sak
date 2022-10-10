@@ -149,6 +149,7 @@ public class VilkårResultatBuilder {
                 .medKantIKantVurderer(kantIKantVurderer)
                 .tilbakestill(perioderSomSkalTilbakestilles);
             v.forEach(periode -> builder.leggTil(builder.hentBuilderFor(periode.getFomDato(), periode.getTomDato()).medUtfall(Utfall.IKKE_VURDERT)));
+            leggTil(builder, Objects.equals(VilkårType.MEDLEMSKAPSVILKÅRET, k)); // Trenger en spesialhåndtering av Medlemskap TODO: Fjerne denne når vi har endret vilkåret til ikke å være Maks periode
         });
         return this;
     }
