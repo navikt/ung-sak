@@ -126,6 +126,7 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         // ønsker bare å se på datoer etter skjæringstidspunktet
         return new Vurderingsdatoer(perioderTilVurdering.getPerioderTilVurdering(), datoer.stream()
             .filter(entry -> entry.isAfter(tidligsteStp.get().minusDays(1)))
+            .filter(entry -> perioderTilVurdering.getAllePerioderTilVurdering().stream().anyMatch(it -> it.inkluderer(entry)))
             .sorted().collect(Collectors.toCollection(TreeSet::new)), perioderTilVurdering.getForlengelseTilVurdering());
     }
 
