@@ -8,13 +8,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -80,7 +79,7 @@ public class VurderLøpendeMedlemskapStegTest {
         personopplysningRepository = provider.getPersonopplysningRepository();
         fagsakRepository = provider.getFagsakRepository();
 
-        steg = new VurderMedlemskapSteg(vurdertLøpendeMedlemskapTjeneste, provider, null, false);
+        steg = new VurderMedlemskapSteg(vurdertLøpendeMedlemskapTjeneste, provider, null);
     }
 
     @Test
