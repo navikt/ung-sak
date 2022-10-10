@@ -3,13 +3,12 @@ package no.nav.k9.sak.domene.behandling.steg.medlemskap;
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -162,9 +161,9 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
         return vilkårBuilder;
     }
 
-    private VilkårBuilder mapPerioderTilVilkårsPerioderMedForlengelse(VilkårBuilder vilkårBuilder,
-                                                                      Optional<Vilkår> utgangspunkt,
-                                                                      VurdertMedlemskapOgForlengelser vurderinger) {
+    VilkårBuilder mapPerioderTilVilkårsPerioderMedForlengelse(VilkårBuilder vilkårBuilder,
+                                                              Optional<Vilkår> utgangspunkt,
+                                                              VurdertMedlemskapOgForlengelser vurderinger) {
 
         var forlengelser = vurderinger.getForlengelser();
 
@@ -177,51 +176,22 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
         }
 
         var vurderingsTilDataMap = vurderinger.getVurderinger();
-        var datoer = vurderingsTilDataMap
-            .keySet()
-            .stream()
-            .sorted(Comparator.reverseOrder())
-            .collect(Collectors.toList());
+        var datoer = new TreeSet<>(vurderingsTilDataMap
+            .keySet());
 
-        var forrigedato = utledForrigeDato(vilkårBuilder, datoer, forlengelser);
         for (LocalDate vurderingsdato : datoer) {
             final var vilkårData = vurderingsTilDataMap.get(vurderingsdato);
 
-            var periodeBuilder = vilkårBuilder.hentBuilderFor(vurderingsdato, forrigedato)
+            var periodeBuilder = vilkårBuilder.hentBuilderFor(vilkårData.getPeriode())
                 .medUtfall(vilkårData.getUtfallType())
                 .medAvslagsårsak(vilkårData.getAvslagsårsak())
                 .medMerknadParametere(vilkårData.getMerknadParametere())
                 .medRegelInput(vilkårData.getRegelInput())
                 .medRegelEvaluering(vilkårData.getRegelEvaluering());
             Optional.ofNullable(vilkårData.getVilkårUtfallMerknad()).ifPresent(periodeBuilder::medMerknad);
-            forrigedato = vurderingsdato.minusDays(1);
             vilkårBuilder.leggTil(periodeBuilder);
         }
         return vilkårBuilder;
-    }
-
-    private LocalDate utledForrigeDato(VilkårBuilder vilkårBuilder, List<LocalDate> datoer, NavigableSet<DatoIntervallEntitet> forlengelser) {
-        var forrigedato = vilkårBuilder.getMaxDatoTilVurdering();
-        if (datoer.isEmpty() && forlengelser.isEmpty()) {
-            return forrigedato;
-        }
-        var relevanteDatoer = new ArrayList<LocalDate>();
-        if (!datoer.isEmpty()) {
-            relevanteDatoer.add(datoer.get(0));
-        }
-        forlengelser.stream()
-            .map(DatoIntervallEntitet::getTomDato)
-            .max(LocalDate::compareTo)
-            .ifPresent(relevanteDatoer::add);
-
-        var størstedato = relevanteDatoer.stream()
-            .max(LocalDate::compareTo)
-            .orElse(forrigedato);
-
-        if (forrigedato.isBefore(størstedato)) {
-            return Tid.TIDENES_ENDE;
-        }
-        return forrigedato;
     }
 
     private LocalDate utledForrigeDato(VilkårBuilder vilkårBuilder, List<LocalDate> datoer) {

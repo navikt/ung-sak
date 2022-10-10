@@ -6,13 +6,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
@@ -110,7 +112,7 @@ public class VurderLøpendeMedlemskap {
         var vurderingsdatoerMedForlengelse = utledVurderingsdatoerMedlemskap.finnVurderingsdatoerMedForlengelse(behandlingId);
 
         if (vurderingsdatoerMedForlengelse.getDatoerTilVurdering().isEmpty()) {
-            return new GrunnlagOgPerioder(Collections.emptyMap(), vurderingsdatoerMedForlengelse.getForlengelser());
+            return new GrunnlagOgPerioder(vurderingsdatoerMedForlengelse.getPerioderTilVurdering(), Collections.emptyMap(), vurderingsdatoerMedForlengelse.getForlengelser());
         }
 
         Map<LocalDate, VurdertLøpendeMedlemskapEntitet> map = mapVurderingFraSaksbehandler(vurdertMedlemskapPeriode);
@@ -137,7 +139,7 @@ public class VurderLøpendeMedlemskap {
 
             resulatat.put(vurderingsdato, grunnlag);
         }
-        return new GrunnlagOgPerioder(resulatat, vurderingsdatoerMedForlengelse.getForlengelser());
+        return new GrunnlagOgPerioder(vurderingsdatoerMedForlengelse.getPerioderTilVurdering(), resulatat, vurderingsdatoerMedForlengelse.getForlengelser());
     }
 
     private Boolean utledBasertPåStatsborgerskap(PersonopplysningerAggregat aggregat) {
@@ -263,12 +265,17 @@ public class VurderLøpendeMedlemskap {
     }
 
     public VurdertMedlemskapOgForlengelser vurderMedlemskapOgHåndterForlengelse(Long behandlingId) {
-        Map<LocalDate, VilkårData> resultat = new TreeMap<>();
 
         var grunnlagOgPerioder = lagGrunnlagMedForlengesesPerioder(behandlingId);
 
+        return vurderPerioderMedForlengelse(grunnlagOgPerioder);
+    }
+
+    VurdertMedlemskapOgForlengelser vurderPerioderMedForlengelse(GrunnlagOgPerioder grunnlagOgPerioder) {
+        Map<LocalDate, VilkårData> resultat = new TreeMap<>();
         for (Map.Entry<LocalDate, MedlemskapsvilkårGrunnlag> entry : grunnlagOgPerioder.getGrunnlagPerVurderingsdato().entrySet()) {
-            VilkårData data = evaluerGrunnlag(entry.getValue(), DatoIntervallEntitet.fraOgMed(entry.getKey()));
+            var tilOgMedDato = utledTilOgMedDato(entry.getKey(), grunnlagOgPerioder.getGrunnlagPerVurderingsdato().keySet(), grunnlagOgPerioder);
+            VilkårData data = evaluerGrunnlag(entry.getValue(), DatoIntervallEntitet.fraOgMedTilOgMed(entry.getKey(), tilOgMedDato));
             if (data.getUtfallType().equals(Utfall.OPPFYLT)) {
                 resultat.put(entry.getKey(), data);
             } else if (data.getUtfallType().equals(Utfall.IKKE_OPPFYLT)) {
@@ -280,5 +287,25 @@ public class VurderLøpendeMedlemskap {
             }
         }
         return new VurdertMedlemskapOgForlengelser(resultat, grunnlagOgPerioder.getForlengelsesPerioder());
+    }
+
+    private LocalDate utledTilOgMedDato(LocalDate key, Set<LocalDate> vurderingsdatoer, GrunnlagOgPerioder grunnlagOgPerioder) {
+        var vurderingsdatoerUtenOmNøkkel = vurderingsdatoer.stream().filter(it -> !Objects.equals(key, it)).collect(Collectors.toCollection(TreeSet::new));
+        var perioder = new TreeSet<>(grunnlagOgPerioder.getPerioderTilVurdering());
+        perioder.addAll(grunnlagOgPerioder.getForlengelsesPerioder());
+
+        var perioderSomOverlapper = perioder.stream().filter(it -> it.inkluderer(key)).collect(Collectors.toSet());
+        if (perioderSomOverlapper.size() != 1) {
+            throw new IllegalStateException("Vurderer dato ikke tilknyttet periode");
+        }
+        var perioden = perioderSomOverlapper.iterator().next();
+
+        return vurderingsdatoerUtenOmNøkkel
+            .stream()
+            .filter(perioden::inkluderer)
+            .filter(it -> it.isAfter(key))
+            .min(LocalDate::compareTo)
+            .map(it -> it.minusDays(1))
+            .orElse(perioden.getTomDato());
     }
 }
