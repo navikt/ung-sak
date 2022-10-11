@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.behandling.steg.medlemskap;
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
@@ -16,9 +17,11 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -33,6 +36,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedlemskap;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.k9.sak.inngangsvilkår.medlemskap.VurdertMedlemskapOgForlengelser;
@@ -53,17 +57,20 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private ProsessTriggereRepository prosessTriggereRepository;
+    private AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap;
 
     @Inject
     public VurderMedlemskapSteg(VurderLøpendeMedlemskap vurderLøpendeMedlemskap,
                                 BehandlingRepositoryProvider provider,
                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
-                                ProsessTriggereRepository prosessTriggereRepository) {
+                                ProsessTriggereRepository prosessTriggereRepository,
+                                AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap) {
         this.vurderLøpendeMedlemskap = vurderLøpendeMedlemskap;
         this.behandlingRepository = provider.getBehandlingRepository();
         this.vilkårResultatRepository = provider.getVilkårResultatRepository();
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.aksjonspunktutlederForMedlemskap = aksjonspunktutlederForMedlemskap;
     }
 
     VurderMedlemskapSteg() {
@@ -72,12 +79,15 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        utledPerioderSomHarBlittLagtTilVurderingPgaEndringIPerioder(kontekst);
+        var stegMåRekjøres = utledPerioderSomHarBlittLagtTilVurderingPgaEndringIPerioder(kontekst);
+        if (stegMåRekjøres) {
+            return BehandleStegResultat.tilbakeførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP));
+        }
         vurderingMedForlengelse(kontekst);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private void utledPerioderSomHarBlittLagtTilVurderingPgaEndringIPerioder(BehandlingskontrollKontekst kontekst) {
+    private boolean utledPerioderSomHarBlittLagtTilVurderingPgaEndringIPerioder(BehandlingskontrollKontekst kontekst) {
         var behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var referanse = BehandlingReferanse.fra(behandling);
@@ -94,12 +104,16 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
             .collect(Collectors.toCollection(TreeSet::new));
 
         if (perioderSattTilIkkeVurdert.isEmpty()) {
-            return;
+            return false;
         }
 
         log.info("Fant {} perioder som har tilstand IKKE_VURDERT og ikke ligger til vurdering", perioderSattTilIkkeVurdert.size());
         var triggere = perioderSattTilIkkeVurdert.stream().map(it -> new Trigger(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_MEDLEMSKAP, it)).collect(Collectors.toSet());
         prosessTriggereRepository.leggTil(behandlingId, triggere);
+
+        var aksjonspunktResultats = aksjonspunktutlederForMedlemskap.utledAksjonspunkterFor(new AksjonspunktUtlederInput(referanse));
+        // krever at steget kjøre på nytt
+        return !aksjonspunktResultats.isEmpty();
     }
 
     private void vurderingMedForlengelse(BehandlingskontrollKontekst kontekst) {
