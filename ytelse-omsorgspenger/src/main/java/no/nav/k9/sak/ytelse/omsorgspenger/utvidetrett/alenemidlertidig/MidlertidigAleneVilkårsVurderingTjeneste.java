@@ -9,7 +9,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -26,12 +26,16 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder
 
 @FagsakYtelseTypeRef(OMSORGSPENGER_MA)
 @BehandlingTypeRef
-@Dependent
+@ApplicationScoped
 public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private UtvidetRettSøknadPerioder søktePerioder;
     private VilkårResultatRepository vilkårResultatRepository;
     private VilkårUtleder vilkårUtleder;
+
+    MidlertidigAleneVilkårsVurderingTjeneste() {
+        // CDI
+    }
 
     @Inject
     public MidlertidigAleneVilkårsVurderingTjeneste(@FagsakYtelseTypeRef(OMSORGSPENGER_MA) VilkårUtleder vilkårUtleder,
