@@ -18,6 +18,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.skjæringstidspunkt.SkattegrunnlaginnhentingTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Periode;
 
@@ -78,4 +79,15 @@ public class FrisinnSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
         LocalDate tom = behandling.getFagsak().getPeriode().getTomDato().plus(Period.parse("P1M"));
         return new Periode(skjæringstidspunkt.minus(periodeFør), tomDagensDato && tom.isBefore(LocalDate.now()) ? LocalDate.now() : tom);
     }
+
+    @Override
+    public Optional<Periode> utledOpplysningsperiodeSkattegrunnlag(Long behandlingId, FagsakYtelseType ytelseType) {
+        var fagsakperiodeTom = behandlingRepository.hentBehandling(behandlingId)
+            .getFagsak()
+            .getPeriode()
+            .getTomDato();
+        var førsteSkjæringstidspunkt = this.utledSkjæringstidspunktForRegisterInnhenting(behandlingId, ytelseType);
+        return Optional.of(SkattegrunnlaginnhentingTjeneste.utledSkattegrunnlagOpplysningsperiode(førsteSkjæringstidspunkt, fagsakperiodeTom));
+    }
+
 }

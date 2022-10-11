@@ -22,7 +22,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
 import no.nav.k9.kodeverk.person.PersonstatusType;
@@ -50,7 +49,6 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
     private PersonopplysningTjeneste personopplysningTjeneste;
     private Instance<ForlengelseTjeneste> forlengelseTjenester;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
-    private Boolean enableForlengelse;
     private BehandlingRepository behandlingRepository;
     private MedlemEndringssjekker endringssjekker = new MedlemEndringssjekker();
 
@@ -59,14 +57,12 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
                                                       MedlemskapRepository medlemskapRepository,
                                                       PersonopplysningTjeneste personopplysningTjeneste,
                                                       @Any Instance<ForlengelseTjeneste> forlengelseTjenester,
-                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
-                                                      @KonfigVerdi(value = "forlengelse.medlemskap.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
+                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.medlemskapRepository = medlemskapRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.forlengelseTjenester = forlengelseTjenester;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
-        this.enableForlengelse = enableForlengelse;
     }
 
     UtledVurderingsdatoerForMedlemskapTjeneste() {
@@ -124,8 +120,9 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         datoer.addAll(utledVurderingsdatoerForMedlemskap(behandlingId, endringssjekker).keySet());
 
         // ønsker bare å se på datoer etter skjæringstidspunktet
-        return new Vurderingsdatoer(datoer.stream()
+        return new Vurderingsdatoer(perioderTilVurdering.getPerioderTilVurdering(), datoer.stream()
             .filter(entry -> entry.isAfter(tidligsteStp.get().minusDays(1)))
+            .filter(entry -> perioderTilVurdering.getAllePerioderTilVurdering().stream().anyMatch(it -> it.inkluderer(entry)))
             .sorted().collect(Collectors.toCollection(TreeSet::new)), perioderTilVurdering.getForlengelseTilVurdering());
     }
 
@@ -133,12 +130,8 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         var vilkårsPerioder = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType())
             .utled(referanse.getBehandlingId(), VilkårType.MEDLEMSKAPSVILKÅRET);
         NavigableSet<DatoIntervallEntitet> forlengelsePerioder;
-        if (enableForlengelse) {
-            var forlengelseTjeneste = ForlengelseTjeneste.finnTjeneste(forlengelseTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
-            forlengelsePerioder = forlengelseTjeneste.utledPerioderSomSkalBehandlesSomForlengelse(referanse, vilkårsPerioder, VilkårType.MEDLEMSKAPSVILKÅRET);
-        } else {
-            forlengelsePerioder = new TreeSet<>();
-        }
+        var forlengelseTjeneste = ForlengelseTjeneste.finnTjeneste(forlengelseTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
+        forlengelsePerioder = forlengelseTjeneste.utledPerioderSomSkalBehandlesSomForlengelse(referanse, vilkårsPerioder, VilkårType.MEDLEMSKAPSVILKÅRET);
 
         return new PerioderTilVurdering(vilkårsPerioder, forlengelsePerioder);
     }

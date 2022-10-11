@@ -21,4 +21,9 @@ public interface SkjæringstidspunktTjeneste {
 
     Periode utledOpplysningsperiode(Long id, FagsakYtelseType fagsakYtelseType, boolean tomDagensDato);
 
+    default Optional<Periode> utledOpplysningsperiodeSkattegrunnlag(Long id, FagsakYtelseType fagsakYtelseType) {
+        return Optional.empty();
+    };
+
+
 }

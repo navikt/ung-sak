@@ -145,12 +145,13 @@ public class SøknadsfristRestTjeneste {
             .filter(it -> Objects.equals(KravDokumentType.INNTEKTSMELDING, it.getType()))
             .forEach(im -> {
                 var arbeidsgiver = vurderteKravDokumenter.get(im).stream().map(VurdertSøktPeriode::getArbeidsgiver).findFirst().orElseThrow();
-                arbeidsgiverKravDokument.put(arbeidsgiver, arbeidsgiverKravDokument.getOrDefault(arbeidsgiver, new ArrayList<>()));
+                var kravdokumenter = arbeidsgiverKravDokument.getOrDefault(arbeidsgiver, new ArrayList<>());
+                kravdokumenter.add(im);
+                arbeidsgiverKravDokument.put(arbeidsgiver, kravdokumenter);
             });
 
         return arbeidsgiverKravDokument.values()
             .stream()
-            .filter(Objects::nonNull)
             .map(kravDokuments -> kravDokuments.stream().min(Comparator.naturalOrder()).orElseThrow())
             .collect(Collectors.toList());
     }

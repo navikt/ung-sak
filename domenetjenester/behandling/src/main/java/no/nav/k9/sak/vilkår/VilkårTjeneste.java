@@ -208,7 +208,7 @@ public class VilkårTjeneste {
             getForlengelsetjeneste(ref.getFagsakYtelseType(), ref.getBehandlingType()),
             EndringIUttakPeriodeUtleder.finnTjeneste(endringIUttakPeriodeUtledere, ref.getFagsakYtelseType()));
         if (skalIgnorereAvslåttePerioder && skalIgnorereAvslagPåKompletthet) {
-            vilkårPeriodeFilter.ignorerAvslåttePerioderInkludertKompletthet();
+            vilkårPeriodeFilter.ignorerAvslåttePerioder();
         }
         if (skalIgnorereAvslåttePerioder && !skalIgnorereAvslagPåKompletthet) {
             vilkårPeriodeFilter.ignorerAvslåttePerioderUnntattKompletthet();
