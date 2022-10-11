@@ -4,7 +4,7 @@ import no.nav.fpsak.nare.evaluation.RuleReasonRef;
 import no.nav.fpsak.nare.evaluation.RuleReasonRefImpl;
 
 enum MedisinskeVilkårAvslagsårsaker {
-    NOE("9999", "noe");
+    IKKE_LANGVARIG_SYK("1067", "Ikke dokumentert sykdom, skade eller lyte."); // TODO: Endre til noe mer fornuftig
 
     private final String kode;
     private final String årsak;

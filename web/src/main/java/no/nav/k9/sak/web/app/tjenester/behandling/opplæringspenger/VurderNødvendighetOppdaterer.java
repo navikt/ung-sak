@@ -5,11 +5,11 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderNødvendighetDto;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder;
@@ -45,9 +45,22 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
             .stream()
             .map(periodeDto -> new VurdertOpplæring(periodeDto.getFom(), periodeDto.getTom(), periodeDto.isNødvendigOpplæring(), periodeDto.getBegrunnelse(), vurdertInstitusjon.getInstitusjon()))
             .toList();
+        sjekkOverlappendePerioder(vurdertOpplæring);
+
         return new VurdertOpplæringGrunnlag(behandlingId,
             new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
             new VurdertOpplæringHolder(vurdertOpplæring),
             dto.getBegrunnelse());
+    }
+
+    private void sjekkOverlappendePerioder(List<VurdertOpplæring> vurdertOpplæring) {
+        List<DatoIntervallEntitet> perioder = vurdertOpplæring.stream().map(VurdertOpplæring::getPeriode).toList();
+        for (DatoIntervallEntitet periode : perioder) {
+            for (DatoIntervallEntitet periode2 : perioder) {
+                if (periode != periode2 && periode.overlapper(periode2)) {
+                    throw new IllegalArgumentException("Overlapp mellom " + periode + " og " + periode2 + " i vurdert opplæring.");
+                }
+            }
+        }
     }
 }

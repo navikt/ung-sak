@@ -11,7 +11,7 @@ import no.nav.k9.sak.inngangsvilkår.Oppfylt;
 @RuleDocumentation(value = MedisinskVilkår.ID, specificationReference = "")
 public class MedisinskVilkår implements RuleService<MedisinskVilkårGrunnlag> {
 
-    public static final String ID = "OLP_VK 9.16";
+    public static final String ID = "OLP_VK 9.14.1";
 
     @Override
     public Evaluation evaluer(MedisinskVilkårGrunnlag grunnlag, Object resultatStruktur) {
@@ -28,9 +28,9 @@ public class MedisinskVilkår implements RuleService<MedisinskVilkårGrunnlag> {
     @Override
     public Specification<MedisinskMellomregningData> getSpecification() {
         Ruleset<MedisinskMellomregningData> rs = new Ruleset<>();
-        return rs.hvisRegel(ErLangvarigSyk.ID, "TODO")
+        return rs.hvisRegel(ErLangvarigSyk.ID, "Hvis pleietrengende er dokumentert langvarig syk...")
             .hvis(new ErLangvarigSyk(), new Oppfylt())
-            .ellers(new IkkeOppfylt(MedisinskeVilkårAvslagsårsaker.NOE.toRuleReason()));
+            .ellers(new IkkeOppfylt(MedisinskeVilkårAvslagsårsaker.IKKE_LANGVARIG_SYK.toRuleReason()));
 
     }
 }

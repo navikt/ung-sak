@@ -203,8 +203,6 @@ spec:
       value: "false"
     - name: SIGRUN_INNTEKT_FILTER_ENABLED
       value: "false"
-    - name: FORLENGELSE_MEDLEMSKAP_ENABLET
-      value: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

@@ -59,6 +59,9 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     VM_1080("1080", "Pleietrengende innlagt i stedet for hjemme."),
     VM_1081("1081", "Ikke i livets sluttfase."),
 
+    VM_1101("1101", "Ikke nødvendig for omsorgen av pleietrengende"),
+    VM_1102("1102", "Institusjonen er ikke godkjent"),
+
     VM_5007("5007", "søknadsfristvilkåret"),
 
     VM_7001("7001", "Søker ikke oppfylt opplysningsplikten jf folketrygdloven §§ 21-7 og 21-3"),

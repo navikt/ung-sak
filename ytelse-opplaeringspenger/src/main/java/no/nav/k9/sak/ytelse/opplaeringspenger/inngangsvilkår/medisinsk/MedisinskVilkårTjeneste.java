@@ -6,6 +6,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtfallOversetter;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkår;
+import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
 
@@ -19,7 +20,7 @@ public class MedisinskVilkårTjeneste {
     }
 
     public VilkårData vurderPerioder(VilkårType vilkåret, BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, MedisinskGrunnlag sykdomGrunnlagBehandling) {
-        var grunnlag = inngangsvilkårOversetter.oversettTilRegelModellMedisinsk(vilkåret, kontekst.getBehandlingId(), periodeTilVurdering, sykdomGrunnlagBehandling);
+        MedisinskVilkårGrunnlag grunnlag = inngangsvilkårOversetter.oversettTilRegelModellMedisinsk(periodeTilVurdering, sykdomGrunnlagBehandling);
         MedisinskVilkårResultat resultat = new MedisinskVilkårResultat();
 
         final var evaluation = new MedisinskVilkår().evaluer(grunnlag, resultat);

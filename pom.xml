@@ -78,7 +78,7 @@
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
-                <version>7.0.5.Final</version>
+                <version>8.0.0.Final</version>
             </dependency>
 
             <dependency>
@@ -145,7 +145,7 @@
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>formidling-kontrakt-jakarta</artifactId>
-                <version>0.0.20</version>
+                <version>0.0.22</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>

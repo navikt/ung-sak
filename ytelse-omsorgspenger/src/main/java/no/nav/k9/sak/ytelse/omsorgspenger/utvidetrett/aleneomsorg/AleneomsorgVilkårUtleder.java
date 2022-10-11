@@ -1,8 +1,7 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
+package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg;
 
 import static java.util.Arrays.asList;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
 
 import java.util.List;
 
@@ -14,13 +13,13 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 
-@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
-@FagsakYtelseTypeRef(OMSORGSPENGER_MA)
+@FagsakYtelseTypeRef(OMSORGSPENGER_AO)
 @BehandlingTypeRef
 @ApplicationScoped
-public class UtvidetRettInngangsvilkårUtleder implements VilkårUtleder {
+public class AleneomsorgVilkårUtleder implements VilkårUtleder {
 
     private static final List<VilkårType> YTELSE_VILKÅR = asList(
+        VilkårType.ALDERSVILKÅR_BARN,
         VilkårType.OMSORGEN_FOR,
         VilkårType.UTVIDETRETT);
 

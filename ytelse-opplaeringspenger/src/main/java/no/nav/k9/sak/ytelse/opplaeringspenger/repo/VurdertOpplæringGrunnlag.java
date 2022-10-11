@@ -63,6 +63,13 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
         this.vurdertOpplæringHolder = vurdertOpplæringHolder;
     }
 
+    public VurdertOpplæringGrunnlag(Long behandlingId, VurdertOpplæringGrunnlag grunnlag) {
+        this.behandlingId = behandlingId;
+        this.begrunnelse = grunnlag.begrunnelse;
+        this.vurdertInstitusjonHolder = grunnlag.vurdertInstitusjonHolder;
+        this.vurdertOpplæringHolder = grunnlag.vurdertOpplæringHolder;
+    }
+
     public VurdertInstitusjonHolder getVurdertInstitusjonHolder() {
         return vurdertInstitusjonHolder;
     }
@@ -81,5 +88,12 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
 
     protected void setAktiv(Boolean aktiv) {
         this.aktiv = aktiv;
+    }
+
+    public static VurdertOpplæringGrunnlag lagTomtGrunnlag() {
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag();
+        grunnlag.vurdertInstitusjonHolder = new VurdertInstitusjonHolder();
+        grunnlag.vurdertOpplæringHolder = new VurdertOpplæringHolder();
+        return grunnlag;
     }
 }

@@ -1,7 +1,10 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
+
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -13,7 +16,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -26,6 +28,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
+import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder;
@@ -38,9 +42,9 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
     private BehandlingRepository behandlingRepository;
     private SøknadRepository søknadRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private VilkårUtleder vilkårUtleder;
     private PersoninfoAdapter personinfoAdapter;
     private UtvidetRettSøknadPerioder søktePerioder;
-    private boolean aldersvilkårLansert;
 
     AleneomsorgVilkårsPerioderTilVurderingTjeneste() {
         // for proxy
@@ -49,15 +53,15 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
     @Inject
     public AleneomsorgVilkårsPerioderTilVurderingTjeneste(BehandlingRepository behandlingRepository,
                                                           VilkårResultatRepository vilkårResultatRepository,
+                                                          @FagsakYtelseTypeRef(OMSORGSPENGER_AO) VilkårUtleder vilkårUtleder,
                                                           PersoninfoAdapter personinfoAdapter,
-                                                          SøknadRepository søknadRepository,
-                                                          @KonfigVerdi(value = "OMP_RAMMEVEDTAK_ALDERSVILKAAR", defaultVerdi = "true") boolean aldersvilkårLansert) {
+                                                          SøknadRepository søknadRepository) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personinfoAdapter = personinfoAdapter;
         this.søknadRepository = søknadRepository;
         this.søktePerioder = new UtvidetRettSøknadPerioder(søknadRepository);
-        this.aldersvilkårLansert = aldersvilkårLansert;
+        this.vilkårUtleder = vilkårUtleder;
     }
 
     @Override
@@ -82,30 +86,24 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
             var vilkårTidslinje = optVilkårene.get().getVilkårTimeline(vilkårType);
             return TidslinjeUtil.tilDatoIntervallEntiteter(vilkårTidslinje);
         } else {
-            var søknadsperioder = søktePerioder.utledPeriode(behandlingId);
-            var søknadsperioderEtterBarnetsFødsel = justerTilDefaultAlder(behandlingId, søknadsperioder);
-            return justerForMottattTidspunkt(behandlingId, søknadsperioderEtterBarnetsFødsel);
+            return utledVilkårsperioder(behandlingId);
         }
     }
 
     @Override
     public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
-        if (aldersvilkårLansert) {
-            return Map.of(
-                VilkårType.ALDERSVILKÅR_BARN, utled(behandlingId, VilkårType.ALDERSVILKÅR_BARN),
-                VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR),
-                VilkårType.UTVIDETRETT, utledUtvidetRettAleneomsorg(behandlingId)
-            );
-        }
-        return Map.of(
-            VilkårType.OMSORGEN_FOR, utled(behandlingId, VilkårType.OMSORGEN_FOR),
-            VilkårType.UTVIDETRETT, utledUtvidetRettAleneomsorg(behandlingId)
-        );
+        final var vilkårPeriodeSet = new EnumMap<VilkårType, NavigableSet<DatoIntervallEntitet>>(VilkårType.class);
+        UtledeteVilkår utledeteVilkår = vilkårUtleder.utledVilkår(null);
+        utledeteVilkår.getAlleAvklarte()
+            .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledVilkårsperioder(behandlingId)));
+
+        return vilkårPeriodeSet;
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledUtvidetRettAleneomsorg(Long behandlingId) {
-        NavigableSet<DatoIntervallEntitet> søknadsperioder = utled(behandlingId, VilkårType.UTVIDETRETT);
-        return justerForMottattTidspunkt(behandlingId, justerTilDefaultAlder(behandlingId, søknadsperioder));
+    private NavigableSet<DatoIntervallEntitet> utledVilkårsperioder(Long behandlingId){
+        var søknadsperioder = søktePerioder.utledPeriode(behandlingId);
+        var søknadsperioderEtterBarnetsFødsel = justerTilDefaultAlder(behandlingId, søknadsperioder);
+        return justerForMottattTidspunkt(behandlingId, søknadsperioderEtterBarnetsFødsel);
     }
 
     private NavigableSet<DatoIntervallEntitet> justerForMottattTidspunkt(Long behandlingId, NavigableSet<DatoIntervallEntitet> søknadsperiode) {
@@ -130,7 +128,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         return TidslinjeUtil.tilDatoIntervallEntiteter(sammenstiltUtvidetRettTimeline);
     }
 
-    DatoIntervallEntitet utledMaksPeriode(NavigableSet<DatoIntervallEntitet> søktePerioder, AktørId barnAktørId) {
+    private DatoIntervallEntitet utledMaksPeriode(NavigableSet<DatoIntervallEntitet> søktePerioder, AktørId barnAktørId) {
         var barninfo = personinfoAdapter.hentBrukerBasisForAktør(barnAktørId).orElseThrow(() -> new IllegalStateException("Mangler personinfo for pleietrengende aktørId"));
 
         // ikke åpne fagsaken før barnets fødselsdato
