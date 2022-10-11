@@ -18,7 +18,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
-import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
 @Entity(name = "GodkjentOpplæringsinstitusjon")
 @Table(name = "GODKJENTE_OPPLAERINGSINSTITUSJONER")
@@ -35,7 +34,6 @@ public class GodkjentOpplæringsinstitusjon extends BaseEntitet {
     @Column(name = "navn", nullable = false)
     private String navn;
 
-    @ChangeTracked
     @BatchSize(size = 20)
     @JoinColumn(name = "institusjon_id", nullable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
