@@ -17,10 +17,16 @@ public class ErNødvendigOpplæring extends LeafSpecification<NødvendighetMello
 
     @Override
     public Evaluation evaluate(NødvendighetMellomregningData mellomregningData) {
+        var godkjentTidslinje = mellomregningData.getOpplæringVurderingTidslinje()
+            .filterValue(vurdering -> Objects.equals(vurdering, OpplæringVurdering.NØDVENDIG))
+            .intersection(mellomregningData.getTidslinjeTilVurdering());
         var ikkeGodkjentTidslinje = mellomregningData.getTidslinjeTilVurdering()
-            .disjoint(mellomregningData.getOpplæringVurderingTidslinje()
-                .filterValue(vurdering -> Objects.equals(vurdering, OpplæringVurdering.NØDVENDIG)));
+            .disjoint(godkjentTidslinje);
 
-        return ikkeGodkjentTidslinje.isEmpty() ? ja() : nei();
+        if (godkjentTidslinje.isEmpty() || ikkeGodkjentTidslinje.isEmpty()) {
+            return ikkeGodkjentTidslinje.isEmpty() ? ja() : nei();
+        } else {
+            throw new IllegalArgumentException("Utviklerfeil: periodene skal være splittet før de sendes hit.");
+        }
     }
 }

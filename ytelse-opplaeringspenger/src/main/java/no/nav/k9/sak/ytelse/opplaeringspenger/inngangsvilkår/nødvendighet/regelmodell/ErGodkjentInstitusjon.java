@@ -17,10 +17,16 @@ public class ErGodkjentInstitusjon extends LeafSpecification<NødvendighetMellom
 
     @Override
     public Evaluation evaluate(NødvendighetMellomregningData mellomregningData) {
+        var godkjentTidslinje = mellomregningData.getInstitusjonVurderingTidslinje()
+            .filterValue(vurdering -> Objects.equals(vurdering, InstitusjonVurdering.GODKJENT))
+            .intersection(mellomregningData.getTidslinjeTilVurdering());
         var ikkeGodkjentTidslinje = mellomregningData.getTidslinjeTilVurdering()
-            .disjoint(mellomregningData.getInstitusjonVurderingTidslinje()
-                .filterValue(vurdering -> Objects.equals(vurdering, InstitusjonVurdering.GODKJENT)));
+            .disjoint(godkjentTidslinje);
 
-        return ikkeGodkjentTidslinje.isEmpty() ? ja() : nei();
+        if (godkjentTidslinje.isEmpty() || ikkeGodkjentTidslinje.isEmpty()) {
+            return ikkeGodkjentTidslinje.isEmpty() ? ja() : nei();
+        } else {
+            throw new IllegalArgumentException("Utviklerfeil: periodene skal være splittet før de sendes hit.");
+        }
     }
 }
