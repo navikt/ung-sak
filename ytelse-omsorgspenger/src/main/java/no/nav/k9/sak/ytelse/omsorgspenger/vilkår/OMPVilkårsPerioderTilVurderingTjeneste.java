@@ -79,10 +79,6 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.prosessTriggereRepository = prosessTriggereRepository;
-
-        vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, søktePerioder);
-        vilkårsPeriodisering.put(VilkårType.OPPTJENINGSVILKÅRET, søktePerioder);
-        vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, søktePerioder);
     }
 
     @Override
