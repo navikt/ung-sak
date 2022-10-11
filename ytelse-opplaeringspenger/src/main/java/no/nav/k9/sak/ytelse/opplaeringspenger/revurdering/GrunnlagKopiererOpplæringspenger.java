@@ -1,53 +1,31 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.revurdering;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.revurdering.GrunnlagKopiererPleiepenger;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
-public class GrunnlagKopiererOpplæringspenger extends GrunnlagKopiererPleiepenger {
+public class GrunnlagKopiererOpplæringspenger implements GrunnlagKopierer {
 
     private VurdertOpplæringRepository vurdertOpplæringRepository;
+    private GrunnlagKopiererPleiepenger grunnlagKopiererPleiepenger;
 
     public GrunnlagKopiererOpplæringspenger() {
     }
 
     @Inject
-    public GrunnlagKopiererOpplæringspenger(BehandlingRepositoryProvider repositoryProvider,
-                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                            AvklartSøknadsfristRepository avklartSøknadsfristRepository,
-                                            PleiebehovResultatRepository pleiebehovResultatRepository,
-                                            SøknadsperiodeRepository søknadsperiodeRepository,
-                                            UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
-                                            OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository,
-                                            RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
-                                            InntektArbeidYtelseTjeneste iayTjeneste,
+    public GrunnlagKopiererOpplæringspenger(@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) GrunnlagKopiererPleiepenger grunnlagKopiererPleiepenger,
                                             VurdertOpplæringRepository vurdertOpplæringRepository) {
-        super(repositoryProvider,
-            beregningPerioderGrunnlagRepository,
-            avklartSøknadsfristRepository,
-            pleiebehovResultatRepository,
-            søknadsperiodeRepository,
-            uttakPerioderGrunnlagRepository,
-            omsorgenForGrunnlagRepository,
-            rettPleiepengerVedDødRepository,
-            iayTjeneste);
         this.vurdertOpplæringRepository = vurdertOpplæringRepository;
+        this.grunnlagKopiererPleiepenger = grunnlagKopiererPleiepenger;
     }
 
     @Override
@@ -55,7 +33,9 @@ public class GrunnlagKopiererOpplæringspenger extends GrunnlagKopiererPleiepeng
         Long originalBehandlingId = original.getId();
         Long nyBehandlingId = ny.getId();
         vurdertOpplæringRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
-        super.kopierGrunnlagVedManuellOpprettelse(original, ny);
+
+        // Denne må ligge til slutt pga IAY kopien som ligger her
+        grunnlagKopiererPleiepenger.kopierGrunnlagVedManuellOpprettelse(original, ny);
     }
 
     @Override
