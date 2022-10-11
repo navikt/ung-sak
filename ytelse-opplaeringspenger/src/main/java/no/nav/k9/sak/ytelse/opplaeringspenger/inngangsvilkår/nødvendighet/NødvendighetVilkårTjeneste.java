@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -59,11 +60,9 @@ public class NødvendighetVilkårTjeneste {
     }
 
     private NavigableSet<DatoIntervallEntitet> finnPerioderTilVurderingFraGrunnlag(VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
-        NavigableSet<DatoIntervallEntitet> perioderTilVurderingFraGrunnlag = new TreeSet<>();
-
-        for (VurdertOpplæring vurdertOpplæring : vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring()) {
-            perioderTilVurderingFraGrunnlag.add(vurdertOpplæring.getPeriode());
-        }
+        NavigableSet<DatoIntervallEntitet> perioderTilVurderingFraGrunnlag = vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring().stream()
+            .map(VurdertOpplæring::getPeriode)
+            .collect(Collectors.toCollection(TreeSet::new));
 
         LocalDateTimeline<Boolean> perioderTilVurderingTidslinje = new LocalDateTimeline<>(perioderTilVurderingFraGrunnlag.stream()
             .map(periode -> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), true))
