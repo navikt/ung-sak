@@ -112,9 +112,7 @@ public class PleiepengerBeregneYtelseStegTest {
                 repositoryProvider.getFagsakRepository(),
                 repositoryProvider.getVilkårResultatRepository(),
                 new UnitTestLookupInstanceImpl<>(null),
-                new UnitTestLookupInstanceImpl<>(null)),
-            new AbakusInMemoryInntektArbeidYtelseTjeneste(),
-            new OppgittOpptjeningFilterProvider(new UnitTestLookupInstanceImpl<>(null), behandlingRepository));
+                new UnitTestLookupInstanceImpl<>(null)));
         beregningsresultat = BeregningsresultatEntitet.builder()
             .medRegelInput("regelInput")
             .medRegelSporing("regelSporing")

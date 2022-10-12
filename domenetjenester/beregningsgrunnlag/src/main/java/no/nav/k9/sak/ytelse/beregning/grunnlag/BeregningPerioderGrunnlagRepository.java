@@ -248,4 +248,22 @@ public class BeregningPerioderGrunnlagRepository {
             lagre(builder, behandlingId, false);
         }
     }
+
+    public void deaktiverPGIPerioder(Long behandlingId, List<PGIPeriode> pgiPerioder) {
+        Objects.requireNonNull(pgiPerioder);
+        var aktivtGrunnlag = hentGrunnlag(behandlingId);
+        if (aktivtGrunnlag.isPresent()) {
+            var grunnlag = aktivtGrunnlag.get();
+
+            var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(grunnlag);
+
+            for (PGIPeriode pgiPeriode : pgiPerioder) {
+                builder.deaktiverKompletthet(pgiPeriode.getSkjæringstidspunkt());
+            }
+
+            deaktiverEksisterende(grunnlag);
+
+            lagre(builder, behandlingId, false);
+        }
+    }
 }
