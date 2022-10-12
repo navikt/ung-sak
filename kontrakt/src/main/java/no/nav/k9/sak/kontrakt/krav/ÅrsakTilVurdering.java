@@ -62,6 +62,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, HENDELSE_DØD_BRUKER);
         sammenheng.put(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING, REVURDERER_NY_INNTEKTSMELDING);
         sammenheng.put(BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK, REVURDERER_ENDRING_FERIEPENGER);
+        sammenheng.put(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_MEDLEMSKAP, REVURDERER_BERØRT_PERIODE);
         SAMMENHENG = Collections.unmodifiableMap(sammenheng);
     }
 

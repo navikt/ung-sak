@@ -9,10 +9,12 @@ import no.nav.k9.sak.inngangsvilkår.medlemskap.regelmodell.MedlemskapsvilkårGr
 
 public class GrunnlagOgPerioder {
 
+    private NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
     private Map<LocalDate, MedlemskapsvilkårGrunnlag> grunnlagPerVurderingsdato;
     private NavigableSet<DatoIntervallEntitet> forlengelsesPerioder;
 
-    public GrunnlagOgPerioder(Map<LocalDate, MedlemskapsvilkårGrunnlag> grunnlagPerVurderingsdato, NavigableSet<DatoIntervallEntitet> forlengelsesPerioder) {
+    public GrunnlagOgPerioder(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Map<LocalDate, MedlemskapsvilkårGrunnlag> grunnlagPerVurderingsdato, NavigableSet<DatoIntervallEntitet> forlengelsesPerioder) {
+        this.perioderTilVurdering = perioderTilVurdering;
         this.grunnlagPerVurderingsdato = grunnlagPerVurderingsdato;
         this.forlengelsesPerioder = forlengelsesPerioder;
     }
@@ -23,5 +25,9 @@ public class GrunnlagOgPerioder {
 
     public NavigableSet<DatoIntervallEntitet> getForlengelsesPerioder() {
         return forlengelsesPerioder;
+    }
+
+    public NavigableSet<DatoIntervallEntitet> getPerioderTilVurdering() {
+        return perioderTilVurdering;
     }
 }

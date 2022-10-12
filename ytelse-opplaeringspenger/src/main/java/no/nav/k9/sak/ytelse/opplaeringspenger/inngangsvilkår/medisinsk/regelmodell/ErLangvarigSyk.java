@@ -9,7 +9,7 @@ import no.nav.fpsak.nare.specification.LeafSpecification;
 @RuleDocumentation(ErLangvarigSyk.ID)
 public class ErLangvarigSyk extends LeafSpecification<MedisinskMellomregningData> {
 
-    public static final String ID = "OLP_VK_9.14.X";
+    public static final String ID = "OLP_VK_9.14.1";
 
     public ErLangvarigSyk() {
         super(ID);

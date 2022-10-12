@@ -7,6 +7,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -68,6 +69,9 @@ class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
         }
         if (Set.of(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON, BehandlingÅrsakType.RE_UTSATT_BEHANDLING).contains(it.getÅrsak())) {
             return StartpunktType.UTTAKSVILKÅR;
+        }
+        if (Objects.equals(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_MEDLEMSKAP, it.getÅrsak())) {
+            return StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP;
         }
         log.info("Ukjent trigger {} med ukjent startpunkt, starter fra starten", it.getÅrsak());
         return StartpunktType.INIT_PERIODER;
