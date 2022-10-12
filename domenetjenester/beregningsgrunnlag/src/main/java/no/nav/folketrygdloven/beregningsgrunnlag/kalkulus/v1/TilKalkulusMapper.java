@@ -12,7 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.NæringsinntektFilter;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FinnPGITilgjengeligPåVedtakstidspunktet;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter.OpptjeningPeriode;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
@@ -106,11 +106,11 @@ public class TilKalkulusMapper {
     public static final String KODEVERDI_UNDEFINED = "-";
 
     private final InntektsmeldingerRelevantForBeregning imTjeneste;
-    private final NæringsinntektFilter næringsinntektFilter;
+    private final FinnPGITilgjengeligPåVedtakstidspunktet finnPGITilgjengeligPåVedtakstidspunktet;
 
-    public TilKalkulusMapper(InntektsmeldingerRelevantForBeregning imTjeneste, NæringsinntektFilter sigrunFilter) {
+    public TilKalkulusMapper(InntektsmeldingerRelevantForBeregning imTjeneste, FinnPGITilgjengeligPåVedtakstidspunktet sigrunFilter) {
         this.imTjeneste = imTjeneste;
-        this.næringsinntektFilter = sigrunFilter;
+        this.finnPGITilgjengeligPåVedtakstidspunktet = sigrunFilter;
     }
 
 
@@ -122,7 +122,7 @@ public class TilKalkulusMapper {
             {
                 addAll(inntektFilter.getAlleInntektSammenligningsgrunnlag());
                 addAll(inntektFilter.getAlleInntektBeregningsgrunnlag());
-                addAll(næringsinntektFilter.finnInntekter(referanse, iayGrunnlag, skjæringstidspunktBeregning));
+                addAll(finnPGITilgjengeligPåVedtakstidspunktet.finnInntekter(referanse, iayGrunnlag, skjæringstidspunktBeregning));
 
             }
         };

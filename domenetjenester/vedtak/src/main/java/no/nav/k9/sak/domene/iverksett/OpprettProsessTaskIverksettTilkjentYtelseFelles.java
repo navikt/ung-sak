@@ -19,7 +19,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
 import no.nav.k9.sak.domene.vedtak.ekstern.VurderOverlappendeInfotrygdYtelserTask;
 import no.nav.k9.sak.domene.vedtak.intern.AvsluttBehandlingTask;
-import no.nav.k9.sak.domene.vedtak.intern.FastsettNæringsinntektperioderTask;
+import no.nav.k9.sak.domene.vedtak.intern.FastsettPGIPerioderTask;
 import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
@@ -32,7 +32,7 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
     protected OppgaveTjeneste oppgaveTjeneste;
     protected InfotrygdFeedService infotrygdFeedService;
     private StønadstatistikkService stønadstatistikkService;
-    private boolean sigrunFilterEnabled;
+    private boolean pgiFilterEnabled;
 
 
     protected OpprettProsessTaskIverksettTilkjentYtelseFelles() {
@@ -43,12 +43,12 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
                                                            OppgaveTjeneste oppgaveTjeneste,
                                                            InfotrygdFeedService infotrygdFeedService,
                                                            StønadstatistikkService stønadstatistikkService,
-                                                           boolean sigrunFilterEnabled) {
+                                                           boolean pgiFilterEnabled) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.infotrygdFeedService = infotrygdFeedService;
         this.stønadstatistikkService = stønadstatistikkService;
-        this.sigrunFilterEnabled = sigrunFilterEnabled;
+        this.pgiFilterEnabled = pgiFilterEnabled;
     }
 
     @Override
@@ -78,8 +78,8 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
         // Da denne sender tilkjent ytelse til fp.oppdrag via kafka
         // taskData.addNesteSekvensiell( ProsessTaskData.forProsessTask(SendTilkjentYtelseTask.TASKTYPE));
 
-        if (sigrunFilterEnabled && behandling.getFagsakYtelseType().omfattesAvK8()) {
-            taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(FastsettNæringsinntektperioderTask.class));
+        if (pgiFilterEnabled && behandling.getFagsakYtelseType().omfattesAvK8()) {
+            taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(FastsettPGIPerioderTask.class));
         }
 
         taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(VurderOverlappendeInfotrygdYtelserTask.class));

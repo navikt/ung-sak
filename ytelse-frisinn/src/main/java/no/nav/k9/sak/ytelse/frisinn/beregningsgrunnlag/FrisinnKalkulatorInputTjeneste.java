@@ -11,7 +11,7 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulatorInputTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.NæringsinntektFilter;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FinnPGITilgjengeligPåVedtakstidspunktet;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -29,9 +29,9 @@ public class FrisinnKalkulatorInputTjeneste extends KalkulatorInputTjeneste {
                                           @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregnings,
                                           @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                           VilkårResultatRepository vilkårResultatRepository,
-                                          NæringsinntektFilter næringsinntektFilter,
+                                          FinnPGITilgjengeligPåVedtakstidspunktet finnPGITilgjengeligPåVedtakstidspunktet,
                                           @KonfigVerdi(value = "FRISINN_NYTT_STP_TOGGLE", defaultVerdi = "false", required = false) boolean nyttStpToggle) {
-        super(opptjeningForBeregningTjeneste, inntektsmeldingerRelevantForBeregnings, ytelseGrunnlagMapper, vilkårResultatRepository, næringsinntektFilter);
+        super(opptjeningForBeregningTjeneste, inntektsmeldingerRelevantForBeregnings, ytelseGrunnlagMapper, vilkårResultatRepository, finnPGITilgjengeligPåVedtakstidspunktet);
         this.nyttStpToggle = nyttStpToggle;
     }
 

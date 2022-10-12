@@ -238,7 +238,7 @@ spec:
       value: "true"
     - name: YTELSE_OLP_AKTIVERT
       value: "true"
-    - name: SIGRUN_INNTEKT_FILTER_ENABLED
+    - name: PGI_FILTER_ENABLED
       value: "true"
     - name: FILTRER_TILSTOTENDE_PERIODE
       value: "true"
