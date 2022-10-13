@@ -146,10 +146,10 @@ public class FastsettPGIPeriodeTjeneste {
             .collect(Collectors.toSet());
     }
 
-    private boolean omfattesAv8_35(Long behandlingId,
-                                   InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                   OppgittOpptjeningFilter oppgittOpptjeningFilter,
-                                   LocalDate skjæringstidspunkt) {
+    public boolean omfattesAv8_35(Long behandlingId,
+                                  InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                  OppgittOpptjeningFilter oppgittOpptjeningFilter,
+                                  LocalDate skjæringstidspunkt) {
         return erSelvstendigNæringsdrivende(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkt) || erMidlertidigInaktiv(behandlingId, skjæringstidspunkt);
     }
 
