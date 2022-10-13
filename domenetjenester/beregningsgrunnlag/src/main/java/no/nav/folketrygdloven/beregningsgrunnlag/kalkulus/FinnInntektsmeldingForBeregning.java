@@ -14,6 +14,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -35,6 +38,9 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 
 @ApplicationScoped
 public class FinnInntektsmeldingForBeregning {
+
+    private static final Logger logger = LoggerFactory.getLogger(FinnInntektsmeldingForBeregning.class);
+
 
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -78,6 +84,10 @@ public class FinnInntektsmeldingForBeregning {
                                                           LocalDate stp,
                                                           Collection<Inntektsmelding> inntektsmeldingerForSak) {
         var inntektsmeldingerForAktivitet = finnInntektsmeldingerMottattForAktivitet(inntektsmeldingerForSak, a);
+        logger.info("Overgang fra infotrygd: Mapper overstyring for aktivitet " + a
+            + " Fant mottatte " + inntektsmeldingerForAktivitet.size() + " inntektsmeldinger for abrbeidsgiver: "
+            + inntektsmeldingerForAktivitet.stream().map(Inntektsmelding::getJournalpostId).toList());
+
         var summertRefusjonTidslinje = lagSummertRefusjontidslinje(stp, inntektsmeldingerForAktivitet);
 
         return mapInntektsmelding(stp, a, summertRefusjonTidslinje, inntektsmeldingerForAktivitet);
@@ -135,11 +145,19 @@ public class FinnInntektsmeldingForBeregning {
                                      LocalDate startDato,
                                      LocalDate opphører,
                                      InntektsmeldingBuilder inntektsmeldingBuilder) {
-        summertRefusjonTidslinje.toSegments()
+        var refusjonsendringer = summertRefusjonTidslinje.toSegments()
             .stream()
             .filter(di -> di.getTom().isAfter(startDato) && (opphører == null || di.getFom().isBefore(opphører.plusDays(1))))
             .filter(s -> getFom(startDato, s).isAfter(stp))
-            .forEach(s -> inntektsmeldingBuilder.leggTil(new Refusjon(s.getValue(), getFom(startDato, s))));
+            .map(s -> new Refusjon(s.getValue(), getFom(startDato, s)))
+            .toList();
+
+        logger.info("Mappet refusjonstidslinje " + summertRefusjonTidslinje +
+            " til følgende endringer " + refusjonsendringer +
+            " med startdato " + startDato +
+            " og opphør " + opphører);
+
+        refusjonsendringer.forEach(inntektsmeldingBuilder::leggTil);
     }
 
     private static LocalDate getFom(LocalDate startDato, LocalDateSegment<BigDecimal> s) {
