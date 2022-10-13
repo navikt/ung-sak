@@ -448,7 +448,7 @@ public class TilKalkulusMapper {
     public OppgittOpptjeningDto mapTilOppgittOpptjeningDto(OppgittOpptjening oppgittOpptjening) {
         if (oppgittOpptjening != null) {
             return new OppgittOpptjeningDto(
-                new JournalpostId(oppgittOpptjening.getJournalpostId().getVerdi()),
+                oppgittOpptjening.getJournalpostId() != null ? new JournalpostId(oppgittOpptjening.getJournalpostId().getVerdi()) : null,
                 oppgittOpptjening.getFrilans().map(this::mapOppgittFrilansOppdragListe).orElse(null),
                 mapOppgittEgenNæringListe(oppgittOpptjening.getEgenNæring()),
                 mapOppgittArbeidsforholdDto(oppgittOpptjening.getOppgittArbeidsforhold()));
