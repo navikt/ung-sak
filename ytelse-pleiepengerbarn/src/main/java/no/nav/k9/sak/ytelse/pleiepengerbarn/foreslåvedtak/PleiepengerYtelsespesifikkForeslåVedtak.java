@@ -68,9 +68,9 @@ public class PleiepengerYtelsespesifikkForeslåVedtak implements Ytelsespesifikk
         var lås = behandlingRepository.taSkriveLås(behandling);
 
         MedisinskGrunnlag medisinskGrunnlag = medisinskGrunnlagTjeneste.hentGrunnlag(behandling.getUuid());
-        boolean harUbesluttedeSykdomsVurderinger = medisinskGrunnlag.getGrunnlagsdata().getVurderinger()
+        boolean harUbesluttedeSykdomsVurderinger = !medisinskGrunnlag.getGrunnlagsdata().getVurderinger()
             .stream()
-            .anyMatch(v -> !v.isBesluttet());
+            .noneMatch(v -> !v.isBesluttet());
 
         Optional<Aksjonspunkt> sykdomAP = behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE);
         if (harUbesluttedeSykdomsVurderinger) {
