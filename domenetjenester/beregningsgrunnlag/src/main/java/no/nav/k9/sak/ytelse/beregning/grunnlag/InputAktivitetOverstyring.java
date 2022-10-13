@@ -121,4 +121,15 @@ public class InputAktivitetOverstyring extends BaseEntitet {
     public Optional<LocalDate> getStartdatoRefusjon() {
         return Optional.ofNullable(startdatoRefusjon);
     }
+
+    @Override
+    public String toString() {
+        return "InputAktivitetOverstyring{" +
+            "arbeidsgiver=" + arbeidsgiver +
+            ", inntektPrÅr=" + inntektPrÅr +
+            ", refusjonPrÅr=" + refusjonPrÅr +
+            ", opphørRefusjon=" + opphørRefusjon +
+            ", startdatoRefusjon=" + startdatoRefusjon +
+            '}';
+    }
 }
