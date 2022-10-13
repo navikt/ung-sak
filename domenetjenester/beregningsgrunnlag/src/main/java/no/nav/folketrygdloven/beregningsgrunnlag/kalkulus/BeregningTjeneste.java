@@ -58,7 +58,7 @@ public interface BeregningTjeneste {
 
 
     /**
-     * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt
+     * @param håndterBeregningDto Dto for håndtering av aksjonspunkt i beregning
      * @param ref {@link BehandlingReferanse}
      * @param skjæringstidspunkt - skjæringtidspunkt
      * @return OppdaterBeregningResultat {@link OppdaterBeregningsgrunnlagResultat}
