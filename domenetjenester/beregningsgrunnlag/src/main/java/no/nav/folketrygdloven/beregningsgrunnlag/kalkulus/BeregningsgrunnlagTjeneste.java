@@ -354,6 +354,15 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             .collect(Collectors.toSet());
     }
 
+    /** Deaktiverer og rydder beregningsgrunnlag i kalkulus.
+     *
+     * Rydding gjøres for følgende scenario:
+     * - Avslåtte perioder før første steg i beregning (grunnet opptjening eller kompletthet)
+     * - Skjæringstidspunkt som ikke lenger finnes på saken (f.eks pga avslag i sykdomsvilkåret eller sammenslått med andre perioder)
+     * - Perioder som tidligere var til vurdering, men som har fått endret vurderingsstatus til ikke-til-vurdering
+     *
+     * @param ref Behandlingreferanse behandlingreferanse
+     */
     public void deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(BehandlingReferanse ref) {
         var vilkårOptional = vilkårTjeneste.hentHvisEksisterer(ref.getBehandlingId())
             .flatMap(v -> v.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
@@ -432,14 +441,19 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public void gjenopprettTilInitiellDersomIkkeTilVurdering(BehandlingReferanse ref) {
+    public Set<DatoIntervallEntitet> gjenopprettTilInitiellDersomIkkeTilVurdering(BehandlingReferanse ref) {
         var vilkårOptional = vilkårTjeneste.hentHvisEksisterer(ref.getBehandlingId()).flatMap(v -> v.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
         if (vilkårOptional.isPresent()) {
             var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
             Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = Objects.equals(ref.getBehandlingType(), BehandlingType.REVURDERING) ? grunnlagRepository.getInitiellVersjon(ref.getBehandlingId()) : Optional.empty();
-            var referanserSomIkkeLengerVurderes = finnReferanserSomIkkeLengerVurderes(ref, vilkårOptional.get(), grunnlagOpt, initiellVersjon);
+            var vilkår = vilkårOptional.get();
+            var referanserSomIkkeLengerVurderes = finnReferanserSomIkkeLengerVurderes(ref, vilkår, grunnlagOpt, initiellVersjon);
             referanserSomIkkeLengerVurderes.forEach(r -> grunnlagRepository.gjenopprettInitiellDersomUlikInitiell(ref.getBehandlingId(), r.getStp()));
+            return vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)
+                .filter(p -> referanserSomIkkeLengerVurderes.stream().map(BgRef::getStp).anyMatch(stp -> p.getFomDato().equals(stp)))
+                .collect(Collectors.toSet());
         }
+        return Collections.emptySet();
     }
 
     /**
