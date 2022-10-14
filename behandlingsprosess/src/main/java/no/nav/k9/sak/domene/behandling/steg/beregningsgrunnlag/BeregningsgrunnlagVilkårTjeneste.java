@@ -56,12 +56,9 @@ public class BeregningsgrunnlagVilkårTjeneste {
         vilkårTjeneste.lagreVilkårresultat(kontekst, vilkårType, vilkårsPeriode, avslagsårsak);
     }
 
-    public void kopierVilkårresultatVedForlengelse(BehandlingskontrollKontekst kontekst,
-                                                   Long originalBehandlingId,
-                                                   Set<PeriodeTilVurdering> forlengelseperioder) {
-        if (forlengelseperioder.stream().anyMatch(p -> !p.erForlengelse())) {
-            throw new IllegalStateException("Kan kun kopiere resultat ved forlengelse");
-        }
+    public void kopierVilkårresultatFraForrigeBehandling(BehandlingskontrollKontekst kontekst,
+                                                         Long originalBehandlingId,
+                                                         Set<DatoIntervallEntitet> perioder) {
         var originalVilkårResultat = vilkårTjeneste.hentVilkårResultat(kontekst.getBehandlingId());
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(originalVilkårResultat);
         var vedtattUtfallPåVilkåret = vilkårTjeneste.hentHvisEksisterer(originalBehandlingId)
@@ -70,10 +67,9 @@ public class BeregningsgrunnlagVilkårTjeneste {
             .orElseThrow();
 
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        for (var periode : forlengelseperioder) {
-            var eksisteredeVurdering = vedtattUtfallPåVilkåret.finnPeriodeForSkjæringstidspunkt(periode.getSkjæringstidspunkt());
-            var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getPeriode())
-                .forlengelseAv(eksisteredeVurdering);
+        for (var periode : perioder) {
+            var eksisteredeVurdering = vedtattUtfallPåVilkåret.finnPeriodeForSkjæringstidspunkt(periode.getFomDato());
+            var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode).forlengelseAv(eksisteredeVurdering);
             vilkårBuilder.leggTil(vilkårPeriodeBuilder);
         }
 
