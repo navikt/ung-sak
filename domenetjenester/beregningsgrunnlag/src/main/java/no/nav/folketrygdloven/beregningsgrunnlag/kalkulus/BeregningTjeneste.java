@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
@@ -18,7 +17,6 @@ import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.Beregn
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 
 /**
@@ -97,13 +95,13 @@ public interface BeregningTjeneste {
      */
     void deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(BehandlingReferanse ref);
 
-    /** Gjenoppretter til beregningsgrunnlaget fra original behandling for perioder som ikke vurderes
+    /** Gjenoppretter det første beregningsgrunnlaget som var opprettet for behandlingen
+     *
+     * Brukes kun av FRISINN
      *
      * @param ref Behandlingreferanse
-     *
-     * @return
      */
-    Set<DatoIntervallEntitet> gjenopprettTilInitiellDersomIkkeTilVurdering(BehandlingReferanse ref);
+    void gjenopprettInitiell(BehandlingReferanse ref);
 
     /** Samlet beregningsgrunnlag for visning i GUI bla. */
     Optional<BeregningsgrunnlagListe> hentBeregningsgrunnlag(BehandlingReferanse ref);

@@ -67,8 +67,12 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
+
+        kopierGrunnlagForForlengelseperioder(ref, kontekst);
+
         var periodeFilter = periodeFilterProvider.getFilter(ref);
-        periodeFilter.ignorerAvslåttePerioder().ignorerForlengelseperioder();
+        periodeFilter.ignorerAvslåttePerioder();
+        periodeFilter.ignorerForlengelseperioder();
         var perioderTilBeregning = new ArrayList<PeriodeTilVurdering>();
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
 
@@ -85,6 +89,20 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         } else {
             var aksjonspunktResultater = utførBeregningForPeriode(kontekst, ref, perioderTilBeregning);
             return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
+        }
+    }
+
+    private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
+        if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
+            var periodeFilter = periodeFilterProvider.getFilter(ref);
+            periodeFilter.ignorerAvslåttePerioder();
+            var allePerioder = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
+            var forlengelseperioder = allePerioder.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toSet());
+            if (!forlengelseperioder.isEmpty()) {
+                kalkulusTjeneste.kopier(ref, forlengelseperioder);
+                var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
+                beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatVedForlengelse(kontekst, originalBehandlingId, forlengelseperioder);
+            }
         }
     }
 

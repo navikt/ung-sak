@@ -31,7 +31,7 @@ public class VilkårPeriodeFilter {
     private final VilkårResultatRepository vilkårResultatRepository;
     private final ForlengelseTjeneste forlengelseTjeneste;
     private final EndringIUttakPeriodeUtleder endringIUttakPeriodeUtleder;
-    private final List<Avslagsårsak> avslagsårsakerSomIkkeFiltreresBort = new ArrayList<>();
+    private List<Avslagsårsak> avslagsårsakerSomIkkeFiltreresBort = new ArrayList<>();
 
     private boolean skalIgnorereAvslåttePerioder;
     private boolean skalIgnorerePerioderFraInfotrygd;
