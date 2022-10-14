@@ -89,7 +89,8 @@ public interface VurderSøknadsfristTjeneste<T extends SøktPeriodeData> {
                 .stream()
                 .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), entry.getKey()))
                 .toList();
-            timeline = timeline.combine(new LocalDateTimeline<>(segments), StandardCombinators::allValues, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            LocalDateTimeline<KravDokument> tidslinjeAktueltDokument = new LocalDateTimeline<>(segments, StandardCombinators::coalesceRightHandSide);
+            timeline = timeline.combine(tidslinjeAktueltDokument, StandardCombinators::allValues, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
         return timeline.mapValue(v -> v.stream()
                 .sorted()
