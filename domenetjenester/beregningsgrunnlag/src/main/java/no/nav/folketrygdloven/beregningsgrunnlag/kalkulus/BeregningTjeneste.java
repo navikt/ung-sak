@@ -95,13 +95,12 @@ public interface BeregningTjeneste {
      */
     void deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(BehandlingReferanse ref);
 
-    /** Gjenoppretter det første beregningsgrunnlaget som var opprettet for behandlingen
+    /** Gjenoppretter til beregningsgrunnlaget fra original behandling for perioder som ikke vurderes
      *
-     * Brukes kun av FRISINN
+     *  @param ref Behandlingreferanse
      *
-     * @param ref Behandlingreferanse
      */
-    void gjenopprettInitiell(BehandlingReferanse ref);
+    void gjenopprettTilInitiellDersomIkkeTilVurdering(BehandlingReferanse ref);
 
     /** Samlet beregningsgrunnlag for visning i GUI bla. */
     Optional<BeregningsgrunnlagListe> hentBeregningsgrunnlag(BehandlingReferanse ref);

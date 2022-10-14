@@ -103,10 +103,13 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         // 3. deaktiverer grunnlag for referanser som er avslått eller inaktive (fjernet skjæringstidspunkt)
         kalkulusTjeneste.deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(referanse);
 
-        // 4. avbryter alle aksjonspunkt i beregning som er åpne (aksjonspunkt reutledes på nytt ved behov)
+        // 4. gjenoppretter beregning til initiell referanse der perioden ikke lenger vurderes (flippet vurderingsstatus)
+        kalkulusTjeneste.gjenopprettTilInitiellDersomIkkeTilVurdering(referanse);
+
+        // 5. avbryter alle aksjonspunkt i beregning som er åpne (aksjonspunkt reutledes på nytt ved behov)
         abrytÅpneBeregningaksjonspunkter(kontekst, behandling);
 
-        // 5. kopierer input overstyringer for migrering fra infotrygd
+        // 6. kopierer input overstyringer for migrering fra infotrygd
         kopierInputOverstyring(behandling);
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(finnAksjonspunkter(behandling));
