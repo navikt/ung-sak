@@ -73,10 +73,11 @@ public class FastsettPGIPeriodeTjeneste {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
         var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId);
         var skjæringstidspunkter = finnSkjæringstidspunkterForBeregning(behandlingId);
-        var sigruninntektPerioder = finnEksisterendePGIPerioder(behandlingId);
+        var pgiPerioder = finnEksisterendePGIPerioder(behandlingId);
+        var perioderSomSkalFjernes = finnPerioderSomIkkeErSkjæringstidspunktISaken(skjæringstidspunkter, pgiPerioder);
         // Vi behandler et vedtak for SN som førstegangsvedtak dersom forrige søknad for stp ikke hadde opplysning om næring
-        var nyeSkjæringstidspunkt = finnSTPMedFørstegangsvedtakSomOmfattesAv8_35(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, sigruninntektPerioder);
-        grunnlagRepository.lagrePGIPeriode(behandlingId, nyeSkjæringstidspunkt);
+        var nyeSkjæringstidspunkt = finnSTPMedFørstegangsvedtakSomOmfattesAv8_35(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, pgiPerioder);
+        grunnlagRepository.lagreOgDeaktiverPGIPerioder(behandlingId, nyeSkjæringstidspunkt, perioderSomSkalFjernes);
     }
 
     /**
@@ -87,9 +88,8 @@ public class FastsettPGIPeriodeTjeneste {
     public void fjernPGIDersomIkkeRelevant(Long behandlingId) {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
         var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId);
-        var skjæringstidspunkter = finnSkjæringstidspunkterForBeregning(behandlingId);
         var sigruninntektPerioder = finnEksisterendePGIPerioder(behandlingId);
-        var perioderSomSkalFjernes = finnPerioderSomSkalFjernes(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, sigruninntektPerioder);
+        var perioderSomSkalFjernes = finnPerioderSomSkalFjernes(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, sigruninntektPerioder);
         if (!perioderSomSkalFjernes.isEmpty()) {
             log.info("Fjerner PGI-perioder " + perioderSomSkalFjernes);
         }
@@ -125,14 +125,19 @@ public class FastsettPGIPeriodeTjeneste {
             .collect(Collectors.toList());
     }
 
-    private ArrayList<PGIPeriode> finnPerioderSomSkalFjernes(Long behandlingId,
-                                                             InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                             OppgittOpptjeningFilter oppgittOpptjeningFilter,
-                                                             List<LocalDate> skjæringstidspunkter,
-                                                             List<PGIPeriode> PGIPerioder) {
+    private List<PGIPeriode> finnPerioderSomIkkeErSkjæringstidspunktISaken(List<LocalDate> skjæringstidspunkter,
+                                                                           List<PGIPeriode> PGIPerioder) {
+        return PGIPerioder.stream()
+            .filter(p -> !skjæringstidspunkter.contains(p.getSkjæringstidspunkt()))
+            .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private List<PGIPeriode> finnPerioderSomSkalFjernes(Long behandlingId,
+                                                        InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                        OppgittOpptjeningFilter oppgittOpptjeningFilter,
+                                                        List<PGIPeriode> PGIPerioder) {
         var nyInnhentingTriggere = finnRelevanteProsessTriggere(behandlingId);
         return PGIPerioder.stream()
-            .filter(p -> skjæringstidspunkter.contains(p.getSkjæringstidspunkt()))
             .filter(p -> !omfattesAv8_35(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, p.getSkjæringstidspunkt())
                 || harTriggerForInnhentingPåNytt(nyInnhentingTriggere, p)
             )
