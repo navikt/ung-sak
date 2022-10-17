@@ -4,16 +4,20 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.dokument.TekstValideringRegex;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class VurderInstitusjonDto {
+@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_INSTITUSJON)
+public class VurderInstitusjonDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty(value = "institusjon")
     @Valid
