@@ -92,13 +92,17 @@ public class BeregningPerioderGrunnlagRepository {
         }
     }
 
-    public void lagrePGIPeriode(Long behandlingId, List<PGIPeriode> perioder) {
+    public void lagreOgDeaktiverPGIPerioder(Long behandlingId, List<PGIPeriode> nyePerioder, List<PGIPeriode> deaktiverPerioder) {
         var grunnlagOptional = hentGrunnlag(behandlingId);
         var aktivtGrunnlag = grunnlagOptional.orElse(new BeregningsgrunnlagPerioderGrunnlag());
 
         var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(aktivtGrunnlag);
-        for (PGIPeriode periode : perioder) {
+        for (PGIPeriode periode : nyePerioder) {
             builder.leggTilSigruninntektPeriode(periode);
+        }
+
+        for (PGIPeriode pgiPeriode : deaktiverPerioder) {
+            builder.deaktiverPGIPeriode(pgiPeriode.getSkjæringstidspunkt());
         }
 
         var differ = differ();
@@ -241,6 +245,24 @@ public class BeregningPerioderGrunnlagRepository {
 
             for (KompletthetPeriode kompletthetPeriode : kompletthetPerioder) {
                 builder.deaktiverKompletthet(kompletthetPeriode.getSkjæringstidspunkt());
+            }
+
+            deaktiverEksisterende(grunnlag);
+
+            lagre(builder, behandlingId, false);
+        }
+    }
+
+    public void deaktiverPGIPerioder(Long behandlingId, List<PGIPeriode> pgiPerioder) {
+        Objects.requireNonNull(pgiPerioder);
+        var aktivtGrunnlag = hentGrunnlag(behandlingId);
+        if (aktivtGrunnlag.isPresent()) {
+            var grunnlag = aktivtGrunnlag.get();
+
+            var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(grunnlag);
+
+            for (PGIPeriode pgiPeriode : pgiPerioder) {
+                builder.deaktiverPGIPeriode(pgiPeriode.getSkjæringstidspunkt());
             }
 
             deaktiverEksisterende(grunnlag);

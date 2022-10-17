@@ -105,7 +105,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             var behandling = behandlingRepository.hentBehandling(behandlingId);
             BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(behandling);
             behandlingRepository.lagre(behandling, behandlingLås);
-            var skalTvingeRegisterinnhenting = Set.of(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER).contains(behandlingÅrsakType);
+            var skalTvingeRegisterinnhenting = Set.of(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT).contains(behandlingÅrsakType);
 
             behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false, skalTvingeRegisterinnhenting);
 
