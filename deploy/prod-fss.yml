@@ -201,7 +201,7 @@ spec:
       value: "true"
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
       value: "false"
-    - name: SIGRUN_INNTEKT_FILTER_ENABLED
+    - name: PGI_FILTER_ENABLED
       value: "false"
 
     # Konfigurasjoner

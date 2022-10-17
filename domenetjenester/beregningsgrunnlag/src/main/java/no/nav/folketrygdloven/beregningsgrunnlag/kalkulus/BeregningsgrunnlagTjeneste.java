@@ -37,6 +37,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -54,7 +55,7 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagReposito
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.NæringsinntektPeriode;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.PGIPeriode;
 
 @Dependent
 public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
@@ -347,34 +348,28 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     private Set<DatoIntervallEntitet> finnForlengelseperioder(BehandlingReferanse ref, Vilkår vilkår) {
         var filter = vilkårPeriodeFilterProvider.getFilter(ref);
-        var forlengelsePerioder = filter.filtrerPerioder(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).collect(Collectors.toSet()), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+        return filter.filtrerPerioder(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).collect(Collectors.toSet()), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
             .stream().filter(PeriodeTilVurdering::erForlengelse)
             .map(PeriodeTilVurdering::getPeriode)
             .collect(Collectors.toSet());
-        return forlengelsePerioder;
     }
 
+    /** Deaktiverer og rydder beregningsgrunnlag i kalkulus.
+     *
+     * Rydding gjøres for følgende scenario:
+     * - Avslåtte perioder før første steg i beregning (grunnet opptjening eller kompletthet)
+     * - Skjæringstidspunkt som ikke lenger finnes på saken (f.eks pga avslag i sykdomsvilkåret eller sammenslått med andre perioder)
+     * - Perioder som tidligere var til vurdering, men som har fått endret vurderingsstatus til ikke-til-vurdering
+     *
+     * @param ref Behandlingreferanse behandlingreferanse
+     */
     public void deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(BehandlingReferanse ref) {
         var vilkårOptional = vilkårTjeneste.hentHvisEksisterer(ref.getBehandlingId())
             .flatMap(v -> v.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
-
         if (vilkårOptional.isPresent()) {
-            var vilkår = vilkårOptional.get();
-            var vilkårsSkjæringspunkter = vilkår.getPerioder().stream().map(VilkårPeriode::getSkjæringstidspunkt).collect(Collectors.toSet());
-            var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
-            var avslåtteSkjæringstidspunkt = vilkår.getPerioder().stream()
-                .filter(vp -> vp.getUtfall().equals(Utfall.IKKE_OPPFYLT))
-                .map(VilkårPeriode::getSkjæringstidspunkt)
-                .collect(Collectors.toSet());
-            var referanserSomSkalDeaktiveres = grunnlagOpt.stream().flatMap(g -> g.getGrunnlagPerioder()
-                    .stream())
-                .map(p -> new BgRef(p.getEksternReferanse(), p.getSkjæringstidspunkt()))
-                .filter(it -> erAvslått(avslåtteSkjæringstidspunkt, it) ||
-                    harFjernetSkjæringstidspunkt(vilkårsSkjæringspunkter, it))
-                .collect(Collectors.toList());
-
+            Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = Objects.equals(ref.getBehandlingType(), BehandlingType.REVURDERING) ? grunnlagRepository.getInitiellVersjon(ref.getBehandlingId()) : Optional.empty();
+            var referanserSomSkalDeaktiveres = finnReferanserSomSkalDeaktiveres(ref, vilkårOptional.get(), initiellVersjon);
             if (!referanserSomSkalDeaktiveres.isEmpty()) {
-                Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = Objects.equals(ref.getBehandlingType(), BehandlingType.REVURDERING) ? grunnlagRepository.getInitiellVersjon(ref.getBehandlingId()) : Optional.empty();
                 var bgReferanser = referanserSomSkalDeaktiveres.stream()
                     .filter(it -> erIkkeInitiellVersjon(initiellVersjon, it))
                     .map(BgRef::getRef)
@@ -382,7 +377,59 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                 finnTjeneste(ref.getFagsakYtelseType()).deaktiverBeregningsgrunnlag(ref.getFagsakYtelseType(), ref.getSaksnummer(), ref.getBehandlingUuid(), bgReferanser);
             }
         }
+    }
 
+    private List<BgRef> finnReferanserSomSkalDeaktiveres(BehandlingReferanse ref,
+                                                         Vilkår vilkår,
+                                                         Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon) {
+        var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+        var stpMedEndretVurderingsstatus = finnReferanserSomIkkeLengerVurderes(ref, vilkår, grunnlagOpt, initiellVersjon);
+        var avslåtteReferanser = finnAvslåttReferanser(vilkår, grunnlagOpt);
+        var fjernetReferanseer = finnFjernetReferanser(vilkår, grunnlagOpt);
+        var referanserSomSkalDeaktiveres = new ArrayList<BgRef>();
+        referanserSomSkalDeaktiveres.addAll(avslåtteReferanser);
+        referanserSomSkalDeaktiveres.addAll(fjernetReferanseer);
+        referanserSomSkalDeaktiveres.addAll(stpMedEndretVurderingsstatus);
+        return referanserSomSkalDeaktiveres;
+    }
+
+    private List<BgRef> finnReferanserSomIkkeLengerVurderes(BehandlingReferanse ref,
+                                                            Vilkår vilkår,
+                                                            Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlagOpt,
+                                                            Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon) {
+        var skjæringstidspunkterSomIkkeVurderes = finnSkjæringstidspunkterSomIkkeVurderes(ref, vilkår);
+        return skjæringstidspunkterSomIkkeVurderes.stream()
+            .flatMap(stp -> grunnlagOpt.flatMap(gr -> gr.finnGrunnlagFor(stp)).stream())
+            .map(p -> new BgRef(p.getEksternReferanse(), p.getSkjæringstidspunkt()))
+            .filter(r -> erIkkeInitiellVersjon(initiellVersjon, r))
+            .toList();
+    }
+
+    private Set<LocalDate> finnSkjæringstidspunkterSomIkkeVurderes(BehandlingReferanse ref, Vilkår vilkår) {
+        var vilkårsSkjæringspunkter = vilkår.getPerioder().stream().map(VilkårPeriode::getSkjæringstidspunkt).collect(Collectors.toSet());
+        var perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var skjæringstidspunkterSomIkkeVurderes = vilkårsSkjæringspunkter.stream()
+            .filter(stp -> perioderTilVurdering.stream().noneMatch(p -> p.getFomDato().equals(stp))).collect(Collectors.toSet());
+        return skjæringstidspunkterSomIkkeVurderes;
+    }
+
+    private List<BgRef> finnFjernetReferanser(Vilkår vilkår, Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlagOpt) {
+        var vilkårsSkjæringspunkter = vilkår.getPerioder().stream().map(VilkårPeriode::getSkjæringstidspunkt).collect(Collectors.toSet());
+        return grunnlagOpt.stream().flatMap(g -> g.getGrunnlagPerioder().stream())
+            .map(p -> new BgRef(p.getEksternReferanse(), p.getSkjæringstidspunkt()))
+            .filter(it -> harFjernetSkjæringstidspunkt(vilkårsSkjæringspunkter, it))
+            .toList();
+    }
+
+    private List<BgRef> finnAvslåttReferanser(Vilkår vilkår, Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlagOpt) {
+        var avslåtteSkjæringstidspunkt = vilkår.getPerioder().stream()
+            .filter(vp -> vp.getUtfall().equals(Utfall.IKKE_OPPFYLT))
+            .map(VilkårPeriode::getSkjæringstidspunkt)
+            .collect(Collectors.toSet());
+        return grunnlagOpt.stream().flatMap(g -> g.getGrunnlagPerioder().stream())
+            .map(p -> new BgRef(p.getEksternReferanse(), p.getSkjæringstidspunkt()))
+            .filter(it -> erAvslått(avslåtteSkjæringstidspunkt, it))
+            .toList();
     }
 
     private boolean harFjernetSkjæringstidspunkt(Set<LocalDate> vilkårsSkjæringspunkter, BgRef it) {
@@ -394,46 +441,57 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public void gjenopprettInitiell(BehandlingReferanse ref) {
-        grunnlagRepository.gjenopprettInitiell(ref.getBehandlingId());
+    public Set<DatoIntervallEntitet> gjenopprettTilInitiellDersomIkkeTilVurdering(BehandlingReferanse ref) {
+        var vilkårOptional = vilkårTjeneste.hentHvisEksisterer(ref.getBehandlingId()).flatMap(v -> v.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+        if (vilkårOptional.isPresent()) {
+            var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+            Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = Objects.equals(ref.getBehandlingType(), BehandlingType.REVURDERING) ? grunnlagRepository.getInitiellVersjon(ref.getBehandlingId()) : Optional.empty();
+            var vilkår = vilkårOptional.get();
+            var referanserSomIkkeLengerVurderes = finnReferanserSomIkkeLengerVurderes(ref, vilkår, grunnlagOpt, initiellVersjon);
+            referanserSomIkkeLengerVurderes.forEach(r -> grunnlagRepository.gjenopprettInitiellDersomUlikInitiell(ref.getBehandlingId(), r.getStp()));
+            return vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)
+                .filter(p -> referanserSomIkkeLengerVurderes.stream().map(BgRef::getStp).anyMatch(stp -> p.getFomDato().equals(stp)))
+                .collect(Collectors.toSet());
+        }
+        return Collections.emptySet();
     }
 
-    /** Fastsetter næringsinntekter som ble brukt til å fatte vedtak for å støtte § 8-35 andre ledd (TSF-2701)
-     *
-     *  Lagrer ned referanse til hvilket iay-grunnlag som ble brukt for hvert skjæringstidspunkt i beregning dersom bruker er selvstendig næringsdrivende.
-     *
-     *  Fra lovteksten:
-     *  Jf § 8-35 andre ledd er Det er de ferdiglignede inntektene som foreligger på vedtakstidspunktet som brukes.
-     *  Dette avviker fra prinsippet om at det er opplysningene som foreligger på sykmeldingstidspunktet som skal anvendes.
-     *  Årsaken til at prinsippet fravikes er at Arbeids- og velferdsetaten ikke har opplysninger om dato for skatteoppgjøret til den enkelte
-     *
+    /**
+     * Fastsetter næringsinntekter som ble brukt til å fatte vedtak for å støtte § 8-35 andre ledd (TSF-2701)
+     * <p>
+     * Lagrer ned referanse til hvilket iay-grunnlag som ble brukt for hvert skjæringstidspunkt i beregning dersom bruker er selvstendig næringsdrivende.
+     * <p>
+     * Fra lovteksten:
+     * Jf § 8-35 andre ledd er Det er de ferdiglignede inntektene som foreligger på vedtakstidspunktet som brukes.
+     * Dette avviker fra prinsippet om at det er opplysningene som foreligger på sykmeldingstidspunktet som skal anvendes.
+     * Årsaken til at prinsippet fravikes er at Arbeids- og velferdsetaten ikke har opplysninger om dato for skatteoppgjøret til den enkelte
+     * <p>
      * Vi behandler et vedtak for SN som førstegangsvedtak dersom forrige søknad for stp ikke hadde opplysning om næring
      *
      * @param behandlingId BehandlingId
      */
-    public void fastsettNæringsinntektPerioderDersomRelevant(Long behandlingId) {
+    public void fastsettPGIDersomRelevant(Long behandlingId) {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
         var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId);
         var skjæringstidspunkter = finnSkjæringstidspunkterForBeregning(behandlingId);
-        var næringsinntektPerioder = finnEksisterendeNæringsinntektPerioder(behandlingId);
-        var perioder = finnPerioderSomSkalBeholdes(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, næringsinntektPerioder);
+        var sigruninntektPerioder = finnEksisterendePGIPerioder(behandlingId);
+        var perioder = finnPerioderSomSkalBeholdes(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, sigruninntektPerioder);
         // Vi behandler et vedtak for SN som førstegangsvedtak dersom forrige søknad for stp ikke hadde opplysning om næring
-        var nyeSkjæringstidspunktForSN = finnSTPMedFørstegangsvedtakForNæring(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, næringsinntektPerioder);
-        perioder.addAll(nyeSkjæringstidspunktForSN);
-        grunnlagRepository.lagreNæringsinntektPeriode(behandlingId, perioder);
+        var nyeSkjæringstidspunkt = finnSTPMedFørstegangsvedtakForNæringEllerMidlertidigInaktiv(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, sigruninntektPerioder);
+        perioder.addAll(nyeSkjæringstidspunkt);
+        grunnlagRepository.lagrePGIPeriode(behandlingId, perioder);
     }
 
-    private List<NæringsinntektPeriode> finnSTPMedFørstegangsvedtakForNæring(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, OppgittOpptjeningFilter oppgittOpptjeningFilter, List<LocalDate> skjæringstidspunkter, List<NæringsinntektPeriode> næringsinntektPerioder) {
-        return skjæringstidspunkter.stream().filter(stp -> erSelvstendigNæringsdrivende(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, stp))
-            .filter(stp -> næringsinntektPerioder.stream().noneMatch(p -> p.getSkjæringstidspunkt().equals(stp)))
-            .map(stp -> new NæringsinntektPeriode(iayGrunnlag.getEksternReferanse(), stp))
+    private List<PGIPeriode> finnSTPMedFørstegangsvedtakForNæringEllerMidlertidigInaktiv(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, OppgittOpptjeningFilter oppgittOpptjeningFilter, List<LocalDate> skjæringstidspunkter, List<PGIPeriode> PGIPerioder) {
+        return skjæringstidspunkter.stream().filter(stp -> erSelvstendigNæringsdrivende(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, stp) || erMidlertidigInaktiv(behandlingId, stp))
+            .filter(stp -> PGIPerioder.stream().noneMatch(p -> p.getSkjæringstidspunkt().equals(stp)))
+            .map(stp -> new PGIPeriode(iayGrunnlag.getEksternReferanse(), stp))
             .collect(Collectors.toList());
     }
 
-    private List<NæringsinntektPeriode> finnEksisterendeNæringsinntektPerioder(Long behandlingId) {
+    private List<PGIPeriode> finnEksisterendePGIPerioder(Long behandlingId) {
         var grunnlagOpt = grunnlagRepository.hentGrunnlag(behandlingId);
-        var næringsinntektPerioder = grunnlagOpt.map(BeregningsgrunnlagPerioderGrunnlag::getNæringsinntektPerioder).orElse(Collections.emptyList());
-        return næringsinntektPerioder;
+        return grunnlagOpt.map(BeregningsgrunnlagPerioderGrunnlag::getPGIPerioder).orElse(Collections.emptyList());
     }
 
     private List<LocalDate> finnSkjæringstidspunkterForBeregning(Long behandlingId) {
@@ -451,17 +509,34 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             .collect(Collectors.toList());
     }
 
-    private ArrayList<NæringsinntektPeriode> finnPerioderSomSkalBeholdes(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                         OppgittOpptjeningFilter oppgittOpptjeningFilter,
-                                                                         List<LocalDate> skjæringstidspunkter,
-                                                                         List<NæringsinntektPeriode> næringsinntektPerioder) {
-        return næringsinntektPerioder.stream()
+    private ArrayList<PGIPeriode> finnPerioderSomSkalBeholdes(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                              OppgittOpptjeningFilter oppgittOpptjeningFilter,
+                                                              List<LocalDate> skjæringstidspunkter,
+                                                              List<PGIPeriode> PGIPerioder) {
+        return PGIPerioder.stream()
             .filter(p -> skjæringstidspunkter.contains(p.getSkjæringstidspunkt()))
-            .filter(p -> erSelvstendigNæringsdrivende(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, p.getSkjæringstidspunkt()))
+            .filter(p -> erSelvstendigNæringsdrivende(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, p.getSkjæringstidspunkt()) || erMidlertidigInaktiv(behandlingId, p.getSkjæringstidspunkt()))
             .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private boolean erSelvstendigNæringsdrivende(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, OppgittOpptjeningFilter oppgittOpptjeningFilter, LocalDate stp) {
+    private boolean erMidlertidigInaktiv(Long behandlingId, LocalDate skjæringstidspunkt) {
+        var opptjeningsvilkår = vilkårTjeneste.hentVilkårResultat(behandlingId).getVilkår(VilkårType.OPPTJENINGSVILKÅRET);
+        var vilkårUtfallMerknad = finnVilkårmerknadForOpptjening(opptjeningsvilkår, skjæringstidspunkt);
+        return VilkårUtfallMerknad.VM_7847_A.equals(vilkårUtfallMerknad) || VilkårUtfallMerknad.VM_7847_B.equals(vilkårUtfallMerknad);
+    }
+
+    private VilkårUtfallMerknad finnVilkårmerknadForOpptjening(Optional<Vilkår> opptjeningsvilkår, LocalDate skjæringstidspunkt) {
+        VilkårUtfallMerknad vilkårsMerknad = null;
+        if (opptjeningsvilkår.isPresent()) {
+            vilkårsMerknad = opptjeningsvilkår.get().finnPeriodeForSkjæringstidspunkt(skjæringstidspunkt).getMerknad();
+        }
+        return vilkårsMerknad;
+    }
+
+    private boolean erSelvstendigNæringsdrivende(Long behandlingId,
+                                                 InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                 OppgittOpptjeningFilter oppgittOpptjeningFilter,
+                                                 LocalDate stp) {
         return oppgittOpptjeningFilter.hentOppgittOpptjening(behandlingId, iayGrunnlag, stp).stream()
             .flatMap(oo -> oo.getEgenNæring().stream())
             .anyMatch(e -> e.getPeriode().inkluderer(stp.minusDays(1)));

@@ -368,7 +368,7 @@ public class Behandling extends BaseEntitet {
     public Optional<BehandlingStegTilstand> getBehandlingStegTilstand() {
         List<BehandlingStegTilstand> tilstander = behandlingStegTilstander.stream()
             .filter(t -> !BehandlingStegStatus.erSluttStatus(t.getBehandlingStegStatus()))
-            .collect(Collectors.toList());
+            .toList();
         if (tilstander.size() > 1) {
             throw new IllegalStateException("Utvikler-feil: Kan ikke ha flere steg samtidig åpne: " + tilstander); //$NON-NLS-1$
         }

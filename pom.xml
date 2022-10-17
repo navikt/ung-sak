@@ -43,8 +43,8 @@
         <felles.version>0.9.33</felles.version>
         <swagger.version>2.2.3</swagger.version>
         <junit.version>5.9.1</junit.version>
-        <k9format.version>7.0.0</k9format.version>
-        <jackson.version>2.13.4</jackson.version>
+        <k9format.version>7.0.2</k9format.version>
+        <jackson.version>2.13.4.20221012</jackson.version>
         <asm.version>9.4</asm.version>
         <kotlin-stdlib.version>1.7.20</kotlin-stdlib.version>
     </properties>
@@ -155,7 +155,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt-jakarta</artifactId>
-                <version>1.5.57</version>
+                <version>1.5.64</version>
             </dependency>
 
             <dependency>
@@ -436,7 +436,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.11.2</version>
+                <version>2.12.0</version>
             </dependency>
             <dependency>
                 <groupId>org.jasypt</groupId>

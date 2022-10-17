@@ -33,7 +33,7 @@ public class OpprettProsessTaskIverksettOMP extends OpprettProsessTaskIverksettT
                                           InfotrygdFeedService infotrygdFeedService,
                                           ÅrskvantumDeaktiveringTjeneste årskvantumDeaktiveringTjeneste,
                                           StønadstatistikkService stønadstatistikkService,
-                                          @KonfigVerdi(value = "SIGRUN_INNTEKT_FILTER_ENABLED", defaultVerdi = "false") boolean sigrunFilterEnabled) {
+                                          @KonfigVerdi(value = "PGI_FILTER_ENABLED", defaultVerdi = "false") boolean sigrunFilterEnabled) {
         super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService, sigrunFilterEnabled);
         this.årskvantumDeaktiveringTjeneste = årskvantumDeaktiveringTjeneste;
 
