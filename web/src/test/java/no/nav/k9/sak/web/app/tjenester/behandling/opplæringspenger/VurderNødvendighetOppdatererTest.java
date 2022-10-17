@@ -50,7 +50,7 @@ public class VurderNødvendighetOppdatererTest {
         now = LocalDate.now();
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.medSøknad().medSøknadsdato(now);
-        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_INSTITUSJON_OG_NØDVENDIGHET, BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR);
+        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_NØDVENDIGHET, BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR);
         behandling = scenario.lagre(repositoryProvider);
     }
 

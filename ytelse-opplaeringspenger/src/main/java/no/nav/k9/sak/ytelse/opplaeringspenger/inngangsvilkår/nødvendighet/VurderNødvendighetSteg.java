@@ -110,7 +110,7 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
         } else {
             // Vi har perioder uten vurdering
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(
-                AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_INSTITUSJON_OG_NØDVENDIGHET)));
+                AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_NØDVENDIGHET)));
         }
     }
 

@@ -3,7 +3,9 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.NaturalId;
@@ -17,7 +19,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 
 @Entity(name = "GodkjentOpplæringsinstitusjon")
 @Table(name = "GODKJENTE_OPPLAERINGSINSTITUSJONER")
@@ -64,6 +68,12 @@ public class GodkjentOpplæringsinstitusjon extends BaseEntitet {
 
     public List<GodkjentOpplæringsinstitusjonPeriode> getPerioder() {
         return perioder;
+    }
+
+    public LocalDateTimeline<Boolean> getTidslinje() {
+        return TidslinjeUtil.tilTidslinjeKomprimert(perioder.stream()
+            .map(GodkjentOpplæringsinstitusjonPeriode::getPeriode)
+            .collect(Collectors.toCollection(TreeSet::new)));
     }
 
     @Override

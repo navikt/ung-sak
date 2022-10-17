@@ -85,7 +85,8 @@ class SøknadOversetter {
                 kurs.getHolder(),
                 kurs.getFormål(),
                 kursPeriodeMedReisetid.getAvreise(),
-                kursPeriodeMedReisetid.getHjemkomst()))
+                kursPeriodeMedReisetid.getHjemkomst(),
+                kurs.getInstitusjonUuid()))
             .collect(Collectors.toList());
     }
 

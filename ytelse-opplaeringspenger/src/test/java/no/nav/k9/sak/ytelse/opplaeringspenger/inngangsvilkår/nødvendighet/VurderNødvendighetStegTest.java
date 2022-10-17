@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.TreeSet;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -106,7 +105,7 @@ public class VurderNødvendighetStegTest {
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
         assertThat(resultat.getAksjonspunktResultater()).hasSize(1);
-        assertThat(resultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.VURDER_INSTITUSJON_OG_NØDVENDIGHET);
+        assertThat(resultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.VURDER_NØDVENDIGHET);
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
         assertThat(vilkår.getPerioder()).hasSize(1);
@@ -300,7 +299,7 @@ public class VurderNødvendighetStegTest {
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
         assertThat(resultat.getAksjonspunktResultater()).hasSize(1);
-        assertThat(resultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.VURDER_INSTITUSJON_OG_NØDVENDIGHET);
+        assertThat(resultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.VURDER_NØDVENDIGHET);
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
         assertThat(vilkår.getPerioder()).hasSize(1);
