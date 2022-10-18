@@ -114,7 +114,7 @@ public class MapTilSøknadsfristDto {
                 if (lhs.getValue() == rhs.getValue()){
                     return new LocalDateSegment<>(intervall, lhs.getValue()); //kan ha overlappende perioder hvis det er søkt for flere arbeidsgivere i samme søknad
                 } else {
-                    throw new IllegalStateException("Ikke-støttet tilstand. Har både " + lhs.getValue() + " og " + rhs.getValue() + " i samme periode i samme kravdokument");
+                    throw new IllegalStateException("Ikke-støttet tilstand. Har både " + lhs.getValue() + " og " + rhs.getValue() + " i samme periode i samme kravdokument, journalpostId " + kravDokument.getJournalpostId().getVerdi());
                 }
             });
 
