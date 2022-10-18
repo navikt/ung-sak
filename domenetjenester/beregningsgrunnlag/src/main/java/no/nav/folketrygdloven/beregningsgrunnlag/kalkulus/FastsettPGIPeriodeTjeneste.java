@@ -70,14 +70,18 @@ public class FastsettPGIPeriodeTjeneste {
      * @param behandlingId BehandlingId
      */
     public void fastsettPGIDersomRelevant(Long behandlingId) {
-        var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
-        var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId);
-        var skjæringstidspunkter = finnSkjæringstidspunkterForBeregning(behandlingId);
-        var pgiPerioder = finnEksisterendePGIPerioder(behandlingId);
-        var perioderSomSkalFjernes = finnPerioderSomIkkeErSkjæringstidspunktISaken(skjæringstidspunkter, pgiPerioder);
-        // Vi behandler et vedtak for SN som førstegangsvedtak dersom forrige søknad for stp ikke hadde opplysning om næring
-        var nyeSkjæringstidspunkt = finnSTPMedFørstegangsvedtakSomOmfattesAv8_35(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, pgiPerioder);
-        grunnlagRepository.lagreOgDeaktiverPGIPerioder(behandlingId, nyeSkjæringstidspunkt, perioderSomSkalFjernes);
+        var vilkårene = vilkårTjeneste.hentVilkårResultat(behandlingId);
+        var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        if (vilkår.isPresent()) {
+            var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
+            var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId);
+            var skjæringstidspunkter = finnSkjæringstidspunkter(vilkår.get());
+            var pgiPerioder = finnEksisterendePGIPerioder(behandlingId);
+            var perioderSomSkalFjernes = finnPerioderSomIkkeErSkjæringstidspunktISaken(skjæringstidspunkter, pgiPerioder);
+            // Vi behandler et vedtak for SN som førstegangsvedtak dersom forrige søknad for stp ikke hadde opplysning om næring
+            var nyeSkjæringstidspunkt = finnSTPMedFørstegangsvedtakSomOmfattesAv8_35(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, pgiPerioder);
+            grunnlagRepository.lagreOgDeaktiverPGIPerioder(behandlingId, nyeSkjæringstidspunkt, perioderSomSkalFjernes);
+        }
     }
 
     /**
@@ -86,15 +90,19 @@ public class FastsettPGIPeriodeTjeneste {
      * @param behandlingId BehandlingId
      */
     public void fjernPGIDersomIkkeRelevant(Long behandlingId) {
-        var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
-        var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId);
-        var skjæringstidspunkter = finnSkjæringstidspunkterForBeregning(behandlingId);
-        var sigruninntektPerioder = finnEksisterendePGIPerioder(behandlingId);
-        var perioderSomSkalFjernes = finnPerioderSomSkalFjernes(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, sigruninntektPerioder);
-        if (!perioderSomSkalFjernes.isEmpty()) {
-            log.info("Fjerner PGI-perioder " + perioderSomSkalFjernes);
+        var vilkårene = vilkårTjeneste.hentVilkårResultat(behandlingId);
+        var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        if (vilkår.isPresent()) {
+            var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
+            var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId);
+            var skjæringstidspunkter = finnSkjæringstidspunkter(vilkår.get());
+            var sigruninntektPerioder = finnEksisterendePGIPerioder(behandlingId);
+            var perioderSomSkalFjernes = finnPerioderSomSkalFjernes(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, sigruninntektPerioder);
+            if (!perioderSomSkalFjernes.isEmpty()) {
+                log.info("Fjerner PGI-perioder " + perioderSomSkalFjernes);
+            }
+            grunnlagRepository.lagreOgDeaktiverPGIPerioder(behandlingId, Collections.emptyList(), perioderSomSkalFjernes);
         }
-        grunnlagRepository.lagreOgDeaktiverPGIPerioder(behandlingId, Collections.emptyList(), perioderSomSkalFjernes);
     }
 
     private List<PGIPeriode> finnSTPMedFørstegangsvedtakSomOmfattesAv8_35(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, OppgittOpptjeningFilter oppgittOpptjeningFilter, List<LocalDate> skjæringstidspunkter, List<PGIPeriode> PGIPerioder) {
@@ -109,12 +117,6 @@ public class FastsettPGIPeriodeTjeneste {
         var grunnlagOpt = grunnlagRepository.hentGrunnlag(behandlingId);
         return grunnlagOpt.map(BeregningsgrunnlagPerioderGrunnlag::getPGIPerioder)
             .orElse(Collections.emptyList());
-    }
-
-    private List<LocalDate> finnSkjæringstidspunkterForBeregning(Long behandlingId) {
-        var vilkårene = vilkårTjeneste.hentVilkårResultat(behandlingId);
-        var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
-        return finnSkjæringstidspunkter(vilkår);
     }
 
     private List<LocalDate> finnSkjæringstidspunkter(Vilkår vilkår) {
