@@ -13,6 +13,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FastsettPGIPeriodeTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -61,6 +62,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private BeregningsgrunnlagTjeneste kalkulusTjeneste;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
+    private FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste;
 
 
     protected VurderPreconditionBeregningSteg() {
@@ -77,7 +79,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                            BeregningsgrunnlagTjeneste kalkulusTjeneste,
                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                           VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
+                                           VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
+                                           FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
@@ -88,6 +91,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
+        this.fastsettPGIPeriodeTjeneste = fastsettPGIPeriodeTjeneste;
     }
 
     @Override
@@ -115,6 +119,9 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
 
         // 6. kopierer input overstyringer for migrering fra infotrygd
         kopierInputOverstyring(behandling);
+
+        // 7. Dekativerer PGI-periode dersom ikke lenger relevant
+        fastsettPGIPeriodeTjeneste.fjernPGIDersomIkkeRelevant(behandling.getId());
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(finnAksjonspunkter(behandling));
     }

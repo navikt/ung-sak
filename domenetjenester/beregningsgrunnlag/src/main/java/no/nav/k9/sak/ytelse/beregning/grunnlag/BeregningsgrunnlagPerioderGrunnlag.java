@@ -150,7 +150,7 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
         }
     }
 
-    void deaktiverSigruninntektPeriode(LocalDate skjæringstidspunkt) {
+    void deaktiverPGIPeriode(LocalDate skjæringstidspunkt) {
         Objects.requireNonNull(skjæringstidspunkt);
         if (this.PGIPerioder != null) {
             this.PGIPerioder.deaktiver(skjæringstidspunkt);

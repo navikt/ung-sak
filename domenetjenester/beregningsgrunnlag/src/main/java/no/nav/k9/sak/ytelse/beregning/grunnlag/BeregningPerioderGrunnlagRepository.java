@@ -92,13 +92,17 @@ public class BeregningPerioderGrunnlagRepository {
         }
     }
 
-    public void lagrePGIPeriode(Long behandlingId, List<PGIPeriode> perioder) {
+    public void lagreOgDeaktiverPGIPerioder(Long behandlingId, List<PGIPeriode> nyePerioder, List<PGIPeriode> deaktiverPerioder) {
         var grunnlagOptional = hentGrunnlag(behandlingId);
         var aktivtGrunnlag = grunnlagOptional.orElse(new BeregningsgrunnlagPerioderGrunnlag());
 
         var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(aktivtGrunnlag);
-        for (PGIPeriode periode : perioder) {
+        for (PGIPeriode periode : nyePerioder) {
             builder.leggTilSigruninntektPeriode(periode);
+        }
+
+        for (PGIPeriode pgiPeriode : deaktiverPerioder) {
+            builder.deaktiverPGIPeriode(pgiPeriode.getSkjæringstidspunkt());
         }
 
         var differ = differ();
@@ -248,4 +252,5 @@ public class BeregningPerioderGrunnlagRepository {
             lagre(builder, behandlingId, false);
         }
     }
+
 }
