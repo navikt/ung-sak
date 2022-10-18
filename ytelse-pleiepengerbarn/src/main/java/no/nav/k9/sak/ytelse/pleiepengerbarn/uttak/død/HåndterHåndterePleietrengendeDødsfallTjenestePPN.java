@@ -42,6 +42,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN extends Håndte
     }
 
 
+    @Override
     public Optional<DatoIntervallEntitet> utledUtvidetPeriodeForDødsfall(BehandlingReferanse referanse) {
         if (!utvidVedDødsfall) {
             return Optional.empty();
@@ -64,10 +65,12 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN extends Håndte
         return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato, sisteDato));
     }
 
+    @Override
     protected Set<VilkårType> vilkårTyperSomForlengesUtoverAldersvilkårOgMedisinskVilkår() {
         return Set.of(VilkårType.OPPTJENINGSVILKÅRET, VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET, VilkårType.SØKNADSFRIST);
     }
 
+    @Override
     protected void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate fødselsdato) {
         var eksisterendeResultat = finnSykdomsvurderingPåDødsdato(periode.getFomDato(), vilkårene);
 

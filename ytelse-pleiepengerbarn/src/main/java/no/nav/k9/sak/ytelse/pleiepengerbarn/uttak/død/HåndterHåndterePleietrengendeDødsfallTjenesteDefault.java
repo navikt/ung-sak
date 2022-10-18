@@ -26,14 +26,18 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 @FagsakYtelseTypeRef(OMSORGSPENGER_KS)
 public class HåndterHåndterePleietrengendeDødsfallTjenesteDefault extends HåndterePleietrengendeDødsfallTjeneste {
 
+
+    @Override
     public Optional<DatoIntervallEntitet> utledUtvidetPeriodeForDødsfall(BehandlingReferanse referanse) {
         return Optional.empty();
     }
 
+    @Override
     protected void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate fødselsdato) {
 
     }
 
+    @Override
     protected Set<VilkårType> vilkårTyperSomForlengesUtoverAldersvilkårOgMedisinskVilkår() {
         return Set.of();
     }

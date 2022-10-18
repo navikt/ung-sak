@@ -52,6 +52,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB extends Håndte
         this.utvidVedDødsfall = utvidVedDødsfall;
     }
 
+    @Override
     public Optional<DatoIntervallEntitet> utledUtvidetPeriodeForDødsfall(BehandlingReferanse referanse) {
         if (!utvidVedDødsfall) {
             return Optional.empty();
@@ -83,6 +84,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB extends Håndte
         return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato, sisteDagPgaDødsfall));
     }
 
+    @Override
     protected Set<VilkårType> vilkårTyperSomForlengesUtoverAldersvilkårOgMedisinskVilkår() {
         return Set.of(VilkårType.OPPTJENINGSVILKÅRET, VilkårType.OMSORGEN_FOR, VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET, VilkårType.SØKNADSFRIST);
     }
@@ -94,6 +96,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB extends Håndte
         };
     }
 
+    @Override
     protected void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate fødselsdato) {
         var set = new TreeSet<DatoIntervallEntitet>();
         set.add(periode);
