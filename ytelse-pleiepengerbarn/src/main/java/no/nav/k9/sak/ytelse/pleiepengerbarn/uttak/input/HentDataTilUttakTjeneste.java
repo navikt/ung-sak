@@ -52,7 +52,7 @@ public class HentDataTilUttakTjeneste {
     private OpptjeningRepository opptjeningRepository;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
-    private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
+    private Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester;
     private HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste;
@@ -71,7 +71,7 @@ public class HentDataTilUttakTjeneste {
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                     @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                    HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste,
+                                    @Any Instance< HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester,
                                     HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste,
                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                     HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste) {
@@ -88,7 +88,7 @@ public class HentDataTilUttakTjeneste {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.opptjeningRepository = opptjeningRepository;
-        this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
+        this.håndterePleietrengendeDødsfallTjenester = håndterePleietrengendeDødsfallTjenester;
         this.hentPerioderTilVurderingTjeneste = hentPerioderTilVurderingTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.hentEtablertTilsynTjeneste = hentEtablertTilsynTjeneste;
@@ -104,6 +104,7 @@ public class HentDataTilUttakTjeneste {
 
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = perioderTilVurderingTjeneste(referanse);
         final NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(referanse.getBehandlingId());
+        HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste = HåndterePleietrengendeDødsfallTjeneste.velgTjeneste(håndterePleietrengendeDødsfallTjenester, referanse);
         var utvidetPeriodeSomFølgeAvDødsfall = håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse);
         final NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
         if (skalMappeHeleTidslinjen) {
@@ -130,9 +131,9 @@ public class HentDataTilUttakTjeneste {
 
         var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId())
                 .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
-        
+
         final List<PeriodeMedVarighet> etablertTilsynPerioder = hentEtablertTilsynTjeneste.hentOgSmørEtablertTilsynPerioder(referanse, unntakEtablertTilsynForPleietrengende, brukUbesluttedeData);
-        
+
         final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getFagsakId(), referanse.getPleietrengendeAktørId(), brukUbesluttedeData);
         var rettVedDød = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
 
