@@ -41,9 +41,11 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.OLPStegHelper;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.LangvarigSykdomPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
@@ -106,21 +108,30 @@ public class VurderSykdomSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        final var perioderSamlet = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.LANGVARIG_SYKDOM);
+        Vilkårene vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
+        VilkårResultatBuilder resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
+            .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
+        VilkårBuilder vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.LANGVARIG_SYKDOM);
 
-        final MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioderSamlet, behandling);
+        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.LANGVARIG_SYKDOM));
 
-        final boolean harPerioderTilVurdering = !perioderSamlet.isEmpty();
+        final var tidslinjeMedInstitusjonsvilkårOppfylt = OLPStegHelper.finnOppfyltVilkårTidslinje(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
+        final var tidslinjeUtenInstitusjonsvilkårOppfylt = tidslinjeTilVurdering.disjoint(tidslinjeMedInstitusjonsvilkårOppfylt);
+
+        tidslinjeTilVurdering = tidslinjeTilVurdering.intersection(tidslinjeMedInstitusjonsvilkårOppfylt);
+        final var perioderTilVurdering = TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeTilVurdering);
+
+        final MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioderTilVurdering, behandling);
+
+        final boolean harPerioderTilVurdering = !tidslinjeTilVurdering.isEmpty();
         if (harPerioderTilVurdering && trengerAksjonspunkt(kontekst, behandling)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
-        Vilkårene vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
-        builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
-
-        vurder(kontekst, medisinskGrunnlag, builder, VilkårType.LANGVARIG_SYKDOM, perioderSamlet);
-        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
+        vurder(kontekst, medisinskGrunnlag, vilkårBuilder, perioderTilVurdering);
+        leggTilResultatIkkeGodkjentInstitusjon(vilkårBuilder, tidslinjeUtenInstitusjonsvilkårOppfylt);
+        resultatBuilder.leggTil(vilkårBuilder);
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), resultatBuilder.build());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
@@ -148,20 +159,23 @@ public class VurderSykdomSteg implements BehandlingSteg {
         return trengerInput || førsteGangManuellRevurdering;
     }
 
+    private void leggTilResultatIkkeGodkjentInstitusjon(VilkårBuilder builder, LocalDateTimeline<Boolean> tidslinje) {
+        TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje)
+            .forEach(datoIntervallEntitet -> builder.leggTil(builder.hentBuilderFor(datoIntervallEntitet)
+                .medUtfall(Utfall.IKKE_OPPFYLT)
+                .medAvslagsårsak(Avslagsårsak.IKKE_GODKJENT_INSTITUSJON)));
+    }
+
     private void vurder(BehandlingskontrollKontekst kontekst,
                         MedisinskGrunnlag medisinskGrunnlag,
-                        VilkårResultatBuilder builder,
-                        VilkårType vilkåret,
+                        VilkårBuilder builder,
                         NavigableSet<DatoIntervallEntitet> perioder) {
 
-        var vilkårBuilder = builder.hentBuilderFor(vilkåret);
         for (DatoIntervallEntitet periode : perioder) {
-            final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(vilkåret, kontekst, periode, medisinskGrunnlag);
-            oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårBuilder);
+            final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(VilkårType.LANGVARIG_SYKDOM, kontekst, periode, medisinskGrunnlag);
+            oppdaterBehandlingMedVilkårresultat(vilkårData, builder);
             oppdaterResultatStruktur(kontekst, periode, vilkårData);
         }
-
-        builder.leggTil(vilkårBuilder);
     }
 
     private void oppdaterResultatStruktur(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, VilkårData vilkårData) {

@@ -77,6 +77,7 @@ public class VurderNødvendighetStegTest {
         søknadsperiode = new Periode(now.minusMonths(3), now);
         scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OPPLÆRINGSPENGER);
         scenario.leggTilVilkår(VilkårType.NØDVENDIG_OPPLÆRING, Utfall.IKKE_VURDERT);
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT); //TODO tilpass testene til nytt vilkår
     }
 
     private void setupBehandlingMedSykdomsvilkår(Utfall utfall, Periode periode) {
