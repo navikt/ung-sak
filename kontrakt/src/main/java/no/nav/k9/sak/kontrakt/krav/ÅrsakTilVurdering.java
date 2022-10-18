@@ -46,7 +46,9 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     // Vurderes for første gang
     FØRSTEGANGSVURDERING("FØRSTEGANGSVURDERING", "Ny periode"),
     // Vurdering etter klage på lignet inntekt
-    REVURDERER_LIGNET_INNTEKT("REVURDERER_LIGNET_INNTEKT", "Manuell revurdering der lignet inntekt innhentes på nytt");
+    REVURDERER_LIGNET_INNTEKT("REVURDERER_LIGNET_INNTEKT", "Manuell revurdering der lignet inntekt innhentes på nytt"),
+    // Vurdering etter klage på lignet inntekt
+    REVURDERER_BRUK_INNTEKT_FRA_FORRIGE_SKATTEOPPJØR("REVURDERER_BRUK_INNTEKT_FRA_FORRIGE_SKATTEOPPJØR", "Manuell revurdering der lignet inntekt fra forrige skatteoppjør skal brukes");
 
     private static final Map<String, ÅrsakTilVurdering> KODER = new LinkedHashMap<>();
     private static final Map<BehandlingÅrsakType, ÅrsakTilVurdering> SAMMENHENG;
@@ -66,6 +68,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
         sammenheng.put(BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK, REVURDERER_ENDRING_FERIEPENGER);
         sammenheng.put(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_MEDLEMSKAP, REVURDERER_BERØRT_PERIODE);
         sammenheng.put(BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT, REVURDERER_LIGNET_INNTEKT);
+        sammenheng.put(BehandlingÅrsakType.RE_BRK_FORRIGE_SKATTELIGNING, REVURDERER_BRUK_INNTEKT_FRA_FORRIGE_SKATTEOPPJØR);
         SAMMENHENG = Collections.unmodifiableMap(sammenheng);
     }
 

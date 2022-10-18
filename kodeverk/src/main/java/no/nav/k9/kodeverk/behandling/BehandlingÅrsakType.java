@@ -50,6 +50,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_OPPLYSNINGER_OM_SØKNAD_FRIST("RE-FRIST", "Nye opplysninger som kan påvirke vurderingen av søknadsfristen"),
     RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG("RE-BER-GRUN", "Nye opplysninger som kan påvirke beregningsgrunnlaget"),
     RE_KLAGE_NY_INNH_LIGNET_INNTEKT("RE-KLAG-INNH-PGI", "Klage/ankebehandling med ny innhenting av lignet inntekt"),
+    RE_BRK_FORRIGE_SKATTELIGNING("RE-FRG-SKTTL", "Retting av sak der skatteopplysninger fra forrige skatteoppgjør skal brukes"),
 
     ETTER_KLAGE("ETTER_KLAGE", "Ny behandling eller revurdering etter klage eller anke"),
 

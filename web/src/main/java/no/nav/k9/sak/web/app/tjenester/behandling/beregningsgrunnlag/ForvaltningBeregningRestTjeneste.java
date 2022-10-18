@@ -80,8 +80,7 @@ public class ForvaltningBeregningRestTjeneste {
     private AksjonspunktRepository aksjonspunktRepository;
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     private KalkulusRestKlient kalkulusSystemRestKlient;
-    private RevurderOgInnhentPGITjeneste revurderOgInnhentPGITjeneste;
-
+    private RevurderPGITjeneste revurderPGITjeneste;
 
 
     public ForvaltningBeregningRestTjeneste() {
@@ -96,14 +95,14 @@ public class ForvaltningBeregningRestTjeneste {
                                             BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
                                             SystemUserOidcRestClient systemUserOidcRestClient,
                                             @KonfigVerdi(value = "ftkalkulus.url") URI endpoint,
-                                            RevurderOgInnhentPGITjeneste revurderOgInnhentPGITjeneste) {
+                                            RevurderPGITjeneste revurderPGITjeneste) {
         this.forvaltningBeregning = forvaltningBeregning;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
-        this.revurderOgInnhentPGITjeneste = revurderOgInnhentPGITjeneste;
+        this.revurderPGITjeneste = revurderPGITjeneste;
         this.kalkulusSystemRestKlient = new KalkulusRestKlient(systemUserOidcRestClient, endpoint);
     }
 
@@ -231,7 +230,19 @@ public class ForvaltningBeregningRestTjeneste {
     @Operation(description = "Oppretter manuell revurdering for reinnhenting av PGI.", summary = ("Oppretter manuell revurdering for reinnhenting av PGI."), tags = "beregning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public void revurderOgInnhentPGI(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) RevurderOgInnhentPGIDto revurderOgInnhentPGIDto) {
-        revurderOgInnhentPGITjeneste.revurderOgInnhentPGI(revurderOgInnhentPGIDto.getSaksnummer(), revurderOgInnhentPGIDto.getSkjæringstidspunkt());
+        revurderPGITjeneste.revurderOgInnhentPGI(revurderOgInnhentPGIDto.getSaksnummer(), revurderOgInnhentPGIDto.getSkjæringstidspunkt());
+    }
+
+    @POST
+    @Path("/revurder-bruk-forrige-skatteoppgjør")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Oppretter manuell revurdering og bruker skatteoppgjør fra oppgitt behandling.", summary = ("Oppretter manuell revurdering og bruker skatteoppgjør fra oppgitt behandling."), tags = "beregning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public void revurderOgBrukForrigeSkatteoppgjør(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BrukForrigeSkatteoppgjørDto brukForrigeSkatteoppgjørDto) {
+        revurderPGITjeneste.revurderOgBrukForrigeSkatteoppgjør(
+            brukForrigeSkatteoppgjørDto.getSaksnummer(),
+            brukForrigeSkatteoppgjørDto.getBehandlingIdForrigeSkatteoppgjør(),
+            brukForrigeSkatteoppgjørDto.getSkjæringstidspunkt());
     }
 
 
