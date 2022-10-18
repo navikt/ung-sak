@@ -36,9 +36,9 @@ public abstract class HåndterePleietrengendeDødsfallTjeneste {
         // CDI
     }
 
-    public HåndterePleietrengendeDødsfallTjeneste(VilkårResultatRepository vilkårResultatRepository,
-                                                  VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                                  PersonopplysningTjeneste personopplysningTjeneste) {
+    protected HåndterePleietrengendeDødsfallTjeneste(VilkårResultatRepository vilkårResultatRepository,
+                                                     VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                                     PersonopplysningTjeneste personopplysningTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.personopplysningTjeneste = personopplysningTjeneste;
@@ -48,7 +48,7 @@ public abstract class HåndterePleietrengendeDødsfallTjeneste {
 
     protected abstract void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate fødselsdato);
 
-    abstract protected Set<VilkårType> vilkårTyperSomForlengesUtoverAldersvilkårOgMedisinskVilkår();
+    protected abstract Set<VilkårType> vilkårTyperSomForlengesUtoverAldersvilkårOgMedisinskVilkår();
 
     public void utvidPerioderVedDødsfall(BehandlingReferanse referanse) {
         Optional<DatoIntervallEntitet> utvidelsesperiode = utledUtvidetPeriodeForDødsfall(referanse);
