@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død;
 
 import java.time.LocalDate;
-import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -12,7 +11,6 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -20,16 +18,13 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.alder.VurderAldersVilkårTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 public abstract class HåndterePleietrengendeDødsfallTjeneste {
 
     private final VurderAldersVilkårTjeneste vurderAldersVilkårTjeneste = new VurderAldersVilkårTjeneste();
 
-    private BehandlingRepository behandlingRepository;
     protected VilkårResultatRepository vilkårResultatRepository;
-    private VilkårUtleder vilkårUtleder;
     protected VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     protected PersonopplysningTjeneste personopplysningTjeneste;
 
@@ -41,14 +36,10 @@ public abstract class HåndterePleietrengendeDødsfallTjeneste {
         // CDI
     }
 
-    public HåndterePleietrengendeDødsfallTjeneste(BehandlingRepository behandlingRepository,
-                                                  VilkårResultatRepository vilkårResultatRepository,
-                                                  VilkårUtleder vilkårUtleder,
+    public HåndterePleietrengendeDødsfallTjeneste(VilkårResultatRepository vilkårResultatRepository,
                                                   VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                   PersonopplysningTjeneste personopplysningTjeneste) {
-        this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.vilkårUtleder = vilkårUtleder;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.personopplysningTjeneste = personopplysningTjeneste;
     }
@@ -56,6 +47,8 @@ public abstract class HåndterePleietrengendeDødsfallTjeneste {
     public abstract Optional<DatoIntervallEntitet> utledUtvidetPeriodeForDødsfall(BehandlingReferanse referanse);
 
     protected abstract void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate fødselsdato);
+
+    abstract protected Set<VilkårType> vilkårTyperSomForlengesUtoverAldersvilkårOgMedisinskVilkår();
 
     public void utvidPerioderVedDødsfall(BehandlingReferanse referanse) {
         Optional<DatoIntervallEntitet> utvidelsesperiode = utledUtvidetPeriodeForDødsfall(referanse);
@@ -74,22 +67,13 @@ public abstract class HåndterePleietrengendeDødsfallTjeneste {
 
         forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato());
         forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
-        forlengAndreVilkår(referanse, periode, vilkårene, resultatBuilder);
+        forlengAndreVilkår(periode, vilkårene, resultatBuilder);
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), resultatBuilder.build());
     }
 
-    private void forlengAndreVilkår(BehandlingReferanse referanse, DatoIntervallEntitet periode, Vilkårene vilkårene, VilkårResultatBuilder resultatBuilder) {
-        Set<VilkårType> vilkår = andreVilkårTyperSomForlenges(referanse);
+    private void forlengAndreVilkår(DatoIntervallEntitet periode, Vilkårene vilkårene, VilkårResultatBuilder resultatBuilder) {
+        Set<VilkårType> vilkår = vilkårTyperSomForlengesUtoverAldersvilkårOgMedisinskVilkår();
         forlengeVilkårMedPeriode(vilkår, resultatBuilder, vilkårene, periode);
-    }
-
-    private Set<VilkårType> andreVilkårTyperSomForlenges(BehandlingReferanse referanse) {
-        EnumSet<VilkårType> vilkår = EnumSet.noneOf(VilkårType.class);
-        vilkår.add(VilkårType.SØKNADSFRIST);
-        vilkår.addAll(vilkårUtleder.utledVilkår(behandlingRepository.hentBehandling(referanse.getBehandlingId())).getAlleAvklarte());
-        vilkår.removeAll(vilkårsPerioderTilVurderingTjeneste.definerendeVilkår());
-        vilkår.remove(VilkårType.ALDERSVILKÅR);
-        return vilkår;
     }
 
     private void forlengOgVurderAldersvilkåret(VilkårResultatBuilder resultatBuilder, DatoIntervallEntitet periode, PersonopplysningEntitet brukerPersonopplysninger) {
