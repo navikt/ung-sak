@@ -80,9 +80,9 @@ public class RevurderPGITjeneste {
     /**
      * Revurderer periode der bruker omfattes av § 8-35 og ferdilignede inntekter fra forrige skatteoppgjør
      *
-     * @param saksnummer         Saksnummer
-     * @param behandlingIdForrigeSkatteoppgjør         behandlingId
-     * @param skjæringstidspunkt Skjæringstidspunkt for aktuell periode
+     * @param saksnummer                       Saksnummer
+     * @param behandlingIdForrigeSkatteoppgjør behandlingId
+     * @param skjæringstidspunkt               Skjæringstidspunkt for aktuell periode
      */
     public void revurderOgBrukForrigeSkatteoppgjør(Saksnummer saksnummer,
                                                    String behandlingIdForrigeSkatteoppgjør,
@@ -102,7 +102,7 @@ public class RevurderPGITjeneste {
         var aktuellPeriode = finnVilkårsperiode(skjæringstidspunkt, tilRevurdering);
 
         ProsessTaskData tilRevurderingTaskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
-        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_BRK_FORRIGE_SKATTELIGNING.getKode());
+        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG.getKode());
         tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, aktuellPeriode.getFom().toString());
         tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, aktuellPeriode.getTom().toString());
         tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
