@@ -24,11 +24,8 @@ public class NødvendighetVilkår implements RuleService<NødvendighetVilkårGru
     @Override
     public Specification<NødvendighetMellomregningData> getSpecification() {
         Ruleset<NødvendighetMellomregningData> rs = new Ruleset<>();
-        return rs.hvisRegel(ErGodkjentInstitusjon.ID, "Hvis opplæringsinstitusjonen er godkjent...")
-            .hvis(new ErGodkjentInstitusjon(),
-                rs.hvisRegel(ErNødvendigOpplæring.ID, "Hvis opplæringen er vurdert som nødvendig...")
-                    .hvis(new ErNødvendigOpplæring(), new Oppfylt())
-                    .ellers(new IkkeOppfylt(NødvendighetVilkårAvslagsårsaker.IKKE_NØDVENDIG.toRuleReason())))
-            .ellers(new IkkeOppfylt(NødvendighetVilkårAvslagsårsaker.IKKE_GODKJENT_INSTITUSJON.toRuleReason()));
+        return rs.hvisRegel(ErNødvendigOpplæring.ID, "Hvis opplæringen er vurdert som nødvendig...")
+            .hvis(new ErNødvendigOpplæring(), new Oppfylt())
+            .ellers(new IkkeOppfylt(NødvendighetVilkårAvslagsårsaker.IKKE_NØDVENDIG.toRuleReason()));
     }
 }

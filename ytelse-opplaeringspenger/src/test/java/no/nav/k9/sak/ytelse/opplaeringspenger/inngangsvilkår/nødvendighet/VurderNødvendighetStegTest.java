@@ -1,13 +1,11 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.TreeSet;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +33,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
@@ -77,17 +74,11 @@ public class VurderNødvendighetStegTest {
         søknadsperiode = new Periode(now.minusMonths(3), now);
         scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OPPLÆRINGSPENGER);
         scenario.leggTilVilkår(VilkårType.NØDVENDIG_OPPLÆRING, Utfall.IKKE_VURDERT);
-        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT); //TODO tilpass testene til nytt vilkår
-    }
-
-    private void setupBehandlingMedSykdomsvilkår(Utfall utfall, Periode periode) {
-        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, utfall, periode);
-        behandling = scenario.lagre(repositoryProvider);
     }
 
     private void setupPerioderTilVurdering(BehandlingskontrollKontekst kontekst) {
         when(perioderTilVurderingTjenesteMock.utled(kontekst.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING))
-            .thenReturn(new TreeSet<>(Collections.singletonList(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFom(), søknadsperiode.getTom()))));
+            .thenReturn(new TreeSet<>(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFom(), søknadsperiode.getTom()))));
     }
 
     private void lagreGrunnlag(VurdertOpplæringGrunnlag grunnlag, Behandling behandling) {
@@ -96,7 +87,9 @@ public class VurderNødvendighetStegTest {
 
     @Test
     public void skalReturnereAksjonspunktNårOpplæringIkkeErVurdert() {
-        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        behandling = scenario.lagre(repositoryProvider);
 
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
@@ -118,19 +111,20 @@ public class VurderNødvendighetStegTest {
     }
 
     @Test
-    public void skalReturnereUtenAksjonspunktNårOpplæringOgInstitusjonErGodkjent() {
-        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+    public void skalReturnereUtenAksjonspunktNårOpplæringErGodkjent() {
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        behandling = scenario.lagre(repositoryProvider);
 
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Ås barnehage avdeling Vågebytoppen", true, "noe");
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), true, "", vurdertInstitusjon.getInstitusjon());
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), true, "", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
-            new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
+            new VurdertInstitusjonHolder(),
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
             "fordi");
         lagreGrunnlag(grunnlag, behandling);
 
@@ -149,18 +143,19 @@ public class VurderNødvendighetStegTest {
 
     @Test
     public void skalReturnereUtenAksjonspunktNårOpplæringIkkeErGodkjent() {
-        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        behandling = scenario.lagre(repositoryProvider);
 
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Xavier Institute", true, "noe");
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), false, "test", vurdertInstitusjon.getInstitusjon());
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), false, "test", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
-            new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
+            new VurdertInstitusjonHolder(),
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
             "fordi");
         lagreGrunnlag(grunnlag, behandling);
 
@@ -178,21 +173,15 @@ public class VurderNødvendighetStegTest {
     }
 
     @Test
-    public void skalReturnereUtenAksjonspunktNårInstitusjonIkkeErGodkjent() {
-        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+    public void skalReturnereUtenAksjonspunktNårInstitusjonsvilkårIkkeErOppfylt() {
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.IKKE_OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.IKKE_OPPFYLT, søknadsperiode);
+        behandling = scenario.lagre(repositoryProvider);
 
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
-
-        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Riskhospitalet", false, "noe");
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), false, "test", vurdertInstitusjon.getInstitusjon());
-        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
-            new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
-            "fordi");
-        lagreGrunnlag(grunnlag, behandling);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
@@ -209,19 +198,20 @@ public class VurderNødvendighetStegTest {
 
     @Test
     public void skalReturnereUtenAksjonspunktNårOpplæringErPeriodevisGodkjentOgIkkeGodkjent() {
-        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        behandling = scenario.lagre(repositoryProvider);
 
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Sjøengen Kro", true, "noe");
-        VurdertOpplæring vurdertOpplæring1 = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "test", vurdertInstitusjon.getInstitusjon());
-        VurdertOpplæring vurdertOpplæring2 = new VurdertOpplæring(søknadsperiode.getTom(), søknadsperiode.getTom(), false, "tast", vurdertInstitusjon.getInstitusjon());
+        VurdertOpplæring vurdertOpplæring1 = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "test", "");
+        VurdertOpplæring vurdertOpplæring2 = new VurdertOpplæring(søknadsperiode.getTom(), søknadsperiode.getTom(), false, "tast", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
-            new VurdertOpplæringHolder(Arrays.asList(vurdertOpplæring1, vurdertOpplæring2)),
+            new VurdertInstitusjonHolder(),
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring1, vurdertOpplæring2)),
             "fordi");
         lagreGrunnlag(grunnlag, behandling);
 
@@ -244,21 +234,20 @@ public class VurderNødvendighetStegTest {
     }
 
     @Test
-    public void skalReturnereUtenAksjonspunktNårInstitusjonErPeriodevisGodkjentOgIkkeGodkjent() {
-        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+    public void skalReturnereUtenAksjonspunktNårInstitusjonsvilkårErDelvisOppfyltOgOpplæringErGodkjent() {
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1)));
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        behandling = scenario.lagre(repositoryProvider);
 
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertInstitusjon vurdertInstitusjon1 = new VurdertInstitusjon("Apexklinikken", true, "noe");
-        VurdertInstitusjon vurdertInstitusjon2 = new VurdertInstitusjon("Kampen Pub", false, "noe annet");
-        VurdertOpplæring vurdertOpplæring1 = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "test", vurdertInstitusjon1.getInstitusjon());
-        VurdertOpplæring vurdertOpplæring2 = new VurdertOpplæring(søknadsperiode.getTom(), søknadsperiode.getTom(), true, "tast", vurdertInstitusjon2.getInstitusjon());
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), true, "test", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(Arrays.asList(vurdertInstitusjon1, vurdertInstitusjon2)),
-            new VurdertOpplæringHolder(Arrays.asList(vurdertOpplæring1, vurdertOpplæring2)),
+            new VurdertInstitusjonHolder(),
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
             "fordi");
         lagreGrunnlag(grunnlag, behandling);
 
@@ -282,18 +271,19 @@ public class VurderNødvendighetStegTest {
 
     @Test
     public void skalReturnereAksjonspunktNårVurderingIkkeErKomplett() {
-        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        behandling = scenario.lagre(repositoryProvider);
 
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Karoline Spiseri og Pub", true, "noe");
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "test", vurdertInstitusjon.getInstitusjon());
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "test", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
-            new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
+            new VurdertInstitusjonHolder(),
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
             "fordi");
         lagreGrunnlag(grunnlag, behandling);
 
@@ -313,7 +303,9 @@ public class VurderNødvendighetStegTest {
 
     @Test
     public void skalReturnereUtenAksjonspunktNårSykdomsvilkårIkkeErOppfylt() {
-        setupBehandlingMedSykdomsvilkår(Utfall.IKKE_OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.IKKE_OPPFYLT, søknadsperiode);
+        behandling = scenario.lagre(repositoryProvider);
 
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
@@ -335,52 +327,19 @@ public class VurderNødvendighetStegTest {
 
     @Test
     public void skalReturnereUtenAksjonspunktNårSykdomsvilkårErDelvisOppfyltOgOpplæringErGodkjent() {
-        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusMonths(1)));
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusMonths(1)));
+        behandling = scenario.lagre(repositoryProvider);
 
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("der", true, "noe");
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusMonths(1), true, "", vurdertInstitusjon.getInstitusjon());
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), true, "", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
-            new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
-            "fordi");
-        lagreGrunnlag(grunnlag, behandling);
-
-        BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
-        assertThat(resultat.getAksjonspunktResultater()).isEmpty();
-        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
-        assertThat(vilkår).isNotNull();
-        assertThat(vilkår.getPerioder()).hasSize(2);
-        assertVilkårPeriode(vilkår.getPerioder().get(0),
-            Utfall.OPPFYLT,
-            søknadsperiode.getFom(),
-            søknadsperiode.getTom().minusMonths(1),
-            null);
-        assertVilkårPeriode(vilkår.getPerioder().get(1),
-            Utfall.IKKE_OPPFYLT,
-            søknadsperiode.getTom().minusMonths(1).plusDays(1),
-            søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE);
-    }
-
-    @Test
-    public void skalReturnereUtenAksjonspunktNårOpplæringErGodkjentUtenforSykdomsperiode() {
-        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusMonths(1)));
-
-        Fagsak fagsak = behandling.getFagsak();
-        BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
-            behandlingRepository.taSkriveLås(behandling));
-        setupPerioderTilVurdering(kontekst);
-
-        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("der", true, "noe");
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), true, "", vurdertInstitusjon.getInstitusjon());
-        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
-            new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
+            new VurdertInstitusjonHolder(),
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
             "fordi");
         lagreGrunnlag(grunnlag, behandling);
 
@@ -403,18 +362,20 @@ public class VurderNødvendighetStegTest {
 
     @Test
     public void skalIkkeLagreVilkårPeriodeUtenforSøknadsperiode() {
-        setupBehandlingMedSykdomsvilkår(Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        behandling = scenario.lagre(repositoryProvider);
+
 
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon("Scandic Helsfyr", true, "noe");
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom().minusWeeks(1), søknadsperiode.getTom().plusWeeks(1), true, "", vurdertInstitusjon.getInstitusjon());
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom().minusWeeks(1), søknadsperiode.getTom().plusWeeks(1), true, "", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
-            new VurdertOpplæringHolder(Collections.singletonList(vurdertOpplæring)),
+            new VurdertInstitusjonHolder(),
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
             "fordi");
         lagreGrunnlag(grunnlag, behandling);
 

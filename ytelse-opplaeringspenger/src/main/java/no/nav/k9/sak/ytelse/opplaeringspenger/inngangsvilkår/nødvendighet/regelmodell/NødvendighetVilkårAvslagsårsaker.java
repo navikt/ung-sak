@@ -5,8 +5,7 @@ import no.nav.fpsak.nare.evaluation.RuleReasonRefImpl;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 
 enum NødvendighetVilkårAvslagsårsaker {
-    IKKE_NØDVENDIG(Avslagsårsak.IKKE_NØDVENDIG.getKode(), Avslagsårsak.IKKE_NØDVENDIG.getNavn()),
-    IKKE_GODKJENT_INSTITUSJON(Avslagsårsak.IKKE_GODKJENT_INSTITUSJON.getKode(), Avslagsårsak.IKKE_GODKJENT_INSTITUSJON.getNavn());
+    IKKE_NØDVENDIG(Avslagsårsak.IKKE_NØDVENDIG.getKode(), Avslagsårsak.IKKE_NØDVENDIG.getNavn());
 
     private final String kode;
     private final String årsak;
