@@ -57,7 +57,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
                             BehandlingRepository behandlingRepository,
                             PersonopplysningTjeneste personopplysningTjeneste,
                             ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder,
-                            HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste,
+                            @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste,
                             PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder) {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
@@ -94,8 +94,8 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
             aksjonspunkter.add(AksjonspunktDefinisjon.MANGLER_AKTIVITETER);
         }
 
+        håndterePleietrengendeDødsfallTjeneste.utvidPerioderVedDødsfall(referanse);
         if (aksjonspunkter.isEmpty()) {
-            håndterePleietrengendeDødsfallTjeneste.utvidPerioderVedDødsfall(referanse);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
         return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);

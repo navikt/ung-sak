@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.PerioderMedSykdomInnvilgetUtleder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeDødsfallTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
 
 @ApplicationScoped
@@ -30,6 +31,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder;
     private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
+    private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
 
     protected FaktaOmUttakSteg() {
         // for proxy
@@ -38,10 +40,12 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     @Inject
     public FaktaOmUttakSteg(BehandlingRepository behandlingRepository,
                             ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder,
-                            PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder) {
+                            PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
+                            @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE) HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.arbeidBrukerBurdeSøktOmUtleder = arbeidBrukerBurdeSøktOmUtleder;
         this.perioderMedSykdomInnvilgetUtleder = perioderMedSykdomInnvilgetUtleder;
+        this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
     }
 
     @SuppressWarnings("unused")
@@ -52,6 +56,8 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         final Long behandlingId = kontekst.getBehandlingId();
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
         var referanse = BehandlingReferanse.fra(behandling);
+
+        håndterePleietrengendeDødsfallTjeneste.utvidPerioderVedDødsfall(referanse);
 
         // TODO PLS: Avklare om dette er funksjonelt ønskelig
         var innvilgedePerioderTilVurdering = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse);
