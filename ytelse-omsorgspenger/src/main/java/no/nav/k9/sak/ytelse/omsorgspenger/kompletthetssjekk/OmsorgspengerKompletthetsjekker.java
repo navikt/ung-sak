@@ -20,7 +20,6 @@ import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetForBeregningTjeneste;
@@ -44,7 +43,6 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     private BehandlingRepository behandlingRepository;
     private KompletthetsjekkerFelles fellesUtil;
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
-    private MottatteDokumentRepository mottatteDokumentRepository;
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
 
     OmsorgspengerKompletthetsjekker() {
@@ -57,13 +55,12 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
                                            BehandlingRepository behandlingRepository,
                                            KompletthetsjekkerFelles fellesUtil,
                                            OmsorgspengerGrunnlagRepository grunnlagRepository,
-                                           MottatteDokumentRepository mottatteDokumentRepository, KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
+                                           KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
         this.kompletthetssjekkerInntektsmelding = kompletthetssjekkerInntektsmelding;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.fellesUtil = fellesUtil;
         this.grunnlagRepository = grunnlagRepository;
-        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
     }
 
