@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger;
 
-import java.util.Collections;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -11,7 +10,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderNødvendighetDto;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
@@ -40,15 +38,14 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
     }
 
     private VurdertOpplæringGrunnlag mapDtoTilGrunnlag(Long behandlingId, VurderNødvendighetDto dto) {
-        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon(dto.getInstitusjon().getInstitusjon(), dto.getInstitusjon().isGodkjent(), dto.getInstitusjon().getBegrunnelse());
         List<VurdertOpplæring> vurdertOpplæring = dto.getPerioder()
             .stream()
-            .map(periodeDto -> new VurdertOpplæring(periodeDto.getFom(), periodeDto.getTom(), periodeDto.isNødvendigOpplæring(), periodeDto.getBegrunnelse(), vurdertInstitusjon.getInstitusjon()))
+            .map(periodeDto -> new VurdertOpplæring(periodeDto.getFom(), periodeDto.getTom(), periodeDto.isNødvendigOpplæring(), periodeDto.getBegrunnelse(), dto.getInstitusjon()))
             .toList();
         sjekkOverlappendePerioder(vurdertOpplæring);
 
         return new VurdertOpplæringGrunnlag(behandlingId,
-            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
+            new VurdertInstitusjonHolder(),
             new VurdertOpplæringHolder(vurdertOpplæring),
             dto.getBegrunnelse());
     }

@@ -9,9 +9,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.dokument.TekstValideringRegex;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -21,7 +23,9 @@ public class VurderNødvendighetDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty(value = "institusjon")
     @Valid
-    private VurderInstitusjonDto institusjon;
+    @Size(max = 100)
+    @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String institusjon;
 
     @JsonProperty(value = "perioder")
     @Valid
@@ -31,12 +35,12 @@ public class VurderNødvendighetDto extends BekreftetAksjonspunktDto {
     public VurderNødvendighetDto() {
     }
 
-    public VurderNødvendighetDto(VurderInstitusjonDto institusjon, List<VurderNødvendighetPeriodeDto> perioder) {
+    public VurderNødvendighetDto(String institusjon, List<VurderNødvendighetPeriodeDto> perioder) {
         this.institusjon = institusjon;
         this.perioder = perioder;
     }
 
-    public VurderInstitusjonDto getInstitusjon() {
+    public String getInstitusjon() {
         return institusjon;
     }
 

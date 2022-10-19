@@ -60,19 +60,20 @@ public class VurdertOpplæringRepository {
     }
 
     private VurdertInstitusjonHolder hentVurdertInstitusjonHolderTilNyttGrunnlag(VurdertOpplæringGrunnlag aktivtGrunnlag, VurdertOpplæringGrunnlag nyttGrunnlag) {
-        VurdertInstitusjon nyVurdertInstitusjon = nyttGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().get(0);
-        if (trengerNyVurdertInstitusjonHolder(aktivtGrunnlag, nyVurdertInstitusjon)) {
-            List<VurdertInstitusjon> nyVurdertInstitusjonList = aktivtGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().stream()
-                .filter(eksisterendeVurdertInstitusjon -> !eksisterendeVurdertInstitusjon.getInstitusjon().equals(nyVurdertInstitusjon.getInstitusjon()))
-                .map(VurdertInstitusjon::new)
-                .collect(Collectors.toList());
+        if (!nyttGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().isEmpty()) {
+            VurdertInstitusjon nyVurdertInstitusjon = nyttGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().get(0);
+            if (trengerNyVurdertInstitusjonHolder(aktivtGrunnlag, nyVurdertInstitusjon)) {
+                List<VurdertInstitusjon> nyVurdertInstitusjonList = aktivtGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().stream()
+                    .filter(eksisterendeVurdertInstitusjon -> !eksisterendeVurdertInstitusjon.getInstitusjon().equals(nyVurdertInstitusjon.getInstitusjon()))
+                    .map(VurdertInstitusjon::new)
+                    .collect(Collectors.toList());
 
-            nyVurdertInstitusjonList.add(nyVurdertInstitusjon);
+                nyVurdertInstitusjonList.add(nyVurdertInstitusjon);
 
-            return new VurdertInstitusjonHolder(nyVurdertInstitusjonList);
-        } else {
-            return aktivtGrunnlag.getVurdertInstitusjonHolder();
+                return new VurdertInstitusjonHolder(nyVurdertInstitusjonList);
+            }
         }
+        return aktivtGrunnlag.getVurdertInstitusjonHolder();
     }
 
     private VurdertOpplæringHolder hentVurdertOpplæringHolderTilNyttGrunnlag(VurdertOpplæringGrunnlag aktivtGrunnlag, VurdertOpplæringGrunnlag nyttGrunnlag) {
