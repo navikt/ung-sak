@@ -54,8 +54,12 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
             return Optional.empty();
         }
 
-        var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
-        var pleietrengendePersonopplysninger = personopplysningerAggregat.getPersonopplysning(referanse.getPleietrengendeAktørId());
+        var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysningerHvisEksisterer(referanse, referanse.getFagsakPeriode().getFomDato());
+        if (personopplysningerAggregat.isEmpty()){
+            //kortslutter når personopplysninger ikke er hentet enda
+            return Optional.empty();
+        }
+        var pleietrengendePersonopplysninger = personopplysningerAggregat.get().getPersonopplysning(referanse.getPleietrengendeAktørId());
 
         var dødsdato = pleietrengendePersonopplysninger.getDødsdato();
         if (dødsdato == null) {
