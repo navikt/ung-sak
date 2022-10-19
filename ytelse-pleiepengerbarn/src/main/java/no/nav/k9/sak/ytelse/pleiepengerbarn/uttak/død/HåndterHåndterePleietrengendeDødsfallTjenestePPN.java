@@ -9,10 +9,12 @@ import java.util.Set;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -24,8 +26,12 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
-public class HåndterHåndterePleietrengendeDødsfallTjenestePPN extends HåndterePleietrengendeDødsfallTjeneste {
+public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements HåndterePleietrengendeDødsfallTjeneste {
 
+    private VilkårForlengingTjeneste vilkårForlengingTjeneste = new VilkårForlengingTjeneste();
+    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
+    private PersonopplysningTjeneste personopplysningTjeneste;
     private boolean utvidVedDødsfall;
 
     HåndterHåndterePleietrengendeDødsfallTjenestePPN() {
@@ -37,8 +43,10 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN extends Håndte
                                                             @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                             PersonopplysningTjeneste personopplysningTjeneste,
                                                             @KonfigVerdi(value = "PSB_PPN_UTVIDE_VED_DODSFALL", defaultVerdi = "true") boolean utvidVedDødsfall) {
-        super(vilkårResultatRepository, vilkårsPerioderTilVurderingTjeneste, personopplysningTjeneste);
+        this.vilkårResultatRepository = vilkårResultatRepository;
+        this.personopplysningTjeneste = personopplysningTjeneste;
         this.utvidVedDødsfall = utvidVedDødsfall;
+        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
 
@@ -66,12 +74,27 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN extends Håndte
     }
 
     @Override
-    protected Set<VilkårType> vilkårTyperSomForlengesUtoverAldersvilkårOgMedisinskVilkår() {
-        return Set.of(VilkårType.OPPTJENINGSVILKÅRET, VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET, VilkårType.SØKNADSFRIST);
+    public void utvidPerioderVedDødsfall(BehandlingReferanse referanse) {
+        Optional<DatoIntervallEntitet> utvidelsesperiode = utledUtvidetPeriodeForDødsfall(referanse);
+        if (utvidelsesperiode.isEmpty()) {
+            return;
+        }
+        var periode = utvidelsesperiode.get();
+
+        var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
+        var brukerPersonopplysninger = personopplysningerAggregat.getPersonopplysning(referanse.getAktørId());
+
+        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
+
+        var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
+
+        forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
+        forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode);
+        forlengAndreVilkår(periode, vilkårene, resultatBuilder);
+        vilkårResultatRepository.lagre(referanse.getBehandlingId(), resultatBuilder.build());
     }
 
-    @Override
-    protected void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate fødselsdato) {
+    private void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode) {
         var eksisterendeResultat = finnSykdomsvurderingPåDødsdato(periode.getFomDato(), vilkårene);
 
         VilkårBuilder vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.I_LIVETS_SLUTTFASE);
@@ -81,7 +104,25 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN extends Håndte
 
     private VilkårPeriode finnSykdomsvurderingPåDødsdato(LocalDate dødsdato, Vilkårene vilkårene) {
         return vilkårene.getVilkår(VilkårType.I_LIVETS_SLUTTFASE).orElseThrow().finnPeriodeSomInneholderDato(dødsdato).orElseThrow();
+    }
 
+    private void forlengOgVurderAldersvilkåret(VilkårResultatBuilder resultatBuilder, DatoIntervallEntitet periode, PersonopplysningEntitet brukerPersonopplysninger) {
+        vilkårForlengingTjeneste.forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
+    }
+
+    private void forlengAndreVilkår(DatoIntervallEntitet periode, Vilkårene vilkårene, VilkårResultatBuilder resultatBuilder) {
+        Set<VilkårType> vilkår = Set.of(VilkårType.OPPTJENINGSVILKÅRET, VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET, VilkårType.SØKNADSFRIST);
+        vilkårForlengingTjeneste.forlengeVilkårMedPeriode(vilkår, resultatBuilder, vilkårene, periode);
+    }
+
+    private boolean harIkkeGodkjentSykdomPåDødsdatoen(LocalDate dødsdato, Vilkårene vilkårene) {
+        for (VilkårType vilkårType : vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()) {
+            Optional<VilkårPeriode> periode = vilkårene.getVilkår(vilkårType).orElseThrow().finnPeriodeSomInneholderDato(dødsdato);
+            if (periode.isPresent() && periode.get().getUtfall() == Utfall.IKKE_OPPFYLT) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
