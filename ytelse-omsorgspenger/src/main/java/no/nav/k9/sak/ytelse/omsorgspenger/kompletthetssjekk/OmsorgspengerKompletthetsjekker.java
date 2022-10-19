@@ -5,7 +5,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -17,7 +16,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -88,15 +86,9 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         // hendelser)
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
         List<ManglendeVedlegg> manglendeInntektsmeldinger = getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt());
-        if (!manglendeInntektsmeldinger.isEmpty()) {
-            if (harSøknadSomArbeidstaker(ref)) {
-                LOGGER.info("Behandling {} er ikke komplett - Søknad arbeidstaker uten tilhørende IM", ref.getBehandlingId());
-                return settPåVent(ref, Venteårsak.AVV_IM_MOT_SØKNAD_AT, 14);
-            } else if (harInntektsmelding(ref)){
-                LOGGER.info("Behandling {} er ikke komplett - IM fra {} arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size());
-                return settPåVent(ref, Venteårsak.AVV_IM_MOT_AAREG, 3);
-            }
-            //kommer hit hvis vi mangler IM og har bare søknad SN/FL. Da venter vi ikke på IM
+        if (!manglendeInntektsmeldinger.isEmpty() && (harRefusjonskravFraMottatteInntektsmeldinger(ref) || harFraværskorrigering(ref))) {
+            LOGGER.info("Behandling {} er ikke komplett - mangler {} IM fra arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size());
+            return settPåVent(ref, Venteårsak.AVV_IM_MOT_AAREG, 3);
         }
         if (ingenSøknadsperioder(ref)) {
             // Gjelder både behandlinger som er førstegangs og som er forlengelse
@@ -108,29 +100,17 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public boolean ingenSøknadsperioder(BehandlingReferanse ref) {
-        return harIngenRefusjonskravFraMottatteInntektsmeldinger(ref) && harIkkeSøknadsperiode(ref) && harIkkeFraværskorrigering(ref);
+        return !harRefusjonskravFraMottatteInntektsmeldinger(ref)
+            && !harSøknadsperiode(ref)
+            && !harFraværskorrigering(ref);
     }
 
-    private boolean harSøknadSomArbeidstaker(BehandlingReferanse ref) {
-        return mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(ref.getFagsakId())
-            .stream()
-            .filter(it -> it.getBehandlingId() != null && it.getBehandlingId().equals(ref.getBehandlingId()))
-            .anyMatch(it -> Set.of(Brevkode.SØKNAD_UTBETALING_OMS_AT, Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT).contains(it.getType()));
+    private boolean harSøknadsperiode(BehandlingReferanse ref) {
+        return grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(ref.getBehandlingId()).isPresent();
     }
 
-    private boolean harInntektsmelding(BehandlingReferanse ref) {
-        return mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(ref.getFagsakId())
-            .stream()
-            .filter(it -> it.getBehandlingId() != null && it.getBehandlingId().equals(ref.getBehandlingId()))
-            .anyMatch(it -> Set.of(Brevkode.INNTEKTSMELDING, Brevkode.FRAVÆRSKORRIGERING_IM_OMS).contains(it.getType()));
-    }
-
-    private boolean harIkkeSøknadsperiode(BehandlingReferanse ref) {
-        return grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(ref.getBehandlingId()).isEmpty();
-    }
-
-    private boolean harIkkeFraværskorrigering(BehandlingReferanse ref) {
-        return grunnlagRepository.hentOppgittFraværFraFraværskorrigeringerHvisEksisterer(ref.getBehandlingId()).isEmpty();
+    private boolean harFraværskorrigering(BehandlingReferanse ref) {
+        return grunnlagRepository.hentOppgittFraværFraFraværskorrigeringerHvisEksisterer(ref.getBehandlingId()).isPresent();
     }
 
     private KompletthetResultat settPåVent(BehandlingReferanse ref, Venteårsak venteårsak, int antallVentedager) {
@@ -144,10 +124,10 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
             .orElse(KompletthetResultat.fristUtløpt());
     }
 
-    private boolean harIngenRefusjonskravFraMottatteInntektsmeldinger(BehandlingReferanse ref) {
+    private boolean harRefusjonskravFraMottatteInntektsmeldinger(BehandlingReferanse ref) {
         List<Inntektsmelding> inntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt());
         return inntektsmeldinger.stream()
-            .allMatch(im -> !im.harRefusjonskrav());
+            .anyMatch(Inntektsmelding::harRefusjonskrav);
     }
 
     @Override
