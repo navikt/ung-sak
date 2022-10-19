@@ -13,6 +13,7 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -25,6 +26,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements HåndterePleietrengendeDødsfallTjeneste {
+    private VilkårForlengingTjeneste vilkårForlengingTjeneste = new VilkårForlengingTjeneste();
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
@@ -76,11 +78,16 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
             return;
         }
         var periode = utvidelsesperiode.get();
+
+        var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
+        var brukerPersonopplysninger = personopplysningerAggregat.getPersonopplysning(referanse.getAktørId());
+
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
 
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
 
         forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode);
+        forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), resultatBuilder.build());
     }
 
@@ -94,6 +101,10 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
 
     private VilkårPeriode finnSykdomsvurderingPåDødsdato(LocalDate dødsdato, Vilkårene vilkårene) {
         return vilkårene.getVilkår(VilkårType.I_LIVETS_SLUTTFASE).orElseThrow().finnPeriodeSomInneholderDato(dødsdato).orElseThrow();
+    }
+
+    private void forlengOgVurderAldersvilkåret(VilkårResultatBuilder resultatBuilder, DatoIntervallEntitet periode, PersonopplysningEntitet brukerPersonopplysninger) {
+        vilkårForlengingTjeneste.forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
     }
 
     private boolean harIkkeGodkjentSykdomPåDødsdatoen(LocalDate dødsdato, Vilkårene vilkårene) {
