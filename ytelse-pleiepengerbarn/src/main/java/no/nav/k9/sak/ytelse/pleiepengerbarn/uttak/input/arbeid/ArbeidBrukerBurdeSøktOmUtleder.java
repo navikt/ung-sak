@@ -50,7 +50,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester;
-    private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
+    private Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester;
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
     private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
     private OpptjeningRepository opptjeningRepository;
@@ -67,7 +67,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
                                           PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
                                           OpptjeningRepository opptjeningRepository,
                                           VilkårResultatRepository vilkårResultatRepository,
-                                          HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste) {
+                                          @Any Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
@@ -75,7 +75,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         this.opptjeningRepository = opptjeningRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsfristTjenester = søknadsfristTjenester;
-        this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
+        this.håndterePleietrengendeDødsfallTjenester = håndterePleietrengendeDødsfallTjenester;
     }
 
     public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledMangler(BehandlingReferanse referanse) {
@@ -96,6 +96,8 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             .medTidslinjeTilVurdering(tidslinjeTilVurdering)
             .medOpptjeningsResultat(opptjeningResultat.orElse(null))
             .medVilkår(vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow());
+
+        HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste = HåndterePleietrengendeDødsfallTjeneste.velgTjeneste(håndterePleietrengendeDødsfallTjenester, referanse);
         håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse).ifPresent(input::medAutomatiskUtvidelseVedDødsfall);
 
         var innvilgeteVilkårPerioder = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse);
