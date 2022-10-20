@@ -45,7 +45,7 @@ import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.OLPStegHelper;
+import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.OppfyltVilkårTidslinjeUtleder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.LangvarigSykdomPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
@@ -115,7 +115,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
 
         var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.LANGVARIG_SYKDOM));
 
-        final var tidslinjeMedInstitusjonsvilkårOppfylt = OLPStegHelper.finnOppfyltVilkårTidslinje(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
+        final var tidslinjeMedInstitusjonsvilkårOppfylt = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
         final var tidslinjeUtenInstitusjonsvilkårOppfylt = tidslinjeTilVurdering.disjoint(tidslinjeMedInstitusjonsvilkårOppfylt);
 
         tidslinjeTilVurdering = tidslinjeTilVurdering.intersection(tidslinjeMedInstitusjonsvilkårOppfylt);

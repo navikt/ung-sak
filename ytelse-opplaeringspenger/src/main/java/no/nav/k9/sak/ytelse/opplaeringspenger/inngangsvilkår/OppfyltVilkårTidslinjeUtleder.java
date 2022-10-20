@@ -13,9 +13,9 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 
-public class OLPStegHelper {
+public class OppfyltVilkårTidslinjeUtleder {
 
-    public static LocalDateTimeline<Boolean> finnOppfyltVilkårTidslinje(Vilkårene vilkårene, VilkårType vilkårType) {
+    public static LocalDateTimeline<Boolean> utled(Vilkårene vilkårene, VilkårType vilkårType) {
         NavigableSet<DatoIntervallEntitet> oppfyltVilkårPerioder = vilkårene.getVilkår(vilkårType)
             .orElseThrow()
             .getPerioder()

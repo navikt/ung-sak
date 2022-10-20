@@ -60,6 +60,7 @@ public class VurdertOpplæringRepository {
     }
 
     private VurdertInstitusjonHolder hentVurdertInstitusjonHolderTilNyttGrunnlag(VurdertOpplæringGrunnlag aktivtGrunnlag, VurdertOpplæringGrunnlag nyttGrunnlag) {
+        //TODO refaktorer
         if (!nyttGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().isEmpty()) {
             VurdertInstitusjon nyVurdertInstitusjon = nyttGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().get(0);
             if (trengerNyVurdertInstitusjonHolder(aktivtGrunnlag, nyVurdertInstitusjon)) {
