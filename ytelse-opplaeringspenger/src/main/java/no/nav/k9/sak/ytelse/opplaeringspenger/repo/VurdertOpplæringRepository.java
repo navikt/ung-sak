@@ -60,19 +60,19 @@ public class VurdertOpplæringRepository {
     }
 
     private VurdertInstitusjonHolder hentVurdertInstitusjonHolderTilNyttGrunnlag(VurdertOpplæringGrunnlag aktivtGrunnlag, VurdertOpplæringGrunnlag nyttGrunnlag) {
-        //TODO refaktorer
-        if (!nyttGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().isEmpty()) {
-            VurdertInstitusjon nyVurdertInstitusjon = nyttGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().get(0);
-            if (trengerNyVurdertInstitusjonHolder(aktivtGrunnlag, nyVurdertInstitusjon)) {
-                List<VurdertInstitusjon> nyVurdertInstitusjonList = aktivtGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().stream()
-                    .filter(eksisterendeVurdertInstitusjon -> !eksisterendeVurdertInstitusjon.getInstitusjon().equals(nyVurdertInstitusjon.getInstitusjon()))
-                    .map(VurdertInstitusjon::new)
-                    .collect(Collectors.toList());
+        List<VurdertInstitusjon> nyVurdertInstitusjon = nyttGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon();
+        if (nyVurdertInstitusjon.size() > 1) {
+            throw new IllegalArgumentException("Utviklerfeil: Skal ikke ha flere enn én ny institusjon om gangen.");
+        }
+        if (!nyVurdertInstitusjon.isEmpty() && trengerNyVurdertInstitusjonHolder(aktivtGrunnlag, nyVurdertInstitusjon.get(0))) {
+            List<VurdertInstitusjon> nyVurdertInstitusjonList = aktivtGrunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon().stream()
+                .filter(eksisterendeVurdertInstitusjon -> !eksisterendeVurdertInstitusjon.getInstitusjon().equals(nyVurdertInstitusjon.get(0).getInstitusjon()))
+                .map(VurdertInstitusjon::new)
+                .collect(Collectors.toList());
 
-                nyVurdertInstitusjonList.add(nyVurdertInstitusjon);
+            nyVurdertInstitusjonList.add(nyVurdertInstitusjon.get(0));
 
-                return new VurdertInstitusjonHolder(nyVurdertInstitusjonList);
-            }
+            return new VurdertInstitusjonHolder(nyVurdertInstitusjonList);
         }
         return aktivtGrunnlag.getVurdertInstitusjonHolder();
     }
