@@ -204,7 +204,7 @@ spec:
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
       value: "false"
     - name: PGI_FILTER_ENABLED
-      value: "false"
+      value: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
