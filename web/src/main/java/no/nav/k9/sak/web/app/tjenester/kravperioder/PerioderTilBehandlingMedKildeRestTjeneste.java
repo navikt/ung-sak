@@ -154,8 +154,10 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             (behandling.getStatus().erFerdigbehandletStatus() || harKommetTilUttak(behandling))) {
             var uttaksplan = uttakTjeneste.hentUttaksplan(behandling.getUuid(), true);
             List<LocalDateSegment<Utfall>> utfallFraUttak = new ArrayList<>();
-            for (Map.Entry<LukketPeriode, UttaksperiodeInfo> entry : uttaksplan.getPerioder().entrySet()) {
-                utfallFraUttak.add(new LocalDateSegment<>(entry.getKey().getFom(), entry.getKey().getTom(), mapUtfall(entry.getValue().getUtfall())));
+            if (uttaksplan != null) {
+                for (Map.Entry<LukketPeriode, UttaksperiodeInfo> entry : uttaksplan.getPerioder().entrySet()) {
+                    utfallFraUttak.add(new LocalDateSegment<>(entry.getKey().getFom(), entry.getKey().getTom(), mapUtfall(entry.getValue().getUtfall())));
+                }
             }
             timeline = new LocalDateTimeline<>(utfallFraUttak, StandardCombinators::coalesceRightHandSide);
         }
