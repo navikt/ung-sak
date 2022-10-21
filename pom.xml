@@ -40,10 +40,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>0.9.33</felles.version>
+        <felles.version>0.9.34</felles.version>
         <swagger.version>2.2.3</swagger.version>
         <junit.version>5.9.1</junit.version>
-        <k9format.version>7.0.2</k9format.version>
+        <k9format.version>7.0.3</k9format.version>
         <jackson.version>2.13.4.20221013</jackson.version>
         <asm.version>9.4</asm.version>
         <kotlin-stdlib.version>1.7.20</kotlin-stdlib.version>
