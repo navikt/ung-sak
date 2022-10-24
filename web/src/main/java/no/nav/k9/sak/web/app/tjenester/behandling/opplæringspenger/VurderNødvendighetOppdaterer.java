@@ -1,16 +1,18 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderNødvendighetDto;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
@@ -32,22 +34,33 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
 
     @Override
     public OppdateringResultat oppdater(VurderNødvendighetDto dto, AksjonspunktOppdaterParameter param) {
-        VurdertOpplæringGrunnlag grunnlag = mapDtoTilGrunnlag(param.getBehandlingId(), dto);
-        vurdertOpplæringRepository.lagreOgFlush(param.getBehandlingId(), grunnlag);
+        List<VurdertOpplæring> vurdertOpplæring = mapDtoTilVurdertOpplæring(dto);
+
+        var aktivVurdertInstitusjonHolder = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(param.getBehandlingId())
+            .map(VurdertOpplæringGrunnlag::getVurdertOpplæringHolder);
+
+        if (aktivVurdertInstitusjonHolder.isPresent()) {
+            LocalDateTimeline<VurdertOpplæring> vurdertOpplæringTidslinje = utledKombinertTidslinje(aktivVurdertInstitusjonHolder.get().getVurdertOpplæring(), vurdertOpplæring);
+
+            vurdertOpplæring = vurdertOpplæringTidslinje
+                .stream()
+                .map(datoSegment -> new VurdertOpplæring(datoSegment.getValue()).medPeriode(datoSegment.getFom(), datoSegment.getTom()))
+                .toList();
+        }
+
+        VurdertOpplæringHolder nyHolder = new VurdertOpplæringHolder(vurdertOpplæring);
+
+        vurdertOpplæringRepository.lagre(param.getBehandlingId(), nyHolder);
         return OppdateringResultat.nyttResultat();
     }
 
-    private VurdertOpplæringGrunnlag mapDtoTilGrunnlag(Long behandlingId, VurderNødvendighetDto dto) {
+    private List<VurdertOpplæring> mapDtoTilVurdertOpplæring(VurderNødvendighetDto dto) {
         List<VurdertOpplæring> vurdertOpplæring = dto.getPerioder()
             .stream()
             .map(periodeDto -> new VurdertOpplæring(periodeDto.getFom(), periodeDto.getTom(), periodeDto.isNødvendigOpplæring(), periodeDto.getBegrunnelse(), dto.getInstitusjon()))
             .toList();
         sjekkOverlappendePerioder(vurdertOpplæring);
-
-        return new VurdertOpplæringGrunnlag(behandlingId,
-            new VurdertInstitusjonHolder(),
-            new VurdertOpplæringHolder(vurdertOpplæring),
-            dto.getBegrunnelse());
+        return vurdertOpplæring;
     }
 
     private void sjekkOverlappendePerioder(List<VurdertOpplæring> vurdertOpplæring) {
@@ -59,5 +72,26 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
                 }
             }
         }
+    }
+
+    private LocalDateTimeline<VurdertOpplæring> utledKombinertTidslinje(List<VurdertOpplæring> eksisterende,
+                                                                        List<VurdertOpplæring> ny) {
+        LocalDateTimeline<VurdertOpplæring> eksisterendeTidslinje = toTidslinje(eksisterende);
+        LocalDateTimeline<VurdertOpplæring> nyTidslinje = toTidslinje(ny);
+
+        return eksisterendeTidslinje.combine(nyTidslinje, (datoInterval, datoSegment, datoSegment2) -> {
+                    VurdertOpplæring value = datoSegment2 == null ? datoSegment.getValue() : datoSegment2.getValue();
+                    return new LocalDateSegment<>(datoInterval, value);
+                },
+                LocalDateTimeline.JoinStyle.CROSS_JOIN)
+            .compress();
+    }
+
+    private LocalDateTimeline<VurdertOpplæring> toTidslinje(List<VurdertOpplæring> perioder) {
+        final var segments = perioder
+            .stream()
+            .map(vurdertOpplæring -> new LocalDateSegment<>(vurdertOpplæring.getPeriode().getFomDato(), vurdertOpplæring.getPeriode().getTomDato(), vurdertOpplæring))
+            .collect(Collectors.toList());
+        return new LocalDateTimeline<>(segments);
     }
 }

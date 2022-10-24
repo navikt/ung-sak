@@ -81,8 +81,11 @@ public class VurderNødvendighetStegTest {
             .thenReturn(new TreeSet<>(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFom(), søknadsperiode.getTom()))));
     }
 
-    private void lagreGrunnlag(VurdertOpplæringGrunnlag grunnlag, Behandling behandling) {
-        vurdertOpplæringRepository.lagreOgFlush(behandling.getId(), grunnlag);
+    private void lagreGrunnlag(VurdertOpplæringGrunnlag grunnlag) {
+        entityManager.persist(grunnlag.getVurdertInstitusjonHolder());
+        entityManager.persist(grunnlag.getVurdertOpplæringHolder());
+        entityManager.persist(grunnlag);
+        entityManager.flush();
     }
 
     @Test
@@ -124,9 +127,9 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), true, "", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             new VurdertInstitusjonHolder(),
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
-            "fordi");
-        lagreGrunnlag(grunnlag, behandling);
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+        );
+        lagreGrunnlag(grunnlag);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
@@ -155,9 +158,9 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), false, "test", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             new VurdertInstitusjonHolder(),
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
-            "fordi");
-        lagreGrunnlag(grunnlag, behandling);
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+        );
+        lagreGrunnlag(grunnlag);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
@@ -211,9 +214,9 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring2 = new VurdertOpplæring(søknadsperiode.getTom(), søknadsperiode.getTom(), false, "tast", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             new VurdertInstitusjonHolder(),
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring1, vurdertOpplæring2)),
-            "fordi");
-        lagreGrunnlag(grunnlag, behandling);
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring1, vurdertOpplæring2))
+        );
+        lagreGrunnlag(grunnlag);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
@@ -247,9 +250,9 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), true, "test", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             new VurdertInstitusjonHolder(),
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
-            "fordi");
-        lagreGrunnlag(grunnlag, behandling);
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+        );
+        lagreGrunnlag(grunnlag);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
@@ -283,9 +286,9 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "test", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             new VurdertInstitusjonHolder(),
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
-            "fordi");
-        lagreGrunnlag(grunnlag, behandling);
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+        );
+        lagreGrunnlag(grunnlag);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();
@@ -339,9 +342,9 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), true, "", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             new VurdertInstitusjonHolder(),
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
-            "fordi");
-        lagreGrunnlag(grunnlag, behandling);
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+        );
+        lagreGrunnlag(grunnlag);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat.getAksjonspunktResultater()).isEmpty();
@@ -375,9 +378,9 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom().minusWeeks(1), søknadsperiode.getTom().plusWeeks(1), true, "", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             new VurdertInstitusjonHolder(),
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
-            "fordi");
-        lagreGrunnlag(grunnlag, behandling);
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+        );
+        lagreGrunnlag(grunnlag);
 
         BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
         assertThat(resultat).isNotNull();

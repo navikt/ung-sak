@@ -70,7 +70,6 @@ public class VurderNødvendighetOppdatererTest {
         assertThat(vurdertOpplæring.getPeriode().getTomDato()).isEqualTo(now);
         assertThat(vurdertOpplæring.getInstitusjon()).isEqualTo(dto.getInstitusjon());
         assertThat(vurdertOpplæring.getBegrunnelse()).isEqualTo(periodeDto.getBegrunnelse());
-        assertThat(grunnlag.get().getBegrunnelse()).isEqualTo(dto.getBegrunnelse());
     }
 
     @Test
@@ -98,6 +97,19 @@ public class VurderNødvendighetOppdatererTest {
         assertThat(vurdertOpplæring2.getPeriode().getTomDato()).isEqualTo(now);
         assertThat(vurdertOpplæring2.getInstitusjon()).isEqualTo(dto2.getInstitusjon());
         assertThat(vurdertOpplæring2.getBegrunnelse()).isEqualTo(periodeDto2.getBegrunnelse());
+    }
+
+    @Test
+    public void oppdaterGrunnlagSkalKopiereVurdertInstitusjonHolderFraAktivtGrunnlag() {
+        final VurderNødvendighetPeriodeDto periodeDto1 = new VurderNødvendighetPeriodeDto(false, now.minusMonths(2), now, "ikke nødvendig");
+        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto("institusjon", List.of(periodeDto1));
+        lagreGrunnlag(dto1);
+        Optional<VurdertOpplæringGrunnlag> grunnlag1 = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
+        lagreGrunnlag(dto1);
+        Optional<VurdertOpplæringGrunnlag> grunnlag2 = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
+        assertThat(grunnlag1).isPresent();
+        assertThat(grunnlag2).isPresent();
+        assertThat(grunnlag1.get().getVurdertInstitusjonHolder()).isEqualTo(grunnlag2.get().getVurdertInstitusjonHolder());
     }
 
     @Test

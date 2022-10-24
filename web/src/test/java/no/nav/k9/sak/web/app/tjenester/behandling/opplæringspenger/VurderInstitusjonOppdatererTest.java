@@ -61,7 +61,6 @@ public class VurderInstitusjonOppdatererTest {
         assertThat(vurdertInstitusjon.getGodkjent()).isEqualTo(dto.isGodkjent());
         assertThat(vurdertInstitusjon.getInstitusjon()).isEqualTo(dto.getInstitusjon());
         assertThat(vurdertInstitusjon.getBegrunnelse()).isEqualTo(dto.getBegrunnelse());
-        assertThat(grunnlag.get().getBegrunnelse()).isEqualTo(dto.getBegrunnelse());
     }
 
     @Test
@@ -78,15 +77,16 @@ public class VurderInstitusjonOppdatererTest {
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
         assertThat(grunnlag).isPresent();
         assertThat(grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon()).hasSize(2);
-        VurdertInstitusjon vurdertInstitusjon1 = grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon().get(0);
-        assertThat(vurdertInstitusjon1.getGodkjent()).isEqualTo(dto1.isGodkjent());
-        assertThat(vurdertInstitusjon1.getInstitusjon()).isEqualTo(dto1.getInstitusjon());
-        assertThat(vurdertInstitusjon1.getBegrunnelse()).isEqualTo(dto1.getBegrunnelse());
-        VurdertInstitusjon vurdertInstitusjon2 = grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon().get(1);
-        assertThat(vurdertInstitusjon2.getGodkjent()).isEqualTo(dto3.isGodkjent());
-        assertThat(vurdertInstitusjon2.getInstitusjon()).isEqualTo(dto3.getInstitusjon());
-        assertThat(vurdertInstitusjon2.getBegrunnelse()).isEqualTo(dto3.getBegrunnelse());
-        assertThat(grunnlag.get().getBegrunnelse()).isEqualTo(dto3.getBegrunnelse());
+        var vurdertInstitusjon1 = grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon().stream().filter(it -> it.getInstitusjon().equals(dto1.getInstitusjon())).findFirst();
+        assertThat(vurdertInstitusjon1).isPresent();
+        assertThat(vurdertInstitusjon1.get().getGodkjent()).isEqualTo(dto1.isGodkjent());
+        assertThat(vurdertInstitusjon1.get().getInstitusjon()).isEqualTo(dto1.getInstitusjon());
+        assertThat(vurdertInstitusjon1.get().getBegrunnelse()).isEqualTo(dto1.getBegrunnelse());
+        var vurdertInstitusjon2 = grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon().stream().filter(it -> it.getInstitusjon().equals(dto2.getInstitusjon())).findFirst();
+        assertThat(vurdertInstitusjon2).isPresent();
+        assertThat(vurdertInstitusjon2.get().getGodkjent()).isEqualTo(dto3.isGodkjent());
+        assertThat(vurdertInstitusjon2.get().getInstitusjon()).isEqualTo(dto3.getInstitusjon());
+        assertThat(vurdertInstitusjon2.get().getBegrunnelse()).isEqualTo(dto3.getBegrunnelse());
     }
 
     private OppdateringResultat lagreGrunnlag(VurderInstitusjonDto dto) {

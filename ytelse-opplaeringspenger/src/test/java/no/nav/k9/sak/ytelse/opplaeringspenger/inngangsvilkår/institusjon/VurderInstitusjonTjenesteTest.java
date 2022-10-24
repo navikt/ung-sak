@@ -184,7 +184,7 @@ public class VurderInstitusjonTjenesteTest {
 
     private void setupVurderingsgrunnlag(List<VurdertInstitusjon> vurderteInstitusjoner) {
         VurdertInstitusjonHolder vurdertInstitusjonHolder = new VurdertInstitusjonHolder(vurderteInstitusjoner);
-        VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = new VurdertOpplæringGrunnlag(behandlingId, vurdertInstitusjonHolder, null, "");
+        VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = new VurdertOpplæringGrunnlag(behandlingId, vurdertInstitusjonHolder, null);
         when(vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandlingId)).thenReturn(Optional.of(vurdertOpplæringGrunnlag));
     }
 

@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -12,7 +13,6 @@ import no.nav.k9.sak.kontrakt.opplæringspenger.VurderInstitusjonDto;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 
 @ApplicationScoped
@@ -31,12 +31,24 @@ public class VurderInstitusjonOppdaterer implements AksjonspunktOppdaterer<Vurde
 
     @Override
     public OppdateringResultat oppdater(VurderInstitusjonDto dto, AksjonspunktOppdaterParameter param) {
+        List<VurdertInstitusjon> vurderteInstitusjoner = new ArrayList<>();
         VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon(dto.getInstitusjon(), dto.isGodkjent(), dto.getBegrunnelse());
-        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(param.getBehandlingId(),
-            new VurdertInstitusjonHolder(Collections.singletonList(vurdertInstitusjon)),
-            new VurdertOpplæringHolder(),
-            dto.getBegrunnelse());
-        vurdertOpplæringRepository.lagreOgFlush(param.getBehandlingId(), grunnlag);
+        vurderteInstitusjoner.add(vurdertInstitusjon);
+
+        var aktivVurdertInstitusjonHolder = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(param.getBehandlingId())
+            .map(VurdertOpplæringGrunnlag::getVurdertInstitusjonHolder);
+
+        if (aktivVurdertInstitusjonHolder.isPresent()) {
+            List<VurdertInstitusjon> aktiveVurdertInstitusjoner = aktivVurdertInstitusjonHolder.get().getVurdertInstitusjon().stream()
+                .filter(eksisterendeVurdertInstitusjon -> !eksisterendeVurdertInstitusjon.getInstitusjon().equals(vurdertInstitusjon.getInstitusjon()))
+                .map(VurdertInstitusjon::new)
+                .toList();
+            vurderteInstitusjoner.addAll(aktiveVurdertInstitusjoner);
+        }
+
+        VurdertInstitusjonHolder nyHolder = new VurdertInstitusjonHolder(vurderteInstitusjoner);
+
+        vurdertOpplæringRepository.lagre(param.getBehandlingId(), nyHolder);
         return OppdateringResultat.nyttResultat();
     }
 }
