@@ -74,6 +74,9 @@ public enum BeregningAvklaringsbehovDefinisjon implements Kodeverdi {
     VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE(
             BeregningAvklaringsbehovKodeDefinition.VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE,
             "Vurder varig endret/nyoppstartet næring selvstendig næringsdrivende"),
+    VURDER_VARIG_ENDRET_ARBEIDSSITUASJON(
+        BeregningAvklaringsbehovKodeDefinition.VURDER_VARIG_ENDRET_ARBEIDSSITUASJON_KODE,
+        "Vurder varig endret arbeidssituasjon"),
     FASTSETT_BEREGNINGSGRUNNLAG_TIDSBEGRENSET_ARBEIDSFORHOLD(
             BeregningAvklaringsbehovKodeDefinition.FASTSETT_BEREGNINGSGRUNNLAG_TIDSBEGRENSET_ARBEIDSFORHOLD_KODE,
             "Fastsett beregningsgrunnlag for tidsbegrenset arbeidsforhold"),
