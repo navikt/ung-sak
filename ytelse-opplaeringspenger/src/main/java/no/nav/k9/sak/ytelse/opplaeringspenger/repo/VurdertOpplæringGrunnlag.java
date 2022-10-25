@@ -41,7 +41,7 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public VurdertOpplæringGrunnlag() {
+    VurdertOpplæringGrunnlag() {
     }
 
     public VurdertOpplæringGrunnlag(Long behandlingId, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder) {
@@ -74,10 +74,8 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
         this.aktiv = aktiv;
     }
 
+    @Deprecated
     public static VurdertOpplæringGrunnlag lagTomtGrunnlag() {
-        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag();
-        grunnlag.vurdertInstitusjonHolder = new VurdertInstitusjonHolder();
-        grunnlag.vurdertOpplæringHolder = new VurdertOpplæringHolder();
-        return grunnlag;
+        return new VurdertOpplæringGrunnlag();
     }
 }

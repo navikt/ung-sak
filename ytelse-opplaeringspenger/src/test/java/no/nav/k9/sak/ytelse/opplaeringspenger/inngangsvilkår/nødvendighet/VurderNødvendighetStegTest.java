@@ -33,7 +33,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
@@ -82,7 +81,6 @@ public class VurderNødvendighetStegTest {
     }
 
     private void lagreGrunnlag(VurdertOpplæringGrunnlag grunnlag) {
-        entityManager.persist(grunnlag.getVurdertInstitusjonHolder());
         entityManager.persist(grunnlag.getVurdertOpplæringHolder());
         entityManager.persist(grunnlag);
         entityManager.flush();

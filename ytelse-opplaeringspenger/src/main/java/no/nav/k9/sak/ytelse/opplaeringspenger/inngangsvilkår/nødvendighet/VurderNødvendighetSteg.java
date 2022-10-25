@@ -90,7 +90,7 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
         tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(tidslinjeUtenGodkjentInstitusjon).disjoint(tidslinjeUtenSykdomsvilkår);
 
         var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(kontekst.getBehandlingId())
-            .orElse(VurdertOpplæringGrunnlag.lagTomtGrunnlag());
+            .orElse(VurdertOpplæringGrunnlag.lagTomtGrunnlag()); //TODO dette skal endres (skal ikke bruke tomt grunnlag)
         var vurdertePerioder = nødvendighetVilkårTjeneste.vurderPerioder(vilkårBuilder, vurdertOpplæringGrunnlag, tidslinjeTilVurdering);
 
         tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(TidslinjeUtil.tilTidslinjeKomprimert(vurdertePerioder));
