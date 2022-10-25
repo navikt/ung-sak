@@ -378,7 +378,7 @@
             <dependency>
                 <groupId>no.nav.pleiepengerbarn.uttak</groupId>
                 <artifactId>kontrakter</artifactId>
-                <version>1.2.4</version>
+                <version>1.2.5</version>
             </dependency>
 
             <dependency>
@@ -468,7 +468,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.8.0</version>
+                <version>4.8.1</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
