@@ -7,10 +7,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.kontrakt.dokument.TekstValideringRegex;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,13 +21,13 @@ import no.nav.k9.sak.kontrakt.dokument.TekstValideringRegex;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_INSTITUSJON)
 public class VurderInstitusjonDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value = "institusjon")
+    @JsonProperty(value = "journalpostId", required = true)
     @Valid
-    @Size(max = 100)
-    @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    private String institusjon;
+    @NotNull
+    private JournalpostIdDto journalpostId;
 
-    @JsonProperty(value = "godkjent")
+    @JsonProperty(value = "godkjent", required = true)
+    @NotNull
     private boolean godkjent;
 
     @JsonProperty("begrunnelse")
@@ -36,14 +38,14 @@ public class VurderInstitusjonDto extends BekreftetAksjonspunktDto {
     public VurderInstitusjonDto() {
     }
 
-    public VurderInstitusjonDto(String institusjon, boolean godkjent, String begrunnelse) {
-        this.institusjon = institusjon;
+    public VurderInstitusjonDto(JournalpostIdDto journalpostId, boolean godkjent, String begrunnelse) {
+        this.journalpostId = journalpostId;
         this.godkjent = godkjent;
         this.begrunnelse = begrunnelse;
     }
 
-    public String getInstitusjon() {
-        return institusjon;
+    public JournalpostIdDto getJournalpostId() {
+        return journalpostId;
     }
 
     public boolean isGodkjent() {

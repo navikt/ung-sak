@@ -126,7 +126,7 @@ public class VurderNødvendighetStegTest {
 
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), true, "", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(),
+            null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring))
         );
         lagreGrunnlag(grunnlag);
@@ -157,7 +157,7 @@ public class VurderNødvendighetStegTest {
 
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), false, "test", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(),
+            null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring))
         );
         lagreGrunnlag(grunnlag);
@@ -213,7 +213,7 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring1 = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "test", "");
         VurdertOpplæring vurdertOpplæring2 = new VurdertOpplæring(søknadsperiode.getTom(), søknadsperiode.getTom(), false, "tast", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(),
+            null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring1, vurdertOpplæring2))
         );
         lagreGrunnlag(grunnlag);
@@ -249,7 +249,7 @@ public class VurderNødvendighetStegTest {
 
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), true, "test", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(),
+            null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring))
         );
         lagreGrunnlag(grunnlag);
@@ -285,7 +285,7 @@ public class VurderNødvendighetStegTest {
 
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "test", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(),
+            null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring))
         );
         lagreGrunnlag(grunnlag);
@@ -341,7 +341,7 @@ public class VurderNødvendighetStegTest {
 
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom(), søknadsperiode.getTom(), true, "", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(),
+            null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring))
         );
         lagreGrunnlag(grunnlag);
@@ -377,7 +377,7 @@ public class VurderNødvendighetStegTest {
 
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(søknadsperiode.getFom().minusWeeks(1), søknadsperiode.getTom().plusWeeks(1), true, "", "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
-            new VurdertInstitusjonHolder(),
+            null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring))
         );
         lagreGrunnlag(grunnlag);

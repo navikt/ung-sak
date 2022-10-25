@@ -30,7 +30,9 @@ public class GodkjentOpplæringsinstitusjonTjeneste {
     }
 
     public Optional<GodkjentOpplæringsinstitusjon> hentMedUuid(UUID uuid) {
-        Objects.requireNonNull(uuid);
+        if (uuid == null) {
+            return Optional.empty();
+        }
 
         return repository.hentMedUuid(uuid);
     }

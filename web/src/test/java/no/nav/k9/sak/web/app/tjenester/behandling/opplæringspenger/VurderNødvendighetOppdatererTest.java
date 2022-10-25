@@ -62,7 +62,7 @@ public class VurderNødvendighetOppdatererTest {
 
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
         assertThat(grunnlag).isPresent();
-        assertThat(grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon()).hasSize(0);
+        assertThat(grunnlag.get().getVurdertInstitusjonHolder()).isNull();
         assertThat(grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring()).hasSize(1);
         VurdertOpplæring vurdertOpplæring = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().get(0);
         assertThat(vurdertOpplæring.getNødvendigOpplæring()).isEqualTo(periodeDto.isNødvendigOpplæring());
@@ -85,18 +85,20 @@ public class VurderNødvendighetOppdatererTest {
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
         assertThat(grunnlag).isPresent();
         assertThat(grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring()).hasSize(2);
-        VurdertOpplæring vurdertOpplæring1 = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().get(0);
-        assertThat(vurdertOpplæring1.getNødvendigOpplæring()).isEqualTo(periodeDto1.isNødvendigOpplæring());
-        assertThat(vurdertOpplæring1.getPeriode().getFomDato()).isEqualTo(now.minusMonths(2));
-        assertThat(vurdertOpplæring1.getPeriode().getTomDato()).isEqualTo(now.minusMonths(1).minusDays(1));
-        assertThat(vurdertOpplæring1.getInstitusjon()).isEqualTo(dto1.getInstitusjon());
-        assertThat(vurdertOpplæring1.getBegrunnelse()).isEqualTo(periodeDto1.getBegrunnelse());
-        VurdertOpplæring vurdertOpplæring2 = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().get(1);
-        assertThat(vurdertOpplæring2.getNødvendigOpplæring()).isEqualTo(periodeDto2.isNødvendigOpplæring());
-        assertThat(vurdertOpplæring2.getPeriode().getFomDato()).isEqualTo(now.minusMonths(1));
-        assertThat(vurdertOpplæring2.getPeriode().getTomDato()).isEqualTo(now);
-        assertThat(vurdertOpplæring2.getInstitusjon()).isEqualTo(dto2.getInstitusjon());
-        assertThat(vurdertOpplæring2.getBegrunnelse()).isEqualTo(periodeDto2.getBegrunnelse());
+        var vurdertOpplæring1 = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().stream().filter(it -> it.getInstitusjon().equals(dto1.getInstitusjon())).findFirst();
+        assertThat(vurdertOpplæring1).isPresent();
+        assertThat(vurdertOpplæring1.get().getNødvendigOpplæring()).isEqualTo(periodeDto1.isNødvendigOpplæring());
+        assertThat(vurdertOpplæring1.get().getPeriode().getFomDato()).isEqualTo(now.minusMonths(2));
+        assertThat(vurdertOpplæring1.get().getPeriode().getTomDato()).isEqualTo(now.minusMonths(1).minusDays(1));
+        assertThat(vurdertOpplæring1.get().getInstitusjon()).isEqualTo(dto1.getInstitusjon());
+        assertThat(vurdertOpplæring1.get().getBegrunnelse()).isEqualTo(periodeDto1.getBegrunnelse());
+        var vurdertOpplæring2 = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().stream().filter(it -> it.getInstitusjon().equals(dto2.getInstitusjon())).findFirst();
+        assertThat(vurdertOpplæring2).isPresent();
+        assertThat(vurdertOpplæring2.get().getNødvendigOpplæring()).isEqualTo(periodeDto2.isNødvendigOpplæring());
+        assertThat(vurdertOpplæring2.get().getPeriode().getFomDato()).isEqualTo(now.minusMonths(1));
+        assertThat(vurdertOpplæring2.get().getPeriode().getTomDato()).isEqualTo(now);
+        assertThat(vurdertOpplæring2.get().getInstitusjon()).isEqualTo(dto2.getInstitusjon());
+        assertThat(vurdertOpplæring2.get().getBegrunnelse()).isEqualTo(periodeDto2.getBegrunnelse());
     }
 
     @Test

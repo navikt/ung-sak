@@ -47,7 +47,7 @@ public class VurdertOpplæring extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public VurdertOpplæring() {
+    VurdertOpplæring() {
     }
 
     public VurdertOpplæring(LocalDate fom, LocalDate tom, Boolean nødvendigOpplæring, String begrunnelse, String institusjon) {

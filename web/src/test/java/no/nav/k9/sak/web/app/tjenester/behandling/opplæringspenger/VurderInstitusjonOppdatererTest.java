@@ -18,6 +18,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
+import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderInstitusjonDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
@@ -48,7 +49,7 @@ public class VurderInstitusjonOppdatererTest {
 
     @Test
     public void skalLagreNyttVurdertInstitusjonGrunnlag() {
-        final VurderInstitusjonDto dto = new VurderInstitusjonDto("Livets skole", true, "fordi");
+        final VurderInstitusjonDto dto = new VurderInstitusjonDto(new JournalpostIdDto("123"), true, "fordi");
 
         OppdateringResultat resultat = lagreGrunnlag(dto);
         assertThat(resultat).isNotNull();
@@ -56,36 +57,35 @@ public class VurderInstitusjonOppdatererTest {
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
         assertThat(grunnlag).isPresent();
         assertThat(grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon()).hasSize(1);
-        assertThat(grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring()).hasSize(0);
+        assertThat(grunnlag.get().getVurdertOpplæringHolder()).isNull();
         VurdertInstitusjon vurdertInstitusjon = grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon().get(0);
         assertThat(vurdertInstitusjon.getGodkjent()).isEqualTo(dto.isGodkjent());
-        assertThat(vurdertInstitusjon.getInstitusjon()).isEqualTo(dto.getInstitusjon());
+        assertThat(vurdertInstitusjon.getJournalpostId()).isEqualTo(dto.getJournalpostId().getJournalpostId());
         assertThat(vurdertInstitusjon.getBegrunnelse()).isEqualTo(dto.getBegrunnelse());
     }
 
     @Test
     public void skalOppdatereVurdertInstitusjonGrunnlag() {
-        final VurderInstitusjonDto dto1 = new VurderInstitusjonDto("Fyrstikkalleen barnehage", true, "fordi");
+        final VurderInstitusjonDto dto1 = new VurderInstitusjonDto(new JournalpostIdDto("123"), true, "fordi");
         lagreGrunnlag(dto1);
 
-        final VurderInstitusjonDto dto2 = new VurderInstitusjonDto("Kampen Pub", true, "fordi noe annet");
+        final VurderInstitusjonDto dto2 = new VurderInstitusjonDto(new JournalpostIdDto("321"), true, "fordi noe annet");
         lagreGrunnlag(dto2);
 
-        final VurderInstitusjonDto dto3 = new VurderInstitusjonDto("Kampen Pub", false, "nei");
+        final VurderInstitusjonDto dto3 = new VurderInstitusjonDto(new JournalpostIdDto("321"), false, "nei");
         lagreGrunnlag(dto3);
 
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
         assertThat(grunnlag).isPresent();
         assertThat(grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon()).hasSize(2);
-        var vurdertInstitusjon1 = grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon().stream().filter(it -> it.getInstitusjon().equals(dto1.getInstitusjon())).findFirst();
+        var vurdertInstitusjon1 = grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon().stream().filter(it -> it.getJournalpostId().equals(dto1.getJournalpostId().getJournalpostId())).findFirst();
         assertThat(vurdertInstitusjon1).isPresent();
         assertThat(vurdertInstitusjon1.get().getGodkjent()).isEqualTo(dto1.isGodkjent());
-        assertThat(vurdertInstitusjon1.get().getInstitusjon()).isEqualTo(dto1.getInstitusjon());
         assertThat(vurdertInstitusjon1.get().getBegrunnelse()).isEqualTo(dto1.getBegrunnelse());
-        var vurdertInstitusjon2 = grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon().stream().filter(it -> it.getInstitusjon().equals(dto2.getInstitusjon())).findFirst();
+        var vurdertInstitusjon2 = grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon().stream().filter(it -> it.getJournalpostId().equals(dto2.getJournalpostId().getJournalpostId())).findFirst();
         assertThat(vurdertInstitusjon2).isPresent();
         assertThat(vurdertInstitusjon2.get().getGodkjent()).isEqualTo(dto3.isGodkjent());
-        assertThat(vurdertInstitusjon2.get().getInstitusjon()).isEqualTo(dto3.getInstitusjon());
+        assertThat(vurdertInstitusjon2.get().getJournalpostId()).isEqualTo(dto3.getJournalpostId().getJournalpostId());
         assertThat(vurdertInstitusjon2.get().getBegrunnelse()).isEqualTo(dto3.getBegrunnelse());
     }
 

@@ -1,8 +1,9 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 
-import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Immutable;
@@ -33,17 +34,20 @@ public class VurdertOpplæringHolder extends BaseEntitet {
     @BatchSize(size = 20)
     @JoinColumn(name = "holder_id", nullable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
-    private Set<VurdertOpplæring> vurdertOpplæring = new LinkedHashSet<>();
+    private Set<VurdertOpplæring> vurdertOpplæring;
 
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public VurdertOpplæringHolder() {
+    VurdertOpplæringHolder() {
     }
 
     public VurdertOpplæringHolder(List<VurdertOpplæring> vurdertOpplæring) {
-        this.vurdertOpplæring = new LinkedHashSet<>(vurdertOpplæring);
+        Objects.requireNonNull(vurdertOpplæring);
+        this.vurdertOpplæring = vurdertOpplæring.stream()
+            .map(VurdertOpplæring::new)
+            .collect(Collectors.toSet());
     }
 
     public List<VurdertOpplæring> getVurdertOpplæring() {

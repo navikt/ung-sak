@@ -26,12 +26,12 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
 
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "vurdert_institusjon_holder_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "vurdert_institusjon_holder_id", updatable = false, unique = true)
     private VurdertInstitusjonHolder vurdertInstitusjonHolder;
 
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "vurdert_opplaering_holder_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "vurdert_opplaering_holder_id", updatable = false, unique = true)
     private VurdertOpplæringHolder vurdertOpplæringHolder;
 
     @Column(name = "aktiv", nullable = false)

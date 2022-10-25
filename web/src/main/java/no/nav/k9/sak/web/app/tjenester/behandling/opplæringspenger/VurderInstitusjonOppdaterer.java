@@ -32,7 +32,7 @@ public class VurderInstitusjonOppdaterer implements AksjonspunktOppdaterer<Vurde
     @Override
     public OppdateringResultat oppdater(VurderInstitusjonDto dto, AksjonspunktOppdaterParameter param) {
         List<VurdertInstitusjon> vurderteInstitusjoner = new ArrayList<>();
-        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon(dto.getInstitusjon(), dto.isGodkjent(), dto.getBegrunnelse());
+        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon(dto.getJournalpostId().getJournalpostId(), dto.isGodkjent(), dto.getBegrunnelse());
         vurderteInstitusjoner.add(vurdertInstitusjon);
 
         var aktivVurdertInstitusjonHolder = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(param.getBehandlingId())
@@ -40,8 +40,7 @@ public class VurderInstitusjonOppdaterer implements AksjonspunktOppdaterer<Vurde
 
         if (aktivVurdertInstitusjonHolder.isPresent()) {
             List<VurdertInstitusjon> aktiveVurdertInstitusjoner = aktivVurdertInstitusjonHolder.get().getVurdertInstitusjon().stream()
-                .filter(eksisterendeVurdertInstitusjon -> !eksisterendeVurdertInstitusjon.getInstitusjon().equals(vurdertInstitusjon.getInstitusjon()))
-                .map(VurdertInstitusjon::new)
+                .filter(eksisterendeVurdertInstitusjon -> !eksisterendeVurdertInstitusjon.getJournalpostId().equals(vurdertInstitusjon.getJournalpostId()))
                 .toList();
             vurderteInstitusjoner.addAll(aktiveVurdertInstitusjoner);
         }

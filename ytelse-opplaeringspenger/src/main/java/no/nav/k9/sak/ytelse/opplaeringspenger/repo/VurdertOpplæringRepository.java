@@ -44,11 +44,10 @@ public class VurdertOpplæringRepository {
 
         var aktivtGrunnlag = getAktivtGrunnlag(behandlingId);
 
-        var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId, vurdertInstitusjonHolder, aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertOpplæringHolder).orElse(new VurdertOpplæringHolder()));
+        var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId, vurdertInstitusjonHolder, aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertOpplæringHolder).orElse(null));
         deaktiverEksisterendeGrunnlag(aktivtGrunnlag);
 
         entityManager.persist(nyttGrunnlag.getVurdertInstitusjonHolder());
-        entityManager.persist(nyttGrunnlag.getVurdertOpplæringHolder());
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
     }
@@ -59,10 +58,9 @@ public class VurdertOpplæringRepository {
 
         var aktivtGrunnlag = getAktivtGrunnlag(behandlingId);
 
-        var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId, aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertInstitusjonHolder).orElse(new VurdertInstitusjonHolder()), vurdertOpplæringHolder);
+        var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId, aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertInstitusjonHolder).orElse(null), vurdertOpplæringHolder);
         deaktiverEksisterendeGrunnlag(aktivtGrunnlag);
 
-        entityManager.persist(nyttGrunnlag.getVurdertInstitusjonHolder());
         entityManager.persist(nyttGrunnlag.getVurdertOpplæringHolder());
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
