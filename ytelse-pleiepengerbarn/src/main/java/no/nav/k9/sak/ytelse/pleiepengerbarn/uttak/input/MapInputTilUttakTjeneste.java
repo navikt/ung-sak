@@ -79,7 +79,6 @@ public class MapInputTilUttakTjeneste {
         return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, true));
     }
 
-
     private Uttaksgrunnlag toRequestData(InputParametere input) {
 
         var behandling = input.getBehandling();
