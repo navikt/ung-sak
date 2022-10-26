@@ -57,7 +57,7 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
     private List<VurdertOpplæring> mapDtoTilVurdertOpplæring(VurderNødvendighetDto dto) {
         List<VurdertOpplæring> vurdertOpplæring = dto.getPerioder()
             .stream()
-            .map(periodeDto -> new VurdertOpplæring(periodeDto.getFom(), periodeDto.getTom(), periodeDto.isNødvendigOpplæring(), periodeDto.getBegrunnelse(), dto.getInstitusjon()))
+            .map(periodeDto -> new VurdertOpplæring(periodeDto.getFom(), periodeDto.getTom(), periodeDto.isNødvendigOpplæring(), periodeDto.getBegrunnelse(), periodeDto.getInstitusjon()))
             .toList();
         sjekkOverlappendePerioder(vurdertOpplæring);
         return vurdertOpplæring;

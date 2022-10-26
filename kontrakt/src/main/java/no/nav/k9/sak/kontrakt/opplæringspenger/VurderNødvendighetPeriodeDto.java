@@ -30,14 +30,20 @@ public class VurderNødvendighetPeriodeDto {
     @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
+    @JsonProperty(value = "institusjon")
+    @Size(max = 100)
+    @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String institusjon;
+
     public VurderNødvendighetPeriodeDto() {
     }
 
-    public VurderNødvendighetPeriodeDto(boolean nødvendigOpplæring, LocalDate fom, LocalDate tom, String begrunnelse) {
+    public VurderNødvendighetPeriodeDto(boolean nødvendigOpplæring, LocalDate fom, LocalDate tom, String begrunnelse, String institusjon) {
         this.nødvendigOpplæring = nødvendigOpplæring;
         this.fom = fom;
         this.tom = tom;
         this.begrunnelse = begrunnelse;
+        this.institusjon = institusjon;
     }
 
     public boolean isNødvendigOpplæring() {
@@ -54,5 +60,9 @@ public class VurderNødvendighetPeriodeDto {
 
     public String getBegrunnelse() {
         return begrunnelse;
+    }
+
+    public String getInstitusjon() {
+        return institusjon;
     }
 }
