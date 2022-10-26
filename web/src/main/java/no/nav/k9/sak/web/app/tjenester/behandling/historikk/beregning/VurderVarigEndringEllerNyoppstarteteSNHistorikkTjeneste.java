@@ -16,7 +16,6 @@ import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndringEllerNyoppstartetSNDtoer;
 
 
 @ApplicationScoped
@@ -34,8 +33,7 @@ public class VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste {
     }
 
     public void lagHistorikkInnslag(AksjonspunktOppdaterParameter param,
-                                    VurderVarigEndringEllerNyoppstartetSNDtoer dto,
-                                    List<OppdaterBeregningsgrunnlagResultat> alleEndringer) {
+                                    List<OppdaterBeregningsgrunnlagResultat> alleEndringer, String begrunnelse) {
         for (var endringer : alleEndringer) {
             LocalDate skjæringstidspunkt = endringer.getSkjæringstidspunkt();
             endringer.getVarigEndretNæringVurdering()
@@ -45,7 +43,7 @@ public class VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste {
                     varigEndretNæringVurdering)
                 );
             historikkAdapter.tekstBuilder()
-                .medBegrunnelse(dto.getBegrunnelse(), param.erBegrunnelseEndret())
+                .medBegrunnelse(begrunnelse, param.erBegrunnelseEndret())
                 .medSkjermlenke(SkjermlenkeType.BEREGNING);
         }
     }

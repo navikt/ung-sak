@@ -30,38 +30,38 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtab
 
 @Dependent
 public class HentEtablertTilsynTjeneste {
-    
+
     private SykdomVurderingTjeneste sykdomVurderingTjeneste;
     private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
     private EtablertTilsynRepository etablertTilsynRepository;
     private EtablertTilsynTjeneste etablertTilsynTjeneste;
     private final LocalDate ukesmøringOmsorgstilbudFomDato;
-    
-    
+
+
     @Inject
     public HentEtablertTilsynTjeneste(SykdomVurderingTjeneste sykdomVurderingTjeneste,
             PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
             EtablertTilsynRepository etablertTilsynRepository,
             EtablertTilsynTjeneste etablertTilsynTjeneste,
             @KonfigVerdi(value = "UKESMOERING_OMSORGSTILBUD_FOM_DATO", defaultVerdi = "", required = false) String ukesmøringOmsorgstilbudFomDatoString) {
-        
+
         this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
         this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
         this.etablertTilsynRepository = etablertTilsynRepository;
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
-        
+
         if (ukesmøringOmsorgstilbudFomDatoString == null || ukesmøringOmsorgstilbudFomDatoString.trim().isEmpty()) {
             this.ukesmøringOmsorgstilbudFomDato = null;
         } else {
             this.ukesmøringOmsorgstilbudFomDato = LocalDate.parse(ukesmøringOmsorgstilbudFomDatoString);
         }
     }
-    
 
-    List<PeriodeMedVarighet> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse,
+
+    public List<PeriodeMedVarighet> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse,
             Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende,
             boolean brukUbesluttedeData) {
-        
+
         if (referanse.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
             return List.of();
         }
@@ -75,15 +75,15 @@ public class HentEtablertTilsynTjeneste {
         }
 
         final LocalDateTimeline<Boolean> sykdomsperioderPåPleietrengende = sykdomVurderingTjeneste.hentPsbOppfyltePerioderPåPleietrengende(referanse.getPleietrengendeAktørId());
-        
+
         final LocalDateTimeline<Duration> etablertTilsynForSmøring = EtablertTilsynUnntaksutnuller.ignorerEtablertTilsynVedInnleggelserOgUnntak(etablertTilsynForPleietrengende, unntakEtablertTilsynForPleietrengende, innleggelser);
         final List<PeriodeMedVarighet> smurteEtablertTilsynPerioder = SykdomsperiodeEtablertTilsynSmører.smørEtablertTilsyn(sykdomsperioderPåPleietrengende, etablertTilsynForSmøring);
         final LocalDateTimeline<Duration> etablertTilsynPerioderTidslinje = håndterSmøringFraFeatureToggleDato(gammelLøsningEtablertTilsynTidslinje, smurteEtablertTilsynPerioder);
-        
+
         return toPeriodeMedVarighetList(etablertTilsynPerioderTidslinje);
     }
 
-    
+
     private LocalDateTimeline<Duration> hentEtablertTilsynForPleietrengende(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
         final List<EtablertTilsynPeriode> etablertTilsynPerioder;
         if (brukUbesluttedeData) {
@@ -97,19 +97,19 @@ public class HentEtablertTilsynTjeneste {
         final LocalDateTimeline<Duration> etablertTilsynTidslinje = toVarighettidslinje(etablertTilsynPerioder);
         return etablertTilsynTidslinje;
     }
-    
+
     private LocalDateTimeline<Duration> håndterSmøringFraFeatureToggleDato(LocalDateTimeline<Duration> ikkeSmurtTidslinje,
             List<PeriodeMedVarighet> smurteEtablertTilsynPerioder) {
-        
+
         LocalDateTimeline<Duration> smurtTidslinje = toVarighettidslinjeFraPerioderMedVarighet(smurteEtablertTilsynPerioder);
         smurtTidslinje = smurtTidslinje.intersection(DatoIntervallEntitet.fraOgMed(ukesmøringOmsorgstilbudFomDato).toLocalDateInterval());
-        
+
         return ikkeSmurtTidslinje.union(smurtTidslinje, StandardCombinators::coalesceRightHandSide);
     }
-    
+
     private static LocalDateTimeline<Duration> gammelLøsningForEtablertTilsyn(LocalDateTimeline<Duration> etablertTilsynForPleietrengende,
             List<PleietrengendeSykdomInnleggelsePeriode> innleggelser) {
-        
+
         return EtablertTilsynUnntaksutnuller.ignorerEtablertTilsynVedInnleggelser(etablertTilsynForPleietrengende, innleggelser);
     }
 
@@ -123,7 +123,7 @@ public class HentEtablertTilsynTjeneste {
                 .collect(Collectors.toList())
         );
     }
-    
+
     private static LocalDateTimeline<Duration> toVarighettidslinje(List<EtablertTilsynPeriode> etablertTilsynPerioder) {
         LocalDateTimeline<Duration> etablertTilsynTidslinje = new LocalDateTimeline<>(etablertTilsynPerioder.stream()
                 .map(e -> new LocalDateSegment<>(e.getPeriode().getFomDato(), e.getPeriode().getTomDato(), e.getVarighet()))

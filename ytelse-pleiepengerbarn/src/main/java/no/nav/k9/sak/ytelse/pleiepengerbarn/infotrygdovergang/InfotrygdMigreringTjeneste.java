@@ -6,7 +6,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -25,7 +24,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -99,10 +97,6 @@ public class InfotrygdMigreringTjeneste {
             LocalDate.now().minusYears(1),
             Set.of("PN", GAMMEL_ORDNING_KODE));
 
-        if (harBerørtSakPåGammelOrdning(grunnlagsperioderPrAktør, perioderTilVurdering)) {
-            throw new IllegalStateException("Fant berørt sak på gammel ordning");
-        }
-
         if (!grunnlagsperioderPrAktør.isEmpty()) {
             log.info("Fant berørte perioder i infotrygd: " + grunnlagsperioderPrAktør.values());
         }
@@ -155,13 +149,6 @@ public class InfotrygdMigreringTjeneste {
         return new LocalDateTimeline<>(annenPartSøktePerioderSegments, StandardCombinators::coalesceLeftHandSide);
     }
 
-    private boolean harBerørtSakPåGammelOrdning(Map<AktørId, List<IntervallMedBehandlingstema>> grunnlagsperioderPrAktør, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
-        return grunnlagsperioderPrAktør.values().stream()
-            .flatMap(Collection::stream)
-            .filter(intervallMedTema -> perioderTilVurdering.stream().anyMatch(p -> p.overlapper(intervallMedTema.intervall())))
-            .anyMatch(p -> p.behandlingstema().equals(GAMMEL_ORDNING_KODE));
-    }
-
     /**
      * Markerer skjæringstidspunkter for migrering fra infotrygd
      * Alle perioder med overlapp eller kant i kant markeres som migrert fra infotrygd
@@ -195,10 +182,10 @@ public class InfotrygdMigreringTjeneste {
         utledetInfotrygdmigreringTilVurdering.addAll(datoerForOverlapp);
         utledetInfotrygdmigreringTilVurdering.addAll(skjæringstidspunkterTilVurdering);
         utledetInfotrygdmigreringTilVurdering.forEach(localDate -> opprettMigrering(fagsakId, localDate, perioderTilVurdering));
-        deaktiverSkjæringstidspunkterSomErFlyttet(eksisterendeInfotrygdMigreringer, alleSøknadsperioder, behandlingId);
+        deaktiverSkjæringstidspunkterSomErFlyttet(eksisterendeInfotrygdMigreringer, behandlingId);
     }
 
-    private void deaktiverSkjæringstidspunkterSomErFlyttet(List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer, NavigableSet<DatoIntervallEntitet> alleSøknadsperioder, Long behandlingId) {
+    private void deaktiverSkjæringstidspunkterSomErFlyttet(List<SakInfotrygdMigrering> eksisterendeInfotrygdMigreringer, Long behandlingId) {
         var alleSkjæringstidspunkt = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)).stream()
             .flatMap(v -> v.getPerioder().stream())
             .map(VilkårPeriode::getSkjæringstidspunkt)

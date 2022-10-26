@@ -244,6 +244,8 @@ spec:
       value: "true"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2022-09-19"
+    - name: PSB_UTTAK_UNNTAK_BEVAR_VEDTATT_VERDI
+      value: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
