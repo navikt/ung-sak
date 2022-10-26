@@ -1,18 +1,24 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -71,7 +77,7 @@ public class HentDataTilUttakTjeneste {
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                     @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                    @Any Instance< HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester,
+                                    @Any Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester,
                                     HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste,
                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                     HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste) {
@@ -130,7 +136,7 @@ public class HentDataTilUttakTjeneste {
         var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
 
         var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId())
-                .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
+            .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
 
         final List<PeriodeMedVarighet> etablertTilsynPerioder = hentEtablertTilsynTjeneste.hentOgSmørEtablertTilsynPerioder(referanse, unntakEtablertTilsynForPleietrengende, brukUbesluttedeData);
 
@@ -140,6 +146,17 @@ public class HentDataTilUttakTjeneste {
         var perioderFraSøknad = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(referanse);
 
         var utsattePerioder = utsattBehandlingAvPeriodeRepository.hentGrunnlag(referanse.getBehandlingId());
+
+        var kravprioritetsBehandlinger = kravprioritet.stream().map(LocalDateSegment::getValue).flatMap(Collection::stream).map(Kravprioritet::getAktuellBehandlingUuid).collect(Collectors.toSet());
+        Map<UUID, UUID> sisteVedtatteBehandlinger = new HashMap<>();
+        for (UUID uuid : kravprioritetsBehandlinger) {
+            var b = behandlingRepository.hentBehandling(uuid);
+            if (b.erSaksbehandlingAvsluttet()) {
+                sisteVedtatteBehandlinger.put(uuid, uuid);
+            } else {
+                sisteVedtatteBehandlinger.put(uuid, b.getOriginalBehandlingId().map(it -> behandlingRepository.hentBehandling(it)).map(Behandling::getUuid).orElse(null));
+            }
+        }
 
         return new InputParametere()
             .medBehandling(behandling)
@@ -160,7 +177,8 @@ public class HentDataTilUttakTjeneste {
             .medRettPleiepengerVedDødGrunnlag(rettVedDød.orElse(null))
             .medAutomatiskUtvidelseVedDødsfall(utvidetPeriodeSomFølgeAvDødsfall.orElse(null))
             .medUnntakEtablertTilsynForPleietrengende(unntakEtablertTilsynForPleietrengende.orElse(null))
-            .medUtsattePerioder(utsattePerioder.orElse(null));
+            .medUtsattePerioder(utsattePerioder.orElse(null))
+            .medSisteVedtatteBehandlingForBehandling(sisteVedtatteBehandlinger);
     }
 
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste(BehandlingReferanse behandlingReferanse) {

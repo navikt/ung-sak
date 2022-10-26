@@ -77,9 +77,6 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
         etablertTilsynTjeneste.opprettGrunnlagForTilsynstidlinje(ref);
 
-        final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
-        uttakTjeneste.opprettUttaksplan(request);
-
         return eksperimentærHåndteringAvSamtidigUttak(behandling, kontekst, ref);
     }
 

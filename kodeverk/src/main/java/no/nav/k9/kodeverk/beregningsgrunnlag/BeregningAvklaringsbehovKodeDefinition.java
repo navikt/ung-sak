@@ -23,6 +23,7 @@ class BeregningAvklaringsbehovKodeDefinition {
     static final String AVKLAR_AKTIVITETER_KODE = "5052";
 
     static final String VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE = "5039";
+    static final String VURDER_VARIG_ENDRET_ARBEIDSSITUASJON_KODE = "5054";
     static final String VURDER_FAKTA_FOR_ATFL_SN_KODE = "5058";
     static final String VURDER_REFUSJON_BERGRUNN = "5059";
 

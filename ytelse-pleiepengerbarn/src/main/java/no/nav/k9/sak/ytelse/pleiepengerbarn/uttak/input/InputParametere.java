@@ -6,6 +6,7 @@ import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -21,7 +22,6 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.PeriodeMedVarighet;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
@@ -50,7 +50,7 @@ public class InputParametere {
     private UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende;
     private Set<PerioderFraSøknad> perioderFraSøknad;
     private DatoIntervallEntitet utvidetPeriodeSomFølgeAvDødsfall;
-
+    private Map<UUID, UUID> sisteVedtatteBehandlingForBehandling;
     private UtsattBehandlingAvPeriode utsattBehandlingAvPerioder;
 
     public InputParametere() {
@@ -234,6 +234,15 @@ public class InputParametere {
 
     public InputParametere medUtsattePerioder(UtsattBehandlingAvPeriode utsattBehandlingAvPerioder) {
         this.utsattBehandlingAvPerioder = utsattBehandlingAvPerioder;
+        return this;
+    }
+
+    public Map<UUID, UUID> getSisteVedtatteBehandlingForBehandling() {
+        return sisteVedtatteBehandlingForBehandling;
+    }
+
+    public InputParametere medSisteVedtatteBehandlingForBehandling(Map<UUID, UUID> sisteVedtatteBehandlingForBehandling) {
+        this.sisteVedtatteBehandlingForBehandling = sisteVedtatteBehandlingForBehandling;
         return this;
     }
 }
