@@ -345,19 +345,7 @@ class InfotrygdMigreringTjenesteTest {
         assertThat(aksjonspunkter.size()).isEqualTo(1);
         assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART);
     }
-
-    @Test
-    void skal_kaste_feil_når_annen_part_har_overlappende_periode_i_infotrygd_på_gammel_ordning() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)));
-        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
-
-        when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any()))
-            .thenReturn(Map.of(AktørId.dummy(),
-                List.of(new IntervallMedBehandlingstema(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), "PB"))));
-
-        assertThrows(IllegalStateException.class, () -> tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling, STP)));
-    }
-
+    
     @Test
     void skal_ikke_gi_aksjonspunt_når_annen_part_har_overlappende_periode_i_infotrygd_som_er_søkt_om() {
         lagUtenInfotrygdPsbYtelse();
