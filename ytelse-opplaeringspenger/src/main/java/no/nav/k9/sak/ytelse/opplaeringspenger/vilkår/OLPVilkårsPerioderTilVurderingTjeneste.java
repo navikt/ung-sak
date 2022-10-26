@@ -1,7 +1,5 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.vilkår;
 
-import static no.nav.k9.kodeverk.vilkår.VilkårType.NØDVENDIG_OPPLÆRING;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -62,6 +60,6 @@ public class OLPVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
 
     @Override
     public Set<VilkårType> definerendeVilkår() {
-        return Set.of(NØDVENDIG_OPPLÆRING);
+        return Set.of(VilkårType.GJENNOMGÅ_OPPLÆRING);
     }
 }
