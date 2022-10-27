@@ -31,7 +31,7 @@ public record MerknadEndretDto(
     List<String> merknadKoder,
 
     @JsonProperty(value = "fritekst")
-    @Size(max = 50)
+    @Size(max = 500)
     @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     String fritekst,
