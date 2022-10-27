@@ -2,13 +2,13 @@ package no.nav.k9.sak.web.app.tjenester.los;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 import static no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste.BASE_PATH;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -21,12 +21,21 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.k9.kodeverk.historikk.HistorikkAktør;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
+import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 @Path(BASE_PATH)
+@Transactional
 @Produces(MediaType.APPLICATION_JSON)
 public class LosRestTjeneste {
 
@@ -36,13 +45,23 @@ public class LosRestTjeneste {
 
     private LosSystemUserKlient losKlient;
 
+    private HistorikkTjenesteAdapter historikkTjenesteAdapter;
+
+    private BehandlingRepository behandlingRepository;
+
     public LosRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public LosRestTjeneste(LosSystemUserKlient losKlient) {
+    public LosRestTjeneste(
+        LosSystemUserKlient losKlient,
+        HistorikkTjenesteAdapter historikkTjenesteAdapter,
+        BehandlingRepository behandlingRepository
+    ) {
         this.losKlient = losKlient;
+        this.historikkTjenesteAdapter = historikkTjenesteAdapter;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @GET
@@ -64,12 +83,26 @@ public class LosRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response postMerknad(@Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MerknadEndretDto merknadEndret) {
         var merknad = losKlient.lagreMerknad(merknadEndret.overstyrSaksbehandlerIdent(getCurrentUserId()));
-        var response = (merknad == null) ? Response.noContent() : Response.ok(merknad);
-        return response.build();
+        if (merknad == null) {
+            lagHistorikkinnslag(merknadEndret, HistorikkinnslagType.MERKNAD_FJERNET);
+            return Response.noContent().build();
+        } else {
+            lagHistorikkinnslag(merknadEndret, HistorikkinnslagType.MERKNAD_NY);
+            return Response.ok(merknad).build();
+        }
+    }
+
+    private void lagHistorikkinnslag(MerknadEndretDto merknad, HistorikkinnslagType historikkinnslagType) {
+        historikkTjenesteAdapter.tekstBuilder()
+            .medSkjermlenke(SkjermlenkeType.UDEFINERT)
+            .medHendelse(historikkinnslagType, String.join(",", merknad.merknadKoder()))
+            .medBegrunnelse(merknad.fritekst());
+
+        Long behandlingId = behandlingRepository.hentBehandling(merknad.behandlingUuid()).getId();
+        historikkTjenesteAdapter.opprettHistorikkInnslag(behandlingId, HistorikkinnslagType.FAKTA_ENDRET);
     }
 
     private static String getCurrentUserId() {
         return SubjectHandler.getSubjectHandler().getUid();
     }
-
 }
