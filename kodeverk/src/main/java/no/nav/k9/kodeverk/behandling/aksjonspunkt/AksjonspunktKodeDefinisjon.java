@@ -76,6 +76,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AVKLAR_AKTIVITETER_KODE = "5052";
 
     public static final String VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE = "5039";
+    public static final String VURDER_VARIG_ENDRET_ARBEIDSSITUASJON_KODE = "5054";
     public static final String VURDER_FAKTA_FOR_ATFL_SN_KODE = "5058";
     public static final String VURDER_REFUSJON_BERGRUNN_KODE = "5059";
 
@@ -116,6 +117,9 @@ public class AksjonspunktKodeDefinisjon {
     public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE = "9007";
     public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART = "9008";
 
+    // OLP
+    public static final String VURDER_INSTITUSJON = "9300";
+    public static final String VURDER_NØDVENDIGHET = "9301";
 
     // OMS
     public static final String AVKLAR_OMSORGEN_FOR_KODE = "9002";

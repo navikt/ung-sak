@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -56,14 +57,17 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.YtelseType;
 @Dependent
 public class MapInputTilUttakTjeneste {
 
-    private HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
-    private String unntak;
+    private final HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
+    private final String unntak;
+    private final boolean enableBevarVerdi;
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
-                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak) {
+                                    @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
+                                    @KonfigVerdi(value = "psb.uttak.unntak.bevar.vedtatt.verdi", required = false, defaultVerdi = "false") boolean enableBevarVerdi) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
+        this.enableBevarVerdi = enableBevarVerdi;
     }
 
 
@@ -74,7 +78,6 @@ public class MapInputTilUttakTjeneste {
     public Uttaksgrunnlag hentUtUbesluttededataOgMapRequest(BehandlingReferanse referanse) {
         return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, true));
     }
-
 
     private Uttaksgrunnlag toRequestData(InputParametere input) {
 
@@ -145,6 +148,7 @@ public class MapInputTilUttakTjeneste {
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
         Map<LukketPeriode, UtenlandsoppholdInfo> utenlandsoppholdperioder = MapUtenlandsopphold.map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
 
+        Map<String, String> sisteVedtatteBehandlingForAvktuellBehandling = mapSisteVedtatteBehandlingForBehandling(input.getSisteVedtatteBehandlingForBehandling());
         return new Uttaksgrunnlag(
             mapTilYtelseType(behandling),
             barn,
@@ -161,8 +165,22 @@ public class MapInputTilUttakTjeneste {
             beredskapsperioder,
             nattevåksperioder,
             kravprioritet,
+            sisteVedtatteBehandlingForAvktuellBehandling,
             utenlandsoppholdperioder
         );
+    }
+
+    private Map<String, String> mapSisteVedtatteBehandlingForBehandling(Map<UUID, UUID> sisteVedtatteBehandlingForBehandling) {
+        Map<String, String> behandlinger = new HashMap<>();
+        if (!enableBevarVerdi) {
+            return behandlinger;
+        }
+        for (Map.Entry<UUID, UUID> entry : sisteVedtatteBehandlingForBehandling.entrySet()) {
+            if (entry.getKey() != null && entry.getValue() != null) {
+                behandlinger.put(entry.getKey().toString(), entry.getValue().toString());
+            }
+        }
+        return behandlinger;
     }
 
     private YtelseType mapTilYtelseType(Behandling behandling) {

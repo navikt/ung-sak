@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,13 +92,17 @@ public class BeregningPerioderGrunnlagRepository {
         }
     }
 
-    public void lagreNæringsinntektPeriode(Long behandlingId, List<NæringsinntektPeriode> perioder) {
+    public void lagreOgDeaktiverPGIPerioder(Long behandlingId, List<PGIPeriode> nyePerioder, List<PGIPeriode> deaktiverPerioder) {
         var grunnlagOptional = hentGrunnlag(behandlingId);
         var aktivtGrunnlag = grunnlagOptional.orElse(new BeregningsgrunnlagPerioderGrunnlag());
 
         var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(aktivtGrunnlag);
-        for (NæringsinntektPeriode periode : perioder) {
-            builder.leggTilNæringsinntektPeriode(periode);
+        for (PGIPeriode periode : nyePerioder) {
+            builder.leggTilSigruninntektPeriode(periode);
+        }
+
+        for (PGIPeriode pgiPeriode : deaktiverPerioder) {
+            builder.deaktiverPGIPeriode(pgiPeriode.getSkjæringstidspunkt());
         }
 
         var differ = differ();
@@ -133,15 +138,20 @@ public class BeregningPerioderGrunnlagRepository {
         entityManager.flush();
     }
 
-    public void gjenopprettInitiell(Long behandlingId) {
+    public void gjenopprettInitiellDersomUlikInitiell(Long behandlingId, LocalDate skjæringstidspunkt) {
         Optional<BeregningsgrunnlagPerioderGrunnlag> aktivtGrunnlag = hentGrunnlag(behandlingId);
-        aktivtGrunnlag.ifPresent(BeregningsgrunnlagPerioderGrunnlag::setIkkeAktivt);
-        aktivtGrunnlag.ifPresent(entityManager::persist);
-        entityManager.flush();
         Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = getInitiellVersjon(behandlingId);
-        initiellVersjon.map(BeregningsgrunnlagPerioderGrunnlagBuilder::new)
-            .ifPresent(builder -> lagre(builder, behandlingId, false));
-        entityManager.flush();
+        var initPeriode = initiellVersjon.flatMap(gr -> gr.finnGrunnlagFor(skjæringstidspunkt));
+        var aktivPeriode = aktivtGrunnlag.flatMap(gr -> gr.finnGrunnlagFor(skjæringstidspunkt));
+        var erLikInitiell = erReferanseLikInitiell(aktivPeriode.map(BeregningsgrunnlagPeriode::getEksternReferanse), initPeriode.map(BeregningsgrunnlagPeriode::getEksternReferanse));
+        if (!erLikInitiell && initPeriode.isPresent()) {
+            lagre(behandlingId, new BeregningsgrunnlagPeriode(initPeriode.get()));
+            entityManager.flush();
+        }
+    }
+
+    private boolean erReferanseLikInitiell(Optional<UUID> grunnlagReferanse, Optional<UUID> initReferanse) {
+        return grunnlagReferanse.isPresent() && initReferanse.isPresent() && grunnlagReferanse.get().equals(initReferanse.get());
     }
 
     public void deaktiver(Long behandlingId, LocalDate skjæringstidspunkt) {
@@ -196,8 +206,8 @@ public class BeregningPerioderGrunnlagRepository {
         if (oppdatertGrunnlag.getInputOverstyringHolder() != null) {
             entityManager.persist(oppdatertGrunnlag.getInputOverstyringHolder());
         }
-        if (oppdatertGrunnlag.getNæringsinntektHolder() != null) {
-            entityManager.persist(oppdatertGrunnlag.getNæringsinntektHolder());
+        if (oppdatertGrunnlag.getPGIHolder() != null) {
+            entityManager.persist(oppdatertGrunnlag.getPGIHolder());
         }
         entityManager.persist(oppdatertGrunnlag);
         entityManager.flush();
@@ -242,4 +252,5 @@ public class BeregningPerioderGrunnlagRepository {
             lagre(builder, behandlingId, false);
         }
     }
+
 }

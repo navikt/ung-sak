@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
@@ -44,6 +45,7 @@ import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OMSORGSPENGER)
+@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 @BehandlingStegRef(value = VURDER_KOMPLETTHET_BEREGNING)
 @BehandlingTypeRef
 @ApplicationScoped

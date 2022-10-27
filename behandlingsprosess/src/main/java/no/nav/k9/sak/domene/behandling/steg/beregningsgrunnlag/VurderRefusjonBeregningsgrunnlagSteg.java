@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_REF_BERGRUNN;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -98,13 +97,16 @@ public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagS
             if (!nyePerioder.isEmpty()) {
                 beregningsgrunnlagTjeneste.kopier(ref, nyePerioder);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
-                beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatVedForlengelse(kontekst, originalBehandlingId, nyePerioder);
+                beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(kontekst,
+                    originalBehandlingId,
+                    nyePerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()));
             }
         }
     }
 
     private Set<PeriodeTilVurdering> finnPerioderSomVurderesGrunnetEndretUttak(BehandlingReferanse ref) {
-        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref).ignorerAvslåttePerioderInkludertKompletthet();
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref).ignorerAvslåttePerioder()
+            .markerEndringIUttak();
         var allePerioder = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
         var endretUttakPerioder = allePerioder.stream()
             .filter(PeriodeTilVurdering::erForlengelse)

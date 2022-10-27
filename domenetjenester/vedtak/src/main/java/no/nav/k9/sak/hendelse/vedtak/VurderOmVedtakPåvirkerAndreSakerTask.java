@@ -58,8 +58,7 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
         var kandidaterTilRevurdering = vurderOmVedtakPåvirkerSakerTjeneste
             .utledSakerMedPerioderSomErKanVærePåvirket(vedtakHendelse);
 
-        log.info(
-            "Etter '{}' vedtak på saksnummer='{}', skal følgende saker '{}' som skal revurderes som følge av vedtak.",
+        log.info("Etter '{}' vedtak på saksnummer='{}', skal følgende saker '{}' som skal revurderes som følge av vedtak.",
             fagsakYtelseType, vedtakHendelse.getSaksnummer(), kandidaterTilRevurdering);
 
         for (SakMedPeriode kandidat : kandidaterTilRevurdering) {

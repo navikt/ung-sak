@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -13,15 +14,9 @@ import no.nav.k9.sak.typer.Periode;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public class VurderVarigEndringEllerNyoppstartetSNDto extends BekreftetBeregningsgrunnlagDto {
+public class VurderVarigEndringEllerNyoppstartetSNDto extends VurderVarigEndringEllerNyoppstartetDto implements VurderVarigEndring {
 
-    @JsonProperty(value = "bruttoBeregningsgrunnlag")
-    @Min(0)
-    @Max(Integer.MAX_VALUE)
-    private Integer bruttoBeregningsgrunnlag;
-
-    @JsonProperty(value = "erVarigEndretNaering", required = true)
-    @NotNull
+    @JsonProperty(value = "erVarigEndretNaering")
     private Boolean erVarigEndretNaering;
 
     public VurderVarigEndringEllerNyoppstartetSNDto() {
@@ -32,20 +27,22 @@ public class VurderVarigEndringEllerNyoppstartetSNDto extends BekreftetBeregning
         super(periode);
     }
 
-    public Integer getBruttoBeregningsgrunnlag() {
-        return bruttoBeregningsgrunnlag;
-    }
-
-    public void setBruttoBeregningsgrunnlag(Integer bruttoBeregningsgrunnlag) {
-        this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
-    }
-
     public boolean getErVarigEndretNaering() {
         return erVarigEndretNaering;
     }
 
     public void setErVarigEndretNaering(Boolean erVarigEndretNaering) {
         this.erVarigEndretNaering = erVarigEndretNaering;
+    }
+
+    @Override
+    public Boolean erVarigEndret() {
+        return erVarigEndretNaering || super.erVarigEndret;
+    }
+
+    @AssertTrue
+    public boolean skalHaSattVurderVarigEndring() {
+        return erVarigEndretNaering != null || erVarigEndret != null;
     }
 
 }

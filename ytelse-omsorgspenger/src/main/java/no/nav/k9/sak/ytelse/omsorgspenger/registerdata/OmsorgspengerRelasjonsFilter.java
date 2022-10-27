@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.registerdata;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -72,7 +73,7 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
             //snarvei for å unngå å hente rammevedtak
             return barn;
         }
-        List<Rammevedtak> rammevedtak = omsorgspengerRammevedtakTjeneste.hentRammevedtak(new BehandlingUuidDto(behandling.getUuid())).getRammevedtak();
+        List<Rammevedtak> rammevedtak = omsorgspengerRammevedtakTjeneste.hentRammevedtak(new BehandlingUuidDto(behandling.getUuid()), barn).getRammevedtak();
         return barn.stream()
             .filter(barnet -> barnetRelevantForSaken(opplysningsperioden, rammevedtak, barnet))
             .toList();
@@ -107,9 +108,11 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
     }
 
     private boolean gjelderForBarnet(Personinfo barn, UtvidetRett utvidetRett) {
-        String fnrGjelderFor = utvidetRett.getUtvidetRettFor();
-        if (PersonIdent.erGyldigFnr(fnrGjelderFor)) {
-            AktørId gjelderFor = aktørTjeneste.hentAktørIdForPersonIdent(new PersonIdent(fnrGjelderFor)).orElseThrow();
+        String personGjelderFor = utvidetRett.getUtvidetRettFor();
+        if ( (personGjelderFor.length() == 6) && (personGjelderFor.equals(barn.getFødselsdato().format(DateTimeFormatter.ofPattern("ddMMyy")))) ) {
+            return true;
+        } else if (PersonIdent.erGyldigFnr(personGjelderFor)) {
+            AktørId gjelderFor = aktørTjeneste.hentAktørIdForPersonIdent(new PersonIdent(personGjelderFor)).orElseThrow();
             return barn.getAktørId().equals(gjelderFor);
         } else {
             return false;

@@ -7,6 +7,7 @@ import java.util.Optional;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -31,8 +32,9 @@ public class OpprettProsessTaskIverksettOMP extends OpprettProsessTaskIverksettT
                                           OppgaveTjeneste oppgaveTjeneste,
                                           InfotrygdFeedService infotrygdFeedService,
                                           ÅrskvantumDeaktiveringTjeneste årskvantumDeaktiveringTjeneste,
-                                          StønadstatistikkService stønadstatistikkService) {
-        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService);
+                                          StønadstatistikkService stønadstatistikkService,
+                                          @KonfigVerdi(value = "PGI_FILTER_ENABLED", defaultVerdi = "false") boolean sigrunFilterEnabled) {
+        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService, sigrunFilterEnabled);
         this.årskvantumDeaktiveringTjeneste = årskvantumDeaktiveringTjeneste;
 
     }

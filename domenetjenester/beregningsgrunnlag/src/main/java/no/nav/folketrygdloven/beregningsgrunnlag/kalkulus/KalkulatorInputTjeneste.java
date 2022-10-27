@@ -39,19 +39,19 @@ public class KalkulatorInputTjeneste {
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
     private VilkårResultatRepository vilkårResultatRepository;
-    private NæringsinntektFilter næringsinntektFilter;
+    private FinnPGITilgjengeligPåVedtakstidspunktet finnPGITilgjengeligPåVedtakstidspunktet;
 
     @Inject
     public KalkulatorInputTjeneste(@Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                    @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
                                    @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                    VilkårResultatRepository vilkårResultatRepository,
-                                   @Any NæringsinntektFilter næringsinntektFilter) {
+                                   @Any FinnPGITilgjengeligPåVedtakstidspunktet finnPGITilgjengeligPåVedtakstidspunktet) {
         this.opptjeningForBeregningTjeneste = Objects.requireNonNull(opptjeningForBeregningTjeneste, "opptjeningForBeregningTjeneste");
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.næringsinntektFilter = næringsinntektFilter;
+        this.finnPGITilgjengeligPåVedtakstidspunktet = finnPGITilgjengeligPåVedtakstidspunktet;
     }
 
     protected KalkulatorInputTjeneste() {
@@ -132,7 +132,7 @@ public class KalkulatorInputTjeneste {
             sakInntektsmeldinger,
             oppgittOpptjening,
             imTjeneste,
-            næringsinntektFilter);
+            finnPGITilgjengeligPåVedtakstidspunktet);
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode);
 
         if (opptjeningAktiviteter.isEmpty() && !erInaktiv(vilkårsMerknad)) {
@@ -166,8 +166,8 @@ public class KalkulatorInputTjeneste {
                                                                Collection<Inntektsmelding> inntektsmeldinger,
                                                                OppgittOpptjening oppgittOpptjening,
                                                                InntektsmeldingerRelevantForBeregning imTjeneste,
-                                                               NæringsinntektFilter næringsinntektFilter) {
-        return new TilKalkulusMapper(imTjeneste, næringsinntektFilter).mapTilDto(inntektArbeidYtelseGrunnlag,
+                                                               FinnPGITilgjengeligPåVedtakstidspunktet finnPGITilgjengeligPåVedtakstidspunktet) {
+        return new TilKalkulusMapper(imTjeneste, finnPGITilgjengeligPåVedtakstidspunktet).mapTilDto(inntektArbeidYtelseGrunnlag,
             inntektsmeldinger,
             referanse.getAktørId(),
             vilkårsperiode,

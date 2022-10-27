@@ -2,13 +2,13 @@ package no.nav.k9.sak.kontrakt.tilsyn;
 
 import java.util.List;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -20,6 +20,11 @@ public class EtablertTilsynNattevåkOgBeredskapDto {
     @Valid
     private List<EtablertTilsynPeriodeDto> etablertTilsynPerioder;
 
+    @JsonProperty(value = "smortEtablertTilsynPerioder")
+    @Size(max = 1000)
+    @Valid
+    private List<SmørtEtablertTilsyn> smørtEtablertTilsynPerioder;
+
     @JsonProperty(value = "nattevåk")
     @Valid
     private NattevåkDto nattevåk;
@@ -28,8 +33,9 @@ public class EtablertTilsynNattevåkOgBeredskapDto {
     @Valid
     private BeredskapDto beredskap;
 
-    public EtablertTilsynNattevåkOgBeredskapDto(List<EtablertTilsynPeriodeDto> etablertTilsynPerioder, NattevåkDto nattevåk, BeredskapDto beredskap) {
+    public EtablertTilsynNattevåkOgBeredskapDto(List<EtablertTilsynPeriodeDto> etablertTilsynPerioder, List<SmørtEtablertTilsyn> smørtEtablertTilsynPerioder, NattevåkDto nattevåk, BeredskapDto beredskap) {
         this.etablertTilsynPerioder = etablertTilsynPerioder;
+        this.smørtEtablertTilsynPerioder = smørtEtablertTilsynPerioder;
         this.nattevåk = nattevåk;
         this.beredskap = beredskap;
     }
@@ -44,5 +50,9 @@ public class EtablertTilsynNattevåkOgBeredskapDto {
 
     public BeredskapDto getBeredskap() {
         return beredskap;
+    }
+
+    public List<SmørtEtablertTilsyn> getSmørtEtablertTilsynPerioder() {
+        return smørtEtablertTilsynPerioder;
     }
 }

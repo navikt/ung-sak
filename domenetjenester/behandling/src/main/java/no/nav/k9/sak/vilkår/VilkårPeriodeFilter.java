@@ -1,5 +1,6 @@
 package no.nav.k9.sak.vilkår;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -30,10 +31,12 @@ public class VilkårPeriodeFilter {
     private final VilkårResultatRepository vilkårResultatRepository;
     private final ForlengelseTjeneste forlengelseTjeneste;
     private final EndringIUttakPeriodeUtleder endringIUttakPeriodeUtleder;
+    private final List<Avslagsårsak> avslagsårsakerSomIkkeFiltreresBort = new ArrayList<>();
+
     private boolean skalIgnorereAvslåttePerioder;
-    private boolean skalIgnorereAvslagPåKompletthet;
     private boolean skalIgnorerePerioderFraInfotrygd;
     private boolean skalIgnorereForlengelser;
+    private boolean skalMarkereEndringIUttak;
 
 
     VilkårPeriodeFilter(BehandlingReferanse behandlingReferanse,
@@ -55,7 +58,9 @@ public class VilkårPeriodeFilter {
         var vilkår = hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         var filtrertePerioder = filtrer(vilkårType, sakInfotrygdMigreringer, vilkår, perioder);
         markerForlengelser(vilkårType, filtrertePerioder);
-        markerEndringIUttak(filtrertePerioder);
+        if (skalMarkereEndringIUttak) {
+            markerEndringIUttak(filtrertePerioder);
+        }
         return Collections.unmodifiableNavigableSet(filtrertePerioder);
     }
 
@@ -64,8 +69,8 @@ public class VilkårPeriodeFilter {
                                                  Optional<Vilkår> vilkår,
                                                  Collection<DatoIntervallEntitet> filterPerioder) {
         if (skalIgnorereAvslåttePerioder) {
-            var avslåttePerioder = filtrerVilkårsperiode(vilkår, avslåttPeriodePredicate());
-            filtrerBort(filterPerioder, avslåttePerioder);
+            var avslåttePerioderUtenInkludertÅrsak = filtrerVilkårsperiode(vilkår, this::avslåttUtenInkludertÅrsak);
+            filtrerBort(filterPerioder, avslåttePerioderUtenInkludertÅrsak);
         }
         if (skalIgnorerePerioderFraInfotrygd) {
             var periodeFraInfotrygd = filtrerVilkårsperiode(vilkår, periodeFraInfotrygdPredicate(sakInfotrygdMigreringer));
@@ -104,17 +109,13 @@ public class VilkårPeriodeFilter {
             .orElse(Collections.emptySet());
     }
 
-    private Predicate<VilkårPeriode> avslåttPeriodePredicate() {
-        return it -> skalFiltreresBort(it, skalIgnorereAvslagPåKompletthet);
-    }
-
     private void filtrerBort(Collection<DatoIntervallEntitet> perioder, Collection<DatoIntervallEntitet> fjernPerioder) {
         fjernPerioder.forEach(p -> perioder.removeIf(p::equals));
     }
 
 
-    private boolean skalFiltreresBort(VilkårPeriode it, boolean skalIgnoreAvslagPåKompletthet) {
-        return Utfall.IKKE_OPPFYLT.equals(it.getUtfall()) && (skalIgnoreAvslagPåKompletthet || !Avslagsårsak.MANGLENDE_INNTEKTSGRUNNLAG.equals(it.getAvslagsårsak()));
+    private boolean avslåttUtenInkludertÅrsak(VilkårPeriode it) {
+        return Utfall.IKKE_OPPFYLT.equals(it.getUtfall()) && !avslagsårsakerSomIkkeFiltreresBort.contains(it.getAvslagsårsak());
     }
 
     public Optional<Vilkårene> hentHvisEksisterer(Long behandlingId) {
@@ -127,15 +128,21 @@ public class VilkårPeriodeFilter {
         return this;
     }
 
-    public VilkårPeriodeFilter ignorerAvslåttePerioderInkludertKompletthet() {
+    public VilkårPeriodeFilter ignorerAvslåttePerioder() {
         this.skalIgnorereAvslåttePerioder = true;
-        this.skalIgnorereAvslagPåKompletthet = true;
+        return this;
+    }
+
+    public VilkårPeriodeFilter ignorerAvslåtteUnntattForLavtBeregningsgrunnlag() {
+        this.skalIgnorereAvslåttePerioder = true;
+        this.avslagsårsakerSomIkkeFiltreresBort.add(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG);
+        this.avslagsårsakerSomIkkeFiltreresBort.add(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG_8_47);
         return this;
     }
 
     public VilkårPeriodeFilter ignorerAvslåttePerioderUnntattKompletthet() {
         this.skalIgnorereAvslåttePerioder = true;
-        this.skalIgnorereAvslagPåKompletthet = false;
+        avslagsårsakerSomIkkeFiltreresBort.add(Avslagsårsak.MANGLENDE_INNTEKTSGRUNNLAG);
         return this;
     }
 
@@ -143,5 +150,11 @@ public class VilkårPeriodeFilter {
         this.skalIgnorerePerioderFraInfotrygd = true;
         return this;
     }
+
+    public VilkårPeriodeFilter markerEndringIUttak() {
+        this.skalMarkereEndringIUttak = true;
+        return this;
+    }
+
 
 }

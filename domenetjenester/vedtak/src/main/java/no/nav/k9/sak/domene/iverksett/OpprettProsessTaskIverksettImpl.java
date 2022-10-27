@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
@@ -22,7 +23,8 @@ public class OpprettProsessTaskIverksettImpl extends OpprettProsessTaskIverksett
     public OpprettProsessTaskIverksettImpl(FagsakProsessTaskRepository prosessTaskRepository,
                                            OppgaveTjeneste oppgaveTjeneste,
                                            InfotrygdFeedService infotrygdFeedService,
-                                           StønadstatistikkService stønadstatistikkService) {
-        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService);
+                                           StønadstatistikkService stønadstatistikkService,
+                                           @KonfigVerdi(value = "PGI_FILTER_ENABLED", defaultVerdi = "false") boolean sigrunFilterEnabled) {
+        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService, sigrunFilterEnabled);
     }
 }

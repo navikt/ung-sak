@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.mottak;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.MapSøknadUttakPerioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.SøknadPersisterer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.FeriePeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtenlandsoppholdPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
@@ -29,6 +31,8 @@ import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.olp.v1.Opplæringspenger;
+import no.nav.k9.søknad.ytelse.olp.v1.kurs.Kurs;
+import no.nav.k9.søknad.ytelse.olp.v1.kurs.KursPeriodeMedReisetid;
 import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie;
 
 @Dependent
@@ -59,7 +63,8 @@ class SøknadOversetter {
             mapUtenlandsopphold(ytelse.getUtenlandsopphold()),
             mapFerie(søknadsperioder, ytelse.getLovbestemtFerie()),
             List.of(),
-            List.of());
+            List.of(),
+            mapKurs(ytelse.getKurs()));
 
         var maksSøknadsperiode = finnMaksperiode(søknadsperioder);
 
@@ -69,6 +74,20 @@ class SøknadOversetter {
         søknadPersisterer.lagreSøknadsperioder(søknadsperioder, ytelse.getTrekkKravPerioder(), journalpostId, behandlingId);
         søknadPersisterer.lagreUttak(perioderFraSøknad, behandlingId);
         søknadPersisterer.oppdaterFagsakperiode(maksSøknadsperiode, fagsakId);
+    }
+
+    private List<KursPeriode> mapKurs(Kurs kurs) {
+        List<KursPeriodeMedReisetid> kursPerioderMedReisetid = kurs.getKursperioder();
+        return kursPerioderMedReisetid.stream().map(kursPeriodeMedReisetid ->
+            new KursPeriode(
+                kursPeriodeMedReisetid.getPeriode().getFraOgMed(),
+                kursPeriodeMedReisetid.getPeriode().getTilOgMed(),
+                kurs.getKursholder().getHolder(),
+                kurs.getFormål(),
+                kursPeriodeMedReisetid.getAvreise(),
+                kursPeriodeMedReisetid.getHjemkomst(),
+                kurs.getKursholder().getInstitusjonUuid()))
+            .collect(Collectors.toList());
     }
 
     private List<UtenlandsoppholdPeriode> mapUtenlandsopphold(Utenlandsopphold utenlandsopphold) {

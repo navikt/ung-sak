@@ -44,6 +44,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjo
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -59,6 +60,7 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @ApplicationScoped
 @Transactional
@@ -78,6 +80,7 @@ public class ForvaltningBeregningRestTjeneste {
     private AksjonspunktRepository aksjonspunktRepository;
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     private KalkulusRestKlient kalkulusSystemRestKlient;
+    private RevurderPGITjeneste revurderPGITjeneste;
 
 
     public ForvaltningBeregningRestTjeneste() {
@@ -91,13 +94,15 @@ public class ForvaltningBeregningRestTjeneste {
                                             AksjonspunktRepository aksjonspunktRepository,
                                             BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
                                             SystemUserOidcRestClient systemUserOidcRestClient,
-                                            @KonfigVerdi(value = "ftkalkulus.url") URI endpoint) {
+                                            @KonfigVerdi(value = "ftkalkulus.url") URI endpoint,
+                                            RevurderPGITjeneste revurderPGITjeneste) {
         this.forvaltningBeregning = forvaltningBeregning;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
+        this.revurderPGITjeneste = revurderPGITjeneste;
         this.kalkulusSystemRestKlient = new KalkulusRestKlient(systemUserOidcRestClient, endpoint);
     }
 
@@ -217,6 +222,27 @@ public class ForvaltningBeregningRestTjeneste {
             aksjonspunkt.getStatus().getKode(),
             aksjonspunkt.getBegrunnelse()
         );
+    }
+
+    @POST
+    @Path("/revurder-innhent-pgi")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Oppretter manuell revurdering for reinnhenting av PGI.", summary = ("Oppretter manuell revurdering for reinnhenting av PGI."), tags = "beregning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public void revurderOgInnhentPGI(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) RevurderOgInnhentPGIDto revurderOgInnhentPGIDto) {
+        revurderPGITjeneste.revurderOgInnhentPGI(revurderOgInnhentPGIDto.getSaksnummer(), revurderOgInnhentPGIDto.getSkjæringstidspunkt());
+    }
+
+    @POST
+    @Path("/revurder-bruk-forrige-skatteoppgjør")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Oppretter manuell revurdering og bruker skatteoppgjør fra oppgitt behandling.", summary = ("Oppretter manuell revurdering og bruker skatteoppgjør fra oppgitt behandling."), tags = "beregning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public void revurderOgBrukForrigeSkatteoppgjør(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BrukForrigeSkatteoppgjørDto brukForrigeSkatteoppgjørDto) {
+        revurderPGITjeneste.revurderOgBrukForrigeSkatteoppgjør(
+            brukForrigeSkatteoppgjørDto.getSaksnummer(),
+            brukForrigeSkatteoppgjørDto.getBehandlingIdForrigeSkatteoppgjør(),
+            brukForrigeSkatteoppgjørDto.getSkjæringstidspunkt());
     }
 
 

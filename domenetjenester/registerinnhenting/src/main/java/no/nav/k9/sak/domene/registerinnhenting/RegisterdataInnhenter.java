@@ -502,6 +502,8 @@ public class RegisterdataInnhenter {
         var behandlingUuid = behandling.getUuid();
         var saksnummer = behandling.getFagsak().getSaksnummer().getVerdi();
         var opplysningsperiode = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), fagsakYtelseType, false);
+
+
         var ytelseType = YtelseType.fraKode(fagsakYtelseType.getKode());
 
         log.info("Trigger innhenting i abakus for behandling med id={} og uuid={}, saksnummer={}, opplysningsperiode={}, ytelseType={}",
@@ -513,6 +515,10 @@ public class RegisterdataInnhenter {
 
         var innhentRegisterdataRequest = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
         innhentRegisterdataRequest.setCallbackUrl(abakusTjeneste.getCallbackUrl());
+
+        skjæringstidspunktTjeneste.utledOpplysningsperiodeSkattegrunnlag(behandling.getId(), fagsakYtelseType)
+            .map(p -> new Periode(p.getFom(), p.getTom()))
+            .ifPresent(innhentRegisterdataRequest::setOpplysningsperiodeSkattegrunnlag);
 
         abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
     }

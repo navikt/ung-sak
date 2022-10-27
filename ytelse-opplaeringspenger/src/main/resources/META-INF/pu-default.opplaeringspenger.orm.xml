@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+                 version="3.0">
+
+    <sequence-generator name="SEQ_GR_OPPLAERING" allocation-size="50" sequence-name="SEQ_GR_OPPLAERING" />
+    <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING" />
+    <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING_HOLDER" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING_HOLDER" />
+    <sequence-generator name="SEQ_OLP_VURDERT_INSTITUSJON" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_INSTITUSJON" />
+    <sequence-generator name="SEQ_OLP_VURDERT_INSTITUSJON_HOLDER" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_INSTITUSJON_HOLDER" />
+    <sequence-generator name="SEQ_GODKJENTE_OPPLAERINGSINSTITUSJONER" allocation-size="50" sequence-name="SEQ_GODKJENTE_OPPLAERINGSINSTITUSJONER" />
+    <sequence-generator name="SEQ_GODKJENTE_OPPLAERINGSINSTITUSJONER" allocation-size="50" sequence-name="SEQ_GODKJENT_OPPLAERINGSINSTITUSJON_PERIODE" />
+
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjon" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjonPeriode" />
+
+</entity-mappings>

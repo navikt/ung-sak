@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.PeriodeMedVarighet;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 
 public class MapTilsyn {
 
-    public Map<LukketPeriode, Duration> map(List<EtablertTilsynPeriode> etablertTilsynsperioder) {
+    public Map<LukketPeriode, Duration> map(List<PeriodeMedVarighet> etablertTilsynsperioder) {
         final var result = new HashMap<LukketPeriode, Duration>();
-        for (EtablertTilsynPeriode etablertTilsynPeriode : etablertTilsynsperioder) {
+        for (PeriodeMedVarighet etablertTilsynPeriode : etablertTilsynsperioder) {
             result.put(new LukketPeriode(etablertTilsynPeriode.getPeriode().getFomDato(), etablertTilsynPeriode.getPeriode().getTomDato()), etablertTilsynPeriode.getVarighet());
         }
 

@@ -1,9 +1,9 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell;
 
-import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.Pleiegrad;
-
 import java.time.LocalDate;
 import java.util.Objects;
+
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.Pleiegrad;
 
 public class LangvarigSykdomPeriode {
     private final LocalDate fraOgMed;
@@ -32,7 +32,10 @@ public class LangvarigSykdomPeriode {
     }
 
     public Pleiegrad getGrad() {
-        //TODO
+        //TODO: Noe mer fornuftig
+        if (dokumentasjon == LangvarigSykdomDokumentasjon.IKKE_DOKUMENTERT) {
+            return Pleiegrad.INGEN;
+        }
         return Pleiegrad.KONTINUERLIG_TILSYN;
     }
 

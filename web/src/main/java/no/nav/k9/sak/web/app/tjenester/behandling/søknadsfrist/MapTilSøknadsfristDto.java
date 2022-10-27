@@ -1,5 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -87,5 +89,46 @@ public class MapTilSøknadsfristDto {
             kravDokument.getJournalpostId(),
             hentAvklarteOpplysninger(kravDokument, avklartSøknadsfristResultat),
             hentOverstyrteOpplysninger(kravDokument, avklartSøknadsfristResultat));
+    }
+
+    public SøknadsfristTilstandDto mapTilV2OMP(Map<KravDokument, List<VurdertSøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravDokumentListMap,
+                                               Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultat,
+                                               LocalDateTimeline<List<KravDokument>> kravrekkefølgeForPerioderIBehandlingen) {
+        var kravstatuser = kravrekkefølgeForPerioderIBehandlingen.stream()
+            .map(segment -> mapPerioderV2OMP(segment, kravDokumentListMap, avklartSøknadsfristResultat))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+        return new SøknadsfristTilstandDto(kravstatuser);
+    }
+
+    private List<KravDokumentStatus> mapPerioderV2OMP(LocalDateSegment<List<KravDokument>> segment, Map<KravDokument, List<VurdertSøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravDokumentListMap, Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultat) {
+        return mapTilKravStatusForPeriodeOMP(segment, kravDokumentListMap, avklartSøknadsfristResultat);
+    }
+
+    private List<KravDokumentStatus> mapTilKravStatusForPeriodeOMP(LocalDateSegment<List<KravDokument>> segment, Map<KravDokument, List<VurdertSøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravDokumentListMap, Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultat) {
+        List<KravDokumentStatus> dokumentStatus = new ArrayList<>();
+        var kravDokumenter = segment.getValue();
+        for (KravDokument kravDokument : kravDokumenter) {
+            var søknadsfristutfallSegmenter = kravDokumentListMap.get(kravDokument).stream().map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), it.getUtfall())).toList();
+            var søknadsfristutfallTidslinje = new LocalDateTimeline<>(søknadsfristutfallSegmenter, (intervall, lhs, rhs) -> {
+                if (lhs.getValue() == rhs.getValue()){
+                    return new LocalDateSegment<>(intervall, lhs.getValue()); //kan ha overlappende perioder hvis det er søkt for flere arbeidsgivere i samme søknad
+                } else {
+                    throw new IllegalStateException("Ikke-støttet tilstand. Har både " + lhs.getValue() + " og " + rhs.getValue() + " i samme periode i samme kravdokument, journalpostId " + kravDokument.getJournalpostId().getVerdi());
+                }
+            });
+
+            var overlappendePerioder = søknadsfristutfallTidslinje.intersection(segment.getLocalDateInterval());
+            var periodeDtoer = overlappendePerioder.stream().map(it -> new SøknadsfristPeriodeDto(DatoIntervallEntitet.fra(it.getLocalDateInterval()).tilPeriode(), it.getValue())).toList();
+
+            dokumentStatus.add(new KravDokumentStatus(KravDokumenType.fraKode(kravDokument.getType().name()),
+                periodeDtoer,
+                kravDokument.getInnsendingsTidspunkt(),
+                kravDokument.getJournalpostId(),
+                hentAvklarteOpplysninger(kravDokument, avklartSøknadsfristResultat),
+                hentOverstyrteOpplysninger(kravDokument, avklartSøknadsfristResultat)));
+        }
+        return dokumentStatus;
+
     }
 }

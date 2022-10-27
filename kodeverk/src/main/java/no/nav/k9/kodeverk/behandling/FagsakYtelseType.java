@@ -344,6 +344,24 @@ public enum FagsakYtelseType implements Kodeverdi {
         OMSORGSPENGER_AO,
         FORELDREPENGER,
         ENGANGSTØNAD));
+    private static final Set<FagsakYtelseType> BEHANDLES_I_K9_SAK = Collections.unmodifiableSet(EnumSet.of(
+        PLEIEPENGER_SYKT_BARN,
+        PLEIEPENGER_NÆRSTÅENDE,
+        OPPLÆRINGSPENGER,
+        OMSORGSPENGER,
+        OMSORGSPENGER_KS,
+        OMSORGSPENGER_MA,
+        OMSORGSPENGER_AO));
+
+    /** Hvorvidt ytelsetypen omfattes av kap 8 i folketrygdloven. */
+    private static final Set<FagsakYtelseType> OMFATTES_AV_KAP_8 = Collections.unmodifiableSet(EnumSet.of(
+        PLEIEPENGER_SYKT_BARN,
+        PLEIEPENGER_NÆRSTÅENDE,
+        OPPLÆRINGSPENGER,
+        OMSORGSPENGER,
+        FORELDREPENGER,
+        SVANGERSKAPSPENGER,
+        SYKEPENGER));
 
     public boolean girOpptjeningsTid(FagsakYtelseType ytelseType) {
         final var relatertYtelseTypeSet = OPPTJENING_RELATERTYTELSE.get(ytelseType);
@@ -391,6 +409,14 @@ public enum FagsakYtelseType implements Kodeverdi {
 
     public boolean erRammevedtak() {
         return this == OMSORGSPENGER_KS || this == OMSORGSPENGER_MA || this == OMSORGSPENGER_AO;
+    }
+
+    public boolean erK9Ytelse() {
+        return BEHANDLES_I_K9_SAK.contains(this);
+    }
+
+    public boolean omfattesAvK8() {
+        return OMFATTES_AV_KAP_8.contains(this);
     }
 
     @SuppressWarnings("unused")

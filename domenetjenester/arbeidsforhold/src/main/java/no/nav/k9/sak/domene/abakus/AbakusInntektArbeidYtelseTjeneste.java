@@ -12,13 +12,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Default;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Default;
+import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
@@ -142,6 +141,38 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         }
         return dto;
     }
+
+
+    /**
+     *  Ikke bruk denne dersom du har tilgang til behandling. Skal kun benyttes i spesielle situasjoner der man må hente på grunnlagsid.
+     *
+     * @param fagsak                          Fagsak
+     * @param inntektArbeidYtelseGrunnlagUuid grunnlag-uuid
+     * @return iay-grunnlag
+     */
+    @Override
+    public InntektArbeidYtelseGrunnlag hentGrunnlagForGrunnlagId(Fagsak fagsak, UUID inntektArbeidYtelseGrunnlagUuid) {
+        var dto = requestCache.getGrunnlag(inntektArbeidYtelseGrunnlagUuid);
+        if (dto == null) {
+            var request = initRequest(fagsak, inntektArbeidYtelseGrunnlagUuid);
+            var grunnlaget = hentOgMapGrunnlag(request, fagsak.getAktørId());
+            if (grunnlaget == null || grunnlaget.getEksternReferanse() == null || !grunnlaget.getEksternReferanse().equals(inntektArbeidYtelseGrunnlagUuid)) {
+                throw new IllegalStateException("Fant ikke grunnlag med referanse=" + inntektArbeidYtelseGrunnlagUuid);
+            }
+            return grunnlaget;
+        }
+        return dto;
+    }
+
+    private InntektArbeidYtelseGrunnlagRequest initRequest(Fagsak fagsak, UUID inntektArbeidYtelseGrunnlagUuid) {
+        var request = new InntektArbeidYtelseGrunnlagRequest(new AktørIdPersonident(fagsak.getAktørId().getId()));
+        request.medSaksnummer(fagsak.getSaksnummer().getVerdi());
+        request.medYtelseType(YtelseType.fraKode(fagsak.getYtelseType().getKode()));
+        request.forGrunnlag(inntektArbeidYtelseGrunnlagUuid);
+        request.medDataset(Arrays.asList(Dataset.values()));
+        return request;
+    }
+
 
     private InntektArbeidYtelseGrunnlagRequest initRequest(Behandling behandling, UUID inntektArbeidYtelseGrunnlagUuid) {
         var request = new InntektArbeidYtelseGrunnlagRequest(new AktørIdPersonident(behandling.getAktørId().getId()));
@@ -278,9 +309,9 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     public void lagreArbeidsforhold(Long behandlingId, AktørId aktørId, ArbeidsforholdInformasjonBuilder informasjonBuilder) {
         Objects.requireNonNull(informasjonBuilder, "informasjonBuilder"); // NOSONAR
 
-        InntektArbeidYtelseGrunnlagBuilder builder = opprettGrunnlagBuilderFor(behandlingId);
-        builder.medInformasjon(informasjonBuilder.build());
-        konverterOgLagre(behandlingId, builder.build());
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        var eksisterendeGrunnlag = Optional.ofNullable(hentGrunnlagHvisEksisterer(behandling));
+        konverterOgLagre(behandlingId, eksisterendeGrunnlag.flatMap(InntektArbeidYtelseGrunnlag::getSaksbehandletVersjon).orElse(null), informasjonBuilder.build());
     }
 
     @Override

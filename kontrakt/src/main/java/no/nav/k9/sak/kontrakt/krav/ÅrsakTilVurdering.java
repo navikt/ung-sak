@@ -44,7 +44,9 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     // Vurderes på nytt pga G_REGULERING
     G_REGULERING("G_REGULERING", "G-regulering"),
     // Vurderes for første gang
-    FØRSTEGANGSVURDERING("FØRSTEGANGSVURDERING", "Ny periode");
+    FØRSTEGANGSVURDERING("FØRSTEGANGSVURDERING", "Ny periode"),
+    // Vurdering etter klage på lignet inntekt
+    REVURDERER_LIGNET_INNTEKT("REVURDERER_LIGNET_INNTEKT", "Manuell revurdering der lignet inntekt innhentes på nytt");
 
     private static final Map<String, ÅrsakTilVurdering> KODER = new LinkedHashMap<>();
     private static final Map<BehandlingÅrsakType, ÅrsakTilVurdering> SAMMENHENG;
@@ -62,6 +64,9 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, HENDELSE_DØD_BRUKER);
         sammenheng.put(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING, REVURDERER_NY_INNTEKTSMELDING);
         sammenheng.put(BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK, REVURDERER_ENDRING_FERIEPENGER);
+        sammenheng.put(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_MEDLEMSKAP, REVURDERER_BERØRT_PERIODE);
+        sammenheng.put(BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT, REVURDERER_LIGNET_INNTEKT);
+        sammenheng.put(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG, MANUELT_REVURDERER_PERIODE);
         SAMMENHENG = Collections.unmodifiableMap(sammenheng);
     }
 

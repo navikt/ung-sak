@@ -82,6 +82,7 @@ public class SykdomRestTjeneste {
             aksjonspunkt.isManglerVurderingAvToOmsorgspersoner(),
             aksjonspunkt.isManglerVurderingAvILivetsSluttfase(),
             aksjonspunkt.isHarDataSomIkkeHarBlittTattMedIBehandling(),
-            aksjonspunkt.isNyttDokumentHarIkkekontrollertEksisterendeVurderinger());
+            aksjonspunkt.isNyttDokumentHarIkkekontrollertEksisterendeVurderinger(),
+            aksjonspunkt.isManglerVurderingAvLangvarigSykdom());
     }
 }

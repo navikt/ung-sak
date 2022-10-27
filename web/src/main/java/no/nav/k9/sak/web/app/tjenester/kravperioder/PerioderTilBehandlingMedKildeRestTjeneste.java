@@ -31,6 +31,7 @@ import jakarta.ws.rs.core.MediaType;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -79,13 +80,14 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
                                                      BehandlingModellRepository behandlingModellRepository,
                                                      UttakTjeneste uttakTjeneste,
                                                      VilkårResultatRepository vilkårResultatRepository,
-                                                     SøknadsfristTjenesteProvider søknadsfristTjenesteProvider) {
+                                                     SøknadsfristTjenesteProvider søknadsfristTjenesteProvider,
+                                                     @KonfigVerdi(value = "filtrer.tilstotende.periode", defaultVerdi = "false") Boolean filtrereUtTilstøtendePeriode) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingModellRepository = behandlingModellRepository;
         this.uttakTjeneste = uttakTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
-        this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste();
+        this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(filtrereUtTilstøtendePeriode);
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
@@ -152,8 +154,10 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             (behandling.getStatus().erFerdigbehandletStatus() || harKommetTilUttak(behandling))) {
             var uttaksplan = uttakTjeneste.hentUttaksplan(behandling.getUuid(), true);
             List<LocalDateSegment<Utfall>> utfallFraUttak = new ArrayList<>();
-            for (Map.Entry<LukketPeriode, UttaksperiodeInfo> entry : uttaksplan.getPerioder().entrySet()) {
-                utfallFraUttak.add(new LocalDateSegment<>(entry.getKey().getFom(), entry.getKey().getTom(), mapUtfall(entry.getValue().getUtfall())));
+            if (uttaksplan != null) {
+                for (Map.Entry<LukketPeriode, UttaksperiodeInfo> entry : uttaksplan.getPerioder().entrySet()) {
+                    utfallFraUttak.add(new LocalDateSegment<>(entry.getKey().getFom(), entry.getKey().getTom(), mapUtfall(entry.getValue().getUtfall())));
+                }
             }
             timeline = new LocalDateTimeline<>(utfallFraUttak, StandardCombinators::coalesceRightHandSide);
         }

@@ -5,8 +5,8 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,7 +38,9 @@ import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfr
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.søknadsfrist.SøknadsfristTilstandDto;
 import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @ApplicationScoped
@@ -84,7 +86,7 @@ public class SøknadsfristRestTjeneste {
         Map<KravDokument, List<VurdertSøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> relevanteVurderteKravdokumentMedPeriodeForBehandling = vurderSøknadsfristTjeneste.relevanteVurderteKravdokumentMedPeriodeForBehandling(referanse);
 
         // Tar ut OMP fra denne inntil løsning for å støtte det bedre er på plass
-        if (nymapping && !Objects.equals(FagsakYtelseType.OMSORGSPENGER, behandling.getFagsakYtelseType())) {
+        if (nymapping) {
             var kravrekkefølge = vurderSøknadsfristTjeneste.utledKravrekkefølge(referanse);
             var behandlingsLinje = new LocalDateTimeline<>(relevanteVurderteKravdokumentMedPeriodeForBehandling.values()
                 .stream()
@@ -93,20 +95,65 @@ public class SøknadsfristRestTjeneste {
                 .toList(), StandardCombinators::alwaysTrueForMatch);
 
             // Tar her første dokumentet som kom inn for en gitt periode, dette fungerer ikke for refusjonskrav fra AG for OMP
-            var kravrekkefølgeForPerioderIBehandlingen = kravrekkefølge.intersection(behandlingsLinje, ((localDateInterval, leftSegment, rightSegment) -> tilKravdokument(leftSegment)));
+            Map<KravDokument, List<VurdertSøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravDokumentListMap;
+            var vurderteKravDokumenter = vurderSøknadsfristTjeneste.vurderSøknadsfrist(referanse);
+            if (!Objects.equals(FagsakYtelseType.OMSORGSPENGER, behandling.getFagsakYtelseType())) {
+                var kravrekkefølgeForPerioderIBehandlingen = kravrekkefølge.intersection(behandlingsLinje, ((localDateInterval, leftSegment, rightSegment) -> tilKravdokument(leftSegment)));
 
-            var kravDokumentListMap = vurderSøknadsfristTjeneste.vurderSøknadsfrist(referanse)
-                .entrySet()
-                .stream()
-                .filter(it -> kravrekkefølgeForPerioderIBehandlingen.stream()
-                    .anyMatch(at -> Objects.equals(at.getValue(), it.getKey())))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                kravDokumentListMap = vurderteKravDokumenter
+                    .entrySet()
+                    .stream()
+                    .filter(it -> kravrekkefølgeForPerioderIBehandlingen.stream()
+                        .anyMatch(at -> Objects.equals(at.getValue(), it.getKey())))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-            return new MapTilSøknadsfristDto().mapTilV2(kravDokumentListMap, avklartSøknadsfristResultat, kravrekkefølgeForPerioderIBehandlingen);
+                return new MapTilSøknadsfristDto().mapTilV2(kravDokumentListMap, avklartSøknadsfristResultat, kravrekkefølgeForPerioderIBehandlingen);
+            } else {
+                var kravrekkefølgeForPerioderIBehandlingen = kravrekkefølge.intersection(behandlingsLinje, ((localDateInterval, leftSegment, rightSegment) -> tilKravdokumenterOMP(leftSegment, vurderteKravDokumenter)));
+                kravDokumentListMap = vurderteKravDokumenter
+                    .entrySet()
+                    .stream()
+                    .filter(it -> kravrekkefølgeForPerioderIBehandlingen.stream()
+                        .flatMap(at -> at.getValue().stream())
+                        .anyMatch(at -> Objects.equals(at, it.getKey())))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+                return new MapTilSøknadsfristDto().mapTilV2OMP(kravDokumentListMap, avklartSøknadsfristResultat, kravrekkefølgeForPerioderIBehandlingen);
+            }
         } else {
 
             return new MapTilSøknadsfristDto().mapTil(relevanteVurderteKravdokumentMedPeriodeForBehandling, avklartSøknadsfristResultat);
         }
+    }
+
+    private LocalDateSegment<List<KravDokument>> tilKravdokumenterOMP(LocalDateSegment<List<KravDokument>> leftSegment, Map<KravDokument, List<VurdertSøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> vurderteKravDokumenter) {
+        if (leftSegment == null) {
+            return null;
+        }
+        List<KravDokument> prioriterteKrav = new ArrayList<>();
+        var førsteSøknadDokument = leftSegment.getValue().stream().filter(it -> Objects.equals(KravDokumentType.SØKNAD, it.getType())).min(Comparator.naturalOrder());
+        førsteSøknadDokument.ifPresent(prioriterteKrav::add);
+
+        prioriterteKrav.addAll(kravdokumentPerVirksomhet(leftSegment, vurderteKravDokumenter));
+        return new LocalDateSegment<>(leftSegment.getLocalDateInterval(), prioriterteKrav);
+    }
+
+    private List<KravDokument> kravdokumentPerVirksomhet(LocalDateSegment<List<KravDokument>> leftSegment, Map<KravDokument, List<VurdertSøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> vurderteKravDokumenter) {
+        Map<Arbeidsgiver, List<KravDokument>> arbeidsgiverKravDokument = new HashMap<>();
+        leftSegment.getValue()
+            .stream()
+            .filter(it -> Objects.equals(KravDokumentType.INNTEKTSMELDING, it.getType()))
+            .forEach(im -> {
+                var arbeidsgiver = vurderteKravDokumenter.get(im).stream().map(VurdertSøktPeriode::getArbeidsgiver).findFirst().orElseThrow();
+                var kravdokumenter = arbeidsgiverKravDokument.getOrDefault(arbeidsgiver, new ArrayList<>());
+                kravdokumenter.add(im);
+                arbeidsgiverKravDokument.put(arbeidsgiver, kravdokumenter);
+            });
+
+        return arbeidsgiverKravDokument.values()
+            .stream()
+            .map(kravDokuments -> kravDokuments.stream().min(Comparator.naturalOrder()).orElseThrow())
+            .collect(Collectors.toList());
     }
 
     private LocalDateSegment<KravDokument> tilKravdokument(LocalDateSegment<List<KravDokument>> leftSegment) {

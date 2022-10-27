@@ -50,6 +50,20 @@ spec:
       - mountPath: /var/run/secrets/nais.io/vault
         kvPath: /kv/preprod/fss/k9-sak/k9saksbehandling
   sidecar: true
+  azure:
+    application:
+      enabled: true
+      replyURLs:
+        - "https://k9.dev.intern.nav.no/k9/sak/cb"
+      claims:
+        extra:
+          - "NAVident"
+    accessPolicy:
+      inbound:
+        rules:
+        - application: k9-sak
+          namespace: k9saksbehandling
+          cluster: dev-fss
   env:
     - name: TZ
       value: "Europe/Oslo"
@@ -100,6 +114,8 @@ spec:
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
       value: https://app-q1.adeo.no
+    - name: LOADBALANCER_ALTERNATIVE_URL
+      value: https://k9.dev.intern.nav.no
 
     # LDAP
     - name: LDAP_URL
@@ -122,22 +138,32 @@ spec:
       value: http://infotrygd-hendelse-api.default/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.teamforeldrepenger/fpabakus
+    - name: FPABAKUS_SCOPE
+      value: api://dev-fss.teamforeldrepenger.fpabakus/.default
     - name: FTKALKULUS_URL
       value: http://ftkalkulus.k9saksbehandling/ftkalkulus
+    - name: FTKALKULUS_SCOPE
+      value: api://dev-fss.k9saksbehandling.ftkalkulus/.default
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
       value: http://abac-k9.default/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
-      value: https://app-q1.adeo.no/k9/oppdrag/api
+      value: /k9/oppdrag/api
     - name: ARBEIDSFORDELING_RS_URL
       value: https://app-q1.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
       value: https://oppgave-q1.nais.preprod.local/api/v1/oppgaver
+    - name: OPPGAVE_RS_SCOPE
+      value: api://dev-fss.oppgavehandtering.oppgave/.default
     - name: MEDL2_RS_URL
       value: https://medlemskap-medl-api.dev.intern.nav.no/api/v1/medlemskapsunntak
+    - name: MEDL2_RS_SCOPE
+      value: api://dev-fss.team-rocket.medlemskap-medl-api/.default
     - name: PDL_BASE_URL
-      value: http://pdl-api.default/graphql
+      value: http://pdl-api.pdl/graphql
+    - name: PDL_SCOPE
+      value: api://dev-fss.pdl.pdl-api/.default
     - name: ORGANISASJON_RS_URL
       value: https://modapp-q1.adeo.no/ereg/api/v1/organisasjon
     - name: K9_FORMIDLING_DOKUMENTDATA_URL
@@ -148,6 +174,8 @@ spec:
       value: http://k9-tilbake.k9saksbehandling/k9/tilbake/api
     - name: K9_FORMIDLING_URL
       value: http://k9-formidling.k9saksbehandling/k9/formidling
+    - name: K9_FORMIDLING_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-formidling/.default
     - name : K9_PUNSJ_URL
       value: https://k9-punsj.dev.adeo.no/api
     - name: INFOTRYGD_BS_BASE_URI
@@ -159,7 +187,9 @@ spec:
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
-      value: http://k9-aarskvantum.default
+      value: http://k9-aarskvantum.k9saksbehandling
+    - name: K9_OMS_AARSKVANTUM_SCOPE
+      value: 2068f5ff-804c-41bd-ba58-280d150b51c2/.default
     - name: K9_OMS_UTVIDETRETT_URL
       value: https://omsorgsdager.dev.intern.nav.no/api
 
@@ -170,8 +200,14 @@ spec:
     # Graphql services
     - name: SAF_BASE_URL
       value: http://saf-q1.teamdokumenthandtering
+    - name: SAF_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.saf/.default
 
     # Sikkerhet:
+    - name: APP_AUTH_SCHEMA_AZUREAD_ENABLED
+      value: "true"
+    - name: APP_AUTH_SCHEMA_AZUREAD_DOMAIN
+      value: "k9.dev.intern.nav.no"
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
     - name: OIDC_OPENAM_HOST_URL
@@ -190,15 +226,11 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: OMP_ORDENTLIG_VALIDERING_MOTTAK
-      value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
       value: "true"
-    - name: FORLENGELSE_MEDLEMSKAP_ENABLET
-      value: "true"
-    - name: PSB_UTVIDE_VED_DODSFALL
+    - name: PSB_PPN_UTVIDE_VED_DODSFALL
       value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "true"
@@ -206,7 +238,13 @@ spec:
       value: "true"
     - name: YTELSE_OLP_AKTIVERT
       value: "true"
-    - name: SIGRUN_INNTEKT_FILTER_ENABLED
+    - name: PGI_FILTER_ENABLED
+      value: "true"
+    - name: FILTRER_TILSTOTENDE_PERIODE
+      value: "true"
+    - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
+      value: "2022-09-19"
+    - name: PSB_UTTAK_UNNTAK_BEVAR_VEDTATT_VERDI
       value: "true"
 
     # Konfigurasjoner
@@ -224,7 +262,7 @@ spec:
       value: "k9-sak"
 
     - name: PIP_USERS
-      value: "srvPDP,srvk9-tilbake,srvsaf,Z993210,Z994080"
+      value: "srvPDP,srvk9-tilbake,srvsaf,Z993210,Z994080,Z994692"
 
     # Pleiepenger infotrygd migrering
     - name: INFOTRYGD_MIGRERING_TILLATELSER

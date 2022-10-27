@@ -37,7 +37,7 @@ public class SøknadsperiodeTjeneste {
     private final SøknadsperiodeRepository søknadsperiodeRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private Instance<MapTilBrevkode> brevkodeMappere;
-    private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
+    private Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester;
 
     @Inject
     public SøknadsperiodeTjeneste(BehandlingRepository behandlingRepository,
@@ -45,13 +45,13 @@ public class SøknadsperiodeTjeneste {
                                   SøknadsperiodeRepository søknadsperiodeRepository,
                                   MottatteDokumentRepository mottatteDokumentRepository,
                                   @Any Instance<MapTilBrevkode> brevkodeMappere,
-                                  HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste) {
+                                  @Any Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.brevkodeMappere = brevkodeMappere;
-        this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
+        this.håndterePleietrengendeDødsfallTjenester = håndterePleietrengendeDødsfallTjenester;
     }
 
     public LocalDateTimeline<List<AktørId>> utledSamledePerioderMedSøkereFor(FagsakYtelseType ytelseType, AktørId pleietrengende) {
@@ -139,6 +139,8 @@ public class SøknadsperiodeTjeneste {
             tidslinje = tidslinje.union(new LocalDateTimeline<>(segments), StandardCombinators::coalesceRightHandSide);
         }
 
+
+        HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste = HåndterePleietrengendeDødsfallTjeneste.velgTjeneste(håndterePleietrengendeDødsfallTjenester, referanse);
         var utvidetPeriode = håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse);
         if (utvidetPeriode.isPresent()) {
             var periode = utvidetPeriode.get();
@@ -147,6 +149,7 @@ public class SøknadsperiodeTjeneste {
 
         return tidslinje.stream().map(s -> new Kravperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue().getBehandlingId(), s.getValue().isHarTrukketKrav())).toList();
     }
+
 
     public static class Kravperiode {
         private final DatoIntervallEntitet periode;

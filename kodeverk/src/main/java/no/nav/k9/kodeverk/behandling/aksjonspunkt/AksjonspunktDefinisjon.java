@@ -100,7 +100,11 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN),
     VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE(
         AksjonspunktKodeDefinisjon.VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE, AksjonspunktType.MANUELL,
-        "Vurder varig endret/nyoppstartet næring selvstendig næringsdrivende", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG,
+        "Vurder varig endret/nyoppstartet næring selvstendig næringsdrivende", BehandlingStatus.UTREDES, BehandlingStegType.FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG,
+        VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN),
+    VURDER_VARIG_ENDRET_ARBEIDSSITUASJON(
+        AksjonspunktKodeDefinisjon.VURDER_VARIG_ENDRET_ARBEIDSSITUASJON_KODE, AksjonspunktType.MANUELL,
+        "Vurder varig endret/nyoppstartet næring selvstendig næringsdrivende", BehandlingStatus.UTREDES, BehandlingStegType.FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG,
         VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN),
     FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE(
         AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE_KODE, AksjonspunktType.MANUELL,
@@ -118,7 +122,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         VurderingspunktType.UT, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN),
     FASTSETT_BEREGNINGSGRUNNLAG_FOR_SN_NY_I_ARBEIDSLIVET(
         AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_FOR_SN_NY_I_ARBEIDSLIVET_KODE, AksjonspunktType.MANUELL,
-        "Fastsett beregningsgrunnlag for SN som er ny i arbeidslivet", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, VurderingspunktType.UT,
+        "Fastsett beregningsgrunnlag for SN som er ny i arbeidslivet", BehandlingStatus.UTREDES, BehandlingStegType.FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN),
     VURDER_GRADERING_UTEN_BEREGNINGSGRUNNLAG(
         AksjonspunktKodeDefinisjon.VURDER_GRADERING_UTEN_BEREGNINGSGRUNNLAG_KODE, AksjonspunktType.MANUELL,
@@ -338,6 +342,13 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         "En annen sak tilknyttet barnet må behandles frem til uttak, eller besluttes, før denne saken kan behandles videre.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK_V2, VurderingspunktType.UT, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST),
 
+    // Gruppe: 93xx - Opplæringspenger
+    VURDER_INSTITUSJON(AksjonspunktKodeDefinisjon.VURDER_INSTITUSJON, AksjonspunktType.MANUELL,
+        "Vurder om institusjonen er godkjent", BehandlingStatus.UTREDES,
+        BehandlingStegType.VURDER_INSTITUSJON_VILKÅR, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UDEFINERT, ENTRINN, TILBAKE, AVBRYTES),
+    VURDER_NØDVENDIGHET(AksjonspunktKodeDefinisjon.VURDER_NØDVENDIGHET, AksjonspunktType.MANUELL,
+        "Vurder om opplæringen er nødvendig for å behandle og ta seg av barnet", BehandlingStatus.UTREDES,
+        BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UDEFINERT, ENTRINN, TILBAKE, AVBRYTES),
 
     // Gruppe : 999x
     AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",

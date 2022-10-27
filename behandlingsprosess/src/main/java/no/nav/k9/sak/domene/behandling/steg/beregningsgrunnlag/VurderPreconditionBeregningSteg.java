@@ -13,7 +13,9 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FastsettPGIPeriodeTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -60,6 +62,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private BeregningsgrunnlagTjeneste kalkulusTjeneste;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
+    private FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste;
 
 
     protected VurderPreconditionBeregningSteg() {
@@ -76,7 +79,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                            BeregningsgrunnlagTjeneste kalkulusTjeneste,
                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                           VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
+                                           VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
+                                           FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
@@ -87,6 +91,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
+        this.fastsettPGIPeriodeTjeneste = fastsettPGIPeriodeTjeneste;
     }
 
     @Override
@@ -97,19 +102,46 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         // 1. Setter alle perioder til vurdering
         ryddVedtaksresultatForPerioderTilVurdering(kontekst, referanse);
 
-        // 2. Avslår perioder der vi har avslag før beregning eller ingen aktiviteter (ingen grunnlag for beregning)
+        // 2. Kopierer grunnlag og vilkårsresultat for forlengelser
+        kopierGrunnlagForForlengelseperioder(kontekst, referanse);
+
+        // 3. Avslår perioder der vi har avslag før beregning eller ingen aktiviteter (ingen grunnlag for beregning)
         avslåBeregningVedBehov(kontekst, behandling, referanse);
 
-        // 3. deaktiverer grunnlag for referanser som er avslått eller inaktive (fjernet skjæringstidspunkt)
+        // 4. deaktiverer grunnlag for referanser som er avslått eller inaktive (fjernet skjæringstidspunkt)
         kalkulusTjeneste.deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(referanse);
 
-        // 4. avbryter alle aksjonspunkt i beregning som er åpne (aksjonspunkt reutledes på nytt ved behov)
+        // 5. gjenoppretter beregning til initiell referanse der perioden ikke lenger vurderes (flippet vurderingsstatus)
+        gjenopprettVedEndretVurderingsstatus(kontekst, referanse);
+
+        // 6. avbryter alle aksjonspunkt i beregning som er åpne (aksjonspunkt reutledes på nytt ved behov)
         abrytÅpneBeregningaksjonspunkter(kontekst, behandling);
 
-        // 5. kopierer input overstyringer for migrering fra infotrygd
+        // 6. kopierer input overstyringer for migrering fra infotrygd
         kopierInputOverstyring(behandling);
 
+        // 7. Dekativerer PGI-periode dersom ikke lenger relevant
+        fastsettPGIPeriodeTjeneste.fjernPGIDersomIkkeRelevant(behandling.getId());
+
         return BehandleStegResultat.utførtMedAksjonspunktResultater(finnAksjonspunkter(behandling));
+    }
+
+    /**
+     * Resetter beregningsgrunnlagreferanser og vilkårsresultat for perioder som ikke er til vurdering lenger i denne behandlingen
+     * <p>
+     * Rydding i kalkulus gjøres av no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste#deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(no.nav.k9.sak.behandling.BehandlingReferanse)
+     *
+     * @param kontekst  Behandlingskontrollkonteksts
+     * @param referanse Behandlingreferanse
+     */
+    private void gjenopprettVedEndretVurderingsstatus(BehandlingskontrollKontekst kontekst, BehandlingReferanse referanse) {
+        var gjenopprettetPeriodeListe = kalkulusTjeneste.gjenopprettTilInitiellDersomIkkeTilVurdering(referanse);
+        if (!gjenopprettetPeriodeListe.isEmpty()) {
+            beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
+                kontekst,
+                referanse.getOriginalBehandlingId().orElseThrow(() -> new IllegalStateException("Kan ikke gjenopprette vilkårsresultat i førstegangsbehandling")),
+                gjenopprettetPeriodeListe);
+        }
     }
 
     /**
@@ -226,6 +258,29 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         var tjeneste = getPerioderTilVurderingTjeneste(ref);
         var perioderTilVurdering = tjeneste.utled(ref.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, perioderTilVurdering);
+    }
+
+
+    /** Kopierer grunnlag og vilkårsresultat for forlengelser
+     *
+     * @param kontekst Behandlingskontrollkontekst
+     * @param ref behandlingreferanse
+     */
+    private void kopierGrunnlagForForlengelseperioder(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+        if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
+            var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
+            periodeFilter.ignorerAvslåttePerioder();
+            var allePerioder = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
+            var forlengelseperioder = allePerioder.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toSet());
+            if (!forlengelseperioder.isEmpty()) {
+                kalkulusTjeneste.kopier(ref, forlengelseperioder);
+                var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
+                beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
+                    kontekst,
+                    originalBehandlingId,
+                    forlengelseperioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()));
+            }
+        }
     }
 
 

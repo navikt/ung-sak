@@ -78,7 +78,7 @@ public class ForvaltningInfotrygMigreringRestTjeneste {
         @ApiResponse(responseCode = "200", description = "Returnerer alle skjæringstidspunkt som har blitt lagret på sak",
             content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = List.class), schema = @Schema(implementation = MigrertSkjæringstidspunktDto.class)), mediaType = MediaType.APPLICATION_JSON))
     })
-    @BeskyttetRessurs(action = READ, resource = DRIFT)
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getSkjæringstidspunkter(@QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) SaksnummerDto saksnummerDto) { // NOSONAR
         var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummerDto.getVerdi());

@@ -68,9 +68,9 @@ public class PleiepengerYtelsespesifikkForeslåVedtak implements Ytelsespesifikk
         var lås = behandlingRepository.taSkriveLås(behandling);
 
         MedisinskGrunnlag medisinskGrunnlag = medisinskGrunnlagTjeneste.hentGrunnlag(behandling.getUuid());
-        boolean harUbesluttedeSykdomsVurderinger = medisinskGrunnlag.getGrunnlagsdata().getVurderinger()
+        boolean harUbesluttedeSykdomsVurderinger = !medisinskGrunnlag.getGrunnlagsdata().getVurderinger()
             .stream()
-            .anyMatch(v -> !v.isBesluttet());
+            .noneMatch(v -> !v.isBesluttet());
 
         Optional<Aksjonspunkt> sykdomAP = behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE);
         if (harUbesluttedeSykdomsVurderinger) {
@@ -81,6 +81,7 @@ public class PleiepengerYtelsespesifikkForeslåVedtak implements Ytelsespesifikk
             } else if (sykdomAP.map(Aksjonspunkt::isToTrinnsBehandling).map(it -> !it).orElse(false)) {
                 Aksjonspunkt aksjonspunkt = sykdomAP.get();
                 aksjonspunktRepository.setToTrinnsBehandlingKreves(aksjonspunkt);
+                aksjonspunktKontrollRepository.setTilUtført(aksjonspunkt, aksjonspunkt.getBegrunnelse());
                 behandlingRepository.lagre(behandling, lås);
             }
         } else if (sykdomAP.map(Aksjonspunkt::isToTrinnsBehandling).orElse(false)) {
