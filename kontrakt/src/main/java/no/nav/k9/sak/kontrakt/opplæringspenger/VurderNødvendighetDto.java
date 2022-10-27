@@ -16,12 +16,8 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_INSTITUSJON_OG_NØDVENDIGHET)
+@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_NØDVENDIGHET)
 public class VurderNødvendighetDto extends BekreftetAksjonspunktDto {
-
-    @JsonProperty(value = "institusjon")
-    @Valid
-    private VurderInstitusjonDto institusjon;
 
     @JsonProperty(value = "perioder")
     @Valid
@@ -31,13 +27,8 @@ public class VurderNødvendighetDto extends BekreftetAksjonspunktDto {
     public VurderNødvendighetDto() {
     }
 
-    public VurderNødvendighetDto(VurderInstitusjonDto institusjon, List<VurderNødvendighetPeriodeDto> perioder) {
-        this.institusjon = institusjon;
+    public VurderNødvendighetDto(List<VurderNødvendighetPeriodeDto> perioder) {
         this.perioder = perioder;
-    }
-
-    public VurderInstitusjonDto getInstitusjon() {
-        return institusjon;
     }
 
     public List<VurderNødvendighetPeriodeDto> getPerioder() {

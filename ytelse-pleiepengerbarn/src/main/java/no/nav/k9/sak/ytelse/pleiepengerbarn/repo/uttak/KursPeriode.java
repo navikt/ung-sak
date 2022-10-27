@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.hibernate.annotations.Immutable;
 
@@ -47,6 +48,9 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
     @Column(name = "institusjon")
     private String institusjon;
 
+    @Column(name = "institusjon_uuid")
+    private UUID institusjonUuid;
+
     @Column(name = "beskrivelse")
     private String beskrivelse;
 
@@ -57,16 +61,17 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
     KursPeriode() {
     }
 
-    public KursPeriode(DatoIntervallEntitet periode, String institusjon, String beskrivelse, LocalDate avreise, LocalDate hjemkomst) {
+    public KursPeriode(DatoIntervallEntitet periode, String institusjon, String beskrivelse, LocalDate avreise, LocalDate hjemkomst, UUID institusjonUuid) {
         this.periode = periode;
         this.institusjon = institusjon;
         this.beskrivelse = beskrivelse;
         this.avreise = avreise;
         this.hjemkomst = hjemkomst;
+        this.institusjonUuid = institusjonUuid;
     }
 
-    public KursPeriode(LocalDate fom, LocalDate tom, String institusjon, String beskrivelse, LocalDate avreise, LocalDate hjemkomst) {
-        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), institusjon, beskrivelse, avreise, hjemkomst);
+    public KursPeriode(LocalDate fom, LocalDate tom, String institusjon, String beskrivelse, LocalDate avreise, LocalDate hjemkomst, UUID institusjonUuid) {
+        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), institusjon, beskrivelse, avreise, hjemkomst, institusjonUuid);
     }
 
     public KursPeriode(KursPeriode it) {
@@ -75,6 +80,7 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
         this.beskrivelse = it.beskrivelse;
         this.avreise = it.avreise;
         this.hjemkomst = it.hjemkomst;
+        this.institusjonUuid = it.institusjonUuid;
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -97,6 +103,10 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
         return hjemkomst;
     }
 
+    public UUID getInstitusjonUuid() {
+        return institusjonUuid;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -106,17 +116,18 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
             && Objects.equals(institusjon, that.institusjon)
             && Objects.equals(beskrivelse, that.beskrivelse)
             && Objects.equals(avreise, that.avreise)
-            && Objects.equals(hjemkomst, that.hjemkomst);
+            && Objects.equals(hjemkomst, that.hjemkomst)
+            && Objects.equals(institusjonUuid, that.institusjonUuid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, institusjon, beskrivelse, avreise, hjemkomst);
+        return Objects.hash(periode, institusjon, beskrivelse, avreise, hjemkomst, institusjonUuid);
     }
 
     @Override
     public String getIndexKey() {
-        return IndexKeyComposer.createKey(institusjon, periode, beskrivelse, avreise, hjemkomst);
+        return IndexKeyComposer.createKey(institusjon, periode, beskrivelse, avreise, hjemkomst, institusjonUuid);
     }
 
     @Override
@@ -124,6 +135,7 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
         return "KursPeriode{" +
             "periode=" + periode +
             ", institusjon=" + institusjon +
+            ", institusjonUuid=" + institusjonUuid +
             ", beskrivelse=" + beskrivelse +
             ", avreise=" + avreise +
             ", hjemkomst=" + hjemkomst +

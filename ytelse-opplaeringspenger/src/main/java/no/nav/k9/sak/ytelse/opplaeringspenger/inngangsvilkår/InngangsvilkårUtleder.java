@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår;
 import static java.util.Arrays.asList;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.ALDERSVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
+import static no.nav.k9.kodeverk.vilkår.VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.LANGVARIG_SYKDOM;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDLEMSKAPSVILKÅRET;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.NØDVENDIG_OPPLÆRING;
@@ -29,6 +30,7 @@ public class InngangsvilkårUtleder implements VilkårUtleder {
         ALDERSVILKÅR,
         LANGVARIG_SYKDOM,
         NØDVENDIG_OPPLÆRING,
+        GODKJENT_OPPLÆRINGSINSTITUSJON,
         MEDLEMSKAPSVILKÅRET,
         OPPTJENINGSPERIODEVILKÅR,
         OPPTJENINGSVILKÅRET,

@@ -30,7 +30,9 @@ public class GodkjentOpplæringsinstitusjonTjeneste {
     }
 
     public Optional<GodkjentOpplæringsinstitusjon> hentMedUuid(UUID uuid) {
-        Objects.requireNonNull(uuid);
+        if (uuid == null) {
+            return Optional.empty();
+        }
 
         return repository.hentMedUuid(uuid);
     }
@@ -58,10 +60,7 @@ public class GodkjentOpplæringsinstitusjonTjeneste {
 
     private boolean erAktiv(GodkjentOpplæringsinstitusjon godkjentOpplæringsInstitusjon, Periode periode) {
         var tidslinje = new LocalDateTimeline<>(periode.getFom(), periode.getTom(), true);
-        var aktivTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(
-            godkjentOpplæringsInstitusjon.getPerioder().stream()
-                .map(GodkjentOpplæringsinstitusjonPeriode::getPeriode)
-                .collect(Collectors.toCollection(TreeSet::new)));
+        var aktivTidslinje = godkjentOpplæringsInstitusjon.getTidslinje();
         return tidslinje.disjoint(aktivTidslinje).isEmpty();
     }
 }

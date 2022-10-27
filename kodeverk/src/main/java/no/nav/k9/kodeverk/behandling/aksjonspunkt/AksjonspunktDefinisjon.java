@@ -343,8 +343,11 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST),
 
     // Gruppe: 93xx - Opplæringspenger
-    VURDER_INSTITUSJON_OG_NØDVENDIGHET(AksjonspunktKodeDefinisjon.VURDER_INSTITUSJON_OG_NØDVENDIGHET, AksjonspunktType.MANUELL,
-        "Vurder om opplæringen er nødvendig og om institusjonen er godkjent", BehandlingStatus.UTREDES,
+    VURDER_INSTITUSJON(AksjonspunktKodeDefinisjon.VURDER_INSTITUSJON, AksjonspunktType.MANUELL,
+        "Vurder om institusjonen er godkjent", BehandlingStatus.UTREDES,
+        BehandlingStegType.VURDER_INSTITUSJON_VILKÅR, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UDEFINERT, ENTRINN, TILBAKE, AVBRYTES),
+    VURDER_NØDVENDIGHET(AksjonspunktKodeDefinisjon.VURDER_NØDVENDIGHET, AksjonspunktType.MANUELL,
+        "Vurder om opplæringen er nødvendig for å behandle og ta seg av barnet", BehandlingStatus.UTREDES,
         BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UDEFINERT, ENTRINN, TILBAKE, AVBRYTES),
 
     // Gruppe : 999x

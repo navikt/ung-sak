@@ -8,14 +8,12 @@ public class NødvendighetMellomregningData {
 
     private final LocalDateTimeline<Boolean> tidslinjeTilVurdering;
     private final LocalDateTimeline<OpplæringVurdering> opplæringVurderingTidslinje;
-    private final LocalDateTimeline<InstitusjonVurdering> institusjonVurderingTidslinje;
 
     public NødvendighetMellomregningData(NødvendighetVilkårGrunnlag grunnlag) {
         Objects.requireNonNull(grunnlag);
 
         this.tidslinjeTilVurdering = new LocalDateTimeline<>(grunnlag.getFom(), grunnlag.getTom(), Boolean.TRUE);
         this.opplæringVurderingTidslinje = grunnlag.getVurdertOpplæringPerioder();
-        this.institusjonVurderingTidslinje = grunnlag.getVurdertInstitusjonPerioder();
     }
 
     public LocalDateTimeline<Boolean> getTidslinjeTilVurdering() {
@@ -24,9 +22,5 @@ public class NødvendighetMellomregningData {
 
     public LocalDateTimeline<OpplæringVurdering> getOpplæringVurderingTidslinje() {
         return opplæringVurderingTidslinje.compress();
-    }
-
-    public LocalDateTimeline<InstitusjonVurdering> getInstitusjonVurderingTidslinje() {
-        return institusjonVurderingTidslinje.compress();
     }
 }

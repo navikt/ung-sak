@@ -1,7 +1,5 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 
-import java.util.List;
-
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.Column;
@@ -26,46 +24,40 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
     @Column(name = "behandling_id", updatable = false, nullable = false)
     private Long behandlingId;
 
-    @Column(name = "aktiv", nullable = false)
-    private Boolean aktiv = true;
-
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "vurdert_institusjon_holder_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "vurdert_institusjon_holder_id", updatable = false, unique = true)
     private VurdertInstitusjonHolder vurdertInstitusjonHolder;
 
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "vurdert_opplaering_holder_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "vurdert_opplaering_holder_id", updatable = false, unique = true)
     private VurdertOpplæringHolder vurdertOpplæringHolder;
 
-    @Column(name = "begrunnelse")
-    private String begrunnelse;
+    @Column(name = "aktiv", nullable = false)
+    private Boolean aktiv = true;
 
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public VurdertOpplæringGrunnlag() {
+    VurdertOpplæringGrunnlag() {
     }
 
-    public VurdertOpplæringGrunnlag(Long behandlingId, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder, String begrunnelse) {
+    public VurdertOpplæringGrunnlag(Long behandlingId, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder) {
         this.behandlingId = behandlingId;
         this.vurdertInstitusjonHolder = vurdertInstitusjonHolder;
         this.vurdertOpplæringHolder = vurdertOpplæringHolder;
-        this.begrunnelse = begrunnelse;
     }
 
     public VurdertOpplæringGrunnlag(VurdertOpplæringGrunnlag grunnlag, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder) {
         this.behandlingId = grunnlag.behandlingId;
-        this.begrunnelse = grunnlag.begrunnelse;
         this.vurdertInstitusjonHolder = vurdertInstitusjonHolder;
         this.vurdertOpplæringHolder = vurdertOpplæringHolder;
     }
 
     public VurdertOpplæringGrunnlag(Long behandlingId, VurdertOpplæringGrunnlag grunnlag) {
         this.behandlingId = behandlingId;
-        this.begrunnelse = grunnlag.begrunnelse;
         this.vurdertInstitusjonHolder = grunnlag.vurdertInstitusjonHolder;
         this.vurdertOpplæringHolder = grunnlag.vurdertOpplæringHolder;
     }
@@ -78,22 +70,12 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
         return vurdertOpplæringHolder;
     }
 
-    public Long getBehandlingId() {
-        return behandlingId;
-    }
-
-    public String getBegrunnelse() {
-        return begrunnelse;
-    }
-
-    protected void setAktiv(Boolean aktiv) {
+    void setAktiv(Boolean aktiv) {
         this.aktiv = aktiv;
     }
 
+    @Deprecated
     public static VurdertOpplæringGrunnlag lagTomtGrunnlag() {
-        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag();
-        grunnlag.vurdertInstitusjonHolder = new VurdertInstitusjonHolder();
-        grunnlag.vurdertOpplæringHolder = new VurdertOpplæringHolder();
-        return grunnlag;
+        return new VurdertOpplæringGrunnlag();
     }
 }

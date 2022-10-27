@@ -5,10 +5,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -39,6 +36,7 @@ import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.OppfyltVilkårTidslinjeUtleder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 
@@ -79,24 +77,20 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.NØDVENDIG_OPPLÆRING);
 
         // TODO: Hent ut resultatet til sykdom
-        var sykdomsVilkåret = vilkårene.getVilkår(VilkårType.LANGVARIG_SYKDOM)
-            .orElseThrow()
-            .getPerioder()
-            .stream()
-            .filter(it -> Objects.equals(Utfall.OPPFYLT, it.getGjeldendeUtfall()))
-            .map(VilkårPeriode::getPeriode)
-            .collect(Collectors.toCollection(TreeSet<DatoIntervallEntitet>::new));
-        var sykdomsTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(sykdomsVilkåret);
+        var sykdomsTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.LANGVARIG_SYKDOM);
+        var godkjentInstitusjonTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
 
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING);
         var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
 
-        var tidslinjeUtenSykdomsvilkår = tidslinjeTilVurdering.disjoint(sykdomsTidslinje);
+        var tidslinjeUtenGodkjentInstitusjon = tidslinjeTilVurdering.disjoint(godkjentInstitusjonTidslinje);
+        var tidslinjeUtenSykdomsvilkår = tidslinjeTilVurdering.disjoint(sykdomsTidslinje).disjoint(tidslinjeUtenGodkjentInstitusjon);
+        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenGodkjentInstitusjon, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
         leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenSykdomsvilkår, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE); // TODO: Endre til noe mer fornuftig
-        tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(tidslinjeUtenSykdomsvilkår);
+        tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(tidslinjeUtenGodkjentInstitusjon).disjoint(tidslinjeUtenSykdomsvilkår);
 
         var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(kontekst.getBehandlingId())
-            .orElse(VurdertOpplæringGrunnlag.lagTomtGrunnlag());
+            .orElse(VurdertOpplæringGrunnlag.lagTomtGrunnlag()); //TODO dette skal endres (skal ikke bruke tomt grunnlag)
         var vurdertePerioder = nødvendighetVilkårTjeneste.vurderPerioder(vilkårBuilder, vurdertOpplæringGrunnlag, tidslinjeTilVurdering);
 
         tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(TidslinjeUtil.tilTidslinjeKomprimert(vurdertePerioder));
@@ -110,7 +104,7 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
         } else {
             // Vi har perioder uten vurdering
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(
-                AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_INSTITUSJON_OG_NØDVENDIGHET)));
+                AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_NØDVENDIGHET)));
         }
     }
 

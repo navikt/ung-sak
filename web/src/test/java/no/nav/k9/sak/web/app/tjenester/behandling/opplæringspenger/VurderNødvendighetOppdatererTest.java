@@ -4,8 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,11 +20,9 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
-import no.nav.k9.sak.kontrakt.opplæringspenger.VurderInstitusjonDto;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderNødvendighetDto;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderNødvendighetPeriodeDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
@@ -50,15 +47,14 @@ public class VurderNødvendighetOppdatererTest {
         now = LocalDate.now();
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.medSøknad().medSøknadsdato(now);
-        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_INSTITUSJON_OG_NØDVENDIGHET, BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR);
+        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_NØDVENDIGHET, BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR);
         behandling = scenario.lagre(repositoryProvider);
     }
 
     @Test
     public void skalLagreNyttVurdertOpplæringGrunnlag() {
-        final VurderNødvendighetPeriodeDto periodeDto = new VurderNødvendighetPeriodeDto(true, now.minusMonths(2), now, "test");
-        final VurderInstitusjonDto institusjonDto = new VurderInstitusjonDto("livets skole", true, "ja");
-        final VurderNødvendighetDto dto = new VurderNødvendighetDto(institusjonDto, Collections.singletonList(periodeDto));
+        final VurderNødvendighetPeriodeDto periodeDto = new VurderNødvendighetPeriodeDto(true, now.minusMonths(2), now, "test", "livets skole");
+        final VurderNødvendighetDto dto = new VurderNødvendighetDto(List.of(periodeDto));
         dto.setBegrunnelse("fordi");
 
         OppdateringResultat resultat = lagreGrunnlag(dto);
@@ -66,58 +62,63 @@ public class VurderNødvendighetOppdatererTest {
 
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
         assertThat(grunnlag).isPresent();
-        assertThat(grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon()).hasSize(1);
-        VurdertInstitusjon vurdertInstitusjon = grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon().get(0);
-        assertThat(vurdertInstitusjon.getInstitusjon()).isEqualTo(institusjonDto.getInstitusjon());
-        assertThat(vurdertInstitusjon.getGodkjent()).isEqualTo(institusjonDto.isGodkjent());
-        assertThat(vurdertInstitusjon.getBegrunnelse()).isEqualTo(institusjonDto.getBegrunnelse());
+        assertThat(grunnlag.get().getVurdertInstitusjonHolder()).isNull();
         assertThat(grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring()).hasSize(1);
         VurdertOpplæring vurdertOpplæring = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().get(0);
         assertThat(vurdertOpplæring.getNødvendigOpplæring()).isEqualTo(periodeDto.isNødvendigOpplæring());
         assertThat(vurdertOpplæring.getPeriode().getFomDato()).isEqualTo(now.minusMonths(2));
         assertThat(vurdertOpplæring.getPeriode().getTomDato()).isEqualTo(now);
+        assertThat(vurdertOpplæring.getInstitusjon()).isEqualTo(periodeDto.getInstitusjon());
         assertThat(vurdertOpplæring.getBegrunnelse()).isEqualTo(periodeDto.getBegrunnelse());
-        assertThat(grunnlag.get().getBegrunnelse()).isEqualTo(dto.getBegrunnelse());
     }
 
     @Test
     public void skalOppdatereVurdertOpplæringGrunnlag() {
-        final VurderNødvendighetPeriodeDto periodeDto1 = new VurderNødvendighetPeriodeDto(false, now.minusMonths(2), now, "ikke nødvendig");
-        final VurderInstitusjonDto institusjonDto1 = new VurderInstitusjonDto("Fyrstikkalleen barnehage", false, "nei");
-        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(institusjonDto1, Collections.singletonList(periodeDto1));
+        final VurderNødvendighetPeriodeDto periodeDto1 = new VurderNødvendighetPeriodeDto(false, now.minusMonths(2), now, "ikke nødvendig", "Fyrstikkalleen barnehage");
+        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(List.of(periodeDto1));
         lagreGrunnlag(dto1);
 
-        final VurderNødvendighetPeriodeDto periodeDto2 = new VurderNødvendighetPeriodeDto(true, now.minusMonths(1), now, "nødvendig");
-        final VurderInstitusjonDto institusjonDto2 = new VurderInstitusjonDto("Fyrstikkalleen barnehage", true, "jo");
-        final VurderNødvendighetDto dto2 = new VurderNødvendighetDto(institusjonDto2, Collections.singletonList(periodeDto2));
+        final VurderNødvendighetPeriodeDto periodeDto2 = new VurderNødvendighetPeriodeDto(true, now.minusMonths(1), now, "nødvendig", "Kampen Pub");
+        final VurderNødvendighetDto dto2 = new VurderNødvendighetDto(List.of(periodeDto2));
         lagreGrunnlag(dto2);
 
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
         assertThat(grunnlag).isPresent();
-        assertThat(grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon()).hasSize(1);
-        VurdertInstitusjon vurdertInstitusjon1 = grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon().get(0);
-        assertThat(vurdertInstitusjon1.getInstitusjon()).isEqualTo(institusjonDto1.getInstitusjon());
-        assertThat(vurdertInstitusjon1.getGodkjent()).isEqualTo(institusjonDto2.isGodkjent());
-        assertThat(vurdertInstitusjon1.getBegrunnelse()).isEqualTo(institusjonDto2.getBegrunnelse());
         assertThat(grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring()).hasSize(2);
-        VurdertOpplæring vurdertOpplæring1 = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().get(0);
-        assertThat(vurdertOpplæring1.getNødvendigOpplæring()).isEqualTo(periodeDto1.isNødvendigOpplæring());
-        assertThat(vurdertOpplæring1.getPeriode().getFomDato()).isEqualTo(now.minusMonths(2));
-        assertThat(vurdertOpplæring1.getPeriode().getTomDato()).isEqualTo(now.minusMonths(1).minusDays(1));
-        assertThat(vurdertOpplæring1.getBegrunnelse()).isEqualTo(periodeDto1.getBegrunnelse());
-        VurdertOpplæring vurdertOpplæring2 = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().get(1);
-        assertThat(vurdertOpplæring2.getNødvendigOpplæring()).isEqualTo(periodeDto2.isNødvendigOpplæring());
-        assertThat(vurdertOpplæring2.getPeriode().getFomDato()).isEqualTo(now.minusMonths(1));
-        assertThat(vurdertOpplæring2.getPeriode().getTomDato()).isEqualTo(now);
-        assertThat(vurdertOpplæring2.getBegrunnelse()).isEqualTo(periodeDto2.getBegrunnelse());
+        var vurdertOpplæring1 = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().stream().filter(it -> it.getInstitusjon().equals(periodeDto1.getInstitusjon())).findFirst();
+        assertThat(vurdertOpplæring1).isPresent();
+        assertThat(vurdertOpplæring1.get().getNødvendigOpplæring()).isEqualTo(periodeDto1.isNødvendigOpplæring());
+        assertThat(vurdertOpplæring1.get().getPeriode().getFomDato()).isEqualTo(now.minusMonths(2));
+        assertThat(vurdertOpplæring1.get().getPeriode().getTomDato()).isEqualTo(now.minusMonths(1).minusDays(1));
+        assertThat(vurdertOpplæring1.get().getInstitusjon()).isEqualTo(periodeDto1.getInstitusjon());
+        assertThat(vurdertOpplæring1.get().getBegrunnelse()).isEqualTo(periodeDto1.getBegrunnelse());
+        var vurdertOpplæring2 = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().stream().filter(it -> it.getInstitusjon().equals(periodeDto2.getInstitusjon())).findFirst();
+        assertThat(vurdertOpplæring2).isPresent();
+        assertThat(vurdertOpplæring2.get().getNødvendigOpplæring()).isEqualTo(periodeDto2.isNødvendigOpplæring());
+        assertThat(vurdertOpplæring2.get().getPeriode().getFomDato()).isEqualTo(now.minusMonths(1));
+        assertThat(vurdertOpplæring2.get().getPeriode().getTomDato()).isEqualTo(now);
+        assertThat(vurdertOpplæring2.get().getInstitusjon()).isEqualTo(periodeDto2.getInstitusjon());
+        assertThat(vurdertOpplæring2.get().getBegrunnelse()).isEqualTo(periodeDto2.getBegrunnelse());
+    }
+
+    @Test
+    public void oppdaterGrunnlagSkalKopiereVurdertInstitusjonHolderFraAktivtGrunnlag() {
+        final VurderNødvendighetPeriodeDto periodeDto1 = new VurderNødvendighetPeriodeDto(false, now.minusMonths(2), now, "ikke nødvendig", "institusjon");
+        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(List.of(periodeDto1));
+        lagreGrunnlag(dto1);
+        Optional<VurdertOpplæringGrunnlag> grunnlag1 = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
+        lagreGrunnlag(dto1);
+        Optional<VurdertOpplæringGrunnlag> grunnlag2 = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
+        assertThat(grunnlag1).isPresent();
+        assertThat(grunnlag2).isPresent();
+        assertThat(grunnlag1.get().getVurdertInstitusjonHolder()).isEqualTo(grunnlag2.get().getVurdertInstitusjonHolder());
     }
 
     @Test
     public void skalIkkeLagreVurdertOpplæringGrunnlagMedOverlappendePerioder() {
-        final VurderNødvendighetPeriodeDto periodeDto1 = new VurderNødvendighetPeriodeDto(true, now.minusMonths(2), now, "test");
-        final VurderNødvendighetPeriodeDto periodeDto2 = new VurderNødvendighetPeriodeDto(false, now.minusMonths(1), now, "test");
-        final VurderInstitusjonDto institusjonDto = new VurderInstitusjonDto("livets skole", true, "ja");
-        final VurderNødvendighetDto dto = new VurderNødvendighetDto(institusjonDto, Arrays.asList(periodeDto1, periodeDto2));
+        final VurderNødvendighetPeriodeDto periodeDto1 = new VurderNødvendighetPeriodeDto(true, now.minusMonths(2), now, "test", "her");
+        final VurderNødvendighetPeriodeDto periodeDto2 = new VurderNødvendighetPeriodeDto(false, now.minusMonths(1), now, "test", "her");
+        final VurderNødvendighetDto dto = new VurderNødvendighetDto(List.of(periodeDto1, periodeDto2));
 
         assertThrows(IllegalArgumentException.class, () ->
             lagreGrunnlag(dto)
@@ -128,10 +129,9 @@ public class VurderNødvendighetOppdatererTest {
 
     @Test
     public void skalIkkeLagreVurdertOpplæringGrunnlagMedDuplisertePerioder() {
-        final VurderNødvendighetPeriodeDto periodeDto1 = new VurderNødvendighetPeriodeDto(true, now.minusMonths(2), now, "test");
-        final VurderNødvendighetPeriodeDto periodeDto2 = new VurderNødvendighetPeriodeDto(false, now.minusMonths(2), now, "test");
-        final VurderInstitusjonDto institusjonDto = new VurderInstitusjonDto("livets skole", true, "ja");
-        final VurderNødvendighetDto dto = new VurderNødvendighetDto(institusjonDto, Arrays.asList(periodeDto1, periodeDto2));
+        final VurderNødvendighetPeriodeDto periodeDto1 = new VurderNødvendighetPeriodeDto(true, now.minusMonths(2), now, "test", "der");
+        final VurderNødvendighetPeriodeDto periodeDto2 = new VurderNødvendighetPeriodeDto(false, now.minusMonths(2), now, "test", "der");
+        final VurderNødvendighetDto dto = new VurderNødvendighetDto(List.of(periodeDto1, periodeDto2));
 
         assertThrows(IllegalArgumentException.class, () ->
             lagreGrunnlag(dto)

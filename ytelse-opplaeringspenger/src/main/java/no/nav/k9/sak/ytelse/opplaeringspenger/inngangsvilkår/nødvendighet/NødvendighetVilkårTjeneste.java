@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
 
+import java.util.Collections;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.TreeSet;
@@ -60,6 +61,10 @@ public class NødvendighetVilkårTjeneste {
     }
 
     private NavigableSet<DatoIntervallEntitet> finnPerioderTilVurderingFraGrunnlag(VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        if (vurdertOpplæringGrunnlag.getVurdertOpplæringHolder() == null) {
+            return Collections.emptyNavigableSet();
+        }
+
         NavigableSet<DatoIntervallEntitet> perioderTilVurderingFraGrunnlag = vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().getVurdertOpplæring().stream()
             .map(VurdertOpplæring::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
