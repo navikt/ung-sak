@@ -78,6 +78,12 @@ public class PersonopplysningDtoPersonIdentTjeneste {
             dtoBarn.setFnr(findFnr(dtoBarn.getAktørId(), tpsFnrFinder));
             dtoBarn.setDiskresjonskode(findKode(dtoBarn.getFnr(), tpsKodeFinder));
         }
+
+        // pleietrengende
+        if (dto.getPleietrengendePart() != null) {
+            dto.getPleietrengendePart().setFnr(findFnr(dto.getPleietrengendePart().getAktørId(), tpsFnrFinder));
+            dto.getPleietrengendePart().setDiskresjonskode(findKode(dto.getPleietrengendePart().getFnr(), tpsKodeFinder));
+        }
     }
 
     private Diskresjonskode findKode(String fnr, Function<String, Optional<String>> tpsKodeFinder) {
