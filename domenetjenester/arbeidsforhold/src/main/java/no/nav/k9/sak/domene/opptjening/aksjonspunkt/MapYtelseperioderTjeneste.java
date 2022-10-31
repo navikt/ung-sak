@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.felles.util.Tuple;
@@ -29,6 +30,7 @@ import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.YtelseStørrelse;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
+import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -37,7 +39,7 @@ public class MapYtelseperioderTjeneste {
 
     private static final OpptjeningAktivitetType UDEFINERT = OpptjeningAktivitetType.UDEFINERT;
     private static final String UTEN_ORGNR = "UTENORGNR";
-    private final PåTversAvHelgErKantIKantVurderer påTversAvHelgErKantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();;
+    private final PåTversAvHelgErKantIKantVurderer påTversAvHelgErKantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
     public MapYtelseperioderTjeneste() {
     }
@@ -95,27 +97,67 @@ public class MapYtelseperioderTjeneste {
             .filter(Objects::nonNull)
             .toList();
 
-        ytelse.getYtelseAnvist().forEach(ytelseAnvist -> {
-            var input = new VurderStatusInput(type, behandlingReferanse);
-            if (orgnumre.isEmpty()) {
-                OpptjeningsperiodeForSaksbehandling.Builder builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
-                    .medPeriode(hentUtDatoIntervall(ytelse, ytelseAnvist))
-                    .medOpptjeningAktivitetType(type)
-                    .medVurderingsStatus(vurderForSaksbehandling.vurderStatus(input));
-                ytelserAnvist.add(builder.build());
-            } else {
-                orgnumre.forEach(orgnr -> {
-                    OpptjeningsperiodeForSaksbehandling.Builder builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
-                        .medPeriode(hentUtDatoIntervall(ytelse, ytelseAnvist))
-                        .medOpptjeningAktivitetType(type)
-                        .medArbeidsgiver(Arbeidsgiver.virksomhet(orgnr))
-                        .medOpptjeningsnøkkel(Opptjeningsnøkkel.forOrgnummer(orgnr))
-                        .medVurderingsStatus(vurderForSaksbehandling.vurderStatus(input));
-                    ytelserAnvist.add(builder.build());
-                });
-            }
-        });
+        var input = new VurderStatusInput(type, behandlingReferanse);
+        var vurderingsstatus = vurderForSaksbehandling.vurderStatus(input);
+
+        if (!ytelse.getYtelseAnvist().isEmpty()) {
+            ytelse.getYtelseAnvist()
+                .stream()
+                .flatMap(ytelseAnvist -> mapAnvisning(ytelseAnvist, ytelse, type, orgnumre, vurderingsstatus))
+                .forEach(ytelserAnvist::add);
+        } else if (erDagpengerIVentetiden(ytelse)) {
+            // Dagpenger i ventetiden skal gi opptjening på lik linje med utbetalte dagpenger
+            var dagpengerIVentetiden = OpptjeningsperiodeForSaksbehandling.Builder.ny()
+                .medPeriode(ytelse.getPeriode())
+                .medOpptjeningAktivitetType(type)
+                .medVurderingsStatus(vurderingsstatus);
+            ytelserAnvist.add(dagpengerIVentetiden.build());
+        }
+
         return ytelserAnvist;
+    }
+
+    /** Avgjør om ytelse gjelder dagpenger i ventetiden
+     *
+     * De tre første dagene av dagpengene kalles ventetid og gir ingen utbetaling av dagpenger.
+     * Søker vil dermed ikke ha meldekort dersom oppstart av pleiepenger er i løpet av denne perioden.
+     *
+     * @param ytelse Ytelse
+     * @return Er dagpenger i ventetiden
+     */
+    private boolean erDagpengerIVentetiden(Ytelse ytelse) {
+        return ytelse.getYtelseType().equals(FagsakYtelseType.DAGPENGER)
+            && ytelse.getYtelseAnvist().isEmpty()
+            && ytelse.getPeriode().antallArbeidsdager() <= 3;
+    }
+
+    private Stream<OpptjeningsperiodeForSaksbehandling> mapAnvisning(YtelseAnvist ytelseAnvist, Ytelse ytelse,
+                                                                     OpptjeningAktivitetType type,
+                                                                     List<String> orgnumre,
+                                                                     VurderingsStatus vurderingsstatus) {
+        if (orgnumre.isEmpty()) {
+            return mapAnvisningUtenOrgnr(ytelseAnvist, ytelse, type, vurderingsstatus);
+        } else {
+            return orgnumre.stream().map(orgnr -> mapAnvisningForOrgnr(ytelseAnvist, ytelse, type, vurderingsstatus, orgnr));
+        }
+    }
+
+    private Stream<OpptjeningsperiodeForSaksbehandling> mapAnvisningUtenOrgnr(YtelseAnvist ytelseAnvist, Ytelse ytelse, OpptjeningAktivitetType type, VurderingsStatus vurderingsstatus) {
+        OpptjeningsperiodeForSaksbehandling.Builder builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
+            .medPeriode(hentUtDatoIntervall(ytelse, ytelseAnvist))
+            .medOpptjeningAktivitetType(type)
+            .medVurderingsStatus(vurderingsstatus);
+        return Stream.of(builder.build());
+    }
+
+    private OpptjeningsperiodeForSaksbehandling mapAnvisningForOrgnr(YtelseAnvist ytelseAnvist, Ytelse ytelse, OpptjeningAktivitetType type, VurderingsStatus vurderingsstatus, String orgnr) {
+        OpptjeningsperiodeForSaksbehandling.Builder builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
+            .medPeriode(hentUtDatoIntervall(ytelse, ytelseAnvist))
+            .medOpptjeningAktivitetType(type)
+            .medArbeidsgiver(Arbeidsgiver.virksomhet(orgnr))
+            .medOpptjeningsnøkkel(Opptjeningsnøkkel.forOrgnummer(orgnr))
+            .medVurderingsStatus(vurderingsstatus);
+        return builder.build();
     }
 
     public static OpptjeningAktivitetType mapYtelseType(Ytelse ytelse) {
@@ -134,7 +176,7 @@ public class MapYtelseperioderTjeneste {
             return OpptjeningAktivitetType.SYKEPENGER;
         }
 
-        if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN) .contains(ytelse.getYtelseType()) ) {
+        if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(ytelse.getYtelseType())) {
             boolean harPSBBasertPåDP = ytelse.getYtelseGrunnlag().flatMap(YtelseGrunnlag::getArbeidskategori)
                 .stream().anyMatch(a -> Arbeidskategori.DAGPENGER.equals(a) || Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER.equals(a));
             if (harPSBBasertPåDP) {
