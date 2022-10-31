@@ -70,9 +70,12 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
         if (harIkkeGodkjentSykdomPåDødsdatoen(dødsdato, vilkårene)) {
             return Optional.empty();
         }
-
         LocalDate sisteDato = vilkårResultatRepository.hent(referanse.getBehandlingId()).getAlleIntervaller().getMaxLocalDate();
-        return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato, sisteDato));
+        if (!sisteDato.isAfter(dødsdato)){
+            return Optional.empty();
+        }
+
+        return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato.plusDays(1), sisteDato));
     }
 
     @Override

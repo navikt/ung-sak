@@ -89,7 +89,10 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         var utvidelseAvPeriode = utledUtvidelse(rettVedDød);
         var sisteDagPgaDødsfall = dødsdato.plus(utvidelseAvPeriode.getAntall(), utvidelseAvPeriode.getEnhet());
 
-        return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato, sisteDagPgaDødsfall));
+        if (!sisteDagPgaDødsfall.isAfter(dødsdato)){
+            return Optional.empty();
+        }
+        return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato.plusDays(1), sisteDagPgaDødsfall));
     }
 
     @Override
