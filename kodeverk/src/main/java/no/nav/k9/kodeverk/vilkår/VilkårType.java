@@ -147,7 +147,7 @@ public enum VilkårType implements Kodeverdi {
         Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "§ 9-14"),
         Avslagsårsak.IKKE_GODKJENT_INSTITUSJON
     ),
-    GJENNOMGÅ_OPPLÆRING("K9_VK_21",
+    GJENNOMGÅ_OPPLÆRING("K9_VK_22",
         "Nødvendig opplæring",
         Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "§ 9-14"),
         Avslagsårsak.MANGLENDE_DOKUMENTASJON,
