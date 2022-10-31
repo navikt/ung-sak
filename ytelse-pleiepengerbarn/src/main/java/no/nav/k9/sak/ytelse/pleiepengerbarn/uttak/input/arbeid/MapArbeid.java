@@ -26,9 +26,9 @@ import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.Permisjon;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
+import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.KravDokument;
@@ -408,8 +408,8 @@ public class MapArbeid {
 
     private LocalDateTimeline<WrappedArbeid> justerPeriodenIHenholdTilStartenPåArbeidsforholdet(ArbeidstidMappingInput input, AktivitetIdentifikator key, LocalDateTimeline<WrappedArbeid> perioder) {
         if (UttakArbeidType.ARBEIDSTAKER.equals(key.getAktivitetType()) && input.getInntektArbeidYtelseGrunnlag() != null) {
-            var aktørArbeid = input.getInntektArbeidYtelseGrunnlag().getAktørArbeidFraRegister(input.getBruker())
-                .map(AktørArbeid::hentAlleYrkesaktiviteter).orElse(List.of());
+            var aktørArbeid = new YrkesaktivitetFilter(input.getInntektArbeidYtelseGrunnlag().getArbeidsforholdInformasjon(), input.getInntektArbeidYtelseGrunnlag().getAktørArbeidFraRegister(input.getBruker()))
+                .getYrkesaktiviteter();
 
             var yrkesaktiviteter = aktørArbeid.stream()
                 .filter(it -> Set.of(ArbeidType.MARITIMT_ARBEIDSFORHOLD, ArbeidType.FORENKLET_OPPGJØRSORDNING, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).contains(it.getArbeidType()))
