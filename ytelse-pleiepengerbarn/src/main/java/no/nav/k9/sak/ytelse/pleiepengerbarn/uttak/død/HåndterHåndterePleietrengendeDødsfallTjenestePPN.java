@@ -55,7 +55,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
         }
 
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysningerHvisEksisterer(referanse, referanse.getFagsakPeriode().getFomDato());
-        if (personopplysningerAggregat.isEmpty()){
+        if (personopplysningerAggregat.isEmpty()) {
             //kortslutter når personopplysninger ikke er hentet enda
             return Optional.empty();
         }
@@ -67,11 +67,11 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
         }
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
 
-        if (harIkkeGodkjentSykdomPåDødsdatoen(dødsdato, vilkårene)) {
+        if (!harGodkjentSykdomPåDødsdatoen(dødsdato, vilkårene)) {
             return Optional.empty();
         }
         LocalDate sisteDato = vilkårResultatRepository.hent(referanse.getBehandlingId()).getAlleIntervaller().getMaxLocalDate();
-        if (!sisteDato.isAfter(dødsdato)){
+        if (!sisteDato.isAfter(dødsdato)) {
             return Optional.empty();
         }
 
@@ -115,14 +115,9 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
         vilkårForlengingTjeneste.forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
     }
 
-    private boolean harIkkeGodkjentSykdomPåDødsdatoen(LocalDate dødsdato, Vilkårene vilkårene) {
-        for (VilkårType vilkårType : vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()) {
-            Optional<VilkårPeriode> periode = vilkårene.getVilkår(vilkårType).orElseThrow().finnPeriodeSomInneholderDato(dødsdato);
-            if (periode.isPresent() && periode.get().getUtfall() == Utfall.IKKE_OPPFYLT) {
-                return true;
-            }
-        }
-        return false;
+    private boolean harGodkjentSykdomPåDødsdatoen(LocalDate dødsdato, Vilkårene vilkårene) {
+        Optional<VilkårPeriode> periode = vilkårene.getVilkår(VilkårType.I_LIVETS_SLUTTFASE).orElseThrow().finnPeriodeSomInneholderDato(dødsdato);
+        return periode.isPresent() && periode.get().getUtfall() == Utfall.OPPFYLT;
     }
 
 }
