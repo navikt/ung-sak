@@ -1,7 +1,5 @@
 package no.nav.k9.sak.kontrakt.opplæringspenger;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -9,9 +7,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -19,19 +18,28 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_NØDVENDIGHET)
 public class VurderNødvendighetDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value = "perioder")
+    @JsonProperty(value = "journalpostId", required = true)
     @Valid
-    @Size(min = 1)
-    private List<VurderNødvendighetPeriodeDto> perioder;
+    @NotNull
+    private JournalpostIdDto journalpostId;
+
+    @JsonProperty(value = "nødvendigOpplæring", required = true)
+    @NotNull
+    private boolean nødvendigOpplæring;
 
     public VurderNødvendighetDto() {
     }
 
-    public VurderNødvendighetDto(List<VurderNødvendighetPeriodeDto> perioder) {
-        this.perioder = perioder;
+    public VurderNødvendighetDto(JournalpostIdDto journalpostId, boolean nødvendigOpplæring) {
+        this.journalpostId = journalpostId;
+        this.nødvendigOpplæring = nødvendigOpplæring;
     }
 
-    public List<VurderNødvendighetPeriodeDto> getPerioder() {
-        return perioder;
+    public JournalpostIdDto getJournalpostId() {
+        return journalpostId;
+    }
+
+    public boolean isNødvendigOpplæring() {
+        return nødvendigOpplæring;
     }
 }

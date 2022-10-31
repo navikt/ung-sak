@@ -73,9 +73,4 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
     void setAktiv(Boolean aktiv) {
         this.aktiv = aktiv;
     }
-
-    @Deprecated
-    public static VurdertOpplæringGrunnlag lagTomtGrunnlag() {
-        return new VurdertOpplæringGrunnlag();
-    }
 }
