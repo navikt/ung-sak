@@ -99,7 +99,8 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
     }
 
     private void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode) {
-        var eksisterendeResultat = finnSykdomsvurderingPåDødsdato(periode.getFomDato(), vilkårene);
+        var dødsdato = periode.getFomDato().minusDays(1); //utvidelsesperioden begynner dagen etter dødsdato
+        var eksisterendeResultat = finnSykdomsvurderingPåDødsdato(dødsdato, vilkårene);
 
         VilkårBuilder vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.I_LIVETS_SLUTTFASE);
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode).forlengelseAv(eksisterendeResultat));

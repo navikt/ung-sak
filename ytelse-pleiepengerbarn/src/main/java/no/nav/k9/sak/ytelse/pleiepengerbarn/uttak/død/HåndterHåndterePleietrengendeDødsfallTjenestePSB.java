@@ -130,7 +130,8 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         var perioderUnder18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
         var perioderOver18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
 
-        var eksisterendeResultat = finnSykdomVurderingPåDødsdato(periode.getFomDato(), perioderUnder18år, perioderOver18år, vilkårene);
+        var dødsdato = periode.getFomDato().minusDays(1); //utvidelsesperioden begynner dagen etter dødsdato
+        var eksisterendeResultat = finnSykdomVurderingPåDødsdato(dødsdato, perioderUnder18år, perioderOver18år, vilkårene);
 
         if (!perioderUnder18år.isEmpty()) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
