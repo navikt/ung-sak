@@ -7,6 +7,8 @@ import java.util.UUID;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka.AivenInfotrygdFeedMeldingProducer;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +34,8 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
     private BehandlingRepository behandlingRepository;
     private InfotrygdFeedMeldingProducer meldingProducer;
     private InfotrygdFeedPeriodeberegner periodeberegner;
+    private AivenInfotrygdFeedMeldingProducer aivenMeldingProducer;
+    private boolean aivenEnabled;
 
     public PubliserInfotrygdFeedElementTask() {
         // CDI
@@ -40,10 +44,14 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
     @Inject
     public PubliserInfotrygdFeedElementTask(BehandlingRepository behandlingRepository,
                                             InfotrygdFeedMeldingProducer meldingProducer,
-                                            InfotrygdFeedPeriodeberegner periodeberegner) {
+                                            InfotrygdFeedPeriodeberegner periodeberegner,
+                                            AivenInfotrygdFeedMeldingProducer aivenMeldingProducer,
+                                            @KonfigVerdi(value = "KAFKA_AIVEN_ENABLED", defaultVerdi = "false") boolean aivenEnabled) {
         this.behandlingRepository = behandlingRepository;
         this.meldingProducer = meldingProducer;
         this.periodeberegner = periodeberegner;
+        this.aivenMeldingProducer = aivenMeldingProducer;
+        this.aivenEnabled = aivenEnabled;
     }
 
     @Override
@@ -56,6 +64,10 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
         logger.info("Publiserer hendelse til Infotrygd Feed. Key: '{}'", key);
 
         meldingProducer.send(key, value);
+
+        if(aivenEnabled) {
+            aivenMeldingProducer.send(key, value);
+        }
     }
 
     InfotrygdFeedMessage getInfotrygdFeedMessage(Behandling behandling) {
