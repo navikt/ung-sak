@@ -82,7 +82,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         }
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
 
-        if (harIkkeGodkjentSykdomPåDødsdatoen(dødsdato, vilkårene)) {
+        if (!harGodkjentSykdomPåDødsdatoen(dødsdato, vilkårene)) {
             return Optional.empty();
         }
 
@@ -169,10 +169,10 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         vilkårForlengingTjeneste.forlengeVilkårMedPeriode(vilkår, resultatBuilder, vilkårene, periode);
     }
 
-    private boolean harIkkeGodkjentSykdomPåDødsdatoen(LocalDate dødsdato, Vilkårene vilkårene) {
-        for (VilkårType vilkårType : vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()) {
+    private boolean harGodkjentSykdomPåDødsdatoen(LocalDate dødsdato, Vilkårene vilkårene) {
+        for (VilkårType vilkårType : Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)) {
             Optional<VilkårPeriode> periode = vilkårene.getVilkår(vilkårType).orElseThrow().finnPeriodeSomInneholderDato(dødsdato);
-            if (periode.isPresent() && periode.get().getUtfall() == Utfall.IKKE_OPPFYLT) {
+            if (periode.isPresent() && periode.get().getUtfall() == Utfall.OPPFYLT) {
                 return true;
             }
         }
