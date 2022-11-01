@@ -40,6 +40,9 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilter;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
@@ -54,6 +57,7 @@ public class KompletthetForBeregningTjeneste {
     private VilkårResultatRepository vilkårResultatRepository;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private FagsakRepository fagsakRepository;
+    private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
     KompletthetForBeregningTjeneste() {
         // CDI
@@ -66,7 +70,7 @@ public class KompletthetForBeregningTjeneste {
                                            BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                            VilkårResultatRepository vilkårResultatRepository,
                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                           FagsakRepository fagsakRepository) {
+                                           FagsakRepository fagsakRepository, VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.fraværFiltere = fraværFiltere;
         this.iayTjeneste = iayTjeneste;
@@ -74,6 +78,7 @@ public class KompletthetForBeregningTjeneste {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.fagsakRepository = fagsakRepository;
+        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
     }
 
     /**
@@ -101,9 +106,16 @@ public class KompletthetForBeregningTjeneste {
                                                                                 BiFunction<BehandlingReferanse, LocalDate, Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>>> finnArbeidsforholdForIdentPåDagFunction, boolean skipVurderingMotArbeid, boolean skalIgnorerePerioderFraInfotrygd) {
         var perioderMedManglendeVedlegg = new HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>>();
 
+
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
+        periodeFilter.ignorerForlengelseperioder();
+        if (skalIgnorerePerioderFraInfotrygd) {
+            periodeFilter.ignorerPerioderFraInfotrygd();
+        }
         // Utled vilkårsperioder
-        var vilkårsPerioder = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false, false, skalIgnorerePerioderFraInfotrygd)
+        var vilkårsPerioder = periodeFilter.filtrerPerioder(beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
             .stream()
+            .map(PeriodeTilVurdering::getPeriode)
             .sorted(Comparator.comparing(DatoIntervallEntitet::getFomDato))
             .collect(Collectors.toCollection(TreeSet::new));
 

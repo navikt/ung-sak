@@ -4,18 +4,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -27,6 +31,7 @@ import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt.AvklarKompletthetForBeregningDto;
 import no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt.KompletthetsPeriode;
+import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
@@ -40,6 +45,7 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
     private BeregningPerioderGrunnlagRepository grunnlagRepository;
+    private Instance<ForlengelseTjeneste> forlengelseTjeneste;
 
     AvklarKompletthetForBeregning() {
         // for CDI proxy
@@ -48,14 +54,19 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
     @Inject
     public AvklarKompletthetForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
                                          HistorikkTjenesteAdapter historikkTjenesteAdapter,
-                                         BeregningPerioderGrunnlagRepository grunnlagRepository) {
+                                         BeregningPerioderGrunnlagRepository grunnlagRepository,
+                                         @Any Instance<ForlengelseTjeneste> forlengelseTjeneste) {
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.grunnlagRepository = grunnlagRepository;
+        this.forlengelseTjeneste = forlengelseTjeneste;
     }
 
     @Override
     public OppdateringResultat oppdater(AvklarKompletthetForBeregningDto dto, AksjonspunktOppdaterParameter param) {
+
+        validerIngenForlengelser(dto, param);
+
         var perioderMedManglendeGrunnlag = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(param.getRef());
 
         var kanFortsette = perioderMedManglendeGrunnlag.entrySet()
@@ -85,6 +96,19 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
             resultat.rekjørSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
             resultat.setSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING); // TODO: Ved fjerning av toggle, endre til å alltid hoppe tilbake
             return resultat;
+        }
+    }
+
+    private void validerIngenForlengelser(AvklarKompletthetForBeregningDto dto, AksjonspunktOppdaterParameter param) {
+        var perioderSomVurderes = dto.getPerioder().stream().map(KompletthetsPeriode::getPeriode)
+            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new));
+
+        var forlengelserSomVurderes = ForlengelseTjeneste.finnTjeneste(forlengelseTjeneste, param.getRef().getFagsakYtelseType(), param.getRef().getBehandlingType())
+            .utledPerioderSomSkalBehandlesSomForlengelse(param.getRef(), perioderSomVurderes, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+
+        if (!forlengelserSomVurderes.isEmpty()) {
+            throw new IllegalStateException("Kan ikke vurdere kompletthet for forlengelser: " + forlengelserSomVurderes);
         }
     }
 

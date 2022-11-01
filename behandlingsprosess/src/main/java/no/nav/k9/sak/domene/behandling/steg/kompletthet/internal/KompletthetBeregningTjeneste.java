@@ -10,6 +10,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +40,8 @@ import no.nav.k9.sak.domene.behandling.steg.kompletthet.TidligereEtterlysning;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
@@ -57,6 +60,7 @@ public class KompletthetBeregningTjeneste {
     private final KompletthetUtleder kompletthetUtleder = new KompletthetUtleder();
     private final EtterlysInntektsmeldingUtleder etterlysInntektsmeldingUtleder = new EtterlysInntektsmeldingUtleder();
     private final EtterlysInntektsmeldingOgVarsleOmAvslagUtleder etterlysInntektsmeldingOgVarsleOmAvslagUtleder = new EtterlysInntektsmeldingOgVarsleOmAvslagUtleder();
+    private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
     @Inject
     public KompletthetBeregningTjeneste(BehandlingRepository behandlingRepository,
@@ -64,13 +68,15 @@ public class KompletthetBeregningTjeneste {
                                         BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                         BestiltEtterlysningRepository etterlysningRepository,
                                         @Any Instance<Kompletthetsjekker> kompletthetsjekkere,
-                                        VilkårResultatRepository vilkårResultatRepository) {
+                                        VilkårResultatRepository vilkårResultatRepository,
+                                        VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.kompletthetsjekkere = kompletthetsjekkere;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
     }
 
     private static boolean erManueltOpprettetRevurdering(Behandling behandling) {
@@ -82,7 +88,8 @@ public class KompletthetBeregningTjeneste {
     }
 
     public KompletthetsAksjon utledTilstand(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, false, true);
+        var perioderTilVurdering = finnPerioderForKompletthetsvurdering(ref);
+
         var kompletthetsVurderinger = Kompletthetsjekker.finnSjekker(kompletthetsjekkere, ref.getFagsakYtelseType()).utledAlleManglendeVedleggForPerioder(ref);
         var innvilgetSøknadsfrist = utledPerioderMedSøknadsfristInnvilget(ref, perioderTilVurdering);
 
@@ -108,7 +115,7 @@ public class KompletthetBeregningTjeneste {
         }
 
         var redusertPerioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, true, true);
-        var inputMedVurderinger = new VurdererInput(erManueltOpprettetRevurdering(behandling), harIkkeFåttMulighetTilÅTaStillingPåNytt(behandling),redusertPerioderTilVurdering, innvilgetSøknadsfrist, kompletthetsVurderinger, grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of()), Set.of(Vurdering.KAN_FORTSETTE));
+        var inputMedVurderinger = new VurdererInput(erManueltOpprettetRevurdering(behandling), harIkkeFåttMulighetTilÅTaStillingPåNytt(behandling), redusertPerioderTilVurdering, innvilgetSøknadsfrist, kompletthetsVurderinger, grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of()), Set.of(Vurdering.KAN_FORTSETTE));
         aksjon = kompletthetUtleder.utled(inputMedVurderinger);
 
         if (aksjon.kanFortsette()) {
@@ -147,6 +154,17 @@ public class KompletthetBeregningTjeneste {
         // Manuell avklaring
         log.info("Behandlingen er IKKE komplett, ber om manuell avklaring og avklaring om mulige avslag.");
         return KompletthetsAksjon.manuellAvklaring(AksjonspunktDefinisjon.ENDELIG_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING);
+    }
+
+    private NavigableSet<DatoIntervallEntitet> finnPerioderForKompletthetsvurdering(BehandlingReferanse ref) {
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
+        periodeFilter.ignorerAvslåttePerioder();
+        periodeFilter.ignorerPerioderFraInfotrygd();
+        periodeFilter.ignorerForlengelseperioder();
+        return periodeFilter.filtrerPerioder(
+                beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref),
+                VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+            .stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
     }
 
     private boolean harIkkeFåttMulighetTilÅTaStillingPåNytt(Behandling behandling) {
