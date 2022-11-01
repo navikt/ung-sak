@@ -131,7 +131,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         var perioderOver18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
 
         var dødsdato = periode.getFomDato().minusDays(1); //utvidelsesperioden begynner dagen etter dødsdato
-        var eksisterendeResultat = finnSykdomVurderingPåDødsdato(dødsdato, perioderUnder18år, perioderOver18år, vilkårene);
+        var eksisterendeResultat = finnSykdomVurderingPåDødsdato(dødsdato, vilkårene);
 
         if (!perioderUnder18år.isEmpty()) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
@@ -150,11 +150,12 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         resultatBuilder.leggTil(vilkårBuilder);
     }
 
-    private VilkårPeriode finnSykdomVurderingPåDødsdato(LocalDate dødsdato, NavigableSet<DatoIntervallEntitet> perioderUnder18år, NavigableSet<DatoIntervallEntitet> perioderOver18år, Vilkårene vilkårene) {
-        if (perioderUnder18år.stream().anyMatch(it -> it.inkluderer(dødsdato))) {
-            return vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR).orElseThrow().finnPeriodeSomInneholderDato(dødsdato).orElseThrow();
-        } else if (perioderOver18år.stream().anyMatch(it -> it.inkluderer(dødsdato))) {
-            return vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR).orElseThrow().finnPeriodeSomInneholderDato(dødsdato).orElseThrow();
+    private VilkårPeriode finnSykdomVurderingPåDødsdato(LocalDate dødsdato, Vilkårene vilkårene) {
+        for (VilkårType vilkårType : Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)){
+            Optional<VilkårPeriode> vilkårPeriodeForDødsdato = vilkårene.getVilkår(vilkårType).orElseThrow().finnPeriodeSomInneholderDato(dødsdato);
+            if (vilkårPeriodeForDødsdato.isPresent()){
+                return vilkårPeriodeForDødsdato.get();
+            }
         }
         throw new IllegalStateException("Fant ikke overlapp verken i over eller under 18");
     }

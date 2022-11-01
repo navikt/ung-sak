@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -286,11 +287,11 @@ public class InfotrygdMigreringTjeneste {
         var søknadTidslinje = new LocalDateTimeline<>(fullstendigePerioder.stream()
             .map(this::utvidetOverHelgSegment)
             .collect(Collectors.toList()), StandardCombinators::coalesceLeftHandSide);
-        var tidslinje2022 = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(
+        var tidslinjeFra2022 = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(
             LocalDate.of(2022, 1, 1),
-            LocalDate.of(2022, 12, 31), true)));
+            TIDENES_ENDE, true)));
 
-        var ytelseIkkeSøktForTidslinje = ytelseTidslinje.intersection(tidslinje2022)
+        var ytelseIkkeSøktForTidslinje = ytelseTidslinje.intersection(tidslinjeFra2022)
             .disjoint(søknadTidslinje);
 
         return ytelseIkkeSøktForTidslinje.toSegments()
