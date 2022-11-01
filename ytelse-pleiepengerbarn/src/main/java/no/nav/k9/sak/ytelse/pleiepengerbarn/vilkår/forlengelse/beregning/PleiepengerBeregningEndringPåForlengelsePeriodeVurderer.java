@@ -51,6 +51,7 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private ProsessTriggereRepository prosessTriggereRepository;
     private Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere;
+    private HarEndretKompletthetVurderer harEndretKompletthetVurderer;
 
     PleiepengerBeregningEndringPåForlengelsePeriodeVurderer() {
     }
@@ -60,12 +61,14 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
                                                                    MottatteDokumentRepository mottatteDokumentRepository,
                                                                    ProsessTriggereRepository prosessTriggereRepository,
                                                                    @Any Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere,
-                                                                   @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning) {
+                                                                   @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
+                                                                   HarEndretKompletthetVurderer harEndretKompletthetVurderer) {
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.endringsVurderere = endringsVurderere;
+        this.harEndretKompletthetVurderer = harEndretKompletthetVurderer;
     }
 
     @Override
@@ -75,6 +78,10 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
         }
 
         if (harEndringPåInntektsmeldingerTilBrukForPerioden(input, periode)) {
+            return true;
+        }
+
+        if (harEndretKompletthetVurderer.harKompletthetMedEndretVurdering(input, periode)) {
             return true;
         }
 
