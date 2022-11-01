@@ -205,6 +205,8 @@ spec:
       value: "false"
     - name: PGI_FILTER_ENABLED
       value: "true"
+    - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
+      value: "2023-01-02"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
