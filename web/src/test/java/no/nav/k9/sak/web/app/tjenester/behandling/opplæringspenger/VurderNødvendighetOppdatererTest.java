@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,8 +23,6 @@ import no.nav.k9.sak.kontrakt.opplæringspenger.VurderNødvendighetDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 
 @CdiDbAwareTest
@@ -103,24 +100,6 @@ public class VurderNødvendighetOppdatererTest {
         assertThat(vurdertOpplæring1).isPresent();
         var vurdertOpplæring2 = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().stream().filter(vurdertOpplæring -> vurdertOpplæring.getJournalpostId().equals(journalpostIdDto2.getJournalpostId())).findFirst();
         assertThat(vurdertOpplæring2).isPresent();
-    }
-
-    @Test
-    public void skalOppdatereGrunnlagOgKopierePerioderFraAktivt() {
-        final JournalpostIdDto journalpostIdDto = new JournalpostIdDto("1341");
-        final VurdertOpplæringPeriode periode = new VurdertOpplæringPeriode(LocalDate.now(), LocalDate.now(), "test");
-        final VurdertOpplæring aktivVurdertOpplæring = new VurdertOpplæring(journalpostIdDto.getJournalpostId(), List.of(periode), true, "");
-        vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertOpplæringHolder(List.of(aktivVurdertOpplæring)));
-
-        final VurderNødvendighetDto dto = new VurderNødvendighetDto(journalpostIdDto, false);
-        lagreGrunnlag(dto);
-
-        Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
-        assertThat(grunnlag).isPresent();
-        assertThat(grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring()).hasSize(1);
-        var vurdertOpplæring = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().get(0);
-        assertThat(vurdertOpplæring.getPerioder()).hasSize(1);
-        assertThat(vurdertOpplæring.getPerioder().get(0)).isEqualTo(periode);
     }
 
     private OppdateringResultat lagreGrunnlag(VurderNødvendighetDto dto) {

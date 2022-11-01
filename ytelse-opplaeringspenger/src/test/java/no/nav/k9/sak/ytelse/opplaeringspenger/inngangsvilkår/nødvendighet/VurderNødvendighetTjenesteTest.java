@@ -74,7 +74,7 @@ class VurderNødvendighetTjenesteTest {
     @Test
     void vurderingGodkjent() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, List.of(), true, "");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
         var resultat = vurderNødvendighetTjeneste.hentTidslinjeTilVurderingMedNødvendighetsGodkjenning(perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
@@ -85,7 +85,7 @@ class VurderNødvendighetTjenesteTest {
     @Test
     void vurderingIkkeGodkjent() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, List.of(), false, "");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, false, "");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
         var resultat = vurderNødvendighetTjeneste.hentTidslinjeTilVurderingMedNødvendighetsGodkjenning(perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
@@ -96,7 +96,7 @@ class VurderNødvendighetTjenesteTest {
     @Test
     void vurderingMangler() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost2, List.of(), true, "");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost2, true, "");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
         var resultat = vurderNødvendighetTjeneste.hentTidslinjeTilVurderingMedNødvendighetsGodkjenning(perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
@@ -110,7 +110,7 @@ class VurderNødvendighetTjenesteTest {
         KursPeriode kursPeriode2 = new KursPeriode(søknadsperiodeTom, søknadsperiodeTom, "der", "beskrivelse", søknadsperiodeTom, søknadsperiodeTom, null);
         PerioderFraSøknad perioderFraSøknad1 = setupPerioderFraSøknad(journalpost1, List.of(kursPeriode1));
         PerioderFraSøknad perioderFraSøknad2 = setupPerioderFraSøknad(journalpost2, List.of(kursPeriode2));
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, List.of(), true, "");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
         var resultat = vurderNødvendighetTjeneste.hentTidslinjeTilVurderingMedNødvendighetsGodkjenning(Set.of(perioderFraSøknad1, perioderFraSøknad2), vurdertOpplæringGrunnlag, søknadsperiode);

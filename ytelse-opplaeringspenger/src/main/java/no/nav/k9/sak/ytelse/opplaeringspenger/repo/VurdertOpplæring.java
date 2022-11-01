@@ -1,24 +1,17 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -37,11 +30,6 @@ public class VurdertOpplæring extends BaseEntitet {
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
     private JournalpostId journalpostId;
 
-    @BatchSize(size = 20)
-    @JoinColumn(name = "holder_id", nullable = false)
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
-    private Set<VurdertOpplæringPeriode> perioder;
-
     @Column(name = "noedvendig_opplaering", nullable = false)
     private Boolean nødvendigOpplæring = false;
 
@@ -55,11 +43,7 @@ public class VurdertOpplæring extends BaseEntitet {
     VurdertOpplæring() {
     }
 
-    public VurdertOpplæring(JournalpostId journalpostId, List<VurdertOpplæringPeriode> perioder, Boolean nødvendigOpplæring, String begrunnelse) {
-        Objects.requireNonNull(perioder);
-        this.perioder = perioder.stream()
-            .map(VurdertOpplæringPeriode::new)
-            .collect(Collectors.toSet());
+    public VurdertOpplæring(JournalpostId journalpostId, Boolean nødvendigOpplæring, String begrunnelse) {
         this.journalpostId = journalpostId;
         this.nødvendigOpplæring = nødvendigOpplæring;
         this.begrunnelse = begrunnelse;
@@ -68,14 +52,7 @@ public class VurdertOpplæring extends BaseEntitet {
     public VurdertOpplæring(VurdertOpplæring that) {
         this.journalpostId = that.journalpostId;
         this.nødvendigOpplæring = that.nødvendigOpplæring;
-        this.perioder = that.perioder.stream()
-            .map(VurdertOpplæringPeriode::new)
-            .collect(Collectors.toSet());
         this.begrunnelse = that.begrunnelse;
-    }
-
-    public List<VurdertOpplæringPeriode> getPerioder() {
-        return perioder.stream().toList();
     }
 
     public Boolean getNødvendigOpplæring() {
@@ -95,22 +72,20 @@ public class VurdertOpplæring extends BaseEntitet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         VurdertOpplæring that = (VurdertOpplæring) o;
-        return Objects.equals(perioder, that.perioder)
-            && Objects.equals(nødvendigOpplæring, that.nødvendigOpplæring)
+        return Objects.equals(nødvendigOpplæring, that.nødvendigOpplæring)
             && Objects.equals(journalpostId, that.journalpostId)
             && Objects.equals(begrunnelse, that.begrunnelse);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(journalpostId, perioder, nødvendigOpplæring, begrunnelse);
+        return Objects.hash(journalpostId, nødvendigOpplæring, begrunnelse);
     }
 
     @Override
     public String toString() {
         return "VurdertOpplæring{" +
             "journalpostId=" + journalpostId +
-            ", perioder=" + perioder +
             ", nødvendigOpplæring=" + nødvendigOpplæring +
             ", begrunnelse=" + begrunnelse +
             '}';

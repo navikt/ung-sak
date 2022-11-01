@@ -14,7 +14,6 @@ import no.nav.k9.sak.kontrakt.opplæringspenger.VurderNødvendighetDto;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 
 @ApplicationScoped
@@ -45,9 +44,7 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
             vurdertOpplæring.addAll(aktiveVurdertInstitusjoner);
         }
 
-        Optional<VurdertOpplæring> eksisterendeVurdertOpplæring = aktivVurdertOpplæringHolder.flatMap(holder -> holder.finnVurderingForJournalpostId(dto.getJournalpostId().getJournalpostId()));
-
-        VurdertOpplæring nyVurdertOpplæring = mapDtoTilVurdertOpplæring(dto, eksisterendeVurdertOpplæring.map(VurdertOpplæring::getPerioder).orElse(List.of()));
+        VurdertOpplæring nyVurdertOpplæring = mapDtoTilVurdertOpplæring(dto);
         vurdertOpplæring.add(nyVurdertOpplæring);
 
         VurdertOpplæringHolder nyHolder = new VurdertOpplæringHolder(vurdertOpplæring);
@@ -56,7 +53,7 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
         return OppdateringResultat.nyttResultat();
     }
 
-    private VurdertOpplæring mapDtoTilVurdertOpplæring(VurderNødvendighetDto dto, List<VurdertOpplæringPeriode> perioder) {
-        return new VurdertOpplæring(dto.getJournalpostId().getJournalpostId(), perioder, dto.isNødvendigOpplæring(), dto.getBegrunnelse());
+    private VurdertOpplæring mapDtoTilVurdertOpplæring(VurderNødvendighetDto dto) {
+        return new VurdertOpplæring(dto.getJournalpostId().getJournalpostId(), dto.isNødvendigOpplæring(), dto.getBegrunnelse());
     }
 }
