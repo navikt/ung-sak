@@ -7,12 +7,12 @@ import java.util.UUID;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
+import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.oppdrag.kontrakt.BehandlingReferanse;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
-import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.sikkerhet.oidc.token.impl.ContextTokenProvider;
 
 @Dependent
 public class K9OppdragRestKlient {
@@ -26,12 +26,14 @@ public class K9OppdragRestKlient {
     }
 
     @Inject
-    public K9OppdragRestKlient(OidcRestClient restClient, @KonfigVerdi(value = "k9.oppdrag.direkte.url", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api") String urlK9Oppdrag) {
-        this.restClient = restClient;
+    public K9OppdragRestKlient(ContextTokenProvider tokenProvider, @KonfigVerdi(value = "k9.oppdrag.direkte.url", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api") String urlK9Oppdrag) {
         this.uriIverksett = tilUri(urlK9Oppdrag, "iverksett/start");
         this.uriSimulering = tilUri(urlK9Oppdrag, "simulering/start");
         this.uriSimuleringResultat = tilUri(urlK9Oppdrag, "simulering/resultat");
         this.uriKansellerSimulering = tilUri(urlK9Oppdrag, "simulering/kanseller");
+
+        //avviker fra @Inject av OidcRestClient fordi det trengs lenger timeout enn normalt mot k9-oppdrag pga simuleringer som tar lang tid (over 20 sekunder) når det er mange perioder
+        restClient = new K9OppdragRestClientConfig().createOidcRestClient(tokenProvider);
     }
 
     private static URI tilUri(String baseUrl, String path) {
