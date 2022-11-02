@@ -90,6 +90,8 @@ spec:
       value: k9saksbehandling.privat-k9-produksjonsstyring-sak-v1
     - name: KAFKA_K9_RAPID_TOPIC
       value: omsorgspenger.k9-rapid-v2
+    - name: KAFKA_INFOTRYGDFEED_AIVEN_TOPIC
+      value: k9saksbehandling.k9-infotrygd-feed-hendelse
 
     # Baseurl
     - name: SCHEMA_REGISTRY_URL
@@ -205,6 +207,8 @@ spec:
       value: "false"
     - name: PGI_FILTER_ENABLED
       value: "true"
+    - name: KAFKA_AIVEN_ENABLED
+      value: "false"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2023-01-02"
 

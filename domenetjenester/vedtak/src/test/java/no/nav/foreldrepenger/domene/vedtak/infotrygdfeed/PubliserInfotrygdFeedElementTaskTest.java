@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka.AivenInfotrygdFeedMeldingProducer;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,8 @@ public class PubliserInfotrygdFeedElementTaskTest {
     private InfotrygdFeedMeldingProducer meldingProducer;
     @Mock
     private BehandlingRepository behandlingRepository;
+    @Mock
+    private AivenInfotrygdFeedMeldingProducer aivenMeldingProducer;
 
     private PubliserInfotrygdFeedElementTask task;
     private InfotrygdFeedPeriodeberegner periodeberegner;
@@ -48,7 +51,8 @@ public class PubliserInfotrygdFeedElementTaskTest {
     private void initServices(LocalDate fom, LocalDate tom) {
         periodeberegner = mock(InfotrygdFeedPeriodeberegner.class);
         when(periodeberegner.finnInnvilgetPeriode(any())).thenReturn(new InfotrygdFeedPeriode(fom, tom));
-        task = new PubliserInfotrygdFeedElementTask(behandlingRepository, meldingProducer, periodeberegner);
+        boolean aivenEnabled = false;
+        task = new PubliserInfotrygdFeedElementTask(behandlingRepository, meldingProducer, periodeberegner, aivenMeldingProducer, aivenEnabled);
     }
 
     @Test
