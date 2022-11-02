@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @Entity(name = "VurdertOpplæringHolder")
 @Table(name = "olp_vurdert_opplaering_holder")
@@ -52,5 +54,9 @@ public class VurdertOpplæringHolder extends BaseEntitet {
 
     public List<VurdertOpplæring> getVurdertOpplæring() {
         return vurdertOpplæring.stream().toList();
+    }
+
+    public Optional<VurdertOpplæring> finnVurderingForJournalpostId(JournalpostId journalpostId) {
+        return vurdertOpplæring.stream().filter(vo -> vo.getJournalpostId().equals(journalpostId)).findFirst();
     }
 }

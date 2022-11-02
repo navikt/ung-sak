@@ -1,11 +1,16 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.GODKJENT;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.MANGLER_VURDERING;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -37,8 +42,10 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.OppfyltVilkårTidslinjeUtleder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderHolder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
 @BehandlingStegRef(value = BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR)
 @BehandlingTypeRef
@@ -51,7 +58,8 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private VurdertOpplæringRepository vurdertOpplæringRepository;
-    private final NødvendighetVilkårTjeneste nødvendighetVilkårTjeneste = new NødvendighetVilkårTjeneste();
+    private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
+    private final VurderNødvendighetTjeneste vurderNødvendighetTjeneste = new VurderNødvendighetTjeneste();
 
     VurderNødvendighetSteg() {
         // CDI
@@ -60,12 +68,14 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
     @Inject
     public VurderNødvendighetSteg(BehandlingRepositoryProvider repositoryProvider,
                                   @FagsakYtelseTypeRef(OPPLÆRINGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                  VurdertOpplæringRepository vurdertOpplæringRepository) {
+                                  VurdertOpplæringRepository vurdertOpplæringRepository,
+                                  UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.vurdertOpplæringRepository = vurdertOpplæringRepository;
+        this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
     }
 
     @Override
@@ -76,39 +86,43 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.NØDVENDIG_OPPLÆRING);
 
-        // TODO: Hent ut resultatet til sykdom
+        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING));
+
         var sykdomsTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.LANGVARIG_SYKDOM);
         var godkjentInstitusjonTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
-
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING);
-        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
-
         var tidslinjeUtenGodkjentInstitusjon = tidslinjeTilVurdering.disjoint(godkjentInstitusjonTidslinje);
         var tidslinjeUtenSykdomsvilkår = tidslinjeTilVurdering.disjoint(sykdomsTidslinje).disjoint(tidslinjeUtenGodkjentInstitusjon);
         leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenGodkjentInstitusjon, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
         leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenSykdomsvilkår, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE); // TODO: Endre til noe mer fornuftig
         tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(tidslinjeUtenGodkjentInstitusjon).disjoint(tidslinjeUtenSykdomsvilkår);
 
-        var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(kontekst.getBehandlingId())
-            .orElse(VurdertOpplæringGrunnlag.lagTomtGrunnlag()); //TODO dette skal endres (skal ikke bruke tomt grunnlag)
-        var vurdertePerioder = nødvendighetVilkårTjeneste.vurderPerioder(vilkårBuilder, vurdertOpplæringGrunnlag, tidslinjeTilVurdering);
+        var uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(kontekst.getBehandlingId());
+        var perioderFraSøknad = uttaksPerioderGrunnlag.map(UttaksPerioderGrunnlag::getRelevantSøknadsperioder)
+            .map(UttakPerioderHolder::getPerioderFraSøknadene)
+            .orElse(Set.of());
+        var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(kontekst.getBehandlingId());
 
-        tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(TidslinjeUtil.tilTidslinjeKomprimert(vurdertePerioder));
+        var tidslinjeTilVurderingMedNødvendighetsgodkjenning = vurderNødvendighetTjeneste.hentTidslinjeTilVurderingMedNødvendighetsGodkjenning(perioderFraSøknad, vurdertOpplæringGrunnlag.orElse(null), tidslinjeTilVurdering);
+
+        var manglerVurderingTidslinje = tidslinjeTilVurderingMedNødvendighetsgodkjenning.filterValue(godkjenning -> Objects.equals(godkjenning, MANGLER_VURDERING));
+        if (!manglerVurderingTidslinje.isEmpty()) {
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(
+                AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_NØDVENDIGHET)));
+        }
+
+        var godkjentTidslinje = tidslinjeTilVurderingMedNødvendighetsgodkjenning.filterValue(godkjenning -> Objects.equals(godkjenning, GODKJENT));
+        var ikkeGodkjentTidslinje = tidslinjeTilVurderingMedNødvendighetsgodkjenning.filterValue(godkjenning -> Objects.equals(godkjenning, IKKE_GODKJENT));
+
+        leggTilVilkårResultat(vilkårBuilder, godkjentTidslinje, Utfall.OPPFYLT, Avslagsårsak.UDEFINERT);
+        leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_NØDVENDIG);
 
         vilkårResultatBuilder.leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårResultatBuilder.build());
 
-        if (tidslinjeTilVurdering.isEmpty()) {
-            // Ingen flere perioder å vurdere
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        } else {
-            // Vi har perioder uten vurdering
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(
-                AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_NØDVENDIGHET)));
-        }
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private void leggTilVilkårResultat(VilkårBuilder vilkårBuilder, LocalDateTimeline<Boolean> tidslinje, Utfall utfall, Avslagsårsak avslagsårsak) {
+    private void leggTilVilkårResultat(VilkårBuilder vilkårBuilder, LocalDateTimeline<?> tidslinje, Utfall utfall, Avslagsårsak avslagsårsak) {
         TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje)
             .forEach(datoIntervallEntitet -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(datoIntervallEntitet)
                 .medUtfall(utfall)
