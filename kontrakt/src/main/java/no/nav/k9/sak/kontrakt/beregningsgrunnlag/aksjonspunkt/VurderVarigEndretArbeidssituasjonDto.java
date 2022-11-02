@@ -27,7 +27,7 @@ public class VurderVarigEndretArbeidssituasjonDto extends VurderVarigEndringElle
     }
 
     @AssertTrue
-    public boolean skalHaSattVurderVarigEndring() {
+    public boolean isSkalHaSattVurderVarigEndring() {
         return erVarigEndret != null;
     }
 }

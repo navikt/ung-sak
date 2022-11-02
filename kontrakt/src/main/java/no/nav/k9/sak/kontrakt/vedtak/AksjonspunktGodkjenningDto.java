@@ -51,7 +51,7 @@ public class AksjonspunktGodkjenningDto {
     }
 
     @AssertTrue(message = "begrunnelse er påkrevd om det ikke er godkjent")
-    private boolean isOk() {
+    public boolean isOk() {
         return godkjent || begrunnelse != null;
     }
 

@@ -42,7 +42,7 @@ public class VurderVarigEndringEllerNyoppstartetSNDto extends VurderVarigEndring
     }
 
     @AssertTrue
-    public boolean skalHaSattVurderVarigEndring() {
+    public boolean isSkalHaSattVurderVarigEndring() {
         return erVarigEndretNaering != null || erVarigEndret != null;
     }
 
