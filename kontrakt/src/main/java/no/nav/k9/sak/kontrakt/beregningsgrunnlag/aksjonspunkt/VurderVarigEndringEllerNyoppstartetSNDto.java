@@ -1,15 +1,13 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotNull;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -37,7 +35,10 @@ public class VurderVarigEndringEllerNyoppstartetSNDto extends VurderVarigEndring
 
     @Override
     public Boolean erVarigEndret() {
-        return erVarigEndretNaering || super.erVarigEndret;
+        if (erVarigEndretNaering != null) {
+            return erVarigEndretNaering;
+        }
+        return super.erVarigEndret;
     }
 
     @AssertTrue
