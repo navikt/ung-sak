@@ -110,7 +110,7 @@ public class BekreftetOgOverstyrteAksjonspunkterDto {
     }
 
     @AssertTrue(message = "Må ha minst ett aksjonspunkt")
-    public boolean minstEttAksjonspunkt() {
+    public boolean isMinstEttAksjonspunkt() {
         return (bekreftedeAksjonspunktDtoer != null && bekreftedeAksjonspunktDtoer.size() > 0) || (overstyrteAksjonspunktDtoer != null && overstyrteAksjonspunktDtoer.size() > 0);
     }
 

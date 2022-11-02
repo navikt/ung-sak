@@ -50,7 +50,7 @@ public class AvklarUtvidetRettDto extends BekreftetAksjonspunktDto {
     }
 
     @AssertTrue(message = "Kan ikke angi avslagsårsak dersom vilkår er ok")
-    private boolean isOk() {
+    public boolean isOk() {
         return !erVilkarOk || (erVilkarOk && avslagsårsak == null);
     }
 

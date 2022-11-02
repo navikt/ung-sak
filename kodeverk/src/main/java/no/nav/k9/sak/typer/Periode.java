@@ -56,13 +56,13 @@ public class Periode implements Comparable<Periode> {
     }
 
     private void validerOk() {
-        if (!ok()) {
+        if (!isOk()) {
             throw new IllegalArgumentException("fom (fra-og-med dato) kan ikke være etter tom (til-og-med dato: " + fom + ">" + tom);
         }
     }
 
     @AssertTrue(message = "fom dato må være <= tom dato hvis satt")
-    private boolean ok() {
+    public boolean isOk() {
         LocalDate fom = getFom();
         LocalDate tom = getTom();
         return (fom == null || tom == null) || fom.isEqual(tom) || fom.isBefore(tom);

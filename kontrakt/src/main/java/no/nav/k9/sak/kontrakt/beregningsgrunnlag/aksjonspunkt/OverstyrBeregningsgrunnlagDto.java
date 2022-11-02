@@ -61,7 +61,7 @@ public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
     }
 
     @AssertTrue
-    public boolean skalVereAvbruttEllerHaVerdier() {
+    public boolean isSkalVereAvbruttEllerHaVerdier() {
         return skalAvbrytes() || overstyrteAndeler != null;
     }
 

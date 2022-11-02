@@ -109,14 +109,14 @@ public class OverstyrBeregningAktivitet {
     }
 
     @AssertTrue(message = "Enten orgnr eller aktørId må være satt")
-    public boolean harOrgnrEllerAktørid() {
+    public boolean isOrgnrEllerAktørid() {
         var orgnr = getArbeidsgiverOrgnr();
         var aktørId = getArbeidsgiverAktørId();
         return orgnr != null || aktørId != null;
     }
 
     @AssertTrue(message = "Enten orgnr eller aktørId må være satt")
-    public boolean erStartdatoRefusjonFørOpphør() {
+    public boolean isStartdatoRefusjonFørOpphør() {
         if (startdatoRefusjon == null || opphørRefusjon == null) {
             return true;
         }

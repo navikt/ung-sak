@@ -64,12 +64,12 @@ public class TilbakekrevingValgDto {
     }
 
     @AssertTrue(message = "Kan kun ha grunnerTilReduksjon når erTilbakekrevingVilkårOppfylt=true")
-    private boolean okGrunner() {
+    public boolean isOkGrunner() {
         return erTilbakekrevingVilkårOppfylt || grunnerTilReduksjon == null;
     }
 
     @AssertTrue(message = "Kan kun ha videreBehandling når erTilbakekrevingVilkårOppfylt=false")
-    private boolean okVidereBehandling() {
+    public boolean isOkVidereBehandling() {
         return !erTilbakekrevingVilkårOppfylt || videreBehandling == null;
     }
 }

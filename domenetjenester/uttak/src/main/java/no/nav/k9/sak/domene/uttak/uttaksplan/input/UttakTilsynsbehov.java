@@ -30,7 +30,7 @@ public class UttakTilsynsbehov {
         }
         this.prosent = prosent;
     }
-    
+
     public int getProsent() {
         return prosent;
     }
@@ -40,7 +40,7 @@ public class UttakTilsynsbehov {
     }
 
     @AssertTrue(message = "Tilsynsbehov må være 100 eller 200")
-    private boolean isOk() {
+    public boolean isOk() {
         return prosent == 100 || prosent == 200;
     }
 }

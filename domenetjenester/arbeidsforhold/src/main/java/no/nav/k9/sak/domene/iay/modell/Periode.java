@@ -63,7 +63,7 @@ public class Periode implements Comparable<Periode> {
     }
 
     @AssertTrue(message = "fom dato må være <= tom dato")
-    private boolean ok() {
+    public boolean isOk() {
         return getFom().isEqual(getTom()) || getFom().isBefore(getTom());
     }
 
