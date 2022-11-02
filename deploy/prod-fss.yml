@@ -209,6 +209,8 @@ spec:
       value: "true"
     - name: KAFKA_AIVEN_ENABLED
       value: "false"
+    - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
+      value: "2023-01-02"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

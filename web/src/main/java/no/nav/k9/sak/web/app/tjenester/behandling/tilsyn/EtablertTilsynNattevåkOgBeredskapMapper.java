@@ -38,13 +38,13 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
         this.hentEtablertTilsynTjeneste = hentEtablertTilsynTjeneste;
     }
 
-    public EtablertTilsynNattevåkOgBeredskapDto tilDto(BehandlingReferanse behandlingRef, Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende) {
+    public EtablertTilsynNattevåkOgBeredskapDto tilDto(BehandlingReferanse behandlingRef, Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende, boolean brukUbesluttedeData) {
         var beredskap = unntakEtablertTilsynForPleietrengende.map(UnntakEtablertTilsynForPleietrengende::getBeredskap);
         var nattevåk = unntakEtablertTilsynForPleietrengende.map(UnntakEtablertTilsynForPleietrengende::getNattevåk);
 
         return new EtablertTilsynNattevåkOgBeredskapDto(
             tilEtablertTilsyn(behandlingRef),
-            tilSmørtEtablertTilsyn(behandlingRef, unntakEtablertTilsynForPleietrengende),
+            tilSmørtEtablertTilsyn(behandlingRef, unntakEtablertTilsynForPleietrengende, brukUbesluttedeData),
             tilNattevåk(nattevåk, behandlingRef.getAktørId()),
             tilBeredskap(beredskap, behandlingRef.getAktørId()));
     }
@@ -54,8 +54,8 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
         return etablertTilsyntidslinje.stream().map(entry -> new EtablertTilsynPeriodeDto(new Periode(entry.getFom(), entry.getTom()), entry.getValue().getVarighet(), entry.getValue().getKilde())).toList();
     }
 
-    private List<SmørtEtablertTilsyn> tilSmørtEtablertTilsyn(BehandlingReferanse behandlingRef, Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende) {
-        var etablertTilsyntidslinje = hentEtablertTilsynTjeneste.hentOgSmørEtablertTilsynPerioder(behandlingRef, unntakEtablertTilsynForPleietrengende, false);
+    private List<SmørtEtablertTilsyn> tilSmørtEtablertTilsyn(BehandlingReferanse behandlingRef, Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende, boolean brukUbesluttedeData) {
+        var etablertTilsyntidslinje = hentEtablertTilsynTjeneste.hentOgSmørEtablertTilsynPerioder(behandlingRef, unntakEtablertTilsynForPleietrengende, brukUbesluttedeData);
         return etablertTilsyntidslinje.stream().map(entry -> new SmørtEtablertTilsyn(entry.getPeriode().tilPeriode(), entry.getVarighet())).toList();
     }
 
