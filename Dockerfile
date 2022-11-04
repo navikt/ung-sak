@@ -1,4 +1,4 @@
-FROM navikt/java:17-appdynamics
+FROM ghcr.io/navikt/baseimages/temurin:17-appdynamics
 ENV APPD_ENABLED=true
 
 LABEL org.opencontainers.image.source=https://github.com/navikt/k9-sak
@@ -19,4 +19,3 @@ COPY web/target/lib/*.jar /app/lib/
 
 # Application Container (Jetty)
 COPY web/target/app.jar /app/
-
