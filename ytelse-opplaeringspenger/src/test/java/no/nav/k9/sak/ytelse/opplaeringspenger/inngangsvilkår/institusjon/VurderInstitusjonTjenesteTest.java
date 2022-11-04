@@ -59,7 +59,7 @@ public class VurderInstitusjonTjenesteTest {
     }
 
     private Set<PerioderFraSøknad> setupEnkelKursperiode(UUID uuid) {
-        KursPeriode kursPeriode = new KursPeriode(søknadsperiodeFom, søknadsperiodeTom, institusjon1, "beskrivelse", søknadsperiodeFom, søknadsperiodeTom, uuid);
+        KursPeriode kursPeriode = lagKursperiode(søknadsperiodeFom, søknadsperiodeTom, institusjon1, uuid);
         return setupKursperioder(journalpost1, List.of(kursPeriode));
     }
 
@@ -79,9 +79,13 @@ public class VurderInstitusjonTjenesteTest {
             kursperiode);
     }
 
+    private KursPeriode lagKursperiode(LocalDate fom, LocalDate tom, String institusjon, UUID uuid) {
+        return new KursPeriode(fom, tom, null, null, institusjon, uuid, "beskrivelse");
+    }
+
     private VurdertOpplæringGrunnlag setupVurderingsgrunnlag(List<VurdertInstitusjon> vurderteInstitusjoner) {
         VurdertInstitusjonHolder vurdertInstitusjonHolder = new VurdertInstitusjonHolder(vurderteInstitusjoner);
-        return new VurdertOpplæringGrunnlag(behandlingId, vurdertInstitusjonHolder, null);
+        return new VurdertOpplæringGrunnlag(behandlingId, vurdertInstitusjonHolder, null, null);
     }
 
     private void setupGodkjentOpplæringsinstitusjonIRegister(String navn, LocalDate fom, LocalDate tom, UUID uuid) {
@@ -143,8 +147,8 @@ public class VurderInstitusjonTjenesteTest {
 
     @Test
     public void enAvToinstitusjonerGodkjentIVurderingsgrunnlag() {
-        KursPeriode kursPeriode1 = new KursPeriode(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1, "beskrivelse", søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), null);
-        KursPeriode kursPeriode2 = new KursPeriode(søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, institusjon2, "beskrivelse", søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, null);
+        KursPeriode kursPeriode1 = lagKursperiode(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1, null);
+        KursPeriode kursPeriode2 = lagKursperiode(søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, institusjon2, null);
         PerioderFraSøknad perioderFraSøknad1 = setupEnkelKursperiode(journalpost1, List.of(kursPeriode1));
         PerioderFraSøknad perioderFraSøknad2 = setupEnkelKursperiode(journalpost2, List.of(kursPeriode2));
         Set<PerioderFraSøknad> perioderFraSøknad = Set.of(perioderFraSøknad1, perioderFraSøknad2);
@@ -161,8 +165,8 @@ public class VurderInstitusjonTjenesteTest {
 
     @Test
     public void enAvToinstitusjonerGodkjentIRegisteret() {
-        KursPeriode kursPeriode1 = new KursPeriode(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1, "beskrivelse", søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1Uuid);
-        KursPeriode kursPeriode2 = new KursPeriode(søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, institusjon2, "beskrivelse", søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, institusjon2Uuid);
+        KursPeriode kursPeriode1 = lagKursperiode(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1, institusjon1Uuid);
+        KursPeriode kursPeriode2 = lagKursperiode(søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, institusjon2, institusjon2Uuid);
         Set<PerioderFraSøknad> perioderFraSøknad = setupKursperioder(journalpost1, List.of(kursPeriode1, kursPeriode2));
         setupGodkjentOpplæringsinstitusjonIRegister(institusjon1, søknadsperiodeFom, søknadsperiodeTom, institusjon1Uuid);
         setupGodkjentOpplæringsinstitusjonIRegister(institusjon2, søknadsperiodeTom.plusDays(1), null, institusjon2Uuid);
@@ -176,8 +180,8 @@ public class VurderInstitusjonTjenesteTest {
 
     @Test
     public void enInstitusjonGodkjentIRegisteretEnGodkjentIVurderingsgrunnlag() {
-        KursPeriode kursPeriode1 = new KursPeriode(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1, "beskrivelse", søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1Uuid);
-        KursPeriode kursPeriode2 = new KursPeriode(søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, institusjon2, "beskrivelse", søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, null);
+        KursPeriode kursPeriode1 = lagKursperiode(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1, institusjon1Uuid);
+        KursPeriode kursPeriode2 = lagKursperiode(søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, institusjon2, null);
         PerioderFraSøknad perioderFraSøknad1 = setupEnkelKursperiode(journalpost1, List.of(kursPeriode1));
         PerioderFraSøknad perioderFraSøknad2 = setupEnkelKursperiode(journalpost2, List.of(kursPeriode2));
         Set<PerioderFraSøknad> perioderFraSøknad = Set.of(perioderFraSøknad1, perioderFraSøknad2);
