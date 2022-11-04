@@ -208,7 +208,7 @@ spec:
     - name: PGI_FILTER_ENABLED
       value: "true"
     - name: KAFKA_AIVEN_ENABLED
-      value: "false"
+      value: "true"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2023-01-02"
 
