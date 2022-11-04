@@ -28,7 +28,8 @@ class VilkårForlengingTjeneste {
     public void forlengeVilkårMedPeriode(Set<VilkårType> vilkår, VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode) {
         for (VilkårType vilkårType : vilkår) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
-            var eksisterendeResultat = vilkårene.getVilkår(vilkårType).orElseThrow().finnPeriodeSomInneholderDato(periode.getFomDato()).orElseThrow();
+            var dødsdato = periode.getFomDato().minusDays(1); //periode begynner 1 dag etter dødsdato
+            var eksisterendeResultat = vilkårene.getVilkår(vilkårType).orElseThrow().finnPeriodeSomInneholderDato(dødsdato).orElseThrow();
 
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode).forlengelseAv(eksisterendeResultat));
             resultatBuilder.leggTil(vilkårBuilder);
