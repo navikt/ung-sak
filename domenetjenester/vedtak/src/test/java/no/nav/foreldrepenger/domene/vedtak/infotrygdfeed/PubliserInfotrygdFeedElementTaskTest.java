@@ -11,13 +11,12 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka.AivenInfotrygdFeedMeldingProducer;
+import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka.InfotrygdFeedMeldingProducer;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
-import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka.InfotrygdFeedMeldingProducer;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
@@ -34,8 +33,6 @@ public class PubliserInfotrygdFeedElementTaskTest {
     private InfotrygdFeedMeldingProducer meldingProducer;
     @Mock
     private BehandlingRepository behandlingRepository;
-    @Mock
-    private AivenInfotrygdFeedMeldingProducer aivenMeldingProducer;
 
     private PubliserInfotrygdFeedElementTask task;
     private InfotrygdFeedPeriodeberegner periodeberegner;
@@ -51,8 +48,7 @@ public class PubliserInfotrygdFeedElementTaskTest {
     private void initServices(LocalDate fom, LocalDate tom) {
         periodeberegner = mock(InfotrygdFeedPeriodeberegner.class);
         when(periodeberegner.finnInnvilgetPeriode(any())).thenReturn(new InfotrygdFeedPeriode(fom, tom));
-        boolean aivenEnabled = false;
-        task = new PubliserInfotrygdFeedElementTask(behandlingRepository, meldingProducer, periodeberegner, aivenMeldingProducer, aivenEnabled);
+        task = new PubliserInfotrygdFeedElementTask(behandlingRepository, meldingProducer, periodeberegner);
     }
 
     @Test
