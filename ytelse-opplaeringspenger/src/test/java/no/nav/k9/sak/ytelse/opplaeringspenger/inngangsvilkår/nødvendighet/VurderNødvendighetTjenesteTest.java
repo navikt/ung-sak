@@ -64,7 +64,7 @@ class VurderNødvendighetTjenesteTest {
 
     private VurdertOpplæringGrunnlag setupVurderingsgrunnlag(List<VurdertOpplæring> vurdertOpplæring) {
         VurdertOpplæringHolder vurdertOpplæringHolder = new VurdertOpplæringHolder(vurdertOpplæring);
-        return new VurdertOpplæringGrunnlag(1344L, null, vurdertOpplæringHolder, null);
+        return new VurdertOpplæringGrunnlag(1344L, null, vurdertOpplæringHolder);
     }
 
     @Test
