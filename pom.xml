@@ -44,7 +44,7 @@
         <swagger.version>2.2.3</swagger.version>
         <junit.version>5.9.1</junit.version>
         <k9format.version>7.0.4</k9format.version>
-        <jackson.version>2.13.4.20221013</jackson.version>
+        <jackson.version>2.14.0</jackson.version>
         <asm.version>9.4</asm.version>
         <kotlin-stdlib.version>1.7.20</kotlin-stdlib.version>
     </properties>
