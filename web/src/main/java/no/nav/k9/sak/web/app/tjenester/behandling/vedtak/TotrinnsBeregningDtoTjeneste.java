@@ -1,5 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.vedtak;
 
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VURDER_FAKTA_FOR_ATFL_SN;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VURDER_VARIG_ENDRET_ARBEIDSSITUASJON;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -11,7 +15,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
@@ -26,9 +29,9 @@ import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 
 @Dependent
 public class TotrinnsBeregningDtoTjeneste {
-    private static final AksjonspunktDefinisjon FAKTA_ATFL_SN = AksjonspunktDefinisjon.VURDER_FAKTA_FOR_ATFL_SN;
-    private static final AksjonspunktDefinisjon VARIG_ENDRET_SN = AksjonspunktDefinisjon.VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE;
-    private static final Set<AksjonspunktDefinisjon> HENT_GRUNNLAG_APDEFS = EnumSet.of(VARIG_ENDRET_SN, FAKTA_ATFL_SN);
+    private static final AksjonspunktDefinisjon FAKTA_ATFL_SN = VURDER_FAKTA_FOR_ATFL_SN;
+    private static final AksjonspunktDefinisjon VARIG_ENDRET_SN = VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE;
+    private static final Set<AksjonspunktDefinisjon> HENT_GRUNNLAG_APDEFS = EnumSet.of(VARIG_ENDRET_SN, VURDER_VARIG_ENDRET_ARBEIDSSITUASJON, FAKTA_ATFL_SN);
 
     private BeregningTjeneste tjeneste;
 
@@ -61,7 +64,14 @@ public class TotrinnsBeregningDtoTjeneste {
             TotrinnsBeregningDto dto = new TotrinnsBeregningDto();
 
             if (VARIG_ENDRET_SN.equals(apDef)) {
-                dto.setFastsattVarigEndringNaering(erVarigEndringFastsattForSelvstendingNæringsdrivendeGittGrunnlag(bgTotrinn, bg));
+                var fastsattVarigEndringNaering = erVarigEndringFastsattForSelvstendingNæringsdrivendeGittGrunnlag(bgTotrinn, bg);
+                dto.setFastsattVarigEndringNaering(Boolean.TRUE.equals(fastsattVarigEndringNaering));
+                dto.setFastsattVarigEndring(fastsattVarigEndringNaering);
+            }
+
+            if (VURDER_VARIG_ENDRET_ARBEIDSSITUASJON.equals(apDef)) {
+                var fastsattVarigEndring = erVarigEndringFastsattForMidlertidigInaktivGittGrunnlag(bgTotrinn, bg);
+                dto.setFastsattVarigEndring(fastsattVarigEndring);
             }
 
             if (FAKTA_ATFL_SN.equals(apDef)) {
@@ -83,7 +93,7 @@ public class TotrinnsBeregningDtoTjeneste {
     }
 
     private Map<BeregningsgrunnlagToTrinn, Beregningsgrunnlag> hentBeregningsgrunnlag(BehandlingReferanse ref, List<BeregningsgrunnlagToTrinn> beregningsgrunnlagTotrinn) {
-        var skjæringstidspunkter = beregningsgrunnlagTotrinn.stream().collect(Collectors.toMap(v -> v.getSkjæringstidspunkt(), v -> v));
+        var skjæringstidspunkter = beregningsgrunnlagTotrinn.stream().collect(Collectors.toMap(BeregningsgrunnlagToTrinn::getSkjæringstidspunkt, v -> v));
 
         var beregningsgrunnlag = tjeneste.hentGrunnlag(ref, skjæringstidspunkter.keySet())
             .stream()
@@ -94,14 +104,35 @@ public class TotrinnsBeregningDtoTjeneste {
         return beregningsgrunnlag;
     }
 
-    private boolean erVarigEndringFastsattForSelvstendingNæringsdrivendeGittGrunnlag(BeregningsgrunnlagToTrinn bgTotrinn, Beregningsgrunnlag beregningsgrunnlag) {
+    private Boolean erVarigEndringFastsattForSelvstendingNæringsdrivendeGittGrunnlag(BeregningsgrunnlagToTrinn bgTotrinn, Beregningsgrunnlag beregningsgrunnlag) {
 
         if (beregningsgrunnlag != null) {
-            return beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
+            var sn = beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
                 .flatMap(bgps -> bgps.getBeregningsgrunnlagPrStatusOgAndelList().stream())
                 .filter(andel -> andel.getAktivitetStatus().equals(AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE))
+                .toList();
+            if (sn.isEmpty()) {
+                return null;
+            }
+            return sn.stream().anyMatch(andel -> andel.getOverstyrtPrÅr() != null);
+        }
+        return bgTotrinn.getFastsattVarigEndring();
+    }
+
+    private Boolean erVarigEndringFastsattForMidlertidigInaktivGittGrunnlag(BeregningsgrunnlagToTrinn bgTotrinn, Beregningsgrunnlag beregningsgrunnlag) {
+
+        if (beregningsgrunnlag != null) {
+            var erMidlertidigInaktiv = beregningsgrunnlag.getAktivitetStatuser().stream().anyMatch(a -> a.getAktivitetStatus().equals(AktivitetStatus.MIDLERTIDIG_INAKTIV));
+
+            if (!erMidlertidigInaktiv) {
+                return null;
+            }
+            return beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
+                .flatMap(bgps -> bgps.getBeregningsgrunnlagPrStatusOgAndelList().stream())
+                .filter(andel -> andel.getAktivitetStatus().equals(AktivitetStatus.BRUKERS_ANDEL))
                 .anyMatch(andel -> andel.getOverstyrtPrÅr() != null);
         }
         return bgTotrinn.getFastsattVarigEndring();
     }
+
 }
