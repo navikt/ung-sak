@@ -331,7 +331,7 @@ public class Behandling extends BaseEntitet {
      * Marker behandling som avsluttet.
      */
     public void avsluttBehandling() {
-        getAksjonspunkterStream().filter(a -> a.erÅpentAksjonspunkt()).forEach(a -> a.avbryt());
+        getAksjonspunkterStream().filter(Aksjonspunkt::erÅpentAksjonspunkt).forEach(Aksjonspunkt::avbryt);
 
         lukkBehandlingStegStatuser(this.behandlingStegTilstander, BehandlingStegStatus.UTFØRT);
         this.status = BehandlingStatus.AVSLUTTET;
@@ -385,14 +385,14 @@ public class Behandling extends BaseEntitet {
         }
 
         // tar nyeste.
-        return behandlingStegTilstander.stream().sorted(COMP_DESC_TID).findFirst();
+        return behandlingStegTilstander.stream().min(COMP_DESC_TID);
     }
 
     public Optional<BehandlingStegTilstand> getBehandlingStegTilstand(BehandlingStegType stegType) {
         List<BehandlingStegTilstand> tilstander = behandlingStegTilstander.stream()
             .filter(t -> !BehandlingStegStatus.erSluttStatus(t.getBehandlingStegStatus())
                 && Objects.equals(stegType, t.getBehandlingSteg()))
-            .collect(Collectors.toList());
+            .toList();
         if (tilstander.size() > 1) {
             throw new IllegalStateException(
                 "Utvikler-feil: Kan ikke ha flere steg samtidig åpne for stegType[" + stegType + "]: " + tilstander); //$NON-NLS-1$ //$NON-NLS-2$
