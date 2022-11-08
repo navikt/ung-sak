@@ -76,8 +76,6 @@ spec:
       value: privat-k9-aksjonspunkthendelse
     - name: KAFKA_DOKUMENTBESTILLING_TOPIC
       value: privat-k9-dokumenthendelse
-    - name: KAFKA_INFOTRYGDFEED_TOPIC
-      value: privat-k9-infotrygdFeedHendelse
     - name: KAFKA_FATTEVEDTAK_TOPIC
       value: privat-familie-vedtakFattet-v1
     - name: KAFKA_VEDTAKHENDELSE_TOPIC
@@ -206,8 +204,6 @@ spec:
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
       value: "false"
     - name: PGI_FILTER_ENABLED
-      value: "true"
-    - name: KAFKA_AIVEN_ENABLED
       value: "true"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2023-01-02"

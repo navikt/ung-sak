@@ -90,8 +90,6 @@ spec:
       value: privat-k9-aksjonspunkthendelse
     - name: KAFKA_DOKUMENTBESTILLING_TOPIC
       value: privat-k9-dokumenthendelse
-    - name: KAFKA_INFOTRYGDFEED_TOPIC
-      value: privat-k9-infotrygdFeedHendelse
     - name: KAFKA_FATTEVEDTAK_TOPIC
       value: privat-familie-vedtakFattet-v1-q1
     - name: KAFKA_VEDTAKHENDELSE_TOPIC
@@ -247,8 +245,6 @@ spec:
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2022-09-19"
     - name: PSB_UTTAK_UNNTAK_BEVAR_VEDTATT_VERDI
-      value: "true"
-    - name: KAFKA_AIVEN_ENABLED
       value: "true"
 
     # Konfigurasjoner
