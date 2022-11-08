@@ -44,7 +44,10 @@ public class VurdertOpplæringRepository {
 
         var aktivtGrunnlag = getAktivtGrunnlag(behandlingId);
 
-        var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId, vurdertInstitusjonHolder, aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertOpplæringHolder).orElse(null));
+        var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId,
+            vurdertInstitusjonHolder,
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertOpplæringHolder).orElse(null),
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertePerioder).orElse(null));
         deaktiverEksisterendeGrunnlag(aktivtGrunnlag);
 
         entityManager.persist(nyttGrunnlag.getVurdertInstitusjonHolder());
@@ -58,10 +61,30 @@ public class VurdertOpplæringRepository {
 
         var aktivtGrunnlag = getAktivtGrunnlag(behandlingId);
 
-        var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId, aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertInstitusjonHolder).orElse(null), vurdertOpplæringHolder);
+        var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId,
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertInstitusjonHolder).orElse(null),
+            vurdertOpplæringHolder,
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertePerioder).orElse(null));
         deaktiverEksisterendeGrunnlag(aktivtGrunnlag);
 
         entityManager.persist(nyttGrunnlag.getVurdertOpplæringHolder());
+        entityManager.persist(nyttGrunnlag);
+        entityManager.flush();
+    }
+
+    public void lagre(Long behandlingId, VurdertOpplæringPerioderHolder vurdertOpplæringPerioderHolder) {
+        Objects.requireNonNull(behandlingId, "behandlingId");
+        Objects.requireNonNull(vurdertOpplæringPerioderHolder, "vurdertOpplæringPerioderHolder");
+
+        var aktivtGrunnlag = getAktivtGrunnlag(behandlingId);
+
+        var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId,
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertInstitusjonHolder).orElse(null),
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertOpplæringHolder).orElse(null),
+            vurdertOpplæringPerioderHolder);
+        deaktiverEksisterendeGrunnlag(aktivtGrunnlag);
+
+        entityManager.persist(nyttGrunnlag.getVurdertePerioder());
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
     }

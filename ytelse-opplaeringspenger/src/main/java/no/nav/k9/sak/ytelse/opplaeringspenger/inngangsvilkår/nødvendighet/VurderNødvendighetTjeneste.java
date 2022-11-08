@@ -53,7 +53,7 @@ class VurderNødvendighetTjeneste {
         var opplæringGrunnlag = Optional.ofNullable(vurdertOpplæringGrunnlag);
         var tidslinje = new LocalDateTimeline<>(List.of(segment));
 
-        if (opplæringGrunnlag.isPresent()) {
+        if (opplæringGrunnlag.isPresent() && vurdertOpplæringGrunnlag.getVurdertOpplæringHolder() != null) {
             for (JournalpostId journalpostId : segment.getValue()) {
                 Optional<VurdertOpplæring> vurdertOpplæring = vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().finnVurderingForJournalpostId(journalpostId.getJournalpostId());
 

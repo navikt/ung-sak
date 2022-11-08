@@ -85,7 +85,7 @@ public class VurderInstitusjonTjenesteTest {
 
     private VurdertOpplæringGrunnlag setupVurderingsgrunnlag(List<VurdertInstitusjon> vurderteInstitusjoner) {
         VurdertInstitusjonHolder vurdertInstitusjonHolder = new VurdertInstitusjonHolder(vurderteInstitusjoner);
-        return new VurdertOpplæringGrunnlag(behandlingId, vurdertInstitusjonHolder, null);
+        return new VurdertOpplæringGrunnlag(behandlingId, vurdertInstitusjonHolder, null, null);
     }
 
     private void setupGodkjentOpplæringsinstitusjonIRegister(String navn, LocalDate fom, LocalDate tom, UUID uuid) {

@@ -154,7 +154,8 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null
         );
         lagreGrunnlag(grunnlag);
 
@@ -186,7 +187,8 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, false, "test");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null
         );
         lagreGrunnlag(grunnlag);
 
@@ -247,7 +249,8 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring2 = new VurdertOpplæring(journalpostId2, false, "tast");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring1, vurdertOpplæring2))
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring1, vurdertOpplæring2)),
+            null
         );
         lagreGrunnlag(grunnlag);
 
@@ -284,7 +287,8 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "test");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null
         );
         lagreGrunnlag(grunnlag);
 
@@ -322,7 +326,8 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "test");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null
         );
         lagreGrunnlag(grunnlag);
 
@@ -380,7 +385,8 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null
         );
         lagreGrunnlag(grunnlag);
 
@@ -416,7 +422,8 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null
         );
         lagreGrunnlag(grunnlag);
 
