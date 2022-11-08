@@ -6,7 +6,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -51,6 +55,10 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
+
+
+    private static final Logger log = LoggerFactory.getLogger(VurderPreconditionBeregningSteg.class);
+
 
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
@@ -137,6 +145,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private void gjenopprettVedEndretVurderingsstatus(BehandlingskontrollKontekst kontekst, BehandlingReferanse referanse) {
         var gjenopprettetPeriodeListe = kalkulusTjeneste.gjenopprettTilInitiellDersomIkkeTilVurdering(referanse);
         if (!gjenopprettetPeriodeListe.isEmpty()) {
+            log.info("Gjenoppretter initiell vurdering for perioder {}", gjenopprettetPeriodeListe);
             beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
                 kontekst,
                 referanse.getOriginalBehandlingId().orElseThrow(() -> new IllegalStateException("Kan ikke gjenopprette vilkårsresultat i førstegangsbehandling")),
@@ -204,6 +213,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         var noeAvslått = !vilkåret.getPerioder().isEmpty() && !avslåttePerioder.isEmpty();
 
         if (noeAvslått) {
+            log.info("Avslår beregning for perioder {}", avslåttePerioder);
             avslåBerregningsperioderDerHvorOpptjeningErAvslått(referanse, vilkårene, avslåttePerioder);
         }
     }
@@ -255,16 +265,20 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     }
 
     private void ryddVedtaksresultatForPerioderTilVurdering(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
-        var tjeneste = getPerioderTilVurderingTjeneste(ref);
-        var perioderTilVurdering = tjeneste.utled(ref.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, perioderTilVurdering);
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
+        var allePerioder = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
+        var alleUnntattForlengelser = allePerioder.stream().filter(p -> !p.erForlengelse())
+            .map(PeriodeTilVurdering::getPeriode)
+            .collect(Collectors.toCollection(TreeSet::new));
+        beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, alleUnntattForlengelser);
     }
 
 
-    /** Kopierer grunnlag og vilkårsresultat for forlengelser
+    /**
+     * Kopierer grunnlag og vilkårsresultat for forlengelser
      *
      * @param kontekst Behandlingskontrollkontekst
-     * @param ref behandlingreferanse
+     * @param ref      behandlingreferanse
      */
     private void kopierGrunnlagForForlengelseperioder(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
         if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
@@ -273,6 +287,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
             var allePerioder = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
             var forlengelseperioder = allePerioder.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toSet());
             if (!forlengelseperioder.isEmpty()) {
+                log.info("Kopierer beregning for forlengelser {}", forlengelseperioder);
                 kalkulusTjeneste.kopier(ref, forlengelseperioder);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
                 beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
