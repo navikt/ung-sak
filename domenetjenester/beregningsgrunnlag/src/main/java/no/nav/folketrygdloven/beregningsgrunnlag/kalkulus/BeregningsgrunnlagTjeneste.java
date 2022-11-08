@@ -364,6 +364,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = Objects.equals(ref.getBehandlingType(), BehandlingType.REVURDERING) ? grunnlagRepository.getInitiellVersjon(ref.getBehandlingId()) : Optional.empty();
             var referanserSomSkalDeaktiveres = finnReferanserSomSkalDeaktiveres(ref, vilkårOptional.get(), initiellVersjon);
             if (!referanserSomSkalDeaktiveres.isEmpty()) {
+                log.info("Deaktiverer referanser {}", referanserSomSkalDeaktiveres);
                 var bgReferanser = referanserSomSkalDeaktiveres.stream()
                     .filter(it -> erIkkeInitiellVersjon(initiellVersjon, it))
                     .map(BgRef::getRef)
