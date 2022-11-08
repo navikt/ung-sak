@@ -1,17 +1,15 @@
 package no.nav.k9.sak.kontrakt.økonomi.tilbakekreving;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -63,13 +61,4 @@ public class TilbakekrevingValgDto {
         return videreBehandling;
     }
 
-    @AssertTrue(message = "Kan kun ha grunnerTilReduksjon når erTilbakekrevingVilkårOppfylt=true")
-    public boolean isOkGrunner() {
-        return erTilbakekrevingVilkårOppfylt || grunnerTilReduksjon == null;
-    }
-
-    @AssertTrue(message = "Kan kun ha videreBehandling når erTilbakekrevingVilkårOppfylt=false")
-    public boolean isOkVidereBehandling() {
-        return !erTilbakekrevingVilkårOppfylt || videreBehandling == null;
-    }
 }
