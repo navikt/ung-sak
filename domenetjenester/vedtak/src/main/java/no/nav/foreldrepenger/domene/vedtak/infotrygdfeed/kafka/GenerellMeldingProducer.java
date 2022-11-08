@@ -30,9 +30,14 @@ public abstract class GenerellMeldingProducer {
                             String truststorePath,
                             String truststorePassword,
                             String keystorePath,
-                            String keystorePassword) {
+                            String keystorePassword,
+                            String vtpOverride) {
 
         this.topic = topic;
+
+        if(vtpOverride != null) {
+            keystorePassword = vtpOverride;
+        }
 
         Properties properties = new Properties();
 
