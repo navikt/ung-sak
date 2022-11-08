@@ -102,7 +102,7 @@ public class VurderNødvendighetStegTest {
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
-            List.of(new KursPeriode(periode.getFom(), periode.getTom(), "institusjon", "beskrivelse", periode.getFom(), periode.getTom(), null)));
+            List.of(new KursPeriode(periode.getFom(), periode.getTom(), null, null, "institusjon", null, "beskrivelse")));
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), uttakPerioderGrunnlagRepository.hentGrunnlag(behandling.getId()).map(UttaksPerioderGrunnlag::getOppgitteSøknadsperioder).orElseThrow());
     }

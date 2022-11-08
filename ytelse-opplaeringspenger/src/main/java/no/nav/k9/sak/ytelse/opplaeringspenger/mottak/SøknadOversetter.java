@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.mottak;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,7 +46,6 @@ class SøknadOversetter {
         this.søknadPersisterer = søknadPersisterer;
     }
 
-
     void persister(Søknad søknad, JournalpostId journalpostId, Behandling behandling) {
         var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
@@ -82,12 +80,26 @@ class SøknadOversetter {
             new KursPeriode(
                 kursPeriodeMedReisetid.getPeriode().getFraOgMed(),
                 kursPeriodeMedReisetid.getPeriode().getTilOgMed(),
+                finnReiseperiodeTil(kursPeriodeMedReisetid),
+                finnReiseperiodeHjem(kursPeriodeMedReisetid),
                 kurs.getKursholder().getHolder(),
-                kurs.getFormål(),
-                kursPeriodeMedReisetid.getAvreise(),
-                kursPeriodeMedReisetid.getHjemkomst(),
-                kurs.getKursholder().getInstitusjonUuid()))
+                kurs.getKursholder().getInstitusjonUuid(),
+                kurs.getFormål()))
             .collect(Collectors.toList());
+    }
+
+    private DatoIntervallEntitet finnReiseperiodeTil(KursPeriodeMedReisetid kursPeriodeMedReisetid) {
+        if (kursPeriodeMedReisetid.getAvreise().equals(kursPeriodeMedReisetid.getPeriode().getFraOgMed())) {
+            return null;
+        }
+        return DatoIntervallEntitet.fraOgMedTilOgMed(kursPeriodeMedReisetid.getAvreise(), kursPeriodeMedReisetid.getPeriode().getFraOgMed().minusDays(1));
+    }
+
+    private DatoIntervallEntitet finnReiseperiodeHjem(KursPeriodeMedReisetid kursPeriodeMedReisetid) {
+        if (kursPeriodeMedReisetid.getHjemkomst().equals(kursPeriodeMedReisetid.getPeriode().getTilOgMed())) {
+            return null;
+        }
+        return DatoIntervallEntitet.fraOgMedTilOgMed(kursPeriodeMedReisetid.getPeriode().getTilOgMed().plusDays(1), kursPeriodeMedReisetid.getHjemkomst());
     }
 
     private List<UtenlandsoppholdPeriode> mapUtenlandsopphold(Utenlandsopphold utenlandsopphold) {

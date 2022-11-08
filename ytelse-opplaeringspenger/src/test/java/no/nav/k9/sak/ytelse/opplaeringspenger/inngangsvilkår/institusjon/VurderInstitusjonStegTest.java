@@ -110,7 +110,7 @@ class VurderInstitusjonStegTest {
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
-            List.of(new KursPeriode(fom, tom, "institusjon", "beskrivelse", fom, tom, institusjonUuid)));
+            List.of(new KursPeriode(fom, tom, null, null, "institusjon", institusjonUuid, "beskrivelse")));
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
     }
