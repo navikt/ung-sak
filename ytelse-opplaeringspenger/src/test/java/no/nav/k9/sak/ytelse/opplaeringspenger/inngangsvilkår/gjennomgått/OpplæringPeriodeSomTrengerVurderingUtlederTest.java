@@ -69,7 +69,7 @@ class OpplæringPeriodeSomTrengerVurderingUtlederTest {
     }
 
     private KursPeriode lagKursperiode(DatoIntervallEntitet periode, String institusjon, UUID uuid) {
-        return new KursPeriode(periode, institusjon, "beskrivelse", periode.getFomDato(), periode.getTomDato(), uuid);
+        return new KursPeriode(periode, null, null, institusjon, uuid, "beskrivelse");
     }
 
     private void setupVilkårsResultat(VilkårType vilkårType, Utfall utfall) {
