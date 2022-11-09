@@ -13,7 +13,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
 class OpplæringPeriodeSomTrengerVurderingUtleder {
@@ -32,10 +31,9 @@ class OpplæringPeriodeSomTrengerVurderingUtleder {
     NavigableSet<DatoIntervallEntitet> utled(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Vilkårene vilkårene) {
         var institusjonsTidslinje = hentTidslinjeForVilkår(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
         var sykdomsTidslinje = hentTidslinjeForVilkår(vilkårene, VilkårType.LANGVARIG_SYKDOM);
-        var nødvendighetsTidslinje = hentTidslinjeForVilkår(vilkårene, VilkårType.NØDVENDIG_OPPLÆRING);
 
         var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
-        var tidslinjeSomKreverVurdering = tidslinjeTilVurdering.intersection(institusjonsTidslinje).intersection(sykdomsTidslinje).intersection(nødvendighetsTidslinje);
+        var tidslinjeSomKreverVurdering = tidslinjeTilVurdering.intersection(institusjonsTidslinje).intersection(sykdomsTidslinje);
 
         return tidslinjeSomKreverVurdering
             .toSegments()

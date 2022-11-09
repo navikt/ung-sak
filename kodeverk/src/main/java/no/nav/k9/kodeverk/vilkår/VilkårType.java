@@ -140,7 +140,8 @@ public enum VilkårType implements Kodeverdi {
         Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "§ 9-14"),
         Avslagsårsak.MANGLENDE_DOKUMENTASJON,
         Avslagsårsak.IKKE_NØDVENDIG,
-        Avslagsårsak.IKKE_GODKJENT_INSTITUSJON
+        Avslagsårsak.IKKE_GODKJENT_INSTITUSJON,
+        Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING
     ),
     GODKJENT_OPPLÆRINGSINSTITUSJON("K9_VK_21",
         "Godkjent opplæringsinstitusjon",
@@ -151,8 +152,8 @@ public enum VilkårType implements Kodeverdi {
         "Nødvendig opplæring",
         Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "§ 9-14"),
         Avslagsårsak.MANGLENDE_DOKUMENTASJON,
-        Avslagsårsak.IKKE_NØDVENDIG,
-        Avslagsårsak.IKKE_GODKJENT_INSTITUSJON
+        Avslagsårsak.IKKE_GODKJENT_INSTITUSJON,
+        Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING
     ),
     LANGVARIG_SYKDOM("K9_VK_17",
         "Nødvendig opplæring",

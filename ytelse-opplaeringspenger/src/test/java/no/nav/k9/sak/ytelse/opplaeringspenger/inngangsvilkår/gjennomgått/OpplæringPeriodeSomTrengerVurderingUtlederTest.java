@@ -82,7 +82,6 @@ class OpplæringPeriodeSomTrengerVurderingUtlederTest {
     void ingenPerioderTrengerVurdering() {
         setupVilkårsResultat(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.IKKE_OPPFYLT);
         setupVilkårsResultat(VilkårType.LANGVARIG_SYKDOM, Utfall.IKKE_OPPFYLT);
-        setupVilkårsResultat(VilkårType.NØDVENDIG_OPPLÆRING, Utfall.IKKE_OPPFYLT);
         vilkårene = vilkårResultatBuilder.build();
 
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = new TreeSet<>(List.of(periode1, periode2));
@@ -95,7 +94,6 @@ class OpplæringPeriodeSomTrengerVurderingUtlederTest {
     void ingenPerioderVurdert() {
         setupVilkårsResultat(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT);
         setupVilkårsResultat(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT);
-        setupVilkårsResultat(VilkårType.NØDVENDIG_OPPLÆRING, Utfall.OPPFYLT);
         vilkårene = vilkårResultatBuilder.build();
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = new TreeSet<>(List.of(periode1));
 
@@ -107,7 +105,6 @@ class OpplæringPeriodeSomTrengerVurderingUtlederTest {
     void noenPerioderVurdert() {
         setupVilkårsResultat(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT);
         setupVilkårsResultat(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT);
-        setupVilkårsResultat(VilkårType.NØDVENDIG_OPPLÆRING, Utfall.OPPFYLT);
         vilkårene = vilkårResultatBuilder.build();
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = new TreeSet<>(List.of(periode1, periode2));
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = new VurdertOpplæringGrunnlag(123L, null, null, new VurdertOpplæringPerioderHolder(List.of((new VurdertOpplæringPeriode(dag1, dag1, true, "")))));
@@ -120,7 +117,6 @@ class OpplæringPeriodeSomTrengerVurderingUtlederTest {
     void allePerioderVurdert() {
         setupVilkårsResultat(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT);
         setupVilkårsResultat(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT);
-        setupVilkårsResultat(VilkårType.NØDVENDIG_OPPLÆRING, Utfall.OPPFYLT);
         vilkårene = vilkårResultatBuilder.build();
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = new TreeSet<>(List.of(periode1, periode2));
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = new VurdertOpplæringGrunnlag(123L, null, null,

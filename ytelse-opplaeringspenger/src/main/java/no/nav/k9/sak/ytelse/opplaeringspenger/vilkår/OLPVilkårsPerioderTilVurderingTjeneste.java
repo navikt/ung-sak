@@ -60,6 +60,6 @@ public class OLPVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
 
     @Override
     public Set<VilkårType> definerendeVilkår() {
-        return Set.of(VilkårType.GJENNOMGÅ_OPPLÆRING);
+        return Set.of(VilkårType.NØDVENDIG_OPPLÆRING);
     }
 }

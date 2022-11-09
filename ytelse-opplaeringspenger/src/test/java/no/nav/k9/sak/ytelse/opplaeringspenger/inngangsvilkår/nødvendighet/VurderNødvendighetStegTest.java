@@ -114,9 +114,10 @@ public class VurderNødvendighetStegTest {
     }
 
     @Test
-    public void skalReturnereAksjonspunktNårOpplæringIkkeErVurdert() {
+    public void skalReturnereAksjonspunktNårNødvendighetIkkeErVurdert() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -140,9 +141,10 @@ public class VurderNødvendighetStegTest {
     }
 
     @Test
-    public void skalReturnereUtenAksjonspunktNårOpplæringErGodkjent() {
+    public void skalReturnereUtenAksjonspunktNårNødvendighetErGodkjent() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -173,9 +175,10 @@ public class VurderNødvendighetStegTest {
     }
 
     @Test
-    public void skalReturnereUtenAksjonspunktNårOpplæringIkkeErGodkjent() {
+    public void skalReturnereUtenAksjonspunktNårNødvendighetIkkeErGodkjent() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -209,6 +212,7 @@ public class VurderNødvendighetStegTest {
     public void skalReturnereUtenAksjonspunktNårInstitusjonsvilkårIkkeErOppfylt() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.IKKE_OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.IKKE_OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.IKKE_OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -231,10 +235,12 @@ public class VurderNødvendighetStegTest {
     }
 
     @Test
-    public void skalReturnereUtenAksjonspunktNårOpplæringErPeriodevisGodkjentOgIkkeGodkjent() {
+    public void skalReturnereUtenAksjonspunktNårNødvendighetErPeriodevisGodkjentOgIkkeGodkjent() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
+
         Periode søknadsperiode1 = new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1));
         setupUttakPerioder(journalpostId1, søknadsperiode1);
         Periode søknadsperiode2 = new Periode(søknadsperiode.getTom(), søknadsperiode.getTom());
@@ -273,9 +279,10 @@ public class VurderNødvendighetStegTest {
     }
 
     @Test
-    public void skalReturnereUtenAksjonspunktNårInstitusjonsvilkårErDelvisOppfyltOgOpplæringErGodkjent() {
+    public void skalReturnereUtenAksjonspunktNårInstitusjonsvilkårErDelvisOppfyltOgNødvendighetErGodkjent() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1)));
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -314,7 +321,9 @@ public class VurderNødvendighetStegTest {
     public void skalReturnereAksjonspunktNårVurderingIkkeErKomplett() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
+
         setupUttakPerioder(journalpostId1, new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1)));
         setupUttakPerioder(journalpostId2, new Periode(søknadsperiode.getTom(), søknadsperiode.getTom()));
 
@@ -349,6 +358,7 @@ public class VurderNødvendighetStegTest {
     public void skalReturnereUtenAksjonspunktNårSykdomsvilkårIkkeErOppfylt() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.IKKE_OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.IKKE_OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -371,9 +381,36 @@ public class VurderNødvendighetStegTest {
     }
 
     @Test
-    public void skalReturnereUtenAksjonspunktNårSykdomsvilkårErDelvisOppfyltOgOpplæringErGodkjent() {
+    public void skalReturnereUtenAksjonspunktNårGjennomgåttOpplæringIkkeErOppfylt() {
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.IKKE_OPPFYLT, søknadsperiode);
+        behandling = scenario.lagre(repositoryProvider);
+        setupUttakPerioder(journalpostId1, søknadsperiode);
+
+        Fagsak fagsak = behandling.getFagsak();
+        BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
+            behandlingRepository.taSkriveLås(behandling));
+        setupPerioderTilVurdering(kontekst);
+
+        BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
+        assertThat(resultat).isNotNull();
+        assertThat(resultat.getAksjonspunktResultater()).isEmpty();
+        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(1);
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.IKKE_OPPFYLT,
+            søknadsperiode.getFom(),
+            søknadsperiode.getTom(),
+            Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING);
+    }
+
+    @Test
+    public void skalReturnereUtenAksjonspunktNårSykdomsvilkårErDelvisOppfyltOgNødvendighetErGodkjent() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusMonths(1)));
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -411,6 +448,7 @@ public class VurderNødvendighetStegTest {
     public void skalIkkeLagreVilkårPeriodeUtenforSøknadsperiode() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 

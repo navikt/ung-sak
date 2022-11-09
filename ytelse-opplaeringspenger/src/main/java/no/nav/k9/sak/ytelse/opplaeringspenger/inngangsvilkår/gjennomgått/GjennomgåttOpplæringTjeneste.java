@@ -75,15 +75,12 @@ public class GjennomgåttOpplæringTjeneste {
 
         var sykdomsTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.LANGVARIG_SYKDOM);
         var godkjentInstitusjonTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
-        var nødvendighetTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.NØDVENDIG_OPPLÆRING);
 
         var tidslinjeUtenGodkjentInstitusjon = tidslinjeTilVurdering.disjoint(godkjentInstitusjonTidslinje);
         var tidslinjeUtenSykdomsvilkår = tidslinjeTilVurdering.disjoint(sykdomsTidslinje).disjoint(tidslinjeUtenGodkjentInstitusjon);
-        var tidslinjeUtenNødvendighet = tidslinjeTilVurdering.disjoint(nødvendighetTidslinje).disjoint(tidslinjeUtenGodkjentInstitusjon).disjoint(tidslinjeUtenSykdomsvilkår);
 
         leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenGodkjentInstitusjon, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
         leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenSykdomsvilkår, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE);
-        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenNødvendighet, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_NØDVENDIG);
 
         tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(tidslinjeUtenGodkjentInstitusjon).disjoint(tidslinjeUtenSykdomsvilkår);
 
