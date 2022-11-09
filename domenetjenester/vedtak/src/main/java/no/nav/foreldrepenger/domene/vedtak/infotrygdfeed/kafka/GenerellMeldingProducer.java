@@ -6,6 +6,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.KafkaException;
+import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.errors.AuthenticationException;
 import org.apache.kafka.common.errors.AuthorizationException;
@@ -48,14 +49,22 @@ public abstract class GenerellMeldingProducer {
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
         // Security
-        properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name);
-        properties.put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "");
-        properties.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "jks");
-        properties.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, truststorePath);
-        properties.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, truststorePassword);
-        properties.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12");
-        properties.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, keystorePath);
-        properties.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, keystorePassword);
+        if(vtpOverride != null) {
+            properties.setProperty(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SASL_SSL.name);
+            properties.setProperty(SaslConfigs.SASL_MECHANISM, "PLAIN");
+            String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
+            String jaasCfg = String.format(jaasTemplate, "vtp", "vtp");
+            properties.setProperty(SaslConfigs.SASL_JAAS_CONFIG, jaasCfg);
+        } else {
+            properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name);
+            properties.put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "");
+            properties.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "jks");
+            properties.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, truststorePath);
+            properties.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, truststorePassword);
+            properties.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12");
+            properties.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, keystorePath);
+            properties.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, keystorePassword);
+        }
 
         this.producer = new KafkaProducer<String, String>(properties);
     }
