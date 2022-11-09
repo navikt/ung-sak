@@ -20,7 +20,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.MapSøknadUttakPerioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.SøknadPersisterer;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.FeriePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
@@ -33,6 +32,7 @@ import no.nav.k9.søknad.ytelse.olp.v1.Opplæringspenger;
 import no.nav.k9.søknad.ytelse.olp.v1.kurs.Kurs;
 import no.nav.k9.søknad.ytelse.olp.v1.kurs.KursPeriodeMedReisetid;
 import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie;
+import no.nav.k9.søknad.ytelse.psb.v1.Uttak;
 
 @Dependent
 class SøknadOversetter {
@@ -55,7 +55,7 @@ class SøknadOversetter {
 
         var arbeidPerioder = new MapSøknadUttakPerioder(tpsTjeneste).mapOppgittArbeidstid(ytelse.getArbeidstid());
         var perioderFraSøknad = new PerioderFraSøknad(journalpostId,
-            mapTilUttakPerioder(arbeidPerioder),
+            mapTilUttakPerioder(ytelse.getUttak()),
             arbeidPerioder,
             List.of(),
             mapUtenlandsopphold(ytelse.getUtenlandsopphold()),
@@ -77,14 +77,14 @@ class SøknadOversetter {
     private List<KursPeriode> mapKurs(Kurs kurs) {
         List<KursPeriodeMedReisetid> kursPerioderMedReisetid = kurs.getKursperioder();
         return kursPerioderMedReisetid.stream().map(kursPeriodeMedReisetid ->
-            new KursPeriode(
-                kursPeriodeMedReisetid.getPeriode().getFraOgMed(),
-                kursPeriodeMedReisetid.getPeriode().getTilOgMed(),
-                finnReiseperiodeTil(kursPeriodeMedReisetid),
-                finnReiseperiodeHjem(kursPeriodeMedReisetid),
-                kurs.getKursholder().getHolder(),
-                kurs.getKursholder().getInstitusjonUuid(),
-                kurs.getFormål()))
+                new KursPeriode(
+                    kursPeriodeMedReisetid.getPeriode().getFraOgMed(),
+                    kursPeriodeMedReisetid.getPeriode().getTilOgMed(),
+                    finnReiseperiodeTil(kursPeriodeMedReisetid),
+                    finnReiseperiodeHjem(kursPeriodeMedReisetid),
+                    kurs.getKursholder().getHolder(),
+                    kurs.getKursholder().getInstitusjonUuid(),
+                    kurs.getFormål()))
             .collect(Collectors.toList());
     }
 
@@ -163,17 +163,14 @@ class SøknadOversetter {
         );
     }
 
-    private Collection<UttakPeriode> mapTilUttakPerioder(Collection<ArbeidPeriode> arbeidPerioder) {
-        Collection<UttakPeriode> uttaksperioder = arbeidPerioder.stream()
-            .map(arbeidPeriode -> {
-                // Omregner arbeidsperiode til uttaksperiode
-                var jobberNormaltTimerPerDag = arbeidPeriode.getJobberNormaltTimerPerDag();
-                var faktiskArbeidTimerPerDag = arbeidPeriode.getFaktiskArbeidTimerPerDag();
-                var fraværTimerPerDag = jobberNormaltTimerPerDag.minus(faktiskArbeidTimerPerDag);
-                return new UttakPeriode(arbeidPeriode.getPeriode(), fraværTimerPerDag);
-            })
-            .toList();
-        return uttaksperioder;
+    private Collection<UttakPeriode> mapTilUttakPerioder(Uttak uttak) {
+        if (uttak == null || uttak.getPerioder() == null) {
+            return List.of();
+        }
+        return uttak.getPerioder()
+            .entrySet()
+            .stream()
+            .map(it -> new UttakPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getKey().getFraOgMed(), it.getKey().getTilOgMed()), it.getValue().getTimerPleieAvBarnetPerDag())).collect(Collectors.toList());
     }
 
     private Optional<Periode> finnMaksperiode(List<Periode> perioder) {
