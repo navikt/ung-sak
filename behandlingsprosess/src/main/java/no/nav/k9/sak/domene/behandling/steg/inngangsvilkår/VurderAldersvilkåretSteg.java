@@ -61,8 +61,7 @@ public class VurderAldersvilkåretSteg implements BehandlingSteg {
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.ALDERSVILKÅR);
         var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(), behandling.getAktørId(), behandling.getFagsak().getPeriode().getFomDato());
         var fødselsdato = personopplysningerAggregat.getSøker().getFødselsdato();
-        var dødsdato = personopplysningerAggregat.getSøker().getDødsdato();
-        vurderAldersVilkårTjeneste.vurderPerioder(vilkårBuilder, perioderTilVurdering, fødselsdato, dødsdato);
+        vurderAldersVilkårTjeneste.vurderPerioder(vilkårBuilder, perioderTilVurdering, fødselsdato);
         resultatBuilder.leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), resultatBuilder.build());
 
