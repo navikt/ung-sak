@@ -193,7 +193,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             .inntekter(lagDummyInntekt(manuellSøknadDto))
             .søknadsperiode(manuellSøknadDto.getPeriode())
             .mottattDato(ZonedDateTime.now(ZoneId.of("Europe/Paris")))
-            .søker(no.nav.k9.søknad.felles.personopplysninger.Søker.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(fnr.getIdent())).build())
+            .søker(new no.nav.k9.søknad.felles.personopplysninger.Søker(NorskIdentitetsnummer.of(fnr.getIdent())))
             .build();
         var valideringsfeil = validerSøknad(fagsak, søknad);
         if (valideringsfeil.isPresent()) {
@@ -364,7 +364,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return Response.ok(saksnummerliste).build();
     }
-    
+
     @GET
     @Path("/saker-med-feil4")
     @Produces(MediaType.TEXT_PLAIN)
@@ -412,7 +412,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private boolean erFraBrukerdialogPsb(Søknad søknad) {
         return søknad.getJournalposter() == null || søknad.getJournalposter().isEmpty();
     }
-    
+
     private boolean harOmsorgstilbud(PleiepengerSyktBarn ytelse) {
         if (ytelse.getTilsynsordning() == null) {
             return false;
