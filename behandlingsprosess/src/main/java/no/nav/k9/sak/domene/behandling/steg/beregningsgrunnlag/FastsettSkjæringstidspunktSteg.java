@@ -73,6 +73,9 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
         var periodeFilter = periodeFilterProvider.getFilter(ref);
+
+        logger.info("Alle perioder til vurdering {}", beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter));
+
         periodeFilter.ignorerAvslåttePerioder().ignorerForlengelseperioder();
         var perioderTilBeregning = new ArrayList<PeriodeTilVurdering>();
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
