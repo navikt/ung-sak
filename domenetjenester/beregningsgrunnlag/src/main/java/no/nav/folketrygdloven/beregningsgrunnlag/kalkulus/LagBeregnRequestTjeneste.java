@@ -32,18 +32,18 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.perioder.ForlengelseperiodeUtleder;
+import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
 
 @ApplicationScoped
 public class LagBeregnRequestTjeneste {
 
     private Instance<KalkulatorInputTjeneste> kalkulatorInputTjeneste;
-    private Instance<ForlengelseperiodeUtleder> periodeUtleder;
+    private Instance<EndretUtbetalingPeriodeutleder> periodeUtleder;
     private FagsakRepository fagsakRepository;
 
     @Inject
     public LagBeregnRequestTjeneste(@Any Instance<KalkulatorInputTjeneste> kalkulatorInputTjeneste,
-                                    @VilkårTypeRef(VilkårType.BEREGNINGSGRUNNLAGVILKÅR) Instance<ForlengelseperiodeUtleder> periodeUtleder,
+                                    @Any Instance<EndretUtbetalingPeriodeutleder> periodeUtleder,
                                     FagsakRepository fagsakRepository) {
         this.kalkulatorInputTjeneste = kalkulatorInputTjeneste;
         this.periodeUtleder = periodeUtleder;
@@ -119,15 +119,15 @@ public class LagBeregnRequestTjeneste {
         return beregnInput.stream().filter(i -> i.getBgReferanse().equals(bgReferanse))
             .filter(BeregnInput::erForlengelse).findFirst()
             .map(BeregnInput::getVilkårsperiode)
-            .map(p -> utledForlengelseperiode(behandlingReferanse, p, VilkårType.BEREGNINGSGRUNNLAGVILKÅR).stream()
+            .map(p -> utledForlengelseperiode(behandlingReferanse, p).stream()
                 .map(intervall -> new Periode(intervall.getFomDato(), intervall.getTomDato())).toList())
             .orElse(null);
     }
 
 
-    public NavigableSet<DatoIntervallEntitet> utledForlengelseperiode(BehandlingReferanse referanse, DatoIntervallEntitet periodeTilVurdering, VilkårType vilkårType) {
-        var utleder = ForlengelseperiodeUtleder.finnUtleder(periodeUtleder, vilkårType, referanse.getFagsakYtelseType());
-        return utleder.utledForlengelseperioder(referanse, periodeTilVurdering);
+    public NavigableSet<DatoIntervallEntitet> utledForlengelseperiode(BehandlingReferanse referanse, DatoIntervallEntitet periodeTilVurdering) {
+        var utleder = EndretUtbetalingPeriodeutleder.finnUtleder(periodeUtleder, referanse.getFagsakYtelseType());
+        return utleder.utledPerioder(referanse, periodeTilVurdering);
     }
 
     private Map<UUID, KalkulatorInputDto> lagInputPrReferanse(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag iayGrunnlag, Collection<Inntektsmelding> sakInntektsmeldinger, List<BeregnInput> beregnInput) {

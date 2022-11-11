@@ -43,7 +43,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class PleiepengerBeregningForlengelseperiodeUtlederTest {
+class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
     public static final String ORGANISASJONSNUMMER = "123456789";
     public static final String ORGANISASJONSNUMMER2 = "123456788";
@@ -65,13 +65,13 @@ class PleiepengerBeregningForlengelseperiodeUtlederTest {
 
 
     private UttakTjeneste uttakTjeneste = mock(UttakTjeneste.class);
-    private PleiepengerBeregningForlengelseperiodeUtleder utleder;
+    private PleiepengerEndretUtbetalingPeriodeutleder utleder;
 
     @BeforeEach
     void setUp() {
         fagsakRepository = new FagsakRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
-        utleder = new PleiepengerBeregningForlengelseperiodeUtleder(uttakTjeneste, behandlingRepository);
+        utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository);
         originalBehandling = opprettBehandling(SKJÆRINGSTIDSPUNKT);
         behandling = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING).build();
     }
@@ -88,7 +88,7 @@ class PleiepengerBeregningForlengelseperiodeUtlederTest {
         when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
             .thenReturn(uttaksplan);
 
-        var forlengelseperioder = utleder.utledForlengelseperioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
 
         assertThat(forlengelseperioder.size()).isEqualTo(0);
     }
@@ -107,7 +107,7 @@ class PleiepengerBeregningForlengelseperiodeUtlederTest {
         when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
             .thenReturn(uttaksplan2);
 
-        var forlengelseperioder = utleder.utledForlengelseperioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
 
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var periode = forlengelseperioder.iterator().next();
@@ -136,7 +136,7 @@ class PleiepengerBeregningForlengelseperiodeUtlederTest {
         when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
             .thenReturn(uttaksplanOriginalBehandling);
 
-        var forlengelseperioder = utleder.utledForlengelseperioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
 
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var periode = forlengelseperioder.iterator().next();
@@ -165,7 +165,7 @@ class PleiepengerBeregningForlengelseperiodeUtlederTest {
         when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
             .thenReturn(uttaksplanOriginalBehandling);
 
-        var forlengelseperioder = utleder.utledForlengelseperioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
 
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var periode = forlengelseperioder.iterator().next();
@@ -194,7 +194,7 @@ class PleiepengerBeregningForlengelseperiodeUtlederTest {
         when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
             .thenReturn(uttaksplanOriginalBehandling);
 
-        var forlengelseperioder = utleder.utledForlengelseperioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
 
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var periode = forlengelseperioder.iterator().next();

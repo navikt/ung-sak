@@ -14,13 +14,11 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.perioder.ForlengelseperiodeUtleder;
+import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
@@ -28,25 +26,24 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
-@VilkårTypeRef(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
 @ApplicationScoped
-class PleiepengerBeregningForlengelseperiodeUtleder implements ForlengelseperiodeUtleder {
+class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetalingPeriodeutleder {
 
     private UttakTjeneste uttakRestKlient;
     private BehandlingRepository behandlingRepository;
 
 
-    public PleiepengerBeregningForlengelseperiodeUtleder() {
+    public PleiepengerEndretUtbetalingPeriodeutleder() {
     }
 
     @Inject
-    public PleiepengerBeregningForlengelseperiodeUtleder(UttakTjeneste uttakRestKlient, BehandlingRepository behandlingRepository) {
+    public PleiepengerEndretUtbetalingPeriodeutleder(UttakTjeneste uttakRestKlient, BehandlingRepository behandlingRepository) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
     }
 
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledForlengelseperioder(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
+    public NavigableSet<DatoIntervallEntitet> utledPerioder(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
 
         var originalBehandlingId = behandlingReferanse.getOriginalBehandlingId()
             .orElseThrow(() -> new IllegalStateException("Forventer å finne original behandling"));
