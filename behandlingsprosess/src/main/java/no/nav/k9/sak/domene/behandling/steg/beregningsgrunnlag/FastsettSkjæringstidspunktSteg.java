@@ -9,6 +9,9 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
@@ -36,6 +39,8 @@ import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 @BehandlingTypeRef
 @ApplicationScoped
 public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
+
+    private final Logger logger = LoggerFactory.getLogger(FastsettSkjæringstidspunktSteg.class);
 
     private BeregningTjeneste kalkulusTjeneste;
     private BehandlingRepository behandlingRepository;
@@ -93,6 +98,8 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
     }
 
     private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, List<PeriodeTilVurdering> vilkårsperioder) {
+        logger.info("Beregner steg {} for perioder {} ", FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, vilkårsperioder);
+
         var resultat = kalkulusTjeneste.startBeregning(ref, vilkårsperioder, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING);
         var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
         for (var entry : resultat.getResultater().entrySet()) {

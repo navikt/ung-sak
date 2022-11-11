@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
@@ -26,6 +29,8 @@ public class BeregningStegTjeneste {
     public interface FortsettBeregningResultatCallback {
         void håndter(KalkulusResultat kalkulusResultat, DatoIntervallEntitet periode);
     }
+
+    private final Logger logger = LoggerFactory.getLogger(BeregningStegTjeneste.class);
 
     private final BeregningTjeneste kalkulusTjeneste;
     private final BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
@@ -64,6 +69,8 @@ public class BeregningStegTjeneste {
                                    VilkårPeriodeFilter periodeFilter) {
         periodeFilter.ignorerAvslåttePerioder();
         var perioderTilVurdering = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
+
+        logger.info("Beregner steg {} for perioder {} ", stegType, perioderTilVurdering);
 
         if (perioderTilVurdering.isEmpty()) {
             return;
