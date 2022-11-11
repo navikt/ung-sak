@@ -55,12 +55,17 @@ public class BeregningStegTjeneste {
     }
 
     public void fortsettBeregningInkludertForlengelser(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
-        fortsettBeregning(ref, stegType, resultatCallback, vilkårPeriodeFilterProvider.getFilter(ref));
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
+        logger.info("Alle perioder til vurdering {}", vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter));
+
+        fortsettBeregning(ref, stegType, resultatCallback, periodeFilter);
     }
 
     public void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
-            periodeFilter.ignorerForlengelseperioder();
+        logger.info("Alle perioder til vurdering {}", vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter));
+
+        periodeFilter.ignorerForlengelseperioder();
         fortsettBeregning(ref, stegType, resultatCallback, periodeFilter);
     }
 
