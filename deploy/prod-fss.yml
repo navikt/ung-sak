@@ -119,7 +119,7 @@ spec:
 
     # Restservice Generelle
     - name: INFOTRYGD_HENDELSER_API_URL
-      value: http://infotrygd-hendelser.default/infotrygd/hendelser
+      value: http://infotrygd-hendelser.infotrygd/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.teamforeldrepenger/fpabakus
     - name: FTKALKULUS_URL
