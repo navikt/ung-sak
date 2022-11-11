@@ -252,15 +252,9 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
 
     private NavigableSet<DatoIntervallEntitet> utledUtvidetPeriode(BehandlingReferanse referanse) {
         LocalDateTimeline<Boolean> utvidedePerioder = utledUtvidetPeriodeForSykdom(referanse);
-        var etablertTilsynendringer = etablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse);
-        logger.info("Endringer etablert tilsyn fra forrige behandling " + etablertTilsynendringer.toSegments().stream().map(LocalDateSegment::getLocalDateInterval).collect(Collectors.toList()));
-        utvidedePerioder = utvidedePerioder.union(etablertTilsynendringer, StandardCombinators::alwaysTrueForMatch);
-        var unntakEtablertTilsynEndringer = endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId());
-        logger.info("Unntak etablert tilsyn endringer " + unntakEtablertTilsynEndringer.toSegments().stream().map(LocalDateSegment::getLocalDateInterval).collect(Collectors.toList()));
-        utvidedePerioder = utvidedePerioder.union(unntakEtablertTilsynEndringer, StandardCombinators::alwaysTrueForMatch);
-        var uttaksendringerSidenForrige = uttaksendringerSidenForrigeBehandling(referanse);
-        logger.info("Uttaksendringer siden forrige behandling " + uttaksendringerSidenForrige.toSegments().stream().map(LocalDateSegment::getLocalDateInterval).collect(Collectors.toList()));
-        utvidedePerioder = utvidedePerioder.union(uttaksendringerSidenForrige, StandardCombinators::alwaysTrueForMatch);
+        utvidedePerioder = utvidedePerioder.union(etablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
+        utvidedePerioder = utvidedePerioder.union(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId()), StandardCombinators::alwaysTrueForMatch);
+        utvidedePerioder = utvidedePerioder.union(uttaksendringerSidenForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
 
         return TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
     }
