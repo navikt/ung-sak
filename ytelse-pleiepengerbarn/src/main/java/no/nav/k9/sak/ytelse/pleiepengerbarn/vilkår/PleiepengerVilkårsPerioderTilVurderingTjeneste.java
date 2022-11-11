@@ -10,6 +10,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -41,12 +44,12 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunn
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
 
 
 public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
+    private Logger logger = LoggerFactory.getLogger(PleiepengerVilkårsPerioderTilVurderingTjeneste.class);
     private final PåTversAvHelgErKantIKantVurderer erKantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
     private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering;
@@ -249,9 +252,15 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
 
     private NavigableSet<DatoIntervallEntitet> utledUtvidetPeriode(BehandlingReferanse referanse) {
         LocalDateTimeline<Boolean> utvidedePerioder = utledUtvidetPeriodeForSykdom(referanse);
-        utvidedePerioder = utvidedePerioder.union(etablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
-        utvidedePerioder = utvidedePerioder.union(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId()), StandardCombinators::alwaysTrueForMatch);
-        utvidedePerioder = utvidedePerioder.union(uttaksendringerSidenForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
+        var etablertTilsynendringer = etablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse);
+        logger.info("Endringer etablert tilsyn fra forrige behandling " + etablertTilsynendringer.toSegments().stream().map(LocalDateSegment::getLocalDateInterval).collect(Collectors.toList()));
+        utvidedePerioder = utvidedePerioder.union(etablertTilsynendringer, StandardCombinators::alwaysTrueForMatch);
+        var unntakEtablertTilsynEndringer = endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId());
+        logger.info("Unntak etablert tilsyn endringer " + unntakEtablertTilsynEndringer.toSegments().stream().map(LocalDateSegment::getLocalDateInterval).collect(Collectors.toList()));
+        utvidedePerioder = utvidedePerioder.union(unntakEtablertTilsynEndringer, StandardCombinators::alwaysTrueForMatch);
+        var uttaksendringerSidenForrige = uttaksendringerSidenForrigeBehandling(referanse);
+        logger.info("Uttaksendringer siden forrige behandling " + uttaksendringerSidenForrige.toSegments().stream().map(LocalDateSegment::getLocalDateInterval).collect(Collectors.toList()));
+        utvidedePerioder = utvidedePerioder.union(uttaksendringerSidenForrige, StandardCombinators::alwaysTrueForMatch);
 
         return TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
     }
