@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -11,7 +12,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
@@ -23,36 +23,44 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.ForlengelseperiodeUtleder;
 
 @ApplicationScoped
 public class LagBeregnRequestTjeneste {
 
     private Instance<KalkulatorInputTjeneste> kalkulatorInputTjeneste;
+    private Instance<ForlengelseperiodeUtleder> periodeUtleder;
     private FagsakRepository fagsakRepository;
 
     @Inject
     public LagBeregnRequestTjeneste(@Any Instance<KalkulatorInputTjeneste> kalkulatorInputTjeneste,
+                                    @VilkårTypeRef(VilkårType.BEREGNINGSGRUNNLAGVILKÅR) Instance<ForlengelseperiodeUtleder> periodeUtleder,
                                     FagsakRepository fagsakRepository) {
         this.kalkulatorInputTjeneste = kalkulatorInputTjeneste;
+        this.periodeUtleder = periodeUtleder;
         this.fagsakRepository = fagsakRepository;
     }
 
     public LagBeregnRequestTjeneste() {
     }
 
-    /** Lager request for beregning
+    /**
+     * Lager request for beregning
      *
-     * @param stegType Stegtype
-     * @param referanse Behandlingreferanse
-     * @param beregnInput   Liste med referanser og skjæringstidspunkt
-     * @param iayGrunnlag   IAY-grunnlag
-     * @param sakInntektsmeldinger  Inntektsmeldinger
+     * @param stegType             Stegtype
+     * @param referanse            Behandlingreferanse
+     * @param beregnInput          Liste med referanser og skjæringstidspunkt
+     * @param iayGrunnlag          IAY-grunnlag
+     * @param sakInntektsmeldinger Inntektsmeldinger
      * @return Request for beregning
      */
     public BeregnListeRequest lagMedInput(BehandlingStegType stegType,
@@ -72,10 +80,10 @@ public class LagBeregnRequestTjeneste {
     }
 
     public HåndterBeregningListeRequest lagForAksjonspunktOppdateringMedInput(List<HåndterBeregningRequest> requestListe,
-                                                                      BehandlingReferanse referanse,
-                                                                      List<BeregnInput> beregnInput,
-                                                                      InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                      Collection<Inntektsmelding> sakInntektsmeldinger) {
+                                                                              BehandlingReferanse referanse,
+                                                                              List<BeregnInput> beregnInput,
+                                                                              InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                              Collection<Inntektsmelding> sakInntektsmeldinger) {
         var input = lagInputPrReferanse(referanse, iayGrunnlag, sakInntektsmeldinger, beregnInput);
         return new HåndterBeregningListeRequest(requestListe,
             input,
@@ -85,9 +93,9 @@ public class LagBeregnRequestTjeneste {
     }
 
     private List<BeregnForRequest> lagRequestForReferanserMedInput(BehandlingReferanse referanse,
-                                                                  List<BeregnInput> beregnInput,
-                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                  Collection<Inntektsmelding> sakInntektsmeldinger) {
+                                                                   List<BeregnInput> beregnInput,
+                                                                   InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                   Collection<Inntektsmelding> sakInntektsmeldinger) {
         return lagRequestMedKalkulatorInput(referanse, iayGrunnlag, sakInntektsmeldinger, beregnInput);
     }
 
@@ -103,17 +111,23 @@ public class LagBeregnRequestTjeneste {
                 e.getKey(), // KoblingReferanse
                 referanseRelasjoner.get(e.getKey()), // Kobling -> Original Referanse relasjon
                 e.getValue(), // Kalkulatorinput
-                finnForlengelseperiode(e.getKey(), beregnInput) // Forlengelseperioder
+                finnForlengelseperiode(behandlingReferanse, e.getKey(), beregnInput) // Forlengelseperioder
             )).toList();
     }
 
-    private List<Periode> finnForlengelseperiode(UUID key, List<BeregnInput> beregnInput) {
-        // Foreløpig mappes hele vilkårsperioden som forlengelseperiode. Det betyr at vi tillater endring i hele perioden ved forlengelse.
-        return beregnInput.stream().filter(i -> i.getBgReferanse().equals(key))
+    private List<Periode> finnForlengelseperiode(BehandlingReferanse behandlingReferanse, UUID bgReferanse, List<BeregnInput> beregnInput) {
+        return beregnInput.stream().filter(i -> i.getBgReferanse().equals(bgReferanse))
             .filter(BeregnInput::erForlengelse).findFirst()
             .map(BeregnInput::getVilkårsperiode)
-            .map(p -> List.of(new Periode(p.getFomDato(), p.getTomDato())))
+            .map(p -> utledForlengelseperiode(behandlingReferanse, p, VilkårType.BEREGNINGSGRUNNLAGVILKÅR).stream()
+                .map(intervall -> new Periode(intervall.getFomDato(), intervall.getTomDato())).toList())
             .orElse(null);
+    }
+
+
+    public NavigableSet<DatoIntervallEntitet> utledForlengelseperiode(BehandlingReferanse referanse, DatoIntervallEntitet periodeTilVurdering, VilkårType vilkårType) {
+        var utleder = ForlengelseperiodeUtleder.finnUtleder(periodeUtleder, vilkårType, referanse.getFagsakYtelseType());
+        return utleder.utledForlengelseperioder(referanse, periodeTilVurdering);
     }
 
     private Map<UUID, KalkulatorInputDto> lagInputPrReferanse(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag iayGrunnlag, Collection<Inntektsmelding> sakInntektsmeldinger, List<BeregnInput> beregnInput) {
