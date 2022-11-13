@@ -20,7 +20,7 @@ public class VurderAldersVilkårTjeneste {
     }
 
     private void vurderPeriode(VilkårBuilder vilkårBuilder, LocalDate maksdato, String regelInput, DatoIntervallEntitet periode) {
-        if (periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, maksdato)) && !periode.getFomDato().equals(maksdato)) {
+        if (periode.inkluderer(maksdato) && !periode.getFomDato().equals(maksdato)) {
             var builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), maksdato));
             builder.medUtfall(Utfall.OPPFYLT)
                 .medRegelInput(regelInput);

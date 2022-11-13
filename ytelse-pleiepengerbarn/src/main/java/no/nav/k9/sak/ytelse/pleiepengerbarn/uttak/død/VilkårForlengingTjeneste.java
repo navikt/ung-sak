@@ -22,6 +22,7 @@ class VilkårForlengingTjeneste {
         var set = new TreeSet<DatoIntervallEntitet>();
         set.add(periode);
         vurderAldersVilkårTjeneste.vurderPerioder(vilkårBuilder, set, fødselsdato);
+        resultatBuilder.leggTil(vilkårBuilder);
     }
 
     public void forlengeVilkårMedPeriode(Set<VilkårType> vilkår, VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode) {
