@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
@@ -16,70 +17,45 @@ public final class Hjelpetidslinjer {
     private Hjelpetidslinjer() {
     }
 
-    /**
-     * Lager en tidslinje der man kun har med helger ut fra tidslinjen som er oppgitt.
-     * 
-     * @param tidslinje Tidslinjen som brukes for å hente helger for.
-     * @return En tidslinje med helger der man tar med alle helger som ligger inni
-     *          eller kant-i-kant med minst én periode i tidslinjen. Dette betyr
-     *          at man kan få helger på utsiden av tidslinjen (i hver ende).
-     */
-    public static LocalDateTimeline<Boolean> lagTidslinjeMedKunHelger(LocalDateTimeline<?> tidslinje) {
-        final List<LocalDateSegment<Boolean>> helgesegmenter = new ArrayList<>();
-        LocalDate sisteHelg = null; 
-        for (LocalDateSegment<?> s : tidslinje) {
-            final LocalDate førsteFom = lørdagenFørHelgEllerMandag(s.getFom());
-            final LocalDate sisteTom = søndagenEtterHelgEllerFredag(s.getTom());
-            
-            LocalDate fom = førsteFom;
-            while (fom.isBefore(sisteTom)) {
-                if (sisteHelg != null && sisteHelg.equals(fom)) {
-                    fom = fom.plusDays(7);
-                    continue;
-                }
-                helgesegmenter.add(new LocalDateSegment<>(fom, fom.plusDays(1), Boolean.TRUE));
-                sisteHelg = fom;
-                fom = fom.plusDays(7);
-            }
-        }
-        return new LocalDateTimeline<>(helgesegmenter);
-    }
-    
-    private static LocalDate lørdagenFørHelgEllerMandag(LocalDate dato) {
-        LocalDate førsteFom = dato;
-        if (førsteFom.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            førsteFom = førsteFom.minusDays(1);
-        } else if (førsteFom.getDayOfWeek() == DayOfWeek.MONDAY) {
-            førsteFom = førsteFom.minusDays(2);
-        }
-        if (førsteFom.getDayOfWeek() != DayOfWeek.SATURDAY) {
-            førsteFom = førsteFom.plusDays(DayOfWeek.SATURDAY.getValue() - førsteFom.getDayOfWeek().getValue());
-        }
-        return førsteFom;
+    public static <T> LocalDateTimeline<T> fjernHelger(LocalDateTimeline<T> tidslinje){
+        LocalDateTimeline<Boolean> helger = lagTidslinjeMedKunHelger(tidslinje);
+        return tidslinje.disjoint(helger);
     }
 
-    private static LocalDate søndagenEtterHelgEllerFredag(LocalDate dato) {
-        LocalDate sisteTom = dato;
-        if (sisteTom.getDayOfWeek() == DayOfWeek.SATURDAY) {
-            sisteTom = sisteTom.plusDays(1);
-        } else if (sisteTom.getDayOfWeek() == DayOfWeek.FRIDAY) {
-            sisteTom = sisteTom.plusDays(2);
+    /**
+     * Lager en tidslinje der man kun har med helger ut fra tidslinjen som er oppgitt.
+     *
+     * @param tidslinje Tidslinjen som brukes for å hente helger for.
+     * @return En tidslinje som av lørdager og søndager fra opprinnelig tidsserie, og ingenting annet
+     */
+    public static LocalDateTimeline<Boolean> lagTidslinjeMedKunHelger(LocalDateTimeline<?> tidslinje) {
+        List<LocalDateSegment<Boolean>> helger = new ArrayList<>();
+        for (LocalDateInterval intervall : tidslinje.getLocalDateIntervals()) {
+            LocalDate d = intervall.getFomDato();
+            while (!d.isAfter(intervall.getTomDato())) {
+                if (d.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                    helger.add(new LocalDateSegment<>(d, d, true));
+                    d = d.plusDays(6);
+                } else if (d.getDayOfWeek() == DayOfWeek.SATURDAY) {
+                    helger.add(new LocalDateSegment<>(d, d.isBefore(intervall.getTomDato()) ? d.plusDays(1) : d, true));
+                    d = d.plusWeeks(1);
+                } else {
+                    d = d.plusDays(DayOfWeek.SATURDAY.getValue() - d.getDayOfWeek().getValue());
+                }
+            }
         }
-        if (sisteTom.getDayOfWeek() != DayOfWeek.SUNDAY) {
-            sisteTom = sisteTom.minusDays(sisteTom.getDayOfWeek().getValue());
-        }
-        return sisteTom;
+        return new LocalDateTimeline<>(helger).compress();
     }
-    
+
+
     /**
      * Lager en ukestidslinje for mandag-fredag for oppgitt intervall.
-     * 
+     *
      * @param fom Fra-og-med-datoen man skal generere ukestidslinje for.
      * @param tom Til-og-med-datoen man skal generere ukestidslinje for.
-     * 
      * @return En tidslinje med et segment per uke. Hvert segment har maksimumsperioden
-     *          mandag til fredag -- og kan være kortere i hver ende hvis ikke
-     *          {@code fom} er en mandag og/eller {@code tom} er en fredag. 
+     * mandag til fredag -- og kan være kortere i hver ende hvis ikke
+     * {@code fom} er en mandag og/eller {@code tom} er en fredag.
      */
     public static LocalDateTimeline<Boolean> lagUkestidslinjeForMandagTilFredag(LocalDate fom, LocalDate tom) {
         Objects.requireNonNull(fom, "fom");
@@ -87,13 +63,11 @@ public final class Hjelpetidslinjer {
         if (fom.isAfter(tom)) {
             throw new IllegalArgumentException("fom kan ikke være etter tom.");
         }
-        
+
         final LocalDateTimeline<Boolean> omsluttende = new LocalDateTimeline<>(fom, tom, true);
-        final LocalDateTimeline<Boolean> helger = lagTidslinjeMedKunHelger(omsluttende);
-        
-        return omsluttende.disjoint(helger);
+        return fjernHelger(omsluttende);
     }
-        
+
     public static <T> LocalDateTimeline<T> utledHullSomMåTettes(LocalDateTimeline<T> tidslinjen, KantIKantVurderer kantIKantVurderer) {
         var segmenter = tidslinjen.compress().toSegments();
 
@@ -111,6 +85,6 @@ public final class Hjelpetidslinjer {
             periode = segment;
         }
 
-        return new LocalDateTimeline<T>(resultat);
+        return new LocalDateTimeline<>(resultat);
     }
 }

@@ -364,7 +364,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return Response.ok(saksnummerliste).build();
     }
-    
+
     @GET
     @Path("/saker-med-feil4")
     @Produces(MediaType.TEXT_PLAIN)
@@ -412,7 +412,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private boolean erFraBrukerdialogPsb(Søknad søknad) {
         return søknad.getJournalposter() == null || søknad.getJournalposter().isEmpty();
     }
-    
+
     private boolean harOmsorgstilbud(PleiepengerSyktBarn ytelse) {
         if (ytelse.getTilsynsordning() == null) {
             return false;
@@ -439,9 +439,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
 
     private boolean erIkkeHelg(Periode periode) {
-        final LocalDateTimeline<Boolean> helePerioden = new LocalDateTimeline<>(periode.getFraOgMed(), periode.getTilOgMed(), Boolean.TRUE);
-        final LocalDateTimeline<Boolean> kunHelger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(helePerioden);
-        return !helePerioden.disjoint(kunHelger).isEmpty();
+        LocalDateTimeline<Boolean> ukedagerTidslinje = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(periode.getFraOgMed(), periode.getTilOgMed());
+        return !ukedagerTidslinje.isEmpty();
     }
 
     @GET
