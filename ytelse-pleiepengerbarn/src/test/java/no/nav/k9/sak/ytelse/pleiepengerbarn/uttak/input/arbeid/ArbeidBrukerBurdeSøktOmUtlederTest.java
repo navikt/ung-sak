@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -103,8 +104,10 @@ class ArbeidBrukerBurdeSøktOmUtlederTest {
 
     @Test
     void skal_utlede_perioder_hvor_det_burde_vært_søkt_om_ytelse_SN() {
-        var førstePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now().minusDays(15));
-        var andrePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(14), LocalDate.now());
+        LocalDate idag = LocalDate.now();
+        LocalDate sluttdato = Set.of(DayOfWeek.SUNDAY, DayOfWeek.SATURDAY).contains(idag.getDayOfWeek()) ? idag.plusDays(2) : idag;
+        var førstePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(sluttdato.minusDays(30), sluttdato.minusDays(15));
+        var andrePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(sluttdato.minusDays(14), sluttdato);
         var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(førstePeriode.getFomDato(), andrePeriode.getTomDato());
         var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeTilVurdering.toLocalDateInterval(), true)));
 
