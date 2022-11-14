@@ -107,7 +107,7 @@ class OpplæringPeriodeSomTrengerVurderingUtlederTest {
         setupVilkårsResultat(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT);
         vilkårene = vilkårResultatBuilder.build();
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = new TreeSet<>(List.of(periode1, periode2));
-        VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = new VurdertOpplæringGrunnlag(123L, null, null, new VurdertOpplæringPerioderHolder(List.of((new VurdertOpplæringPeriode(dag1, dag1, true, "")))));
+        VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = new VurdertOpplæringGrunnlag(123L, null, null, new VurdertOpplæringPerioderHolder(List.of((new VurdertOpplæringPeriode(dag1, dag1, true, null, "")))));
 
         var resultat = opplæringPeriodeSomTrengerVurderingUtleder.trengerVurderingFraSaksbehandler(perioderTilVurdering, vilkårene, vurdertOpplæringGrunnlag, uttaksPerioderGrunnlag);
         assertThat(resultat).isTrue();
@@ -121,8 +121,8 @@ class OpplæringPeriodeSomTrengerVurderingUtlederTest {
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = new TreeSet<>(List.of(periode1, periode2));
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = new VurdertOpplæringGrunnlag(123L, null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(dag1, dag1, true, ""),
-                new VurdertOpplæringPeriode(dag2, dag2, true, ""))));
+                new VurdertOpplæringPeriode(dag1, dag1, true, null, ""),
+                new VurdertOpplæringPeriode(dag2, dag2, true, null, ""))));
 
         var resultat = opplæringPeriodeSomTrengerVurderingUtleder.trengerVurderingFraSaksbehandler(perioderTilVurdering, vilkårene, vurdertOpplæringGrunnlag, uttaksPerioderGrunnlag);
         assertThat(resultat).isFalse();

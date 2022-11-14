@@ -42,16 +42,16 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
     @ChangeTracked
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "reiseTilFom")),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "reiseTilTom"))
+        @AttributeOverride(name = "fomDato", column = @Column(name = "reise_til_fom")),
+        @AttributeOverride(name = "tomDato", column = @Column(name = "reise_til_tom"))
     })
     private DatoIntervallEntitet reiseperiodeTil;
 
     @ChangeTracked
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "reiseHjemFom")),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "reiseHjemTom"))
+        @AttributeOverride(name = "fomDato", column = @Column(name = "reise_hjem_fom")),
+        @AttributeOverride(name = "tomDato", column = @Column(name = "reise_hjem_tom"))
     })
     private DatoIntervallEntitet reiseperiodeHjem;
 
@@ -109,7 +109,7 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
         return reiseperiodeTil;
     }
 
-    public DatoIntervallEntitet getreiseperiodeHjem() {
+    public DatoIntervallEntitet getReiseperiodeHjem() {
         return reiseperiodeHjem;
     }
 

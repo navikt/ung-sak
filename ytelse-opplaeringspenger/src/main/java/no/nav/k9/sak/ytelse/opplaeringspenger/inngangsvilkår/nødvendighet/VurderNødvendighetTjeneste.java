@@ -4,6 +4,7 @@ import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendigh
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.MANGLER_VURDERING;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -85,7 +86,11 @@ class VurderNødvendighetTjeneste {
         NavigableSet<LocalDateSegment<JournalpostId>> segments = new TreeSet<>();
         for (PerioderFraSøknad fraSøknad : perioderFraSøknad) {
             segments.addAll(fraSøknad.getKurs().stream()
-                .map(kursPeriode -> new LocalDateSegment<>(kursPeriode.getPeriode().getFomDato(), kursPeriode.getPeriode().getTomDato(), fraSøknad.getJournalpostId()))
+                .map(kursPeriode -> {
+                    LocalDate fomDato = kursPeriode.getReiseperiodeTil() != null ? kursPeriode.getReiseperiodeTil().getFomDato() : kursPeriode.getPeriode().getFomDato();
+                    LocalDate tomDato = kursPeriode.getReiseperiodeHjem() != null ? kursPeriode.getReiseperiodeHjem().getTomDato() :  kursPeriode.getPeriode().getTomDato();
+                    return new LocalDateSegment<>(fomDato, tomDato, fraSøknad.getJournalpostId());
+                })
                 .collect(Collectors.toCollection(TreeSet::new)));
         }
 

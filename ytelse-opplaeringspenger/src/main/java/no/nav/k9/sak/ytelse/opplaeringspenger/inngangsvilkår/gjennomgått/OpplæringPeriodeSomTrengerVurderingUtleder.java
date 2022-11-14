@@ -49,9 +49,12 @@ class OpplæringPeriodeSomTrengerVurderingUtleder {
         var tidslinjeSomMåVurderes = TidslinjeUtil.tilTidslinjeKomprimert(perioderSomMåVurderes);
 
         if (vurdertOpplæringGrunnlag != null && vurdertOpplæringGrunnlag.getVurdertePerioder() != null) {
-            var vurdertTidslinje = vurdertOpplæringGrunnlag.getVurdertePerioder().getTidslinje();
+            var vurdertTidslinje = vurdertOpplæringGrunnlag.getVurdertePerioder().getTidslinjeOpplæring();
             tidslinjeSomMåVurderes = tidslinjeSomMåVurderes.disjoint(vurdertTidslinje);
         }
+
+        // Antar at reisetiden er vurdert
+        tidslinjeSomMåVurderes = tidslinjeSomMåVurderes.disjoint(ReisetidUtleder.finnOppgittReisetid(uttaksPerioderGrunnlag));
 
         return !tidslinjeSomMåVurderes.isEmpty();
     }

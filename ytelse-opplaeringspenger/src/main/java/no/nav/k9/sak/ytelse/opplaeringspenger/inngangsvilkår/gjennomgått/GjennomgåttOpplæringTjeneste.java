@@ -23,6 +23,7 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
 @Dependent
 public class GjennomgåttOpplæringTjeneste {
@@ -59,13 +60,13 @@ public class GjennomgåttOpplæringTjeneste {
             return Aksjon.TRENGER_AVKLARING;
         }
 
-        lagreVilkårsResultat(referanse.getBehandlingId(), vilkårene, perioderTilVurdering, vurdertOpplæringGrunnlag);
+        lagreVilkårsResultat(referanse.getBehandlingId(), vilkårene, perioderTilVurdering, vurdertOpplæringGrunnlag, uttaksPerioderGrunnlag);
 
         return Aksjon.FORTSETT;
     }
 
-    //TODO: Bør dette ligge et annet sted?
-    private void lagreVilkårsResultat(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag) {
+    //TODO: Bør dette ligge et annet sted? For mange parametre...
+    private void lagreVilkårsResultat(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, UttaksPerioderGrunnlag uttaksPerioderGrunnlag) {
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
@@ -85,13 +86,21 @@ public class GjennomgåttOpplæringTjeneste {
         tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(tidslinjeUtenGodkjentInstitusjon).disjoint(tidslinjeUtenSykdomsvilkår);
 
         if (vurdertOpplæringGrunnlag != null && vurdertOpplæringGrunnlag.getVurdertePerioder() != null) {
-            var vurdertTidslinjeTilVurdering = vurdertOpplæringGrunnlag.getVurdertePerioder().getTidslinje().intersection(tidslinjeTilVurdering);
+            var vurdertTidslinjeTilVurdering = vurdertOpplæringGrunnlag.getVurdertePerioder().getTidslinjeOpplæring().intersection(tidslinjeTilVurdering);
             var godkjentTidslinjeTilVurdering = vurdertTidslinjeTilVurdering.filterValue(VurdertOpplæringPeriode::getGjennomførtOpplæring);
             var ikkeGodkjentTidslinjeTilVurdering = vurdertTidslinjeTilVurdering.disjoint(godkjentTidslinjeTilVurdering);
 
             leggTilVilkårResultat(vilkårBuilder, godkjentTidslinjeTilVurdering, Utfall.OPPFYLT, Avslagsårsak.UDEFINERT);
             leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentTidslinjeTilVurdering, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING);
+
+            tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(godkjentTidslinjeTilVurdering).disjoint(ikkeGodkjentTidslinjeTilVurdering);
         }
+
+        var godkjentReisetidTidslinje = ReisetidUtleder.utledGodkjentReisetid(uttaksPerioderGrunnlag, vurdertOpplæringGrunnlag).intersection(tidslinjeTilVurdering);
+        var ikkeGodkjentReisetidTidslinje = ReisetidUtleder.finnOppgittReisetid(uttaksPerioderGrunnlag).intersection(tidslinjeTilVurdering).disjoint(godkjentReisetidTidslinje);
+
+        leggTilVilkårResultat(vilkårBuilder, godkjentReisetidTidslinje, Utfall.OPPFYLT, Avslagsårsak.UDEFINERT);
+        leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentReisetidTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_REISETID);
 
         resultatBuilder.leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(behandlingId, resultatBuilder.build());

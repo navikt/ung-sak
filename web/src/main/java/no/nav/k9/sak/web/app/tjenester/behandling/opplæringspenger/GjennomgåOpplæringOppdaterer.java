@@ -13,10 +13,13 @@ import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderGjennomgåttOpplæringDto;
+import no.nav.k9.sak.kontrakt.opplæringspenger.VurderReisetidDto;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderGjennomgåttOpplæringDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -57,11 +60,33 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
     private List<VurdertOpplæringPeriode> mapDtoTilVurdertOpplæringPerioder(VurderGjennomgåttOpplæringDto dto) {
         List<VurdertOpplæringPeriode> vurdertOpplæringPerioder = dto.getPerioder()
             .stream()
-            .map(periodeDto -> new VurdertOpplæringPeriode(periodeDto.getPeriode().getFom(), periodeDto.getPeriode().getTom(), periodeDto.getGjennomførtOpplæring(), periodeDto.getBegrunnelse()))
+            .map(periodeDto -> new VurdertOpplæringPeriode(periodeDto.getPeriode().getFom(), periodeDto.getPeriode().getTom(),
+                periodeDto.getGjennomførtOpplæring(),
+                mapReisetid(periodeDto.getReisetid()),
+                periodeDto.getBegrunnelse()))
             .toList();
         sjekkOverlappendePerioder(vurdertOpplæringPerioder);
         return vurdertOpplæringPerioder;
     }
+
+    private VurdertReisetid mapReisetid(VurderReisetidDto reisetidDto) {
+        if (reisetidDto == null) {
+            return null;
+        }
+        return new VurdertReisetid(
+            finnReiseperiode(reisetidDto.getReisetidTil()),
+            finnReiseperiode(reisetidDto.getReisetidHjem()),
+            reisetidDto.getBegrunnelse());
+    }
+
+    private DatoIntervallEntitet finnReiseperiode(Periode periode) {
+        if (periode == null || periode.getFom() == null || periode.getTom() == null) {
+            return null;
+        }
+        return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
+    }
+
+    //TODO sjekk overlapp reisetid
 
     private void sjekkOverlappendePerioder(List<VurdertOpplæringPeriode> vurdertOpplæringPerioder) {
         List<DatoIntervallEntitet> perioder = vurdertOpplæringPerioder.stream().map(VurdertOpplæringPeriode::getPeriode).toList();

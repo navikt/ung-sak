@@ -56,7 +56,7 @@ public class VurdertOpplæringPerioderHolder extends BaseEntitet {
         return perioder.stream().toList();
     }
 
-    public LocalDateTimeline<VurdertOpplæringPeriode> getTidslinje() {
+    public LocalDateTimeline<VurdertOpplæringPeriode> getTidslinjeOpplæring() {
         var segmenter = this.perioder.stream()
             .map(periode -> new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), periode))
             .collect(Collectors.toList());

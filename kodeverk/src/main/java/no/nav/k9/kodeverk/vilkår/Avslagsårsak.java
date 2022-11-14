@@ -107,6 +107,8 @@ public enum Avslagsårsak implements Kodeverdi {
         Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "9-14")),
     IKKE_GJENNOMGÅTT_OPPLÆRING("1103", "Ikke nødvendig for omsorgen av pleietrengende",
         Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "9-14")),
+    IKKE_GODKJENT_REISETID("1104", "Ikke godkjent reisetid",
+        Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "9-14")),
     SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",
             Map.of(FagsakYtelseType.PSB, "9-3 1. ledd")),
     SØKER_HAR_AVGÅTT_MED_DØDEN("1091", "Søker har avgått med døden.",

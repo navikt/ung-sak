@@ -4,6 +4,7 @@ import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.institusjon
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.institusjon.InstitusjonGodkjenningStatus.IKKE_GODKJENT;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.institusjon.InstitusjonGodkjenningStatus.MANGLER_VURDERING;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -113,8 +114,11 @@ public class VurderInstitusjonTjeneste {
         NavigableSet<LocalDateSegment<InstitusjonFraSøknad>> segments = new TreeSet<>();
         for (PerioderFraSøknad fraSøknad : perioderFraSøknad) {
             segments.addAll(fraSøknad.getKurs().stream()
-                .map(kursPeriode -> new LocalDateSegment<>(kursPeriode.getPeriode().getFomDato(), kursPeriode.getPeriode().getTomDato(),
-                    new InstitusjonFraSøknad(fraSøknad.getJournalpostId(), kursPeriode.getInstitusjon(), kursPeriode.getInstitusjonUuid())))
+                .map(kursPeriode -> {
+                    LocalDate fomDato = kursPeriode.getReiseperiodeTil() != null ? kursPeriode.getReiseperiodeTil().getFomDato() : kursPeriode.getPeriode().getFomDato();
+                    LocalDate tomDato = kursPeriode.getReiseperiodeHjem() != null ? kursPeriode.getReiseperiodeHjem().getTomDato() :  kursPeriode.getPeriode().getTomDato();
+                    return new LocalDateSegment<>(fomDato, tomDato, new InstitusjonFraSøknad(fraSøknad.getJournalpostId(), kursPeriode.getInstitusjon(), kursPeriode.getInstitusjonUuid()));
+                })
                 .collect(Collectors.toCollection(TreeSet::new)));
         }
 

@@ -21,8 +21,9 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderGjennomgåttOpplæringDto;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderGjennomgåttOpplæringPeriodeDto;
+import no.nav.k9.sak.kontrakt.opplæringspenger.VurderReisetidDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 
@@ -37,21 +38,22 @@ class GjennomgåOpplæringOppdatererTest {
 
     private GjennomgåOpplæringOppdaterer gjennomgåOpplæringOppdaterer;
     private Behandling behandling;
-    private final JournalpostId journalpostId = new JournalpostId("123");
+    private final LocalDate idag = LocalDate.now();
 
     @BeforeEach
     void setup() {
         BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         gjennomgåOpplæringOppdaterer = new GjennomgåOpplæringOppdaterer(vurdertOpplæringRepository);
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.medSøknad().medSøknadsdato(LocalDate.now());
+        scenario.medSøknad().medSøknadsdato(idag);
         scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_GJENNOMGÅTT_OPPLÆRING, BehandlingStegType.VURDER_GJENNOMGÅTT_OPPLÆRING);
         behandling = scenario.lagre(repositoryProvider);
     }
 
     @Test
     void skalLagreNyttGrunnlag() {
-        var periodeDto = new VurderGjennomgåttOpplæringPeriodeDto(LocalDate.now(), LocalDate.now(), true, "test");
+        var reisetidDto = new VurderReisetidDto(new Periode(idag.minusDays(1), idag.minusDays(1)), new Periode(idag.plusDays(1), idag.plusDays(1)), "reise");
+        var periodeDto = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag, true, reisetidDto, "test");
         var dto = new VurderGjennomgåttOpplæringDto(List.of(periodeDto));
 
         var resultat = lagreGrunnlag(dto);
@@ -66,14 +68,21 @@ class GjennomgåOpplæringOppdatererTest {
         assertThat(periodeFraGrunnlag.getPeriode().getTomDato()).isEqualTo(periodeDto.getPeriode().getTom());
         assertThat(periodeFraGrunnlag.getGjennomførtOpplæring()).isEqualTo(periodeDto.getGjennomførtOpplæring());
         assertThat(periodeFraGrunnlag.getBegrunnelse()).isEqualTo(periodeDto.getBegrunnelse());
+        assertThat(periodeFraGrunnlag.getReisetid()).isNotNull();
+        assertThat(periodeFraGrunnlag.getReisetid().getReiseperiodeTil().getFomDato()).isEqualTo(reisetidDto.getReisetidTil().getFom());
+        assertThat(periodeFraGrunnlag.getReisetid().getReiseperiodeTil().getTomDato()).isEqualTo(reisetidDto.getReisetidTil().getTom());
+        assertThat(periodeFraGrunnlag.getReisetid().getReiseperiodeHjem().getFomDato()).isEqualTo(reisetidDto.getReisetidHjem().getFom());
+        assertThat(periodeFraGrunnlag.getReisetid().getReiseperiodeHjem().getTomDato()).isEqualTo(reisetidDto.getReisetidHjem().getTom());
+        assertThat(periodeFraGrunnlag.getReisetid().getBegrunnelse()).isEqualTo(reisetidDto.getBegrunnelse());
     }
 
     @Test
     void skalOppdatereGrunnlag() {
-        var periodeDto1 = new VurderGjennomgåttOpplæringPeriodeDto(LocalDate.now(), LocalDate.now(), false, "test1");
+        var periodeDto1 = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag, false, null, "test1");
         var dto1 = new VurderGjennomgåttOpplæringDto(List.of(periodeDto1));
         lagreGrunnlag(dto1);
-        var periodeDto2 = new VurderGjennomgåttOpplæringPeriodeDto(LocalDate.now(), LocalDate.now().plusDays(1), true, "test2");
+        var reisetidDto = new VurderReisetidDto(new Periode(idag.minusDays(1), idag.minusDays(1)), null, "reise");
+        var periodeDto2 = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag.plusDays(1), true, reisetidDto, "test2");
         var dto2 = new VurderGjennomgåttOpplæringDto(List.of(periodeDto2));
         lagreGrunnlag(dto2);
 
@@ -86,14 +95,16 @@ class GjennomgåOpplæringOppdatererTest {
         assertThat(periodeFraGrunnlag.getPeriode().getTomDato()).isEqualTo(periodeDto2.getPeriode().getTom());
         assertThat(periodeFraGrunnlag.getGjennomførtOpplæring()).isEqualTo(periodeDto2.getGjennomførtOpplæring());
         assertThat(periodeFraGrunnlag.getBegrunnelse()).isEqualTo(periodeDto2.getBegrunnelse());
+        assertThat(periodeFraGrunnlag.getReisetid()).isNotNull();
     }
 
     @Test
     void skalKopiereFraAktivtGrunnlag() {
-        var periodeDto1 = new VurderGjennomgåttOpplæringPeriodeDto(LocalDate.now(), LocalDate.now(), false, "test");
+        var reisetidDto = new VurderReisetidDto(new Periode(idag.minusDays(1), idag.minusDays(1)), null, "reise");
+        var periodeDto1 = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag, false, reisetidDto, "test");
         var dto1 = new VurderGjennomgåttOpplæringDto(List.of(periodeDto1));
         lagreGrunnlag(dto1);
-        var periodeDto2 = new VurderGjennomgåttOpplæringPeriodeDto(LocalDate.now().plusDays(1), LocalDate.now().plusDays(1), true, "test");
+        var periodeDto2 = new VurderGjennomgåttOpplæringPeriodeDto(idag.plusDays(1), idag.plusDays(1), true, null, "test");
         var dto2 = new VurderGjennomgåttOpplæringDto(List.of(periodeDto2));
         lagreGrunnlag(dto2);
 
@@ -105,6 +116,8 @@ class GjennomgåOpplæringOppdatererTest {
         var perioderFraGrunnlag2 = grunnlag.get().getVurdertePerioder().getPerioder().stream().filter(perioder -> perioder.getPeriode().getFomDato().equals(periodeDto2.getPeriode().getFom())).findFirst();
         assertThat(perioderFraGrunnlag1).isPresent();
         assertThat(perioderFraGrunnlag2).isPresent();
+        assertThat(perioderFraGrunnlag1.get().getReisetid()).isNotNull();
+        assertThat(perioderFraGrunnlag2.get().getReisetid()).isNull();
     }
 
     private OppdateringResultat lagreGrunnlag(VurderGjennomgåttOpplæringDto dto) {

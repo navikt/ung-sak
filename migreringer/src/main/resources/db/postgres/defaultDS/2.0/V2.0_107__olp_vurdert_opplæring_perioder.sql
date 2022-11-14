@@ -1,3 +1,8 @@
+alter table UP_KURS_PERIODE rename column reiseTilFom to REISE_TIL_FOM;
+alter table UP_KURS_PERIODE rename column reiseTilTom to REISE_TIL_TOM;
+alter table UP_KURS_PERIODE rename column reiseHjemFom to REISE_HJEM_FOM;
+alter table UP_KURS_PERIODE rename column reiseHjemTom to REISE_HJEM_TOM;
+
 create table if not exists OLP_VURDERT_OPPLAERING_PERIODER_HOLDER
 (
     ID                      BIGINT                                 NOT NULL PRIMARY KEY,
@@ -9,6 +14,22 @@ create table if not exists OLP_VURDERT_OPPLAERING_PERIODER_HOLDER
 );
 create sequence if not exists SEQ_OLP_VURDERT_OPPLAERING_PERIODER_HOLDER increment by 50 minvalue 1000000;
 
+create table if not exists OLP_VURDERT_REISETID
+(
+    ID                      BIGINT                                 NOT NULL PRIMARY KEY,
+    REISE_TIL_FOM           DATE                                           ,
+    REISE_TIL_TOM           DATE                                           ,
+    REISE_HJEM_FOM          DATE                                           ,
+    REISE_HJEM_TOM          DATE                                           ,
+    BEGRUNNELSE             VARCHAR(4000)                                  ,
+    VERSJON                 BIGINT       DEFAULT 0                 NOT NULL,
+    OPPRETTET_AV            VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
+    OPPRETTET_TID           TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    ENDRET_AV               VARCHAR(20),
+    ENDRET_TID              TIMESTAMP(3)
+);
+create sequence if not exists SEQ_OLP_VURDERT_REISETID increment by 50 minvalue 1000000;
+
 create table if not exists OLP_VURDERT_OPPLAERING_PERIODE
 (
     ID                      BIGINT                                 NOT NULL PRIMARY KEY,
@@ -16,6 +37,7 @@ create table if not exists OLP_VURDERT_OPPLAERING_PERIODE
     FOM                     DATE                                   NOT NULL,
     TOM                     DATE                                   NOT NULL,
     GJENNOMFOERT_OPPLAERING BOOLEAN      DEFAULT false             NOT NULL,
+    VURDERT_REISETID_ID     BIGINT                                         ,
     BEGRUNNELSE             VARCHAR(4000)                                  ,
     VERSJON                 BIGINT       DEFAULT 0                 NOT NULL,
     OPPRETTET_AV            VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
@@ -23,6 +45,7 @@ create table if not exists OLP_VURDERT_OPPLAERING_PERIODE
     ENDRET_AV               VARCHAR(20),
     ENDRET_TID              TIMESTAMP(3),
     constraint FK_OLP_VURDERT_OPPLAERING_PERIODE_1 foreign key (HOLDER_ID) references OLP_VURDERT_OPPLAERING_PERIODER_HOLDER,
+    constraint FK_OLP_VURDERT_OPPLAERING_PERIODE_2 foreign key (VURDERT_REISETID_ID) references OLP_VURDERT_REISETID,
     CONSTRAINT OLP_VURDERT_OPPLAERING_PERIODE_IKKE_OVERLAPP EXCLUDE USING GIST (
         HOLDER_ID WITH =,
         TSRANGE(FOM, TOM) WITH &&
