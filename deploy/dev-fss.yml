@@ -208,6 +208,8 @@ spec:
       value: "true"
     - name: APP_AUTH_SCHEMA_AZUREAD_DOMAIN
       value: "k9.dev.intern.nav.no"
+    - name: APP_AUTH_SCHEMA_AZUREAD_ADDITIONAL_PATHS
+      value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/formidling,api://dev-fss.k9saksbehandling.k9-formidling/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default"
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
     - name: OIDC_OPENAM_HOST_URL
