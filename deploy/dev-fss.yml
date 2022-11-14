@@ -58,12 +58,11 @@ spec:
       claims:
         extra:
           - "NAVident"
-    accessPolicy:
-      inbound:
-        rules:
+  accessPolicy:
+    inbound:
+      rules:
         - application: k9-sak
           namespace: k9saksbehandling
-          cluster: dev-fss
   env:
     - name: TZ
       value: "Europe/Oslo"
