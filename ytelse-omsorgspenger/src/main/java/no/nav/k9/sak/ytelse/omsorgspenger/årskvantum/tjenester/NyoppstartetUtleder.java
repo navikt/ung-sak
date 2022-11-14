@@ -67,9 +67,11 @@ public class NyoppstartetUtleder {
     private Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledAktivTidslinjePrArbeidsforhold(AktørArbeid aktørArbeid) {
         Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktiveArbeidsforhold = new HashMap<>();
         for (Yrkesaktivitet yrkesaktivitet : aktørArbeid.hentAlleYrkesaktiviteter()) {
-            var aktivitetIdentifikator = AktivitetIdentifikator.lagAktivitetIdentifikator(UttakArbeidType.ARBEIDSTAKER, yrkesaktivitet.getArbeidsgiver(), yrkesaktivitet.getArbeidsforholdRef());
-            var aktivitetTidslinje = mapYrkesAktivitet(yrkesaktivitet);
-            aktiveArbeidsforhold.put(aktivitetIdentifikator, aktivitetTidslinje);
+            if (yrkesaktivitet.erArbeidsforhold()) {
+                var aktivitetIdentifikator = AktivitetIdentifikator.lagAktivitetIdentifikator(UttakArbeidType.ARBEIDSTAKER, yrkesaktivitet.getArbeidsgiver(), yrkesaktivitet.getArbeidsforholdRef());
+                var aktivitetTidslinje = mapYrkesAktivitet(yrkesaktivitet);
+                aktiveArbeidsforhold.put(aktivitetIdentifikator, aktivitetTidslinje);
+            }
         }
         return aktiveArbeidsforhold;
     }
