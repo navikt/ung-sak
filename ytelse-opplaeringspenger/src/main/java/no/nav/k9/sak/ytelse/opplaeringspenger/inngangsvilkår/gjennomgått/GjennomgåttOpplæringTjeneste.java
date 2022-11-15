@@ -2,8 +2,6 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 
-import java.util.NavigableSet;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -15,15 +13,12 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.OppfyltVilkårTidslinjeUtleder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
 @Dependent
 public class GjennomgåttOpplæringTjeneste {
@@ -60,13 +55,19 @@ public class GjennomgåttOpplæringTjeneste {
             return Aksjon.TRENGER_AVKLARING;
         }
 
-        lagreVilkårsResultat(referanse.getBehandlingId(), vilkårene, perioderTilVurdering, vurdertOpplæringGrunnlag, uttaksPerioderGrunnlag);
-
         return Aksjon.FORTSETT;
     }
 
-    //TODO: Bør dette ligge et annet sted? For mange parametre...
-    private void lagreVilkårsResultat(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, UttaksPerioderGrunnlag uttaksPerioderGrunnlag) {
+    public void lagreVilkårsResultat(BehandlingReferanse referanse) {
+
+        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
+
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.GJENNOMGÅ_OPPLÆRING);
+
+        var uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
+
+        var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(referanse.getBehandlingId()).orElse(null);
+
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
@@ -103,7 +104,7 @@ public class GjennomgåttOpplæringTjeneste {
         leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentReisetidTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_REISETID);
 
         resultatBuilder.leggTil(vilkårBuilder);
-        vilkårResultatRepository.lagre(behandlingId, resultatBuilder.build());
+        vilkårResultatRepository.lagre(referanse.getBehandlingId(), resultatBuilder.build());
     }
 
     private static void leggTilVilkårResultat(VilkårBuilder vilkårBuilder, LocalDateTimeline<?> tidslinje, Utfall utfall, Avslagsårsak avslagsårsak) {
