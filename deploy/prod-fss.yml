@@ -191,8 +191,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
-      value: "false"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
     - name: PSB_PPN_UTVIDE_VED_DODSFALL

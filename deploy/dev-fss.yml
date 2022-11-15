@@ -227,8 +227,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
-      value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
       value: "true"
     - name: PSB_PPN_UTVIDE_VED_DODSFALL
