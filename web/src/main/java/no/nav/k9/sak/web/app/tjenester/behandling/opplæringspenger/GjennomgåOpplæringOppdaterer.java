@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -86,10 +87,22 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
         return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
     }
 
-    //TODO sjekk overlapp reisetid
-
     private void sjekkOverlappendePerioder(List<VurdertOpplæringPeriode> vurdertOpplæringPerioder) {
-        List<DatoIntervallEntitet> perioder = vurdertOpplæringPerioder.stream().map(VurdertOpplæringPeriode::getPeriode).toList();
+        List<DatoIntervallEntitet> perioder = new ArrayList<>();
+
+        for (VurdertOpplæringPeriode vurdertOpplæringPeriode : vurdertOpplæringPerioder) {
+            perioder.add(vurdertOpplæringPeriode.getPeriode());
+
+            if (vurdertOpplæringPeriode.getReisetid() != null) {
+                if (vurdertOpplæringPeriode.getReisetid().getReiseperiodeTil() != null) {
+                    perioder.add(vurdertOpplæringPeriode.getReisetid().getReiseperiodeTil());
+                }
+                if (vurdertOpplæringPeriode.getReisetid().getReiseperiodeHjem() != null) {
+                    perioder.add(vurdertOpplæringPeriode.getReisetid().getReiseperiodeHjem());
+                }
+            }
+        }
+
         for (DatoIntervallEntitet periode : perioder) {
             for (DatoIntervallEntitet periode2 : perioder) {
                 if (periode != periode2 && periode.overlapper(periode2)) {

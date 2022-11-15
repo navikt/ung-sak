@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -118,6 +119,24 @@ class GjennomgåOpplæringOppdatererTest {
         assertThat(perioderFraGrunnlag2).isPresent();
         assertThat(perioderFraGrunnlag1.get().getReisetid()).isNotNull();
         assertThat(perioderFraGrunnlag2.get().getReisetid()).isNull();
+    }
+
+    @Test
+    void overlappendePerioderSkalFeile() {
+        var periodeDto1 = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag, true, null, "");
+        var periodeDto2 = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag.plusDays(1), true, null, "");
+        var dto = new VurderGjennomgåttOpplæringDto(List.of(periodeDto1, periodeDto2));
+
+        assertThrows(IllegalArgumentException.class, () -> lagreGrunnlag(dto));
+    }
+
+    @Test
+    void overlappendeReisetidSkalFeile() {
+        var reisetidDto = new VurderReisetidDto(new Periode(idag.minusDays(1), idag), null, "");
+        var periodeDto1 = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag, true, reisetidDto, "");
+        var dto = new VurderGjennomgåttOpplæringDto(List.of(periodeDto1));
+
+        assertThrows(IllegalArgumentException.class, () -> lagreGrunnlag(dto));
     }
 
     private OppdateringResultat lagreGrunnlag(VurderGjennomgåttOpplæringDto dto) {
