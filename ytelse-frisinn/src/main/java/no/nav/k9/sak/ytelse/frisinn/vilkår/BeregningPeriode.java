@@ -13,8 +13,6 @@ import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 class BeregningPeriode implements VilkårsPeriodiseringsFunksjon {
 
     private final LocalDate FØRSTE_STP_FRISINN = LocalDate.of(2020, 3, 1);
-    // ENDRE DENNE TIL Å VÆRE DATO FOR NYE REGLER
-    private final LocalDate ENDRINGSDATO = LocalDate.of(2022, 1, 1);
     private final UttakRepository uttakRepository;
 
     BeregningPeriode(UttakRepository uttakRepository) {
