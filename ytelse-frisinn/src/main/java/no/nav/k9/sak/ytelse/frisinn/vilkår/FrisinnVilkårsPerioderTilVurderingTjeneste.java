@@ -37,11 +37,10 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
 
     @Inject
     public FrisinnVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef(FRISINN) VilkårUtleder vilkårUtleder,
-                                                      UttakRepository uttakRepository,
-                                                      @KonfigVerdi(value = "FRISINN_NYTT_STP_TOGGLE", defaultVerdi = "false", required = false) boolean nyttStpToggle) {
+                                                      UttakRepository uttakRepository) {
         this.maksSøktePeriode = new MaksSøktePeriode(uttakRepository);
         this.vilkårUtleder = vilkårUtleder;
-        final var beregningPeriode = new BeregningPeriode(uttakRepository, nyttStpToggle);
+        final var beregningPeriode = new BeregningPeriode(uttakRepository);
         vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, beregningPeriode);
     }
 

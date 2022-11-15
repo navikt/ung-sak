@@ -27,31 +27,29 @@ public class OppgittOpptjeningFilter {
 
     private OppgittOpptjening oppgittOpptjening;
     private OppgittOpptjening overstyrtOppgittOpptjening;
-    private boolean frisinnNyttStpToggle;
 
 
-    public OppgittOpptjeningFilter(OppgittOpptjening oppgittOpptjening, OppgittOpptjening overstyrtOppgittOpptjening, boolean frisinnNyttStpToggle) {
+    public OppgittOpptjeningFilter(OppgittOpptjening oppgittOpptjening, OppgittOpptjening overstyrtOppgittOpptjening) {
         this.oppgittOpptjening = oppgittOpptjening;
         this.overstyrtOppgittOpptjening = overstyrtOppgittOpptjening;
-        this.frisinnNyttStpToggle = frisinnNyttStpToggle;
     }
 
-    public OppgittOpptjeningFilter(Optional<OppgittOpptjening> oppgittOpptjening, Optional<OppgittOpptjening> overstyrtOppgittOpptjening, boolean frisinnNyttStpToggle) {
-        this(oppgittOpptjening.orElse(null), overstyrtOppgittOpptjening.orElse(null), frisinnNyttStpToggle);
+    public OppgittOpptjeningFilter(Optional<OppgittOpptjening> oppgittOpptjening, Optional<OppgittOpptjening> overstyrtOppgittOpptjening) {
+        this(oppgittOpptjening.orElse(null), overstyrtOppgittOpptjening.orElse(null));
     }
 
 
     /**
      * Brukes for FRISINN
      *
-     * @return OppgittOpptjening
      * @param stp
+     * @return OppgittOpptjening
      */
     public OppgittOpptjening getOppgittOpptjeningFrisinn(LocalDate stp) {
         if (overstyrtOppgittOpptjening == null) {
             return oppgittOpptjening;
         }
-        OppgittOpptjening slåttSammenGammelOverstyrtMedNytilkommet = leggTilNyeOpptjeningerHvisTilkommet(frisinnNyttStpToggle ? stp : SKJÆRINGSTIDSPUNKT);
+        OppgittOpptjening slåttSammenGammelOverstyrtMedNytilkommet = leggTilNyeOpptjeningerHvisTilkommet(SKJÆRINGSTIDSPUNKT);
         return slåttSammenGammelOverstyrtMedNytilkommet;
     }
 
@@ -145,8 +143,8 @@ public class OppgittOpptjeningFilter {
     private List<EgenNæringBuilder> leggTilSN(DatoIntervallEntitet senestePeriodeSN) {
         List<OppgittEgenNæring> egenNæring = oppgittOpptjening.getEgenNæring().stream().filter(oppgittEgenNæring -> oppgittEgenNæring.getPeriode().equals(senestePeriodeSN)).collect(Collectors.toList());
         return egenNæring.stream().map(en -> EgenNæringBuilder.fraEksisterende(en)
-            .medPeriode(en.getPeriode())
-            .medBruttoInntekt(en.getBruttoInntekt()))
+                .medPeriode(en.getPeriode())
+                .medBruttoInntekt(en.getBruttoInntekt()))
             .collect(Collectors.toList());
     }
 
@@ -154,9 +152,9 @@ public class OppgittOpptjeningFilter {
         List<OppgittArbeidsforhold> oppgitteArbeidsforhold = oppgittOpptjening.getOppgittArbeidsforhold().stream().filter(it -> it.getPeriode().equals(senestePeriode)).collect(Collectors.toList());
 
         return oppgitteArbeidsforhold.stream().map(arbForhold -> OppgittArbeidsforholdBuilder.ny()
-            .medArbeidType(arbForhold.getArbeidType())
-            .medPeriode(arbForhold.getPeriode())
-            .medInntekt(arbForhold.getInntekt()))
+                .medArbeidType(arbForhold.getArbeidType())
+                .medPeriode(arbForhold.getPeriode())
+                .medInntekt(arbForhold.getInntekt()))
             .collect(Collectors.toList());
     }
 
