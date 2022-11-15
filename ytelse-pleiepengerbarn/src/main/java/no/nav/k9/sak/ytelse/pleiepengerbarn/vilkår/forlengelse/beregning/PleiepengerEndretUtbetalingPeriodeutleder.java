@@ -14,6 +14,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -31,19 +32,27 @@ class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetalingPerio
 
     private UttakTjeneste uttakRestKlient;
     private BehandlingRepository behandlingRepository;
+    private boolean enabled;
 
 
     public PleiepengerEndretUtbetalingPeriodeutleder() {
     }
 
     @Inject
-    public PleiepengerEndretUtbetalingPeriodeutleder(UttakTjeneste uttakRestKlient, BehandlingRepository behandlingRepository) {
+    public PleiepengerEndretUtbetalingPeriodeutleder(UttakTjeneste uttakRestKlient,
+                                                     BehandlingRepository behandlingRepository,
+                                                     @KonfigVerdi(value = "BG_FORLENGELSE_BASERT_PÅ_UTTAK", defaultVerdi = "false") boolean enabled) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
+        this.enabled = enabled;
     }
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledPerioder(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
+
+        if (!enabled) {
+            return new TreeSet<>(Set.of(periode));
+        }
 
         var originalBehandlingId = behandlingReferanse.getOriginalBehandlingId()
             .orElseThrow(() -> new IllegalStateException("Forventer å finne original behandling"));
