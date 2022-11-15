@@ -66,7 +66,7 @@ public class FrontendLoginResource {
             var tuple = findScopeForUrl(originalUri);
             if (tuple != null) {
                 var requestedDomain = requestDataHelp.requestedHostWithScheme(httpServletRequest);
-                var token = brukerTokenProvider.getToken(tuple.getElement1());
+                var token = brukerTokenProvider.getToken(tuple.getElement2());
                 String cookieDomain = ServerInfo.instance().getValidCookieDomain(requestedDomain);
                 responseBuilder.cookie(new NewCookie(ID_TOKEN_COOKIE_NAME, token.getToken(), tuple.getElement1(), cookieDomain, "", DEFAULT_MAX_AGE, true, true));
             }
