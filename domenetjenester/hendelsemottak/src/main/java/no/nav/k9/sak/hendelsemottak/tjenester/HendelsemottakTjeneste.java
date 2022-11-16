@@ -1,8 +1,10 @@
 package no.nav.k9.sak.hendelsemottak.tjenester;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -45,6 +47,18 @@ public class HendelsemottakTjeneste {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
     }
 
+    private LocalDate utledDato(LocalDate fagsakSluttdato, Hendelse payload, BehandlingÅrsakType behandlingÅrsak) {
+        var dødsdato = payload.getHendelsePeriode().getTom();
+        if (gjelderDødsfall(behandlingÅrsak) && dødsdato.isBefore(fagsakSluttdato)) {
+            return fagsakSluttdato;
+        }
+        return dødsdato;
+    }
+
+    private static boolean gjelderDødsfall(BehandlingÅrsakType behandlingÅrsak) {
+        return Set.of(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN).contains(behandlingÅrsak);
+    }
+
     private List<FagsakerTilVurderingUtleder> finnMatchendeUtledere(HendelseType hendelseType) {
         var matchendeUtledere = HendelseTypeRef.Lookup.list(utledere, hendelseType.getKode());
         return new ArrayList<>(matchendeUtledere);
@@ -68,10 +82,10 @@ public class HendelsemottakTjeneste {
             var fagsak = entry.getKey();
             var behandlingÅrsak = entry.getValue();
 
-            ProsessTaskData tilRevurderingTaskData =  ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
+            ProsessTaskData tilRevurderingTaskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, behandlingÅrsak.getKode());
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, payload.getHendelsePeriode().getFom().toString());
-            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, payload.getHendelsePeriode().getTom().toString());
+            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, utledDato(fagsak.getPeriode().getTomDato(), payload, behandlingÅrsak).toString());
             var tilRevurdering = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
             tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
 
