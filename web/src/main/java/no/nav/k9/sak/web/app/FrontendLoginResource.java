@@ -40,7 +40,7 @@ public class FrontendLoginResource {
     }
 
     @Inject
-    public FrontendLoginResource(@KonfigVerdi(value = "app.auth.schema.azuread.optional.paths", defaultVerdi = "") String optionalScopes, BrukerTokenProvider brukerTokenProvider) {
+    public FrontendLoginResource(@KonfigVerdi(value = "app.auth.schema.azuread.optional.paths", required = false, defaultVerdi = "") String optionalScopes, BrukerTokenProvider brukerTokenProvider) {
         this.optionalScopes = hentUtPathMedScope(optionalScopes, ContextPathHolder.instance().getContextPath());
         this.brukerTokenProvider = brukerTokenProvider;
     }
