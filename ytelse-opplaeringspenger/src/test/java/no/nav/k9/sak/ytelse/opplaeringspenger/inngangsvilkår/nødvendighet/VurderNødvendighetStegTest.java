@@ -17,6 +17,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -40,6 +41,7 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
@@ -65,6 +67,9 @@ public class VurderNødvendighetStegTest {
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
 
     @Inject
+    private PleiebehovResultatRepository resultatRepository;
+
+    @Inject
     @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteBean;
 
@@ -81,7 +86,7 @@ public class VurderNødvendighetStegTest {
     public void setup(){
         perioderTilVurderingTjenesteMock = spy(perioderTilVurderingTjenesteBean);
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        vurderNødvendighetSteg = new VurderNødvendighetSteg(repositoryProvider, perioderTilVurderingTjenesteMock, vurdertOpplæringRepository, uttakPerioderGrunnlagRepository);
+        vurderNødvendighetSteg = new VurderNødvendighetSteg(repositoryProvider, perioderTilVurderingTjenesteMock, vurdertOpplæringRepository, uttakPerioderGrunnlagRepository, resultatRepository);
         LocalDate now = LocalDate.now();
         søknadsperiode = new Periode(now.minusMonths(3), now);
         scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OPPLÆRINGSPENGER);
@@ -172,6 +177,13 @@ public class VurderNødvendighetStegTest {
             søknadsperiode.getFom(),
             søknadsperiode.getTom(),
             null);
+
+        var pleiebehovResultat = resultatRepository.hentHvisEksisterer(behandling.getId());
+        assertThat(pleiebehovResultat).isPresent();
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder()).hasSize(1);
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getPeriode().getFomDato()).isEqualTo(søknadsperiode.getFom());
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getPeriode().getTomDato()).isEqualTo(søknadsperiode.getTom());
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getGrad()).isEqualTo(Pleiegrad.OPPLÆRINGSPENGER);
     }
 
     @Test
@@ -206,6 +218,13 @@ public class VurderNødvendighetStegTest {
             søknadsperiode.getFom(),
             søknadsperiode.getTom(),
             Avslagsårsak.IKKE_NØDVENDIG);
+
+        var pleiebehovResultat = resultatRepository.hentHvisEksisterer(behandling.getId());
+        assertThat(pleiebehovResultat).isPresent();
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder()).hasSize(1);
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getPeriode().getFomDato()).isEqualTo(søknadsperiode.getFom());
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getPeriode().getTomDato()).isEqualTo(søknadsperiode.getTom());
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getGrad()).isEqualTo(Pleiegrad.INGEN);
     }
 
     @Test

@@ -46,11 +46,7 @@ import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.OppfyltVilkårTidslinjeUtleder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.LangvarigSykdomPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
@@ -174,22 +170,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
         for (DatoIntervallEntitet periode : perioder) {
             final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(VilkårType.LANGVARIG_SYKDOM, kontekst, periode, medisinskGrunnlag);
             oppdaterBehandlingMedVilkårresultat(vilkårData, builder);
-            oppdaterResultatStruktur(kontekst, periode, vilkårData);
         }
-    }
-
-    private void oppdaterResultatStruktur(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, VilkårData vilkårData) {
-        final var nåværendeResultat = resultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
-        var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
-        builder.tilbakeStill(periodeTilVurdering);
-        final var vilkårresultat = ((MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat());
-
-        vilkårresultat.getLangvarigSykdomPerioder().forEach(periode -> builder.leggTil(utledPeriode(periode)));
-        resultatRepository.lagreOgFlush(kontekst.getBehandlingId(), builder);
-    }
-
-    private EtablertPleieperiode utledPeriode(LangvarigSykdomPeriode periode) {
-        return new EtablertPleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), no.nav.k9.kodeverk.medisinsk.Pleiegrad.fraKode(periode.getGrad().name()));
     }
 
     private void oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, VilkårBuilder vilkårBuilder) {
