@@ -63,6 +63,10 @@ spec:
       rules:
         - application: k9-sak
           namespace: k9saksbehandling
+        - application: k9-formidling
+          namespace: k9saksbehandling
+        - application: k9-formidling-dokumentdata
+          namespace: k9saksbehandling
   env:
     - name: TZ
       value: "Europe/Oslo"
