@@ -95,17 +95,8 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
 
         var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING));
 
-        //TODO: trekk ut noe?
-        var sykdomsTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.LANGVARIG_SYKDOM);
-        var godkjentInstitusjonTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
-        var gjennomførtOpplæringTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.GJENNOMGÅ_OPPLÆRING);
-        var tidslinjeUtenGodkjentInstitusjon = tidslinjeTilVurdering.disjoint(godkjentInstitusjonTidslinje);
-        var tidslinjeUtenSykdomsvilkår = tidslinjeTilVurdering.disjoint(sykdomsTidslinje).disjoint(tidslinjeUtenGodkjentInstitusjon);
-        var tidslinjeUtenGjennomgåttOpplæring = tidslinjeTilVurdering.disjoint(gjennomførtOpplæringTidslinje).disjoint(tidslinjeUtenGodkjentInstitusjon).disjoint(tidslinjeUtenSykdomsvilkår);
-        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenGodkjentInstitusjon, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
-        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenSykdomsvilkår, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE); // TODO: Endre til noe mer fornuftig
-        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenGjennomgåttOpplæring, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING);
-        tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(tidslinjeUtenGodkjentInstitusjon).disjoint(tidslinjeUtenSykdomsvilkår).disjoint(tidslinjeUtenGjennomgåttOpplæring);
+        var tidslinjeIkkeGodkjentTidligereVilkår = leggTilVilkårsresultatForIkkeGodkjentTidligereVilkår(vilkårene, vilkårBuilder, tidslinjeTilVurdering);
+        tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(tidslinjeIkkeGodkjentTidligereVilkår);
 
         var uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(kontekst.getBehandlingId());
         var perioderFraSøknad = uttaksPerioderGrunnlag.map(UttaksPerioderGrunnlag::getRelevantSøknadsperioder)
@@ -140,6 +131,22 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
             .forEach(datoIntervallEntitet -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(datoIntervallEntitet)
                 .medUtfall(utfall)
                 .medAvslagsårsak(avslagsårsak)));
+    }
+
+    private LocalDateTimeline<Boolean> leggTilVilkårsresultatForIkkeGodkjentTidligereVilkår(Vilkårene vilkårene, VilkårBuilder vilkårBuilder, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        var sykdomsTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.LANGVARIG_SYKDOM);
+        var godkjentInstitusjonTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
+        var gjennomførtOpplæringTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.GJENNOMGÅ_OPPLÆRING);
+
+        var tidslinjeUtenGodkjentInstitusjon = tidslinjeTilVurdering.disjoint(godkjentInstitusjonTidslinje);
+        var tidslinjeUtenSykdomsvilkår = tidslinjeTilVurdering.disjoint(sykdomsTidslinje).disjoint(tidslinjeUtenGodkjentInstitusjon);
+        var tidslinjeUtenGjennomgåttOpplæring = tidslinjeTilVurdering.disjoint(gjennomførtOpplæringTidslinje).disjoint(tidslinjeUtenGodkjentInstitusjon).disjoint(tidslinjeUtenSykdomsvilkår);
+
+        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenGodkjentInstitusjon, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
+        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenSykdomsvilkår, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE); // TODO: Endre til noe mer fornuftig
+        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenGjennomgåttOpplæring, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING);
+
+        return tidslinjeUtenGodkjentInstitusjon.crossJoin(tidslinjeUtenSykdomsvilkår).crossJoin(tidslinjeUtenGjennomgåttOpplæring);
     }
 
     private void lagreResultat(BehandlingskontrollKontekst kontekst) {
