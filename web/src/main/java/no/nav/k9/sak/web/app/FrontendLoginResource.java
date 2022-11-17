@@ -81,7 +81,7 @@ public class FrontendLoginResource {
     }
 
     List<Tuple<String, String>> hentUtPathMedScope(String configString, String cookiePath) {
-        if (cookiePath == null) {
+        if (configString == null) {
             return List.of();
         }
         return Arrays.stream(configString.split(";"))
