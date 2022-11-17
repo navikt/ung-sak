@@ -32,9 +32,9 @@ import no.nav.k9.sikkerhet.oidc.token.bruker.BrukerTokenProvider;
 @ApplicationScoped
 public class FrontendLoginResource {
 
+    private final ExtractRequestDataHelp requestDataHelp = new ExtractRequestDataHelp();
     private List<Tuple<String, String>> optionalScopes;
     private BrukerTokenProvider brukerTokenProvider;
-    private final ExtractRequestDataHelp requestDataHelp = new ExtractRequestDataHelp();
 
     public FrontendLoginResource() {
     }
@@ -46,7 +46,7 @@ public class FrontendLoginResource {
     }
 
     @GET
-    public Response login(@QueryParam("redirectTo") @DefaultValue("/k9/web/") String redirectTo, @QueryParam("original") @DefaultValue("/k9/sak") String originalUri,  @Context HttpServletRequest httpServletRequest) {
+    public Response login(@QueryParam("redirectTo") @DefaultValue("/k9/web/") String redirectTo, @QueryParam("original") @DefaultValue("/k9/sak") String originalUri, @Context HttpServletRequest httpServletRequest) {
         var uri = URI.create(redirectTo);
         var relativePath = "";
         if (uri.getPath() != null) {
@@ -81,6 +81,9 @@ public class FrontendLoginResource {
     }
 
     List<Tuple<String, String>> hentUtPathMedScope(String configString, String cookiePath) {
+        if (cookiePath == null) {
+            return List.of();
+        }
         return Arrays.stream(configString.split(";"))
             .map(it -> trekkUtTilTuple(it, cookiePath))
             .filter(Objects::nonNull)
