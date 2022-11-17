@@ -13,6 +13,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagReferanserTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
+import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -95,7 +96,7 @@ public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagS
         if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
             Set<PeriodeTilVurdering> nyePerioder = finnPerioderSomVurderesGrunnetEndretUttak(ref);
             if (!nyePerioder.isEmpty()) {
-                beregningsgrunnlagTjeneste.kopier(ref, nyePerioder);
+                beregningsgrunnlagTjeneste.kopier(ref, nyePerioder, StegType.VURDER_VILKAR_BERGRUNN);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
                 beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(kontekst,
                     originalBehandlingId,
