@@ -36,7 +36,7 @@ create table if not exists OLP_VURDERT_OPPLAERING_PERIODE
     HOLDER_ID               BIGINT                                 NOT NULL,
     FOM                     DATE                                   NOT NULL,
     TOM                     DATE                                   NOT NULL,
-    GJENNOMFOERT_OPPLAERING BOOLEAN      DEFAULT false             NOT NULL,
+    GJENNOMFOERT_OPPLAERING BOOLEAN                                NOT NULL,
     VURDERT_REISETID_ID     BIGINT                                         ,
     BEGRUNNELSE             VARCHAR(4000)                                  ,
     VERSJON                 BIGINT       DEFAULT 0                 NOT NULL,

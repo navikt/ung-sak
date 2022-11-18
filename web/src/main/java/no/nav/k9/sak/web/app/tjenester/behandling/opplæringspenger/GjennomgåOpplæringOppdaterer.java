@@ -2,6 +2,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,6 +14,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderGjennomgåttOpplæringDto;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderReisetidDto;
 import no.nav.k9.sak.typer.Periode;
@@ -103,13 +105,7 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
             }
         }
 
-        for (DatoIntervallEntitet periode : perioder) {
-            for (DatoIntervallEntitet periode2 : perioder) {
-                if (periode != periode2 && periode.overlapper(periode2)) {
-                    throw new IllegalArgumentException("Overlapp mellom " + periode + " og " + periode2 + " i vurdert opplæring.");
-                }
-            }
-        }
+        TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(perioder));
     }
 
     private LocalDateTimeline<VurdertOpplæringPeriode> utledKombinertTidslinje(List<VurdertOpplæringPeriode> eksisterende,
