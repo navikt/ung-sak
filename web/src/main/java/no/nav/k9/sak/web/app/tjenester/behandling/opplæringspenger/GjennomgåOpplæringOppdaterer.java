@@ -2,7 +2,6 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -14,7 +13,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderGjennomgåttOpplæringDto;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderReisetidDto;
 import no.nav.k9.sak.typer.Periode;
@@ -105,7 +103,7 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
             }
         }
 
-        TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(perioder));
+        new LocalDateTimeline<>(perioder.stream().map(periode -> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), true)).toList());
     }
 
     private LocalDateTimeline<VurdertOpplæringPeriode> utledKombinertTidslinje(List<VurdertOpplæringPeriode> eksisterende,
