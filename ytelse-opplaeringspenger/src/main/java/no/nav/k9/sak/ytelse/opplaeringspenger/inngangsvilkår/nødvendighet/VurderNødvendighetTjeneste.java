@@ -1,99 +1,124 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.GODKJENT;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GJENNOMGÅTT_OPPLÆRING;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT_INSTITUSJON;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT_SYKDOMSVILKÅR;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.MANGLER_VURDERING;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.NavigableSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.Aksjon;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderHolder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
-class VurderNødvendighetTjeneste {
+@Dependent
+public class VurderNødvendighetTjeneste {
 
-    public LocalDateTimeline<NødvendighetGodkjenningStatus> hentTidslinjeTilVurderingMedNødvendighetsGodkjenning(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
-        Objects.requireNonNull(perioderFraSøknad);
-        Objects.requireNonNull(tidslinjeTilVurdering);
+    private final VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private final VilkårResultatRepository vilkårResultatRepository;
+    private final VurdertOpplæringRepository vurdertOpplæringRepository;
+    private final UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
+    private final PleiebehovResultatRepository resultatRepository;
+    private final VurderNødvendighetTidslinjeUtleder tidslinjeUtleder;
 
-        LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinjeMedNødvendighetsgodkjenning = lagTidslinjeMedNødvendighetsGodkjenning(perioderFraSøknad, vurdertOpplæringGrunnlag);
-        return tidslinjeMedNødvendighetsgodkjenning.intersection(tidslinjeTilVurdering);
+    @Inject
+    public VurderNødvendighetTjeneste(BehandlingRepositoryProvider repositoryProvider,
+                                      @FagsakYtelseTypeRef(OPPLÆRINGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                      VurdertOpplæringRepository vurdertOpplæringRepository,
+                                      UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
+                                      PleiebehovResultatRepository resultatRepository) {
+        this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
+        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.vurdertOpplæringRepository = vurdertOpplæringRepository;
+        this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
+        this.resultatRepository = resultatRepository;
+        this.tidslinjeUtleder = new VurderNødvendighetTidslinjeUtleder();
     }
 
-    private LocalDateTimeline<NødvendighetGodkjenningStatus> lagTidslinjeMedNødvendighetsGodkjenning(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag) {
+    public Aksjon vurder(BehandlingReferanse referanse) {
 
-        LocalDateTimeline<List<JournalpostId>> tidslinjeMedJournalpostId = hentTidslinjeMedJournalpostIdFraSøknad(perioderFraSøknad);
+        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
 
-        LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinjeMedStatus = tidslinjeMedJournalpostId.mapValue(v -> MANGLER_VURDERING);
-        for (LocalDateSegment<List<JournalpostId>> segment : tidslinjeMedJournalpostId) {
-            var vurderTidslinje = mapNødvendighetsVurderingForSegment(vurdertOpplæringGrunnlag, segment)
-                .filterValue(v -> Set.of(GODKJENT, IKKE_GODKJENT).contains(v))
-                .compress();
-            tidslinjeMedStatus = tidslinjeMedStatus.combine(vurderTidslinje, this::mergeVurderinger, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        var uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId());
+        var perioderFraSøknad = uttaksPerioderGrunnlag.map(UttaksPerioderGrunnlag::getRelevantSøknadsperioder)
+            .map(UttakPerioderHolder::getPerioderFraSøknadene)
+            .orElse(Set.of());
+        var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(referanse.getBehandlingId());
+
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING);
+        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
+
+        var tidslinje = tidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag.orElse(null), tidslinjeTilVurdering);
+
+        if (tidslinje.filterValue(value -> Objects.equals(value, MANGLER_VURDERING)).stream()
+            .findFirst()
+            .isPresent()) {
+            return Aksjon.TRENGER_AVKLARING;
         }
-        return tidslinjeMedStatus.compress();
+
+        lagreVilkårsResultat(referanse, vilkårene, tidslinje);
+
+        return Aksjon.FORTSETT;
     }
 
-    private LocalDateTimeline<NødvendighetGodkjenningStatus> mapNødvendighetsVurderingForSegment(VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateSegment<List<JournalpostId>> segment) {
-        Objects.requireNonNull(segment);
-        if (segment.getValue().isEmpty()) {
-            throw new IllegalStateException("Forventet minst en søknad med institusjonsopphold");
-        }
+    private void lagreVilkårsResultat(BehandlingReferanse referanse, Vilkårene vilkårene, LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinje) {
+        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
+            .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.NØDVENDIG_OPPLÆRING);
 
-        var opplæringGrunnlag = Optional.ofNullable(vurdertOpplæringGrunnlag);
-        var tidslinje = new LocalDateTimeline<>(List.of(segment));
+        leggTilVilkårsresultatTidligereVilkår(vilkårBuilder, tidslinje);
 
-        if (opplæringGrunnlag.isPresent() && vurdertOpplæringGrunnlag.getVurdertOpplæringHolder() != null) {
-            for (JournalpostId journalpostId : segment.getValue()) {
-                Optional<VurdertOpplæring> vurdertOpplæring = vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().finnVurderingForJournalpostId(journalpostId.getJournalpostId());
+        leggTilVilkårsresultatNødvendighet(vilkårBuilder, tidslinje);
 
-                if (vurdertOpplæring.isPresent()) {
-                    return tidslinje.mapValue(v -> vurdertOpplæring.get().getNødvendigOpplæring() ? GODKJENT : IKKE_GODKJENT);
-                }
-            }
-        }
-        return tidslinje.mapValue(v -> MANGLER_VURDERING);
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
+        vilkårResultatRepository.lagre(referanse.getBehandlingId(), vilkårResultatBuilder.build());
     }
 
-    private LocalDateSegment<NødvendighetGodkjenningStatus> mergeVurderinger(LocalDateInterval interval, LocalDateSegment<NødvendighetGodkjenningStatus> leftside, LocalDateSegment<NødvendighetGodkjenningStatus> rightSide) {
-        if (leftside.getValue() != null && Objects.equals(leftside.getValue(), GODKJENT)) {
-            return new LocalDateSegment<>(interval, GODKJENT);
-        }
-        if (rightSide != null && rightSide.getValue() != null && Objects.equals(rightSide.getValue(), GODKJENT)) {
-            return new LocalDateSegment<>(interval, GODKJENT);
-        }
-        if (leftside.getValue() != null && Objects.equals(leftside.getValue(), IKKE_GODKJENT)) {
-            return new LocalDateSegment<>(interval, IKKE_GODKJENT);
-        }
-        if (rightSide != null && rightSide.getValue() != null && Objects.equals(rightSide.getValue(), IKKE_GODKJENT)) {
-            return new LocalDateSegment<>(interval, IKKE_GODKJENT);
-        }
-        return new LocalDateSegment<>(interval, MANGLER_VURDERING);
+    private void leggTilVilkårsresultatTidligereVilkår(VilkårBuilder vilkårBuilder, LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinje) {
+        var tidslinjeUtenGodkjentInstitusjon = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GODKJENT_INSTITUSJON));
+        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenGodkjentInstitusjon, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
+
+        var tidslinjeUtenSykdomsvilkår = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GODKJENT_SYKDOMSVILKÅR));
+        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenSykdomsvilkår, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE); // TODO: Endre til noe mer fornuftig
+
+        var tidslinjeUtenGjennomgåttOpplæring = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GJENNOMGÅTT_OPPLÆRING));
+        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenGjennomgåttOpplæring, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING);
     }
 
-    private LocalDateTimeline<List<JournalpostId>> hentTidslinjeMedJournalpostIdFraSøknad(Set<PerioderFraSøknad> perioderFraSøknad) {
-        NavigableSet<LocalDateSegment<JournalpostId>> segments = new TreeSet<>();
-        for (PerioderFraSøknad fraSøknad : perioderFraSøknad) {
-            segments.addAll(fraSøknad.getKurs().stream()
-                .map(kursPeriode -> {
-                    LocalDate fomDato = kursPeriode.getReiseperiodeTil() != null ? kursPeriode.getReiseperiodeTil().getFomDato() : kursPeriode.getPeriode().getFomDato();
-                    LocalDate tomDato = kursPeriode.getReiseperiodeHjem() != null ? kursPeriode.getReiseperiodeHjem().getTomDato() :  kursPeriode.getPeriode().getTomDato();
-                    return new LocalDateSegment<>(fomDato, tomDato, fraSøknad.getJournalpostId());
-                })
-                .collect(Collectors.toCollection(TreeSet::new)));
-        }
+    private void leggTilVilkårsresultatNødvendighet(VilkårBuilder vilkårBuilder, LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinje) {
+        var godkjentTidslinje = tidslinje.filterValue(value -> Objects.equals(value, GODKJENT));
+        var ikkeGodkjentTidslinje = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GODKJENT));
 
-        return LocalDateTimeline.buildGroupOverlappingSegments(segments);
+        leggTilVilkårResultat(vilkårBuilder, godkjentTidslinje, Utfall.OPPFYLT, Avslagsårsak.UDEFINERT);
+        leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_NØDVENDIG);
+    }
+
+    private void leggTilVilkårResultat(VilkårBuilder vilkårBuilder, LocalDateTimeline<?> tidslinje, Utfall utfall, Avslagsårsak avslagsårsak) {
+        TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje)
+            .forEach(datoIntervallEntitet -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(datoIntervallEntitet)
+                .medUtfall(utfall)
+                .medAvslagsårsak(avslagsårsak)));
     }
 }
