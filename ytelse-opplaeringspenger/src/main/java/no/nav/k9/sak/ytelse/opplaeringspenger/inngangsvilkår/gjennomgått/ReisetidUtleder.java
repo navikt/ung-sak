@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeSet;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -13,16 +14,15 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
 class ReisetidUtleder {
 
-    static LocalDateTimeline<Boolean> finnOppgittReisetid(UttaksPerioderGrunnlag uttaksPerioderGrunnlag) {
-        Objects.requireNonNull(uttaksPerioderGrunnlag);
+    static LocalDateTimeline<Boolean> finnOppgittReisetid(Set<PerioderFraSøknad> perioderFraSøknad) {
+        Objects.requireNonNull(perioderFraSøknad);
 
         NavigableSet<DatoIntervallEntitet> reisetid = new TreeSet<>();
-        for (PerioderFraSøknad perioderFraSøknad : uttaksPerioderGrunnlag.getRelevantSøknadsperioder().getPerioderFraSøknadene()) {
-            for (KursPeriode kursPeriode : perioderFraSøknad.getKurs()) {
+        for (PerioderFraSøknad perioder : perioderFraSøknad) {
+            for (KursPeriode kursPeriode : perioder.getKurs()) {
                 if (kursPeriode.getReiseperiodeTil() != null) {
                     reisetid.add(kursPeriode.getReiseperiodeTil());
                 }
@@ -34,12 +34,12 @@ class ReisetidUtleder {
         return TidslinjeUtil.tilTidslinjeKomprimert(reisetid);
     }
 
-    static LocalDateTimeline<Boolean> utledGodkjentReisetid(UttaksPerioderGrunnlag uttaksPerioderGrunnlag, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag) {
-        Objects.requireNonNull(uttaksPerioderGrunnlag);
+    static LocalDateTimeline<Boolean> utledGodkjentReisetid(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag) {
+        Objects.requireNonNull(perioderFraSøknad);
 
         NavigableSet<DatoIntervallEntitet> godkjentReisetid = new TreeSet<>();
-        for (PerioderFraSøknad perioderFraSøknad : uttaksPerioderGrunnlag.getRelevantSøknadsperioder().getPerioderFraSøknadene()) {
-            for (KursPeriode kursPeriode : perioderFraSøknad.getKurs()) {
+        for (PerioderFraSøknad perioder : perioderFraSøknad) {
+            for (KursPeriode kursPeriode : perioder.getKurs()) {
                 if (kanGodkjennesAutomatisk(kursPeriode.getReiseperiodeTil())) {
                     godkjentReisetid.add(kursPeriode.getReiseperiodeTil());
                 }
