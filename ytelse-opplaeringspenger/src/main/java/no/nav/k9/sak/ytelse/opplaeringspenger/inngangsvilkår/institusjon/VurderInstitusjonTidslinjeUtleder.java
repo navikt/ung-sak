@@ -25,15 +25,15 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 
-public class VurderInstitusjonTidslinjeUtleder {
+class VurderInstitusjonTidslinjeUtleder {
 
     private final GodkjentOpplæringsinstitusjonTjeneste godkjentOpplæringsinstitusjonTjeneste;
 
-    public VurderInstitusjonTidslinjeUtleder(GodkjentOpplæringsinstitusjonTjeneste godkjentOpplæringsinstitusjonTjeneste) {
+    VurderInstitusjonTidslinjeUtleder(GodkjentOpplæringsinstitusjonTjeneste godkjentOpplæringsinstitusjonTjeneste) {
         this.godkjentOpplæringsinstitusjonTjeneste = godkjentOpplæringsinstitusjonTjeneste;
     }
 
-    public LocalDateTimeline<InstitusjonGodkjenningStatus> utled(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+    LocalDateTimeline<InstitusjonGodkjenningStatus> utled(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
 
         var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering)
             .map(segment -> List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), true)));

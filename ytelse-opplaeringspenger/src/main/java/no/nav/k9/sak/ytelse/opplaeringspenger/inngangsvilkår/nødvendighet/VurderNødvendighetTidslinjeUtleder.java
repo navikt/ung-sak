@@ -26,7 +26,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 
 class VurderNødvendighetTidslinjeUtleder {
 
-    public LocalDateTimeline<NødvendighetGodkjenningStatus> utled(Vilkårene vilkårene, Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+    LocalDateTimeline<NødvendighetGodkjenningStatus> utled(Vilkårene vilkårene, Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
         Objects.requireNonNull(vilkårene);
         Objects.requireNonNull(perioderFraSøknad);
         Objects.requireNonNull(tidslinjeTilVurdering);

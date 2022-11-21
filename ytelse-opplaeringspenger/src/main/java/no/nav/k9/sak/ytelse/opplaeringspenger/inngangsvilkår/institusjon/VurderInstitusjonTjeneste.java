@@ -67,9 +67,7 @@ public class VurderInstitusjonTjeneste {
 
         var tidslinje = tidslinjeUtleder.utled(perioderFraSøknad, vurdertOpplæringGrunnlag.orElse(null), perioderTilVurdering);
 
-        if (tidslinje.filterValue(godkjenning -> Objects.equals(godkjenning, MANGLER_VURDERING)).stream()
-            .findFirst()
-            .isPresent()) {
+        if (tidslinje.filterValue(godkjenning -> Objects.equals(godkjenning, MANGLER_VURDERING)).stream().findFirst().isPresent()) {
             return Aksjon.TRENGER_AVKLARING;
         }
 

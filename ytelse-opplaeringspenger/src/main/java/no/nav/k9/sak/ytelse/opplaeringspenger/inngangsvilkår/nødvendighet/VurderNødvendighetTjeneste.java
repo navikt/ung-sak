@@ -61,10 +61,9 @@ public class VurderNødvendighetTjeneste {
 
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
 
-        var uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId());
-        var perioderFraSøknad = uttaksPerioderGrunnlag.map(UttaksPerioderGrunnlag::getRelevantSøknadsperioder)
-            .map(UttakPerioderHolder::getPerioderFraSøknadene)
-            .orElse(Set.of());
+        var uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
+        var perioderFraSøknad = uttaksPerioderGrunnlag.getRelevantSøknadsperioder().getPerioderFraSøknadene();
+
         var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(referanse.getBehandlingId());
 
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING);
@@ -72,9 +71,7 @@ public class VurderNødvendighetTjeneste {
 
         var tidslinje = tidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag.orElse(null), tidslinjeTilVurdering);
 
-        if (tidslinje.filterValue(value -> Objects.equals(value, MANGLER_VURDERING)).stream()
-            .findFirst()
-            .isPresent()) {
+        if (tidslinje.filterValue(value -> Objects.equals(value, MANGLER_VURDERING)).stream().findFirst().isPresent()) {
             return Aksjon.TRENGER_AVKLARING;
         }
 
