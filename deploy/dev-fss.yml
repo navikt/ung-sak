@@ -63,6 +63,10 @@ spec:
       rules:
         - application: k9-sak
           namespace: k9saksbehandling
+        - application: k9-formidling
+          namespace: k9saksbehandling
+        - application: k9-formidling-dokumentdata
+          namespace: k9saksbehandling
   env:
     - name: TZ
       value: "Europe/Oslo"
@@ -208,6 +212,8 @@ spec:
     - name: APP_AUTH_SCHEMA_AZUREAD_DOMAIN
       value: "k9.dev.intern.nav.no"
     - name: APP_AUTH_SCHEMA_AZUREAD_ADDITIONAL_PATHS
+      value: "/k9/formidling,api://dev-fss.k9saksbehandling.k9-formidling/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default"
+    - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
       value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default"
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
@@ -242,8 +248,10 @@ spec:
     - name: FILTRER_TILSTOTENDE_PERIODE
       value: "true"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
-      value: "2022-09-19"
+      value: "2022-09-12"
     - name: PSB_UTTAK_UNNTAK_BEVAR_VEDTATT_VERDI
+      value: "true"
+    - name: PLS_UTTAK_PROSENT_PLEIEBEHOV
       value: "true"
 
     # Konfigurasjoner

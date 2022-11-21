@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -203,13 +204,28 @@ public class SykdomVurderingTjeneste {
     }
 
     public LocalDateTimeline<Boolean> hentPsbOppfyltePerioderPåPleietrengende(AktørId pleietrengendeAktørId) {
-        final var innleggelseSegments = pleietrengendeSykdomDokumentRepository.hentInnleggelse(pleietrengendeAktørId)
+        final PleietrengendeSykdomInnleggelser innleggelse = pleietrengendeSykdomDokumentRepository.hentInnleggelse(pleietrengendeAktørId);
+        final LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> ktpVurderinger = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, pleietrengendeAktørId);
+        
+        return tilPsbOppfyltePerioderTidslinje(innleggelse, ktpVurderinger);
+    }
+    
+    public LocalDateTimeline<Boolean> hentPsbOppfyltePerioderPåBehandling(UUID behandlingUuid) {
+        final PleietrengendeSykdomInnleggelser innleggelse = pleietrengendeSykdomDokumentRepository.hentInnleggelse(behandlingUuid);
+        final LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> ktpVurderinger = sykdomVurderingRepository.getVurderingstidslinjeFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandlingUuid);
+        
+        return tilPsbOppfyltePerioderTidslinje(innleggelse, ktpVurderinger);
+    }
+
+    private LocalDateTimeline<Boolean> tilPsbOppfyltePerioderTidslinje(PleietrengendeSykdomInnleggelser innleggelse,
+            LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> ktpVurderinger) {
+        final var innleggelseSegments = innleggelse
             .getPerioder()
             .stream()
             .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), Boolean.TRUE))
             .collect(Collectors.toList());
         final var innleggelseTidslinje = new LocalDateTimeline<>(innleggelseSegments);
-        final var ktpVurderingerTidslinje = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, pleietrengendeAktørId)
+        final var ktpVurderingerTidslinje = ktpVurderinger
             .filterValue(v -> v.getResultat() == Resultat.OPPFYLT)
             .mapValue(v -> Boolean.TRUE);
 
