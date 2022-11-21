@@ -41,7 +41,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     @Inject
     public PleiepengerEndretUtbetalingPeriodeutleder(UttakTjeneste uttakRestKlient,
                                                      BehandlingRepository behandlingRepository,
-                                                     @KonfigVerdi(value = "BG_FORLENGELSE_BASERT_PÅ_UTTAK", defaultVerdi = "false") boolean enabled) {
+                                                     @KonfigVerdi(value = "BG_FORLENGELSE_BASERT_PAA_UTTAK", defaultVerdi = "false") boolean enabled) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.enabled = enabled;

@@ -205,7 +205,7 @@ spec:
       value: "false"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2023-01-02"
-    - name: BG_FORLENGELSE_BASERT_PÅ_UTTAK
+    - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
       value: "false"
 
     # Konfigurasjoner
