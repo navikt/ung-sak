@@ -98,7 +98,12 @@ public class HentEtablertTilsynTjeneste {
         }
 
         final LocalDateTimeline<Duration> etablertTilsynForPleietrengende = hentEtablertTilsynForPleietrengende(referanse, brukUbesluttedeData);
-        final List<PleietrengendeSykdomInnleggelsePeriode> innleggelser = pleietrengendeSykdomDokumentRepository.hentInnleggelse(referanse.getPleietrengendeAktørId()).getPerioder();
+        final List<PleietrengendeSykdomInnleggelsePeriode> innleggelser;
+        if (brukUbesluttedeData) {
+            innleggelser = pleietrengendeSykdomDokumentRepository.hentInnleggelse(referanse.getPleietrengendeAktørId()).getPerioder();
+        } else {
+            innleggelser = pleietrengendeSykdomDokumentRepository.hentInnleggelse(referanse.getBehandlingUuid()).getPerioder();
+        }
         final LocalDateTimeline<Duration> gammelLøsningEtablertTilsynTidslinje = gammelLøsningForEtablertTilsyn(etablertTilsynForPleietrengende, innleggelser);
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, null);
         var pleietrengendeDødsdato = personopplysningerAggregat.getPersonopplysning(referanse.getPleietrengendeAktørId()).getDødsdato();
@@ -107,7 +112,12 @@ public class HentEtablertTilsynTjeneste {
             return toPeriodeMedVarighetList(gammelLøsningEtablertTilsynTidslinje, pleietrengendeDødsdato);
         }
 
-        final LocalDateTimeline<Boolean> sykdomsperioderPåPleietrengende = sykdomVurderingTjeneste.hentPsbOppfyltePerioderPåPleietrengende(referanse.getPleietrengendeAktørId());
+        final LocalDateTimeline<Boolean> sykdomsperioderPåPleietrengende;
+        if (brukUbesluttedeData) {
+            sykdomsperioderPåPleietrengende = sykdomVurderingTjeneste.hentPsbOppfyltePerioderPåPleietrengende(referanse.getPleietrengendeAktørId());
+        } else {
+            sykdomsperioderPåPleietrengende = sykdomVurderingTjeneste.hentPsbOppfyltePerioderPåBehandling(referanse.getBehandlingUuid());
+        }
 
         final LocalDateTimeline<Duration> etablertTilsynForSmøring = EtablertTilsynUnntaksutnuller.ignorerEtablertTilsynVedInnleggelserOgUnntak(etablertTilsynForPleietrengende, unntakEtablertTilsynForPleietrengende, innleggelser);
         final List<PeriodeMedVarighet> smurteEtablertTilsynPerioder = SykdomsperiodeEtablertTilsynSmører.smørEtablertTilsyn(sykdomsperioderPåPleietrengende, etablertTilsynForSmøring);
