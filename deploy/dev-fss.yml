@@ -251,6 +251,8 @@ spec:
       value: "2022-09-12"
     - name: PSB_UTTAK_UNNTAK_BEVAR_VEDTATT_VERDI
       value: "true"
+    - name: BG_FORLENGELSE_BASERT_PÅ_UTTAK
+      value: "false"
     - name: PLS_UTTAK_PROSENT_PLEIEBEHOV
       value: "true"
 
