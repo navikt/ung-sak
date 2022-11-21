@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.PRECONDITION_BEREGNING;
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_VILKAR_BERGRUNN;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,6 +20,7 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FastsettPGIPeriodeTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
+import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
@@ -288,7 +290,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
             var forlengelseperioder = allePerioder.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toSet());
             if (!forlengelseperioder.isEmpty()) {
                 log.info("Kopierer beregning for forlengelser {}", forlengelseperioder);
-                kalkulusTjeneste.kopier(ref, forlengelseperioder);
+                kalkulusTjeneste.kopier(ref, forlengelseperioder, StegType.VURDER_VILKAR_BERGRUNN);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
                 beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
                     kontekst,

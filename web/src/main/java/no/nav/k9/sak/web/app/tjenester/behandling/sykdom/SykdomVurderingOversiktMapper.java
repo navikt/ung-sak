@@ -21,18 +21,18 @@ import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingOversiktElement;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste.SykdomVurderingerOgPerioder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 
 public class SykdomVurderingOversiktMapper {
-    public SykdomVurderingOversikt mapPSB(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder, LocalDate pleietrengendesFødselsdato) {
+    public SykdomVurderingOversikt mapPSB(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder, LocalDate pleietrengendesFødselsdato, boolean lukketBehandling) {
         final var elements = tilSykdomVurderingOversiktElement(behandlingUuid, saksnummer, sykdomVurderingerOgPerioder);
-
+        
         return new SykdomVurderingOversikt(
                 elements,
-                sykdomVurderingerOgPerioder.getResterendeVurderingsperioder(),
-                sykdomVurderingerOgPerioder.getResterendeValgfrieVurderingsperioder(),
+                lukketBehandling ? List.of() : sykdomVurderingerOgPerioder.getResterendeVurderingsperioder(),
+                lukketBehandling ? List.of() : sykdomVurderingerOgPerioder.getResterendeValgfrieVurderingsperioder(),
                 sykdomVurderingerOgPerioder.getNyeSøknadsperioder(),
                 sykdomVurderingerOgPerioder.getPerioderSomKanVurderes(),
                 pleietrengendesFødselsdato,
@@ -41,15 +41,15 @@ public class SykdomVurderingOversiktMapper {
                 );
     }
 
-    public SykdomVurderingOversikt mapPPN(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder) {
+    public SykdomVurderingOversikt mapPPN(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder, boolean lukketBehandling) {
         final var elements = tilSykdomVurderingOversiktElement(behandlingUuid, saksnummer, sykdomVurderingerOgPerioder);
 
         Boolean harPerioderDerPleietrengendeErOver18år = null; //ikke relevant for PPN, sender null for å styre oppførsel i frontend
         LocalDate pleietrengendesFødselsdato = null; //ikke relevant for PPN
         return new SykdomVurderingOversikt(
             elements,
-            sykdomVurderingerOgPerioder.getResterendeVurderingsperioder(),
-            sykdomVurderingerOgPerioder.getResterendeValgfrieVurderingsperioder(),
+            lukketBehandling ? List.of() : sykdomVurderingerOgPerioder.getResterendeVurderingsperioder(),
+            lukketBehandling ? List.of() : sykdomVurderingerOgPerioder.getResterendeValgfrieVurderingsperioder(),
             sykdomVurderingerOgPerioder.getNyeSøknadsperioder(),
             sykdomVurderingerOgPerioder.getPerioderSomKanVurderes(),
             pleietrengendesFødselsdato,

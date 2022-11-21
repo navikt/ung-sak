@@ -29,6 +29,9 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 
@@ -41,6 +44,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
     private VilkårResultatRepository vilkårResultatRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
+    private PleiebehovResultatRepository resultatRepository;
     private boolean utvidVedDødsfall;
 
     HåndterHåndterePleietrengendeDødsfallTjenestePSB() {
@@ -52,10 +56,11 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
                                                             @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                             PersonopplysningTjeneste personopplysningTjeneste,
                                                             RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
-                                                            @KonfigVerdi(value = "PSB_PPN_UTVIDE_VED_DODSFALL", defaultVerdi = "true") boolean utvidVedDødsfall) {
+                                                            PleiebehovResultatRepository resultatRepository, @KonfigVerdi(value = "PSB_PPN_UTVIDE_VED_DODSFALL", defaultVerdi = "true") boolean utvidVedDødsfall) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
+        this.resultatRepository = resultatRepository;
         this.utvidVedDødsfall = utvidVedDødsfall;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
@@ -115,6 +120,11 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
         forlengAndreVilkår(periode, vilkårene, resultatBuilder);
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), resultatBuilder.build());
+
+        final var nåværendeResultat = resultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
+        var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
+        builder.tilbakeStill(periode);
+        resultatRepository.lagreOgFlush(referanse.getBehandlingId(), builder);
     }
 
     private UtvidelseAvPeriode utledUtvidelse(RettVedDødType rettVedDød) {
