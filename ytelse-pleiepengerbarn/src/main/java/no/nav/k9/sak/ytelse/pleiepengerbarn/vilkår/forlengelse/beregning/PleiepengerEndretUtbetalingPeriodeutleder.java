@@ -28,7 +28,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 @ApplicationScoped
-class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetalingPeriodeutleder {
+public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetalingPeriodeutleder {
 
     private UttakTjeneste uttakRestKlient;
     private BehandlingRepository behandlingRepository;
