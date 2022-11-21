@@ -182,6 +182,12 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         final LocalDateTimeline<Boolean> endringerISøktePerioder = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder)
             .getDiffPerioder();
 
+        logger.info("tilVurdering " + perioder);
+
+
+        logger.info("endringerISøktePerioder " + endringerISøktePerioder.toSegments().stream().map(LocalDateSegment::getLocalDateInterval).toList());
+
+
         final LocalDateTimeline<Boolean> utvidedePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
 
         var ekstraPerioder = TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
