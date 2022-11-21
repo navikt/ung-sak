@@ -73,13 +73,19 @@ public class BeregningStegTjeneste {
         var forlengelserMedEndring = perioderTilVurdering.stream()
             .filter(p -> !ingenRelevantEndring(ref, p))
             .collect(Collectors.toCollection(TreeSet::new));
-        fortsettBeregning(ref, stegType, resultatCallback, forlengelserMedEndring);
+
+        if (!forlengelserMedEndring.isEmpty()) {
+            fortsettBeregning(ref, stegType, resultatCallback, forlengelserMedEndring);
+        }
 
         // Kopierer dersom ingen endring
         var forlengelserUtenEndring = perioderTilVurdering.stream()
             .filter(p -> ingenRelevantEndring(ref, p))
             .collect(Collectors.toCollection(TreeSet::new));
-        kalkulusTjeneste.kopier(ref, forlengelserUtenEndring, new StegType(stegType.getKode()));
+
+        if (!forlengelserUtenEndring.isEmpty()) {
+            kalkulusTjeneste.kopier(ref, forlengelserUtenEndring, new StegType(stegType.getKode()));
+        }
     }
 
     public void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
