@@ -28,13 +28,10 @@ import no.nav.k9.sak.typer.Periode;
 @ApplicationScoped
 public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
 
-    public static final MonthDay FØRSTE_MULIGE_SKATTEOPPGJØRSDATO = MonthDay.of(5, 1);
-    public static final int ANTALL_FERDIGLIGNEDE_ÅR = 4;
     private BehandlingRepository behandlingRepository;
 
     private Period periodeEtter = Period.parse("P3M");
     private Period periodeFør = Period.parse("P17M");
-    private Period skattegrunnlagPeriodeFør = Period.parse("P5Y");
 
     PleiepengerbarnSkjæringstidspunktTjenesteImpl() {
         // CDI

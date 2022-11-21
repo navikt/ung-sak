@@ -516,7 +516,11 @@ public class RegisterdataInnhenter {
         var innhentRegisterdataRequest = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
         innhentRegisterdataRequest.setCallbackUrl(abakusTjeneste.getCallbackUrl());
 
-        skjæringstidspunktTjeneste.utledOpplysningsperiodeSkattegrunnlag(behandling.getId(), fagsakYtelseType)
+        var opplysningsperiodeSkattegrunnlag = skjæringstidspunktTjeneste.utledOpplysningsperiodeSkattegrunnlag(behandling.getId(), fagsakYtelseType);
+        if (opplysningsperiodeSkattegrunnlag.isPresent()) {
+            log.info("Opplysningsperiode skattegrunnlag: " + opplysningsperiodeSkattegrunnlag);
+        }
+        opplysningsperiodeSkattegrunnlag
             .map(p -> new Periode(p.getFom(), p.getTom()))
             .ifPresent(innhentRegisterdataRequest::setOpplysningsperiodeSkattegrunnlag);
 
