@@ -182,12 +182,6 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         final LocalDateTimeline<Boolean> endringerISøktePerioder = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder)
             .getDiffPerioder();
 
-        logger.info("tilVurdering " + perioder);
-
-
-        logger.info("endringerISøktePerioder " + endringerISøktePerioder.toSegments().stream().map(LocalDateSegment::getLocalDateInterval).toList());
-
-
         final LocalDateTimeline<Boolean> utvidedePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
 
         var ekstraPerioder = TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
@@ -195,6 +189,8 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId())
             .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
         if (vilkårene.isPresent()) {
+            logger.info("ekstraPerioder " + perioder);
+
             return utledVilkårsPerioderFraPerioderTilVurdering(referanse.getBehandlingId(), vilkårene.get(), ekstraPerioder);
         }
         return ekstraPerioder;
@@ -261,6 +257,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         utvidedePerioder = utvidedePerioder.union(etablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
         utvidedePerioder = utvidedePerioder.union(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId()), StandardCombinators::alwaysTrueForMatch);
         utvidedePerioder = utvidedePerioder.union(uttaksendringerSidenForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
+        logger.info("utvidedePerioder " + utvidedePerioder);
 
         return TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
     }
