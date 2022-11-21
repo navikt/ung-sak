@@ -30,7 +30,7 @@ import no.nav.k9.sak.kontrakt.opplæringspenger.GodkjentOpplæringsinstitusjonDt
 import no.nav.k9.sak.kontrakt.opplæringspenger.GodkjentOpplæringsinstitusjonIdDto;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
-import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.GodkjentOpplæringsinstitusjonTjeneste;
+import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.institusjon.GodkjentOpplæringsinstitusjonTjeneste;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjonPeriode;
 

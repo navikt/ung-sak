@@ -47,7 +47,6 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.OppfyltVilkårTidslinjeUtleder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
@@ -63,7 +62,6 @@ public class VurderSykdomSteg implements BehandlingSteg {
 
     private final MedisinskVilkårTjeneste medisinskVilkårTjeneste = new MedisinskVilkårTjeneste();
     private BehandlingRepositoryProvider repositoryProvider;
-    private PleiebehovResultatRepository resultatRepository;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -77,7 +75,6 @@ public class VurderSykdomSteg implements BehandlingSteg {
 
     @Inject
     public VurderSykdomSteg(BehandlingRepositoryProvider repositoryProvider,
-                            PleiebehovResultatRepository resultatRepository,
                             @FagsakYtelseTypeRef(OPPLÆRINGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                             SykdomVurderingTjeneste sykdomVurderingTjeneste,
                             MedisinskGrunnlagRepository medisinskGrunnlagRepository,
@@ -85,7 +82,6 @@ public class VurderSykdomSteg implements BehandlingSteg {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
-        this.resultatRepository = resultatRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
