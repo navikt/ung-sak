@@ -184,7 +184,7 @@ public class VurderNødvendighetStegTest {
         assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder()).hasSize(1);
         assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getPeriode().getFomDato()).isEqualTo(søknadsperiode.getFom());
         assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getPeriode().getTomDato()).isEqualTo(søknadsperiode.getTom());
-        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getGrad()).isEqualTo(Pleiegrad.OPPLÆRINGSPENGER);
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getGrad()).isEqualTo(Pleiegrad.NØDVENDIG_OPPLÆRING);
     }
 
     @Test

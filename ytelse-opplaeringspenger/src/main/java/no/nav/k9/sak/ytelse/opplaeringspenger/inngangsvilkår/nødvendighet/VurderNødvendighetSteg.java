@@ -109,7 +109,7 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
     }
 
     private EtablertPleieperiode lagPleieperiode(VilkårPeriode vilkårPeriode) {
-        return new EtablertPleieperiode(vilkårPeriode.getPeriode(), vilkårPeriode.getGjeldendeUtfall() == Utfall.OPPFYLT ? Pleiegrad.OPPLÆRINGSPENGER : Pleiegrad.INGEN);
+        return new EtablertPleieperiode(vilkårPeriode.getPeriode(), vilkårPeriode.getGjeldendeUtfall() == Utfall.OPPFYLT ? Pleiegrad.NØDVENDIG_OPPLÆRING : Pleiegrad.INGEN);
     }
 
     @Override

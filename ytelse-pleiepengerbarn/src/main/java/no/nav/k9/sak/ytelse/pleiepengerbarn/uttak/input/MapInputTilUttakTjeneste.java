@@ -324,7 +324,7 @@ public class MapInputTilUttakTjeneste {
         return switch (grad) {
             case INGEN -> Pleiebehov.PROSENT_0;
             case LIVETS_SLUTT_TILSYN -> (ny200ProsentPleiebehovFor2023) ? Pleiebehov.PROSENT_200 : Pleiebehov.PROSENT_100;
-            case KONTINUERLIG_TILSYN, OPPLÆRINGSPENGER -> Pleiebehov.PROSENT_100;
+            case KONTINUERLIG_TILSYN, NØDVENDIG_OPPLÆRING -> Pleiebehov.PROSENT_100;
             case UTVIDET_KONTINUERLIG_TILSYN, INNLEGGELSE -> Pleiebehov.PROSENT_200;
             default -> throw new IllegalStateException("Ukjent Pleiegrad: " + grad);
         };
