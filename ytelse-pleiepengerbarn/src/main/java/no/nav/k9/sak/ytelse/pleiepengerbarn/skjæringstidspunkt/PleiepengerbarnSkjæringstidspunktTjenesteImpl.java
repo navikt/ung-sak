@@ -5,8 +5,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRST�
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.time.LocalDate;
-import java.time.MonthDay;
-import java.time.Period;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -18,9 +16,7 @@ import no.nav.k9.sak.behandling.Skjæringstidspunkt.Builder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.skjæringstidspunkt.SkattegrunnlaginnhentingTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.k9.sak.typer.Periode;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
@@ -29,9 +25,6 @@ import no.nav.k9.sak.typer.Periode;
 public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
 
     private BehandlingRepository behandlingRepository;
-
-    private Period periodeEtter = Period.parse("P3M");
-    private Period periodeFør = Period.parse("P17M");
 
     PleiepengerbarnSkjæringstidspunktTjenesteImpl() {
         // CDI
@@ -65,29 +58,6 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
     private LocalDate førsteUttaksdag(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         return behandling.getFagsak().getPeriode().getFomDato();
-    }
-
-    @Override
-    public Periode utledOpplysningsperiode(Long behandlingId, FagsakYtelseType ytelseType, boolean tomDagensDato) {
-        var skjæringstidspunkt = this.utledSkjæringstidspunktForRegisterInnhenting(behandlingId, ytelseType);
-
-        var tom = behandlingRepository.hentBehandling(behandlingId)
-            .getFagsak()
-            .getPeriode()
-            .getTomDato()
-            .plus(periodeEtter);
-
-        return new Periode(skjæringstidspunkt.minus(periodeFør), tomDagensDato && tom.isBefore(LocalDate.now()) ? LocalDate.now() : tom);
-    }
-
-    @Override
-    public Optional<Periode> utledOpplysningsperiodeSkattegrunnlag(Long behandlingId, FagsakYtelseType ytelseType) {
-        var fagsakperiodeTom = behandlingRepository.hentBehandling(behandlingId)
-            .getFagsak()
-            .getPeriode()
-            .getTomDato();
-        var førsteSkjæringstidspunkt = this.utledSkjæringstidspunktForRegisterInnhenting(behandlingId, ytelseType);
-        return Optional.of(SkattegrunnlaginnhentingTjeneste.utledSkattegrunnlagOpplysningsperiode(førsteSkjæringstidspunkt, fagsakperiodeTom));
     }
 
 }

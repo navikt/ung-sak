@@ -41,9 +41,4 @@ public class DummySkjæringstidspunktTjeneste implements SkjæringstidspunktTjen
         this.utledetSkjæringstidspunkt = utledetSkjæringstidspunkt;
     }
 
-    @Override
-    public Periode utledOpplysningsperiode(Long id, FagsakYtelseType fagsakYtelseType, boolean tomDagensDato) {
-        return null;
-    }
-
 }

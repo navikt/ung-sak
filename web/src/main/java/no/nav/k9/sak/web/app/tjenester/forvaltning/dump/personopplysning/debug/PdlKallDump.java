@@ -30,9 +30,9 @@ import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
+import no.nav.k9.sak.domene.registerinnhenting.OpplysningsperiodeTjeneste;
 import no.nav.k9.sak.domene.registerinnhenting.YtelsesspesifikkRelasjonsFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
@@ -63,11 +63,10 @@ public class PdlKallDump implements DebugDumpBehandling {
         }
     }
 
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
-
     private DebugPersoninfoAdapter personinfoAdapter;
 
     private Instance<YtelsesspesifikkRelasjonsFilter> relasjonsFiltre;
+    private Instance<OpplysningsperiodeTjeneste> opplysningsperiodeTjeneste;
 
     public static final String path = "pdlkall";
 
@@ -75,12 +74,12 @@ public class PdlKallDump implements DebugDumpBehandling {
     }
 
     @Inject
-    public PdlKallDump(SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                       DebugPersoninfoAdapter personinfoAdapter,
-                       @Any Instance<YtelsesspesifikkRelasjonsFilter> relasjonsFiltre) {
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
+    public PdlKallDump(DebugPersoninfoAdapter personinfoAdapter,
+                       @Any Instance<YtelsesspesifikkRelasjonsFilter> relasjonsFiltre,
+                       @Any Instance<OpplysningsperiodeTjeneste> opplysningsperiodeTjeneste) {
         this.personinfoAdapter = personinfoAdapter;
         this.relasjonsFiltre = relasjonsFiltre;
+        this.opplysningsperiodeTjeneste = opplysningsperiodeTjeneste;
     }
 
     @Override
@@ -102,7 +101,8 @@ public class PdlKallDump implements DebugDumpBehandling {
         var informasjonBuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
 
         var fagsakYtelseType = behandling.getFagsakYtelseType();
-        var opplysningsperioden = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), fagsakYtelseType, true);
+        var opplysningsperioden = OpplysningsperiodeTjeneste.getTjeneste(opplysningsperiodeTjeneste, behandling.getFagsakYtelseType())
+            .utledOpplysningsperiode(behandling.getId(), true);
         dumpinnhold.add(opplysningsperioden.toString());
 
         Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(dumpinnhold, søkerPersonInfo.getAktørId(), opplysningsperioden);
@@ -215,7 +215,7 @@ public class PdlKallDump implements DebugDumpBehandling {
             final PersonInformasjonBuilder.AdresseBuilder adresseBuilder = informasjonBuilder.getAdresseBuilder(aktørId, periode,
                 adresse.getAdresse().getAdresseType());
 
-            dumpinnhold.add("adressebuilder for " + aktørId + " oppdatering=" + adresseBuilder.getErOppdatering() + " periode=" + periode + " type=" +adresse.getAdresse().getAdresseType() + " adresse=" +adresse.getAdresse().getAdresselinje1());
+            dumpinnhold.add("adressebuilder for " + aktørId + " oppdatering=" + adresseBuilder.getErOppdatering() + " periode=" + periode + " type=" + adresse.getAdresse().getAdresseType() + " adresse=" + adresse.getAdresse().getAdresselinje1());
 
             adresseBuilder.medPeriode(periode)
                 .medAdresselinje1(adresse.getAdresse().getAdresselinje1())
