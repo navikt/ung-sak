@@ -65,4 +65,9 @@ public class KroniskSykSkjæringstidspunktTjeneste implements Skjæringstidspunk
         return new Periode(skjæringstidspunkt.minus(periodeFør), tomDagensDato && tom.isBefore(LocalDate.now()) ? LocalDate.now() : tom);
     }
 
+    @Override
+    public Optional<Periode> utledOpplysningsperiodeSkattegrunnlag(Long id, FagsakYtelseType fagsakYtelseType) {
+        return Optional.empty();
+    }
+
 }

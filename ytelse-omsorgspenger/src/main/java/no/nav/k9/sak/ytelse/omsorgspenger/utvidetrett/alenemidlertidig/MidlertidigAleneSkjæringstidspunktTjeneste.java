@@ -65,4 +65,9 @@ public class MidlertidigAleneSkjæringstidspunktTjeneste implements Skjæringsti
         return new Periode(skjæringstidspunkt.minus(periodeFør), tomDagensDato && tom.isBefore(LocalDate.now()) ? LocalDate.now() : tom);
     }
 
+    @Override
+    public Optional<Periode> utledOpplysningsperiodeSkattegrunnlag(Long id, FagsakYtelseType fagsakYtelseType) {
+        return Optional.empty();
+    }
+
 }

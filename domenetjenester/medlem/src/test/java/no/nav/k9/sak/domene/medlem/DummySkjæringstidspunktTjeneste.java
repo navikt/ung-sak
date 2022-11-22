@@ -46,4 +46,9 @@ public class DummySkjæringstidspunktTjeneste implements SkjæringstidspunktTjen
         return null;
     }
 
+    @Override
+    public Optional<Periode> utledOpplysningsperiodeSkattegrunnlag(Long id, FagsakYtelseType fagsakYtelseType) {
+        return Optional.empty();
+    }
+
 }

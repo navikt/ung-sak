@@ -61,10 +61,15 @@ public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjene
     public LocalDate utledSkjæringstidspunktForRegisterInnhenting(Long behandlingId, FagsakYtelseType ytelseType) {
         return getTjeneste(ytelseType).utledSkjæringstidspunktForRegisterInnhenting(behandlingId, ytelseType);
     }
-    
+
     @Override
     public Periode utledOpplysningsperiode(Long id, FagsakYtelseType fagsakYtelseType, boolean tomDagensDato) {
         return getTjeneste(fagsakYtelseType).utledOpplysningsperiode(id, fagsakYtelseType, tomDagensDato);
+    }
+
+    @Override
+    public Optional<Periode> utledOpplysningsperiodeSkattegrunnlag(Long id, FagsakYtelseType fagsakYtelseType) {
+        return Optional.empty();
     }
 
 }
