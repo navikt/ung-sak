@@ -19,11 +19,6 @@ public interface SkjæringstidspunktTjeneste {
      */
     LocalDate utledSkjæringstidspunktForRegisterInnhenting(Long behandlingId, FagsakYtelseType ytelseType);
 
-    Periode utledOpplysningsperiode(Long id, FagsakYtelseType fagsakYtelseType, boolean tomDagensDato);
-
-    default Optional<Periode> utledOpplysningsperiodeSkattegrunnlag(Long id, FagsakYtelseType fagsakYtelseType) {
-        return Optional.empty();
-    };
 
 
 }
