@@ -108,6 +108,9 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
 
     private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Long behandlingId, Vilkår vilkår, NavigableSet<DatoIntervallEntitet> perioder) {
         var perioderTilVurdering = new TreeSet<>(utledPerioderTilVurderingVedÅHensyntaFullstendigTidslinje(behandlingId, perioder));
+
+        logger.info("perioderTilVurdering " + perioderTilVurdering);
+
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         var referanse = BehandlingReferanse.fra(behandling);
@@ -119,6 +122,10 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId())));
         perioderTilVurdering.addAll(perioderSomSkalTilbakestilles(behandlingId));
+
+        logger.info("vilkårPerioder " + vilkår.getPerioder()
+            .stream()
+            .map(VilkårPeriode::getPeriode).toList());
 
         return vilkår.getPerioder()
             .stream()
