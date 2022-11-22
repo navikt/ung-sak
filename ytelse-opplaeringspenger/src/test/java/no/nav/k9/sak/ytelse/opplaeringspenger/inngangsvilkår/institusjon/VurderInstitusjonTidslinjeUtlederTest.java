@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -22,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
@@ -44,13 +44,14 @@ public class VurderInstitusjonTidslinjeUtlederTest {
     private final String institusjon2 = "noe annet";
     private final UUID institusjon1Uuid = UUID.randomUUID();
     private final UUID institusjon2Uuid = UUID.randomUUID();
-    private NavigableSet<DatoIntervallEntitet> søknadsperioder;
+    private LocalDateTimeline<Boolean> søknadstidslinje;
 
     @BeforeEach
     public void setup() {
         godkjentOpplæringsinstitusjonTjeneste = mock(GodkjentOpplæringsinstitusjonTjeneste.class);
         vurderInstitusjonTidslinjeUtleder = new VurderInstitusjonTidslinjeUtleder(godkjentOpplæringsinstitusjonTjeneste);
-        søknadsperioder = new TreeSet<>(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom)));
+        var søknadsperioder = new TreeSet<>(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom)));
+        søknadstidslinje = TidslinjeUtil.tilTidslinjeKomprimert(søknadsperioder);
     }
 
     private Set<PerioderFraSøknad> setupEnkelKursperiode() {
@@ -97,7 +98,7 @@ public class VurderInstitusjonTidslinjeUtlederTest {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode(institusjon1Uuid);
         setupGodkjentOpplæringsinstitusjonIRegister("noe", søknadsperiodeFom, søknadsperiodeTom, institusjon1Uuid);
 
-        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, null, søknadsperioder);
+        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, null, søknadstidslinje);
         assertThat(resultat).isNotNull();
         assertTidslinje(resultat, GODKJENT);
     }
@@ -106,7 +107,7 @@ public class VurderInstitusjonTidslinjeUtlederTest {
     public void institusjonLiggerIkkeIRegisterEllerVurderingsgrunnlag() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
 
-        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, null, søknadsperioder);
+        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, null, søknadstidslinje);
         assertThat(resultat).isNotNull();
         assertTidslinje(resultat, MANGLER_VURDERING);
     }
@@ -116,7 +117,7 @@ public class VurderInstitusjonTidslinjeUtlederTest {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode(institusjon1Uuid);
         setupGodkjentOpplæringsinstitusjonIRegister(institusjon1, søknadsperiodeTom.plusDays(1), søknadsperiodeTom.plusDays(1), institusjon1Uuid);
 
-        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, null, søknadsperioder);
+        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, null, søknadstidslinje);
         assertThat(resultat).isNotNull();
         assertTidslinje(resultat, MANGLER_VURDERING);
     }
@@ -126,7 +127,7 @@ public class VurderInstitusjonTidslinjeUtlederTest {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode(institusjon1Uuid);
         setupGodkjentOpplæringsinstitusjonIRegister(institusjon1, søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1Uuid);
 
-        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, null, søknadsperioder);
+        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, null, søknadstidslinje);
         assertThat(resultat).isNotNull();
         var forventetGodkjentTidslinje = resultat.intersection(new LocalDateTimeline<>(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), true));
         assertTidslinje(forventetGodkjentTidslinje, GODKJENT);
@@ -139,7 +140,7 @@ public class VurderInstitusjonTidslinjeUtlederTest {
         VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon(journalpost1, true, "begrunnelse");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertInstitusjon));
 
-        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperioder);
+        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, vurdertOpplæringGrunnlag, søknadstidslinje);
         assertThat(resultat).isNotNull();
         assertTidslinje(resultat, GODKJENT);
     }
@@ -155,7 +156,7 @@ public class VurderInstitusjonTidslinjeUtlederTest {
         VurdertInstitusjon vurdertInstitusjon2 = new VurdertInstitusjon(journalpost2, false, "nei");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertInstitusjon1, vurdertInstitusjon2));
 
-        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperioder);
+        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, vurdertOpplæringGrunnlag, søknadstidslinje);
         assertThat(resultat).isNotNull();
         var forventetGodkjentTidslinje = resultat.intersection(new LocalDateTimeline<>(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), true));
         assertTidslinje(forventetGodkjentTidslinje, GODKJENT);
@@ -170,7 +171,7 @@ public class VurderInstitusjonTidslinjeUtlederTest {
         setupGodkjentOpplæringsinstitusjonIRegister(institusjon1, søknadsperiodeFom, søknadsperiodeTom, institusjon1Uuid);
         setupGodkjentOpplæringsinstitusjonIRegister(institusjon2, søknadsperiodeTom.plusDays(1), null, institusjon2Uuid);
 
-        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, null, søknadsperioder);
+        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, null, søknadstidslinje);
         assertThat(resultat).isNotNull();
         var forventetGodkjentTidslinje = resultat.intersection(new LocalDateTimeline<>(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), true));
         assertTidslinje(forventetGodkjentTidslinje, GODKJENT);
@@ -188,7 +189,7 @@ public class VurderInstitusjonTidslinjeUtlederTest {
         VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon(journalpost2, true, "ja");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertInstitusjon));
 
-        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperioder);
+        var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, vurdertOpplæringGrunnlag, søknadstidslinje);
         assertThat(resultat).isNotNull();
         assertTidslinje(resultat, GODKJENT);
     }

@@ -9,7 +9,6 @@ import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendigh
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.MANGLER_VURDERING;
 
 import java.util.Objects;
-import java.util.Set;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -28,10 +27,7 @@ import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.Aksjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderHolder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
 @Dependent
 public class VurderNødvendighetTjeneste {
@@ -40,20 +36,17 @@ public class VurderNødvendighetTjeneste {
     private final VilkårResultatRepository vilkårResultatRepository;
     private final VurdertOpplæringRepository vurdertOpplæringRepository;
     private final UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
-    private final PleiebehovResultatRepository resultatRepository;
     private final VurderNødvendighetTidslinjeUtleder tidslinjeUtleder;
 
     @Inject
     public VurderNødvendighetTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                       @FagsakYtelseTypeRef(OPPLÆRINGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                       VurdertOpplæringRepository vurdertOpplæringRepository,
-                                      UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
-                                      PleiebehovResultatRepository resultatRepository) {
+                                      UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository) {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.vurdertOpplæringRepository = vurdertOpplæringRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
-        this.resultatRepository = resultatRepository;
         this.tidslinjeUtleder = new VurderNødvendighetTidslinjeUtleder();
     }
 

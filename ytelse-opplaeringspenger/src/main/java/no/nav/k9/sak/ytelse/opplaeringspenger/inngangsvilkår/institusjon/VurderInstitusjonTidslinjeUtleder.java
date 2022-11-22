@@ -18,8 +18,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
@@ -33,10 +31,9 @@ class VurderInstitusjonTidslinjeUtleder {
         this.godkjentOpplæringsinstitusjonTjeneste = godkjentOpplæringsinstitusjonTjeneste;
     }
 
-    LocalDateTimeline<InstitusjonGodkjenningStatus> utled(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
-
-        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering)
-            .map(segment -> List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), true)));
+    LocalDateTimeline<InstitusjonGodkjenningStatus> utled(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        Objects.requireNonNull(perioderFraSøknad);
+        Objects.requireNonNull(tidslinjeTilVurdering);
 
         LocalDateTimeline<InstitusjonGodkjenningStatus> tidslinjeMedInstitusjonsgodkjenning = lagTidslinjeMedInstitusjonsGodkjenning(perioderFraSøknad, vurdertOpplæringGrunnlag);
 
@@ -108,7 +105,6 @@ class VurderInstitusjonTidslinjeUtleder {
     }
 
     private LocalDateTimeline<List<InstitusjonFraSøknad>> hentTidslinjeMedInstitusjonFraSøknad(Set<PerioderFraSøknad> perioderFraSøknad) {
-        Objects.requireNonNull(perioderFraSøknad);
 
         NavigableSet<LocalDateSegment<InstitusjonFraSøknad>> segments = new TreeSet<>();
         for (PerioderFraSøknad fraSøknad : perioderFraSøknad) {
