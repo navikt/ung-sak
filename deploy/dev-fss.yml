@@ -237,8 +237,6 @@ spec:
       value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
       value: "true"
-    - name: PSB_PPN_UTVIDE_VED_DODSFALL
-      value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "true"
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE

@@ -13,7 +13,6 @@ import java.util.TreeSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.uttak.RettVedDødType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -45,7 +44,6 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
     private PersonopplysningTjeneste personopplysningTjeneste;
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
     private PleiebehovResultatRepository resultatRepository;
-    private boolean utvidVedDødsfall;
 
     HåndterHåndterePleietrengendeDødsfallTjenestePSB() {
         // CDI
@@ -56,21 +54,16 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
                                                             @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                             PersonopplysningTjeneste personopplysningTjeneste,
                                                             RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
-                                                            PleiebehovResultatRepository resultatRepository, @KonfigVerdi(value = "PSB_PPN_UTVIDE_VED_DODSFALL", defaultVerdi = "true") boolean utvidVedDødsfall) {
+                                                            PleiebehovResultatRepository resultatRepository) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.resultatRepository = resultatRepository;
-        this.utvidVedDødsfall = utvidVedDødsfall;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
     @Override
     public Optional<DatoIntervallEntitet> utledUtvidetPeriodeForDødsfall(BehandlingReferanse referanse) {
-        if (!utvidVedDødsfall) {
-            return Optional.empty();
-        }
-
         var rettVedDødGrunnlagOpt = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
         if (rettVedDødGrunnlagOpt.isEmpty()) {
             return Optional.empty();
