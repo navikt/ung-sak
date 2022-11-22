@@ -127,7 +127,7 @@ spec:
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
-      value: http://abac-k9.teamabac/application/authorize
+      value: http://abac-k9.k9saksbehandling/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
       value: https://app.adeo.no/k9/oppdrag/api
     - name: ARBEIDSFORDELING_RS_URL
