@@ -6,6 +6,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,11 +26,13 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.uttak.ArbeidsgiverMedPerioderSomManglerDto;
 import no.nav.k9.sak.kontrakt.uttak.ManglendeArbeidstidDto;
@@ -37,6 +40,7 @@ import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
+import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.KjøreplanUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
@@ -111,10 +115,21 @@ public class PleiepengerUttakRestTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
         var utsattBehandlingAvPeriode = utsattBehandlingAvPeriodeRepository.hentGrunnlag(behandling.getId());
 
-        var utsattePerioder = utsattBehandlingAvPeriode.stream()
+        var utsattePerioderSegmenter = utsattBehandlingAvPeriode.stream()
             .map(UtsattBehandlingAvPeriode::getPerioder)
             .flatMap(Collection::stream)
-            .map(it -> new LukketPeriode(it.getPeriode().getFomDato(), it.getPeriode().getTomDato()))
+            .map(UtsattPeriode::getPeriode)
+            .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true))
+            .collect(Collectors.toList());
+
+        var utsattePerioder = new LocalDateTimeline<>(utsattePerioderSegmenter)
+            .compress()
+            .getLocalDateIntervals()
+            .stream()
+            .map(DatoIntervallEntitet::fra)
+            .collect(Collectors.toCollection(TreeSet::new))
+            .stream()
+            .map(it -> new LukketPeriode(it.getFomDato(), it.getTomDato()))
             .collect(Collectors.toSet());
 
         return new UttaksplanMedUtsattePerioder(uttaksplan, utsattePerioder);
