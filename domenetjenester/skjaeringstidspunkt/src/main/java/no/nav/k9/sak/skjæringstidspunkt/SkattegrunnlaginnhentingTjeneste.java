@@ -17,8 +17,7 @@ public class SkattegrunnlaginnhentingTjeneste {
     }
 
     private static int finnFørsteÅr(LocalDate førsteSkjæringstidspunkt) {
-        var åretFørFørsteStp = førsteSkjæringstidspunkt.getYear() - 1;
-        return åretFørFørsteStp - ANTALL_FERDIGLIGNEDE_ÅR;
+        return førsteSkjæringstidspunkt.getYear() - ANTALL_FERDIGLIGNEDE_ÅR;
     }
 
     private static int finnSisteÅr(LocalDate fagsakperiodeTom) {
