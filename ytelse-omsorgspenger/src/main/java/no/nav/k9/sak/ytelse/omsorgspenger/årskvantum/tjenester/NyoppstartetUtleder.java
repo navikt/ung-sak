@@ -30,42 +30,52 @@ public class NyoppstartetUtleder {
             return Map.of();
         }
 
-        Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktiveArbeidsforhold = utledAktivTidslinjePrArbeidsforhold(aktørArbeid.get());
-        Map<Arbeidsgiver, LocalDateTimeline<Boolean>> aktiveArbeidssteder = utledAktivTidslinjePrArbeidsgiver(aktiveArbeidsforhold);
+        Map<AktivitetIdentifikator, LocalDateTimeline<ArbeidsforholdStatus>> aktiveArbeidsforhold = utledAktivTidslinjePrArbeidsforhold(aktørArbeid.get());
+        Map<Arbeidsgiver, LocalDateTimeline<ArbeidsforholdStatus>> aktiveArbeidssteder = utledAktivTidslinjePrArbeidsgiver(aktiveArbeidsforhold);
         return utledNyoppstartetPerioder(aktiveArbeidssteder);
     }
 
-    private Map<Arbeidsgiver, LocalDateTimeline<Boolean>> utledNyoppstartetPerioder(Map<Arbeidsgiver, LocalDateTimeline<Boolean>> aktiveArbeidssteder) {
+    private Map<Arbeidsgiver, LocalDateTimeline<Boolean>> utledNyoppstartetPerioder(Map<Arbeidsgiver, LocalDateTimeline<ArbeidsforholdStatus>> aktiveArbeidssteder) {
         return aktiveArbeidssteder.entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey, entry -> nyoppstartetPerioder(entry.getValue())));
     }
 
-    static LocalDateTimeline<Boolean> nyoppstartetPerioder(LocalDateTimeline<Boolean> aktivTidslinje) {
-        List<LocalDate> startdatoer = aktivTidslinje.compress().stream().map(LocalDateSegment::getFom).toList();
+    static LocalDateTimeline<Boolean> nyoppstartetPerioder(LocalDateTimeline<ArbeidsforholdStatus> arbeidsforholdStatusTidslinje) {
+        LocalDateTimeline<Boolean> permisjonTidslinje = arbeidsforholdStatusTidslinje.filterValue(ArbeidsforholdStatus.PERMISJON::equals).mapValue(v -> true).compress();
+        LocalDateTimeline<Boolean> arbeidTidslinje = arbeidsforholdStatusTidslinje.filterValue(ArbeidsforholdStatus.AKTIV::equals).mapValue(v -> true).compress();
+        LocalDateTimeline<Boolean> kortePermisjonerTidslinje = new LocalDateTimeline<>(permisjonTidslinje.stream()
+            .filter(segment -> segment.getFom().plus(OPPHOLD_FØR_NYOPPSTARTET_IGJEN).minusDays(1).isAfter(segment.getTom()))
+            .toList());
+
+        LocalDateTimeline<Boolean> aktivtArbeidsforholdTidslinje = arbeidTidslinje
+            .crossJoin(kortePermisjonerTidslinje, StandardCombinators::alwaysTrueForMatch)
+            .compress();
+
+        List<LocalDate> startdatoer = aktivtArbeidsforholdTidslinje.stream().map(LocalDateSegment::getFom).toList();
         return new LocalDateTimeline<>(startdatoer.stream()
             .filter(startdato -> {
                 LocalDateTimeline<Boolean> periodeSomMåVæreUtenArbeidForAtDetteErNyStart = new LocalDateTimeline<>(startdato.minus(OPPHOLD_FØR_NYOPPSTARTET_IGJEN), startdato.minusDays(1), true);
-                return !aktivTidslinje.intersects(periodeSomMåVæreUtenArbeidForAtDetteErNyStart);
+                return !arbeidTidslinje.intersects(periodeSomMåVæreUtenArbeidForAtDetteErNyStart);
             })
             .map(startdato -> new LocalDateSegment<>(startdato, startdato.plus(NYOPPSTARTET_VARIGHET).minusDays(1), true))
             .toList(), StandardCombinators::alwaysTrueForMatch)
-            .intersection(aktivTidslinje);
+            .compress();
     }
 
-    private Map<Arbeidsgiver, LocalDateTimeline<Boolean>> utledAktivTidslinjePrArbeidsgiver(Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktiveArbeidsforhold) {
-        Map<Arbeidsgiver, LocalDateTimeline<Boolean>> aktivHosArbeidsgiver = new HashMap<>();
+    private Map<Arbeidsgiver, LocalDateTimeline<ArbeidsforholdStatus>> utledAktivTidslinjePrArbeidsgiver(Map<AktivitetIdentifikator, LocalDateTimeline<ArbeidsforholdStatus>> aktiveArbeidsforhold) {
+        Map<Arbeidsgiver, LocalDateTimeline<ArbeidsforholdStatus>> aktivHosArbeidsgiver = new HashMap<>();
         for (var entry : aktiveArbeidsforhold.entrySet()) {
             Arbeidsgiver arbeidsgiver = entry.getKey().getArbeidsgiverArbeidsforhold().getArbeidsgiver();
-            LocalDateTimeline<Boolean> aktivTidslinje = aktivHosArbeidsgiver.getOrDefault(arbeidsgiver, LocalDateTimeline.empty());
-            aktivTidslinje = aktivTidslinje.crossJoin(entry.getValue(), StandardCombinators::alwaysTrueForMatch);
+            LocalDateTimeline<ArbeidsforholdStatus> aktivTidslinje = aktivHosArbeidsgiver.getOrDefault(arbeidsgiver, LocalDateTimeline.empty());
+            aktivTidslinje = aktivTidslinje.crossJoin(entry.getValue(), (interval, lhs, rhs) -> new LocalDateSegment<>(interval, rhs == null || lhs != null && lhs.getValue() == ArbeidsforholdStatus.AKTIV ? lhs.getValue() : rhs.getValue()));
             aktivHosArbeidsgiver.put(arbeidsgiver, aktivTidslinje);
         }
         return aktivHosArbeidsgiver;
     }
 
-    private Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledAktivTidslinjePrArbeidsforhold(AktørArbeid aktørArbeid) {
-        Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktiveArbeidsforhold = new HashMap<>();
+    private Map<AktivitetIdentifikator, LocalDateTimeline<ArbeidsforholdStatus>> utledAktivTidslinjePrArbeidsforhold(AktørArbeid aktørArbeid) {
+        Map<AktivitetIdentifikator, LocalDateTimeline<ArbeidsforholdStatus>> aktiveArbeidsforhold = new HashMap<>();
         for (Yrkesaktivitet yrkesaktivitet : aktørArbeid.hentAlleYrkesaktiviteter()) {
             if (yrkesaktivitet.erArbeidsforhold()) {
                 var aktivitetIdentifikator = AktivitetIdentifikator.lagAktivitetIdentifikator(UttakArbeidType.ARBEIDSTAKER, yrkesaktivitet.getArbeidsgiver(), yrkesaktivitet.getArbeidsforholdRef());
@@ -76,23 +86,28 @@ public class NyoppstartetUtleder {
         return aktiveArbeidsforhold;
     }
 
-    private LocalDateTimeline<Boolean> mapYrkesAktivitet(Yrkesaktivitet yrkesaktivitet) {
+    private LocalDateTimeline<ArbeidsforholdStatus> mapYrkesAktivitet(Yrkesaktivitet yrkesaktivitet) {
         var segmenter = yrkesaktivitet.getAnsettelsesPeriode()
             .stream()
-            .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), true))
+            .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), ArbeidsforholdStatus.AKTIV))
             .toList();
         // Har ikke helt kontroll på aa-reg mtp overlapp her så better safe than sorry (bruker combinator)
         var arbeidsAktivTidslinje = new LocalDateTimeline<>(segmenter, StandardCombinators::coalesceRightHandSide);
         // Ta bort permisjoner
         var permisjonTidslinje = mapPermisjon(yrkesaktivitet);
-        arbeidsAktivTidslinje = arbeidsAktivTidslinje.disjoint(permisjonTidslinje);
+        arbeidsAktivTidslinje = arbeidsAktivTidslinje.crossJoin(permisjonTidslinje, StandardCombinators::coalesceRightHandSide);
         return arbeidsAktivTidslinje.compress();
     }
 
-    private LocalDateTimeline<Boolean> mapPermisjon(Yrkesaktivitet yrkesaktivitet) {
+    enum ArbeidsforholdStatus {
+        AKTIV,
+        PERMISJON
+    }
+
+    private LocalDateTimeline<ArbeidsforholdStatus> mapPermisjon(Yrkesaktivitet yrkesaktivitet) {
         var relevantePermitteringer = yrkesaktivitet.getPermisjon().stream()
             .filter(it -> erStørreEllerLik100Prosent(it.getProsentsats()))
-            .map(it -> new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), true))
+            .map(it -> new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), ArbeidsforholdStatus.PERMISJON))
             .toList();
 
         return new LocalDateTimeline<>(relevantePermitteringer, StandardCombinators::coalesceRightHandSide)
