@@ -2,12 +2,14 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -90,18 +92,11 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
     private void sjekkOverlappendePerioder(List<VurdertOpplæringPeriode> vurdertOpplæringPerioder) {
         List<DatoIntervallEntitet> perioder = new ArrayList<>();
 
-        for (VurdertOpplæringPeriode vurdertOpplæringPeriode : vurdertOpplæringPerioder) {
-            perioder.add(vurdertOpplæringPeriode.getPeriode());
-
-            if (vurdertOpplæringPeriode.getReisetid() != null) {
-                if (vurdertOpplæringPeriode.getReisetid().getReiseperiodeTil() != null) {
-                    perioder.add(vurdertOpplæringPeriode.getReisetid().getReiseperiodeTil());
-                }
-                if (vurdertOpplæringPeriode.getReisetid().getReiseperiodeHjem() != null) {
-                    perioder.add(vurdertOpplæringPeriode.getReisetid().getReiseperiodeHjem());
-                }
-            }
-        }
+        perioder.addAll(vurdertOpplæringPerioder.stream().map(VurdertOpplæringPeriode::getPeriode).toList());
+        perioder.addAll(vurdertOpplæringPerioder.stream().map(VurdertOpplæringPeriode::getReisetid).filter(Objects::nonNull)
+            .map(VurdertReisetid::getReiseperiodeTil).filter(Objects::nonNull).toList());
+        perioder.addAll(vurdertOpplæringPerioder.stream().map(VurdertOpplæringPeriode::getReisetid).filter(Objects::nonNull)
+            .map(VurdertReisetid::getReiseperiodeHjem).filter(Objects::nonNull).toList());
 
         new LocalDateTimeline<>(perioder.stream().map(periode -> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), true)).toList());
     }
@@ -111,12 +106,7 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
         LocalDateTimeline<VurdertOpplæringPeriode> eksisterendeTidslinje = toTidslinje(eksisterende);
         LocalDateTimeline<VurdertOpplæringPeriode> nyTidslinje = toTidslinje(ny);
 
-        return eksisterendeTidslinje.combine(nyTidslinje, (datoInterval, datoSegment, datoSegment2) -> {
-                    VurdertOpplæringPeriode value = datoSegment2 == null ? datoSegment.getValue() : datoSegment2.getValue();
-                    return new LocalDateSegment<>(datoInterval, value);
-                },
-                LocalDateTimeline.JoinStyle.CROSS_JOIN)
-            .compress();
+        return eksisterendeTidslinje.combine(nyTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
     }
 
     private LocalDateTimeline<VurdertOpplæringPeriode> toTidslinje(List<VurdertOpplæringPeriode> perioder) {
