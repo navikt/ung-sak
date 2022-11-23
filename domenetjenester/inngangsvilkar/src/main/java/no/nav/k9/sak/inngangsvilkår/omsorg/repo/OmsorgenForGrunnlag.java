@@ -1,6 +1,8 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg;
+package no.nav.k9.sak.inngangsvilkår.omsorg.repo;
 
 import java.util.Objects;
+
+import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,9 +13,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.Immutable;
-
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "OmsorgenForGrunnlag")

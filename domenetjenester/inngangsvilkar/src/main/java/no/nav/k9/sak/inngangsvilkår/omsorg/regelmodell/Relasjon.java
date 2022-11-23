@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell;
+package no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell;
 
 public class Relasjon {
 

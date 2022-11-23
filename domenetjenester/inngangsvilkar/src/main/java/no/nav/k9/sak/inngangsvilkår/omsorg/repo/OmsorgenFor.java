@@ -1,9 +1,11 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg;
+package no.nav.k9.sak.inngangsvilkår.omsorg.repo;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -14,9 +16,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.Immutable;
-
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "OmsorgenFor")
@@ -84,6 +83,6 @@ public class OmsorgenFor extends BaseEntitet {
     public int hashCode() {
         return Objects.hash(perioder);
     }
-    
+
 
 }

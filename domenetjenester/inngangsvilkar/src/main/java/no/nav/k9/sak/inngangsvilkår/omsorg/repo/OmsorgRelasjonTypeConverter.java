@@ -1,7 +1,6 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg;
+package no.nav.k9.sak.inngangsvilkår.omsorg.repo;
 
 import jakarta.persistence.AttributeConverter;
-
 import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 
 public class OmsorgRelasjonTypeConverter implements AttributeConverter<BarnRelasjon, String>{

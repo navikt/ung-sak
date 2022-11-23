@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.sykdom;
+package no.nav.k9.kodeverk.sykdom;
 
 public enum Resultat {
     OPPFYLT("OPPFYLT"),

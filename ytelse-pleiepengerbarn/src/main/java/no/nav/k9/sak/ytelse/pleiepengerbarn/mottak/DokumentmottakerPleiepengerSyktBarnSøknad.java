@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
@@ -27,7 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
-import no.nav.k9.sak.hendelse.brukerdialoginnsyn.BrukerdialoginnsynService;
+import no.nav.k9.sak.domene.behandling.steg.omsorgenfor.BrukerdialoginnsynTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
@@ -56,7 +58,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     private ProsessTaskTjeneste taskTjeneste;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
-    private BrukerdialoginnsynService brukerdialoginnsynService;
+    private Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynServicer;
     private DokumentmottakerFelles dokumentMottakerFelles;
 
     DokumentmottakerPleiepengerSyktBarnSøknad() {
@@ -71,7 +73,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                                               ProsessTaskTjeneste taskTjeneste,
                                               OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
                                               SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-                                              BrukerdialoginnsynService brukerdialoginnsynService,
+                                              @Any Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynServicer,
                                               DokumentmottakerFelles dokumentMottakerFelles) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
@@ -80,13 +82,15 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
         this.taskTjeneste = taskTjeneste;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
-        this.brukerdialoginnsynService = brukerdialoginnsynService;
+        this.brukerdialoginnsynServicer = brukerdialoginnsynServicer;
         this.dokumentMottakerFelles = dokumentMottakerFelles;
     }
 
     @Override
     public void lagreDokumentinnhold(Collection<MottattDokument> dokumenter, Behandling behandling) {
         var behandlingId = behandling.getId();
+
+        var brukerdialoginnsynService = BrukerdialoginnsynTjeneste.finnTjeneste(brukerdialoginnsynServicer, behandling.getFagsakYtelseType());
 
         var sorterteDokumenter = sorterSøknadsdokumenter(dokumenter);
         for (MottattDokument dokument : sorterteDokumenter) {

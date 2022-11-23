@@ -36,20 +36,20 @@ public class JettyDevServer extends JettyServer {
     }
 
     private static String initCryptoStoreConfig(String storeName, String storeProperty, String storePasswordProperty,
-            String defaultPassword) {
+                                                String defaultPassword) {
         String defaultLocation = getProperty("user.home", ".") + "/.modig/" + storeName + ".jks";
 
         String storePath = getProperty(storeProperty, defaultLocation);
         File storeFile = new File(storePath);
         if (!storeFile.exists()) {
             throw new IllegalStateException("Finner ikke " + storeName + " i " + storePath
-                    + "\n\tKonfigurer enten som System property \'" + storeProperty + "\' eller environment variabel \'"
-                    + storeProperty.toUpperCase().replace('.', '_') + "\'");
+                + "\n\tKonfigurer enten som System property \'" + storeProperty + "\' eller environment variabel \'"
+                + storeProperty.toUpperCase().replace('.', '_') + "\'");
         }
         String password = getProperty(storePasswordProperty, defaultPassword);
         if (password == null) {
             throw new IllegalStateException(
-                    "Passord for å aksessere store " + storeName + " i " + storePath + " er null");
+                "Passord for å aksessere store " + storeName + " i " + storePath + " er null");
         }
 
         System.setProperty(storeProperty, storeFile.getAbsolutePath());
@@ -113,7 +113,7 @@ public class JettyDevServer extends JettyServer {
         // truststore avgjør hva vi stoler på av sertifikater når vi gjør utadgående TLS kall
         initCryptoStoreConfig("truststore", "javax.net.ssl.trustStore", "javax.net.ssl.trustStorePassword", "changeit");
         initCryptoStoreConfig("keystore", "javax.net.ssl.keyStore", "javax.net.ssl.keyStorePassword",
-                "devillokeystore1234");
+            "devillokeystore1234");
     }
 
     @SuppressWarnings("resource")
@@ -130,8 +130,8 @@ public class JettyDevServer extends JettyServer {
         https.addCustomizer(new SecureRequestCustomizer());
 
         ServerConnector sslConnector = new ServerConnector(server,
-                new SslConnectionFactory(sslContextFactory, "http/1.1"),
-                new HttpConnectionFactory(https));
+            new SslConnectionFactory(sslContextFactory, "http/1.1"),
+            new HttpConnectionFactory(https));
         sslConnector.setPort(appKonfigurasjon.getSslPort());
         connectors.add(sslConnector);
 
