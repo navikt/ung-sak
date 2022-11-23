@@ -97,7 +97,13 @@ public abstract class AbstractLocalDateInterval implements Comparable<AbstractLo
 
     @Override
     public int compareTo(AbstractLocalDateInterval periode) {
-        return getFomDato().compareTo(periode.getFomDato());
+        var cmpFom = getFomDato().compareTo(periode.getFomDato());
+
+        if (cmpFom != 0) {
+            return cmpFom;
+        }
+
+        return getTomDato().compareTo(periode.getTomDato());
     }
 
     @Override
