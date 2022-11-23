@@ -52,31 +52,22 @@ public class VurderNødvendighetTjeneste {
 
     public Aksjon vurder(BehandlingReferanse referanse) {
 
-        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
-
-        var uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
-        var perioderFraSøknad = uttaksPerioderGrunnlag.getRelevantSøknadsperioder().getPerioderFraSøknadene();
-
-        var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(referanse.getBehandlingId());
-
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING);
-        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
-
-        var tidslinje = tidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag.orElse(null), tidslinjeTilVurdering);
+        var tidslinje = hentTidslinjeMedVurdering(referanse);
 
         if (tidslinje.filterValue(value -> Objects.equals(value, MANGLER_VURDERING)).stream().findFirst().isPresent()) {
             return Aksjon.TRENGER_AVKLARING;
         }
 
-        lagreVilkårsResultat(referanse, vilkårene, tidslinje);
-
         return Aksjon.FORTSETT;
     }
 
-    private void lagreVilkårsResultat(BehandlingReferanse referanse, Vilkårene vilkårene, LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinje) {
+    public void lagreVilkårsResultat(BehandlingReferanse referanse) {
+        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.NØDVENDIG_OPPLÆRING);
+
+        var tidslinje = hentTidslinjeMedVurdering(referanse);
 
         leggTilVilkårsresultatTidligereVilkår(vilkårBuilder, tidslinje);
 
@@ -110,5 +101,19 @@ public class VurderNødvendighetTjeneste {
             .forEach(datoIntervallEntitet -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(datoIntervallEntitet)
                 .medUtfall(utfall)
                 .medAvslagsårsak(avslagsårsak)));
+    }
+
+    private LocalDateTimeline<NødvendighetGodkjenningStatus> hentTidslinjeMedVurdering(BehandlingReferanse referanse) {
+        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
+
+        var uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
+        var perioderFraSøknad = uttaksPerioderGrunnlag.getRelevantSøknadsperioder().getPerioderFraSøknadene();
+
+        var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(referanse.getBehandlingId());
+
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING);
+        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
+
+        return tidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag.orElse(null), tidslinjeTilVurdering);
     }
 }

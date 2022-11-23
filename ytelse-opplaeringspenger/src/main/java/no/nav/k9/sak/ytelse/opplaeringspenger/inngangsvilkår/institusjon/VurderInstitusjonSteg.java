@@ -54,6 +54,8 @@ public class VurderInstitusjonSteg implements BehandlingSteg {
                 AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_INSTITUSJON));
         }
 
+        vurderInstitusjonTjeneste.lagreVilkårsResultat(referanse);
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 }

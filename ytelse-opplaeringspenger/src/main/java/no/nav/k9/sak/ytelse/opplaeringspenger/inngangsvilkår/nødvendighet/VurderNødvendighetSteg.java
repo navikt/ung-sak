@@ -85,6 +85,8 @@ public class VurderNødvendighetSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_NØDVENDIGHET));
         }
 
+        vurderNødvendighetTjeneste.lagreVilkårsResultat(referanse);
+
         lagreResultat(referanse);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();

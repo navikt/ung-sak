@@ -49,32 +49,25 @@ public class VurderInstitusjonTjeneste {
     }
 
     public Aksjon vurder(BehandlingReferanse referanse) {
-        var uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
-        var perioderFraSøknad = uttaksPerioderGrunnlag.getRelevantSøknadsperioder().getPerioderFraSøknadene();
 
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING);
-        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
-
-        var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(referanse.getBehandlingId());
-
-        var tidslinje = tidslinjeUtleder.utled(perioderFraSøknad, vurdertOpplæringGrunnlag.orElse(null), tidslinjeTilVurdering);
+        var tidslinje = hentTidslinjeMedVurdering(referanse);
 
         if (tidslinje.filterValue(godkjenning -> Objects.equals(godkjenning, MANGLER_VURDERING)).stream().findFirst().isPresent()) {
             return Aksjon.TRENGER_AVKLARING;
         }
 
-        lagreVilkårsResultat(referanse, tidslinje);
-
         return Aksjon.FORTSETT;
     }
 
-    private void lagreVilkårsResultat(BehandlingReferanse referanse, LocalDateTimeline<InstitusjonGodkjenningStatus> tidslinje) {
+    public void lagreVilkårsResultat(BehandlingReferanse referanse) {
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
 
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
         var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
+
+        var tidslinje = hentTidslinjeMedVurdering(referanse);
 
         var godkjentTidslinje = tidslinje.filterValue(godkjenning -> Objects.equals(godkjenning, GODKJENT));
         var ikkeGodkjentTidslinje = tidslinje.filterValue(godkjenning -> Objects.equals(godkjenning, IKKE_GODKJENT));
@@ -91,5 +84,17 @@ public class VurderInstitusjonTjeneste {
             .forEach(datoIntervallEntitet -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(datoIntervallEntitet)
                 .medUtfall(utfall)
                 .medAvslagsårsak(avslagsårsak)));
+    }
+
+    private LocalDateTimeline<InstitusjonGodkjenningStatus> hentTidslinjeMedVurdering(BehandlingReferanse referanse) {
+        var uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
+        var perioderFraSøknad = uttaksPerioderGrunnlag.getRelevantSøknadsperioder().getPerioderFraSøknadene();
+
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING);
+        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
+
+        var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(referanse.getBehandlingId());
+
+        return tidslinjeUtleder.utled(perioderFraSøknad, vurdertOpplæringGrunnlag.orElse(null), tidslinjeTilVurdering);
     }
 }

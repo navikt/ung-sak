@@ -50,31 +50,22 @@ public class GjennomgåttOpplæringTjeneste {
 
     public Aksjon vurder(BehandlingReferanse referanse) {
 
-        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
-
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.GJENNOMGÅ_OPPLÆRING);
-        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
-
-        var uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
-        var perioderFraSøknad = uttaksPerioderGrunnlag.getRelevantSøknadsperioder().getPerioderFraSøknadene();
-
-        var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(referanse.getBehandlingId()).orElse(null);
-
-        var tidslinje = tidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, tidslinjeTilVurdering);
+        var tidslinje = hentTidslinjeMedVurdering(referanse);
 
         if (tidslinje.filterValue(value -> Objects.equals(value, MANGLER_VURDERING)).stream().findFirst().isPresent()) {
             return Aksjon.TRENGER_AVKLARING;
         }
 
-        lagreVilkårsResultat(referanse, vilkårene, tidslinje);
-
         return Aksjon.FORTSETT;
     }
 
-    private void lagreVilkårsResultat(BehandlingReferanse referanse, Vilkårene vilkårene, LocalDateTimeline<OpplæringGodkjenningStatus> tidslinje) {
+    public void lagreVilkårsResultat(BehandlingReferanse referanse) {
+        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.GJENNOMGÅ_OPPLÆRING);
+
+        var tidslinje = hentTidslinjeMedVurdering(referanse);
 
         leggTilVilkårsresultatTidligereVilkår(vilkårBuilder, tidslinje);
 
@@ -113,5 +104,19 @@ public class GjennomgåttOpplæringTjeneste {
             .forEach(datoIntervallEntitet -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(datoIntervallEntitet)
                 .medUtfall(utfall)
                 .medAvslagsårsak(avslagsårsak)));
+    }
+
+    private LocalDateTimeline<OpplæringGodkjenningStatus> hentTidslinjeMedVurdering(BehandlingReferanse referanse) {
+        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
+
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.GJENNOMGÅ_OPPLÆRING);
+        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
+
+        var uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
+        var perioderFraSøknad = uttaksPerioderGrunnlag.getRelevantSøknadsperioder().getPerioderFraSøknadene();
+
+        var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(referanse.getBehandlingId()).orElse(null);
+
+        return tidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, tidslinjeTilVurdering);
     }
 }

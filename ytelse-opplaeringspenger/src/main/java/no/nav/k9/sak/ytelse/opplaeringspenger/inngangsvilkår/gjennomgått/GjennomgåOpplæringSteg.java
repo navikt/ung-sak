@@ -55,6 +55,8 @@ public class GjennomgåOpplæringSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_GJENNOMGÅTT_OPPLÆRING));
         }
 
+        gjennomgåttOpplæringTjeneste.lagreVilkårsResultat(referanse);
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
