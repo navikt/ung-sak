@@ -1,8 +1,7 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
+package no.nav.k9.sak.behandlingslager.kodeverk;
 
 import jakarta.persistence.AttributeConverter;
-
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
+import no.nav.k9.kodeverk.sykdom.Resultat;
 
 public class SykdomResultatTypeConverter implements AttributeConverter<Resultat, String> {
     @Override

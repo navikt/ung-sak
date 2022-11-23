@@ -8,8 +8,8 @@
 	<sequence-generator name="SEQ_OMSORGEN_FOR" allocation-size="50" sequence-name="SEQ_OMSORGEN_FOR" />
 	<sequence-generator name="SEQ_OMSORGEN_FOR_PERIODE" allocation-size="50" sequence-name="SEQ_OMSORGEN_FOR_PERIODE" />
 
-	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlag" />
-	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenFor" />
-	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForPeriode" />
+	<entity class="no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForGrunnlag" />
+	<entity class="no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenFor" />
+	<entity class="no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForPeriode" />
 
 </entity-mappings>

@@ -10,31 +10,34 @@ import no.nav.k9.innsyn.Omsorg;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.domene.behandling.steg.omsorgenfor.BrukerdialoginnsynTjeneste;
 import no.nav.k9.søknad.JsonUtils;
 
+@FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
 @ApplicationScoped
-public class BrukerdialoginnsynService {
+public class PSBBrukerdialoginnsynTjeneste implements BrukerdialoginnsynTjeneste {
 
     private ProsessTaskTjeneste prosessTaskRepository;
     private boolean enableBrukerdialoginnsyn;
 
 
-    public BrukerdialoginnsynService() {
+    public PSBBrukerdialoginnsynTjeneste() {
 
     }
 
     @Inject
-    public BrukerdialoginnsynService(ProsessTaskTjeneste prosessTaskRepository,
-                                     @KonfigVerdi(value = "ENABLE_BRUKERDIALOGINNSYN", defaultVerdi = "false") boolean enableBrukerdialoginnsyn) {
+    public PSBBrukerdialoginnsynTjeneste(ProsessTaskTjeneste prosessTaskRepository,
+                                         @KonfigVerdi(value = "ENABLE_BRUKERDIALOGINNSYN", defaultVerdi = "false") boolean enableBrukerdialoginnsyn) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.enableBrukerdialoginnsyn = enableBrukerdialoginnsyn;
     }
 
 
     public void publiserDokumentHendelse(Behandling behandling, MottattDokument mottattDokument) {
-        if (!enableBrukerdialoginnsyn || behandling.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+        if (!enableBrukerdialoginnsyn) {
             return;
         }
         final ProsessTaskData pd = PubliserSøknadForBrukerdialoginnsynTask.createProsessTaskData(behandling, mottattDokument);
@@ -42,7 +45,7 @@ public class BrukerdialoginnsynService {
     }
 
     public void publiserOmsorgenForHendelse(Behandling behandling, boolean harOmsorg) {
-        if (!enableBrukerdialoginnsyn || behandling.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+        if (!enableBrukerdialoginnsyn) {
             return;
         }
 

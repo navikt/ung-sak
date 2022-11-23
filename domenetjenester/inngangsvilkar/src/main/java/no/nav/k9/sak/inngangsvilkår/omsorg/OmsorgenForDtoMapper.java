@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor;
+package no.nav.k9.sak.inngangsvilkår.omsorg;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,19 +12,19 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForGrunnlag;
+import no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForGrunnlagRepository;
+import no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForPeriode;
 import no.nav.k9.sak.kontrakt.omsorg.OmsorgenForDto;
 import no.nav.k9.sak.kontrakt.omsorg.OmsorgenForOversiktDto;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForPeriode;
 
 @ApplicationScoped
 public class OmsorgenForDtoMapper {
@@ -40,9 +40,9 @@ public class OmsorgenForDtoMapper {
 
     @Inject
     public OmsorgenForDtoMapper(@Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-            OmsorgenForGrunnlagRepository omsorgenForRepository,
-            OmsorgenForTjeneste omsorgenForTjeneste,
-            BehandlingRepository behandlingRepository) {
+                                OmsorgenForGrunnlagRepository omsorgenForRepository,
+                                OmsorgenForTjeneste omsorgenForTjeneste,
+                                BehandlingRepository behandlingRepository) {
         this.omsorgenForGrunnlagRepository = omsorgenForRepository;
         this.omsorgenForTjeneste = omsorgenForTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
@@ -60,7 +60,7 @@ public class OmsorgenForDtoMapper {
         if (grunnlagOpt.isEmpty()) {
             return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), tvingManuellVurdering, true, List.of());
         }
-        final boolean ikkeVurdertBlirOppfylt = systemdata.isRegistrertForeldrerelasjon() && !tvingManuellVurdering ;
+        final boolean ikkeVurdertBlirOppfylt = systemdata.isRegistrertForeldrerelasjon() && !tvingManuellVurdering;
 
         final var omsorgenForListe = toOmsorgenForDtoListe(grunnlagOpt.get().getOmsorgenFor().getPerioder(), ikkeVurdertBlirOppfylt, tidslinjeTilVurdering);
         final boolean kanLøseAksjonspunkt = omsorgenForListe.stream().allMatch(o -> o.getResultatEtterAutomatikk() != Resultat.IKKE_VURDERT);
@@ -79,7 +79,7 @@ public class OmsorgenForDtoMapper {
         return tidslinjeTilVurdering;
     }
 
-    List<OmsorgenForDto> toOmsorgenForDtoListe(List<OmsorgenForPeriode> perioder, boolean ikkeVurdertBlirOppfylt, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+    public List<OmsorgenForDto> toOmsorgenForDtoListe(List<OmsorgenForPeriode> perioder, boolean ikkeVurdertBlirOppfylt, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
 
         List<LocalDateSegment<OmsorgenForPeriode>> omsorgenForDateSegments = perioder.stream().map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p)).collect(Collectors.toList());
         LocalDateTimeline<OmsorgenForPeriode> omsorgenForTimeline = new LocalDateTimeline<>(omsorgenForDateSegments);

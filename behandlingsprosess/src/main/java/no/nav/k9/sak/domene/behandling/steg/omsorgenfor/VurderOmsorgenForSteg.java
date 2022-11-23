@@ -1,7 +1,6 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor;
+package no.nav.k9.sak.domene.behandling.steg.omsorgenfor;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_OMSORG_FOR;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -12,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -38,26 +39,26 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.hendelse.brukerdialoginnsyn.BrukerdialoginnsynService;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
+import no.nav.k9.sak.inngangsvilkår.omsorg.OmsorgenForTjeneste;
+import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForVilkårGrunnlag;
+import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.RelasjonsRolle;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.OmsorgenForVilkårGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.RelasjonsRolle;
 
 @BehandlingStegRef(value = VURDER_OMSORG_FOR)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class VurderOmsorgenForSteg implements BehandlingSteg {
 
     public static final VilkårType VILKÅRET = VilkårType.OMSORGEN_FOR;
     private static final Logger log = LoggerFactory.getLogger(VurderOmsorgenForSteg.class);
     private BehandlingRepositoryProvider repositoryProvider;
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private OmsorgenForTjeneste omsorgenForTjeneste;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-    private BrukerdialoginnsynService brukerdialoginnsynService;
+    private Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynTjenester;
 
     VurderOmsorgenForSteg() {
         // CDI
@@ -65,23 +66,24 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
 
     @Inject
     public VurderOmsorgenForSteg(BehandlingRepositoryProvider repositoryProvider,
-                                 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                  OmsorgenForTjeneste omsorgenForTjeneste,
-                                 BrukerdialoginnsynService brukerdialoginnsynService) {
+                                 @Any Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynTjenester) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
-        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.perioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.omsorgenForTjeneste = omsorgenForTjeneste;
-        this.brukerdialoginnsynService = brukerdialoginnsynService;
+        this.brukerdialoginnsynTjenester = brukerdialoginnsynTjenester;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+        final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
         final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(kontekst, perioder);
 
-        final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         if (skalHaAksjonspunktGrunnetManuellRevurdering(samletOmsorgenForTidslinje, behandling) || harAksjonspunkt(samletOmsorgenForTidslinje, false)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2)));
         } else if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2) && harIkkeLengerAksjonspunkt(behandling, samletOmsorgenForTidslinje)) {
@@ -94,14 +96,14 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
 
         final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         final boolean haddeOmsorgenForISistePeriode = harOmsorgenForISistePeriode(vilkårene);
-        final List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(kontekst, samletOmsorgenForTidslinje);
+        final List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(samletOmsorgenForTidslinje);
 
-        final Vilkårene oppdaterteVilkår = oppdaterVilkårene(kontekst, vilkårene, vilkårData);
+        final Vilkårene oppdaterteVilkår = oppdaterVilkårene(perioderTilVurderingTjeneste, vilkårene, vilkårData);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
 
         final boolean harOmsorgenForISistePeriode = harOmsorgenForISistePeriode(oppdaterteVilkår);
         if (haddeOmsorgenForISistePeriode != harOmsorgenForISistePeriode) {
-            brukerdialoginnsynService.publiserOmsorgenForHendelse(behandling, harOmsorgenForISistePeriode);
+            BrukerdialoginnsynTjeneste.finnTjeneste(brukerdialoginnsynTjenester, behandling.getFagsakYtelseType()).publiserOmsorgenForHendelse(behandling, harOmsorgenForISistePeriode);
         }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
@@ -140,7 +142,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         return false;
     }
 
-    private Vilkårene oppdaterVilkårene(BehandlingskontrollKontekst kontekst, Vilkårene vilkårene, final List<VilkårData> vilkårData) {
+    private Vilkårene oppdaterVilkårene(VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, Vilkårene vilkårene, final List<VilkårData> vilkårData) {
         final VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
@@ -167,10 +169,11 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType førsteSteg, BehandlingStegType sisteSteg) {
+        final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
         perioder.forEach(periode -> {
             if (!erVilkårOverstyrt(kontekst.getBehandlingId(), periode.getFomDato(), periode.getTomDato())) {
-                Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
                 RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(modell, repositoryProvider, behandling, kontekst);
                 ryddVilkårTyper.ryddVedTilbakeføring();
                 behandlingRepository.lagre(behandling, kontekst.getSkriveLås());

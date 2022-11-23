@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell;
+package no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell;
 
 import no.nav.fpsak.nare.RuleService;
 import no.nav.fpsak.nare.Ruleset;

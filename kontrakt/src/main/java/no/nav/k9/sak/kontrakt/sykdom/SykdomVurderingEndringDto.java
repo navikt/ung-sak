@@ -5,17 +5,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.abac.AbacAttributt;
+import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -26,7 +26,7 @@ public class SykdomVurderingEndringDto {
     @JsonProperty(value = "behandlingUuid", required = true)
     @Valid
     private UUID behandlingUuid;
-    
+
     /**
      * IDen til SykdomVurdering (og ikke en gitt SykdomVurderingVersjon).
      */
@@ -36,7 +36,7 @@ public class SykdomVurderingEndringDto {
     @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String id;
-    
+
     /**
      * Versjonen man tok utgangspunkt i før endring.
      */
@@ -66,30 +66,30 @@ public class SykdomVurderingEndringDto {
     @Size(max = 100)
     @Valid
     private Set<String> tilknyttedeDokumenter;
-    
+
     @JsonProperty(value = "dryRun")
     @Valid
     private boolean dryRun;
 
-    
+
     public SykdomVurderingEndringDto() {
-        
+
     }
-    
+
     public SykdomVurderingEndringDto(String behandlingUuid) {
         this.behandlingUuid = UUID.fromString(behandlingUuid);
     }
-    
+
     public SykdomVurderingEndringDto(UUID behandlingUuid) {
         this.behandlingUuid = behandlingUuid;
     }
-    
-    
+
+
     @AbacAttributt("behandlingUuid")
     public UUID getBehandlingUuid() {
         return behandlingUuid;
     }
-    
+
     public String getId() {
         return id;
     }
@@ -117,12 +117,12 @@ public class SykdomVurderingEndringDto {
     public boolean isDryRun() {
         return dryRun;
     }
-    
+
     public SykdomVurderingEndringDto medId(String id) {
         this.id = id;
         return this;
     }
-    
+
     public SykdomVurderingEndringDto medVersjon(String versjon) {
         this.versjon = versjon;
         return this;
@@ -132,12 +132,12 @@ public class SykdomVurderingEndringDto {
         this.tekst = tekst;
         return this;
     }
-    
+
     public SykdomVurderingEndringDto medResultat(Resultat resultat) {
         this.resultat = resultat;
         return this;
     }
-    
+
     public SykdomVurderingEndringDto medPerioder(List<Periode> perioder) {
         this.perioder = perioder;
         return this;

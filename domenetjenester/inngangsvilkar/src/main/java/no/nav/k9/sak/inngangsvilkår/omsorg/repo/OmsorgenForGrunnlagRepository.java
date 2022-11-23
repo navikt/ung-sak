@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg;
+package no.nav.k9.sak.inngangsvilkår.omsorg.repo;
 
 import java.util.Comparator;
 import java.util.List;
@@ -11,17 +11,16 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 
 @Dependent
 public class OmsorgenForGrunnlagRepository {
@@ -123,7 +122,7 @@ public class OmsorgenForGrunnlagRepository {
         return optionalGrunnlag;
     }
 
-    boolean fyllHelgehull(List<OmsorgenForPeriode> perioder) {
+    public boolean fyllHelgehull(List<OmsorgenForPeriode> perioder) {
         boolean endret = false;
             perioder.sort(Comparator.comparing(p -> p.getPeriode().getFomDato()));
             ListIterator<OmsorgenForPeriode> iterator = perioder.listIterator();

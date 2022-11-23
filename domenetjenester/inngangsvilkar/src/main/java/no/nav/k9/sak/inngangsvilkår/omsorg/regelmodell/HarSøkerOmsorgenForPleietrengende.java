@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell;
+package no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell;
 
 import no.nav.fpsak.nare.doc.RuleDocumentation;
 import no.nav.fpsak.nare.evaluation.Evaluation;
@@ -18,7 +18,7 @@ public class HarSøkerOmsorgenForPleietrengende extends LeafSpecification<Omsorg
         if (grunnlag.getErOmsorgsPerson() != null && grunnlag.getErOmsorgsPerson()) {
             return ja();
         }
-        
+
         final var relasjon = grunnlag.getRelasjonMellomSøkerOgPleietrengende();
         if (relasjon != null && erMorEllerFarTilPleietrengende(relasjon) && grunnlag.getErOmsorgsPerson() == null) {
             return ja();
