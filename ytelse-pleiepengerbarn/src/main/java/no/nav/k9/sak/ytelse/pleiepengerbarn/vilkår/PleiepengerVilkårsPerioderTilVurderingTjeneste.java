@@ -10,9 +10,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -49,7 +46,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerio
 
 public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
-    private Logger logger = LoggerFactory.getLogger(PleiepengerVilkårsPerioderTilVurderingTjeneste.class);
     private final PåTversAvHelgErKantIKantVurderer erKantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
     private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering;
@@ -109,26 +105,17 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Long behandlingId, Vilkår vilkår, NavigableSet<DatoIntervallEntitet> perioder) {
         var perioderTilVurdering = new TreeSet<>(utledPerioderTilVurderingVedÅHensyntaFullstendigTidslinje(behandlingId, perioder));
 
-        logger.info("perioderTilVurderingFraSøknad " + perioderTilVurdering);
-
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         var referanse = BehandlingReferanse.fra(behandling);
         if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
             var berørtePerioder = utledUtvidetPeriode(referanse);
-            logger.info("berørtePerioder " + berørtePerioder);
             perioderTilVurdering.addAll(berørtePerioder);
         }
 
-        var fraProsessTriggere = revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse);
-        logger.info("fraProsessTriggere " + fraProsessTriggere);
-        perioderTilVurdering.addAll(fraProsessTriggere);
-        var fraInntektsmelding = revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId()));
-        logger.info("fraInntektsmelding " + fraInntektsmelding);
-        perioderTilVurdering.addAll(fraInntektsmelding);
-        var tilbakestilte = perioderSomSkalTilbakestilles(behandlingId);
-        logger.info("tilbakestilte " + tilbakestilte);
-        perioderTilVurdering.addAll(tilbakestilte);
+        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
+        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId())));
+        perioderTilVurdering.addAll(perioderSomSkalTilbakestilles(behandlingId));
 
         return vilkår.getPerioder()
             .stream()
@@ -199,7 +186,6 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId())
             .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
         if (vilkårene.isPresent()) {
-            logger.info("ekstraPerioder " + ekstraPerioder);
             return utledVilkårsPerioderFraPerioderTilVurdering(referanse.getBehandlingId(), vilkårene.get(), ekstraPerioder);
         }
         return ekstraPerioder;

@@ -91,8 +91,6 @@ public class BeregningStegTjeneste {
 
     public void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
-        logger.info("Alle perioder til vurdering {}", vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter));
-
         periodeFilter.ignorerForlengelseperioder();
         fortsettBeregning(ref, stegType, resultatCallback, periodeFilter);
     }
