@@ -120,16 +120,15 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
             perioderTilVurdering.addAll(berørtePerioder);
         }
 
-        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
-        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId())));
-        perioderTilVurdering.addAll(perioderSomSkalTilbakestilles(behandlingId));
-
-        logger.info("perioderTilVurderingEtterAlleErLagtTil " + perioderTilVurdering);
-
-
-        logger.info("vilkårPerioder " + vilkår.getPerioder()
-            .stream()
-            .map(VilkårPeriode::getPeriode).toList());
+        var fraProsessTriggere = revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse);
+        logger.info("fraProsessTriggere " + fraProsessTriggere);
+        perioderTilVurdering.addAll(fraProsessTriggere);
+        var fraInntektsmelding = revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId()));
+        logger.info("fraInntektsmelding " + fraInntektsmelding);
+        perioderTilVurdering.addAll(fraInntektsmelding);
+        var tilbakestilte = perioderSomSkalTilbakestilles(behandlingId);
+        logger.info("tilbakestilte " + tilbakestilte);
+        perioderTilVurdering.addAll(tilbakestilte);
 
         return vilkår.getPerioder()
             .stream()
@@ -193,9 +192,6 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         final LocalDateTimeline<Boolean> endringerISøktePerioder = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder)
             .getDiffPerioder();
 
-        logger.info("endringerISøktePerioder " + endringerISøktePerioder);
-        logger.info("vurderingsperioderTimeline " + vurderingsperioderTimeline);
-
         final LocalDateTimeline<Boolean> utvidedePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
 
         var ekstraPerioder = TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
@@ -203,8 +199,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId())
             .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
         if (vilkårene.isPresent()) {
-            logger.info("ekstraPerioder " + perioder);
-
+            logger.info("ekstraPerioder " + ekstraPerioder);
             return utledVilkårsPerioderFraPerioderTilVurdering(referanse.getBehandlingId(), vilkårene.get(), ekstraPerioder);
         }
         return ekstraPerioder;
