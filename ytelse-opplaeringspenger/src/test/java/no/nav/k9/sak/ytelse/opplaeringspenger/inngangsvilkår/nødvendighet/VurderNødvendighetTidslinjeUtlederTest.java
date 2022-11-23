@@ -42,17 +42,13 @@ class VurderNødvendighetTidslinjeUtlederTest {
     private final JournalpostId journalpost1 = new JournalpostId("234");
     private final JournalpostId journalpost2 = new JournalpostId("567");
     private LocalDateTimeline<Boolean> søknadsperiode;
-    private final VilkårResultatBuilder vilkårResultatBuilder = new VilkårResultatBuilder();
 
     @BeforeEach
     void setup() {
         søknadsperiode = TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom))));
-        setupVilkårResultat(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
-        setupVilkårResultat(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
-        setupVilkårResultat(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
     }
 
-    private void setupVilkårResultat(VilkårType vilkårType, Utfall utfall, LocalDate fom, LocalDate tom) {
+    private void setupVilkårResultat(VilkårResultatBuilder vilkårResultatBuilder, VilkårType vilkårType, Utfall utfall, LocalDate fom, LocalDate tom) {
         vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(vilkårType)
             .leggTil(new VilkårPeriodeBuilder().medUtfall(utfall).medPeriode(fom, tom)));
     }
@@ -87,6 +83,10 @@ class VurderNødvendighetTidslinjeUtlederTest {
     void ingenVurdering() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
 
+        var vilkårResultatBuilder = new VilkårResultatBuilder();
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
         var vilkårene = vilkårResultatBuilder.build();
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, null, søknadsperiode);
@@ -100,6 +100,10 @@ class VurderNødvendighetTidslinjeUtlederTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
+        var vilkårResultatBuilder = new VilkårResultatBuilder();
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
         var vilkårene = vilkårResultatBuilder.build();
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
@@ -113,6 +117,10 @@ class VurderNødvendighetTidslinjeUtlederTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, false, "");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
+        var vilkårResultatBuilder = new VilkårResultatBuilder();
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
         var vilkårene = vilkårResultatBuilder.build();
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
@@ -126,6 +134,10 @@ class VurderNødvendighetTidslinjeUtlederTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost2, true, "");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
+        var vilkårResultatBuilder = new VilkårResultatBuilder();
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
         var vilkårene = vilkårResultatBuilder.build();
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
@@ -142,6 +154,10 @@ class VurderNødvendighetTidslinjeUtlederTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
+        var vilkårResultatBuilder = new VilkårResultatBuilder();
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
         var vilkårene = vilkårResultatBuilder.build();
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, Set.of(perioderFraSøknad1, perioderFraSøknad2), vurdertOpplæringGrunnlag, søknadsperiode);
@@ -157,7 +173,10 @@ class VurderNødvendighetTidslinjeUtlederTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
-        setupVilkårResultat(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.IKKE_OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        var vilkårResultatBuilder = new VilkårResultatBuilder();
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.IKKE_OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
         var vilkårene = vilkårResultatBuilder.build();
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
@@ -171,7 +190,10 @@ class VurderNødvendighetTidslinjeUtlederTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
-        setupVilkårResultat(VilkårType.LANGVARIG_SYKDOM, Utfall.IKKE_OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        var vilkårResultatBuilder = new VilkårResultatBuilder();
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.LANGVARIG_SYKDOM, Utfall.IKKE_OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
         var vilkårene = vilkårResultatBuilder.build();
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
@@ -185,7 +207,10 @@ class VurderNødvendighetTidslinjeUtlederTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
-        setupVilkårResultat(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.IKKE_OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        var vilkårResultatBuilder = new VilkårResultatBuilder();
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.IKKE_OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
         var vilkårene = vilkårResultatBuilder.build();
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
@@ -199,7 +224,11 @@ class VurderNødvendighetTidslinjeUtlederTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
-        setupVilkårResultat(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.IKKE_OPPFYLT, søknadsperiodeFom, søknadsperiodeTom.minusWeeks(1));
+        var vilkårResultatBuilder = new VilkårResultatBuilder();
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiodeTom.minusWeeks(1).plusDays(1), søknadsperiodeTom);
+        setupVilkårResultat(vilkårResultatBuilder, VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.IKKE_OPPFYLT, søknadsperiodeFom, søknadsperiodeTom.minusWeeks(1));
         var vilkårene = vilkårResultatBuilder.build();
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
