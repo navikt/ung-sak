@@ -40,7 +40,7 @@ public class VurdertReisetid extends BaseEntitet {
     })
     private DatoIntervallEntitet reiseperiodeHjem;
 
-    @Column(name = "begrunnelse")
+    @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
 
     @Version

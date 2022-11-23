@@ -44,7 +44,7 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private VurdertReisetid reisetid;
 
-    @Column(name = "begrunnelse")
+    @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
 
     @Version

@@ -8,12 +8,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
-import no.nav.k9.sak.kontrakt.dokument.TekstValideringRegex;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -30,18 +27,13 @@ public class VurderInstitusjonDto extends BekreftetAksjonspunktDto {
     @NotNull
     private boolean godkjent;
 
-    @JsonProperty("begrunnelse")
-    @Size(max = 4000)
-    @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    private String begrunnelse;
-
     public VurderInstitusjonDto() {
     }
 
     public VurderInstitusjonDto(JournalpostIdDto journalpostId, boolean godkjent, String begrunnelse) {
+        super(begrunnelse);
         this.journalpostId = journalpostId;
         this.godkjent = godkjent;
-        this.begrunnelse = begrunnelse;
     }
 
     public JournalpostIdDto getJournalpostId() {
@@ -50,9 +42,5 @@ public class VurderInstitusjonDto extends BekreftetAksjonspunktDto {
 
     public boolean isGodkjent() {
         return godkjent;
-    }
-
-    public String getBegrunnelse() {
-        return begrunnelse;
     }
 }

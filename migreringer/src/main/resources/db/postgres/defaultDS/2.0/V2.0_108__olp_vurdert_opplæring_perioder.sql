@@ -21,7 +21,7 @@ create table if not exists OLP_VURDERT_REISETID
     REISE_TIL_TOM           DATE                                           ,
     REISE_HJEM_FOM          DATE                                           ,
     REISE_HJEM_TOM          DATE                                           ,
-    BEGRUNNELSE             VARCHAR(4000)                                  ,
+    BEGRUNNELSE             VARCHAR(4000)                          NOT NULL,
     VERSJON                 BIGINT       DEFAULT 0                 NOT NULL,
     OPPRETTET_AV            VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
     OPPRETTET_TID           TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -38,7 +38,7 @@ create table if not exists OLP_VURDERT_OPPLAERING_PERIODE
     TOM                     DATE                                   NOT NULL,
     GJENNOMFOERT_OPPLAERING BOOLEAN                                NOT NULL,
     VURDERT_REISETID_ID     BIGINT                                         ,
-    BEGRUNNELSE             VARCHAR(4000)                                  ,
+    BEGRUNNELSE             VARCHAR(4000)                          NOT NULL,
     VERSJON                 BIGINT       DEFAULT 0                 NOT NULL,
     OPPRETTET_AV            VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
     OPPRETTET_TID           TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -57,3 +57,6 @@ create index IDX_OLP_VURDERT_OPPLAERING_PERIODE_1 on OLP_VURDERT_OPPLAERING_PERI
 alter table GR_OPPLAERING add column vurderte_perioder_id BIGINT;
 alter table GR_OPPLAERING add constraint FK_GR_OPPLAERING_4 foreign key (vurderte_perioder_id) references OLP_VURDERT_OPPLAERING_PERIODER_HOLDER;
 create index IDX_GR_OPPLAERING_4 on GR_OPPLAERING (vurderte_perioder_id);
+
+alter table olp_vurdert_opplaering alter column begrunnelse set not null;
+alter table olp_vurdert_institusjon alter column begrunnelse set not null;
