@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.opplæringspenger;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,39 +10,30 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
-import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_INSTITUSJON)
-public class VurderInstitusjonDto extends BekreftetAksjonspunktDto {
+@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_GJENNOMGÅTT_OPPLÆRING)
+public class VurderGjennomgåttOpplæringDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value = "journalpostId", required = true)
+    @JsonProperty(value = "perioder", required = true)
     @Valid
     @NotNull
-    private JournalpostIdDto journalpostId;
+    @Size(min = 1)
+    private List<VurderGjennomgåttOpplæringPeriodeDto> perioder;
 
-    @JsonProperty(value = "godkjent", required = true)
-    @NotNull
-    private boolean godkjent;
-
-    public VurderInstitusjonDto() {
+    public VurderGjennomgåttOpplæringDto() {
     }
 
-    public VurderInstitusjonDto(JournalpostIdDto journalpostId, boolean godkjent, String begrunnelse) {
-        super(begrunnelse);
-        this.journalpostId = journalpostId;
-        this.godkjent = godkjent;
+    public VurderGjennomgåttOpplæringDto(List<VurderGjennomgåttOpplæringPeriodeDto> perioder) {
+        this.perioder = perioder;
     }
 
-    public JournalpostIdDto getJournalpostId() {
-        return journalpostId;
-    }
-
-    public boolean isGodkjent() {
-        return godkjent;
+    public List<VurderGjennomgåttOpplæringPeriodeDto> getPerioder() {
+        return perioder;
     }
 }

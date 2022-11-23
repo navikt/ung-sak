@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
+package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.institusjon;
 
 import java.util.List;
 import java.util.Objects;

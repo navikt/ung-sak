@@ -7,6 +7,9 @@
     <sequence-generator name="SEQ_GR_OPPLAERING" allocation-size="50" sequence-name="SEQ_GR_OPPLAERING" />
     <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING" />
     <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING_HOLDER" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING_HOLDER" />
+    <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING_PERIODE" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING_PERIODE" />
+    <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING_PERIODER_HOLDER" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING_PERIODER_HOLDER" />
+    <sequence-generator name="SEQ_OLP_VURDERT_REISETID" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_REISETID" />
     <sequence-generator name="SEQ_OLP_VURDERT_INSTITUSJON" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_INSTITUSJON" />
     <sequence-generator name="SEQ_OLP_VURDERT_INSTITUSJON_HOLDER" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_INSTITUSJON_HOLDER" />
     <sequence-generator name="SEQ_GODKJENTE_OPPLAERINGSINSTITUSJONER" allocation-size="50" sequence-name="SEQ_GODKJENTE_OPPLAERINGSINSTITUSJONER" />
@@ -15,6 +18,9 @@
     <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag" />
     <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring" />
     <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHolder" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid" />
     <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon" />
     <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder" />
     <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjon" />

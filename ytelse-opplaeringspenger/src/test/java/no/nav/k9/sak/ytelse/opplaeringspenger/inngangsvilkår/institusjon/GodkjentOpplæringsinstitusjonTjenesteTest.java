@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
+package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.institusjon;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

@@ -30,7 +30,8 @@ public class VurderNødvendighetDto extends BekreftetAksjonspunktDto {
     public VurderNødvendighetDto() {
     }
 
-    public VurderNødvendighetDto(JournalpostIdDto journalpostId, boolean nødvendigOpplæring) {
+    public VurderNødvendighetDto(JournalpostIdDto journalpostId, boolean nødvendigOpplæring, String begrunnelse) {
+        super(begrunnelse);
         this.journalpostId = journalpostId;
         this.nødvendigOpplæring = nødvendigOpplæring;
     }

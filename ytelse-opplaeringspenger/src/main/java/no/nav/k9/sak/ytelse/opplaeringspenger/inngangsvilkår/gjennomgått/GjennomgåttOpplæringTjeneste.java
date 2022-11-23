@@ -1,12 +1,12 @@
-package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
+package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.GODKJENT;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GJENNOMGÅTT_OPPLÆRING;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT_INSTITUSJON;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT_SYKDOMSVILKÅR;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.MANGLER_VURDERING;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.GODKJENT;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.IKKE_GODKJENT;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.IKKE_GODKJENT_INSTITUSJON;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.IKKE_GODKJENT_REISETID;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.IKKE_GODKJENT_SYKDOMSVILKÅR;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.MANGLER_VURDERING;
 
 import java.util.Objects;
 
@@ -17,9 +17,7 @@ import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -30,24 +28,24 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 
 @Dependent
-public class VurderNødvendighetTjeneste {
+public class GjennomgåttOpplæringTjeneste {
 
-    private final VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private final VilkårResultatRepository vilkårResultatRepository;
-    private final VurdertOpplæringRepository vurdertOpplæringRepository;
+    private final VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private final UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
-    private final VurderNødvendighetTidslinjeUtleder tidslinjeUtleder;
+    private final VurdertOpplæringRepository vurdertOpplæringRepository;
+    private final GjennomgåttOpplæringTidslinjeUtleder tidslinjeUtleder;
 
     @Inject
-    public VurderNødvendighetTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                                      @FagsakYtelseTypeRef(OPPLÆRINGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                      VurdertOpplæringRepository vurdertOpplæringRepository,
-                                      UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository) {
-        this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
+    public GjennomgåttOpplæringTjeneste(VilkårResultatRepository vilkårResultatRepository,
+                                        @FagsakYtelseTypeRef(OPPLÆRINGSPENGER) VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                        UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
+                                        VurdertOpplæringRepository vurdertOpplæringRepository) {
+        this.vilkårResultatRepository = vilkårResultatRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
-        this.vurdertOpplæringRepository = vurdertOpplæringRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
-        this.tidslinjeUtleder = new VurderNødvendighetTidslinjeUtleder();
+        this.vurdertOpplæringRepository = vurdertOpplæringRepository;
+        this.tidslinjeUtleder = new GjennomgåttOpplæringTidslinjeUtleder();
     }
 
     public Aksjon vurder(BehandlingReferanse referanse) {
@@ -65,55 +63,60 @@ public class VurderNødvendighetTjeneste {
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
-        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.NØDVENDIG_OPPLÆRING);
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.GJENNOMGÅ_OPPLÆRING);
 
         var tidslinje = hentTidslinjeMedVurdering(referanse);
 
         leggTilVilkårsresultatTidligereVilkår(vilkårBuilder, tidslinje);
 
-        leggTilVilkårsresultatNødvendighet(vilkårBuilder, tidslinje);
+        leggTilVilkårsresultatgjennomgåttOpplæring(vilkårBuilder, tidslinje);
+
+        leggTilVilkårsresultatReisetid(vilkårBuilder, tidslinje);
 
         vilkårResultatBuilder.leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), vilkårResultatBuilder.build());
     }
 
-    private void leggTilVilkårsresultatTidligereVilkår(VilkårBuilder vilkårBuilder, LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinje) {
+    private void leggTilVilkårsresultatTidligereVilkår(VilkårBuilder vilkårBuilder, LocalDateTimeline<OpplæringGodkjenningStatus> tidslinje) {
         var tidslinjeUtenGodkjentInstitusjon = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GODKJENT_INSTITUSJON));
         leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenGodkjentInstitusjon, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
 
         var tidslinjeUtenSykdomsvilkår = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GODKJENT_SYKDOMSVILKÅR));
         leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenSykdomsvilkår, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE); // TODO: Endre til noe mer fornuftig
-
-        var tidslinjeUtenGjennomgåttOpplæring = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GJENNOMGÅTT_OPPLÆRING));
-        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenGjennomgåttOpplæring, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING);
     }
 
-    private void leggTilVilkårsresultatNødvendighet(VilkårBuilder vilkårBuilder, LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinje) {
+    private void leggTilVilkårsresultatgjennomgåttOpplæring(VilkårBuilder vilkårBuilder, LocalDateTimeline<OpplæringGodkjenningStatus> tidslinje) {
         var godkjentTidslinje = tidslinje.filterValue(value -> Objects.equals(value, GODKJENT));
         var ikkeGodkjentTidslinje = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GODKJENT));
 
         leggTilVilkårResultat(vilkårBuilder, godkjentTidslinje, Utfall.OPPFYLT, Avslagsårsak.UDEFINERT);
-        leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_NØDVENDIG);
+        leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING);
     }
 
-    private void leggTilVilkårResultat(VilkårBuilder vilkårBuilder, LocalDateTimeline<?> tidslinje, Utfall utfall, Avslagsårsak avslagsårsak) {
+    private void leggTilVilkårsresultatReisetid(VilkårBuilder vilkårBuilder, LocalDateTimeline<OpplæringGodkjenningStatus> tidslinje) {
+        var ikkeGodkjentReisetidTidslinje = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GODKJENT_REISETID));
+
+        leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentReisetidTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_REISETID);
+    }
+
+    private static void leggTilVilkårResultat(VilkårBuilder vilkårBuilder, LocalDateTimeline<?> tidslinje, Utfall utfall, Avslagsårsak avslagsårsak) {
         TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje)
             .forEach(datoIntervallEntitet -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(datoIntervallEntitet)
                 .medUtfall(utfall)
                 .medAvslagsårsak(avslagsårsak)));
     }
 
-    private LocalDateTimeline<NødvendighetGodkjenningStatus> hentTidslinjeMedVurdering(BehandlingReferanse referanse) {
+    private LocalDateTimeline<OpplæringGodkjenningStatus> hentTidslinjeMedVurdering(BehandlingReferanse referanse) {
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
+
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.GJENNOMGÅ_OPPLÆRING);
+        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
 
         var uttaksPerioderGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
         var perioderFraSøknad = uttaksPerioderGrunnlag.getRelevantSøknadsperioder().getPerioderFraSøknadene();
 
-        var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(referanse.getBehandlingId());
+        var vurdertOpplæringGrunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(referanse.getBehandlingId()).orElse(null);
 
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING);
-        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
-
-        return tidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag.orElse(null), tidslinjeTilVurdering);
+        return tidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, tidslinjeTilVurdering);
     }
 }
