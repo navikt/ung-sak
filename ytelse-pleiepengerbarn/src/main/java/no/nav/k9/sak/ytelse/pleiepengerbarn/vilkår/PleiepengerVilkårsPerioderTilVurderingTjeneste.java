@@ -109,19 +109,23 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Long behandlingId, Vilkår vilkår, NavigableSet<DatoIntervallEntitet> perioder) {
         var perioderTilVurdering = new TreeSet<>(utledPerioderTilVurderingVedÅHensyntaFullstendigTidslinje(behandlingId, perioder));
 
-        logger.info("perioderTilVurdering " + perioderTilVurdering);
+        logger.info("perioderTilVurderingFraSøknad " + perioderTilVurdering);
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         var referanse = BehandlingReferanse.fra(behandling);
         if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
             var berørtePerioder = utledUtvidetPeriode(referanse);
+            logger.info("berørtePerioder " + berørtePerioder);
             perioderTilVurdering.addAll(berørtePerioder);
         }
 
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId())));
         perioderTilVurdering.addAll(perioderSomSkalTilbakestilles(behandlingId));
+
+        logger.info("perioderTilVurderingEtterAlleErLagtTil " + perioderTilVurdering);
+
 
         logger.info("vilkårPerioder " + vilkår.getPerioder()
             .stream()
@@ -188,6 +192,9 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
 
         final LocalDateTimeline<Boolean> endringerISøktePerioder = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder)
             .getDiffPerioder();
+
+        logger.info("endringerISøktePerioder " + endringerISøktePerioder);
+        logger.info("vurderingsperioderTimeline " + vurderingsperioderTimeline);
 
         final LocalDateTimeline<Boolean> utvidedePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
 
@@ -264,8 +271,6 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         utvidedePerioder = utvidedePerioder.union(etablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
         utvidedePerioder = utvidedePerioder.union(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId()), StandardCombinators::alwaysTrueForMatch);
         utvidedePerioder = utvidedePerioder.union(uttaksendringerSidenForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
-        logger.info("utvidedePerioder " + utvidedePerioder);
-
         return TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
     }
 
