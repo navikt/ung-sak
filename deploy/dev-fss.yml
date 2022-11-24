@@ -262,7 +262,7 @@ spec:
     - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
       vale: "true"
     - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
-      vale: "true"
+      vale: "false"
     - name: ENABLE_PRODUCER_FATTVEDTAK_AIVEN
       vale: "false"
 
