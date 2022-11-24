@@ -97,6 +97,8 @@ spec:
       value: k9saksbehandling.k9-dokumenthendelse-v1
     - name: KAFKA_FATTEVEDTAK_TOPIC
       value: privat-familie-vedtakFattet-v1-q1
+    - name: KAFKA_FATTEVEDTAK_AIVEN_TOPIC
+      value: teamforeldrepenger.familie-vedtakfattet-v1
     - name: KAFKA_VEDTAKHENDELSE_TOPIC
       value: privat-k9-vedtakhendelse
     - name: KAFKA_VEDTAKHENDELSE_AIVEN_TOPIC
@@ -261,6 +263,8 @@ spec:
       vale: "true"
     - name: KAFKA_VEDTAKHENDELSE_AIVEN_ENABLED
       vale: "true"
+    - name: KAFKA_FATTVEDTAK_AIVEN_ENABLED
+      vale: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
