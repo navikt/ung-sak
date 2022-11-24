@@ -215,6 +215,8 @@ spec:
       vale: "false"
     - name: KAFKA_VEDTAKHENDELSE_AIVEN_ENABLED
       vale: "false"
+    - name: KAFKA_FATTVEDTAK_AIVEN_ENABLED
+      vale: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
