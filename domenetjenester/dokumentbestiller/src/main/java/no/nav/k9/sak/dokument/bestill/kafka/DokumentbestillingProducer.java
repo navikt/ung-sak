@@ -1,8 +1,6 @@
 package no.nav.k9.sak.dokument.bestill.kafka;
 
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.StringSerializer;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -31,6 +29,7 @@ public class DokumentbestillingProducer {
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
         @KonfigVerdi(value = "KAFKA_DOKUMENTBESTILLING_AIVEN_ENABLED", defaultVerdi = "false") boolean aivenEnabled,
+        @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
         @KonfigVerdi("systembruker.username") String username,
         @KonfigVerdi("systembruker.password") String password
     ) {
@@ -52,9 +51,6 @@ public class DokumentbestillingProducer {
                 .username(username)
                 .password(password)
                 .buildForProducerJaas();
-
-        props.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        props.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
         this.producer = new GenerellKafkaProducer(_topicName, props);
 

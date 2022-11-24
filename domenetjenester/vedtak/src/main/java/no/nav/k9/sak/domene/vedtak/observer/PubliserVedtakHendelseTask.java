@@ -11,8 +11,9 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfig;
+import no.nav.k9.felles.integrasjon.kafka.GenerellKafkaProducer;
+import no.nav.k9.felles.integrasjon.kafka.KafkaPropertiesBuilder;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -35,7 +36,7 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
-    private HendelseProducer producer;
+    private GenerellKafkaProducer producer;
     private Validator validator;
 
     PubliserVedtakHendelseTask() {
@@ -43,19 +44,48 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
     }
 
     @Inject
-    public PubliserVedtakHendelseTask(BehandlingRepositoryProvider repositoryProvider,
-                                      BehandlingVedtakRepository behandlingVedtakRepository,
-                                      BehandlingLåsRepository behandlingLåsRepository,
-                                      @KonfigVerdi("kafka.vedtakhendelse.topic") String topic,
-                                      @KonfigVerdi("bootstrap.servers") String bootstrapServers,
-                                      @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
-                                      @KonfigVerdi("systembruker.username") String username,
-                                      @KonfigVerdi("systembruker.password") String password) {
+    public PubliserVedtakHendelseTask(
+        BehandlingRepositoryProvider repositoryProvider,
+        BehandlingVedtakRepository behandlingVedtakRepository,
+        BehandlingLåsRepository behandlingLåsRepository,
+        @KonfigVerdi("kafka.vedtakhendelse.topic") String topic,
+        @KonfigVerdi("kafka.vedtakhendelse.aiven.topic") String topicV2,
+        @KonfigVerdi(value = "KAFKA_BROKERS") String bootstrapServersAiven,
+        @KonfigVerdi("bootstrap.servers") String bootstrapServersOnPrem,
+        @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
+        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
+        @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
+        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
+        @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
+        @KonfigVerdi(value = "KAFKA_VEDTAKHENDELSE_AIVEN_ENABLED", defaultVerdi = "false") boolean aivenEnabled,
+        @KonfigVerdi("systembruker.username") String username,
+        @KonfigVerdi("systembruker.password") String password
+    ) {
         super(behandlingLåsRepository);
 
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingVedtakRepository = behandlingVedtakRepository;
-        this.producer = new HendelseProducer(topic, bootstrapServers, schemaRegistryUrl, username, password);
+
+        String _topicName = aivenEnabled ? topicV2 : topic;
+        String _bootstrapServer = aivenEnabled ? bootstrapServersAiven : bootstrapServersOnPrem;
+
+        var builder = new KafkaPropertiesBuilder()
+            .clientId("KP-" + _topicName).bootstrapServers(_bootstrapServer).schemaRegistreUrl(schemaRegistryUrl);
+
+        var props = aivenEnabled ?
+            builder
+                .truststorePath(trustStorePath)
+                .truststorePassword(trustStorePassword)
+                .keystorePath(keyStoreLocation)
+                .keystorePassword(keyStorePassword)
+                .buildForProducerAiven() :
+            builder
+                .username(username)
+                .password(password)
+                .buildForProducerJaas();
+
+
+        producer = new GenerellKafkaProducer(_topicName, props);
 
         @SuppressWarnings("resource")
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();

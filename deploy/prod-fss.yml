@@ -211,6 +211,8 @@ spec:
       value: "false"
     - name: KAFKA_DOKUMENTBESTILLING_AIVEN_ENABLED
       vale: "true"
+    - name: KAFKA_VEDTAKHENDELSE_AIVEN_ENABLED
+      vale: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
