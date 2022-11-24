@@ -3,8 +3,7 @@ name: Create or update Kafka topics
 on:
   push:
     paths:
-      - 'deploy/topics.yml'
-      - 'deploy/topics-q.yml'
+      - 'deploy/kafka/**'
 
 jobs:
   deploy-kafka-topics-dev:
@@ -17,8 +16,12 @@ jobs:
         env:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: dev-gcp
-          VAR: kafka-pool=nav-dev
-          RESOURCE: deploy/topics-q.yml
+          RESOURCE: deploy/kafka/aapen-k9-stonadstatistikk-v1-dev.yml
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.DEPLOY_KEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: deploy/kafka/aksjonspunkthendelse-dev.yml
 
   deploy-kafka-topics-prod:
     name: Deploy to Aiven Prod
@@ -30,5 +33,9 @@ jobs:
         env:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: prod-gcp
-          VAR: kafka-pool=nav-prod
-          RESOURCE: deploy/topics.yml
+          RESOURCE: deploy/kafka/aapen-k9-stonadstatistikk-v1-prod.yml
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.DEPLOY_KEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: deploy/kafka/aksjonspunkthendelse-prod.yml
