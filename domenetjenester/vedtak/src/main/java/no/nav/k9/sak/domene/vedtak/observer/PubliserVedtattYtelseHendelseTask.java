@@ -81,27 +81,33 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         this.informasjonselementer = informasjonselementer;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vedtakTjeneste = vedtakTjeneste;
+        this.aivenEnabled = aivenEnabled;
 
-        String _topicName = aivenEnabled ? topicV2 : topic;
-        String _bootstrapServer = aivenEnabled ? bootstrapServersAiven : bootstrapServersOnPrem;
 
-        var builder = new KafkaPropertiesBuilder()
-            .clientId("KP-" + _topicName).bootstrapServers(_bootstrapServer).schemaRegistreUrl(schemaRegistryUrl);
+        var onPremPropsBuilder = new KafkaPropertiesBuilder()
+            .clientId("KP-" + topic).bootstrapServers(bootstrapServersOnPrem).schemaRegistreUrl(schemaRegistryUrl);
 
-        var props = aivenEnabled ?
-            builder
+        Properties onPremProps = onPremPropsBuilder
+            .username(username)
+            .password(password)
+            .buildForProducerJaas();
+
+        producer = new GenerellKafkaProducer(topic, onPremProps);
+
+        if (aivenEnabled) {
+            var aivenPropsBuilder = new KafkaPropertiesBuilder()
+                .clientId("KP-" + topicV2).bootstrapServers(bootstrapServersAiven).schemaRegistreUrl(schemaRegistryUrl);
+
+            Properties aivenProps = aivenPropsBuilder
                 .truststorePath(trustStorePath)
                 .truststorePassword(trustStorePassword)
                 .keystorePath(keyStoreLocation)
                 .keystorePassword(keyStorePassword)
-                .buildForProducerAiven() :
-            builder
-                .username(username)
-                .password(password)
-                .buildForProducerJaas();
+                .buildForProducerAiven();
 
+            producerAiven = new GenerellKafkaProducer(topicV2, aivenProps);
+        }
 
-        producer = new GenerellKafkaProducer(_topicName, props);
 
 
         @SuppressWarnings("resource")
@@ -137,7 +143,13 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
                     taskData.setPayload(payload);
                     taskTjeneste.lagre(taskData);
                 }
+                if (aivenEnabled) {
+                    String key = behandling.getUuid().toString();
+                    RecordMetadata recordMetadata = producerAiven.sendJsonMedNøkkel(key, payload);
+                    log.info("Sendte melding til Aiven på {} partition {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
+                }
 
+                //ja, produser på begge topics. Strategi er å dobbelt-produsere, og så la konsumentene håndtere switch-over
                 producer.sendJson(payload);
             }
         }
