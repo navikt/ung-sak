@@ -257,6 +257,8 @@ spec:
       value: "false"
     - name: PLS_UTTAK_PROSENT_PLEIEBEHOV
       value: "true"
+    - name: KAFKA_DOKUMENTBESTILLING_AIVEN_ENABLED
+      vale: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

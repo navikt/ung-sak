@@ -209,6 +209,8 @@ spec:
       value: "2023-01-02"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
       value: "false"
+    - name: KAFKA_DOKUMENTBESTILLING_AIVEN_ENABLED
+      vale: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
