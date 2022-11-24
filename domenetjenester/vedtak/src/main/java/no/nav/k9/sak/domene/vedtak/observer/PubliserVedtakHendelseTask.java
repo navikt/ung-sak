@@ -57,7 +57,7 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
         @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
-        @KonfigVerdi(value = "KAFKA_VEDTAKHENDELSE_AIVEN_ENABLED", defaultVerdi = "false") boolean aivenEnabled,
+        @KonfigVerdi(value = "ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN", defaultVerdi = "false") boolean aivenEnabled,
         @KonfigVerdi("systembruker.username") String username,
         @KonfigVerdi("systembruker.password") String password
     ) {

@@ -211,11 +211,11 @@ spec:
       value: "2023-01-02"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
       value: "false"
-    - name: KAFKA_DOKUMENTBESTILLING_AIVEN_ENABLED
+    - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
       vale: "false"
-    - name: KAFKA_VEDTAKHENDELSE_AIVEN_ENABLED
+    - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
       vale: "false"
-    - name: KAFKA_FATTVEDTAK_AIVEN_ENABLED
+    - name: ENABLE_PRODUCER_FATTVEDTAK_AIVEN
       vale: "false"
 
     # Konfigurasjoner

@@ -2,8 +2,10 @@ package no.nav.k9.sak.domene.vedtak.observer;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,10 +43,12 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "vedtak.publiserHendelse";
     private static final Logger log = LoggerFactory.getLogger(VurderOmVedtakPåvirkerAndreSakerTask.class);
+    private boolean aivenEnabled = false;
 
     private BehandlingRepository behandlingRepository;
     private VedtattYtelseTjeneste vedtakTjeneste;
     private GenerellKafkaProducer producer;
+    private GenerellKafkaProducer producerAiven;
     private Validator validator;
 
     private Instance<InformasjonselementerUtleder> informasjonselementer;
@@ -69,7 +73,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
         @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
-        @KonfigVerdi(value = "KAFKA_FATTVEDTAK_AIVEN_ENABLED", defaultVerdi = "false") boolean aivenEnabled,
+        @KonfigVerdi(value = "ENABLE_PRODUCER_FATTVEDTAK_AIVEN", defaultVerdi = "false") boolean aivenEnabled,
         @KonfigVerdi("systembruker.username") String username,
         @KonfigVerdi("systembruker.password") String password
     ) {

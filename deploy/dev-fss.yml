@@ -259,11 +259,11 @@ spec:
       value: "false"
     - name: PLS_UTTAK_PROSENT_PLEIEBEHOV
       value: "true"
-    - name: KAFKA_DOKUMENTBESTILLING_AIVEN_ENABLED
+    - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
       vale: "true"
-    - name: KAFKA_VEDTAKHENDELSE_AIVEN_ENABLED
+    - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
       vale: "true"
-    - name: KAFKA_FATTVEDTAK_AIVEN_ENABLED
+    - name: ENABLE_PRODUCER_FATTVEDTAK_AIVEN
       vale: "false"
 
     # Konfigurasjoner
