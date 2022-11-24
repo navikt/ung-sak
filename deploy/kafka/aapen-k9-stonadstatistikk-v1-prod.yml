@@ -7,14 +7,14 @@ metadata:
   labels:
     team: k9saksbehandling
 spec:
-  pool: {{kafka-pool}}
+  pool: nav-prod
   config:
     cleanupPolicy: delete  # delete, compact
     minimumInSyncReplicas: 1
     partitions: 1
     replication: 3  # see min/max requirements
     retentionBytes: -1  # -1 means unlimited
-    retentionHours: 2160
+    retentionHours: 2160 # 90 dager
   acl:
     - team: k9saksbehandling
       application: k9-sak
