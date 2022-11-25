@@ -18,6 +18,7 @@ import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
@@ -44,6 +45,7 @@ public class OmsorgenForTjeneste {
     private BehandlingRepository behandlingRepository;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+    private Instance<OmsorgenForVilkår> omsorgenForVilkårene;
 
     OmsorgenForTjeneste() {
         // CDI
@@ -53,7 +55,9 @@ public class OmsorgenForTjeneste {
     public OmsorgenForTjeneste(OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository,
                                BehandlingRepository behandlingRepository,
                                BasisPersonopplysningTjeneste personopplysningTjeneste,
-                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
+                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
+                               @Any Instance<OmsorgenForVilkår> omsorgenForVilkårene) {
+        this.omsorgenForVilkårene = omsorgenForVilkårene;
 
         this.utfallOversetter = new VilkårUtfallOversetter();
         this.omsorgenForGrunnlagRepository = omsorgenForGrunnlagRepository;
@@ -62,10 +66,10 @@ public class OmsorgenForTjeneste {
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
 
-    public List<VilkårData> vurderPerioder(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje) {
+    public List<VilkårData> vurderPerioder(BehandlingReferanse referanse, LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje) {
         final List<VilkårData> resultat = new ArrayList<>();
         for (LocalDateSegment<OmsorgenForVilkårGrunnlag> s : samletOmsorgenForTidslinje.toSegments()) {
-            final var evaluation = new OmsorgenForVilkår().evaluer(s.getValue());
+            final var evaluation = OmsorgenForVilkår.finnTjeneste(omsorgenForVilkårene, referanse.getFagsakYtelseType()).evaluer(s.getValue());
             final var vilkårData = utfallOversetter.oversett(VilkårType.OMSORGEN_FOR, evaluation, s.getValue(), DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()));
             resultat.add(vilkårData);
         }
