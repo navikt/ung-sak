@@ -3,11 +3,14 @@ package no.nav.k9.sak.behandling.hendelse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +20,9 @@ import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -268,12 +274,31 @@ public class BehandlingskontrollEventObserver {
             return false;
         }
         
-        final Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravdokumenterMedPeriode = søknadsfristTjeneste.hentPerioderTilVurdering(behandlingRef);
+        final LocalDateTimeline<KravDokument> eldsteKravTidslinje = hentKravdokumenterMedEldsteKravFørst(behandlingRef, søknadsfristTjeneste);
         
-        return kravdokumenterMedPeriode.entrySet()
+        return eldsteKravTidslinje
                 .stream()
                 .anyMatch(it -> kravdokumenter.stream()
-                    .anyMatch(at -> at.getJournalpostId().equals(it.getKey().getJournalpostId())));
+                    .anyMatch(at -> at.getJournalpostId().equals(it.getValue().getJournalpostId())));
+    }
+
+    private LocalDateTimeline<KravDokument> hentKravdokumenterMedEldsteKravFørst(BehandlingReferanse behandlingRef,
+            VurderSøknadsfristTjeneste<SøktPeriodeData> søknadsfristTjeneste) {
+        final Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravdokumenterMedPeriode = søknadsfristTjeneste.hentPerioderTilVurdering(behandlingRef);
+        final var kravdokumenterMedEldsteFørst = kravdokumenterMedPeriode.keySet()
+                .stream()
+                .sorted(Comparator.comparing(KravDokument::getInnsendingsTidspunkt))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        
+        LocalDateTimeline<KravDokument> eldsteKravTidslinje = LocalDateTimeline.empty();
+        for (KravDokument kravdokument : kravdokumenterMedEldsteFørst) {
+            final List<SøktPeriode<SøktPeriodeData>> perioder = kravdokumenterMedPeriode.get(kravdokument);
+            final var tidslinje = new LocalDateTimeline<>(perioder.stream()
+                    .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), kravdokument))
+                    .collect(Collectors.toList()));
+            eldsteKravTidslinje = eldsteKravTidslinje.union(tidslinje, StandardCombinators::coalesceLeftHandSide);
+        }
+        return eldsteKravTidslinje;
     }
     
     private VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData> finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
