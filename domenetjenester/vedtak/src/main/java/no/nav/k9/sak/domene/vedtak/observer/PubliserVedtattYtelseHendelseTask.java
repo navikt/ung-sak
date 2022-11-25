@@ -72,7 +72,6 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
-        @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
         @KonfigVerdi(value = "ENABLE_PRODUCER_FATTVEDTAK_AIVEN", defaultVerdi = "false") boolean aivenEnabled,
         @KonfigVerdi("systembruker.username") String username,
         @KonfigVerdi("systembruker.password") String password
@@ -85,7 +84,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
 
 
         var onPremPropsBuilder = new KafkaPropertiesBuilder()
-            .clientId("KP-" + topic).bootstrapServers(bootstrapServersOnPrem).schemaRegistreUrl(schemaRegistryUrl);
+            .clientId("KP-" + topic).bootstrapServers(bootstrapServersOnPrem);
 
         Properties onPremProps = onPremPropsBuilder
             .username(username)
@@ -96,7 +95,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
 
         if (aivenEnabled) {
             var aivenPropsBuilder = new KafkaPropertiesBuilder()
-                .clientId("KP-" + topicV2).bootstrapServers(bootstrapServersAiven).schemaRegistreUrl(schemaRegistryUrl);
+                .clientId("KP-" + topicV2).bootstrapServers(bootstrapServersAiven);
 
             Properties aivenProps = aivenPropsBuilder
                 .truststorePath(trustStorePath)

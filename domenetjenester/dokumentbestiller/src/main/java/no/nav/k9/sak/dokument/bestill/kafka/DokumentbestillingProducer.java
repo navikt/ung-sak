@@ -29,7 +29,6 @@ public class DokumentbestillingProducer {
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
         @KonfigVerdi(value = "ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN", defaultVerdi = "false") boolean aivenEnabled,
-        @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
         @KonfigVerdi("systembruker.username") String username,
         @KonfigVerdi("systembruker.password") String password
     ) {
