@@ -76,10 +76,16 @@ spec:
       value: privat-k9-aksjonspunkthendelse
     - name: KAFKA_DOKUMENTBESTILLING_TOPIC
       value: privat-k9-dokumenthendelse
+    - name: KAFKA_DOKUMENTBESTILLING_AIVEN_TOPIC
+      value: k9saksbehandling.k9-dokumenthendelse-v1
     - name: KAFKA_FATTEVEDTAK_TOPIC
       value: privat-familie-vedtakFattet-v1
+    - name: KAFKA_FATTEVEDTAK_AIVEN_TOPIC
+      value: teamforeldrepenger.familie-vedtakfattet-v1
     - name: KAFKA_VEDTAKHENDELSE_TOPIC
       value: privat-k9-vedtakhendelse
+    - name: KAFKA_VEDTAKHENDELSE_AIVEN_TOPIC
+      value: k9saksbehandling.k9-vedtakhendelse
     - name: KAFKA_STONADSTATISTIKK_TOPIC
       value: k9saksbehandling.aapen-k9-stonadstatistikk-v1
     - name: KAFKA_BRUKERDIALOGINNSYN_TOPIC
@@ -205,6 +211,12 @@ spec:
       value: "2023-01-02"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
       value: "false"
+    - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
+      vale: "false"
+    - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
+      vale: "false"
+    - name: ENABLE_PRODUCER_FATTVEDTAK_AIVEN
+      vale: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
