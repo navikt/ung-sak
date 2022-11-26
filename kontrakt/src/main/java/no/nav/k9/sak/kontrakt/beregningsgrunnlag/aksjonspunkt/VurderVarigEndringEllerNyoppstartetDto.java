@@ -43,4 +43,7 @@ public class VurderVarigEndringEllerNyoppstartetDto extends BekreftetBeregningsg
         return erVarigEndret;
     }
 
+    public void setErVarigEndret(Boolean erVarigEndret) {
+        this.erVarigEndret = erVarigEndret;
+    }
 }
