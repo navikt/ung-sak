@@ -30,6 +30,7 @@ public class StønadstatistikkPeriode {
     private LocalDate tom;
 
     @JsonProperty(value = "utfall", required = true)
+    @NotNull
     @Valid
     private StønadstatistikkUtfall utfall;
 

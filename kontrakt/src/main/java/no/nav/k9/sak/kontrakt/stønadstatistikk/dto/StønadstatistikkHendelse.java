@@ -12,6 +12,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertFalse;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -42,7 +44,7 @@ public class StønadstatistikkHendelse {
     private PersonIdent pleietrengende;
 
     @JsonProperty(value = "diagnosekoder", required = true)
-    @Size(max=1000)
+    @Size(max = 1000)
     @NotNull
     @Valid
     private List<StønadstatistikkDiagnosekode> diagnosekoder;
@@ -70,13 +72,13 @@ public class StønadstatistikkHendelse {
     private LocalDateTime vedtakstidspunkt;
 
     @JsonProperty(value = "perioder", required = true)
-    @Size(max=100000)
+    @Size(max = 100000)
     @NotNull
     @Valid
     private List<StønadstatistikkPeriode> perioder;
 
     @JsonProperty(value = "relasjon", required = false)
-    @Size(max=100000)
+    @Size(max = 100000)
     @Valid
     private List<StønadstatistikkRelasjonPeriode> relasjon;
 
@@ -86,16 +88,16 @@ public class StønadstatistikkHendelse {
     }
 
     public StønadstatistikkHendelse(FagsakYtelseType ytelseType,
-            PersonIdent søker,
-            PersonIdent pleietrengende,
-            List<StønadstatistikkDiagnosekode> diagnosekoder,
-            Saksnummer saksnummer,
-            String utbetalingsreferanse,
-            UUID behandlingUuid,
-            UUID forrigeBehandlingUuid,
-            LocalDateTime vedtakstidspunkt,
-            List<StønadstatistikkPeriode> perioder,
-            List<StønadstatistikkRelasjonPeriode> relasjon) {
+                                    PersonIdent søker,
+                                    PersonIdent pleietrengende,
+                                    List<StønadstatistikkDiagnosekode> diagnosekoder,
+                                    Saksnummer saksnummer,
+                                    String utbetalingsreferanse,
+                                    UUID behandlingUuid,
+                                    UUID forrigeBehandlingUuid,
+                                    LocalDateTime vedtakstidspunkt,
+                                    List<StønadstatistikkPeriode> perioder,
+                                    List<StønadstatistikkRelasjonPeriode> relasjon) {
         this.ytelseType = ytelseType;
         this.søker = søker;
         this.pleietrengende = pleietrengende;
@@ -115,7 +117,7 @@ public class StønadstatistikkHendelse {
                                                             UUID behandlingUuid,
                                                             UUID forrigeBehandlingUuid,
                                                             LocalDateTime vedtakstidspunkt,
-                                                            List<StønadstatistikkPeriode> perioder){
+                                                            List<StønadstatistikkPeriode> perioder) {
         StønadstatistikkHendelse hendelse = new StønadstatistikkHendelse();
         hendelse.søker = søker;
         hendelse.ytelseType = FagsakYtelseType.OMSORGSPENGER;
@@ -123,7 +125,7 @@ public class StønadstatistikkHendelse {
         hendelse.utbetalingsreferanse = utbetalingsreferanse;
         hendelse.behandlingUuid = behandlingUuid;
         hendelse.forrigeBehandlingUuid = forrigeBehandlingUuid;
-        hendelse.vedtakstidspunkt=vedtakstidspunkt;
+        hendelse.vedtakstidspunkt = vedtakstidspunkt;
         hendelse.perioder = perioder;
 
         //ubrukte
@@ -131,6 +133,25 @@ public class StønadstatistikkHendelse {
         return hendelse;
     }
 
+
+    @AssertTrue
+    boolean isDetaljertInngangsvilkårBruktKunForOmsorgspenger() {
+        return ytelseType == FagsakYtelseType.OMSORGSPENGER || perioder.stream().flatMap(p -> p.getInngangsvilkår().stream()).noneMatch(iv -> iv.getDetaljertUtfall() != null);
+    }
+
+    @AssertFalse
+    boolean isManglerFelterIPeriodeForPSB() {
+        return ytelseType == FagsakYtelseType.PSB && perioder.stream().anyMatch(
+            p -> p.getUttaksgrad() == null || p.getSøkersTapteArbeidstid() == null || p.getOppgittTilsyn() == null || p.getPleiebehov() == null || p.getGraderingMotTilsyn() == null
+        );
+    }
+
+    @AssertFalse
+    boolean isManglerFelterIPeriodeForPPN() {
+        return ytelseType == FagsakYtelseType.PPN && perioder.stream().anyMatch(
+            p -> p.getUttaksgrad() == null || p.getSøkersTapteArbeidstid() == null || p.getPleiebehov() == null
+        );
+    }
 
     public FagsakYtelseType getYtelseType() {
         return ytelseType;

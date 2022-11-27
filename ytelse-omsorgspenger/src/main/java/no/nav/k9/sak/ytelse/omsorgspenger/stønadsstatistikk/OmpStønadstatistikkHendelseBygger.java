@@ -34,6 +34,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposito
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkHendelseBygger;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkArbeidsforhold;
+import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkDetaljertUtfall;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkHendelse;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkInngangsvilkår;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkPeriode;
@@ -54,8 +55,9 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
     private AktørTjeneste aktørTjeneste;
     private BehandlingVedtakRepository behandlingVedtakRepository;
 
-    public static final Set<VilkårType> VILKÅR_PR_KRAVSTILLER = Set.of(VilkårType.SØKNADSFRIST);
-
+    OmpStønadstatistikkHendelseBygger() {
+        //for CDI proxy
+    }
 
     @Inject
     public OmpStønadstatistikkHendelseBygger(StønadstatistikkPeriodetidslinjebygger stønadstatistikkPeriodetidslinjebygger,
@@ -116,12 +118,14 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
         BigDecimal uttaksgrad = null; //TODO utled uttaksgrad
         //TODO utlede Årsak-er?
         //TODO opplyse om tapt/arbeidstid o.l. ha bare tall normalisert til 7.5t
-        //TODO søknadsfrist (pr kravstiller)
-        //TODO vilkår som er pr arbeidsforhold/aktivitet
         return StønadstatistikkPeriode.forOmsorgspenger(ds.getFom(), ds.getTom(), uttaksgrad, mapUtbetalingsgrader(info, ds.getValue().getBeregningsresultatAndeler()), mapInngangsvilkår(ds.getValue()), bruttoBeregningsgrunnlag);
     }
 
     private List<StønadstatistikkUtbetalingsgrad> mapUtbetalingsgrader(UttakResultatPeriode uttakResultatPerioder, List<BeregningsresultatAndel> beregningsresultatAndeler) {
+        if (uttakResultatPerioder == null) {
+            //skjer hvis alt for perioden er avslått i søknadsfrist-vilkåret
+            return List.of();
+        }
         List<UttakAktivitet> aktiviterter = uttakResultatPerioder.getUttakAktiviteter();
         return aktiviterter.stream().map(u -> {
             var a = u.getArbeidsforhold();
@@ -221,24 +225,48 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
         return resultat;
     }
 
-    private List<StønadstatistikkInngangsvilkår> mapVilkårFraK9Sak(Map<VilkårType, Utfall> vilkår) {
+    private List<StønadstatistikkInngangsvilkår> mapVilkårFraK9Sak(Map<VilkårType, VilkårUtfall> vilkår) {
         return vilkår.entrySet().stream()
-            .map(e -> new StønadstatistikkInngangsvilkår(mapK9SakVilkår(e.getKey()), mapUtfall(e.getValue())))
+            .map(e -> mapVilkår(e.getKey(), e.getValue()))
             .toList();
     }
 
-    private List<StønadstatistikkInngangsvilkår> mapVilkårFraK9Årskvantum(Map<Vilkår, no.nav.k9.aarskvantum.kontrakter.Utfall> vilkår) {
-        return vilkår.entrySet().stream()
-            .map(e -> new StønadstatistikkInngangsvilkår(mapÅrskvantumVilkår(e.getKey()), mapUtfall(e.getValue())))
+    private StønadstatistikkInngangsvilkår mapVilkår(VilkårType vilkårType, VilkårUtfall utfall) {
+        String vilkårtype = mapK9SakVilkår(vilkårType);
+        StønadstatistikkUtfall hovedutfall = mapUtfall(utfall.getUtfall());
+        return new StønadstatistikkInngangsvilkår(vilkårtype, hovedutfall, mapDetaljertUtfall(utfall.getDetaljer()));
+    }
+
+    private List<StønadstatistikkDetaljertUtfall> mapDetaljertUtfall(Set<DetaljertVilkårUtfall> detaljer) {
+        if (detaljer == null) {
+            return null;
+        }
+        return detaljer.stream()
+            .map(this::mapDetaljert)
             .toList();
     }
 
-    private static StønadstatistikkUtfall mapUtfall(no.nav.k9.aarskvantum.kontrakter.Utfall value) {
-        return switch (value) {
-            case INNVILGET -> StønadstatistikkUtfall.OPPFYLT;
-            case AVSLÅTT -> StønadstatistikkUtfall.IKKE_OPPFYLT;
-            default -> throw new IllegalArgumentException("Ikke-støttet utfall: " + value);
-        };
+    private StønadstatistikkDetaljertUtfall mapDetaljert(DetaljertVilkårUtfall detaljer) {
+        return new StønadstatistikkDetaljertUtfall(
+            detaljer.getKravstiller(),
+            detaljer.getType() != null ? detaljer.getType() : null,
+            detaljer.getOrganisasjonsnummer(),
+            detaljer.getAktørId(),
+            detaljer.getArbeidsforholdId(),
+            mapUtfall(detaljer.getUtfall())
+        );
+    }
+
+    private List<StønadstatistikkInngangsvilkår> mapVilkårFraK9Årskvantum(Map<Vilkår, VilkårUtfall> vilkår) {
+        return vilkår.entrySet().stream()
+            .map(e -> mapVilkår(e.getKey(), e.getValue()))
+            .toList();
+    }
+
+    private StønadstatistikkInngangsvilkår mapVilkår(Vilkår vilkårType, VilkårUtfall utfall) {
+        String vilkårtype = mapÅrskvantumVilkår(vilkårType);
+        StønadstatistikkUtfall hovedutfall = mapUtfall(utfall.getUtfall());
+        return new StønadstatistikkInngangsvilkår(vilkårtype, hovedutfall, mapDetaljertUtfall(utfall.getDetaljer()));
     }
 
     private static StønadstatistikkUtfall mapUtfall(Utfall utfall) {
