@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'deploy/kafka/**'
+      - '.github/workflows/kafka.yaml'
 
 jobs:
   deploy-kafka-topics-dev:
@@ -22,6 +23,11 @@ jobs:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: dev-gcp
           RESOURCE: deploy/kafka/aksjonspunkthendelse-dev.yml
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.DEPLOY_KEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: deploy/kafka/k9-vedtakhendelse-dev.yml
 
   deploy-kafka-topics-prod:
     name: Deploy to Aiven Prod
@@ -39,3 +45,8 @@ jobs:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: prod-gcp
           RESOURCE: deploy/kafka/aksjonspunkthendelse-prod.yml
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.DEPLOY_KEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: deploy/kafka/k9-vedtakhendelse-prod.yml
