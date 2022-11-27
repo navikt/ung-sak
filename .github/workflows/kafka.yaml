@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'deploy/kafka/**'
-      - '.github/workflows/kafka.yml'
+      - '.github/workflows/kafka.yaml'
 
 jobs:
   deploy-kafka-topics-dev:
