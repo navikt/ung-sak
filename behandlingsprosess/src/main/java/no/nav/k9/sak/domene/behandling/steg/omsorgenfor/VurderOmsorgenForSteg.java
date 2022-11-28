@@ -20,6 +20,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -96,7 +97,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
 
         final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         final boolean haddeOmsorgenForISistePeriode = harOmsorgenForISistePeriode(vilkårene);
-        final List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(samletOmsorgenForTidslinje);
+        final List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(BehandlingReferanse.fra(behandling), samletOmsorgenForTidslinje);
 
         final Vilkårene oppdaterteVilkår = oppdaterVilkårene(perioderTilVurderingTjeneste, vilkårene, vilkårData);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
