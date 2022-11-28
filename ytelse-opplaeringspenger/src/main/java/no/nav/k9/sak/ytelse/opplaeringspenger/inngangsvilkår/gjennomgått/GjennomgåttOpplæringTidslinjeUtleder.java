@@ -14,17 +14,18 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 class GjennomgåttOpplæringTidslinjeUtleder {
 
     LocalDateTimeline<OpplæringGodkjenningStatus> utled(Vilkårene vilkårene, Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
-        Objects.requireNonNull(vilkårene);
-        Objects.requireNonNull(perioderFraSøknad);
-        Objects.requireNonNull(tidslinjeTilVurdering);
+        Objects.requireNonNull(vilkårene, "Vilkårene må være satt");
+        Objects.requireNonNull(perioderFraSøknad, "Persioder fra søknad må være satt");
+        Objects.requireNonNull(tidslinjeTilVurdering, "Tidslinje til vurdering må være satt");
 
         LocalDateTimeline<OpplæringGodkjenningStatus> tidslinjeIkkeGodkjentTidligereVilkår = lagTidslinjeMedIkkeGodkjentTidligereVilkår(vilkårene, tidslinjeTilVurdering);
+        var tidslinjeTilVurderingEtterJusteringMotVilkår = tidslinjeTilVurdering.disjoint(tidslinjeIkkeGodkjentTidligereVilkår);
 
-        LocalDateTimeline<OpplæringGodkjenningStatus> tidslinjeMedGjennomgåttOpplæring = lagTidslinjeGjennomgåttOpplæring(vurdertOpplæringGrunnlag, tidslinjeTilVurdering);
+        LocalDateTimeline<OpplæringGodkjenningStatus> tidslinjeMedGjennomgåttOpplæring = lagTidslinjeGjennomgåttOpplæring(vurdertOpplæringGrunnlag, tidslinjeTilVurderingEtterJusteringMotVilkår);
 
-        LocalDateTimeline<OpplæringGodkjenningStatus> tidslinjeReisetid = lagTidslinjeReisetid(perioderFraSøknad, vurdertOpplæringGrunnlag, tidslinjeTilVurdering);
+        LocalDateTimeline<OpplæringGodkjenningStatus> tidslinjeReisetid = lagTidslinjeReisetid(perioderFraSøknad, vurdertOpplæringGrunnlag, tidslinjeTilVurderingEtterJusteringMotVilkår);
 
-        return tidslinjeIkkeGodkjentTidligereVilkår.crossJoin(tidslinjeMedGjennomgåttOpplæring).crossJoin(tidslinjeReisetid).crossJoin(tidslinjeTilVurdering.mapValue(value -> OpplæringGodkjenningStatus.MANGLER_VURDERING));
+        return tidslinjeMedGjennomgåttOpplæring.crossJoin(tidslinjeReisetid).crossJoin(tidslinjeTilVurderingEtterJusteringMotVilkår.mapValue(value -> OpplæringGodkjenningStatus.MANGLER_VURDERING));
     }
 
     private LocalDateTimeline<OpplæringGodkjenningStatus> lagTidslinjeMedIkkeGodkjentTidligereVilkår(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
