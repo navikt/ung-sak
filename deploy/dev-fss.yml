@@ -264,7 +264,7 @@ spec:
     - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
       vale: "true"
     - name: ENABLE_PRODUCER_FATTVEDTAK_AIVEN
-      vale: "false"
+      vale: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
