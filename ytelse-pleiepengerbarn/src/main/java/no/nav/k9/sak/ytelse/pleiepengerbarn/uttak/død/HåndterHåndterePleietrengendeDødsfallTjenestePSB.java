@@ -38,7 +38,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements HåndterePleietrengendeDødsfallTjeneste {
 
-    private VilkårForlengingTjeneste vilkårForlengingTjeneste = new VilkårForlengingTjeneste();
+    private final VilkårForlengingTjeneste vilkårForlengingTjeneste = new VilkårForlengingTjeneste();
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
@@ -60,6 +60,18 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.resultatRepository = resultatRepository;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+    }
+
+    private static NavigableSet<DatoIntervallEntitet> utledPeriode(DatoIntervallEntitet periode, VilkårPeriode eksisterendeResultat) {
+        var eksisterendeVilkårsPeriode = eksisterendeResultat.getPeriode();
+        var set = new TreeSet<DatoIntervallEntitet>();
+
+        if (periode.getTomDato().isAfter(eksisterendeVilkårsPeriode.getTomDato())) {
+            set.add(periode);
+        } else {
+            set.add(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), eksisterendeVilkårsPeriode.getTomDato()));
+        }
+        return set;
     }
 
     @Override
@@ -87,7 +99,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         var utvidelseAvPeriode = utledUtvidelse(rettVedDød);
         var sisteDagPgaDødsfall = dødsdato.plus(utvidelseAvPeriode.getAntall(), utvidelseAvPeriode.getEnhet());
 
-        if (!sisteDagPgaDødsfall.isAfter(dødsdato)){
+        if (!sisteDagPgaDødsfall.isAfter(dødsdato)) {
             return Optional.empty();
         }
         return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato.plusDays(1), sisteDagPgaDødsfall));
@@ -128,13 +140,12 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
     }
 
     private void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate fødselsdato) {
-        var set = new TreeSet<DatoIntervallEntitet>();
-        set.add(periode);
-        var perioderUnder18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
-        var perioderOver18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
-
         var dødsdato = periode.getFomDato().minusDays(1); //utvidelsesperioden begynner dagen etter dødsdato
         var eksisterendeResultat = finnSykdomVurderingPåDødsdato(dødsdato, vilkårene);
+        var set = utledPeriode(periode, eksisterendeResultat);
+
+        var perioderUnder18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
+        var perioderOver18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
 
         if (!perioderUnder18år.isEmpty()) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
@@ -154,9 +165,9 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
     }
 
     private VilkårPeriode finnSykdomVurderingPåDødsdato(LocalDate dødsdato, Vilkårene vilkårene) {
-        for (VilkårType vilkårType : Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)){
+        for (VilkårType vilkårType : Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)) {
             Optional<VilkårPeriode> vilkårPeriodeForDødsdato = vilkårene.getVilkår(vilkårType).orElseThrow().finnPeriodeSomInneholderDato(dødsdato);
-            if (vilkårPeriodeForDødsdato.isPresent()){
+            if (vilkårPeriodeForDødsdato.isPresent()) {
                 return vilkårPeriodeForDødsdato.get();
             }
         }
