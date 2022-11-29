@@ -1,28 +1,26 @@
 package no.nav.k9.sak.behandling.hendelse.produksjonsstyring;
 
-import java.util.Properties;
-import java.util.concurrent.ExecutionException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.header.internals.RecordHeaders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.KafkaException;
-import org.apache.kafka.common.errors.AuthenticationException;
-import org.apache.kafka.common.errors.AuthorizationException;
-import org.apache.kafka.common.errors.RetriableException;
-import org.apache.kafka.common.serialization.StringSerializer;
-
+import no.nav.k9.felles.integrasjon.kafka.GenerellKafkaProducer;
+import no.nav.k9.felles.integrasjon.kafka.KafkaPropertiesBuilder;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.sak.behandling.hendelse.HendelseKafkaProducerFeil;
 
 @ApplicationScoped
 public class ProsessEventKafkaProducer {
 
-    Producer<String, String> producer;
+    private static final Logger logger = LoggerFactory.getLogger(ProsessEventKafkaProducer.class);
+
+    private GenerellKafkaProducer producer;
     String topic;
 
     public ProsessEventKafkaProducer() {
@@ -31,21 +29,40 @@ public class ProsessEventKafkaProducer {
 
     @Inject
     public ProsessEventKafkaProducer(@KonfigVerdi("kafka.aksjonspunkthendelse.topic") String topic,
-                                     @KonfigVerdi("bootstrap.servers") String bootstrapServers,
-                                     @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
+                                     @KonfigVerdi("kafka.aksjonspunkthendelse.aiven.topic") String topicV2,
+                                     @KonfigVerdi(value = "KAFKA_BROKERS") String bootstrapServersAiven,
+                                     @KonfigVerdi("bootstrap.servers") String bootstrapServersOnPrem,
+                                     @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
+                                     @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
+                                     @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
+                                     @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
+                                     @KonfigVerdi(value = "ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN", defaultVerdi = "false") boolean aivenEnabled,
                                      @KonfigVerdi("systembruker.username") String username,
                                      @KonfigVerdi("systembruker.password") String password) {
-        Properties properties = new Properties();
 
-        properties.setProperty("bootstrap.servers", bootstrapServers);
-        properties.setProperty("schema.registry.url", schemaRegistryUrl);
-        properties.setProperty("client.id", "KP-" + topic);
 
-        setSecurity(username, properties);
-        setUsernameAndPassword(username, password, properties);
+        String _topicName = aivenEnabled ? topicV2 : topic;
+        String _bootstrapServer = aivenEnabled ? bootstrapServersAiven : bootstrapServersOnPrem;
 
-        this.producer = createProducer(properties);
-        this.topic = topic;
+        var builder = new KafkaPropertiesBuilder()
+            .clientId("KP-" + _topicName).bootstrapServers(_bootstrapServer);
+
+        var props = aivenEnabled ?
+            builder
+                .truststorePath(trustStorePath)
+                .truststorePassword(trustStorePassword)
+                .keystorePath(keyStoreLocation)
+                .keystorePassword(keyStorePassword)
+                .buildForProducerAiven() :
+            builder
+                .username(username)
+                .password(password)
+                .buildForProducerJaas();
+
+
+        producer = new GenerellKafkaProducer(_topicName, props);
+
+        this.topic = _topicName;
 
     }
 
@@ -53,46 +70,17 @@ public class ProsessEventKafkaProducer {
         producer.flush();
     }
 
-    void runProducerWithSingleJson(ProducerRecord<String, String> record) {
-        try {
-            producer.send(record)
-                .get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw HendelseKafkaProducerFeil.FACTORY.uventetFeil(topic, e).toException();
-        } catch (ExecutionException e) {
-            throw HendelseKafkaProducerFeil.FACTORY.uventetFeil(topic, e).toException();
-        } catch (AuthenticationException | AuthorizationException e) {
-            throw HendelseKafkaProducerFeil.FACTORY.feilIPålogging(topic, e).toException();
-        } catch (RetriableException e) {
-            throw HendelseKafkaProducerFeil.FACTORY.retriableExceptionMotKaka(topic, e).toException();
-        } catch (KafkaException e) {
-            throw HendelseKafkaProducerFeil.FACTORY.annenExceptionMotKafka(topic, e).toException();
-        }
+    public void sendHendelse(String nøkkel, String json) {
+        ProducerRecord<String, String> melding = new ProducerRecord<>(topic, nøkkel, json);
+        RecordMetadata recordMetadata = producer.runProducerWithSingleJson(melding);
+        logger.info("Sendt hendelse til Aiven på {} partisjon {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
     }
 
-    void setUsernameAndPassword(String username, String password, Properties properties) {
-        if ((username != null && !username.isEmpty()) && (password != null && !password.isEmpty())) {
-            String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
-            String jaasCfg = String.format(jaasTemplate, username, password);
-            properties.setProperty("sasl.jaas.config", jaasCfg);
-        }
-    }
-
-    Producer<String, String> createProducer(Properties properties) {
-        properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        return new KafkaProducer<>(properties);
-    }
-
-    void setSecurity(String username, Properties properties) {
-        if (username != null && !username.isEmpty()) {
-            properties.setProperty("security.protocol", "SASL_SSL");
-            properties.setProperty("sasl.mechanism", "PLAIN");
-        }
-    }
-
-    public void sendJsonMedNøkkel(String nøkkel, String json) {
-        runProducerWithSingleJson(new ProducerRecord<>(topic, nøkkel, json));
+    public void sendHeartbeat() {
+        String nøkkel = null;
+        String verdi = LocalDateTime.now().toInstant(ZoneOffset.UTC).toString();
+        ProducerRecord<String, String> melding = new ProducerRecord<>(topic, null, nøkkel, verdi, new RecordHeaders().add("Heartbeat", null));
+        RecordMetadata recordMetadata = producer.runProducerWithSingleJson(melding);
+        logger.info("Sendt heartbeat til Aiven på {} partisjon {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
     }
 }
