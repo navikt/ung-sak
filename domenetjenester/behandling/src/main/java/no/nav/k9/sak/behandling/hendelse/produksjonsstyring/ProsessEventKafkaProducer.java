@@ -62,7 +62,7 @@ public class ProsessEventKafkaProducer {
 
         producer = new GenerellKafkaProducer(_topicName, props);
 
-        this.topic = topic;
+        this.topic = _topicName;
 
     }
 
