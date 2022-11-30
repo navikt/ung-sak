@@ -10,6 +10,7 @@ import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -27,6 +28,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
@@ -120,6 +122,15 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
 
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
+        var perioder = vilkårsPerioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
+        var perioderSomMåforlenges = TidslinjeUtil.tilTidslinjeKomprimert(perioder)
+            .intersection(periode.toLocalDateInterval())
+            .compress()
+            .stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval())).collect(Collectors.toCollection(TreeSet::new));
+        if (perioderSomMåforlenges.size() > 1) {
+            throw new IllegalStateException("Fant flere perioder som må forlenges.");
+        }
+        periode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), perioderSomMåforlenges.last().getTomDato());
 
         forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato());
         forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
