@@ -20,10 +20,13 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningGrunnlagDiff;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
+import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 @GrunnlagRef(PersonInformasjonEntitet.class)
@@ -36,14 +39,17 @@ class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
 
     private final String source = this.getClass().getSimpleName();
     private PersonopplysningRepository personopplysningRepository;
+    private FagsakRepository fagsakRepository;
 
     StartpunktUtlederPersonopplysning() {
         // For CDI
     }
 
     @Inject
-    StartpunktUtlederPersonopplysning(PersonopplysningRepository personopplysningRepository) {
+    StartpunktUtlederPersonopplysning(PersonopplysningRepository personopplysningRepository,
+                                      FagsakRepository fagsakRepository) {
         this.personopplysningRepository = personopplysningRepository;
+        this.fagsakRepository = fagsakRepository;
     }
 
     @Override
@@ -78,8 +84,11 @@ class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
             FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UTTAKSVILKÅR, "sivilstand", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
             startpunkter.add(StartpunktType.UTTAKSVILKÅR);
         }
-        if (poDiff.erBarnDødsdatoEndret()) {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.BEREGNING, "barnets dødsdato", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
+
+        Fagsak fagsak = fagsakRepository.finnEksaktFagsak(ref.getFagsakId());
+        AktørId pleietrengendeAktørId = fagsak.getPleietrengendeAktørId();
+        if (pleietrengendeAktørId != null && poDiff.erDødsdatoEndret(pleietrengendeAktørId)) {
+            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UTTAKSVILKÅR, "pletrengendes dødsdato", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
             startpunkter.add(StartpunktType.UTTAKSVILKÅR);
         }
 
