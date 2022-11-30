@@ -1,11 +1,7 @@
 package no.nav.k9.sak.behandling.hendelse.produksjonsstyring;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,11 +72,4 @@ public class ProsessEventKafkaProducer {
         logger.info("Sendt hendelse til Aiven på {} partisjon {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
     }
 
-    public void sendHeartbeat() {
-        String nøkkel = null;
-        String verdi = LocalDateTime.now().toInstant(ZoneOffset.UTC).toString();
-        ProducerRecord<String, String> melding = new ProducerRecord<>(topic, null, nøkkel, verdi, new RecordHeaders().add("Heartbeat", null));
-        RecordMetadata recordMetadata = producer.runProducerWithSingleJson(melding);
-        logger.info("Sendt heartbeat til Aiven på {} partisjon {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
-    }
 }
