@@ -74,6 +74,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String FASTSETT_BEREGNINGSGRUNNLAG_FOR_SN_NY_I_ARBEIDSLIVET_KODE = "5049";
     public static final String VURDER_GRADERING_UTEN_BEREGNINGSGRUNNLAG_KODE = "5050";
     public static final String AVKLAR_AKTIVITETER_KODE = "5052";
+    public static final String VURDER_NYTT_INNTKTSFRHLD_KODE = "5067";
+    public static final String VURDER_REPRESENTERER_STORTINGET_KODE = "5087";
 
     public static final String VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE = "5039";
     public static final String VURDER_VARIG_ENDRET_ARBEIDSSITUASJON_KODE = "5054";
