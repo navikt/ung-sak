@@ -71,6 +71,7 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS_KODE = "5038";
     public static final String FORDEL_BEREGNINGSGRUNNLAG_KODE = "5046";
+    public static final String VURDER_NYTT_INNTEKTSFORHOLD_KODE = "5067";
     public static final String FASTSETT_BEREGNINGSGRUNNLAG_TIDSBEGRENSET_ARBEIDSFORHOLD_KODE = "5047";
     public static final String FASTSETT_BEREGNINGSGRUNNLAG_FOR_SN_NY_I_ARBEIDSLIVET_KODE = "5049";
     public static final String VURDER_GRADERING_UTEN_BEREGNINGSGRUNNLAG_KODE = "5050";
