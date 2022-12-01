@@ -6,6 +6,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,11 +26,12 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.institusjon.GodkjentOpplæringsinstitusjonTjeneste;
@@ -81,9 +83,9 @@ public class VurderInstitusjonRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     @Path((BASEPATH))
     public Response hentVurdertInstitusjon(@NotNull @QueryParam(BehandlingUuidDto.NAME)
-                                               @Parameter(description = BehandlingUuidDto.DESC)
-                                               @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-                                               BehandlingUuidDto behandlingUuidDto) {
+                                           @Parameter(description = BehandlingUuidDto.DESC)
+                                           @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+                                           BehandlingUuidDto behandlingUuidDto) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuidDto.getBehandlingUuid());
         var referanse = BehandlingReferanse.fra(behandling);
 
@@ -98,19 +100,7 @@ public class VurderInstitusjonRestTjeneste {
             .build();
     }
 
-    private static InstitusjonerDto mapTilDto(VurdertOpplæringGrunnlag grunnlag, Set<PerioderFraSøknad> perioderFraSøknad) {
-
-        List<InstitusjonPeriodeDto> beskrivelser = new ArrayList<>();
-
-        for (PerioderFraSøknad perioder : perioderFraSøknad) {
-            for (KursPeriode kursPeriode : perioder.getKurs()) {
-                beskrivelser.add(new InstitusjonPeriodeDto(
-                    new Periode(kursPeriode.getPeriode().getFomDato(), kursPeriode.getPeriode().getTomDato()),
-                    kursPeriode.getInstitusjon(),
-                    new JournalpostIdDto(perioder.getJournalpostId().getVerdi()))
-                );
-            }
-        }
+    private InstitusjonerDto mapTilDto(VurdertOpplæringGrunnlag grunnlag, Set<PerioderFraSøknad> perioderFraSøknad) {
 
         List<InstitusjonVurderingDto> vurderinger = new ArrayList<>();
 
@@ -118,12 +108,60 @@ public class VurderInstitusjonRestTjeneste {
             for (VurdertInstitusjon vurdertInstitusjon : grunnlag.getVurdertInstitusjonHolder().getVurdertInstitusjon()) {
                 vurderinger.add(new InstitusjonVurderingDto(
                     new JournalpostIdDto(vurdertInstitusjon.getJournalpostId().getVerdi()),
-                    vurdertInstitusjon.getGodkjent() ? Resultat.OPPFYLT : Resultat.IKKE_OPPFYLT,
+                    finnPerioderForJournalpostId(vurdertInstitusjon.getJournalpostId(), perioderFraSøknad),
+                    vurdertInstitusjon.getGodkjent() ? Resultat.GODKJENT_MANUELT : Resultat.IKKE_GODKJENT_MANUELT,
                     vurdertInstitusjon.getBegrunnelse())
                 );
             }
         }
 
+        List<InstitusjonPeriodeDto> beskrivelser = new ArrayList<>();
+
+        for (PerioderFraSøknad perioder : perioderFraSøknad) {
+
+            List<KursPeriode> automatiskGodkjentePerioder = new ArrayList<>();
+
+            for (KursPeriode kursPeriode : perioder.getKurs()) {
+                beskrivelser.add(new InstitusjonPeriodeDto(
+                    new Periode(kursPeriode.getPeriode().getFomDato(), kursPeriode.getPeriode().getTomDato()),
+                    kursPeriode.getInstitusjon(),
+                    new JournalpostIdDto(perioder.getJournalpostId().getVerdi()))
+                );
+
+                if (godkjentIRegister(kursPeriode.getInstitusjonUuid(), kursPeriode.getPeriode())) {
+                    automatiskGodkjentePerioder.add(kursPeriode);
+                }
+            }
+
+            if (!automatiskGodkjentePerioder.isEmpty()) {
+                vurderinger.add(new InstitusjonVurderingDto(
+                    new JournalpostIdDto(perioder.getJournalpostId().getVerdi()),
+                    automatiskGodkjentePerioder.stream().map(kursPeriode -> new Periode(kursPeriode.getPeriode().getFomDato(), kursPeriode.getPeriode().getTomDato())).toList(),
+                    Resultat.GODKJENT_AUTOMATISK,
+                    null)
+                );
+            }
+        }
+
         return new InstitusjonerDto(beskrivelser, vurderinger);
+    }
+
+    private List<Periode> finnPerioderForJournalpostId(JournalpostId journalpostId, Set<PerioderFraSøknad> perioderFraSøknad) {
+        List<KursPeriode> perioder = new ArrayList<>();
+        for (PerioderFraSøknad periode : perioderFraSøknad) {
+            if (periode.getJournalpostId().equals(journalpostId)) {
+                perioder.addAll(periode.getKurs());
+            }
+        }
+        return perioder.stream().map(kursPeriode -> new Periode(kursPeriode.getPeriode().getFomDato(), kursPeriode.getPeriode().getTomDato())).toList();
+    }
+
+    private boolean godkjentIRegister(UUID institusjonUuid, DatoIntervallEntitet periode) {
+        if (institusjonUuid == null) {
+            return false;
+        }
+
+        return godkjentOpplæringsinstitusjonTjeneste.hentAktivMedUuid(institusjonUuid, new Periode(periode.getFomDato(), periode.getTomDato()))
+            .isPresent();
     }
 }
