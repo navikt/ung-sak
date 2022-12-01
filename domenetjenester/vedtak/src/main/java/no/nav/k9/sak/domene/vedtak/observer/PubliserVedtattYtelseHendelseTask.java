@@ -91,7 +91,6 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
             .password(password)
             .buildForProducerJaas();
 
-        producer = new GenerellKafkaProducer(topic, onPremProps);
 
         if (aivenEnabled) {
             var aivenPropsBuilder = new KafkaPropertiesBuilder()
@@ -105,8 +104,9 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
                 .buildForProducerAiven();
 
             producerAiven = new GenerellKafkaProducer(topicV2, aivenProps);
+        } else {
+            producer = new GenerellKafkaProducer(topic, onPremProps);
         }
-
 
 
         @SuppressWarnings("resource")
@@ -143,13 +143,13 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
                     taskTjeneste.lagre(taskData);
                 }
                 if (aivenEnabled) {
-                    String key = behandling.getUuid().toString();
+                    String key = behandling.getFagsak().getSaksnummer().getVerdi();
                     RecordMetadata recordMetadata = producerAiven.sendJsonMedNøkkel(key, payload);
                     log.info("Sendte melding til Aiven på {} partition {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
+                } else {
+                    RecordMetadata recordMetadata = producer.sendJson(payload);
+                    log.info("Sendte melding til onprem kafka på {} partition {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
                 }
-
-                //ja, produser på begge topics. Strategi er å dobbelt-produsere, og så la konsumentene håndtere switch-over
-                producer.sendJson(payload);
             }
         }
     }

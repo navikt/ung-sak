@@ -43,8 +43,10 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -60,7 +62,9 @@ import no.nav.k9.sak.kontrakt.kompletthet.Status;
 import no.nav.k9.sak.kontrakt.kompletthet.inntektsmelding.VurderingPerPeriode;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 
@@ -82,6 +86,7 @@ public class KompletthetForBeregningRestTjeneste {
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private InntektsmeldingVurderingUtleder inntektsmeldingVurderingUtleder;
 
     public KompletthetForBeregningRestTjeneste() {
@@ -95,6 +100,7 @@ public class KompletthetForBeregningRestTjeneste {
                                                KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
                                                @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                                MottatteDokumentRepository mottatteDokumentRepository,
+                                               InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                InntektsmeldingVurderingUtleder inntektsmeldingVurderingUtleder) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
@@ -102,7 +108,16 @@ public class KompletthetForBeregningRestTjeneste {
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.inntektsmeldingVurderingUtleder = inntektsmeldingVurderingUtleder;
+    }
+
+    private static LocalDateTime utledInnsendingstidspunkt(List<MottattDokument> mottattDokumenter, Inntektsmelding im) {
+        return mottattDokumenter.stream()
+            .filter(it -> Objects.equals(it.getJournalpostId(), im.getJournalpostId()))
+            .findFirst()
+            .map(MottattDokument::getInnsendingstidspunkt)
+            .orElseThrow();
     }
 
     @GET
@@ -121,10 +136,11 @@ public class KompletthetForBeregningRestTjeneste {
         var perioderTilVurdering = tjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var innvilgetSøknadsfrist = utledPerioderMedInnvilgetPåSøknadsfrist(ref, perioderTilVurdering);
         var sakInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(behandling.getFagsakId());
+        var yrkesaktivitetFilter = inntektArbeidYtelseTjeneste.finnGrunnlag(ref.getBehandlingId()).map(it -> new YrkesaktivitetFilter(it.getArbeidsforholdInformasjon(), it.getAktørArbeidFraRegister(ref.getAktørId())));
 
         var status = manglendeVedleggForPeriode.entrySet()
             .stream()
-            .map(it -> mapV1Periode(ref, unikeInntektsmeldingerForFagsak, kompletthetPerioder, sakInfotrygdMigreringer, perioderTilVurdering, innvilgetSøknadsfrist, it))
+            .map(it -> mapV1Periode(ref, unikeInntektsmeldingerForFagsak, kompletthetPerioder, sakInfotrygdMigreringer, perioderTilVurdering, innvilgetSøknadsfrist, yrkesaktivitetFilter.orElse(null), it))
             .collect(Collectors.toList());
 
         return new KompletthetsVurderingDto(status);
@@ -142,14 +158,6 @@ public class KompletthetForBeregningRestTjeneste {
         return unikeInntektsmeldingerForFagsak;
     }
 
-    private static LocalDateTime utledInnsendingstidspunkt(List<MottattDokument> mottattDokumenter, Inntektsmelding im) {
-        return mottattDokumenter.stream()
-            .filter(it -> Objects.equals(it.getJournalpostId(), im.getJournalpostId()))
-            .findFirst()
-            .map(MottattDokument::getInnsendingstidspunkt)
-            .orElseThrow();
-    }
-
     private NavigableSet<DatoIntervallEntitet> utledPerioderMedInnvilgetPåSøknadsfrist(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         return vilkårResultatRepository.hent(ref.getBehandlingId())
             .getVilkår(VilkårType.SØKNADSFRIST)
@@ -162,12 +170,12 @@ public class KompletthetForBeregningRestTjeneste {
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private KompletthetsTilstandPåPeriodeDto mapV1Periode(BehandlingReferanse ref, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, List<KompletthetPeriode> kompletthetPerioder, List<SakInfotrygdMigrering> sakInfotrygdMigreringer, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, NavigableSet<DatoIntervallEntitet> innvilgetSøknadsfrist, Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it) {
+    private KompletthetsTilstandPåPeriodeDto mapV1Periode(BehandlingReferanse ref, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, List<KompletthetPeriode> kompletthetPerioder, List<SakInfotrygdMigrering> sakInfotrygdMigreringer, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, NavigableSet<DatoIntervallEntitet> innvilgetSøknadsfrist, YrkesaktivitetFilter yrkesaktivitetFilter, Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it) {
         var kompletthetsvurdering = finnRelevantVurderingForPeriode(it.getKey(), kompletthetPerioder);
         var erInfotrygdMigrering = sakInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).anyMatch(at -> it.getKey().inkluderer(at));
 
         return new KompletthetsTilstandPåPeriodeDto(new Periode(it.getKey().getFomDato(), it.getKey().getTomDato()),
-            mapStatusPåInntektsmeldinger(it, unikeInntektsmeldingerForFagsak, ref, kompletthetsvurdering, erInfotrygdMigrering),
+            mapStatusPåInntektsmeldinger(it, unikeInntektsmeldingerForFagsak, ref, kompletthetsvurdering, erInfotrygdMigrering, yrkesaktivitetFilter),
             kompletthetsvurdering.map(KompletthetPeriode::getVurdering).orElse(Vurdering.UDEFINERT),
             utledVurdering(it, perioderTilVurdering, erInfotrygdMigrering, innvilgetSøknadsfrist),
             kompletthetsvurdering.map(KompletthetPeriode::getBegrunnelse).orElse(null));
@@ -196,10 +204,11 @@ public class KompletthetForBeregningRestTjeneste {
         var perioderTilVurdering = tjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var innvilgetSøknadsfrist = utledPerioderMedInnvilgetPåSøknadsfrist(ref, perioderTilVurdering);
         var sakInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(behandling.getFagsakId());
+        var yrkesaktivitetFilter = inntektArbeidYtelseTjeneste.finnGrunnlag(ref.getBehandlingId()).map(it -> new YrkesaktivitetFilter(it.getArbeidsforholdInformasjon(), it.getAktørArbeidFraRegister(ref.getAktørId())));
 
         var status = manglendeVedleggForPeriode.entrySet()
             .stream()
-            .map(it -> mapPeriode(ref, unikeInntektsmeldingerForFagsak, kompletthetPerioder, sakInfotrygdMigreringer, perioderTilVurdering, it, innvilgetSøknadsfrist))
+            .map(it -> mapPeriode(ref, unikeInntektsmeldingerForFagsak, kompletthetPerioder, sakInfotrygdMigreringer, perioderTilVurdering, yrkesaktivitetFilter.orElse(null), it, innvilgetSøknadsfrist))
             .collect(Collectors.toList());
 
         return new KompletthetsVurderingV2Dto(status);
@@ -220,13 +229,14 @@ public class KompletthetForBeregningRestTjeneste {
     private KompletthetsTilstandPåPeriodeV2Dto mapPeriode(BehandlingReferanse ref, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, List<KompletthetPeriode> kompletthetPerioder,
                                                           List<SakInfotrygdMigrering> sakInfotrygdMigreringer,
                                                           NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
+                                                          YrkesaktivitetFilter yrkesaktivitetFilter,
                                                           Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it,
                                                           NavigableSet<DatoIntervallEntitet> innvilgetSøknadsfrist) {
 
         var kompletthetsvurdering = finnRelevantVurderingForPeriode(it.getKey(), kompletthetPerioder);
         var erInfotrygdMigrering = sakInfotrygdMigreringer.stream().map(SakInfotrygdMigrering::getSkjæringstidspunkt).anyMatch(at -> it.getKey().inkluderer(at));
         return new KompletthetsTilstandPåPeriodeV2Dto(new Periode(it.getKey().getFomDato(), it.getKey().getTomDato()),
-            mapStatusPåInntektsmeldingerV2(it, unikeInntektsmeldingerForFagsak, ref, kompletthetsvurdering, erInfotrygdMigrering),
+            mapStatusPåInntektsmeldingerV2(it, unikeInntektsmeldingerForFagsak, ref, kompletthetsvurdering, erInfotrygdMigrering, yrkesaktivitetFilter),
             kompletthetsvurdering.map(KompletthetPeriode::getVurdering).orElse(Vurdering.UDEFINERT),
             utledVurdering(it, perioderTilVurdering, erInfotrygdMigrering, innvilgetSøknadsfrist),
             kompletthetsvurdering.map(KompletthetPeriode::getBegrunnelse).orElse(null));
@@ -235,7 +245,7 @@ public class KompletthetForBeregningRestTjeneste {
     private List<ArbeidsgiverArbeidsforholdStatus> mapStatusPåInntektsmeldinger(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it,
                                                                                 Set<Inntektsmelding> unikeInntektsmeldingerForFagsak,
                                                                                 BehandlingReferanse behandlingReferanse,
-                                                                                Optional<KompletthetPeriode> kompletthetsvurdering, boolean erInfotrygdMigrering) {
+                                                                                Optional<KompletthetPeriode> kompletthetsvurdering, boolean erInfotrygdMigrering, YrkesaktivitetFilter yrkesaktivitetFilter) {
         var resultat = it.getValue()
             .stream()
             .map(at -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(at.getArbeidsgiver().getIdentifikator(), at.getArbeidsforholdId()), utledStatus(kompletthetsvurdering, at.getHarFraværFraArbeidsgiverIPerioden(), erInfotrygdMigrering), null))
@@ -244,13 +254,13 @@ public class KompletthetForBeregningRestTjeneste {
         resultat.addAll(kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
             .stream()
             .map(im -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(im.getArbeidsgiver().getIdentifikator(),
-                im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), Status.MOTTATT, im.getJournalpostId()))
+                im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), utledStatusBasertPåArbeidsforhold(im.getArbeidsgiver(), im.getArbeidsforholdRef(), it.getKey(), yrkesaktivitetFilter), im.getJournalpostId()))
             .toList());
 
         return resultat;
     }
 
-    private List<ArbeidsgiverArbeidsforholdStatusV2> mapStatusPåInntektsmeldingerV2(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, BehandlingReferanse behandlingReferanse, Optional<KompletthetPeriode> kompletthetsvurdering, boolean erInfotrygdMigrering) {
+    private List<ArbeidsgiverArbeidsforholdStatusV2> mapStatusPåInntektsmeldingerV2(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak, BehandlingReferanse behandlingReferanse, Optional<KompletthetPeriode> kompletthetsvurdering, boolean erInfotrygdMigrering, YrkesaktivitetFilter yrkesaktivitetFilter) {
         var resultat = it.getValue()
             .stream()
             .map(at -> new ArbeidsgiverArbeidsforholdStatusV2(new ArbeidsgiverArbeidsforholdIdV2(at.getArbeidsgiver(), at.getArbeidsforholdId()), utledStatus(kompletthetsvurdering, at.getHarFraværFraArbeidsgiverIPerioden(), erInfotrygdMigrering), null))
@@ -259,10 +269,32 @@ public class KompletthetForBeregningRestTjeneste {
         resultat.addAll(kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
             .stream()
             .map(im -> new ArbeidsgiverArbeidsforholdStatusV2(new ArbeidsgiverArbeidsforholdIdV2(im.getArbeidsgiver(),
-                im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), Status.MOTTATT, im.getJournalpostId()))
+                im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), utledStatusBasertPåArbeidsforhold(im.getArbeidsgiver(), im.getArbeidsforholdRef(), it.getKey(), yrkesaktivitetFilter), im.getJournalpostId()))
             .toList());
 
         return resultat;
+    }
+
+    private Status utledStatusBasertPåArbeidsforhold(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, DatoIntervallEntitet key, YrkesaktivitetFilter yrkesaktivitetFilter) {
+        if (yrkesaktivitetFilter != null) {
+            var harArbeidsforholdIPerioden = yrkesaktivitetFilter.getAlleYrkesaktiviteter()
+                .stream()
+                .filter(ya -> Objects.equals(ya.getArbeidsgiver(), arbeidsgiver))
+                .anyMatch(ya -> ya.getAlleAktivitetsAvtaler().stream().anyMatch(periode -> periode.erAnsettelsesPeriode() && periode.getPeriode().overlapper(key)));
+
+            if (!harArbeidsforholdIPerioden) {
+                return Status.MOTTATT_IKKE_ANSATT;
+            }
+            harArbeidsforholdIPerioden = yrkesaktivitetFilter.getAlleYrkesaktiviteter()
+                .stream()
+                .filter(ya -> Objects.equals(ya.getArbeidsgiver(), arbeidsgiver) && arbeidsforholdRef.gjelderFor(ya.getArbeidsforholdRef()))
+                .anyMatch(ya -> ya.getAlleAktivitetsAvtaler().stream().anyMatch(periode -> periode.erAnsettelsesPeriode() && periode.getPeriode().overlapper(key)));
+
+            if (!harArbeidsforholdIPerioden) {
+                return Status.MOTTATT_UKJENT_ARBEIDSFORHOLDSID;
+            }
+        }
+        return Status.MOTTATT;
     }
 
     private Status utledStatus(Optional<KompletthetPeriode> kompletthetsvurdering, boolean harFraværFraArbeidsgiverIPerioden, boolean erInfotrygdMigrering) {

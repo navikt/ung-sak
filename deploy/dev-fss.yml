@@ -91,6 +91,8 @@ spec:
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
       value: privat-k9-aksjonspunkthendelse
+    - name: KAFKA_AKSJONSPUNKTHENDELSE_AIVEN_TOPIC
+      value: k9saksbehandling.k9sak-aksjonspunkthendelse
     - name: KAFKA_DOKUMENTBESTILLING_TOPIC
       value: privat-k9-dokumenthendelse
     - name: KAFKA_DOKUMENTBESTILLING_AIVEN_TOPIC
@@ -265,6 +267,8 @@ spec:
       value: "true"
     - name: ENABLE_PRODUCER_FATTVEDTAK_AIVEN
       value: "true"
+    - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
+      value: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

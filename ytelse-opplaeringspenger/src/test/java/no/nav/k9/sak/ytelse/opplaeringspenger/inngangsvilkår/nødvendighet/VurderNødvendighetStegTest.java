@@ -51,39 +51,32 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 @CdiDbAwareTest
 public class VurderNødvendighetStegTest {
 
+    private final JournalpostId journalpostId1 = new JournalpostId("123");
+    private final JournalpostId journalpostId2 = new JournalpostId("321");
     @Inject
     private EntityManager entityManager;
-
     @Inject
     private VilkårResultatRepository vilkårResultatRepository;
-
     @Inject
     private BehandlingRepository behandlingRepository;
-
     @Inject
     private VurdertOpplæringRepository vurdertOpplæringRepository;
-
     @Inject
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
-
     @Inject
     private PleiebehovResultatRepository resultatRepository;
-
     @Inject
     @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteBean;
-
     private BehandlingRepositoryProvider repositoryProvider;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteMock;
     private Behandling behandling;
     private VurderNødvendighetSteg vurderNødvendighetSteg;
     private Periode søknadsperiode;
     private TestScenarioBuilder scenario;
-    private final JournalpostId journalpostId1 = new JournalpostId("123");
-    private final JournalpostId journalpostId2 = new JournalpostId("321");
 
     @BeforeEach
-    public void setup(){
+    public void setup() {
         perioderTilVurderingTjenesteMock = spy(perioderTilVurderingTjenesteBean);
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         vurderNødvendighetSteg = new VurderNødvendighetSteg(repositoryProvider, perioderTilVurderingTjenesteMock, resultatRepository,
@@ -218,7 +211,7 @@ public class VurderNødvendighetStegTest {
             Utfall.IKKE_OPPFYLT,
             søknadsperiode.getFom(),
             søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_NØDVENDIG);
+            Avslagsårsak.IKKE_NØDVENDIG_OPPLÆRING);
 
         var pleiebehovResultat = resultatRepository.hentHvisEksisterer(behandling.getId());
         assertThat(pleiebehovResultat).isPresent();
@@ -246,12 +239,7 @@ public class VurderNødvendighetStegTest {
         assertThat(resultat.getAksjonspunktResultater()).isEmpty();
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
-        assertThat(vilkår.getPerioder()).hasSize(1);
-        assertVilkårPeriode(vilkår.getPerioder().get(0),
-            Utfall.IKKE_OPPFYLT,
-            søknadsperiode.getFom(),
-            søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
+        assertThat(vilkår.getPerioder()).isEmpty();
     }
 
     @Test
@@ -295,7 +283,7 @@ public class VurderNødvendighetStegTest {
             Utfall.IKKE_OPPFYLT,
             søknadsperiode.getTom(),
             søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_NØDVENDIG);
+            Avslagsårsak.IKKE_NØDVENDIG_OPPLÆRING);
     }
 
     @Test
@@ -324,17 +312,12 @@ public class VurderNødvendighetStegTest {
         assertThat(resultat.getAksjonspunktResultater()).isEmpty();
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
-        assertThat(vilkår.getPerioder()).hasSize(2);
+        assertThat(vilkår.getPerioder()).hasSize(1);
         assertVilkårPeriode(vilkår.getPerioder().get(0),
             Utfall.OPPFYLT,
             søknadsperiode.getFom(),
-            søknadsperiode.getTom().minusDays(1),
+            søknadsperiode.getTom(),
             null);
-        assertVilkårPeriode(vilkår.getPerioder().get(1),
-            Utfall.IKKE_OPPFYLT,
-            søknadsperiode.getTom(),
-            søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
     }
 
     @Test
@@ -392,12 +375,7 @@ public class VurderNødvendighetStegTest {
         assertThat(resultat.getAksjonspunktResultater()).isEmpty();
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
-        assertThat(vilkår.getPerioder()).hasSize(1);
-        assertVilkårPeriode(vilkår.getPerioder().get(0),
-            Utfall.IKKE_OPPFYLT,
-            søknadsperiode.getFom(),
-            søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE);
+        assertThat(vilkår.getPerioder()).isEmpty();
     }
 
     @Test
@@ -418,12 +396,7 @@ public class VurderNødvendighetStegTest {
         assertThat(resultat.getAksjonspunktResultater()).isEmpty();
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
-        assertThat(vilkår.getPerioder()).hasSize(1);
-        assertVilkårPeriode(vilkår.getPerioder().get(0),
-            Utfall.IKKE_OPPFYLT,
-            søknadsperiode.getFom(),
-            søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING);
+        assertThat(vilkår.getPerioder()).isEmpty();
     }
 
     @Test
@@ -451,17 +424,12 @@ public class VurderNødvendighetStegTest {
         assertThat(resultat.getAksjonspunktResultater()).isEmpty();
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
-        assertThat(vilkår.getPerioder()).hasSize(2);
+        assertThat(vilkår.getPerioder()).hasSize(1);
         assertVilkårPeriode(vilkår.getPerioder().get(0),
             Utfall.OPPFYLT,
             søknadsperiode.getFom(),
-            søknadsperiode.getTom().minusMonths(1),
-            null);
-        assertVilkårPeriode(vilkår.getPerioder().get(1),
-            Utfall.IKKE_OPPFYLT,
-            søknadsperiode.getTom().minusMonths(1).plusDays(1),
             søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE);
+            null);
     }
 
     @Test
