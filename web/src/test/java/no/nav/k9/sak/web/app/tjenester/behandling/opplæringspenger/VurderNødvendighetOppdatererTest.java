@@ -52,7 +52,7 @@ public class VurderNødvendighetOppdatererTest {
     @Test
     public void skalLagreNyttVurdertOpplæringGrunnlag() {
         final JournalpostIdDto journalpostIdDto = new JournalpostIdDto("1337");
-        final VurderNødvendighetDto dto = new VurderNødvendighetDto(journalpostIdDto, true);
+        final VurderNødvendighetDto dto = new VurderNødvendighetDto(journalpostIdDto, true, "");
         dto.setBegrunnelse("fordi");
 
         OppdateringResultat resultat = lagreGrunnlag(dto);
@@ -70,10 +70,10 @@ public class VurderNødvendighetOppdatererTest {
     @Test
     public void skalOppdatereVurdertOpplæringGrunnlag() {
         final JournalpostIdDto journalpostIdDto = new JournalpostIdDto("1338");
-        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(journalpostIdDto, false);
+        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(journalpostIdDto, false, "");
         lagreGrunnlag(dto1);
 
-        final VurderNødvendighetDto dto2 = new VurderNødvendighetDto(journalpostIdDto, true);
+        final VurderNødvendighetDto dto2 = new VurderNødvendighetDto(journalpostIdDto, true, "");
         lagreGrunnlag(dto2);
 
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
@@ -86,11 +86,11 @@ public class VurderNødvendighetOppdatererTest {
     @Test
     public void skalLagreGrunnlagOgKopiereFraAktivtForAnnenJornalpostId() {
         final JournalpostIdDto journalpostIdDto1 = new JournalpostIdDto("1339");
-        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(journalpostIdDto1, true);
+        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(journalpostIdDto1, true, "");
         lagreGrunnlag(dto1);
 
         final JournalpostIdDto journalpostIdDto2 = new JournalpostIdDto("1340");
-        final VurderNødvendighetDto dto2 = new VurderNødvendighetDto(journalpostIdDto2, true);
+        final VurderNødvendighetDto dto2 = new VurderNødvendighetDto(journalpostIdDto2, true, "");
         lagreGrunnlag(dto2);
 
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());

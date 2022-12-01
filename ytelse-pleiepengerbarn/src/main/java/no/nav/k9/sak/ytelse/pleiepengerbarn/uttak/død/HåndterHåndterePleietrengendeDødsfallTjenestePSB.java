@@ -10,10 +10,10 @@ import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.uttak.RettVedDødType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -28,6 +28,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
@@ -39,13 +40,12 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements HåndterePleietrengendeDødsfallTjeneste {
 
-    private VilkårForlengingTjeneste vilkårForlengingTjeneste = new VilkårForlengingTjeneste();
+    private final VilkårForlengingTjeneste vilkårForlengingTjeneste = new VilkårForlengingTjeneste();
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
     private PleiebehovResultatRepository resultatRepository;
-    private boolean utvidVedDødsfall;
 
     HåndterHåndterePleietrengendeDødsfallTjenestePSB() {
         // CDI
@@ -56,21 +56,23 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
                                                             @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                             PersonopplysningTjeneste personopplysningTjeneste,
                                                             RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
-                                                            PleiebehovResultatRepository resultatRepository, @KonfigVerdi(value = "PSB_PPN_UTVIDE_VED_DODSFALL", defaultVerdi = "true") boolean utvidVedDødsfall) {
+                                                            PleiebehovResultatRepository resultatRepository) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.resultatRepository = resultatRepository;
-        this.utvidVedDødsfall = utvidVedDødsfall;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+    }
+
+    private static DatoIntervallEntitet utledPeriode(DatoIntervallEntitet periode, DatoIntervallEntitet last) {
+        if (last.getTomDato().isAfter(periode.getTomDato())) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), last.getTomDato());
+        }
+        return periode;
     }
 
     @Override
     public Optional<DatoIntervallEntitet> utledUtvidetPeriodeForDødsfall(BehandlingReferanse referanse) {
-        if (!utvidVedDødsfall) {
-            return Optional.empty();
-        }
-
         var rettVedDødGrunnlagOpt = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
         if (rettVedDødGrunnlagOpt.isEmpty()) {
             return Optional.empty();
@@ -94,7 +96,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         var utvidelseAvPeriode = utledUtvidelse(rettVedDød);
         var sisteDagPgaDødsfall = dødsdato.plus(utvidelseAvPeriode.getAntall(), utvidelseAvPeriode.getEnhet());
 
-        if (!sisteDagPgaDødsfall.isAfter(dødsdato)){
+        if (!sisteDagPgaDødsfall.isAfter(dødsdato)) {
             return Optional.empty();
         }
         return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato.plusDays(1), sisteDagPgaDødsfall));
@@ -115,6 +117,15 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
 
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
+        var perioder = vilkårsPerioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
+        var perioderSomMåforlenges = TidslinjeUtil.tilTidslinjeKomprimert(perioder)
+            .intersection(periode.toLocalDateInterval())
+            .compress()
+            .stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval())).collect(Collectors.toCollection(TreeSet::new));
+        if (perioderSomMåforlenges.size() > 1) {
+            throw new IllegalStateException("Fant flere perioder som må forlenges.");
+        }
+        periode = utledPeriode(periode, perioderSomMåforlenges.last());
 
         forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato());
         forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
@@ -135,13 +146,12 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
     }
 
     private void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate fødselsdato) {
-        var set = new TreeSet<DatoIntervallEntitet>();
-        set.add(periode);
-        var perioderUnder18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
-        var perioderOver18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
-
         var dødsdato = periode.getFomDato().minusDays(1); //utvidelsesperioden begynner dagen etter dødsdato
         var eksisterendeResultat = finnSykdomVurderingPåDødsdato(dødsdato, vilkårene);
+        var set = new TreeSet<>(Set.of(periode));
+
+        var perioderUnder18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
+        var perioderOver18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
 
         if (!perioderUnder18år.isEmpty()) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
@@ -161,9 +171,9 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
     }
 
     private VilkårPeriode finnSykdomVurderingPåDødsdato(LocalDate dødsdato, Vilkårene vilkårene) {
-        for (VilkårType vilkårType : Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)){
+        for (VilkårType vilkårType : Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)) {
             Optional<VilkårPeriode> vilkårPeriodeForDødsdato = vilkårene.getVilkår(vilkårType).orElseThrow().finnPeriodeSomInneholderDato(dødsdato);
-            if (vilkårPeriodeForDødsdato.isPresent()){
+            if (vilkårPeriodeForDødsdato.isPresent()) {
                 return vilkårPeriodeForDødsdato.get();
             }
         }

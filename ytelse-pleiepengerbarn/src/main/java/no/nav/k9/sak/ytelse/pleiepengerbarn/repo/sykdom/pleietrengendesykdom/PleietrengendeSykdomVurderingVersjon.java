@@ -19,11 +19,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
+import no.nav.k9.sak.behandlingslager.kodeverk.SykdomResultatTypeConverter;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomResultatTypeConverter;
 
 @Entity(name = "PleietrengendeSykdomVurderingVersjon")
 @Table(name = "PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON")

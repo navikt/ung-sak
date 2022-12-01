@@ -4,6 +4,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import java.util.Comparator;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -18,6 +19,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
@@ -28,7 +30,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 @ApplicationScoped
-class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetalingPeriodeutleder {
+public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetalingPeriodeutleder {
 
     private UttakTjeneste uttakRestKlient;
     private BehandlingRepository behandlingRepository;
@@ -41,7 +43,7 @@ class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetalingPerio
     @Inject
     public PleiepengerEndretUtbetalingPeriodeutleder(UttakTjeneste uttakRestKlient,
                                                      BehandlingRepository behandlingRepository,
-                                                     @KonfigVerdi(value = "BG_FORLENGELSE_BASERT_PÅ_UTTAK", defaultVerdi = "false") boolean enabled) {
+                                                     @KonfigVerdi(value = "BG_FORLENGELSE_BASERT_PAA_UTTAK", defaultVerdi = "false") boolean enabled) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.enabled = enabled;
@@ -68,22 +70,31 @@ class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetalingPerio
         var differanse1 = uttakTidslinje.combine(originalUttakTidslinje, StandardCombinators::difference, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         var differanse2 = originalUttakTidslinje.combine(uttakTidslinje, StandardCombinators::difference, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        var periodeTidslinje = new LocalDateTimeline<>(periode.toLocalDateInterval(), Boolean.TRUE);
-
         var resultat = new TreeSet<DatoIntervallEntitet>();
-
-        periodeTidslinje.intersection(differanse1, StandardCombinators::rightOnly).toSegments().stream()
-            .filter(s -> !s.getValue().isEmpty())
-            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
-            .filter(periode::overlapper)
-            .forEach(resultat::add);
-        periodeTidslinje.intersection(differanse2, StandardCombinators::rightOnly).toSegments().stream()
-            .filter(s -> !s.getValue().isEmpty())
-            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
-            .filter(periode::overlapper)
-            .forEach(resultat::add);
-
+        resultat.addAll(finnRelevanteIntervaller(periode, differanse1));
+        resultat.addAll(finnRelevanteIntervaller(periode, differanse2));
         return resultat;
+    }
+
+    private NavigableSet<DatoIntervallEntitet> finnRelevanteIntervaller(DatoIntervallEntitet periode, LocalDateTimeline<Set<Utbetalingsgrader>> differanse1) {
+        var kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
+
+        var intervaller1 = differanse1.toSegments().stream()
+            .filter(s -> !s.getValue().isEmpty())
+            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
+            .sorted(Comparator.naturalOrder())
+            .toList();
+
+        var resultat1 = new TreeSet<DatoIntervallEntitet>();
+
+        for (var intervall : intervaller1) {
+            if (intervall.overlapper(periode)) {
+                resultat1.add(intervall);
+            } else if (resultat1.stream().anyMatch(r -> kantIKantVurderer.erKantIKant(intervall, r)) || kantIKantVurderer.erKantIKant(intervall, periode)) {
+                resultat1.add(intervall);
+            }
+        }
+        return resultat1;
     }
 
     private LocalDateTimeline<Set<Utbetalingsgrader>> lagTidslinje(Uttaksplan uttaksplan) {

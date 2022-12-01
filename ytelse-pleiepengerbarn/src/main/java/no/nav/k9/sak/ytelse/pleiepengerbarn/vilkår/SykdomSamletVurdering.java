@@ -3,9 +3,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
@@ -13,12 +10,10 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeTidslinjeUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeTidslinjeUtils;
 
 public class SykdomSamletVurdering {
-
-    private static Logger logger = LoggerFactory.getLogger(SykdomSamletVurdering.class);
 
 
     private PleietrengendeSykdomVurderingVersjon ktp;
@@ -101,20 +96,15 @@ public class SykdomSamletVurdering {
                 PleietrengendeSykdomInnleggelser innleggelser1 = left.getValue().getInnleggelser();
                 PleietrengendeSykdomInnleggelser innleggelser2 = right.getValue().getInnleggelser();
                 if (innleggelser1 == null && innleggelser2 != null || innleggelser1 != null && innleggelser2 == null) {
-                    logger.info("Diff i innleggelser for periode " + localDateInterval);
                     return new LocalDateSegment<>(localDateInterval, true);
                 }
 
                 PleietrengendeSykdomVurderingVersjon toOp1 = left.getValue().getToOp();
                 PleietrengendeSykdomVurderingVersjon toOp2 = right.getValue().getToOp();
                 if (toOp1 == null && toOp2 != null || toOp1 != null && toOp2 == null) {
-                    logger.info("Diff i toOp for periode " + localDateInterval);
                     return new LocalDateSegment<>(localDateInterval, true);
                 } else if (toOp1 != null && toOp2 != null) {
                     if (toOp1.getResultat() != toOp2.getResultat()) {
-                        logger.info("Diff i toOp for periode {}. Ny: {}, Forrige: {}",
-                            localDateInterval, toOp1.getResultat(), toOp2.getResultat());
-
                         return new LocalDateSegment<>(localDateInterval, true);
                     }
                 }
@@ -122,13 +112,9 @@ public class SykdomSamletVurdering {
                 PleietrengendeSykdomVurderingVersjon ktp1 = left.getValue().getKtp();
                 PleietrengendeSykdomVurderingVersjon ktp2 = right.getValue().getKtp();
                 if (ktp1 == null && ktp2 != null || ktp1 != null && ktp2 == null) {
-                    logger.info("Diff i ktp for periode " + localDateInterval);
-
                     return new LocalDateSegment<>(localDateInterval, true);
                 } else if (ktp1 != null && ktp2 != null) {
                     if (ktp1.getResultat() != ktp2.getResultat()) {
-                        logger.info("Diff i ktp for periode {}. Ny: {}, Forrige: {}",
-                            localDateInterval, ktp1.getResultat(), ktp2.getResultat());
                         return new LocalDateSegment<>(localDateInterval, true);
                     }
                 }
@@ -136,12 +122,9 @@ public class SykdomSamletVurdering {
                 PleietrengendeSykdomVurderingVersjon slu1 = left.getValue().getSlu();
                 PleietrengendeSykdomVurderingVersjon slu2 = right.getValue().getSlu();
                 if (slu1 == null && slu2 != null || slu1 != null && slu2 == null) {
-                    logger.info("Diff i slu for periode " + localDateInterval);
                     return new LocalDateSegment<>(localDateInterval, true);
                 } else if (slu1 != null && slu2 != null) {
                     if (slu1.getResultat() != slu2.getResultat()) {
-                        logger.info("Diff i slu for periode {}. Ny: {}, Forrige: {}",
-                            localDateInterval, slu1.getResultat(), slu2.getResultat());
                         return new LocalDateSegment<>(localDateInterval, true);
                     }
                 }

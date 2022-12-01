@@ -33,7 +33,7 @@ public class VurdertOpplæring extends BaseEntitet {
     @Column(name = "noedvendig_opplaering", nullable = false)
     private Boolean nødvendigOpplæring = false;
 
-    @Column(name = "begrunnelse")
+    @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
 
     @Version

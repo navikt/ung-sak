@@ -17,11 +17,11 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
+import no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForGrunnlagRepository;
+import no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForSaksbehandlervurdering;
 import no.nav.k9.sak.kontrakt.omsorg.AvklarOmsorgenForDto;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForSaksbehandlervurdering;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOmsorgenForDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -75,13 +75,13 @@ public class AvklarOmsorgenForV2 implements AksjonspunktOppdaterer<AvklarOmsorge
 
     private List<OmsorgenForSaksbehandlervurdering> toOmsorgenForSaksbehandlervurderinger(AvklarOmsorgenForDto dto) {
         return dto.getOmsorgsperioder()
-                .stream()
-                .map(op -> new OmsorgenForSaksbehandlervurdering(
-                    DatoIntervallEntitet.fraOgMedTilOgMed(op.getPeriode().getFom(), op.getPeriode().getTom()),
-                    op.getBegrunnelse(),
-                    op.getResultat()
-                ))
-                .collect(Collectors.toList());
+            .stream()
+            .map(op -> new OmsorgenForSaksbehandlervurdering(
+                DatoIntervallEntitet.fraOgMedTilOgMed(op.getPeriode().getFom(), op.getPeriode().getTom()),
+                op.getBegrunnelse(),
+                op.getResultat()
+            ))
+            .collect(Collectors.toList());
     }
 
     private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, String begrunnelse) {

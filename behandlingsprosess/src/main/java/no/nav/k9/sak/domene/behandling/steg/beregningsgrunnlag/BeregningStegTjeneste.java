@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
@@ -46,7 +47,7 @@ public class BeregningStegTjeneste {
     public BeregningStegTjeneste(BeregningTjeneste kalkulusTjeneste,
                                  BeregningsgrunnlagVilkårTjeneste vilkårTjeneste,
                                  VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                 Instance<EndretUtbetalingPeriodeutleder> endretUtbetalingPeriodeutleder) {
+                                 @Any Instance<EndretUtbetalingPeriodeutleder> endretUtbetalingPeriodeutleder) {
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.vilkårTjeneste = vilkårTjeneste;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
@@ -90,8 +91,6 @@ public class BeregningStegTjeneste {
 
     public void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
-        logger.info("Alle perioder til vurdering {}", vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter));
-
         periodeFilter.ignorerForlengelseperioder();
         fortsettBeregning(ref, stegType, resultatCallback, periodeFilter);
     }

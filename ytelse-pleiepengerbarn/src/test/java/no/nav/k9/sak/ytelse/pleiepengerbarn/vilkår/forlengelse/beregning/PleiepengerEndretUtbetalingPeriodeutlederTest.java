@@ -128,7 +128,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         List<Utbetalingsgrader> utbetalingsgraderPeriode1 = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
         leggTilPeriode(perioder2, fom, utbetalingsgraderPeriode1, antallDagerTilEndring-1);
         List<Utbetalingsgrader> utbetalingsgraderPeriode2 = List.of(delvisUtbetaling(ARBEIDSFORHOLD_1, BigDecimal.valueOf(50)));
-        leggTilPeriode(perioder2, fom.plusDays(antallDagerTilEndring), utbetalingsgraderPeriode2, antallDager);
+        leggTilPeriode(perioder2, fom.plusDays(antallDagerTilEndring), utbetalingsgraderPeriode2, antallDager-antallDagerTilEndring);
         Uttaksplan uttaksplanForlengelse = new Uttaksplan(perioder2, List.of());
 
         when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
@@ -157,7 +157,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         List<Utbetalingsgrader> utbetalingsgraderPeriode1 = List.of(fullUtbetaling(ARBEIDSFORHOLD_1), fullUtbetaling(ARBEIDSFORHOLD_2));
         leggTilPeriode(perioder2, fom, utbetalingsgraderPeriode1, antallDagerTilEndring-1);
         List<Utbetalingsgrader> utbetalingsgraderPeriode2 = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
-        leggTilPeriode(perioder2, fom.plusDays(antallDagerTilEndring), utbetalingsgraderPeriode2, antallDager);
+        leggTilPeriode(perioder2, fom.plusDays(antallDagerTilEndring), utbetalingsgraderPeriode2, antallDager-antallDagerTilEndring);
         Uttaksplan uttaksplanForlengelse = new Uttaksplan(perioder2, List.of());
 
         when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
@@ -186,7 +186,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         List<Utbetalingsgrader> utbetalingsgraderPeriode1 = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
         leggTilPeriode(perioder2, fom, utbetalingsgraderPeriode1, antallDagerTilEndring-1);
         List<Utbetalingsgrader> utbetalingsgraderPeriode2 = List.of(fullUtbetaling(ARBEIDSFORHOLD_1), fullUtbetaling(ARBEIDSFORHOLD_2));
-        leggTilPeriode(perioder2, fom.plusDays(antallDagerTilEndring), utbetalingsgraderPeriode2, antallDager);
+        leggTilPeriode(perioder2, fom.plusDays(antallDagerTilEndring), utbetalingsgraderPeriode2, antallDager-antallDagerTilEndring);
         Uttaksplan uttaksplanForlengelse = new Uttaksplan(perioder2, List.of());
 
         when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
@@ -200,6 +200,29 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         var periode = forlengelseperioder.iterator().next();
         assertThat(periode.getFomDato()).isEqualTo(fom.plusDays(antallDagerTilEndring));
         assertThat(periode.getTomDato()).isEqualTo(fom.plusDays(antallDager));
+    }
+
+    @Test
+    void skal_gi_en_periode_ved_trukket_periode() {
+        var fom = SKJÆRINGSTIDSPUNKT;
+
+        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, 15, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
+
+        Uttaksplan uttaksplan2 = lagUttaksplanEnPeriode(fom, 10, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
+
+        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
+            .thenReturn(uttaksplan2);
+
+        var forlengelseperioder = utleder.utledPerioder(
+            BehandlingReferanse.fra(behandling),
+            DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(10)));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(1);
+        var periode = forlengelseperioder.iterator().next();
+        assertThat(periode.getFomDato()).isEqualTo(fom.plusDays(11));
+        assertThat(periode.getTomDato()).isEqualTo(fom.plusDays(15));
     }
 
 

@@ -1,10 +1,7 @@
 package no.nav.k9.sak.kontrakt.krav;
 
+import java.util.Objects;
 import java.util.Set;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -12,6 +9,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -42,5 +42,18 @@ public class PeriodeMedÅrsaker {
 
     public Set<ÅrsakTilVurdering> getÅrsaker() {
         return årsaker;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PeriodeMedÅrsaker that = (PeriodeMedÅrsaker) o;
+        return Objects.equals(periode, that.periode) && Objects.equals(årsaker, that.årsaker);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(periode, årsaker);
     }
 }

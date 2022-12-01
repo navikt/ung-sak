@@ -1,16 +1,16 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
-import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Periode;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.sykdom.Resultat;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 
 public class BeredskapOgNattevåkOppdaterer {
 
@@ -55,7 +55,7 @@ public class BeredskapOgNattevåkOppdaterer {
         var segmenterSomSkalLeggesTil = nyeUnntak.stream().map(periode ->
             new LocalDateSegment<>(new LocalDateInterval(periode.fom(), periode.tom()), new UnntakEtablertTilsynPeriode()
                     // XXX: Nullstilles slik fordi feltet "begrunnelse" er brukt både til begrunnelse fra søker og vurderingstekst fra saksbehandler.
-                    .medBegrunnelse(periode.resultat().equals(Resultat.IKKE_VURDERT) ? "" : periode.begrunnelse()) 
+                    .medBegrunnelse(periode.resultat().equals(Resultat.IKKE_VURDERT) ? "" : periode.begrunnelse())
                     //.medBegrunnelse(periode.begrunnelse())
                     .medResultat(periode.resultat())
                     .medAktørId(aktørId)

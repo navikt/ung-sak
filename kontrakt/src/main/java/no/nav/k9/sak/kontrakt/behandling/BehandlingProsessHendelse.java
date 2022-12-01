@@ -213,6 +213,7 @@ public class BehandlingProsessHendelse {
         this.relatertPartAktørId = kopierFra.relatertPartAktørId;
         this.ansvarligBeslutterForTotrinn = kopierFra.ansvarligBeslutterForTotrinn;
         this.aksjonspunktTilstand = kopierFra.aksjonspunktTilstand.stream().map(AksjonspunktTilstandDto::new).toList();
+        this.nyeKrav = kopierFra.nyeKrav;
     }
 
     public static Builder builder() {

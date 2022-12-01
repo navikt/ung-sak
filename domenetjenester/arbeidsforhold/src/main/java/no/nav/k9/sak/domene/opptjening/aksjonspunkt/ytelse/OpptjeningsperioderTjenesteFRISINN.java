@@ -80,7 +80,7 @@ public class OpptjeningsperioderTjenesteFRISINN {
         }
 
         perioder.addAll(mapOppgittOpptjening(mapArbeidOpptjening, oppgittOpptjening, vurderOpptjening, opptjeningPeriode, ref));
-        perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(ref, vurderOpptjening, true, new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato())));
+        perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(ref, vilkårsperiode, vurderOpptjening, true, new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato())));
         lagOpptjeningsperiodeForFrilansAktivitet(ref, oppgittOpptjening, vurderOpptjening, grunnlag, perioder, opptjeningPeriode,
             mapArbeidOpptjening).ifPresent(perioder::add);
 
