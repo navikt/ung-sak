@@ -64,6 +64,7 @@ import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 
@@ -253,7 +254,7 @@ public class KompletthetForBeregningRestTjeneste {
         resultat.addAll(kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
             .stream()
             .map(im -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(im.getArbeidsgiver().getIdentifikator(),
-                im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), utledStatusBasertPåArbeidsforhold(im.getArbeidsgiver(), it.getKey(), yrkesaktivitetFilter), im.getJournalpostId()))
+                im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), utledStatusBasertPåArbeidsforhold(im.getArbeidsgiver(), im.getArbeidsforholdRef(), it.getKey(), yrkesaktivitetFilter), im.getJournalpostId()))
             .toList());
 
         return resultat;
@@ -268,13 +269,13 @@ public class KompletthetForBeregningRestTjeneste {
         resultat.addAll(kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, it.getKey())
             .stream()
             .map(im -> new ArbeidsgiverArbeidsforholdStatusV2(new ArbeidsgiverArbeidsforholdIdV2(im.getArbeidsgiver(),
-                im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), utledStatusBasertPåArbeidsforhold(im.getArbeidsgiver(), it.getKey(), yrkesaktivitetFilter), im.getJournalpostId()))
+                im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), utledStatusBasertPåArbeidsforhold(im.getArbeidsgiver(), im.getArbeidsforholdRef(), it.getKey(), yrkesaktivitetFilter), im.getJournalpostId()))
             .toList());
 
         return resultat;
     }
 
-    private Status utledStatusBasertPåArbeidsforhold(Arbeidsgiver arbeidsgiver, DatoIntervallEntitet key, YrkesaktivitetFilter yrkesaktivitetFilter) {
+    private Status utledStatusBasertPåArbeidsforhold(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, DatoIntervallEntitet key, YrkesaktivitetFilter yrkesaktivitetFilter) {
         if (yrkesaktivitetFilter != null) {
             var harArbeidsforholdIPerioden = yrkesaktivitetFilter.getAlleYrkesaktiviteter()
                 .stream()
@@ -283,6 +284,14 @@ public class KompletthetForBeregningRestTjeneste {
 
             if (!harArbeidsforholdIPerioden) {
                 return Status.MOTTATT_IKKE_ANSATT;
+            }
+            harArbeidsforholdIPerioden = yrkesaktivitetFilter.getAlleYrkesaktiviteter()
+                .stream()
+                .filter(ya -> Objects.equals(ya.getArbeidsgiver(), arbeidsgiver) && arbeidsforholdRef.gjelderFor(ya.getArbeidsforholdRef()))
+                .anyMatch(ya -> ya.getAlleAktivitetsAvtaler().stream().anyMatch(periode -> periode.erAnsettelsesPeriode() && periode.getPeriode().overlapper(key)));
+
+            if (!harArbeidsforholdIPerioden) {
+                return Status.MOTTATT_UKJENT_ARBEIDSFORHOLDSID;
             }
         }
         return Status.MOTTATT;
