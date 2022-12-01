@@ -6,6 +6,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +30,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -117,27 +119,35 @@ public class VurderInstitusjonRestTjeneste {
 
         List<InstitusjonPeriodeDto> beskrivelser = new ArrayList<>();
 
-        for (PerioderFraSøknad perioder : perioderFraSøknad) {
+        for (PerioderFraSøknad fraSøknad : perioderFraSøknad) {
 
-            List<KursPeriode> automatiskGodkjentePerioder = new ArrayList<>();
+            var kursperioder = fraSøknad.getKurs();
+            var journalpostId = fraSøknad.getJournalpostId();
 
-            for (KursPeriode kursPeriode : perioder.getKurs()) {
+            for (KursPeriode kursPeriode : kursperioder) {
                 beskrivelser.add(new InstitusjonPeriodeDto(
                     new Periode(kursPeriode.getPeriode().getFomDato(), kursPeriode.getPeriode().getTomDato()),
                     kursPeriode.getInstitusjon(),
-                    new JournalpostIdDto(perioder.getJournalpostId().getVerdi()))
+                    new JournalpostIdDto(journalpostId.getVerdi()))
                 );
-
-                if (godkjentIRegister(kursPeriode.getInstitusjonUuid(), kursPeriode.getPeriode())) {
-                    automatiskGodkjentePerioder.add(kursPeriode);
-                }
             }
 
-            if (!automatiskGodkjentePerioder.isEmpty()) {
+            var institusjonUuid = kursperioder.stream().findAny().orElseThrow().getInstitusjonUuid();
+            var perioder = kursperioder.stream().map(KursPeriode::getPeriode).toList();
+
+            if (godkjentIRegister(institusjonUuid, perioder)) {
                 vurderinger.add(new InstitusjonVurderingDto(
-                    new JournalpostIdDto(perioder.getJournalpostId().getVerdi()),
-                    automatiskGodkjentePerioder.stream().map(kursPeriode -> new Periode(kursPeriode.getPeriode().getFomDato(), kursPeriode.getPeriode().getTomDato())).toList(),
+                    new JournalpostIdDto(journalpostId.getVerdi()),
+                    perioder.stream().map(periode -> new Periode(periode.getFomDato(), periode.getTomDato())).toList(),
                     Resultat.GODKJENT_AUTOMATISK,
+                    null)
+                );
+
+            } else if (vurderinger.stream().noneMatch(vurdering -> vurdering.getJournalpostId().getJournalpostId().equals(journalpostId))) {
+                vurderinger.add(new InstitusjonVurderingDto(
+                    new JournalpostIdDto(journalpostId.getVerdi()),
+                    perioder.stream().map(periode -> new Periode(periode.getFomDato(), periode.getTomDato())).toList(),
+                    Resultat.MÅ_VURDERES,
                     null)
                 );
             }
@@ -156,12 +166,12 @@ public class VurderInstitusjonRestTjeneste {
         return perioder.stream().map(kursPeriode -> new Periode(kursPeriode.getPeriode().getFomDato(), kursPeriode.getPeriode().getTomDato())).toList();
     }
 
-    private boolean godkjentIRegister(UUID institusjonUuid, DatoIntervallEntitet periode) {
+    private boolean godkjentIRegister(UUID institusjonUuid, List<DatoIntervallEntitet> perioder) {
         if (institusjonUuid == null) {
             return false;
         }
 
-        return godkjentOpplæringsinstitusjonTjeneste.hentAktivMedUuid(institusjonUuid, new Periode(periode.getFomDato(), periode.getTomDato()))
+        return godkjentOpplæringsinstitusjonTjeneste.hentAktivMedUuid(institusjonUuid, TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(perioder)))
             .isPresent();
     }
 }
