@@ -13,14 +13,25 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 
-public class OppfyltVilkårTidslinjeUtleder {
+public class VilkårTidslinjeUtleder {
 
-    public static LocalDateTimeline<Boolean> utled(Vilkårene vilkårene, VilkårType vilkårType) {
+    public static LocalDateTimeline<Boolean> utledOppfylt(Vilkårene vilkårene, VilkårType vilkårType) {
         NavigableSet<DatoIntervallEntitet> oppfyltVilkårPerioder = vilkårene.getVilkår(vilkårType)
             .orElseThrow()
             .getPerioder()
             .stream()
             .filter(it -> Objects.equals(Utfall.OPPFYLT, it.getGjeldendeUtfall()))
+            .map(VilkårPeriode::getPeriode)
+            .collect(Collectors.toCollection(TreeSet<DatoIntervallEntitet>::new));
+        return TidslinjeUtil.tilTidslinjeKomprimert(oppfyltVilkårPerioder);
+    }
+
+    public static LocalDateTimeline<Boolean> utledAvslått(Vilkårene vilkårene, VilkårType vilkårType) {
+        NavigableSet<DatoIntervallEntitet> oppfyltVilkårPerioder = vilkårene.getVilkår(vilkårType)
+            .orElseThrow()
+            .getPerioder()
+            .stream()
+            .filter(it -> Objects.equals(Utfall.IKKE_OPPFYLT, it.getGjeldendeUtfall()))
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet<DatoIntervallEntitet>::new));
         return TidslinjeUtil.tilTidslinjeKomprimert(oppfyltVilkårPerioder);

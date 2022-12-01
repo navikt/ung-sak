@@ -16,10 +16,11 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.OppfyltVilkårTidslinjeUtleder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.VilkårTidslinjeUtleder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
@@ -31,23 +32,20 @@ class VurderNødvendighetTidslinjeUtleder {
         Objects.requireNonNull(perioderFraSøknad);
         Objects.requireNonNull(tidslinjeTilVurdering);
 
-        LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinjeIkkeGodkjentTidligereVilkår = lagTidslinjeMedIkkeGodkjentTidligereVilkår(vilkårene, tidslinjeTilVurdering);
+        var perioderSomSkalAvslås = lagTidslinjeMedIkkeGodkjentTidligereVilkår(vilkårene, tidslinjeTilVurdering);
 
         LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinjeMedNødvendighetsgodkjenning = lagTidslinjeMedNødvendighetsGodkjenning(perioderFraSøknad, vurdertOpplæringGrunnlag);
 
-        return tidslinjeIkkeGodkjentTidligereVilkår.crossJoin(tidslinjeMedNødvendighetsgodkjenning).intersection(tidslinjeTilVurdering);
+        return tidslinjeMedNødvendighetsgodkjenning.intersection(tidslinjeTilVurdering.disjoint(perioderSomSkalAvslås));
     }
 
-    private LocalDateTimeline<NødvendighetGodkjenningStatus> lagTidslinjeMedIkkeGodkjentTidligereVilkår(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
-        var godkjentInstitusjonTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
-        var sykdomsTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.LANGVARIG_SYKDOM);
-        var gjennomførtOpplæringTidslinje = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.GJENNOMGÅ_OPPLÆRING);
+    private LocalDateTimeline<Boolean> lagTidslinjeMedIkkeGodkjentTidligereVilkår(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        var godkjentInstitusjonTidslinje = VilkårTidslinjeUtleder.utledAvslått(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
+        var sykdomsTidslinje = VilkårTidslinjeUtleder.utledAvslått(vilkårene, VilkårType.LANGVARIG_SYKDOM);
+        var gjennomførtOpplæringTidslinje = VilkårTidslinjeUtleder.utledAvslått(vilkårene, VilkårType.GJENNOMGÅ_OPPLÆRING);
 
-        var tidslinjeUtenGodkjentInstitusjon = tidslinjeTilVurdering.disjoint(godkjentInstitusjonTidslinje).mapValue(value -> NødvendighetGodkjenningStatus.IKKE_GODKJENT_INSTITUSJON);
-        var tidslinjeUtenSykdomsvilkår = tidslinjeTilVurdering.disjoint(sykdomsTidslinje).mapValue(value -> NødvendighetGodkjenningStatus.IKKE_GODKJENT_SYKDOMSVILKÅR);
-        var tidslinjeUtenGjennomgåttOpplæring = tidslinjeTilVurdering.disjoint(gjennomførtOpplæringTidslinje).mapValue(value -> NødvendighetGodkjenningStatus.IKKE_GJENNOMGÅTT_OPPLÆRING);
-
-        return tidslinjeUtenGodkjentInstitusjon.crossJoin(tidslinjeUtenSykdomsvilkår).crossJoin(tidslinjeUtenGjennomgåttOpplæring);
+        return godkjentInstitusjonTidslinje.combine(sykdomsTidslinje, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN)
+            .combine(gjennomførtOpplæringTidslinje, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN).intersection(tidslinjeTilVurdering);
     }
 
     private LocalDateTimeline<NødvendighetGodkjenningStatus> lagTidslinjeMedNødvendighetsGodkjenning(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag) {
