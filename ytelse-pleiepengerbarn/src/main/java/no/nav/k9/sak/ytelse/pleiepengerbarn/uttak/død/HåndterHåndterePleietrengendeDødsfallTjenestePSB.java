@@ -64,16 +64,11 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
-    private static NavigableSet<DatoIntervallEntitet> utledPeriode(DatoIntervallEntitet periode, VilkårPeriode eksisterendeResultat) {
-        var eksisterendeVilkårsPeriode = eksisterendeResultat.getPeriode();
-        var set = new TreeSet<DatoIntervallEntitet>();
-
-        if (periode.getTomDato().isAfter(eksisterendeVilkårsPeriode.getTomDato())) {
-            set.add(periode);
-        } else {
-            set.add(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), eksisterendeVilkårsPeriode.getTomDato()));
+    private static DatoIntervallEntitet utledPeriode(DatoIntervallEntitet periode, DatoIntervallEntitet last) {
+        if (last.getTomDato().isAfter(periode.getTomDato())) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), last.getTomDato());
         }
-        return set;
+        return periode;
     }
 
     @Override
@@ -130,7 +125,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         if (perioderSomMåforlenges.size() > 1) {
             throw new IllegalStateException("Fant flere perioder som må forlenges.");
         }
-        periode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), perioderSomMåforlenges.last().getTomDato());
+        periode = utledPeriode(periode, perioderSomMåforlenges.last());
 
         forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato());
         forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
@@ -153,7 +148,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
     private void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate fødselsdato) {
         var dødsdato = periode.getFomDato().minusDays(1); //utvidelsesperioden begynner dagen etter dødsdato
         var eksisterendeResultat = finnSykdomVurderingPåDødsdato(dødsdato, vilkårene);
-        var set = utledPeriode(periode, eksisterendeResultat);
+        var set = new TreeSet<>(Set.of(periode));
 
         var perioderUnder18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
         var perioderOver18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
