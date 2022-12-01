@@ -68,7 +68,7 @@ public class GjennomgåttOpplæringTjeneste {
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.GJENNOMGÅ_OPPLÆRING);
         var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
 
-        klippKortPerioderSomIkkeHarBehandlingsgrunnlag(vilkårBuilder, tidslinjeTilVurdering.disjoint(tidslinje));
+        klippBortPerioderSomIkkeHarBehandlingsgrunnlag(vilkårBuilder, tidslinjeTilVurdering.disjoint(tidslinje));
 
         leggTilVilkårsresultatReisetid(vilkårBuilder, tidslinje);
         leggTilVilkårsresultatgjennomgåttOpplæring(vilkårBuilder, tidslinje);
@@ -77,7 +77,7 @@ public class GjennomgåttOpplæringTjeneste {
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), vilkårResultatBuilder.build());
     }
 
-    private void klippKortPerioderSomIkkeHarBehandlingsgrunnlag(VilkårBuilder vilkårBuilder, LocalDateTimeline<Boolean> tidslinje) {
+    private void klippBortPerioderSomIkkeHarBehandlingsgrunnlag(VilkårBuilder vilkårBuilder, LocalDateTimeline<Boolean> tidslinje) {
         // Klipper bort periodene, det er ingen grunn til å vurdere vilkåret der hvor man ikke har behandlingsgrunnlag
         tidslinje.compress().forEach(segment -> vilkårBuilder.tilbakestill(DatoIntervallEntitet.fra(segment.getLocalDateInterval())));
     }

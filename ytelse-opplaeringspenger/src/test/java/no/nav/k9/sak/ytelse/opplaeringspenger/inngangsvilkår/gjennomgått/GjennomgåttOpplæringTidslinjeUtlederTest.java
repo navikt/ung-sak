@@ -2,9 +2,7 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått;
 
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.GODKJENT;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.IKKE_GODKJENT;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.IKKE_GODKJENT_INSTITUSJON;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.IKKE_GODKJENT_REISETID;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.IKKE_GODKJENT_SYKDOMSVILKÅR;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.MANGLER_VURDERING;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -152,7 +150,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
 
         var resultat = gjennomgåttOpplæringTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
         assertThat(resultat).isNotNull();
-        assertTidslinje(resultat, IKKE_GODKJENT_INSTITUSJON);
+        assertThat(resultat).isEmpty();
     }
 
     @Test
@@ -166,7 +164,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
 
         var resultat = gjennomgåttOpplæringTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
         assertThat(resultat).isNotNull();
-        assertTidslinje(resultat, IKKE_GODKJENT_SYKDOMSVILKÅR);
+        assertThat(resultat).isEmpty();
     }
 
     @Test
@@ -225,6 +223,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
     }
 
     private void assertTidslinje(LocalDateTimeline<OpplæringGodkjenningStatus> tidslinje, OpplæringGodkjenningStatus forventetStatus) {
+        assertThat(tidslinje).isNotEmpty();
         assertThat(tidslinje.disjoint(tidslinje.filterValue(v -> Objects.equals(v, forventetStatus)))).isEmpty();
     }
 }
