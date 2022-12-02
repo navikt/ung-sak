@@ -119,8 +119,8 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
         var perioder = utledPerioder(referanse);
         var perioderSomMåforlenges = TidslinjeUtil.tilTidslinjeKomprimert(perioder)
-            .intersection(periode.toLocalDateInterval())
             .compress()
+            .intersection(periode.toLocalDateInterval())
             .stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval())).collect(Collectors.toCollection(TreeSet::new));
         if (perioderSomMåforlenges.size() > 1) {
             throw new IllegalStateException("Fant flere perioder som må forlenges.");
