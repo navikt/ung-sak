@@ -63,6 +63,10 @@ spec:
       rules:
         - application: k9-sak
           namespace: k9saksbehandling
+        - application: k9-tilbake
+          namespace: k9saksbehandling
+        - application: k9-klage
+          namespace: k9saksbehandling
         - application: k9-formidling
           namespace: k9saksbehandling
         - application: k9-formidling-dokumentdata
@@ -268,7 +272,9 @@ spec:
     - name: ENABLE_PRODUCER_FATTVEDTAK_AIVEN
       value: "true"
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
-      value: "false"
+      value: "true"
+    - name: VENT_REGELENDRING_8_41
+      vale: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
