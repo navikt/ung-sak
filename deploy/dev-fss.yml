@@ -63,6 +63,10 @@ spec:
       rules:
         - application: k9-sak
           namespace: k9saksbehandling
+        - application: k9-tilbake
+          namespace: k9saksbehandling
+        - application: k9-klage
+          namespace: k9saksbehandling
         - application: k9-formidling
           namespace: k9saksbehandling
         - application: k9-formidling-dokumentdata

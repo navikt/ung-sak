@@ -271,7 +271,7 @@ class GjennomgåOpplæringStegTest {
             Utfall.IKKE_OPPFYLT,
             reisetidHjem.getFom(),
             reisetidHjem.getTom(),
-            Avslagsårsak.IKKE_GODKJENT_REISETID);
+            Avslagsårsak.IKKE_PÅ_REISE);
     }
 
     private void assertVilkårPeriode(VilkårPeriode vilkårPeriode, Utfall utfall, LocalDate fom, LocalDate tom, Avslagsårsak avslagsårsak) {

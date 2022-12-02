@@ -2,10 +2,7 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.GODKJENT;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GJENNOMGÅTT_OPPLÆRING;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT_INSTITUSJON;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT_SYKDOMSVILKÅR;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.MANGLER_VURDERING;
 
 import java.util.Objects;
@@ -23,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.Aksjon;
@@ -54,7 +52,7 @@ public class VurderNødvendighetTjeneste {
 
         var tidslinje = hentTidslinjeMedVurdering(referanse);
 
-        if (tidslinje.filterValue(value -> Objects.equals(value, MANGLER_VURDERING)).stream().findFirst().isPresent()) {
+        if (tidslinje.stream().anyMatch(segment -> Objects.equals(segment.getValue(), MANGLER_VURDERING))) {
             return Aksjon.TRENGER_AVKLARING;
         }
 
@@ -68,8 +66,9 @@ public class VurderNødvendighetTjeneste {
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.NØDVENDIG_OPPLÆRING);
 
         var tidslinje = hentTidslinjeMedVurdering(referanse);
-
-        leggTilVilkårsresultatTidligereVilkår(vilkårBuilder, tidslinje);
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING);
+        var tidslinjeSomSkalFjernes = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering).disjoint(tidslinje);
+        leggTilVilkårsresultatTidligereVilkår(vilkårBuilder, tidslinjeSomSkalFjernes);
 
         leggTilVilkårsresultatNødvendighet(vilkårBuilder, tidslinje);
 
@@ -77,15 +76,8 @@ public class VurderNødvendighetTjeneste {
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), vilkårResultatBuilder.build());
     }
 
-    private void leggTilVilkårsresultatTidligereVilkår(VilkårBuilder vilkårBuilder, LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinje) {
-        var tidslinjeUtenGodkjentInstitusjon = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GODKJENT_INSTITUSJON));
-        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenGodkjentInstitusjon, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
-
-        var tidslinjeUtenSykdomsvilkår = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GODKJENT_SYKDOMSVILKÅR));
-        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenSykdomsvilkår, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE); // TODO: Endre til noe mer fornuftig
-
-        var tidslinjeUtenGjennomgåttOpplæring = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GJENNOMGÅTT_OPPLÆRING));
-        leggTilVilkårResultat(vilkårBuilder, tidslinjeUtenGjennomgåttOpplæring, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING);
+    private void leggTilVilkårsresultatTidligereVilkår(VilkårBuilder vilkårBuilder, LocalDateTimeline<Boolean> tidslinjeSomSkalFjernes) {
+        tidslinjeSomSkalFjernes.compress().forEach(segment -> vilkårBuilder.tilbakestill(DatoIntervallEntitet.fra(segment.getLocalDateInterval())));
     }
 
     private void leggTilVilkårsresultatNødvendighet(VilkårBuilder vilkårBuilder, LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinje) {
@@ -93,7 +85,7 @@ public class VurderNødvendighetTjeneste {
         var ikkeGodkjentTidslinje = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GODKJENT));
 
         leggTilVilkårResultat(vilkårBuilder, godkjentTidslinje, Utfall.OPPFYLT, Avslagsårsak.UDEFINERT);
-        leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_NØDVENDIG);
+        leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_NØDVENDIG_OPPLÆRING);
     }
 
     private void leggTilVilkårResultat(VilkårBuilder vilkårBuilder, LocalDateTimeline<?> tidslinje, Utfall utfall, Avslagsårsak avslagsårsak) {
