@@ -13,6 +13,7 @@ import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinis
 
 import java.time.Period;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -272,6 +273,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W"),
     AUTO_VENT_ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING(AksjonspunktKodeDefinisjon.ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING_KODE, AksjonspunktType.AUTOPUNKT, "Vent på etterlyst inntektsmelding og/eller tilsvar på varsel om avslag",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P3W"),
+    AUTO_VENT_PÅ_LOVENDRING_8_41(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_LOVENDRING_8_41_KODE, AksjonspunktType.AUTOPUNKT,
+        "Vent på vedtak om lovendring vedrørende beregning av næring i kombinasjon med arbeid eller frilans", BehandlingStatus.UTREDES, BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR,
+        UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST),
 
     // Gruppe : 80xx (FRISINN)
     AUTO_VENT_FRISINN_BEREGNING(AksjonspunktKodeDefinisjon.AUTO_VENT_FRISINN_BEREGNING, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",
