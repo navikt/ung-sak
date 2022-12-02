@@ -25,6 +25,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_VENT_MILITÆR_OG_BG_UNDER_3G_KODE = "7023";
     public static final String AUTO_VENT_GRADERING_FLERE_ARBEIDSFORHOLD_KODE = "7025";
     public static final String AUTO_VENT_ETTERLYST_INNTEKTSMELDING_KODE = "7030";
+    public static final String AUTO_VENT_PÅ_LOVENDRING_8_41_KODE = "7041";
 
     public static final String AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE_KODE = "5021";
     public static final String AVKLAR_LOVLIG_OPPHOLD_KODE = "5019";

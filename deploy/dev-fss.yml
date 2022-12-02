@@ -273,6 +273,8 @@ spec:
       value: "true"
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
       value: "false"
+    - name: VENT_REGELENDRING_8_41
+      vale: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
