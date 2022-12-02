@@ -64,9 +64,9 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
-    private static DatoIntervallEntitet utledPeriode(DatoIntervallEntitet periode, DatoIntervallEntitet last) {
-        if (last.getTomDato().isAfter(periode.getTomDato())) {
-            return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), last.getTomDato());
+    private static DatoIntervallEntitet utledPeriode(DatoIntervallEntitet periode, TreeSet<DatoIntervallEntitet> last) {
+        if (!last.isEmpty() && last.last().getTomDato().isAfter(periode.getTomDato())) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), last.last().getTomDato());
         }
         return periode;
     }
@@ -125,7 +125,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         if (perioderSomMåforlenges.size() > 1) {
             throw new IllegalStateException("Fant flere perioder som må forlenges.");
         }
-        periode = utledPeriode(periode, perioderSomMåforlenges.last());
+        periode = utledPeriode(periode, perioderSomMåforlenges);
 
         forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato());
         forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
