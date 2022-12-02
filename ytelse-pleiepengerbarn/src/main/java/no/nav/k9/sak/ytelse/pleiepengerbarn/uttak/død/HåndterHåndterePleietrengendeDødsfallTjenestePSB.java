@@ -117,7 +117,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
 
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
-        var perioder = vilkårsPerioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
+        var perioder = utledPerioder(referanse);
         var perioderSomMåforlenges = TidslinjeUtil.tilTidslinjeKomprimert(perioder)
             .intersection(periode.toLocalDateInterval())
             .compress()
@@ -136,6 +136,14 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
         builder.tilbakeStill(periode);
         resultatRepository.lagreOgFlush(referanse.getBehandlingId(), builder);
+    }
+
+    private NavigableSet<DatoIntervallEntitet> utledPerioder(BehandlingReferanse referanse) {
+        var perioderUnder = vilkårsPerioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
+        var perioderOver = vilkårsPerioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+        var perioder = new TreeSet<>(perioderUnder);
+        perioder.addAll(perioderOver);
+        return perioder;
     }
 
     private UtvidelseAvPeriode utledUtvidelse(RettVedDødType rettVedDød) {
