@@ -52,7 +52,6 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
@@ -79,7 +78,6 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
     private FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private boolean skalVentePåRegelendring;
 
 
@@ -99,7 +97,6 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                            VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
                                            FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste,
-                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                            @KonfigVerdi(value = "VENT_REGELENDRING_8_41", defaultVerdi = "false") boolean skalVentePåRegelendring) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
@@ -112,7 +109,6 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.fastsettPGIPeriodeTjeneste = fastsettPGIPeriodeTjeneste;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.skalVentePåRegelendring = skalVentePåRegelendring;
     }
 
@@ -289,8 +285,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         // Sett påvirkede saker på vent midlertidig til ny lov om 8-41 er vedtatt.
         // Dette gjelder saker som beregning som næringsdrivende samt enten frilans eller arbeid (eller begge)
         // og har skjæringstidspunkt beregning likt 1.1.2023 eller senere
-        var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
-        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
+        var ref = BehandlingReferanse.fra(behandling);
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
         periodeFilter.ignorerAvslåttePerioder().ignorerForlengelseperioder();
 
