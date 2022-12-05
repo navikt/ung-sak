@@ -305,7 +305,8 @@ public class ÅrskvantumTjeneste {
                 utledSøknadÅrsak(fraværPeriode),
                 opprinneligBehandlingUuid.map(UUID::toString).orElse(null),
                 avvikImSøknad,
-                utledVurderteVilkår(arbeidforholdStatus, utfallInngangsvilkår, wrappedOppgittFraværPeriode));
+                utledVurderteVilkår(arbeidforholdStatus, utfallInngangsvilkår, wrappedOppgittFraværPeriode),
+                List.of()); // TODO HN legger til hjemler her når omsorgsvilkåret er på plass
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
