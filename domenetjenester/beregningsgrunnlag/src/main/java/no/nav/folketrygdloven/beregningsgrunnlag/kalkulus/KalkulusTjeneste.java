@@ -2,6 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,10 +30,12 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.MapEndringsresultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.AvklaringsbehovMedTilstandDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.EksternArbeidsforholdRef;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdReferanseDto;
+import no.nav.folketrygdloven.kalkulus.kodeverk.AvklaringsbehovDefinisjon;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
 import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Vilkårsavslagsårsak;
@@ -134,20 +137,19 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public void kopier(BehandlingReferanse referanse,
-                       List<BeregnInput> beregningInput) {
+    public void kopier(BehandlingReferanse referanse, List<BeregnInput> beregningInput, StegType stegType) {
         if (beregningInput.isEmpty()) {
             return;
         }
-        var request = getKopierBeregningListeRequest(referanse, beregningInput);
+        var request = getKopierBeregningListeRequest(referanse, beregningInput, stegType);
         restTjeneste.kopierBeregning(request);
     }
 
-    private KopierBeregningListeRequest getKopierBeregningListeRequest(BehandlingReferanse referanse, List<BeregnInput> beregningInput) {
+    private KopierBeregningListeRequest getKopierBeregningListeRequest(BehandlingReferanse referanse, List<BeregnInput> beregningInput, StegType stegType) {
         return new KopierBeregningListeRequest(referanse.getSaksnummer().getVerdi(),
             referanse.getBehandlingUuid(),
             YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
-            StegType.VURDER_VILKAR_BERGRUNN,
+            stegType,
             beregningInput.stream().map(i -> new KopierBeregningRequest(i.getBgReferanse(),
                 i.getOriginalReferanseMedSammeSkjæringstidspunkt().orElseThrow(() -> new IllegalStateException("Forventer å finne original referanse med samme skjæringstidspunkt ved kopiering"))
             )).toList());
@@ -298,7 +300,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         Map<UUID, KalkulusResultat> resultater = new LinkedHashMap<>();
         for (var tilstandResponse : response) {
             var avklaringsbehovResultatList = tilstandResponse.getAvklaringsbehovMedTilstandDto().stream()
-                .map(dto -> BeregningAvklaringsbehovResultat.opprettMedFristFor(BeregningAvklaringsbehovDefinisjon.fraKode(dto.getBeregningAvklaringsbehovDefinisjon().getKode()),
+                .map(dto -> BeregningAvklaringsbehovResultat.opprettMedFristFor(mapTilAvklaringsbehov(dto),
                     dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist()))
                 .collect(Collectors.toList());
             KalkulusResultat kalkulusResultat = new KalkulusResultat(avklaringsbehovResultatList);
@@ -312,6 +314,18 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             resultater.put(tilstandResponse.getEksternReferanse(), kalkulusResultat);
         }
         return new SamletKalkulusResultat(resultater, bgReferanser);
+    }
+
+    private BeregningAvklaringsbehovDefinisjon mapTilAvklaringsbehov(AvklaringsbehovMedTilstandDto dto) {
+        return BeregningAvklaringsbehovDefinisjon.fraKode(finnEksternKode(dto.getBeregningAvklaringsbehovDefinisjon()));
+    }
+
+    private String finnEksternKode(AvklaringsbehovDefinisjon beregningAvklaringsbehovDefinisjon) {
+        if (Arrays.stream(BeregningAvklaringsbehovDefinisjon.values()).map(BeregningAvklaringsbehovDefinisjon::getKode)
+            .anyMatch(beregningAvklaringsbehovDefinisjon.getKode()::equals)) {
+            return beregningAvklaringsbehovDefinisjon.getKode();
+        }
+        return beregningAvklaringsbehovDefinisjon.getKodeNy();
     }
 
     private Avslagsårsak mapTilAvslagsårsak(Vilkårsavslagsårsak vilkårsavslagsårsak) {

@@ -9,13 +9,15 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -36,6 +38,8 @@ import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 @BehandlingTypeRef
 @ApplicationScoped
 public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
+
+    private final Logger logger = LoggerFactory.getLogger(FastsettSkjæringstidspunktSteg.class);
 
     private BeregningTjeneste kalkulusTjeneste;
     private BehandlingRepository behandlingRepository;
@@ -68,6 +72,7 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
         var periodeFilter = periodeFilterProvider.getFilter(ref);
+
         periodeFilter.ignorerAvslåttePerioder().ignorerForlengelseperioder();
         var perioderTilBeregning = new ArrayList<PeriodeTilVurdering>();
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
@@ -93,6 +98,8 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
     }
 
     private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, List<PeriodeTilVurdering> vilkårsperioder) {
+        logger.info("Beregner steg {} for perioder {} ", FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, vilkårsperioder);
+
         var resultat = kalkulusTjeneste.startBeregning(ref, vilkårsperioder, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING);
         var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
         for (var entry : resultat.getResultater().entrySet()) {

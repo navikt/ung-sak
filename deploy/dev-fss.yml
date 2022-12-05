@@ -58,12 +58,19 @@ spec:
       claims:
         extra:
           - "NAVident"
-    accessPolicy:
-      inbound:
-        rules:
+  accessPolicy:
+    inbound:
+      rules:
         - application: k9-sak
           namespace: k9saksbehandling
-          cluster: dev-fss
+        - application: k9-tilbake
+          namespace: k9saksbehandling
+        - application: k9-klage
+          namespace: k9saksbehandling
+        - application: k9-formidling
+          namespace: k9saksbehandling
+        - application: k9-formidling-dokumentdata
+          namespace: k9saksbehandling
   env:
     - name: TZ
       value: "Europe/Oslo"
@@ -88,12 +95,20 @@ spec:
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
       value: privat-k9-aksjonspunkthendelse
+    - name: KAFKA_AKSJONSPUNKTHENDELSE_AIVEN_TOPIC
+      value: k9saksbehandling.k9sak-aksjonspunkthendelse
     - name: KAFKA_DOKUMENTBESTILLING_TOPIC
       value: privat-k9-dokumenthendelse
+    - name: KAFKA_DOKUMENTBESTILLING_AIVEN_TOPIC
+      value: k9saksbehandling.k9-dokumenthendelse-v1
     - name: KAFKA_FATTEVEDTAK_TOPIC
       value: privat-familie-vedtakFattet-v1-q1
+    - name: KAFKA_FATTEVEDTAK_AIVEN_TOPIC
+      value: teamforeldrepenger.familie-vedtakfattet-v1
     - name: KAFKA_VEDTAKHENDELSE_TOPIC
       value: privat-k9-vedtakhendelse
+    - name: KAFKA_VEDTAKHENDELSE_AIVEN_TOPIC
+      value: k9saksbehandling.k9-vedtakhendelse
     - name: KAFKA_STONADSTATISTIKK_TOPIC
       value: k9saksbehandling.aapen-k9-stonadstatistikk-v1
     - name: KAFKA_BRUKERDIALOGINNSYN_TOPIC
@@ -135,7 +150,7 @@ spec:
 
     # Restservice Generelle
     - name: INFOTRYGD_HENDELSER_API_URL
-      value: http://infotrygd-hendelse-api.default/infotrygd/hendelser
+      value: http://infotrygd-hendelse-api.infotrygd/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.teamforeldrepenger/fpabakus
     - name: FPABAKUS_SCOPE
@@ -147,7 +162,7 @@ spec:
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
-      value: http://abac-k9.default/application/authorize
+      value: http://abac-k9.k9saksbehandling/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
       value: /k9/oppdrag/api
     - name: ARBEIDSFORDELING_RS_URL
@@ -189,7 +204,7 @@ spec:
     - name: K9_OMS_AARSKVANTUM_URL
       value: http://k9-aarskvantum.k9saksbehandling
     - name: K9_OMS_AARSKVANTUM_SCOPE
-      value: 2068f5ff-804c-41bd-ba58-280d150b51c2/.default
+      value: api://dev-fss.k9saksbehandling.k9-aarskvantum/.default
     - name: K9_OMS_UTVIDETRETT_URL
       value: https://omsorgsdager.dev.intern.nav.no/api
 
@@ -201,13 +216,17 @@ spec:
     - name: SAF_BASE_URL
       value: http://saf-q1.teamdokumenthandtering
     - name: SAF_SCOPE
-      value: api://dev-fss.teamdokumenthandtering.saf/.default
+      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
 
     # Sikkerhet:
     - name: APP_AUTH_SCHEMA_AZUREAD_ENABLED
       value: "true"
     - name: APP_AUTH_SCHEMA_AZUREAD_DOMAIN
       value: "k9.dev.intern.nav.no"
+    - name: APP_AUTH_SCHEMA_AZUREAD_ADDITIONAL_PATHS
+      value: "/k9/formidling/dokumentdata,api://dev-fss.k9saksbehandling.k9-formidling-dokumentdata/.default;/k9/formidling,api://dev-fss.k9saksbehandling.k9-formidling/.default"
+    - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
+      value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default"
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
     - name: OIDC_OPENAM_HOST_URL
@@ -230,22 +249,32 @@ spec:
       value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
       value: "true"
-    - name: PSB_PPN_UTVIDE_VED_DODSFALL
-      value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "true"
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
       value: "true"
     - name: YTELSE_OLP_AKTIVERT
       value: "true"
-    - name: PGI_FILTER_ENABLED
-      value: "true"
     - name: FILTRER_TILSTOTENDE_PERIODE
       value: "true"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
-      value: "2022-09-19"
+      value: "2022-09-12"
     - name: PSB_UTTAK_UNNTAK_BEVAR_VEDTATT_VERDI
       value: "true"
+    - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
+      value: "false"
+    - name: PLS_UTTAK_PROSENT_PLEIEBEHOV
+      value: "true"
+    - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
+      value: "true"
+    - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
+      value: "true"
+    - name: ENABLE_PRODUCER_FATTVEDTAK_AIVEN
+      value: "true"
+    - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
+      value: "true"
+    - name: VENT_REGELENDRING_8_41
+      vale: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
@@ -267,8 +296,3 @@ spec:
     # Pleiepenger infotrygd migrering
     - name: INFOTRYGD_MIGRERING_TILLATELSER
       value: "Z990404,Z990422,Z994004,Z994337,Z994185"
-
-
-    # FRISINN NYE REGLER 2022
-    - name: FRISINN_NYTT_STP_TOGGLE
-      value: "false"

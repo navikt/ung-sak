@@ -87,7 +87,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
         var nyttårsaftenEtÅrFremITid = LocalDate.now().withMonth(12).withDayOfMonth(31).plus(MAKS_FREMTID);
         if (uttakMaksDato.isAfter(nyttårsaftenEtÅrFremITid)) {
-            throw new IllegalArgumentException("Uttaksplan kan ikke være åpen eller for langt frem i tid. Uttak maksdato:'"+ uttakMaksDato + "', utbetaling maksdato: '" + LocalDate.now().plus(MAKS_FREMTID) + "'");
+            throw new IllegalArgumentException("Uttaksplan kan ikke være åpen eller for langt frem i tid. Uttak maksdato:'"+ uttakMaksDato + "', utbetaling maksdato: '" + nyttårsaftenEtÅrFremITid + "'");
         }
 
         // stopper periodisering her for å unngå 'evigvarende' ekspansjon -

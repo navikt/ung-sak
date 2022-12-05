@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.typer.Periode;
 
@@ -62,7 +62,7 @@ public class SykdomVurderingOversiktElement {
     @JsonProperty(value = "erInnleggelsesperiode")
     @Valid
     private boolean erInnleggelsesperiode;
-    
+
 
     @JsonProperty(value = "links")
     @Size(max = 100)
@@ -77,7 +77,7 @@ public class SykdomVurderingOversiktElement {
         this.endretIDenneBehandlingen = endretIDenneBehandlingen;
         this.links = new ArrayList<>(links);
     }
-    
+
     public SykdomVurderingOversiktElement(SykdomVurderingOversiktElement element) {
         this.id = element.id;
         this.resultat = element.resultat;
@@ -88,7 +88,7 @@ public class SykdomVurderingOversiktElement {
         this.erInnleggelsesperiode = element.erInnleggelsesperiode;
         this.links = element.links;
     }
-    
+
 
     public SykdomVurderingOversiktElement(){
 
@@ -105,7 +105,7 @@ public class SykdomVurderingOversiktElement {
     public Periode getPeriode() {
         return periode;
     }
-    
+
     public void setPeriode(Periode periode) {
         this.periode = periode;
     }
@@ -113,7 +113,7 @@ public class SykdomVurderingOversiktElement {
     public boolean isGjelderForSøker() {
         return gjelderForSøker;
     }
-    
+
     public void setGjelderForSøker(boolean gjelderForSøker) {
         this.gjelderForSøker = gjelderForSøker;
     }
@@ -121,23 +121,23 @@ public class SykdomVurderingOversiktElement {
     public boolean isGjelderForAnnenPart() {
         return gjelderForAnnenPart;
     }
-    
+
     public void setGjelderForAnnenPart(boolean gjelderForAnnenPart) {
         this.gjelderForAnnenPart = gjelderForAnnenPart;
     }
-    
+
     public boolean isEndretIDenneBehandlingen() {
         return endretIDenneBehandlingen;
     }
-    
+
     public boolean isErInnleggelsesperiode() {
         return erInnleggelsesperiode;
     }
-    
+
     public void setErInnleggelsesperiode(boolean erInnleggelsesperiode) {
         this.erInnleggelsesperiode = erInnleggelsesperiode;
     }
-    
+
     public List<ResourceLink> getLinks() {
         return Collections.unmodifiableList(links);
     }

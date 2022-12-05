@@ -2,9 +2,10 @@ package no.nav.k9.sak.domene.vedtak.observer;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,8 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfig;
+import no.nav.k9.felles.integrasjon.kafka.GenerellKafkaProducer;
+import no.nav.k9.felles.integrasjon.kafka.KafkaPropertiesBuilder;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -40,10 +43,12 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "vedtak.publiserHendelse";
     private static final Logger log = LoggerFactory.getLogger(VurderOmVedtakPåvirkerAndreSakerTask.class);
+    private boolean aivenEnabled = false;
 
     private BehandlingRepository behandlingRepository;
     private VedtattYtelseTjeneste vedtakTjeneste;
-    private HendelseProducer producer;
+    private GenerellKafkaProducer producer;
+    private GenerellKafkaProducer producerAiven;
     private Validator validator;
 
     private Instance<InformasjonselementerUtleder> informasjonselementer;
@@ -54,20 +59,55 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
     }
 
     @Inject
-    public PubliserVedtattYtelseHendelseTask(BehandlingRepositoryProvider repositoryProvider,
-                                             VedtattYtelseTjeneste vedtakTjeneste,
-                                             ProsessTaskTjeneste taskTjeneste,
-                                             @Any Instance<InformasjonselementerUtleder> informasjonselementer,
-                                             @KonfigVerdi("kafka.fattevedtak.topic") String topic,
-                                             @KonfigVerdi("bootstrap.servers") String bootstrapServers,
-                                             @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
-                                             @KonfigVerdi("systembruker.username") String username,
-                                             @KonfigVerdi("systembruker.password") String password) {
+    public PubliserVedtattYtelseHendelseTask(
+        BehandlingRepositoryProvider repositoryProvider,
+        VedtattYtelseTjeneste vedtakTjeneste,
+        ProsessTaskTjeneste taskTjeneste,
+        @Any Instance<InformasjonselementerUtleder> informasjonselementer,
+        @KonfigVerdi("kafka.fattevedtak.topic") String topic,
+        @KonfigVerdi("kafka.fattevedtak.aiven.topic") String topicV2,
+        @KonfigVerdi(value = "KAFKA_BROKERS") String bootstrapServersAiven,
+        @KonfigVerdi("bootstrap.servers") String bootstrapServersOnPrem,
+        @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
+        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
+        @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
+        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
+        @KonfigVerdi(value = "ENABLE_PRODUCER_FATTVEDTAK_AIVEN", defaultVerdi = "false") boolean aivenEnabled,
+        @KonfigVerdi("systembruker.username") String username,
+        @KonfigVerdi("systembruker.password") String password
+    ) {
         this.taskTjeneste = taskTjeneste;
         this.informasjonselementer = informasjonselementer;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vedtakTjeneste = vedtakTjeneste;
-        this.producer = new HendelseProducer(topic, bootstrapServers, schemaRegistryUrl, username, password);
+        this.aivenEnabled = aivenEnabled;
+
+
+        var onPremPropsBuilder = new KafkaPropertiesBuilder()
+            .clientId("KP-" + topic).bootstrapServers(bootstrapServersOnPrem);
+
+        Properties onPremProps = onPremPropsBuilder
+            .username(username)
+            .password(password)
+            .buildForProducerJaas();
+
+
+        if (aivenEnabled) {
+            var aivenPropsBuilder = new KafkaPropertiesBuilder()
+                .clientId("KP-" + topicV2).bootstrapServers(bootstrapServersAiven);
+
+            Properties aivenProps = aivenPropsBuilder
+                .truststorePath(trustStorePath)
+                .truststorePassword(trustStorePassword)
+                .keystorePath(keyStoreLocation)
+                .keystorePassword(keyStorePassword)
+                .buildForProducerAiven();
+
+            producerAiven = new GenerellKafkaProducer(topicV2, aivenProps);
+        } else {
+            producer = new GenerellKafkaProducer(topic, onPremProps);
+        }
+
 
         @SuppressWarnings("resource")
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -102,8 +142,14 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
                     taskData.setPayload(payload);
                     taskTjeneste.lagre(taskData);
                 }
-
-                producer.sendJson(payload);
+                if (aivenEnabled) {
+                    String key = behandling.getFagsak().getSaksnummer().getVerdi();
+                    RecordMetadata recordMetadata = producerAiven.sendJsonMedNøkkel(key, payload);
+                    log.info("Sendte melding til Aiven på {} partition {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
+                } else {
+                    RecordMetadata recordMetadata = producer.sendJson(payload);
+                    log.info("Sendte melding til onprem kafka på {} partition {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
+                }
             }
         }
     }
@@ -121,8 +167,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
             // Har feilet validering
             List<String> allErrors = violations
                 .stream()
-                .map(it -> it.getPropertyPath().toString() + " :: " + it.getMessage())
-                .collect(Collectors.toList());
+                .map(it -> it.getPropertyPath().toString() + " :: " + it.getMessage()).toList();
             throw new IllegalArgumentException("Vedtatt-ytelse valideringsfeil \n " + allErrors);
         }
         return JacksonJsonConfig.toJson(ytelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);

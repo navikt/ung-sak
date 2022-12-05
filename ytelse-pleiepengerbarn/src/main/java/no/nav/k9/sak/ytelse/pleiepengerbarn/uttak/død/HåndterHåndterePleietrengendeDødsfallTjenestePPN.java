@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -30,7 +29,6 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
-    private boolean utvidVedDødsfall;
 
     HåndterHåndterePleietrengendeDødsfallTjenestePPN() {
         // CDI
@@ -39,21 +37,15 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
     @Inject
     public HåndterHåndterePleietrengendeDødsfallTjenestePPN(VilkårResultatRepository vilkårResultatRepository,
                                                             @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                                            PersonopplysningTjeneste personopplysningTjeneste,
-                                                            @KonfigVerdi(value = "PSB_PPN_UTVIDE_VED_DODSFALL", defaultVerdi = "true") boolean utvidVedDødsfall) {
+                                                            PersonopplysningTjeneste personopplysningTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
-        this.utvidVedDødsfall = utvidVedDødsfall;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
 
     @Override
     public Optional<DatoIntervallEntitet> utledUtvidetPeriodeForDødsfall(BehandlingReferanse referanse) {
-        if (!utvidVedDødsfall) {
-            return Optional.empty();
-        }
-
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysningerHvisEksisterer(referanse, referanse.getFagsakPeriode().getFomDato());
         if (personopplysningerAggregat.isEmpty()) {
             //kortslutter når personopplysninger ikke er hentet enda

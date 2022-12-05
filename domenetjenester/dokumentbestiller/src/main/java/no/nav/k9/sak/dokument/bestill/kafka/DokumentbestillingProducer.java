@@ -1,27 +1,17 @@
 package no.nav.k9.sak.dokument.bestill.kafka;
 
-import java.util.Properties;
-import java.util.concurrent.ExecutionException;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.KafkaException;
-import org.apache.kafka.common.errors.AuthenticationException;
-import org.apache.kafka.common.errors.AuthorizationException;
-import org.apache.kafka.common.errors.RetriableException;
-import org.apache.kafka.common.serialization.StringSerializer;
-
+import no.nav.k9.felles.integrasjon.kafka.GenerellKafkaProducer;
+import no.nav.k9.felles.integrasjon.kafka.KafkaPropertiesBuilder;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
 public class DokumentbestillingProducer {
 
-    Producer<String, String> producer;
+    GenerellKafkaProducer producer;
     String topic;
 
     public DokumentbestillingProducer() {
@@ -29,23 +19,39 @@ public class DokumentbestillingProducer {
     }
 
     @Inject
-    public DokumentbestillingProducer(@KonfigVerdi("kafka.dokumentbestilling.topic") String topic,
-                                      @KonfigVerdi("bootstrap.servers") String bootstrapServers,
-                                      @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
-                                      @KonfigVerdi("systembruker.username") String username,
-                                      @KonfigVerdi("systembruker.password") String password) {
-        Properties properties = new Properties();
+    public DokumentbestillingProducer(
+        @KonfigVerdi("kafka.dokumentbestilling.topic") String topicName,
+        @KonfigVerdi(value = "kafka.dokumentbestilling.aiven.topic") String topicV2Name,
+        @KonfigVerdi(value = "KAFKA_BROKERS") String bootstrapServersAiven,
+        @KonfigVerdi("bootstrap.servers") String bootstrapServersOnPrem,
+        @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
+        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
+        @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
+        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
+        @KonfigVerdi(value = "ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN", defaultVerdi = "false") boolean aivenEnabled,
+        @KonfigVerdi("systembruker.username") String username,
+        @KonfigVerdi("systembruker.password") String password
+    ) {
 
-        String clientId = "KP-" + topic;
-        properties.setProperty("bootstrap.servers", bootstrapServers);
-        properties.setProperty("schema.registry.url", schemaRegistryUrl);
-        properties.setProperty("client.id", clientId);
+        String _topicName = aivenEnabled ? topicV2Name : topicName;
+        String _bootstrapServer = aivenEnabled ? bootstrapServersAiven : bootstrapServersOnPrem;
 
-        setSecurity(username, properties);
-        setUsernameAndPassword(username, password, properties);
+        var builder = new KafkaPropertiesBuilder()
+            .clientId("KP-" + topicName).bootstrapServers(_bootstrapServer);
 
-        this.producer = createProducer(properties);
-        this.topic = topic;
+        var props = aivenEnabled ?
+            builder
+                .truststorePath(trustStorePath)
+                .truststorePassword(trustStorePassword)
+                .keystorePath(keyStoreLocation)
+                .keystorePassword(keyStorePassword)
+                .buildForProducerAiven() :
+            builder
+                .username(username)
+                .password(password)
+                .buildForProducerJaas();
+
+        this.producer = new GenerellKafkaProducer(_topicName, props);
 
     }
 
@@ -53,47 +59,7 @@ public class DokumentbestillingProducer {
         producer.flush();
     }
 
-    void runProducerWithSingleJson(ProducerRecord<String, String> record) {
-        try {
-            @SuppressWarnings("unused")
-            var recordMetadata = producer.send(record).get(); // NOSONAR
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw DokumentbestillerKafkaFeil.FACTORY.uventetFeil(topic, e).toException();
-        } catch (ExecutionException e) {
-            throw DokumentbestillerKafkaFeil.FACTORY.uventetFeil(topic, e).toException();
-        } catch (AuthenticationException | AuthorizationException e) {
-            throw DokumentbestillerKafkaFeil.FACTORY.feilIPålogging(topic, e).toException();
-        } catch (RetriableException e) {
-            throw DokumentbestillerKafkaFeil.FACTORY.retriableExceptionMotKaka(topic, e).toException();
-        } catch (KafkaException e) {
-            throw DokumentbestillerKafkaFeil.FACTORY.annenExceptionMotKafka(topic, e).toException();
-        }
-    }
-
-    void setUsernameAndPassword(String username, String password, Properties properties) {
-        if ((username != null && !username.isEmpty())
-            && (password != null && !password.isEmpty())) {
-            String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
-            String jaasCfg = String.format(jaasTemplate, username, password);
-            properties.setProperty("sasl.jaas.config", jaasCfg);
-        }
-    }
-
-    Producer<String, String> createProducer(Properties properties) {
-        properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        return new KafkaProducer<>(properties);
-    }
-
-    void setSecurity(String username, Properties properties) {
-        if (username != null && !username.isEmpty()) {
-            properties.setProperty("security.protocol", "SASL_SSL");
-            properties.setProperty("sasl.mechanism", "PLAIN");
-        }
-    }
-
     public void publiserDokumentbestillingJson(String json) {
-        runProducerWithSingleJson(new ProducerRecord<>(topic, json));
+        producer.runProducerWithSingleJson(new ProducerRecord<>(producer.getTopic(), json));
     }
 }

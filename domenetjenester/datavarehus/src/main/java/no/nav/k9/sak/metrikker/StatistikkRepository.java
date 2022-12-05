@@ -68,7 +68,7 @@ public class StatistikkRepository {
         FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
         .map(FagsakYtelseType::getKode).collect(Collectors.toList());
 
-    static final List<String> PROSESS_TASK_STATUSER = Stream.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.FEILET, ProsessTaskStatus.VENTER_SVAR, ProsessTaskStatus.SUSPENDERT).map(ProsessTaskStatus::getDbKode).collect(Collectors.toList());
+    static final List<String> PROSESS_TASK_STATUSER = Stream.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.FEILET, ProsessTaskStatus.VENTER_SVAR).map(ProsessTaskStatus::getDbKode).collect(Collectors.toList());
     static final List<String> AKSJONSPUNKTER = AksjonspunktDefinisjon.kodeMap().values().stream()
         .filter(p -> !AksjonspunktDefinisjon.UNDEFINED.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
     static final List<String> AKSJONSPUNKT_STATUSER = AksjonspunktStatus.kodeMap().values().stream()

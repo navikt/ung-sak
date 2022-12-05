@@ -18,13 +18,13 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
+import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
@@ -60,14 +60,17 @@ public class MapInputTilUttakTjeneste {
     private final HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private final String unntak;
     private final boolean enableBevarVerdi;
+    private final boolean ny200ProsentPleiebehovFor2023;
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
                                     @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
-                                    @KonfigVerdi(value = "psb.uttak.unntak.bevar.vedtatt.verdi", required = false, defaultVerdi = "false") boolean enableBevarVerdi) {
+                                    @KonfigVerdi(value = "psb.uttak.unntak.bevar.vedtatt.verdi", required = false, defaultVerdi = "false") boolean enableBevarVerdi,
+                                    @KonfigVerdi(value = "pls.uttak.prosent.pleiebehov", required = false, defaultVerdi = "false") boolean ny200ProsentPleiebehovFor2023) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
         this.enableBevarVerdi = enableBevarVerdi;
+        this.ny200ProsentPleiebehovFor2023 = ny200ProsentPleiebehovFor2023;
     }
 
 
@@ -320,7 +323,8 @@ public class MapInputTilUttakTjeneste {
     private Pleiebehov mapToPleiebehov(Pleiegrad grad) {
         return switch (grad) {
             case INGEN -> Pleiebehov.PROSENT_0;
-            case KONTINUERLIG_TILSYN, LIVETS_SLUTT_TILSYN -> Pleiebehov.PROSENT_100;
+            case LIVETS_SLUTT_TILSYN -> (ny200ProsentPleiebehovFor2023) ? Pleiebehov.PROSENT_200 : Pleiebehov.PROSENT_100;
+            case KONTINUERLIG_TILSYN, NØDVENDIG_OPPLÆRING -> Pleiebehov.PROSENT_100;
             case UTVIDET_KONTINUERLIG_TILSYN, INNLEGGELSE -> Pleiebehov.PROSENT_200;
             default -> throw new IllegalStateException("Ukjent Pleiegrad: " + grad);
         };

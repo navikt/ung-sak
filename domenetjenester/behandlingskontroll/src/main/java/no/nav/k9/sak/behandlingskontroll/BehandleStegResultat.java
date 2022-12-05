@@ -11,6 +11,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 
 public class BehandleStegResultat {
     private final List<AksjonspunktResultat> aksjonspunktListe;
@@ -27,6 +28,11 @@ public class BehandleStegResultat {
         this.aksjonspunktListe = List.of();
         this.stegType = tilSteg;
         this.transisjon = transisjon;
+    }
+
+    public static BehandleStegResultat utførtMedAksjonspunktResultater(AksjonspunktResultat aksjonspunktResultater) {
+        Objects.requireNonNull(aksjonspunktResultater);
+        return new BehandleStegResultat(FellesTransisjoner.UTFØRT, List.of(aksjonspunktResultater));
     }
 
     /**

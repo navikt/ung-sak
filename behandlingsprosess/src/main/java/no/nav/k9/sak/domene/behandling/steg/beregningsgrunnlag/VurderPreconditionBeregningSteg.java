@@ -2,6 +2,8 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.PRECONDITION_BEREGNING;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -18,9 +20,14 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FastsettPGIPeriodeTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
+import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -71,6 +78,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
     private FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste;
+    private boolean skalVentePåRegelendring;
 
 
     protected VurderPreconditionBeregningSteg() {
@@ -88,7 +96,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            BeregningsgrunnlagTjeneste kalkulusTjeneste,
                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                            VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                           FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste) {
+                                           FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste,
+                                           @KonfigVerdi(value = "VENT_REGELENDRING_8_41", defaultVerdi = "false") boolean skalVentePåRegelendring) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
@@ -100,6 +109,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.fastsettPGIPeriodeTjeneste = fastsettPGIPeriodeTjeneste;
+        this.skalVentePåRegelendring = skalVentePåRegelendring;
     }
 
     @Override
@@ -201,7 +211,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         var perioderTilVurderingIBeregning = periodeFilter.filtrerPerioder(vurdertePerioderIOpptjening, VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
             .stream().map(PeriodeTilVurdering::getPeriode).toList();
 
-        var opptjeningForBeregningTjeneste = finnOpptjeningForBeregningTjeneste(behandling);
+        var opptjeningForBeregningTjeneste = finnOpptjeningForBeregningTjeneste(BehandlingReferanse.fra(behandling));
         var grunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
         var avslåttePerioder = vilkåret.getPerioder()
@@ -251,17 +261,43 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
             .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + ref.getFagsakYtelseType() + "], behandlingtype [" + ref.getBehandlingType() + "]"));
     }
 
-    private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(Behandling behandling) {
-        FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
+    private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(BehandlingReferanse behandlingRef) {
+        FagsakYtelseType ytelseType = behandlingRef.getFagsakYtelseType();
         return FagsakYtelseTypeRef.Lookup.find(opptjeningForBeregningTjeneste, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningForBeregningTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
     }
 
     private List<AksjonspunktResultat> finnAksjonspunkter(Behandling behandling) {
         FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
+
+        if (skalVentePåRegelendring && måSettesPåVentGrunnetPåventendeRegelendring_8_41(behandling)) {
+            return Collections.singletonList(AksjonspunktResultat.opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon.AUTO_VENT_PÅ_LOVENDRING_8_41,
+                Venteårsak.VENT_LOVENDRING_8_41, LocalDateTime.of(LocalDate.of(2023, 1, 3), LocalDateTime.now().toLocalTime())));
+        }
+
+
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(aksjonspunktUtledere, ytelseType);
         return tjeneste.map(utleder -> utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling))))
             .orElse(Collections.emptyList());
+    }
+
+    private boolean måSettesPåVentGrunnetPåventendeRegelendring_8_41(Behandling behandling) {
+        // Sett påvirkede saker på vent midlertidig til ny lov om 8-41 er vedtatt.
+        // Dette gjelder saker som beregning som næringsdrivende samt enten frilans eller arbeid (eller begge)
+        // og har skjæringstidspunkt beregning likt 1.1.2023 eller senere
+        var ref = BehandlingReferanse.fra(behandling);
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
+        periodeFilter.ignorerAvslåttePerioder().ignorerForlengelseperioder();
+
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
+        var iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
+        return perioderTilVurdering.stream().anyMatch(p -> skalSettesPåVent(p, ref, iayGrunnlag));
+    }
+
+    private boolean skalSettesPåVent(PeriodeTilVurdering p, BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag) {
+        var opptjeningsperioder = finnOpptjeningForBeregningTjeneste(ref).hentEksaktOpptjeningForBeregning(ref, iayGrunnlag, p.getPeriode())
+            .map(OpptjeningAktiviteter::getOpptjeningPerioder).orElse(Collections.emptyList());
+        return SkalVentePåRegelendring_8_41.kanPåvirkesAvRegelendring(p.getSkjæringstidspunkt(), opptjeningsperioder);
     }
 
     private void ryddVedtaksresultatForPerioderTilVurdering(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
@@ -288,7 +324,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
             var forlengelseperioder = allePerioder.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toSet());
             if (!forlengelseperioder.isEmpty()) {
                 log.info("Kopierer beregning for forlengelser {}", forlengelseperioder);
-                kalkulusTjeneste.kopier(ref, forlengelseperioder);
+                kalkulusTjeneste.kopier(ref, forlengelseperioder, StegType.VURDER_VILKAR_BERGRUNN);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
                 beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
                     kontekst,

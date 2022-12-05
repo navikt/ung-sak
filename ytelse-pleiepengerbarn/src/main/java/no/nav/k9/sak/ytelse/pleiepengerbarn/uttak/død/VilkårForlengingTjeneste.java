@@ -18,11 +18,11 @@ class VilkårForlengingTjeneste {
         var aldersvilkår = VilkårType.ALDERSVILKÅR;
         var vilkårBuilder = resultatBuilder.hentBuilderFor(aldersvilkår);
         var fødselsdato = brukerPersonopplysninger.getFødselsdato();
-        var dødsdato = brukerPersonopplysninger.getDødsdato();
 
         var set = new TreeSet<DatoIntervallEntitet>();
         set.add(periode);
-        vurderAldersVilkårTjeneste.vurderPerioder(vilkårBuilder, set, fødselsdato, dødsdato);
+        vurderAldersVilkårTjeneste.vurderPerioder(vilkårBuilder, set, fødselsdato);
+        resultatBuilder.leggTil(vilkårBuilder);
     }
 
     public void forlengeVilkårMedPeriode(Set<VilkårType> vilkår, VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode) {

@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -87,17 +88,22 @@ public class OpptjeningAktivitetArbeidVurdererTest {
 
     @Test
     public void skal_ikke_underkjenne_velferdspermisjon_over_14_dager_som_går_over_skjæringstidspunktet_med_14_dager_før_skjæringstidspunket() {
-        var permisjonPeriodeOver14Dager = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(14), skjæringstidspunkt.plusDays(3));
+        Set<PermisjonsbeskrivelseType> synonymeTyper = Set.of(
+            PermisjonsbeskrivelseType.VELFERDSPERMISJON, //denne blir splittet i de 2 under, som må håndteres likt
+            PermisjonsbeskrivelseType.ANNEN_PERMISJON_IKKE_LOVFESTET,
+            PermisjonsbeskrivelseType.ANNEN_PERMISJON_LOVFESTET);
+        for (PermisjonsbeskrivelseType velferdspermisjonType : synonymeTyper) {
+            var permisjonPeriodeOver14Dager = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(14), skjæringstidspunkt.plusDays(3));
 
-        var iayBuilder = opprettIAYMedYrkesaktivitet();
-        leggTilPermisjon(iayBuilder, permisjonPeriodeOver14Dager, PermisjonsbeskrivelseType.VELFERDSPERMISJON);
-        var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
+            var iayBuilder = opprettIAYMedYrkesaktivitet();
+            leggTilPermisjon(iayBuilder, permisjonPeriodeOver14Dager, velferdspermisjonType);
+            var iayGrunnlag = lagreIayGrunnlag(iayBuilder);
 
-        VurderStatusInput input = byggInput(iayGrunnlag);
+            VurderStatusInput input = byggInput(iayGrunnlag);
 
-        assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.TIL_VURDERING);
+            assertThat(vurderer.vurderArbeid(input)).isEqualTo(VurderingsStatus.TIL_VURDERING);
+        }
     }
-
 
     @Test
     public void skal_underkjenne_sammenhengende_permisjoner_som_overstiger_14_dager() {

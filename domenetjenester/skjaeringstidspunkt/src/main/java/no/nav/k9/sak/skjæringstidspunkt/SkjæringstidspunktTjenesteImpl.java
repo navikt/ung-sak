@@ -7,14 +7,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
 public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
@@ -61,10 +59,6 @@ public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjene
     public LocalDate utledSkjæringstidspunktForRegisterInnhenting(Long behandlingId, FagsakYtelseType ytelseType) {
         return getTjeneste(ytelseType).utledSkjæringstidspunktForRegisterInnhenting(behandlingId, ytelseType);
     }
-    
-    @Override
-    public Periode utledOpplysningsperiode(Long id, FagsakYtelseType fagsakYtelseType, boolean tomDagensDato) {
-        return getTjeneste(fagsakYtelseType).utledOpplysningsperiode(id, fagsakYtelseType, tomDagensDato);
-    }
+
 
 }

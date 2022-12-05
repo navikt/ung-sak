@@ -83,7 +83,7 @@ public class HenleggBehandlingTjeneste {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(behandling.getFagsakYtelseType())) {
+        if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN, FagsakYtelseType.OPPLÆRINGSPENGER).contains(behandling.getFagsakYtelseType())) {
             throw new IllegalArgumentException("Det er p.t. ikke støttet å henlegge behandlinger for fagsak " + behandling.getFagsakYtelseType().getNavn());
         }
 
@@ -103,7 +103,7 @@ public class HenleggBehandlingTjeneste {
     }
 
     private void validerÅrsakMotKrav(BehandlingResultatType årsakKode, Behandling behandling) {
-        if (Objects.equals(BehandlingResultatType.HENLAGT_FEILOPPRETTET, årsakKode)) {
+        if (Objects.equals(behandling.getFagsakYtelseType(), FagsakYtelseType.OMP) && Objects.equals(BehandlingResultatType.HENLAGT_FEILOPPRETTET, årsakKode)) {
             var gyldigeDokumenterPåBehandling = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
                 .stream()
                 .filter(it -> Objects.equals(it.getBehandlingId(), behandling.getId()))

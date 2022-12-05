@@ -3,26 +3,38 @@ package no.nav.k9.sak.behandling.hendelse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.hendelse.EventHendelse;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserEventTask;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserEventTaskImpl;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserProduksjonsstyringHendelseTask;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserProduksjonsstyringHendelseTaskImpl;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent;
@@ -36,6 +48,11 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingProsessHendelse;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringAksjonspunktHendelse;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingAvsluttetHendelse;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingOpprettetHendelse;
+import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.perioder.SøktPeriode;
+import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 
 @ApplicationScoped
 public class BehandlingskontrollEventObserver {
@@ -44,14 +61,18 @@ public class BehandlingskontrollEventObserver {
 
     private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
+    private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
 
     public BehandlingskontrollEventObserver() {
     }
 
     @Inject
-    public BehandlingskontrollEventObserver(ProsessTaskTjeneste prosessTaskRepository, BehandlingRepository behandlingRepository) {
+    public BehandlingskontrollEventObserver(ProsessTaskTjeneste prosessTaskRepository,
+            BehandlingRepository behandlingRepository,
+            @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
+        this.søknadsfristTjenester = søknadsfristTjenester;
     }
 
     public void observerStoppetEvent(@Observes BehandlingskontrollEvent.StoppetEvent event) {
@@ -212,6 +233,9 @@ public class BehandlingskontrollEventObserver {
         Map<String, String> aksjonspunktKoderMedStatusListe = new HashMap<>();
         var fagsak = behandling.getFagsak();
         behandling.getAksjonspunkter().forEach(aksjonspunkt -> aksjonspunktKoderMedStatusListe.put(aksjonspunkt.getAksjonspunktDefinisjon().getKode(), aksjonspunkt.getStatus().getKode()));
+        
+        final boolean nyeKrav = sjekkOmDetHarKommetNyeKrav(behandling);
+        
         return BehandlingProsessHendelse.builder()
             .medEksternId(behandling.getUuid())
             .medEventTid(LocalDateTime.now())
@@ -234,6 +258,54 @@ public class BehandlingskontrollEventObserver {
             .medRelatertPartAktørId(fagsak.getRelatertPersonAktørId())
             .medAnsvarligBeslutterForTotrinn(behandling.getAnsvarligBeslutter())
             .medAksjonspunktTilstander(lagAksjonspunkttilstander(behandling.getAksjonspunkter()))
+            .medNyeKrav(nyeKrav)
             .build();
+    }
+    
+    public boolean sjekkOmDetHarKommetNyeKrav(Behandling behandling) {
+        final var behandlingRef = BehandlingReferanse.fra(behandling);
+        final var søknadsfristTjeneste = finnVurderSøknadsfristTjeneste(behandlingRef);
+        if (søknadsfristTjeneste == null) {
+            return false;
+        }
+        
+        final Set<KravDokument> kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(behandlingRef);
+        if (kravdokumenter.isEmpty()) {
+            return false;
+        }
+        
+        final LocalDateTimeline<KravDokument> eldsteKravTidslinje = hentKravdokumenterMedEldsteKravFørst(behandlingRef, søknadsfristTjeneste);
+        
+        return eldsteKravTidslinje
+                .stream()
+                .anyMatch(it -> kravdokumenter.stream()
+                    .anyMatch(at -> at.getJournalpostId().equals(it.getValue().getJournalpostId())));
+    }
+
+    private LocalDateTimeline<KravDokument> hentKravdokumenterMedEldsteKravFørst(BehandlingReferanse behandlingRef,
+            VurderSøknadsfristTjeneste<SøktPeriodeData> søknadsfristTjeneste) {
+        final Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravdokumenterMedPeriode = søknadsfristTjeneste.hentPerioderTilVurdering(behandlingRef);
+        final var kravdokumenterMedEldsteFørst = kravdokumenterMedPeriode.keySet()
+                .stream()
+                .sorted(Comparator.comparing(KravDokument::getInnsendingsTidspunkt))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        
+        LocalDateTimeline<KravDokument> eldsteKravTidslinje = LocalDateTimeline.empty();
+        for (KravDokument kravdokument : kravdokumenterMedEldsteFørst) {
+            final List<SøktPeriode<SøktPeriodeData>> perioder = kravdokumenterMedPeriode.get(kravdokument);
+            final var tidslinje = new LocalDateTimeline<>(perioder.stream()
+                    .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), kravdokument))
+                    .collect(Collectors.toList()));
+            eldsteKravTidslinje = eldsteKravTidslinje.union(tidslinje, StandardCombinators::coalesceLeftHandSide);
+        }
+        return eldsteKravTidslinje;
+    }
+    
+    private VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData> finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
+        final FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
+        
+        @SuppressWarnings("unchecked")
+        final var tjeneste = (VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData>) FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType).orElse(null);
+        return tjeneste;
     }
 }

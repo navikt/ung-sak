@@ -45,6 +45,9 @@ public class DatasourceUtil {
         config.setJdbcUrl(getProperty(dataSourceName + ".url"));
 
         config.setMinimumIdle(0);
+        config.setValidationTimeout(30000);
+        config.setConnectionTimeout(30000);
+        config.setIdleTimeout(600000);
         config.setMaximumPoolSize(maxPoolSize);
         config.setConnectionTestQuery("select 1");
         config.setDriverClassName("org.postgresql.Driver");
@@ -55,7 +58,7 @@ public class DatasourceUtil {
         }
 
         // optimaliserer inserts for postgres
-        var dsProperties=new Properties();
+        var dsProperties = new Properties();
         dsProperties.setProperty("reWriteBatchedInserts", "true");
         dsProperties.setProperty("logServerErrorDetail", "false"); // skrur av batch exceptions som lekker statements i åpen logg
         config.setDataSourceProperties(dsProperties);
