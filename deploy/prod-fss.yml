@@ -130,7 +130,7 @@ spec:
     - name: LOADBALANCER_URL
       value: https://app.adeo.no
     - name: LOADBALANCER_ALTERNATIVE_URL
-      value: https://k9.dev.intern.nav.no
+      value: https://k9.intern.nav.no
 
     # LDAP
     - name: LDAP_URL
@@ -216,7 +216,7 @@ spec:
     - name: SAF_BASE_URL
       value: http://saf.teamdokumenthandtering
     - name: SAF_SCOPE
-      value: api://prod-fss.teamdokumenthandtering.saf-q1/.default
+      value: api://prod-fss.teamdokumenthandtering.saf/.default
 
     # Sikkerhet:
     - name: APP_AUTH_SCHEMA_AZUREAD_ENABLED
