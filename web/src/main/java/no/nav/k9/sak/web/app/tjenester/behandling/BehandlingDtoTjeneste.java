@@ -403,6 +403,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(BehandlingRestTjeneste.DIREKTE_OVERGANG_PATH, "direkte-overgang", uuidQueryParams));
                 //TODO: Sette opp opplæringspenger som et eget case?
                 dto.leggTil(getFraMap(VurderInstitusjonRestTjeneste.BASEPATH, "institusjon", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_LVS_PATH, "sykdom-vurdering-oversikt-lvs", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
             }
             case PLEIEPENGER_NÆRSTÅENDE -> {

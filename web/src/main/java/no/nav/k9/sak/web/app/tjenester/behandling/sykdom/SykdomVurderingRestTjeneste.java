@@ -85,6 +85,8 @@ public class SykdomVurderingRestTjeneste {
     public static final String VURDERING_OVERSIKT_TOO_PATH = BASE_PATH + VURDERING_OVERSIKT_TOO;
     private static final String VURDERING_OVERSIKT_SLU = "/oversikt/I_LIVETS_SLUTT";
     public static final String VURDERING_OVERSIKT_SLU_PATH = BASE_PATH + VURDERING_OVERSIKT_SLU;
+    private static final String VURDERING_OVERSIKT_LVS = "/oversikt/LANGVARIG_SYKDOM";
+    public static final String VURDERING_OVERSIKT_LVS_PATH = BASE_PATH + VURDERING_OVERSIKT_LVS;
 
     private BehandlingRepository behandlingRepository;
     private SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper = new SykdomVurderingOversiktMapper();
@@ -163,7 +165,7 @@ public class SykdomVurderingRestTjeneste {
         final LocalDate pleietrengendesFødselsdato = sykdomVurderingTjeneste.finnPleietrengendesFødselsdato(behandling);
 
         final boolean lukketBehandling = behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK);
-        
+
         return sykdomVurderingOversiktMapper.mapPSB(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato, lukketBehandling);
     }
 
@@ -191,7 +193,7 @@ public class SykdomVurderingRestTjeneste {
         final LocalDate pleietrengendesFødselsdato = sykdomVurderingTjeneste.finnPleietrengendesFødselsdato(behandling);
 
         final boolean lukketBehandling = behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK);
-        
+
         return sykdomVurderingOversiktMapper.mapPSB(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato, lukketBehandling);
     }
 
@@ -218,8 +220,35 @@ public class SykdomVurderingRestTjeneste {
         final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingTjeneste.hentVurderingerForILivetsSluttfase(behandling);
 
         final boolean lukketBehandling = behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK);
-        
+
         return sykdomVurderingOversiktMapper.mapPPN(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, lukketBehandling);
+    }
+
+    @GET
+    @Path(VURDERING_OVERSIKT_LVS)
+    @Operation(description = "En oversikt over sykdomsvurderinger for langvarig sykdom",
+        summary = "En oversikt over sykdomsvurderinger for langvarig sykdom",
+        tags = "sykdom",
+        responses = {
+            @ApiResponse(responseCode = "200",
+                description = "",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = SykdomVurderingOversikt.class)))
+        })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public SykdomVurderingOversikt hentSykdomsoversiktForLangvarigSykdom(
+        @NotNull @QueryParam(BehandlingUuidDto.NAME)
+        @Parameter(description = BehandlingUuidDto.DESC)
+        @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingUuidDto behandlingUuid) {
+
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
+        validerYtelsetype(behandling, FagsakYtelseType.OPPLÆRINGSPENGER);
+        final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingTjeneste.hentVurderingerForLangvarigSykdom(behandling);
+
+        final boolean lukketBehandling = behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK);
+
+        return sykdomVurderingOversiktMapper.mapOLP(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, lukketBehandling);
     }
 
     @GET
