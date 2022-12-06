@@ -263,7 +263,7 @@ spec:
     - name: ENABLE_PRODUCER_FATTVEDTAK_AIVEN
       value: "true"
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
-      value: "false"
+      value: "true"
     - name: VENT_REGELENDRING_8_41
       vale: "true"
 
