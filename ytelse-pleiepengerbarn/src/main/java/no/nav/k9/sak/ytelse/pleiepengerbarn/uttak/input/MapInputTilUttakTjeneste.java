@@ -57,20 +57,26 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.YtelseType;
 @Dependent
 public class MapInputTilUttakTjeneste {
 
+    private static final String SPEILE_SAK_SOM_HAR_BLITT_FEIL = "BiJUC";
+
+
     private final HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private final String unntak;
     private final boolean enableBevarVerdi;
     private final boolean ny200ProsentPleiebehovFor2023;
+    private final boolean skalKjøreNyLogikkForSpeiling;
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
                                     @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
                                     @KonfigVerdi(value = "psb.uttak.unntak.bevar.vedtatt.verdi", required = false, defaultVerdi = "false") boolean enableBevarVerdi,
-                                    @KonfigVerdi(value = "pls.uttak.prosent.pleiebehov", required = false, defaultVerdi = "false") boolean ny200ProsentPleiebehovFor2023) {
+                                    @KonfigVerdi(value = "pls.uttak.prosent.pleiebehov", required = false, defaultVerdi = "false") boolean ny200ProsentPleiebehovFor2023,
+                                    @KonfigVerdi(value = "IKKE_YRKESAKTIV_UTEN_SPEILING", required = false, defaultVerdi = "false") boolean skalKjøreNyLogikkForSpeiling) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
         this.enableBevarVerdi = enableBevarVerdi;
         this.ny200ProsentPleiebehovFor2023 = ny200ProsentPleiebehovFor2023;
+        this.skalKjøreNyLogikkForSpeiling = skalKjøreNyLogikkForSpeiling;
     }
 
 
@@ -115,7 +121,11 @@ public class MapInputTilUttakTjeneste {
             .map(VilkårPeriode::getPeriode)
             .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).toList());
 
-        var inaktivitetUtlederInput = new InaktivitetUtlederInput(behandling.getAktørId(), opptjeningTidslinje, input.getInntektArbeidYtelseGrunnlag());
+        var inaktivitetUtlederInput = new InaktivitetUtlederInput(
+            behandling.getAktørId(),
+            opptjeningTidslinje,
+            input.getInntektArbeidYtelseGrunnlag(),
+            skalKjøreNyLogikkForSpeiling || behandling.getFagsak().getSaksnummer().getVerdi().equals(SPEILE_SAK_SOM_HAR_BLITT_FEIL));
         var inaktivTidslinje = new PerioderMedInaktivitetUtleder().utled(inaktivitetUtlederInput);
 
         var arbeidstidInput = new ArbeidstidMappingInput()
