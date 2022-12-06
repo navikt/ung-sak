@@ -66,7 +66,7 @@ spec:
         - application: k9-klage
         - application: k9-formidling
         - application: k9-formidling-dokumentdata
-        - application :k9-punsj
+        - application: k9-punsj
   env:
     - name: TZ
       value: "Europe/Oslo"
