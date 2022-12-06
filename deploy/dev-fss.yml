@@ -62,15 +62,11 @@ spec:
     inbound:
       rules:
         - application: k9-sak
-          namespace: k9saksbehandling
         - application: k9-tilbake
-          namespace: k9saksbehandling
         - application: k9-klage
-          namespace: k9saksbehandling
         - application: k9-formidling
-          namespace: k9saksbehandling
         - application: k9-formidling-dokumentdata
-          namespace: k9saksbehandling
+        - application: k9-punsj
   env:
     - name: TZ
       value: "Europe/Oslo"
@@ -192,7 +188,7 @@ spec:
     - name: K9_FORMIDLING_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-formidling/.default
     - name : K9_PUNSJ_URL
-      value: https://k9-punsj.dev.adeo.no/api
+      value: https://k9-punsj.dev.intern.nav.no/api
     - name: INFOTRYGD_BS_BASE_URI
       value: https://k9-infotrygd.dev.intern.nav.no
     - name: ARBEID_OG_INNTEKT_BASE_URL
