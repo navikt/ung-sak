@@ -271,6 +271,8 @@ spec:
       value: "true"
     - name: VENT_REGELENDRING_8_41
       vale: "false"
+    - name: IKKE_YRKESAKTIV_UTEN_SPEILING
+      vale: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

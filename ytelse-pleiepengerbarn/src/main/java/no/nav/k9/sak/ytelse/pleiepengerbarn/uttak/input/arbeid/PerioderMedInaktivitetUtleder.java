@@ -25,6 +25,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
 
 public class PerioderMedInaktivitetUtleder {
 
+
     public Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> utled(InaktivitetUtlederInput input) {
         var tidslinjeTilVurdering = input.getTidslinjeTilVurdering();
 
@@ -44,8 +45,7 @@ public class PerioderMedInaktivitetUtleder {
         var alleYrkesaktiviteter = aktørArbeid.map(AktørArbeid::hentAlleYrkesaktiviteter)
             .orElse(Collections.emptyList());
 
-        LocalDateTimeline<BigDecimal> antallArbeidsgivereTidslinje = utledAntallArbeidsgivereTidslinje(alleYrkesaktiviteter);
-
+        LocalDateTimeline<BigDecimal> antallArbeidsgivereTidslinje = input.skalKjøreNyLogikkForSpeiling() ? utledAntallArbeidsgivereTidslinje(alleYrkesaktiviteter) : LocalDateTimeline.empty();
         alleYrkesaktiviteter
             .stream()
             .filter(it -> ArbeidType.AA_REGISTER_TYPER.contains(it.getArbeidType()))
@@ -84,22 +84,30 @@ public class PerioderMedInaktivitetUtleder {
 
 
                 if (ikkeAktivPeriode.toSegments().stream().noneMatch(it -> Objects.equals(it.getFom(), justertSegment.getFom()))) {
-                    var tilkomneArbeidsgivereTidslinje = utledTilkomneArbeidsgivereTidslinje(antallArbeidsgivereTidslinje, ikkeAktivPeriode);
                     var arbeidsgiver = aktivitet.getKey().getArbeidsgiver();
 
-                    var ikkeErstattetTidslinje = ikkeAktivPeriode.disjoint(tilkomneArbeidsgivereTidslinje);
-                    if (!ikkeErstattetTidslinje.isEmpty()) {
-                        resultat.put(lagNyNøkkel(aktivitet, UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING), new LocalDateTimeline<>(lagIkkeYrkesaktivSegmenter(ikkeErstattetTidslinje, UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING, arbeidsgiver)));
-                    }
-
-                    var erstattetTidslinje = ikkeAktivPeriode.intersection(tilkomneArbeidsgivereTidslinje);
-                    if (!erstattetTidslinje.isEmpty()) {
-                        resultat.put(lagNyNøkkel(aktivitet, UttakArbeidType.IKKE_YRKESAKTIV), new LocalDateTimeline<>(lagIkkeYrkesaktivSegmenter(erstattetTidslinje, UttakArbeidType.IKKE_YRKESAKTIV, arbeidsgiver)));
+                    if (!antallArbeidsgivereTidslinje.isEmpty()) {
+                        uttakUtenSpeilingUtenErstattetArbeid(antallArbeidsgivereTidslinje, resultat, aktivitet, ikkeAktivPeriode, arbeidsgiver);
+                    } else {
+                        resultat.put(aktivitet.getKey(), new LocalDateTimeline<>(lagIkkeYrkesaktivSegmenter(ikkeAktivPeriode, UttakArbeidType.IKKE_YRKESAKTIV, arbeidsgiver)));
                     }
                 }
             }
         }
         return resultat;
+    }
+
+    private void uttakUtenSpeilingUtenErstattetArbeid(LocalDateTimeline<BigDecimal> antallArbeidsgivereTidslinje, HashMap<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> resultat, Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktivitet, LocalDateTimeline<Boolean> ikkeAktivPeriode, Arbeidsgiver arbeidsgiver) {
+        var tilkomneArbeidsgivereTidslinje = utledTilkomneArbeidsgivereTidslinje(antallArbeidsgivereTidslinje, ikkeAktivPeriode);
+        var ikkeErstattetTidslinje = ikkeAktivPeriode.disjoint(tilkomneArbeidsgivereTidslinje);
+        if (!ikkeErstattetTidslinje.isEmpty()) {
+            resultat.put(lagNyNøkkel(aktivitet, UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING), new LocalDateTimeline<>(lagIkkeYrkesaktivSegmenter(ikkeErstattetTidslinje, UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING, arbeidsgiver)));
+        }
+
+        var erstattetTidslinje = ikkeAktivPeriode.intersection(tilkomneArbeidsgivereTidslinje);
+        if (!erstattetTidslinje.isEmpty()) {
+            resultat.put(lagNyNøkkel(aktivitet, UttakArbeidType.IKKE_YRKESAKTIV), new LocalDateTimeline<>(lagIkkeYrkesaktivSegmenter(erstattetTidslinje, UttakArbeidType.IKKE_YRKESAKTIV, arbeidsgiver)));
+        }
     }
 
     private AktivitetIdentifikator lagNyNøkkel(Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktivitet, UttakArbeidType type) {
