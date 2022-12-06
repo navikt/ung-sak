@@ -25,6 +25,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_VENT_MILITÆR_OG_BG_UNDER_3G_KODE = "7023";
     public static final String AUTO_VENT_GRADERING_FLERE_ARBEIDSFORHOLD_KODE = "7025";
     public static final String AUTO_VENT_ETTERLYST_INNTEKTSMELDING_KODE = "7030";
+    public static final String AUTO_VENT_PÅ_LOVENDRING_8_41_KODE = "7041";
 
     public static final String AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE_KODE = "5021";
     public static final String AVKLAR_LOVLIG_OPPHOLD_KODE = "5019";
@@ -74,6 +75,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String FASTSETT_BEREGNINGSGRUNNLAG_FOR_SN_NY_I_ARBEIDSLIVET_KODE = "5049";
     public static final String VURDER_GRADERING_UTEN_BEREGNINGSGRUNNLAG_KODE = "5050";
     public static final String AVKLAR_AKTIVITETER_KODE = "5052";
+    public static final String VURDER_NYTT_INNTKTSFRHLD_KODE = "5067";
+    public static final String VURDER_REPRESENTERER_STORTINGET_KODE = "5087";
 
     public static final String VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE = "5039";
     public static final String VURDER_VARIG_ENDRET_ARBEIDSSITUASJON_KODE = "5054";

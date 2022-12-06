@@ -5,8 +5,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -34,17 +32,15 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedlemskap;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
 @BehandlingStegRef(value = POST_VURDER_MEDISINSKVILKÅR)
 @BehandlingTypeRef
@@ -126,68 +122,55 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
     }
 
     VilkårResultatBuilder justerVilkårsperioderEtterDefinerendeVilkår(Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
-        var avslåttePerioder = finnPerioderMedUtfall(vilkårene, perioderTilVurdering, perioderTilVurderingTjeneste, Utfall.IKKE_OPPFYLT);
-        var innvilgedePerioder = finnPerioderMedUtfall(vilkårene, perioderTilVurdering, perioderTilVurderingTjeneste, Utfall.OPPFYLT);
+        var innvilgedePerioder = finnPerioderMedUtfall(vilkårene, perioderTilVurdering, perioderTilVurderingTjeneste);
 
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
 
-        justerPeriodeForAndreVilkår(avslåttePerioder, innvilgedePerioder, resultatBuilder);
+        justerPeriodeForAndreVilkår(innvilgedePerioder, resultatBuilder);
 
         return resultatBuilder;
     }
 
-    private NavigableSet<VilkårPeriode> finnPerioderMedUtfall(Vilkårene vilkårene,
-                                                              NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, Utfall utfall) {
+    private LocalDateTimeline<Boolean> finnPerioderMedUtfall(Vilkårene vilkårene,
+                                                             NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
+        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
 
-        return definerendeVilkår.stream()
-            .map(it -> vilkårene.getVilkår(it).orElseThrow())
-            .map(Vilkår::getPerioder)
-            .flatMap(Collection::stream)
-            .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
-            .filter(it -> Objects.equals(utfall, it.getUtfall()))
-            .collect(Collectors.toCollection(TreeSet::new));
+        for (VilkårType vilkårType : definerendeVilkår) {
+            var segmenger = vilkårene.getVilkår(vilkårType).orElseThrow()
+                .getPerioder()
+                .stream()
+                .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
+                .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), Objects.equals(Utfall.OPPFYLT, it.getGjeldendeUtfall())))
+                .collect(Collectors.toCollection(TreeSet::new));
+            tidslinje = tidslinje.combine(new LocalDateTimeline<>(segmenger), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        return tidslinje.compress();
     }
 
-    private void justerPeriodeForAndreVilkår(NavigableSet<VilkårPeriode> avslåttePerioder, Set<VilkårPeriode> innvilgedePerioder, VilkårResultatBuilder resultatBuilder) {
+    private void justerPeriodeForAndreVilkår(LocalDateTimeline<Boolean> tidslinje, VilkårResultatBuilder resultatBuilder) {
         for (VilkårType vilkårType : Set.of(VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.OPPTJENINGSVILKÅRET, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET)) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
-            var perioderSomSkalTilbakestilles = avslåttePerioder.stream()
-                .map(VilkårPeriode::getPeriode)
+            var perioderSomSkalTilbakestilles = tidslinje.filterValue(it -> !it)
+                .stream()
+                .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
                 .filter(vilkårBuilder::harDataPåPeriode)
                 .collect(Collectors.toCollection(TreeSet::new));
             if (!perioderSomSkalTilbakestilles.isEmpty()) {
                 vilkårBuilder = vilkårBuilder.tilbakestill(perioderSomSkalTilbakestilles);
             }
-            var innvilgetTidslinje = utledTidslinje(innvilgedePerioder, resultatBuilder.getKantIKantVurderer());
-            for (DatoIntervallEntitet innvilgetPeriode : innvilgetTidslinje) {
+            var innvilgetTidslinje = tidslinje.filterValue(it -> it);
+            var innvilgendePerioder = innvilgetTidslinje.combine(Hjelpetidslinjer.utledHullSomMåTettes(innvilgetTidslinje, resultatBuilder.getKantIKantVurderer()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN)
+                .stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval())).collect(Collectors.toCollection(TreeSet::new));
+            for (DatoIntervallEntitet innvilgetPeriode : innvilgendePerioder) {
                 vilkårBuilder = vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(innvilgetPeriode)
                     .medPeriode(innvilgetPeriode));
             }
             resultatBuilder.leggTil(vilkårBuilder);
         }
-    }
-
-    private NavigableSet<DatoIntervallEntitet> utledTidslinje(Set<VilkårPeriode> innvilgedePerioder, KantIKantVurderer kantIKantVurderer) {
-        DatoIntervallEntitet periode = null;
-        var vilkårPerioder = new ArrayList<DatoIntervallEntitet>();
-
-        for (VilkårPeriode vilkårPeriode : innvilgedePerioder) {
-            if (periode == null) {
-                periode = vilkårPeriode.getPeriode();
-            } else if (kantIKantVurderer.erKantIKant(vilkårPeriode.getPeriode(), periode)) {
-                periode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), vilkårPeriode.getTom());
-            } else {
-                vilkårPerioder.add(periode);
-                periode = vilkårPeriode.getPeriode();
-            }
-        }
-        if (periode != null) {
-            vilkårPerioder.add(periode);
-        }
-        return compress(vilkårPerioder);
     }
 
     private NavigableSet<DatoIntervallEntitet> compress(List<DatoIntervallEntitet> vilkårPerioder) {
