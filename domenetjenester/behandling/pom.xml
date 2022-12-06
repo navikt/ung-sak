@@ -25,7 +25,6 @@
 		<dependency>
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>kontrakt-jakarta</artifactId>
-            <scope>provided</scope> <!-- ikke trekk med transitivt for andre moduler -->
         </dependency>
 
         <dependency>
