@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
@@ -64,6 +67,130 @@ class PerioderMedInaktivitetUtlederTest {
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(1);
+        var aktivitetIdentifikator = utledetTidslinje.keySet().iterator().next();
+        assertThat(aktivitetIdentifikator.getAktivitetType()).isEqualTo(UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING);
+    }
+
+    @Test
+    void skal_utlede_tidslinje_der_inaktivt_arbeid_erstattes_av_nytt() {
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(14);
+        var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var brukerAktørId = AktørId.dummy();
+        iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
+            .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom.minusDays(3), tom.minusDays(3)))))
+            .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("111111111"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(tom.minusDays(1), tom.plusDays(1)))))));
+        var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
+
+        var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag);
+        var utledetTidslinje = utleder.utled(input);
+
+        assertThat(utledetTidslinje).hasSize(2);
+
+        var ikkeYrkesaktiv = utledetTidslinje.entrySet()
+            .stream().filter(e -> e.getKey().getAktivitetType().equals(UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING))
+            .findFirst()
+            .orElseThrow();
+        assertThat(ikkeYrkesaktiv.getKey().getArbeidsgiver().getArbeidsgiverOrgnr()).isEqualTo("000000000");
+        var ikkeYrkesaktivSegmenter = ikkeYrkesaktiv.getValue().toSegments();
+        assertThat(ikkeYrkesaktivSegmenter.size()).isEqualTo(1);
+        var segmentIkkeYrkesaktiv = ikkeYrkesaktivSegmenter.iterator().next();
+        assertThat(segmentIkkeYrkesaktiv.getFom()).isEqualTo(tom.minusDays(2));
+        assertThat(segmentIkkeYrkesaktiv.getTom()).isEqualTo(tom.minusDays(2));
+
+        var erstattetIkkeYrkesaktiv = utledetTidslinje.entrySet()
+            .stream().filter(e -> e.getKey().getAktivitetType().equals(UttakArbeidType.IKKE_YRKESAKTIV))
+            .findFirst()
+            .orElseThrow();
+        assertThat(erstattetIkkeYrkesaktiv.getKey().getArbeidsgiver().getArbeidsgiverOrgnr()).isEqualTo("000000000");
+        var erstattetIkkeYrkesaktivSegmenter = erstattetIkkeYrkesaktiv.getValue().toSegments();
+        assertThat(erstattetIkkeYrkesaktivSegmenter.size()).isEqualTo(1);
+        var segmentErstattetIkkeYrkesaktiv = erstattetIkkeYrkesaktivSegmenter.iterator().next();
+        assertThat(segmentErstattetIkkeYrkesaktiv.getFom()).isEqualTo(tom.minusDays(1));
+        assertThat(segmentErstattetIkkeYrkesaktiv.getTom()).isEqualTo(tom);
+    }
+
+
+    @Test
+    void skal_utlede_tidslinje_der_inaktivt_arbeid_erstattes_av_nytt_samme_dag_som_bortfalt() {
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(14);
+        var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var brukerAktørId = AktørId.dummy();
+        iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
+            .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom.minusDays(3), tom.minusDays(3)))))
+            .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("111111111"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(tom.minusDays(2), tom.plusDays(1)))))));
+        var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
+
+        var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag);
+        var utledetTidslinje = utleder.utled(input);
+
+        assertThat(utledetTidslinje).hasSize(1);
+        var erstattetIkkeYrkesaktiv = utledetTidslinje.entrySet()
+            .stream().filter(e -> e.getKey().getAktivitetType().equals(UttakArbeidType.IKKE_YRKESAKTIV))
+            .findFirst()
+            .orElseThrow();
+        assertThat(erstattetIkkeYrkesaktiv.getKey().getArbeidsgiver().getArbeidsgiverOrgnr()).isEqualTo("000000000");
+        var erstattetIkkeYrkesaktivSegmenter = erstattetIkkeYrkesaktiv.getValue().toSegments();
+        assertThat(erstattetIkkeYrkesaktivSegmenter.size()).isEqualTo(1);
+        var segmentErstattetIkkeYrkesaktiv = erstattetIkkeYrkesaktivSegmenter.iterator().next();
+        assertThat(segmentErstattetIkkeYrkesaktiv.getFom()).isEqualTo(tom.minusDays(2));
+        assertThat(segmentErstattetIkkeYrkesaktiv.getTom()).isEqualTo(tom);
+    }
+
+
+    @Test
+    void skal_utlede_tidslinje_der_inaktivt_arbeid_erstattes_av_nytt_utenfor_periode() {
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(14);
+        var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var brukerAktørId = AktørId.dummy();
+        iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
+            .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom.minusDays(3), tom.minusDays(3)))))
+            .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("111111111"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(tom.plusDays(1), tom.plusDays(1)))))));
+        var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
+
+        var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag);
+        var utledetTidslinje = utleder.utled(input);
+
+        assertThat(utledetTidslinje).hasSize(1);
+        var ikkeYrkesaktiv = utledetTidslinje.entrySet()
+            .stream().filter(e -> e.getKey().getAktivitetType().equals(UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING))
+            .findFirst()
+            .orElseThrow();
+        assertThat(ikkeYrkesaktiv.getKey().getArbeidsgiver().getArbeidsgiverOrgnr()).isEqualTo("000000000");
+        var ikkeYrkesaktivSegmenter = ikkeYrkesaktiv.getValue().toSegments();
+        assertThat(ikkeYrkesaktivSegmenter.size()).isEqualTo(1);
+        var segmentIkkeYrkesaktiv = ikkeYrkesaktivSegmenter.iterator().next();
+        assertThat(segmentIkkeYrkesaktiv.getFom()).isEqualTo(tom.minusDays(2));
+        assertThat(segmentIkkeYrkesaktiv.getTom()).isEqualTo(tom);
     }
 
     @Test
@@ -111,6 +238,7 @@ class PerioderMedInaktivitetUtlederTest {
         var key = utledetTidslinje.keySet().iterator().next();
         var segmenter = utledetTidslinje.get(key).toSegments().stream().map(LocalDateSegment::getLocalDateInterval).toList();
         assertThat(segmenter).contains(new LocalDateInterval(fom, tom));
+        assertThat(key.getAktivitetType()).isEqualTo(UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING);
     }
 
     @Test
@@ -134,6 +262,8 @@ class PerioderMedInaktivitetUtlederTest {
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(1);
+        var aktivitetIdentifikator = utledetTidslinje.keySet().iterator().next();
+        assertThat(aktivitetIdentifikator.getAktivitetType()).isEqualTo(UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING);
     }
 
     @Test

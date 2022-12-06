@@ -1,5 +1,9 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.BortfaltOgTilkommetArbeidsgiver.utledAntallArbeidsgivereTidslinje;
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.BortfaltOgTilkommetArbeidsgiver.utledTilkomneArbeidsgivereTidslinje;
+
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,12 +16,11 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.typer.Stillingsprosent;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
 
 public class PerioderMedInaktivitetUtleder {
@@ -38,16 +41,24 @@ public class PerioderMedInaktivitetUtleder {
 
         var mellomregning = new HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>>();
 
-        aktørArbeid.map(AktørArbeid::hentAlleYrkesaktiviteter)
-            .orElse(Collections.emptyList())
+        var alleYrkesaktiviteter = aktørArbeid.map(AktørArbeid::hentAlleYrkesaktiviteter)
+            .orElse(Collections.emptyList());
+
+        LocalDateTimeline<BigDecimal> antallArbeidsgivereTidslinje = utledAntallArbeidsgivereTidslinje(alleYrkesaktiviteter);
+
+        alleYrkesaktiviteter
             .stream()
             .filter(it -> ArbeidType.AA_REGISTER_TYPER.contains(it.getArbeidType()))
             .forEach(yrkesaktivitet -> mapYrkesAktivitet(mellomregning, yrkesaktivitet));
 
-        return utledBortfallendeAktiviteterSomSkalFortsattKompenseres(mellomregning, ikkeAktivTidslinje);
+
+        return utledBortfallendeAktiviteterSomSkalFortsattKompenseres(mellomregning, antallArbeidsgivereTidslinje, ikkeAktivTidslinje);
     }
 
-    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> utledBortfallendeAktiviteterSomSkalFortsattKompenseres(HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>> mellomregning, LocalDateTimeline<Boolean> ikkeAktivTidslinje) {
+
+    private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> utledBortfallendeAktiviteterSomSkalFortsattKompenseres(HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>> mellomregning,
+                                                                                                                                 LocalDateTimeline<BigDecimal> antallArbeidsgivereTidslinje,
+                                                                                                                                 LocalDateTimeline<Boolean> ikkeAktivTidslinje) {
         var resultat = new HashMap<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>();
         for (LocalDateSegment<Boolean> periodeMedYtelse : ikkeAktivTidslinje.toSegments()) {
             for (Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktivitet : mellomregning.entrySet()) {
@@ -71,17 +82,42 @@ public class PerioderMedInaktivitetUtleder {
                     continue;
                 }
 
+
                 if (ikkeAktivPeriode.toSegments().stream().noneMatch(it -> Objects.equals(it.getFom(), justertSegment.getFom()))) {
-                    var segmenter = ikkeAktivPeriode.toSegments()
-                        .stream()
-                        .map(it -> new LocalDateSegment<>(it.getLocalDateInterval(),
-                            new WrappedArbeid(new ArbeidPeriode(DatoIntervallEntitet.fra(it.getLocalDateInterval()), UttakArbeidType.IKKE_YRKESAKTIV, aktivitet.getKey().getArbeidsgiver(), null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))))
-                        .collect(Collectors.toList());
-                    resultat.put(aktivitet.getKey(), new LocalDateTimeline<>(segmenter));
+                    var tilkomneArbeidsgivereTidslinje = utledTilkomneArbeidsgivereTidslinje(antallArbeidsgivereTidslinje, ikkeAktivPeriode);
+                    var arbeidsgiver = aktivitet.getKey().getArbeidsgiver();
+
+                    var ikkeErstattetTidslinje = ikkeAktivPeriode.disjoint(tilkomneArbeidsgivereTidslinje);
+                    if (!ikkeErstattetTidslinje.isEmpty()) {
+                        resultat.put(lagNyNøkkel(aktivitet, UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING), new LocalDateTimeline<>(lagIkkeYrkesaktivSegmenter(ikkeErstattetTidslinje, UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING, arbeidsgiver)));
+                    }
+
+                    var erstattetTidslinje = ikkeAktivPeriode.intersection(tilkomneArbeidsgivereTidslinje);
+                    if (!erstattetTidslinje.isEmpty()) {
+                        resultat.put(lagNyNøkkel(aktivitet, UttakArbeidType.IKKE_YRKESAKTIV), new LocalDateTimeline<>(lagIkkeYrkesaktivSegmenter(erstattetTidslinje, UttakArbeidType.IKKE_YRKESAKTIV, arbeidsgiver)));
+                    }
                 }
             }
         }
         return resultat;
+    }
+
+    private AktivitetIdentifikator lagNyNøkkel(Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktivitet, UttakArbeidType type) {
+        return new AktivitetIdentifikator(type, aktivitet.getKey().getArbeidsgiver(), aktivitet.getKey().getArbeidsforhold());
+    }
+
+    private List<LocalDateSegment<WrappedArbeid>> lagIkkeYrkesaktivSegmenter(LocalDateTimeline<Boolean> tidslinje, UttakArbeidType type, Arbeidsgiver arbeidsgiver) {
+        return tidslinje.toSegments()
+            .stream()
+            .map(it -> new LocalDateSegment<>(it.getLocalDateInterval(),
+                new WrappedArbeid(
+                    new ArbeidPeriode(DatoIntervallEntitet.fra(it.getLocalDateInterval()),
+                        type,
+                        arbeidsgiver,
+                        null,
+                        Duration.ofMinutes((long) (7.5 * 60)),
+                        Duration.ZERO))))
+            .collect(Collectors.toList());
     }
 
     private void mapYrkesAktivitet(HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>> resultat, Yrkesaktivitet yrkesaktivitet) {
@@ -95,7 +131,7 @@ public class PerioderMedInaktivitetUtleder {
         LocalDateTimeline<Boolean> aktivtsArbeidsforholdTidslinje = new LocalDateTimeline<>(segmenter, StandardCombinators::alwaysTrueForMatch);
 
         // Ta bort permisjoner
-        var permitteringsTidslinje = mapPermittering(yrkesaktivitet);
+        var permitteringsTidslinje = PermitteringTidslinjeTjeneste.mapPermittering(yrkesaktivitet);
         aktivtsArbeidsforholdTidslinje = aktivtsArbeidsforholdTidslinje.disjoint(permitteringsTidslinje);
 
         var arbeidsAktivTidslinje = resultat.getOrDefault(key, LocalDateTimeline.empty());
@@ -103,23 +139,9 @@ public class PerioderMedInaktivitetUtleder {
         resultat.put(key, arbeidsAktivTidslinje.compress());
     }
 
-    private LocalDateTimeline<Boolean> mapPermittering(Yrkesaktivitet yrkesaktivitet) {
-        var relevantePermitteringer = yrkesaktivitet.getPermisjon().stream()
-            .filter(it -> Objects.equals(it.getPermisjonsbeskrivelseType(), PermisjonsbeskrivelseType.PERMITTERING))
-            .filter(it -> erStørreEllerLik100Prosent(it.getProsentsats()))
-            .map(permisjon -> new LocalDateSegment<>(permisjon.getFraOgMed(), permisjon.getTilOgMed(), true))
-            .toList();
-
-        LocalDateTimeline<Boolean> timeline = new LocalDateTimeline<>(relevantePermitteringer, StandardCombinators::alwaysTrueForMatch);
-
-        return timeline.compress();
-    }
 
     private AktivitetIdentifikator utledIdentifikator(Yrkesaktivitet yrkesaktivitet) {
         return new AktivitetIdentifikator(UttakArbeidType.IKKE_YRKESAKTIV, yrkesaktivitet.getArbeidsgiver(), null);
     }
 
-    private boolean erStørreEllerLik100Prosent(Stillingsprosent prosentsats) {
-        return Stillingsprosent.HUNDRED.getVerdi().intValue() <= prosentsats.getVerdi().intValue();
-    }
 }
