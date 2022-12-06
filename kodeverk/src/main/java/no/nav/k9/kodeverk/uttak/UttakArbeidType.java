@@ -31,7 +31,7 @@ public enum UttakArbeidType implements Kodeverdi {
     KUN_YTELSE(AktivitetStatus.BRUKERS_ANDEL, "Kun ytelse"),
 
     IKKE_YRKESAKTIV(AktivitetStatus.IKKE_YRKESAKTIV, "Ikke yrkesaktiv"),
-    ERSTATTET_IKKE_YRKESAKTIV("ERSTATTET_IKKE_YRKESAKTIV", "Ikke yrkesaktiv som har blitt erstattet med nytt"),
+    IKKE_YRKESAKTIV_UTEN_ERSTATNING("IKKE_YRKESAKTIV_UTEN_ERSTATNING", "Ikke yrkesaktiv som ikke har blitt erstattet med nytt"),
 
     // 8-47 opptjening gir inaktiv
     INAKTIV(AktivitetStatus.MIDLERTIDIG_INAKTIV, "Inaktiv"),
@@ -129,7 +129,7 @@ public enum UttakArbeidType implements Kodeverdi {
     }
 
     public boolean matcher(AktivitetStatus aktivitetStatus) {
-        if (UttakArbeidType.IKKE_YRKESAKTIV.equals(this) || UttakArbeidType.ERSTATTET_IKKE_YRKESAKTIV.equals(this)) {
+        if (UttakArbeidType.IKKE_YRKESAKTIV.equals(this) || UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING.equals(this)) {
             return Objects.equals(UttakArbeidType.ARBEIDSTAKER.getAktivitetStatus().getKode(), aktivitetStatus.getKode());
         }
         if (UttakArbeidType.INAKTIV.equals(this)) {

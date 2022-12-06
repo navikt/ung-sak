@@ -68,7 +68,7 @@ class PerioderMedInaktivitetUtlederTest {
 
         assertThat(utledetTidslinje).hasSize(1);
         var aktivitetIdentifikator = utledetTidslinje.keySet().iterator().next();
-        assertThat(aktivitetIdentifikator.getAktivitetType()).isEqualTo(UttakArbeidType.IKKE_YRKESAKTIV);
+        assertThat(aktivitetIdentifikator.getAktivitetType()).isEqualTo(UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING);
     }
 
     @Test
@@ -97,7 +97,7 @@ class PerioderMedInaktivitetUtlederTest {
         assertThat(utledetTidslinje).hasSize(2);
 
         var ikkeYrkesaktiv = utledetTidslinje.entrySet()
-            .stream().filter(e -> e.getKey().getAktivitetType().equals(UttakArbeidType.IKKE_YRKESAKTIV))
+            .stream().filter(e -> e.getKey().getAktivitetType().equals(UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING))
             .findFirst()
             .orElseThrow();
         assertThat(ikkeYrkesaktiv.getKey().getArbeidsgiver().getArbeidsgiverOrgnr()).isEqualTo("000000000");
@@ -108,7 +108,7 @@ class PerioderMedInaktivitetUtlederTest {
         assertThat(segmentIkkeYrkesaktiv.getTom()).isEqualTo(tom.minusDays(2));
 
         var erstattetIkkeYrkesaktiv = utledetTidslinje.entrySet()
-            .stream().filter(e -> e.getKey().getAktivitetType().equals(UttakArbeidType.ERSTATTET_IKKE_YRKESAKTIV))
+            .stream().filter(e -> e.getKey().getAktivitetType().equals(UttakArbeidType.IKKE_YRKESAKTIV))
             .findFirst()
             .orElseThrow();
         assertThat(erstattetIkkeYrkesaktiv.getKey().getArbeidsgiver().getArbeidsgiverOrgnr()).isEqualTo("000000000");
@@ -145,7 +145,7 @@ class PerioderMedInaktivitetUtlederTest {
 
         assertThat(utledetTidslinje).hasSize(1);
         var erstattetIkkeYrkesaktiv = utledetTidslinje.entrySet()
-            .stream().filter(e -> e.getKey().getAktivitetType().equals(UttakArbeidType.ERSTATTET_IKKE_YRKESAKTIV))
+            .stream().filter(e -> e.getKey().getAktivitetType().equals(UttakArbeidType.IKKE_YRKESAKTIV))
             .findFirst()
             .orElseThrow();
         assertThat(erstattetIkkeYrkesaktiv.getKey().getArbeidsgiver().getArbeidsgiverOrgnr()).isEqualTo("000000000");
@@ -182,7 +182,7 @@ class PerioderMedInaktivitetUtlederTest {
 
         assertThat(utledetTidslinje).hasSize(1);
         var ikkeYrkesaktiv = utledetTidslinje.entrySet()
-            .stream().filter(e -> e.getKey().getAktivitetType().equals(UttakArbeidType.IKKE_YRKESAKTIV))
+            .stream().filter(e -> e.getKey().getAktivitetType().equals(UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING))
             .findFirst()
             .orElseThrow();
         assertThat(ikkeYrkesaktiv.getKey().getArbeidsgiver().getArbeidsgiverOrgnr()).isEqualTo("000000000");
@@ -238,7 +238,7 @@ class PerioderMedInaktivitetUtlederTest {
         var key = utledetTidslinje.keySet().iterator().next();
         var segmenter = utledetTidslinje.get(key).toSegments().stream().map(LocalDateSegment::getLocalDateInterval).toList();
         assertThat(segmenter).contains(new LocalDateInterval(fom, tom));
-        assertThat(key.getAktivitetType()).isEqualTo(UttakArbeidType.IKKE_YRKESAKTIV);
+        assertThat(key.getAktivitetType()).isEqualTo(UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING);
     }
 
     @Test
@@ -263,7 +263,7 @@ class PerioderMedInaktivitetUtlederTest {
 
         assertThat(utledetTidslinje).hasSize(1);
         var aktivitetIdentifikator = utledetTidslinje.keySet().iterator().next();
-        assertThat(aktivitetIdentifikator.getAktivitetType()).isEqualTo(UttakArbeidType.IKKE_YRKESAKTIV);
+        assertThat(aktivitetIdentifikator.getAktivitetType()).isEqualTo(UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING);
     }
 
     @Test

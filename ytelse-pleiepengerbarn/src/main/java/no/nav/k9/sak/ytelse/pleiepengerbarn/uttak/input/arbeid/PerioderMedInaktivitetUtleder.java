@@ -89,12 +89,12 @@ public class PerioderMedInaktivitetUtleder {
 
                     var ikkeErstattetTidslinje = ikkeAktivPeriode.disjoint(tilkomneArbeidsgivereTidslinje);
                     if (!ikkeErstattetTidslinje.isEmpty()) {
-                        resultat.put(lagNyNøkkel(aktivitet, UttakArbeidType.IKKE_YRKESAKTIV), new LocalDateTimeline<>(lagIkkeYrkesaktivSegmenter(ikkeErstattetTidslinje, UttakArbeidType.IKKE_YRKESAKTIV, arbeidsgiver)));
+                        resultat.put(lagNyNøkkel(aktivitet, UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING), new LocalDateTimeline<>(lagIkkeYrkesaktivSegmenter(ikkeErstattetTidslinje, UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING, arbeidsgiver)));
                     }
 
                     var erstattetTidslinje = ikkeAktivPeriode.intersection(tilkomneArbeidsgivereTidslinje);
                     if (!erstattetTidslinje.isEmpty()) {
-                        resultat.put(lagNyNøkkel(aktivitet, UttakArbeidType.ERSTATTET_IKKE_YRKESAKTIV), new LocalDateTimeline<>(lagIkkeYrkesaktivSegmenter(erstattetTidslinje, UttakArbeidType.ERSTATTET_IKKE_YRKESAKTIV, arbeidsgiver)));
+                        resultat.put(lagNyNøkkel(aktivitet, UttakArbeidType.IKKE_YRKESAKTIV), new LocalDateTimeline<>(lagIkkeYrkesaktivSegmenter(erstattetTidslinje, UttakArbeidType.IKKE_YRKESAKTIV, arbeidsgiver)));
                     }
                 }
             }
