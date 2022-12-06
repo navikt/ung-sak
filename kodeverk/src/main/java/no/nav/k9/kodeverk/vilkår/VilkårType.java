@@ -146,13 +146,13 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.IKKE_GODKJENT_INSTITUSJON
     ),
     GJENNOMGÅ_OPPLÆRING("K9_VK_22",
-        "Nødvendig opplæring",
+        "Gjennomgå opplæring",
         Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "§ 9-14"),
         Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING,
         Avslagsårsak.IKKE_PÅ_REISE
     ),
     LANGVARIG_SYKDOM("K9_VK_17",
-        "Nødvendig opplæring",
+        "Langvarig sykdom",
         Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "§ 9-14"),
         Avslagsårsak.MANGLENDE_DOKUMENTASJON
     ),
