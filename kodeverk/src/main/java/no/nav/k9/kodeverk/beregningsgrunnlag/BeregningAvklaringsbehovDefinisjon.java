@@ -71,7 +71,7 @@ public enum BeregningAvklaringsbehovDefinisjon implements Kodeverdi {
         AksjonspunktKodeDefinisjon.VURDER_REFUSJON_BERGRUNN_KODE, "Vurder endring i refusjon refusjon"),
     VURDER_NYTT_INNTKTSFRHLD(
         BeregningAvklaringsbehovKodeDefinition.VURDER_NYTT_INNTKTSFRHLD_KODE,
-        AksjonspunktKodeDefinisjon.VURDER_NYTT_INNTKTSFRHLD_KODE, "Vurder om tilkommet inntektsforhold skal redusere utbetaling"),
+        AksjonspunktKodeDefinisjon.VURDER_NYTT_INNTEKTSFORHOLD_KODE, "Vurder om tilkommet inntektsforhold skal redusere utbetaling"),
     VURDER_REPRESENTERER_STORTINGET(
         BeregningAvklaringsbehovKodeDefinition.VURDER_REPRESENTERER_STORTINGET_KODE,
         AksjonspunktKodeDefinisjon.VURDER_REPRESENTERER_STORTINGET_KODE, "Vurder om tilkommet inntektsforhold skal redusere utbetaling"),
