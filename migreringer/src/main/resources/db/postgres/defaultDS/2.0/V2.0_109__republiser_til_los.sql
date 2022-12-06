@@ -6,4 +6,4 @@ FROM Behandling b INNER JOIN Fagsak f ON (
     f.id = b.fagsak_id
   )
 WHERE b.behandling_status IN ('OPPRE', 'UTRED')
-  AND f.ytelse_type = 'PSB';
+  AND f.ytelse_type IN ('PSB', 'PPN');
