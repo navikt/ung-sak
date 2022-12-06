@@ -67,15 +67,15 @@ public class RepubliserEventTask implements ProsessTaskHandler {
         final var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get());
         final var aksjonspunkter = dto.getAksjonspunktKoderMedStatusListe();
 
-        final ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
-        taskData.setCallIdFraEksisterende();
-        taskData.setPrioritet(50);
-        taskData.setPayload(toJson(dto));
+        final ProsessTaskData nyProsessTask = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
+        nyProsessTask.setCallIdFraEksisterende();
+        nyProsessTask.setPrioritet(50);
+        nyProsessTask.setPayload(toJson(dto));
         
-        taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandling.get().getId().toString());
-        taskData.setProperty(PubliserEventTask.BESKRIVELSE, String.valueOf(aksjonspunkter));
+        nyProsessTask.setProperty(PubliserEventTask.PROPERTY_KEY, behandling.get().getId().toString());
+        nyProsessTask.setProperty(PubliserEventTask.BESKRIVELSE, String.valueOf(aksjonspunkter));
 
-        prosessTaskTjeneste.lagre(prosessTaskData);
+        prosessTaskTjeneste.lagre(nyProsessTask);
     }
 
     private String toJson(final BehandlingProsessHendelse dto) {
