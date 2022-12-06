@@ -121,6 +121,9 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
     }
 
     private UttakArbeidType mapUttakArbeidType(Arbeidsforhold arb) {
+        if (arb.getType().equals(no.nav.k9.kodeverk.uttak.UttakArbeidType.ERSTATTET_IKKE_YRKESAKTIV.getKode())) {
+            return new UttakArbeidType(no.nav.k9.kodeverk.uttak.UttakArbeidType.IKKE_YRKESAKTIV.getKode());
+        }
         return new UttakArbeidType(arb.getType());
     }
 
