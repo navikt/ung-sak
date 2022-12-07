@@ -318,27 +318,36 @@ public class SykdomVurderingTjeneste {
 
         LocalDateTimeline<Boolean> resterendeVurderingsperioder;
 
+        FagsakYtelseType fagsakYtelseType = finnFagsakYtelseType(sykdomVurderingType);
+
         //ta høyde for perioder trukket av søker(e)
-        LocalDateTimeline<List<AktørId>> søknadsperioderForAlleSøkere = søknadsperiodeTjeneste.utledSamledePerioderMedSøkereFor(FagsakYtelseType.PSB, behandling.getFagsak().getPleietrengendeAktørId());
+        LocalDateTimeline<List<AktørId>> søknadsperioderForAlleSøkere = søknadsperiodeTjeneste.utledSamledePerioderMedSøkereFor(fagsakYtelseType, behandling.getFagsak().getPleietrengendeAktørId());
         LocalDateTimeline<List<AktørId>> søknadsperioderForInneværendeBehandling = new LocalDateTimeline<>(søknadsperioderForAlleSøkere.stream().filter(s -> s.getValue().contains(behandling.getAktørId())).collect(Collectors.toList()));
 
-        if (sykdomVurderingType.equals(SykdomVurderingType.TO_OMSORGSPERSONER)) {
-            /*
-             * To omsorgspersoner skal kun vurderes for oppfylte periode med kontinuerlig tilsyn og pleie.
-             *
-             * I tillegg er to omsorgspersoner kun obligatorisk å vurdere for perioder med flere søkere.
-             */
-            LocalDateTimeline<Boolean> ktpPerioder = TidslinjeUtil.tilTidslinjeKomprimert(hentKontinuerligTilsynOgPleiePerioder(behandling));
-            alleResterendeVurderingsperioder = alleResterendeVurderingsperioder.intersection(ktpPerioder);
-            final LocalDateTimeline<?> flereOmsorgspersoner = harAndreSakerEnn(saksnummer, søknadsperioderPåPleietrengende);
-            resterendeVurderingsperioder = alleResterendeVurderingsperioder.disjoint(utenOmsorgenForTidslinje)
-                .intersection(flereOmsorgspersoner)
-                .intersection(søknadsperioderForAlleSøkere)
-                .intersection(søknadsperioderTilSøker);
-        } else {
-            resterendeVurderingsperioder = alleResterendeVurderingsperioder.disjoint(utenOmsorgenForTidslinje)
+        if (fagsakYtelseType.equals(FagsakYtelseType.OPPLÆRINGSPENGER)) {
+            resterendeVurderingsperioder = alleResterendeVurderingsperioder
                 .intersection(søknadsperioderTilSøker)
                 .intersection(søknadsperioderForInneværendeBehandling);
+        } else {
+
+            if (sykdomVurderingType.equals(SykdomVurderingType.TO_OMSORGSPERSONER)) {
+                /*
+                 * To omsorgspersoner skal kun vurderes for oppfylte periode med kontinuerlig tilsyn og pleie.
+                 *
+                 * I tillegg er to omsorgspersoner kun obligatorisk å vurdere for perioder med flere søkere.
+                 */
+                LocalDateTimeline<Boolean> ktpPerioder = TidslinjeUtil.tilTidslinjeKomprimert(hentKontinuerligTilsynOgPleiePerioder(behandling));
+                alleResterendeVurderingsperioder = alleResterendeVurderingsperioder.intersection(ktpPerioder);
+                final LocalDateTimeline<?> flereOmsorgspersoner = harAndreSakerEnn(saksnummer, søknadsperioderPåPleietrengende);
+                resterendeVurderingsperioder = alleResterendeVurderingsperioder.disjoint(utenOmsorgenForTidslinje)
+                    .intersection(flereOmsorgspersoner)
+                    .intersection(søknadsperioderForAlleSøkere)
+                    .intersection(søknadsperioderTilSøker);
+            } else {
+                resterendeVurderingsperioder = alleResterendeVurderingsperioder.disjoint(utenOmsorgenForTidslinje)
+                    .intersection(søknadsperioderTilSøker)
+                    .intersection(søknadsperioderForInneværendeBehandling);
+            }
         }
 
         final LocalDateTimeline<Boolean> resterendeValgfrieVurderingsperioder = alleResterendeVurderingsperioder
@@ -361,6 +370,14 @@ public class SykdomVurderingTjeneste {
             nyeSøknadsperioder,
             TidslinjeUtil.tilPerioder(innleggelseUnder18årTidslinje)
         );
+    }
+
+    private static FagsakYtelseType finnFagsakYtelseType(SykdomVurderingType sykdomVurderingType) {
+        return switch (sykdomVurderingType) {
+            case KONTINUERLIG_TILSYN_OG_PLEIE, TO_OMSORGSPERSONER -> FagsakYtelseType.PSB;
+            case LANGVARIG_SYKDOM -> FagsakYtelseType.OPPLÆRINGSPENGER;
+            default -> throw new IllegalArgumentException("Ikke støttet sykdomVurderingType " + sykdomVurderingType);
+        };
     }
 
     private LocalDateTimeline<Boolean> utledManglerGodkjentLegeerklæringTidslinje(AktørId pleietrengende) {
