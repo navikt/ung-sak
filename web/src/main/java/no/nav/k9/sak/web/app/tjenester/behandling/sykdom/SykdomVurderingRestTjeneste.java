@@ -352,7 +352,7 @@ public class SykdomVurderingRestTjeneste {
         switch (behandling.getFagsakYtelseType()) {
             case PLEIEPENGER_SYKT_BARN ->
                 sikreAtOppdateringIkkeKrysser18årsdag(behandling, sykdomVurderingOppdatering.getPerioder());
-            case PLEIEPENGER_NÆRSTÅENDE -> ingenValidering();
+            case PLEIEPENGER_NÆRSTÅENDE, OPPLÆRINGSPENGER -> ingenValidering();
             default -> throw new IllegalStateException("Ikke-støttet ytelsetype: " + behandling.getFagsakYtelseType());
         }
 
