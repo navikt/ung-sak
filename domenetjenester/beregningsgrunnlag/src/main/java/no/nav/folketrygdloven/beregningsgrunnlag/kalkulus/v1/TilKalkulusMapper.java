@@ -368,7 +368,7 @@ public class TilKalkulusMapper {
     }
 
     private static boolean gjelderSøktYtelse(Permisjon p, DatoIntervallEntitet vilkårsPeriode) {
-        return no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType.PERMISJON_TILSVARENDE_VELFERDSPERIMISJON.contains(p.getPermisjonsbeskrivelseType()) &&
+        return no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType.K9_VELFERDSPERMISJON.contains(p.getPermisjonsbeskrivelseType()) &&
             p.getProsentsats().getVerdi().compareTo(BigDecimal.valueOf(100)) >= 0 && p.getPeriode().overlapper(vilkårsPeriode);
     }
 
