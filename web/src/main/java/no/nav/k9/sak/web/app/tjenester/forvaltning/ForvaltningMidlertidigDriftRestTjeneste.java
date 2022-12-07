@@ -229,11 +229,14 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     })
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = DRIFT)
     public Response beskyttAktoerId(@Parameter(description = "Liste med aktør-IDer") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid AktørListeDto aktører) {
+        /*
         for (AktørId aktørId : aktører.getAktører()) {
             personopplysningRepository.beskyttAktørId(aktørId);
         }
         
         return Response.ok().build();
+        */
+        throw new IllegalStateException("Dette kallet er deaktivert.");
     }
 
     @POST
