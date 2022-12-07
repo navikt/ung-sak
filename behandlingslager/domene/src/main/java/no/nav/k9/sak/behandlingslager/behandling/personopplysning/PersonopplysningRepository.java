@@ -120,7 +120,7 @@ public class PersonopplysningRepository {
 
     private List<Long> finnBehandlingerMedAdresseInformasjonFor(AktørId aktørId) {
         @SuppressWarnings("unchecked")
-        final List<Long> result = entityManager.createNativeQuery("SELECT g.behandling_id\n"
+        final List<Long> result = entityManager.createNativeQuery("SELECT DISTINCT g.behandling_id\n"
                 + "FROM GR_PERSONOPPLYSNING g INNER JOIN PO_INFORMASJON i ON (\n"
                 + "    g.registrert_informasjon_id = i.id\n"
                 + "    OR g.overstyrt_informasjon_id = i.id\n"
