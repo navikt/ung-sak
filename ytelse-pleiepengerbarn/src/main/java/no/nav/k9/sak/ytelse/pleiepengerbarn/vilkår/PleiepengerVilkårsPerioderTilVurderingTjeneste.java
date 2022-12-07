@@ -294,11 +294,17 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     }
 
     private List<Periode> utledVurderingsperiode(Vilkårene vilkårene) {
-        return definerendeVilkår().stream()
-            .flatMap(vt -> vilkårene.getVilkår(vt).stream())
-            .flatMap(v -> v.getPerioder().stream())
-            .map(VilkårPeriode::getPeriode)
-            .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
-            .toList();
+        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
+
+        for (VilkårType vilkårType : definerendeVilkår()) {
+            var vilkår = vilkårene.getVilkår(vilkårType);
+            if (vilkår.isPresent()) {
+                var vilkårperioder = vilkår.get().getPerioder();
+                var perioder = vilkårperioder.stream().map(VilkårPeriode::getPeriode).toList();
+                tidslinje = tidslinje.combine(TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(perioder)), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
+        }
+
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje).stream().map(DatoIntervallEntitet::tilPeriode).toList();
     }
 }

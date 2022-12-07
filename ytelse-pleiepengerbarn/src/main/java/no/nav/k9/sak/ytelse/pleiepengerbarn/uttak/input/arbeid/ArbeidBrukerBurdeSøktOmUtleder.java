@@ -9,7 +9,6 @@ import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -35,6 +34,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjeneste;
@@ -103,9 +103,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         var innvilgeteVilkårPerioder = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse);
 
         var innvilgedeSegmenter = innvilgeteVilkårPerioder.stream()
-            .map(VilkårPeriode::getPeriode)
-            .map(DatoIntervallEntitet::toLocalDateInterval)
-            .map(it -> new LocalDateSegment<>(it, true))
+            .map(periode -> new LocalDateSegment<>(periode.getFom(), periode.getTom(), true))
             .collect(Collectors.toList());
 
         var timelineMedYtelse = new LocalDateTimeline<>(innvilgedeSegmenter);
@@ -169,11 +167,17 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     private NavigableSet<DatoIntervallEntitet> finnSykdomsperioder(BehandlingReferanse referanse) {
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
 
-        final var resultat = new TreeSet<DatoIntervallEntitet>();
-        for (VilkårType vilkårType : perioderTilVurderingTjeneste.definerendeVilkår()) {
-            resultat.addAll(perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), vilkårType));
+        var timeline = new LocalDateTimeline<Boolean>(List.of());
+        var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
+
+        for (VilkårType vilkårType : definerendeVilkår) {
+            var perioder = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), vilkårType);
+            var periodeTidslinje = new LocalDateTimeline<>(perioder.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()));
+
+            timeline = timeline.combine(periodeTidslinje, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-        return resultat;
+
+        return TidslinjeUtil.tilDatoIntervallEntiteter(timeline.compress());
     }
 
     private HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledHvaSomBurdeVærtSøktOm(LocalDateTimeline<Boolean> tidslinjeTilVurdering,
