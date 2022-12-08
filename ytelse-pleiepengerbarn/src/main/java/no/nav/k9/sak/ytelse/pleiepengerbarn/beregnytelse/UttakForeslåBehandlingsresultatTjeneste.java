@@ -64,7 +64,6 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
                 .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
                 .toList()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-        timeline.compress();
         if (timeline.isEmpty()) {
             return behandling.getFagsak().getPeriode();
         }
