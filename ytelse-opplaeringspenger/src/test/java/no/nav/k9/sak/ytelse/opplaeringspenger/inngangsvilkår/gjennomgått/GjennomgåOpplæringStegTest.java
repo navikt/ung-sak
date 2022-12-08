@@ -50,22 +50,16 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 class GjennomgåOpplæringStegTest {
 
     private GjennomgåOpplæringSteg gjennomgåOpplæringSteg;
-
     @Inject
     private EntityManager entityManager;
-
     @Inject
     private VilkårResultatRepository vilkårResultatRepository;
-
     @Inject
     private BehandlingRepository behandlingRepository;
-
     @Inject
     private VurdertOpplæringRepository vurdertOpplæringRepository;
-
     @Inject
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
-
     @Inject
     @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteBean;
@@ -207,6 +201,57 @@ class GjennomgåOpplæringStegTest {
             søknadsperiode.getTom(),
             søknadsperiode.getTom(),
             Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING);
+    }
+
+    @Test
+    void skalReturnereUtenAksjonspunktNårTidligereVilkårIkkeErGodkjent() {
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.IKKE_OPPFYLT, søknadsperiode);
+        behandling = scenario.lagre(repositoryProvider);
+        setupUttakPerioder(søknadsperiode, null, null);
+
+        var kontekst = setupBehandlingskontekst();
+        setupPerioderTilVurdering(kontekst);
+
+        BehandleStegResultat resultat = gjennomgåOpplæringSteg.utførSteg(kontekst);
+        assertThat(resultat).isNotNull();
+        assertThat(resultat.getAksjonspunktResultater()).hasSize(0);
+        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING).orElse(null);
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(0);
+    }
+
+    @Test
+    void skalReturnereUtenAksjonspunktNårTidligereVilkårErDelvisGodkjent() {
+        Periode godkjentPeriode = new Periode(søknadsperiode.getFom().plusDays(1), søknadsperiode.getTom());
+        Periode ikkeGodkjentPeriode = new Periode(søknadsperiode.getFom(), søknadsperiode.getFom());
+
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.IKKE_OPPFYLT, ikkeGodkjentPeriode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, godkjentPeriode);
+
+        behandling = scenario.lagre(repositoryProvider);
+        setupUttakPerioder(søknadsperiode, null, null);
+
+        var kontekst = setupBehandlingskontekst();
+        setupPerioderTilVurdering(kontekst);
+
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
+            new VurdertOpplæringPerioderHolder(List.of(
+                new VurdertOpplæringPeriode(godkjentPeriode.getFom(), godkjentPeriode.getTom(), true, null, ""))));
+        lagreGrunnlag(grunnlag);
+
+        BehandleStegResultat resultat = gjennomgåOpplæringSteg.utførSteg(kontekst);
+        assertThat(resultat).isNotNull();
+        assertThat(resultat.getAksjonspunktResultater()).hasSize(0);
+        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING).orElse(null);
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(1);
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.OPPFYLT,
+            godkjentPeriode.getFom(),
+            godkjentPeriode.getTom(),
+            null);
     }
 
     @Test

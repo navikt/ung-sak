@@ -686,10 +686,23 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private void lagreVilkårResultat(BehandlingRepositoryProvider repoProvider, BehandlingLås lås) {
         VilkårResultatBuilder inngangsvilkårBuilder = Vilkårene.builder();
 
-        vilkår.forEach(v -> {
-            inngangsvilkårBuilder.leggTil(new VilkårBuilder(v.getVilkårType()).leggTil(new VilkårPeriodeBuilder()
+        Map<VilkårType, List<VilkårData>> vilkårDataMap = new HashMap<>();
+        for (VilkårData vilkårData : vilkår) {
+            var vilkårType = vilkårData.getVilkårType();
+            List<VilkårData> dataForVilkårType = new ArrayList<>(List.of(vilkårData));
+
+            if (vilkårDataMap.containsKey(vilkårType)) {
+                dataForVilkårType.addAll(vilkårDataMap.get(vilkårType));
+            }
+            vilkårDataMap.put(vilkårType, dataForVilkårType);
+        }
+
+        vilkårDataMap.forEach((key, value) -> {
+            var vilkårBuilder = new VilkårBuilder(key);
+            value.forEach(v -> vilkårBuilder.leggTil(new VilkårPeriodeBuilder()
                 .medPeriode(DatoIntervallEntitet.fra(v.getPeriode()))
                 .medUtfall(v.getUtfall())));
+            inngangsvilkårBuilder.leggTil(vilkårBuilder);
         });
 
         final var build = inngangsvilkårBuilder.build();
