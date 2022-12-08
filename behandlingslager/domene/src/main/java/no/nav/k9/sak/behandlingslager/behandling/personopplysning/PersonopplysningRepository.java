@@ -1,15 +1,16 @@
 package no.nav.k9.sak.behandlingslager.behandling.personopplysning;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.hibernate.jpa.QueryHints;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-
-import org.hibernate.jpa.QueryHints;
-
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -17,6 +18,7 @@ import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
 import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
+import no.nav.k9.sak.typer.AktørId;
 
 /**
  * Dette er et Repository for håndtering av alle persistente endringer i en Personopplysning graf.
@@ -89,6 +91,47 @@ public class PersonopplysningRepository {
         Optional<PersonopplysningGrunnlagEntitet> pbg = getAktivtGrunnlag(behandlingId);
         PersonopplysningGrunnlagEntitet entitet = pbg.orElse(null);
         return Optional.ofNullable(entitet);
+    }
+    
+    public void beskyttAktørId(AktørId aktørId) {
+        final List<Long> behandlingIder = finnBehandlingerMedAdresseInformasjonFor(aktørId);
+        
+        for (Long behandlingId : behandlingIder) {
+            entityManager.createNativeQuery("UPDATE vr_vilkar_periode vp\n"
+                    + "SET regel_input = NULL\n"
+                    + "WHERE EXISTS (\n"
+                    + "  SELECT *\n"
+                    + "  FROM vr_vilkar vv INNER JOIN rs_vilkars_resultat rs ON (\n"
+                    + "        rs.vilkarene_id = vv.vilkar_resultat_id\n"
+                    + "    ) \n"
+                    + "  WHERE vv.id = vp.vilkar_id\n"
+                    + "    AND rs.behandling_id = :behandlingId\n"
+                    + ")")
+                .setParameter("behandlingId", behandlingId)
+                .executeUpdate();
+        }
+            
+        entityManager.createNativeQuery("DELETE FROM PO_ADRESSE WHERE AKTOER_ID = :aktor")
+            .setParameter("aktor", aktørId.getId())
+            .executeUpdate();
+        
+        entityManager.flush();
+    }
+
+    private List<Long> finnBehandlingerMedAdresseInformasjonFor(AktørId aktørId) {
+        @SuppressWarnings("unchecked")
+        final List<Long> result = entityManager.createNativeQuery("SELECT DISTINCT g.behandling_id\n"
+                + "FROM GR_PERSONOPPLYSNING g INNER JOIN PO_INFORMASJON i ON (\n"
+                + "    g.registrert_informasjon_id = i.id\n"
+                + "    OR g.overstyrt_informasjon_id = i.id\n"
+                + "  ) INNER JOIN PO_ADRESSE a ON (\n"
+                + "    i.id = a.po_informasjon_id\n"
+                + "  )\n"
+                + "WHERE a.aktoer_id = :aktor")
+                .setParameter("aktor", aktørId.getId())
+                .getResultList();
+        
+        return result;
     }
 
     private Optional<PersonopplysningGrunnlagEntitet> getAktivtGrunnlag(Long behandlingId) {
