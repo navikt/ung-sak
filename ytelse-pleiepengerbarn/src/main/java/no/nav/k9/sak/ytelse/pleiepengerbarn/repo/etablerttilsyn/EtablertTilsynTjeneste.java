@@ -63,7 +63,19 @@ public class EtablertTilsynTjeneste {
         final EtablertTilsyn forrigeBehandlingEtablertTilsyn = behandlingOpt.flatMap(behandlingId -> etablertTilsynRepository.hentHvisEksisterer(behandlingId))
             .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
             .orElse(new EtablertTilsyn(List.of()));
-        return uhåndterteEndringerFraForrige(behandlingRef, forrigeBehandlingEtablertTilsyn).compress();
+
+        var etablertTilsyn = utledGrunnlagForBehandling(behandlingRef);
+
+        return sammenlignGrunnlag(etablertTilsyn, forrigeBehandlingEtablertTilsyn).compress();
+    }
+
+    private EtablertTilsyn utledGrunnlagForBehandling(BehandlingReferanse behandlingRef) {
+        if (behandlingRef.getBehandlingStatus().erFerdigbehandletStatus()) {
+            return etablertTilsynRepository.hentHvisEksisterer(behandlingRef.getBehandlingId())
+                .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
+                .orElse(new EtablertTilsyn(List.of()));
+        }
+        return utledGrunnlagForTilsynstidlinje(behandlingRef);
     }
 
     public LocalDateTimeline<Boolean> finnForskjellerFraEksisterendeVersjon(BehandlingReferanse behandlingRef) {
@@ -82,6 +94,10 @@ public class EtablertTilsynTjeneste {
     private LocalDateTimeline<Boolean> uhåndterteEndringerFraForrige(BehandlingReferanse behandlingRef, EtablertTilsyn forrigeBehandlingEtablertTilsyn) {
         final EtablertTilsyn nyBehandlingtablertTilsyn = utledGrunnlagForTilsynstidlinje(behandlingRef);
 
+        return sammenlignGrunnlag(forrigeBehandlingEtablertTilsyn, nyBehandlingtablertTilsyn);
+    }
+
+    private LocalDateTimeline<Boolean> sammenlignGrunnlag(EtablertTilsyn forrigeBehandlingEtablertTilsyn, EtablertTilsyn nyBehandlingtablertTilsyn) {
         final LocalDateTimeline<Duration> forrigeBehandlingEtablertTilsynTidslinje = tilTidslinje(forrigeBehandlingEtablertTilsyn);
         final LocalDateTimeline<Duration> nyBehandlingEtablertTilsynTidslinje = tilTidslinje(nyBehandlingtablertTilsyn);
 
