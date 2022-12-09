@@ -8,6 +8,7 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -251,7 +252,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         return modell.erStegAFørStegB(steg, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
     }
 
-    private List<DatoIntervallEntitet> utledVurderingsperiode(Behandling behandling) {
+    private NavigableSet<DatoIntervallEntitet> utledVurderingsperiode(Behandling behandling) {
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
         var vilkårene = vilkårResultatRepository.hent(behandling.getId());
 
@@ -262,7 +263,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
             .flatMap(Optional::stream)
             .flatMap(Collection::stream)
             .map(VilkårPeriode::getPeriode)
-            .toList();
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
 }

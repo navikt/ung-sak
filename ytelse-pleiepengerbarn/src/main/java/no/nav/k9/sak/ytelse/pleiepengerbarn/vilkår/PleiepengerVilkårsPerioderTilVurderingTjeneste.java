@@ -32,7 +32,6 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.vilkår.EndringIUttakPeriodeUtleder;
@@ -42,7 +41,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunn
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
-
 
 public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
@@ -174,9 +172,8 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
 
         final var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         final var vurderingsperioderTimeline = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
-        List<DatoIntervallEntitet> nyeVurderingsperioder = perioder.stream().toList();
 
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder)
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, perioder)
             .getDiffPerioder();
 
         final LocalDateTimeline<Boolean> utvidedePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
@@ -293,7 +290,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private List<DatoIntervallEntitet> utledVurderingsperiode(Vilkårene vilkårene) {
+    private NavigableSet<DatoIntervallEntitet> utledVurderingsperiode(Vilkårene vilkårene) {
         LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
 
         for (VilkårType vilkårType : definerendeVilkår()) {
@@ -305,6 +302,6 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
             }
         }
 
-        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje).stream().toList();
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje);
     }
 }

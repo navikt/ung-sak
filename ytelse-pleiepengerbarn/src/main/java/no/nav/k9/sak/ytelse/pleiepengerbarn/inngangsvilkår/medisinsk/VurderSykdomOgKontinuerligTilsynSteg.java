@@ -163,8 +163,8 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             behandling.getUuid(),
             behandling.getAktørId(),
             behandling.getFagsak().getPleietrengendeAktørId(),
-            perioderSamlet.stream().toList(),
-            perioderTilVurderingUtenOmsorgenFor.stream().toList()
+            perioderSamlet,
+            perioderTilVurderingUtenOmsorgenFor
         );
     }
 

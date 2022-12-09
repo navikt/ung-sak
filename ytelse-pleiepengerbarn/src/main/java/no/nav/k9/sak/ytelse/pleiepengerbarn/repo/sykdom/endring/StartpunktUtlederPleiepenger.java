@@ -6,7 +6,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 
 import org.slf4j.Logger;
@@ -126,7 +126,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         var sykdomGrunnlag = medisinskGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
             .map(MedisinskGrunnlag::getGrunnlagsdata);
 
-        List<DatoIntervallEntitet> nyeVurderingsperioder = utledVurderingsperiode(ref);
+        NavigableSet<DatoIntervallEntitet> nyeVurderingsperioder = utledVurderingsperiode(ref);
         var utledGrunnlag = medisinskGrunnlagTjeneste.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
         var sykdomGrunnlagSammenlikningsresultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
@@ -135,10 +135,10 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         return startpunktType;
     }
 
-    private List<DatoIntervallEntitet> utledVurderingsperiode(BehandlingReferanse ref) {
+    private NavigableSet<DatoIntervallEntitet> utledVurderingsperiode(BehandlingReferanse ref) {
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(ref.getBehandlingId());
         if (vilkårene.isEmpty()) {
-            return List.of();
+            return new TreeSet<>();
         }
 
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
@@ -153,7 +153,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
             }
         }
 
-        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje).stream().toList();
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje);
     }
 
 }
