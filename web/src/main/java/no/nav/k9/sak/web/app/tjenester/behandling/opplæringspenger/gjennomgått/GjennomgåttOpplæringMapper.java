@@ -14,11 +14,15 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 class GjennomgåttOpplæringMapper {
 
     GjennomgåttOpplæringDto mapTilDto(VurdertOpplæringGrunnlag grunnlag, Set<PerioderFraSøknad> perioderFraSøknad) {
+        List<OpplæringPeriodeDto> perioder = mapPerioder(perioderFraSøknad);
+        List<OpplæringVurderingDto> vurderinger = mapVurderinger(grunnlag);
+        return new GjennomgåttOpplæringDto(perioder, vurderinger);
+    }
 
+    private List<OpplæringPeriodeDto> mapPerioder(Set<PerioderFraSøknad> perioderFraSøknad) {
         List<OpplæringPeriodeDto> perioder = new ArrayList<>();
 
         for (PerioderFraSøknad fraSøknad : perioderFraSøknad) {
-
             for (KursPeriode kursPeriode : fraSøknad.getKurs()) {
                 perioder.add(new OpplæringPeriodeDto(
                     kursPeriode.getPeriode().tilPeriode(),
@@ -27,10 +31,13 @@ class GjennomgåttOpplæringMapper {
             }
         }
 
+        return perioder;
+    }
+
+    private List<OpplæringVurderingDto> mapVurderinger(VurdertOpplæringGrunnlag grunnlag) {
         List<OpplæringVurderingDto> vurderinger = new ArrayList<>();
 
         if (grunnlag != null && grunnlag.getVurdertePerioder() != null) {
-
             for (VurdertOpplæringPeriode vurdertOpplæringPeriode : grunnlag.getVurdertePerioder().getPerioder()) {
                 vurderinger.add(new OpplæringVurderingDto(vurdertOpplæringPeriode.getPeriode().tilPeriode(),
                     vurdertOpplæringPeriode.getGjennomførtOpplæring() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
@@ -39,8 +46,8 @@ class GjennomgåttOpplæringMapper {
                 );
             }
         }
-
-        return new GjennomgåttOpplæringDto(perioder, vurderinger);
+        //TODO: få med perioder som mangler vurdering
+        return vurderinger;
     }
 
     private ReisetidDto mapReisetid(KursPeriode kursPeriode) {
