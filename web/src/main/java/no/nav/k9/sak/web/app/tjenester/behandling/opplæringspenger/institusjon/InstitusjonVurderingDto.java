@@ -22,7 +22,7 @@ public class InstitusjonVurderingDto {
     @NotNull
     private JournalpostIdDto journalpostId;
 
-    @JsonProperty(value = "perioder")
+    @JsonProperty(value = "perioder", required = true)
     @Size(min = 1)
     @Valid
     private List<Periode> perioder;
@@ -32,7 +32,7 @@ public class InstitusjonVurderingDto {
     @NotNull
     private Resultat resultat;
 
-    @JsonProperty(value = "begrunnelse")
+    @JsonProperty(value = "begrunnelse", required = true)
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid

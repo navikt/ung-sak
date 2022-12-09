@@ -7,20 +7,23 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class InstitusjonerDto {
 
-    @JsonProperty(value = "perioder")
+    @JsonProperty(value = "perioder", required = true)
     @Size(max = 1000)
     @Valid
+    @NotNull
     private List<InstitusjonPeriodeDto> perioder;
 
-    @JsonProperty(value = "vurderinger")
+    @JsonProperty(value = "vurderinger", required = true)
     @Size(max = 1000)
     @Valid
+    @NotNull
     private List<InstitusjonVurderingDto> vurderinger;
 
     public InstitusjonerDto(List<InstitusjonPeriodeDto> perioder, List<InstitusjonVurderingDto> vurderinger) {
