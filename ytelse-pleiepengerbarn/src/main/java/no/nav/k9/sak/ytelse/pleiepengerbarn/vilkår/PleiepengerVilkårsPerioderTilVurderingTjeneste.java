@@ -174,7 +174,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
 
         final var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         final var vurderingsperioderTimeline = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
-        List<Periode> nyeVurderingsperioder = TidslinjeUtil.tilPerioder(perioder);
+        List<DatoIntervallEntitet> nyeVurderingsperioder = perioder.stream().toList();
 
         final LocalDateTimeline<Boolean> endringerISøktePerioder = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder)
             .getDiffPerioder();
@@ -293,7 +293,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private List<Periode> utledVurderingsperiode(Vilkårene vilkårene) {
+    private List<DatoIntervallEntitet> utledVurderingsperiode(Vilkårene vilkårene) {
         LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
 
         for (VilkårType vilkårType : definerendeVilkår()) {
@@ -305,6 +305,6 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
             }
         }
 
-        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje).stream().map(DatoIntervallEntitet::tilPeriode).toList();
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje).stream().toList();
     }
 }

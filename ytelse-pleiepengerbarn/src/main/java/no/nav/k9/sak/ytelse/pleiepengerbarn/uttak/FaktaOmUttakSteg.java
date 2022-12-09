@@ -7,7 +7,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -23,7 +22,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
-import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
@@ -101,7 +100,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
     }
 
-    private List<AksjonspunktDefinisjon> vurderAksjonspunktForNattevåkOgBeredskap(Behandling behandling, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, List<Periode> innvilgedePerioderTilVurdering) {
+    private List<AksjonspunktDefinisjon> vurderAksjonspunktForNattevåkOgBeredskap(Behandling behandling, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, List<DatoIntervallEntitet> innvilgedePerioderTilVurdering) {
         var aksjonspunkter = new ArrayList<AksjonspunktDefinisjon>();
         if (søktOmNattevåk(unntakEtablertTilsynForPleietrengende) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
             if (harNattevåkPerioderSomIkkeErVurdert(unntakEtablertTilsynForPleietrengende)) {
@@ -136,7 +135,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         return false;
     }
 
-    private boolean harNoenGodkjentPerioderMedSykdom(List<Periode> innvilgedePerioder) {
+    private boolean harNoenGodkjentPerioderMedSykdom(List<DatoIntervallEntitet> innvilgedePerioder) {
         return !innvilgedePerioder.isEmpty();
     }
 

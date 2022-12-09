@@ -26,9 +26,9 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
@@ -126,7 +126,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         var sykdomGrunnlag = medisinskGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
             .map(MedisinskGrunnlag::getGrunnlagsdata);
 
-        List<Periode> nyeVurderingsperioder = utledVurderingsperiode(ref);
+        List<DatoIntervallEntitet> nyeVurderingsperioder = utledVurderingsperiode(ref);
         var utledGrunnlag = medisinskGrunnlagTjeneste.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
         var sykdomGrunnlagSammenlikningsresultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
@@ -135,7 +135,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         return startpunktType;
     }
 
-    private List<Periode> utledVurderingsperiode(BehandlingReferanse ref) {
+    private List<DatoIntervallEntitet> utledVurderingsperiode(BehandlingReferanse ref) {
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(ref.getBehandlingId());
         if (vilkårene.isEmpty()) {
             return List.of();
@@ -153,7 +153,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
             }
         }
 
-        return TidslinjeUtil.tilPerioder(tidslinje);
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje).stream().toList();
     }
 
 }

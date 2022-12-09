@@ -23,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.typer.Periode;
 
 @Dependent
 public class PerioderMedSykdomInnvilgetUtleder {
@@ -41,7 +40,7 @@ public class PerioderMedSykdomInnvilgetUtleder {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
-    public List<Periode> utledInnvilgedePerioderTilVurdering(BehandlingReferanse referanse) {
+    public List<DatoIntervallEntitet> utledInnvilgedePerioderTilVurdering(BehandlingReferanse referanse) {
         var behandlingId = referanse.getBehandlingId();
         final var perioderVurdertISykdom = utledPerioderVurdert(behandlingId);
 
@@ -62,7 +61,7 @@ public class PerioderMedSykdomInnvilgetUtleder {
         return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }
 
-    private List<Periode> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+    private List<DatoIntervallEntitet> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = finnVilkårsPerioderTjeneste(behandlingId);
 
         var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
@@ -79,7 +78,7 @@ public class PerioderMedSykdomInnvilgetUtleder {
         }
 
         tidslinje = tidslinje.filterValue(it -> it);
-        return TidslinjeUtil.tilPerioder(tidslinje.compress());
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress()).stream().toList();
     }
 
     private VilkårsPerioderTilVurderingTjeneste finnVilkårsPerioderTjeneste(Long behandlingId) {

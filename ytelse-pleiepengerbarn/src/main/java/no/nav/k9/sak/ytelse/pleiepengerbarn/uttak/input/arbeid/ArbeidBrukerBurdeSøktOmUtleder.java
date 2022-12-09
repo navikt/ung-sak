@@ -103,7 +103,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         var innvilgeteVilkårPerioder = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse);
 
         var innvilgedeSegmenter = innvilgeteVilkårPerioder.stream()
-            .map(periode -> new LocalDateSegment<>(periode.getFom(), periode.getTom(), true))
+            .map(periode -> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), true))
             .collect(Collectors.toList());
 
         var timelineMedYtelse = new LocalDateTimeline<>(innvilgedeSegmenter);

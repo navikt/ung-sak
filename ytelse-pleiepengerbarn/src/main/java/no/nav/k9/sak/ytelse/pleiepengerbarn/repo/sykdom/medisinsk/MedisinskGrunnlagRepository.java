@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -18,11 +19,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
@@ -101,20 +102,20 @@ public class MedisinskGrunnlagRepository {
         return tidslinje.compress();
     }
 
-    public MedisinskGrunnlagsdata utledGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder, List<Periode> søknadsperioderSomSkalFjernes) {
+    public MedisinskGrunnlagsdata utledGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId pleietrengendeAktørId, List<DatoIntervallEntitet> vurderingsperioder, List<DatoIntervallEntitet> søknadsperioderSomSkalFjernes) {
         final Optional<MedisinskGrunnlag> grunnlagFraForrigeBehandling = hentGrunnlagFraForrigeBehandling(saksnummer, behandlingUuid);
 
         return utledGrunnlag(pleietrengendeAktørId, vurderingsperioder, søknadsperioderSomSkalFjernes, grunnlagFraForrigeBehandling);
     }
 
-    private MedisinskGrunnlagsdata utledGrunnlag(AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder, List<Periode> søknadsperioderSomSkalFjernes, Optional<MedisinskGrunnlag> grunnlagFraForrigeBehandling) {
+    private MedisinskGrunnlagsdata utledGrunnlag(AktørId pleietrengendeAktørId, List<DatoIntervallEntitet> vurderingsperioder, List<DatoIntervallEntitet> søknadsperioderSomSkalFjernes, Optional<MedisinskGrunnlag> grunnlagFraForrigeBehandling) {
         final LocalDateTime opprettetTidspunkt = LocalDateTime.now();
 
-        final LocalDateTimeline<Boolean> søktePerioderFraForrigeBehandling = TidslinjeUtil.kunPerioderSomIkkeFinnesI(hentSøktePerioderFraForrigeBehandling(grunnlagFraForrigeBehandling), TidslinjeUtil.tilTidslinjeKomprimert(søknadsperioderSomSkalFjernes));
-        final LocalDateTimeline<Boolean> vurderingsperioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(vurderingsperioder);
+        final LocalDateTimeline<Boolean> søktePerioderFraForrigeBehandling = TidslinjeUtil.kunPerioderSomIkkeFinnesI(hentSøktePerioderFraForrigeBehandling(grunnlagFraForrigeBehandling), TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(søknadsperioderSomSkalFjernes)));
+        final LocalDateTimeline<Boolean> vurderingsperioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(vurderingsperioder));
         final LocalDateTimeline<Boolean> søktePerioderTidslinje = søktePerioderFraForrigeBehandling.union(vurderingsperioderTidslinje, (interval, s1, s2) -> new LocalDateSegment<>(interval, true)).compress();
 
-        final List<Periode> søktePerioder = TidslinjeUtil.tilPerioder(søktePerioderTidslinje);
+        final Set<DatoIntervallEntitet> søktePerioder = TidslinjeUtil.tilDatoIntervallEntiteter(søktePerioderTidslinje);
 
         final List<PleietrengendeSykdomVurderingVersjon> vurderinger = hentVurderinger(pleietrengendeAktørId);
 
@@ -130,7 +131,7 @@ public class MedisinskGrunnlagRepository {
 
         return new MedisinskGrunnlagsdata(
             UUID.randomUUID(),
-            søktePerioder.stream().map(p -> new MedisinskGrunnlagsdataSøktPeriode(p.getFom(), p.getTom())).collect(Collectors.toList()),
+            søktePerioder.stream().map(p -> new MedisinskGrunnlagsdataSøktPeriode(p.getFomDato(), p.getTomDato())).collect(Collectors.toList()),
             vurderinger,
             godkjenteLegeerklæringer,
             harAndreMedisinskeDokumenter,
@@ -142,7 +143,7 @@ public class MedisinskGrunnlagRepository {
     }
 
 
-    public MedisinskGrunnlag utledOgLagreGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId søkerAktørId, AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder, List<Periode> søknadsperioderSomSkalFjernes) {
+    public MedisinskGrunnlag utledOgLagreGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId søkerAktørId, AktørId pleietrengendeAktørId, List<DatoIntervallEntitet> vurderingsperioder, List<DatoIntervallEntitet> søknadsperioderSomSkalFjernes) {
         final Optional<MedisinskGrunnlag> grunnlagFraForrigeBehandling = hentGrunnlagFraForrigeBehandling(saksnummer, behandlingUuid);
         final Optional<MedisinskGrunnlag> forrigeVersjon = hentGrunnlagForBehandling(behandlingUuid);
 
