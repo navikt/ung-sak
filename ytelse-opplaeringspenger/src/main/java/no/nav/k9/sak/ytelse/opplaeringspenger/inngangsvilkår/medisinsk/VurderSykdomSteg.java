@@ -133,8 +133,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
             behandling.getAktørId(),
             behandling.getFagsak().getPleietrengendeAktørId(),
             perioderSamlet.stream().toList(),
-            //TODO tom liste her?
-            perioderSamlet.stream().toList()
+            List.of()
         );
     }
 
