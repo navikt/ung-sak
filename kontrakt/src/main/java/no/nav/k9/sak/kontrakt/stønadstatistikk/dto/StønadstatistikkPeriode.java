@@ -128,6 +128,7 @@ public class StønadstatistikkPeriode {
 
     public static StønadstatistikkPeriode forOmsorgspenger(LocalDate fom,
                                                            LocalDate tom,
+                                                           StønadstatistikkUtfall utfall,
                                                            BigDecimal uttaksgrad,
                                                            List<StønadstatistikkUtbetalingsgrad> utbetalingsgrader,
                                                            List<StønadstatistikkInngangsvilkår> inngangsvilkår,
@@ -135,6 +136,7 @@ public class StønadstatistikkPeriode {
         StønadstatistikkPeriode sp = new StønadstatistikkPeriode();
         sp.fom = fom;
         sp.tom = tom;
+        sp.utfall = utfall;
         sp.uttaksgrad = uttaksgrad;
         sp.utbetalingsgrader = utbetalingsgrader;
         sp.inngangsvilkår = inngangsvilkår;

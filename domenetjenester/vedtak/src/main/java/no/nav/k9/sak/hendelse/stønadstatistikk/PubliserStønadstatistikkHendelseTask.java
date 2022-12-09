@@ -50,7 +50,7 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
 
         logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}'", key);
         if (Environment.current().isLocal()){
-            logger.info("Hendelse: {}", key);
+            logger.info("Hendelse: {}", key, value);
         }
 
         meldingProducer.send(key, value);

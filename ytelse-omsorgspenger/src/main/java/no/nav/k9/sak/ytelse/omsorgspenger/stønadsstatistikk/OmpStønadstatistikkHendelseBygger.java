@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.aarskvantum.kontrakter.Vilkår;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -79,6 +81,13 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
             logger.info("Lager ikke StønadstatistikkHendelse siden behandingen er henlagt: " + behandlingUuid.toString());
             return null;
         }
+        if (behandling.getType() == BehandlingType.UNNTAKSBEHANDLING) {
+            //det er høy kost/nytte for å få med unntaksbehandlinger.
+            //høy kostnad: må bygge opp hendelsen på helt annen måte (fra tilkjent ytelse isdf vilkår o.l.), må endre DTO mot DVH
+            //lav nytte: det er veldig få slike behandlinger, og utfall er lagret som fritekst isdf koder
+            logger.info("Lager ikke StønadstatistikkHendelse for unntaksbehandling");
+            return null;
+        }
 
         final PersonIdent søker = aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getAktørId()).orElseThrow();
 
@@ -118,7 +127,24 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
         BigDecimal uttaksgrad = null; //TODO utled uttaksgrad
         //TODO utlede Årsak-er?
         //TODO opplyse om tapt/arbeidstid o.l. ha bare tall normalisert til 7.5t
-        return StønadstatistikkPeriode.forOmsorgspenger(ds.getFom(), ds.getTom(), uttaksgrad, mapUtbetalingsgrader(info, ds.getValue().getBeregningsresultatAndeler()), mapInngangsvilkår(ds.getValue()), bruttoBeregningsgrunnlag);
+        return StønadstatistikkPeriode.forOmsorgspenger(ds.getFom(), ds.getTom(), mapUtfall(ds.getValue()), uttaksgrad, mapUtbetalingsgrader(info, ds.getValue().getBeregningsresultatAndeler()), mapInngangsvilkår(ds.getValue()), bruttoBeregningsgrunnlag);
+    }
+
+    private StønadstatistikkUtfall mapUtfall(StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse hendelse) {
+        Set<Utfall> alleUtfall = EnumSet.noneOf(Utfall.class);
+        alleUtfall.addAll(hendelse.getVilkårFraK9sak().values().stream().map(VilkårUtfall::getUtfall).toList());
+        alleUtfall.addAll(hendelse.getVilkårFraÅrskvantum().values().stream().map(VilkårUtfall::getUtfall).toList());
+
+        if (alleUtfall.contains(Utfall.IKKE_OPPFYLT)) {
+            return StønadstatistikkUtfall.IKKE_OPPFYLT;
+        }
+        if (alleUtfall.contains(Utfall.UDEFINERT)) {
+            throw new IllegalArgumentException("Ikke-håndtert utfall-type: UDEFINERT");
+        }
+        if (alleUtfall.contains(Utfall.IKKE_VURDERT)) {
+            throw new IllegalArgumentException("Ikke-håndtert utfall-type: IKKE_VURDERT");
+        }
+        return StønadstatistikkUtfall.OPPFYLT;
     }
 
     private List<StønadstatistikkUtbetalingsgrad> mapUtbetalingsgrader(UttakResultatPeriode uttakResultatPerioder, List<BeregningsresultatAndel> beregningsresultatAndeler) {
@@ -173,7 +199,8 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
             case KUN_YTELSE -> AktivitetStatus.KUN_YTELSE;
             case IKKE_YRKESAKTIV -> AktivitetStatus.IKKE_YRKESAKTIV;
             case INAKTIV -> AktivitetStatus.MIDLERTIDIG_INAKTIV;
-            case ANNET -> throw new IllegalArgumentException("Ikke støttet å mappe til AktivitetStatus: " + type);
+            case IKKE_YRKESAKTIV_UTEN_ERSTATNING, //TODO mappe IKKE_YRKESAKTIV_UTEN_ERSTATNING?
+                ANNET -> throw new IllegalArgumentException("Ikke støttet å mappe til AktivitetStatus: " + type);
         };
     }
 

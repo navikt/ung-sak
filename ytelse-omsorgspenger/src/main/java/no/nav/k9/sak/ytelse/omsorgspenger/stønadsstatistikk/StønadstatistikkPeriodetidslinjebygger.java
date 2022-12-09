@@ -165,7 +165,14 @@ class StønadstatistikkPeriodetidslinjebygger {
         return new VilkårUtfall(utfall, Set.of(DetaljertVilkårUtfall.forKravstillerPerArbeidsforhold(utfall, StønadstatistikkKravstillerType.BRUKER, aktivitet.aktivitetType().getKode(), aktivitet.arbeidsgiver().getArbeidsgiverOrgnr(), aktivitet.arbeidsgiver().getArbeidsgiverAktørId(), null)));
     }
 
-    private static LocalDateSegmentCombinator<Map<VilkårType, VilkårUtfall>, Map<VilkårType, VilkårUtfall>, Map<VilkårType, VilkårUtfall>> SEGMENT_KOMBINATOR_VILKÅR_UTFALL = (LocalDateInterval intervall, LocalDateSegment<Map<VilkårType, VilkårUtfall>> lhs, LocalDateSegment<Map<VilkårType, VilkårUtfall>> rhs) -> new LocalDateSegment<>(intervall, union(lhs.getValue(), rhs.getValue()));
+    private static LocalDateSegmentCombinator<Map<VilkårType, VilkårUtfall>, Map<VilkårType, VilkårUtfall>, Map<VilkårType, VilkårUtfall>> SEGMENT_KOMBINATOR_VILKÅR_UTFALL = (LocalDateInterval intervall, LocalDateSegment<Map<VilkårType, VilkårUtfall>> lhs, LocalDateSegment<Map<VilkårType, VilkårUtfall>> rhs) -> new LocalDateSegment<>(intervall, nullSafeUnion(lhs, rhs));
+
+    private static Map<VilkårType, VilkårUtfall> nullSafeUnion(LocalDateSegment<Map<VilkårType, VilkårUtfall>> lhs, LocalDateSegment<Map<VilkårType, VilkårUtfall>> rhs) {
+        if (lhs != null && rhs != null) {
+            return union(lhs.getValue(), rhs.getValue());
+        }
+        return lhs != null ? lhs.getValue() : rhs.getValue();
+    }
 
     private static Map<VilkårType, VilkårUtfall> union(Map<VilkårType, VilkårUtfall> a, Map<VilkårType, VilkårUtfall> b) {
         Map<VilkårType, VilkårUtfall> resultat = new EnumMap<>(VilkårType.class);
@@ -223,8 +230,6 @@ class StønadstatistikkPeriodetidslinjebygger {
 
         private UttakResultatPeriode uttakresultat;
 
-        //TODO søknadsfrist her
-
         private BeregningsgrunnlagDto beregningsgrunnlagDto;
         private List<BeregningsresultatAndel> beregningsresultatAndeler;
 
@@ -248,11 +253,6 @@ class StønadstatistikkPeriodetidslinjebygger {
         public InformasjonTilStønadstatistikkHendelse(InformasjonTilStønadstatistikkHendelse info, List<BeregningsresultatAndel> beregningsresultatAndeler) {
             this(info);
             this.beregningsresultatAndeler = beregningsresultatAndeler;
-        }
-
-        public InformasjonTilStønadstatistikkHendelse(InformasjonTilStønadstatistikkHendelse info, Map<VilkårType, VilkårUtfall> vilkårFraK9sak) {
-            this(info);
-            this.vilkårFraK9sak = vilkårFraK9sak;
         }
 
         public InformasjonTilStønadstatistikkHendelse() {
