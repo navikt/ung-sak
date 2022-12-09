@@ -64,7 +64,9 @@ import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.FosterbarnRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.RammevedtakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.ÅrskvantumRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.gjennomgått.VurderGjennomgåttOpplæringRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.institusjon.VurderInstitusjonRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.nødvendighet.VurderNødvendigOpplæringRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PleietrengendeRestTjeneste;
@@ -404,6 +406,8 @@ public class BehandlingDtoTjeneste {
                 //TODO: Sette opp opplæringspenger som et eget case?
                 dto.leggTil(getFraMap(VurderInstitusjonRestTjeneste.BASEPATH, "institusjon", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_LVS_PATH, "sykdom-vurdering-oversikt-lvs", uuidQueryParams));
+                dto.leggTil(getFraMap(VurderGjennomgåttOpplæringRestTjeneste.BASEPATH, "gjennomgått-opplæring", uuidQueryParams));
+                dto.leggTil(getFraMap(VurderNødvendigOpplæringRestTjeneste.BASEPATH, "nødvendig-opplæring", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
             }
             case PLEIEPENGER_NÆRSTÅENDE -> {
