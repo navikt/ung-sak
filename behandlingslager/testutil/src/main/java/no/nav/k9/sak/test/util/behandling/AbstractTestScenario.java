@@ -17,13 +17,12 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-import jakarta.persistence.EntityManager;
-
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
+import jakarta.persistence.EntityManager;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -63,7 +62,6 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -686,23 +684,10 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private void lagreVilkårResultat(BehandlingRepositoryProvider repoProvider, BehandlingLås lås) {
         VilkårResultatBuilder inngangsvilkårBuilder = Vilkårene.builder();
 
-        Map<VilkårType, List<VilkårData>> vilkårDataMap = new HashMap<>();
-        for (VilkårData vilkårData : vilkår) {
-            var vilkårType = vilkårData.getVilkårType();
-            List<VilkårData> dataForVilkårType = new ArrayList<>(List.of(vilkårData));
-
-            if (vilkårDataMap.containsKey(vilkårType)) {
-                dataForVilkårType.addAll(vilkårDataMap.get(vilkårType));
-            }
-            vilkårDataMap.put(vilkårType, dataForVilkårType);
-        }
-
-        vilkårDataMap.forEach((key, value) -> {
-            var vilkårBuilder = new VilkårBuilder(key);
-            value.forEach(v -> vilkårBuilder.leggTil(new VilkårPeriodeBuilder()
+        vilkår.forEach(v -> {
+            inngangsvilkårBuilder.leggTil(inngangsvilkårBuilder.hentBuilderFor(v.getVilkårType()).leggTil(new VilkårPeriodeBuilder()
                 .medPeriode(DatoIntervallEntitet.fra(v.getPeriode()))
                 .medUtfall(v.getUtfall())));
-            inngangsvilkårBuilder.leggTil(vilkårBuilder);
         });
 
         final var build = inngangsvilkårBuilder.build();
