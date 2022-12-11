@@ -1,5 +1,7 @@
 package no.nav.k9.sak.hendelse.stønadstatistikk;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -27,11 +29,12 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
     private StønadstatistikkHendelseMeldingProducer meldingProducer;
 
 
-    public PubliserStønadstatistikkHendelseTask() {}
+    public PubliserStønadstatistikkHendelseTask() {
+    }
 
     @Inject
     public PubliserStønadstatistikkHendelseTask(StønadstatistikkService stønadstatistikkService,
-            StønadstatistikkHendelseMeldingProducer meldingProducer) {
+                                                StønadstatistikkHendelseMeldingProducer meldingProducer) {
         this.stønadstatistikkService = stønadstatistikkService;
         this.meldingProducer = meldingProducer;
     }
@@ -48,17 +51,19 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
 
         final String value = StønadstatistikkSerializer.toJson(hendelse);
 
-        logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}'", key);
-        if (Environment.current().isLocal()){
-            logger.info("Hendelse: {}", key, value);
+        if (Environment.current().isProd()) {
+            logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}'", key);
+        } else {
+            //kan ikke logge innhold i hendelsen i  prod, da verdien inneholder bl.a. aktørId og orgNr
+            //logger i test for å enkelt sjekke om innhold er riktig
+            logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}' Innhold (base64): {}", key, Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8)));
         }
-
         meldingProducer.send(key, value);
     }
 
 
     public static ProsessTaskData createProsessTaskData(Behandling behandling) {
-        final ProsessTaskData pd =  ProsessTaskData.forProsessTask(PubliserStønadstatistikkHendelseTask.class);
+        final ProsessTaskData pd = ProsessTaskData.forProsessTask(PubliserStønadstatistikkHendelseTask.class);
         final Fagsak fagsak = behandling.getFagsak();
         final String saksnummer = fagsak.getSaksnummer().getVerdi();
         final String gruppe = PubliserStønadstatistikkHendelseTask.TASKTYPE + "-" + saksnummer;

@@ -118,7 +118,7 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
     }
 
     private List<StønadstatistikkPeriode> mapPerioder(LocalDateTimeline<StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse> periodetidslinje) {
-        return periodetidslinje.toSegments().stream().map(entry -> mapPeriode(entry)).toList();
+        return periodetidslinje.toSegments().stream().map(this::mapPeriode).toList();
     }
 
     private StønadstatistikkPeriode mapPeriode(LocalDateSegment<StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse> ds) {
@@ -126,7 +126,6 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
         final BigDecimal bruttoBeregningsgrunnlag = (ds.getValue().getBeregningsgrunnlagDto() != null) ? ds.getValue().getBeregningsgrunnlagDto().getÅrsinntektVisningstall() : BigDecimal.valueOf(-1);
         BigDecimal uttaksgrad = null; //TODO utled uttaksgrad
         //TODO utlede Årsak-er?
-        //TODO opplyse om tapt/arbeidstid o.l. ha bare tall normalisert til 7.5t
         return StønadstatistikkPeriode.forOmsorgspenger(ds.getFom(), ds.getTom(), mapUtfall(ds.getValue()), uttaksgrad, mapUtbetalingsgrader(info, ds.getValue().getBeregningsresultatAndeler()), mapInngangsvilkår(ds.getValue()), bruttoBeregningsgrunnlag);
     }
 
@@ -308,9 +307,7 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
         return switch (vilkår) {
             case K9_VILKÅRET -> "DVH_OMP_K9_VILKÅRET";
             case MEDLEMSKAPSVILKÅRET -> "DVH_OMP_MEDLEMSKAPSVILKÅRET";
-            case OMSORGEN_FOR -> "DVH_OMP_OMSORGEN_FOR";
             case ALDERSVILKÅR -> "DVH_OMP_ALDERSVILKÅR";
-            case ALDERSVILKÅR_BARN -> "DVH_OMP_ALDERSVILKÅR_BARN";
             case SØKNADSFRIST -> "DVH_OMP_SØKNADSFRIST";
             case SØKERSOPPLYSNINGSPLIKT -> "DVH_OMP_SØKERSOPPLYSNINGSPLIKT";
             case OPPTJENINGSPERIODEVILKÅR -> "DVH_OMP_OPPTJENINGSPERIODEVILKÅR";
