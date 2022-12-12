@@ -61,7 +61,7 @@ public class OmsorgspengerOpplysningsperiodeTjeneste implements Opplysningsperio
             .getPeriode()
             .getTomDato();
         var førsteSkjæringstidspunkt = førsteUttaksdag(behandlingId);
-        return SkattegrunnlaginnhentingTjeneste.utledSkattegrunnlagOpplysningsperiode(førsteSkjæringstidspunkt, fagsakperiodeTom);
+        return SkattegrunnlaginnhentingTjeneste.utledSkattegrunnlagOpplysningsperiode(førsteSkjæringstidspunkt, fagsakperiodeTom, LocalDate.now());
     }
 
     // TODO: Kan denne forenkles i kontekst av registerinnhenting?
