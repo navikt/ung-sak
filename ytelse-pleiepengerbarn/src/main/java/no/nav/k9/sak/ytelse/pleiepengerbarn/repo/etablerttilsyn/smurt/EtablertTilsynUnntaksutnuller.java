@@ -46,7 +46,7 @@ public class EtablertTilsynUnntaksutnuller {
     }
 
 
-    private static LocalDateTimeline<Duration> håndterUnntak(
+    public static LocalDateTimeline<Duration> håndterUnntak(
             LocalDateTimeline<Duration> etablertTilsynTidslinje,
             Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende) {
         if (unntakEtablertTilsynForPleietrengende.isEmpty()) {
