@@ -4,6 +4,9 @@ import java.util.Collections;
 import java.util.NavigableSet;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -33,6 +36,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.HentEtablertTilsynTjenes
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class VurderOmEtablertTilsynErEndretTask implements ProsessTaskHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(VurderOmEtablertTilsynErEndretTask.class);
     public static final String TASKNAME = "drift.vurderOmEtablertTilsynErEndret";
 
     private BehandlingRepository behandlingRepository;
@@ -67,8 +71,11 @@ public class VurderOmEtablertTilsynErEndretTask implements ProsessTaskHandler {
                 
         final NavigableSet<DatoIntervallEntitet> perioder = finnPerioderDerEtablertTilsynHarBlittEndret(sisteBehandlingPåKandidat);
         if (perioder.isEmpty()) {
+            log.info("Ingen perioder som må ET-revurderes for: " + saksnummer.getVerdi());
             return;
         }
+        
+        log.info("Starter ET-revurdering av: " + saksnummer.getVerdi());
         
         final var taskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
         taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON.getKode());
