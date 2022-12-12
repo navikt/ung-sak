@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
@@ -29,6 +30,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelsePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 
 @Dependent
 public class HentEtablertTilsynTjeneste {
@@ -39,6 +42,7 @@ public class HentEtablertTilsynTjeneste {
     private EtablertTilsynRepository etablertTilsynRepository;
     private EtablertTilsynTjeneste etablertTilsynTjeneste;
     private PersonopplysningTjeneste personopplysningTjeneste;
+    private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
 
     @Inject
     public HentEtablertTilsynTjeneste(SykdomVurderingTjeneste sykdomVurderingTjeneste,
@@ -46,6 +50,7 @@ public class HentEtablertTilsynTjeneste {
                                       EtablertTilsynRepository etablertTilsynRepository,
                                       EtablertTilsynTjeneste etablertTilsynTjeneste,
                                       PersonopplysningTjeneste personopplysningTjeneste,
+                                      UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
                                       @KonfigVerdi(value = "UKESMOERING_OMSORGSTILBUD_FOM_DATO", defaultVerdi = "", required = false) String ukesmøringOmsorgstilbudFomDatoString) {
 
         this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
@@ -53,6 +58,7 @@ public class HentEtablertTilsynTjeneste {
         this.etablertTilsynRepository = etablertTilsynRepository;
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.personopplysningTjeneste = personopplysningTjeneste;
+        this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
 
         if (ukesmøringOmsorgstilbudFomDatoString == null || ukesmøringOmsorgstilbudFomDatoString.trim().isEmpty()) {
             this.ukesmøringOmsorgstilbudFomDato = null;
@@ -77,9 +83,8 @@ public class HentEtablertTilsynTjeneste {
 
     private static LocalDateTimeline<Duration> toVarighettidslinjeFraPerioderMedVarighet(List<PeriodeMedVarighet> perioderMedVarighetliste) {
         return new LocalDateTimeline<>(perioderMedVarighetliste.stream()
-            .map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p.getVarighet()))
-            .collect(Collectors.toList())
-        );
+                .map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p.getVarighet()))
+                .collect(Collectors.toList()));
     }
 
     private static LocalDateTimeline<Duration> toVarighettidslinje(List<EtablertTilsynPeriode> etablertTilsynPerioder) {
@@ -90,8 +95,39 @@ public class HentEtablertTilsynTjeneste {
     }
 
     public List<PeriodeMedVarighet> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse,
+            Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende,
+            boolean brukUbesluttedeData) {
+        return hentOgSmørEtablertTilsynPerioder(referanse, unntakEtablertTilsynForPleietrengende, brukUbesluttedeData, ukesmøringOmsorgstilbudFomDato);
+    }
+    
+    public LocalDateTimeline<Boolean> finnEndringerMellomSmurtOgUsmurt(BehandlingReferanse referanse) {
+        final var etablertTilsynGrunnlag = etablertTilsynRepository.hentHvisEksisterer(referanse.getBehandlingId());
+        if (etablertTilsynGrunnlag.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+        
+        final LocalDateTimeline<Duration> perioderUtenSmøring = toVarighettidslinjeFraPerioderMedVarighet(hentOgSmørEtablertTilsynPerioder(referanse, false, false)).compress();
+        final LocalDateTimeline<Duration> perioderMedSmøring = toVarighettidslinjeFraPerioderMedVarighet(hentOgSmørEtablertTilsynPerioder(referanse, false, true)).compress();
+        
+        return perioderMedSmøring.combine(perioderUtenSmøring, (datoInterval, datoSegment, datoSegment2) -> {
+            if (datoSegment == null || datoSegment2 == null) {
+                return new LocalDateSegment<>(datoInterval, Boolean.TRUE);
+            }
+            return new LocalDateSegment<>(datoInterval, !datoSegment.getValue().equals(datoSegment2.getValue()));
+        }, JoinStyle.CROSS_JOIN).compress().filterValue(Boolean::booleanValue);
+    }
+    
+    private List<PeriodeMedVarighet> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse, boolean brukUbesluttedeData, boolean brukUkessmøring) {
+        final var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(referanse.getBehandlingId())
+                .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
+        final LocalDate ukesmøringOmsorgstilbudFomDato = (brukUkessmøring) ? this.ukesmøringOmsorgstilbudFomDato : null;
+        return hentOgSmørEtablertTilsynPerioder(referanse, unntakEtablertTilsynForPleietrengende, brukUbesluttedeData, ukesmøringOmsorgstilbudFomDato);
+    }
+    
+    private List<PeriodeMedVarighet> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse,
                                                                      Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende,
-                                                                     boolean brukUbesluttedeData) {
+                                                                     boolean brukUbesluttedeData,
+                                                                     LocalDate ukesmøringOmsorgstilbudFomDato) {
 
         if (referanse.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
             return List.of();
