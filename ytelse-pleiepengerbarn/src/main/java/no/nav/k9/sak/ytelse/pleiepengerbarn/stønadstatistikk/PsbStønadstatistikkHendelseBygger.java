@@ -263,7 +263,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
 
     private UttakArbeidType toUttakArbeidType(Utbetalingsgrader data) {
         var type = UttakArbeidType.fraKode(data.getArbeidsforhold().getType());
-        if (UttakArbeidType.IKKE_YRKESAKTIV.equals(type)) {
+        if (UttakArbeidType.IKKE_YRKESAKTIV.equals(type) || UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING.equals(type)) {
             type = UttakArbeidType.ARBEIDSTAKER;
         }
         return type;
