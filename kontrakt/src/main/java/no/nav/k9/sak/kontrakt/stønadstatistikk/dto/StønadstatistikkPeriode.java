@@ -129,7 +129,6 @@ public class StønadstatistikkPeriode {
     public static StønadstatistikkPeriode forOmsorgspenger(LocalDate fom,
                                                            LocalDate tom,
                                                            StønadstatistikkUtfall utfall,
-                                                           BigDecimal uttaksgrad,
                                                            List<StønadstatistikkUtbetalingsgrad> utbetalingsgrader,
                                                            List<StønadstatistikkInngangsvilkår> inngangsvilkår,
                                                            BigDecimal bruttoBeregningsgrunnlag) {
@@ -137,7 +136,7 @@ public class StønadstatistikkPeriode {
         sp.fom = fom;
         sp.tom = tom;
         sp.utfall = utfall;
-        sp.uttaksgrad = uttaksgrad;
+        sp.uttaksgrad = null; //tror ikke det er verdifullt å forsøke å lage et samlet tall basert på ulike arbeidsforhold
         sp.utbetalingsgrader = utbetalingsgrader;
         sp.inngangsvilkår = inngangsvilkår;
         sp.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;

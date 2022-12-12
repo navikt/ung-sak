@@ -97,6 +97,9 @@ class MapFraÅrskvantumResultat {
             if (e.getKey() == Vilkår.INNGANGSVILKÅR){
                 continue; //dette er en samling av vilkår fra k9-sak. Ignoreres her (sendes pr vilkår et annet sted)
             }
+            if (e.getKey() == Vilkår.UIDENTIFISERT_RAMMEVEDTAK){
+                continue; //dette er ikke et vilkår, brukes bar internt for å trigge aksjonspunkt
+            }
             VilkårUtfall vilkårUtfall = VILKÅR_FOR_SPESIFIKT_KRAV_ELLER_AKTIVITET.contains(e.getKey())
                 ? new VilkårUtfall(map(e.getValue()), Set.of(mapDetaljertUtfall(e.getKey(), map(e.getValue()), aktivitet)))
                 : new VilkårUtfall(map(e.getValue()));
