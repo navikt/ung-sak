@@ -1,11 +1,15 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.gjennomgått;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
@@ -18,7 +22,8 @@ class GjennomgåttOpplæringMapper {
     GjennomgåttOpplæringDto mapTilDto(VurdertOpplæringGrunnlag grunnlag, Set<PerioderFraSøknad> perioderFraSøknad) {
         List<OpplæringPeriodeDto> perioder = mapPerioder(perioderFraSøknad);
         List<OpplæringVurderingDto> vurderinger = mapVurderinger(grunnlag, perioder);
-        return new GjennomgåttOpplæringDto(perioder, vurderinger);
+        boolean trengerVurderingAvReisetid = trengerVurderingAvReisetid(grunnlag, perioder);
+        return new GjennomgåttOpplæringDto(perioder, vurderinger, trengerVurderingAvReisetid);
     }
 
     private List<OpplæringPeriodeDto> mapPerioder(Set<PerioderFraSøknad> perioderFraSøknad) {
@@ -86,5 +91,65 @@ class GjennomgåttOpplæringMapper {
         }
 
         return null;
+    }
+
+    private boolean trengerVurderingAvReisetid(VurdertOpplæringGrunnlag grunnlag, List<OpplæringPeriodeDto> perioder) {
+        var tidslinjeMedGodkjentReisetid = lagTidslinjeMedGodkjentReisetid(grunnlag, perioder);
+        var reisetidSomSkalGodkjennes = lagTidslinjeMedReisedagerSomSkalGodkjennes(perioder);
+        return !reisetidSomSkalGodkjennes.disjoint(tidslinjeMedGodkjentReisetid).isEmpty();
+    }
+
+    private LocalDateTimeline<Boolean> lagTidslinjeMedGodkjentReisetid(VurdertOpplæringGrunnlag grunnlag, List<OpplæringPeriodeDto> perioder) {
+
+        LocalDateTimeline<Boolean> vurdert = LocalDateTimeline.empty();
+
+        if (grunnlag != null && grunnlag.getVurdertePerioder() != null) {
+            for (VurdertOpplæringPeriode vurdertOpplæringPeriode : grunnlag.getVurdertePerioder().getPerioder()) {
+                if (vurdertOpplæringPeriode.getReisetid() != null) {
+                    if (vurdertOpplæringPeriode.getReisetid().getReiseperiodeTil() != null) {
+                        vurdert = vurdert.union(TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(List.of(vurdertOpplæringPeriode.getReisetid().getReiseperiodeTil()))), StandardCombinators::alwaysTrueForMatch);
+                    }
+                    if (vurdertOpplæringPeriode.getReisetid().getReiseperiodeHjem() != null) {
+                        vurdert = vurdert.union(TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(List.of(vurdertOpplæringPeriode.getReisetid().getReiseperiodeHjem()))), StandardCombinators::alwaysTrueForMatch);
+                    }
+                }
+            }
+        }
+
+        LocalDateTimeline<Boolean> automatisk = LocalDateTimeline.empty();
+
+        for (OpplæringPeriodeDto periode : perioder) {
+            if (periode.getReisetid() != null) {
+                if (kanGodkjennesAutomatisk(periode.getReisetid().getReisetidTil())) {
+                    automatisk = automatisk.union(TidslinjeUtil.tilTidslinjeKomprimert(List.of(periode.getReisetid().getReisetidTil())), StandardCombinators::alwaysTrueForMatch);
+                }
+                if (kanGodkjennesAutomatisk(periode.getReisetid().getReisetidHjem())) {
+                    automatisk = automatisk.union(TidslinjeUtil.tilTidslinjeKomprimert(List.of(periode.getReisetid().getReisetidHjem())), StandardCombinators::alwaysTrueForMatch);
+                }
+            }
+        }
+
+        return vurdert.union(automatisk, StandardCombinators::alwaysTrueForMatch);
+    }
+
+    private boolean kanGodkjennesAutomatisk(Periode reisetid) {
+        return reisetid != null && reisetid.getFom().equals(reisetid.getTom());
+    }
+
+    private LocalDateTimeline<Boolean> lagTidslinjeMedReisedagerSomSkalGodkjennes(List<OpplæringPeriodeDto> perioder) {
+        List<LocalDate> reisedagerSomSkalGodkjennes = new ArrayList<>();
+
+        for (OpplæringPeriodeDto periode : perioder) {
+            if (periode.getReisetid() != null) {
+                if (periode.getReisetid().getReisetidTil() != null) {
+                    reisedagerSomSkalGodkjennes.add(periode.getReisetid().getReisetidTil().getTom());
+                }
+                if (periode.getReisetid().getReisetidHjem() != null) {
+                    reisedagerSomSkalGodkjennes.add(periode.getReisetid().getReisetidHjem().getFom());
+                }
+            }
+        }
+
+        return TidslinjeUtil.tilTidslinjeKomprimert(reisedagerSomSkalGodkjennes.stream().map(localDate -> new Periode(localDate, localDate)).toList());
     }
 }

@@ -26,9 +26,15 @@ public class GjennomgåttOpplæringDto {
     @NotNull
     private List<OpplæringVurderingDto> vurderinger;
 
-    public GjennomgåttOpplæringDto(List<OpplæringPeriodeDto> perioder, List<OpplæringVurderingDto> vurderinger) {
+    @JsonProperty(value = "trengerVurderingAvReisetid", required = true)
+    @Valid
+    @NotNull
+    private Boolean trengerVurderingAvReisetid;
+
+    public GjennomgåttOpplæringDto(List<OpplæringPeriodeDto> perioder, List<OpplæringVurderingDto> vurderinger, Boolean trengerVurderingAvReisetid) {
         this.perioder = perioder;
         this.vurderinger = vurderinger;
+        this.trengerVurderingAvReisetid = trengerVurderingAvReisetid;
     }
 
     public List<OpplæringPeriodeDto> getPerioder() {
@@ -37,5 +43,9 @@ public class GjennomgåttOpplæringDto {
 
     public List<OpplæringVurderingDto> getVurderinger() {
         return vurderinger;
+    }
+
+    public Boolean getTrengerVurderingAvReisetid() {
+        return trengerVurderingAvReisetid;
     }
 }

@@ -26,6 +26,7 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
@@ -46,8 +47,8 @@ class VurderGjennomgåttOpplæringRestTjenesteTest {
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
 
     private Behandling behandling;
-    private final Periode kursperiode1 = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now());
-    private final Periode kursperiode2 = new Periode(LocalDate.now().plusDays(1), LocalDate.now().plusWeeks(1));
+    private final Periode periode1 = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now());
+    private final Periode periode2 = new Periode(LocalDate.now().plusDays(1), LocalDate.now().plusWeeks(1));
 
     @BeforeEach
     void setup() {
@@ -57,16 +58,23 @@ class VurderGjennomgåttOpplæringRestTjenesteTest {
         behandling = scenario.lagre(repositoryProvider);
     }
 
-    private PerioderFraSøknad lagPerioderFraSøknad(List<Periode> kursperioder) {
+    private KursPeriode lagKursperiode(Periode periode, Periode reisetidTil, Periode reisetidHjem) {
+        return new KursPeriode(periode.getFom(), periode.getTom(),
+            reisetidTil != null ? DatoIntervallEntitet.fra(reisetidTil) : null,
+            reisetidHjem != null ? DatoIntervallEntitet.fra(reisetidHjem) : null,
+            "noe", null, "");
+    }
+
+    private PerioderFraSøknad lagPerioderFraSøknad(List<KursPeriode> kursperioder) {
         PerioderFraSøknad perioderFraSøknad = new PerioderFraSøknad(new JournalpostId("1098"),
-            kursperioder.stream().map(kursperiode -> new UttakPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(kursperiode.getFom(), kursperiode.getTom()), Duration.ofHours(7).plusMinutes(30))).toList(),
+            kursperioder.stream().map(kursperiode -> new UttakPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(kursperiode.getPeriode().getFomDato(), kursperiode.getPeriode().getTomDato()), Duration.ofHours(7).plusMinutes(30))).toList(),
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
-            kursperioder.stream().map(kursperiode -> new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), null, null, "noe", null, "")).toList());
+            kursperioder);
 
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         return perioderFraSøknad;
@@ -74,7 +82,8 @@ class VurderGjennomgåttOpplæringRestTjenesteTest {
 
     @Test
     void ingenVurdering() {
-        var perioderFraSøknad = lagPerioderFraSøknad(List.of(kursperiode1));
+        var kursperiode = lagKursperiode(periode1, null, null);
+        var perioderFraSøknad = lagPerioderFraSøknad(List.of(kursperiode));
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
 
         Response response = restTjeneste.hentVurdertOpplæring(new BehandlingUuidDto(behandling.getUuid()));
@@ -85,22 +94,25 @@ class VurderGjennomgåttOpplæringRestTjenesteTest {
         assertThat(result).isNotNull();
 
         assertThat(result.getPerioder()).hasSize(1);
-        assertThat(result.getPerioder().get(0).getPeriode()).isEqualTo(kursperiode1);
+        assertThat(result.getPerioder().get(0).getPeriode()).isEqualTo(periode1);
         assertThat(result.getPerioder().get(0).getReisetid()).isNotNull();
 
         assertThat(result.getVurderinger()).hasSize(1);
-        assertThat(result.getVurderinger().get(0).getPeriode()).isEqualTo(kursperiode1);
+        assertThat(result.getVurderinger().get(0).getPeriode()).isEqualTo(periode1);
         assertThat(result.getVurderinger().get(0).getResultat()).isEqualTo(Resultat.MÅ_VURDERES);
         assertThat(result.getVurderinger().get(0).getReisetidVurdering()).isNull();
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isNull();
+
+        assertThat(result.getTrengerVurderingAvReisetid()).isEqualTo(Boolean.FALSE);
     }
 
     @Test
     void komplettVurdering() {
-        var perioderFraSøknad = lagPerioderFraSøknad(List.of(kursperiode1));
+        var kursperiode = lagKursperiode(periode1, null, null);
+        var perioderFraSøknad = lagPerioderFraSøknad(List.of(kursperiode));
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
 
-        var vurdertOpplæringperiode = new VurdertOpplæringPeriode(kursperiode1.getFom(), kursperiode1.getTom(), true, null, "derfor");
+        var vurdertOpplæringperiode = new VurdertOpplæringPeriode(periode1.getFom(), periode1.getTom(), true, null, "derfor");
         vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertOpplæringPerioderHolder(List.of(vurdertOpplæringperiode)));
 
         Response response = restTjeneste.hentVurdertOpplæring(new BehandlingUuidDto(behandling.getUuid()));
@@ -111,10 +123,10 @@ class VurderGjennomgåttOpplæringRestTjenesteTest {
         assertThat(result).isNotNull();
 
         assertThat(result.getPerioder()).hasSize(1);
-        assertThat(result.getPerioder().get(0).getPeriode()).isEqualTo(kursperiode1);
+        assertThat(result.getPerioder().get(0).getPeriode()).isEqualTo(periode1);
 
         assertThat(result.getVurderinger()).hasSize(1);
-        assertThat(result.getVurderinger().get(0).getPeriode()).isEqualTo(kursperiode1);
+        assertThat(result.getVurderinger().get(0).getPeriode()).isEqualTo(periode1);
         assertThat(result.getVurderinger().get(0).getResultat()).isEqualTo(Resultat.GODKJENT);
         assertThat(result.getVurderinger().get(0).getReisetidVurdering()).isNull();
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isEqualTo(vurdertOpplæringperiode.getBegrunnelse());
@@ -122,10 +134,12 @@ class VurderGjennomgåttOpplæringRestTjenesteTest {
 
     @Test
     void kombinertVurdering() {
+        var kursperiode1 = lagKursperiode(periode1, null, null);
+        var kursperiode2 = lagKursperiode(periode2, null, null);
         var perioderFraSøknad1 = lagPerioderFraSøknad(List.of(kursperiode1, kursperiode2));
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad1)));
 
-        var vurdertOpplæringperiode = new VurdertOpplæringPeriode(kursperiode1.getFom(), kursperiode1.getTom(), false, null, "nei");
+        var vurdertOpplæringperiode = new VurdertOpplæringPeriode(periode1.getFom(), periode1.getTom(), false, null, "nei");
         vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertOpplæringPerioderHolder(List.of(vurdertOpplæringperiode)));
 
         Response response = restTjeneste.hentVurdertOpplæring(new BehandlingUuidDto(behandling.getUuid()));
@@ -137,11 +151,68 @@ class VurderGjennomgåttOpplæringRestTjenesteTest {
         assertThat(result.getPerioder()).hasSize(2);
 
         assertThat(result.getVurderinger()).hasSize(2);
-        var medVurdering = result.getVurderinger().stream().filter(v -> v.getPeriode().equals(kursperiode1)).findFirst().orElseThrow();
+        var medVurdering = result.getVurderinger().stream().filter(v -> v.getPeriode().equals(periode1)).findFirst().orElseThrow();
         assertThat(medVurdering.getResultat()).isEqualTo(Resultat.IKKE_GODKJENT);
-        var utenVurdering = result.getVurderinger().stream().filter(v -> v.getPeriode().equals(kursperiode2)).findFirst().orElseThrow();
+        var utenVurdering = result.getVurderinger().stream().filter(v -> v.getPeriode().equals(periode2)).findFirst().orElseThrow();
         assertThat(utenVurdering.getResultat()).isEqualTo(Resultat.MÅ_VURDERES);
     }
 
-    //TODO: test reisetid
+    @Test
+    void reisetidTrengerVurdering() {
+        var reisetidTil = new Periode(periode1.getFom().minusDays(2), periode1.getFom().minusDays(1));
+        var kursperiode = lagKursperiode(periode1, reisetidTil, null);
+        var perioderFraSøknad = lagPerioderFraSøknad(List.of(kursperiode));
+        uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
+
+        Response response = restTjeneste.hentVurdertOpplæring(new BehandlingUuidDto(behandling.getUuid()));
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        GjennomgåttOpplæringDto result = (GjennomgåttOpplæringDto) response.getEntity();
+        assertThat(result).isNotNull();
+        assertThat(result.getTrengerVurderingAvReisetid()).isEqualTo(Boolean.TRUE);
+    }
+
+    @Test
+    void reisetidTrengerIkkeVurdering() {
+        var reisetidTil = new Periode(periode1.getFom().minusDays(1), periode1.getFom().minusDays(1));
+        var kursperiode = lagKursperiode(periode1, reisetidTil, null);
+        var perioderFraSøknad = lagPerioderFraSøknad(List.of(kursperiode));
+        uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
+
+        Response response = restTjeneste.hentVurdertOpplæring(new BehandlingUuidDto(behandling.getUuid()));
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        GjennomgåttOpplæringDto result = (GjennomgåttOpplæringDto) response.getEntity();
+        assertThat(result).isNotNull();
+        assertThat(result.getTrengerVurderingAvReisetid()).isEqualTo(Boolean.FALSE);
+    }
+
+    @Test
+    void reisetidVurdert() {
+        var reisetidTil = new Periode(periode1.getFom().minusDays(2), periode1.getFom().minusDays(1));
+        var reisetidHjem = new Periode(periode1.getTom().plusDays(1), periode1.getTom().plusDays(1));
+        var kursperiode = lagKursperiode(periode1, reisetidTil, reisetidHjem);
+        var perioderFraSøknad = lagPerioderFraSøknad(List.of(kursperiode));
+        uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
+
+        var vurdertReisetid = new VurdertReisetid(DatoIntervallEntitet.fra(reisetidTil), null, "reise");
+        var vurdertOpplæringperiode = new VurdertOpplæringPeriode(periode1.getFom(), periode1.getTom(), true, vurdertReisetid, "derfor");
+        vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertOpplæringPerioderHolder(List.of(vurdertOpplæringperiode)));
+
+        Response response = restTjeneste.hentVurdertOpplæring(new BehandlingUuidDto(behandling.getUuid()));
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        GjennomgåttOpplæringDto result = (GjennomgåttOpplæringDto) response.getEntity();
+        assertThat(result).isNotNull();
+        assertThat(result.getTrengerVurderingAvReisetid()).isEqualTo(Boolean.FALSE);
+
+        assertThat(result.getVurderinger()).hasSize(1);
+        assertThat(result.getVurderinger().get(0).getReisetidVurdering()).isNotNull();
+        assertThat(result.getVurderinger().get(0).getReisetidVurdering().getReisetidTil()).isEqualTo(reisetidTil);
+        assertThat(result.getVurderinger().get(0).getReisetidVurdering().getReisetidHjem()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidVurdering().getBegrunnelse()).isEqualTo("reise");
+    }
 }
