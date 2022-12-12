@@ -10,8 +10,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
@@ -106,8 +106,8 @@ public class HentEtablertTilsynTjeneste {
             return LocalDateTimeline.empty();
         }
         
-        final LocalDateTimeline<Duration> perioderUtenSmøring = toVarighettidslinjeFraPerioderMedVarighet(hentOgSmørEtablertTilsynPerioder(referanse, false, false)).compress();
-        final LocalDateTimeline<Duration> perioderMedSmøring = toVarighettidslinjeFraPerioderMedVarighet(hentOgSmørEtablertTilsynPerioder(referanse, false, true)).compress();
+        final LocalDateTimeline<Duration> perioderUtenSmøring = hentOgSmørEtablertTilsynPerioder(referanse, false);
+        final LocalDateTimeline<Duration> perioderMedSmøring = hentOgSmørEtablertTilsynPerioder(referanse, true);
         
         return perioderMedSmøring.combine(perioderUtenSmøring, (datoInterval, datoSegment, datoSegment2) -> {
             if (datoSegment == null || datoSegment2 == null) {
@@ -117,11 +117,18 @@ public class HentEtablertTilsynTjeneste {
         }, JoinStyle.CROSS_JOIN).compress().filterValue(Boolean::booleanValue);
     }
     
-    private List<PeriodeMedVarighet> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse, boolean brukUbesluttedeData, boolean brukUkessmøring) {
+    private LocalDateTimeline<Duration> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse, boolean nyLøsning) {
         final var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(referanse.getBehandlingId())
                 .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
-        final LocalDate ukesmøringOmsorgstilbudFomDato = (brukUkessmøring) ? this.ukesmøringOmsorgstilbudFomDato : null;
-        return hentOgSmørEtablertTilsynPerioder(referanse, unntakEtablertTilsynForPleietrengende, brukUbesluttedeData, ukesmøringOmsorgstilbudFomDato);
+        final LocalDate ukesmøringOmsorgstilbudFomDato = (nyLøsning) ? this.ukesmøringOmsorgstilbudFomDato : null;
+        
+        final List<PeriodeMedVarighet> perioder = hentOgSmørEtablertTilsynPerioder(referanse, unntakEtablertTilsynForPleietrengende, false, ukesmøringOmsorgstilbudFomDato);
+        final LocalDateTimeline<Duration> resultat = toVarighettidslinjeFraPerioderMedVarighet(perioder);
+        if (nyLøsning) {
+            return resultat.compress();
+        } else {
+            return EtablertTilsynUnntaksutnuller.håndterUnntak(resultat, unntakEtablertTilsynForPleietrengende).compress();
+        }
     }
     
     private List<PeriodeMedVarighet> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse,
