@@ -254,7 +254,7 @@ spec:
     - name: FILTRER_TILSTOTENDE_PERIODE
       value: "true"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
-      value: "2022-09-12"
+      value: "2022-08-29"
     - name: PSB_UTTAK_UNNTAK_BEVAR_VEDTATT_VERDI
       value: "true"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
