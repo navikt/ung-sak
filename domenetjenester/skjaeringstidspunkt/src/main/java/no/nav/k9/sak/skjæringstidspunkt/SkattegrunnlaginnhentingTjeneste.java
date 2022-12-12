@@ -12,39 +12,39 @@ public class SkattegrunnlaginnhentingTjeneste {
 
     public static final MonthDay FØRSTE_MULIGE_SKATTEOPPGJØRSDATO = MonthDay.of(5, 1);
 
-    public static Periode utledSkattegrunnlagOpplysningsperiode(LocalDate førsteSkjæringstidspunkt, LocalDate fagsakperiodeTom) {
-        int sisteÅr = finnSisteÅr(fagsakperiodeTom);
-        int førsteÅr = finnFørsteÅr(førsteSkjæringstidspunkt);
+    public static Periode utledSkattegrunnlagOpplysningsperiode(LocalDate førsteSkjæringstidspunkt, LocalDate fagsakperiodeTom, LocalDate dagensDato) {
+        int sisteÅr = finnSisteÅr(fagsakperiodeTom, dagensDato);
+        int førsteÅr = finnFørsteÅr(førsteSkjæringstidspunkt, dagensDato);
         if (førsteÅr <= 2015) {
             throw new IllegalStateException("Første år må være etter 2015");
         }
         return new Periode(LocalDate.of(førsteÅr, 1, 1), LocalDate.of(sisteÅr, 12, 31));
     }
 
-    private static int finnFørsteÅr(LocalDate førsteSkjæringstidspunkt) {
+    private static int finnFørsteÅr(LocalDate førsteSkjæringstidspunkt, LocalDate dagensDato) {
         var stpÅr = førsteSkjæringstidspunkt.getYear();
-        int sisteTilgjengeligeÅr = finnSisteTilgjengeligeÅr();
-        if (sisteTilgjengeligeÅr == stpÅr - 1) {
+        int sisteTilgjengeligeÅr = finnSisteTilgjengeligeÅr(dagensDato);
+        if (sisteTilgjengeligeÅr >= stpÅr - 1) {
             return stpÅr - MIN_ANTALL_FERDIGLIGNEDE_ÅR;
         } else {
             return stpÅr - MAKS_ANTALL_FERDIGLIGNEDE_ÅR;
         }
     }
 
-    private static int finnSisteÅr(LocalDate fagsakperiodeTom) {
+    private static int finnSisteÅr(LocalDate fagsakperiodeTom, LocalDate dagensDato) {
         var åretFørFagsakTom = fagsakperiodeTom.getYear() - 1;
-        int sisteTilgjengeligeÅr = finnSisteTilgjengeligeÅr();
+        int sisteTilgjengeligeÅr = finnSisteTilgjengeligeÅr(dagensDato);
         return Math.min(åretFørFagsakTom, sisteTilgjengeligeÅr);
     }
 
-    private static int finnSisteTilgjengeligeÅr() {
-        var fjoråret = LocalDate.now().getYear() - 1;
-        var sisteTilgjengeligeÅr = erSkatteoppgjørForÅretFørTilgjengelig() ? fjoråret : fjoråret - 1;
+    private static int finnSisteTilgjengeligeÅr(LocalDate dagensDato) {
+        var fjoråret = dagensDato.getYear() - 1;
+        var sisteTilgjengeligeÅr = erSkatteoppgjørForÅretFørTilgjengelig(dagensDato) ? fjoråret : fjoråret - 1;
         return sisteTilgjengeligeÅr;
     }
 
-    private static boolean erSkatteoppgjørForÅretFørTilgjengelig() {
-        return MonthDay.now().isAfter(FØRSTE_MULIGE_SKATTEOPPGJØRSDATO);
+    private static boolean erSkatteoppgjørForÅretFørTilgjengelig(LocalDate dagensDato) {
+        return !MonthDay.of(dagensDato.getMonthValue(), dagensDato.getDayOfMonth()).isBefore(FØRSTE_MULIGE_SKATTEOPPGJØRSDATO);
     }
 
 }
