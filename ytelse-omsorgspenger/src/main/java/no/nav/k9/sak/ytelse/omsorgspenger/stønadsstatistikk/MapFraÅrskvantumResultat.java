@@ -112,10 +112,11 @@ class MapFraÅrskvantumResultat {
         return switch (vilkårType) {
             case ARBEIDSFORHOLD, SMITTEVERN ->
                 DetaljertVilkårUtfall.forArbeidsforhold(utfall, aktivitet.getArbeidsforhold().getType(), aktivitet.getArbeidsforhold().getOrganisasjonsnummer(), aktivitet.getArbeidsforhold().getAktørId(), aktivitet.getArbeidsforhold().getArbeidsforholdId());
+            case FREMTIDIG_KRAV ->
+                //TODO denne er strengt talt pr kravstiller i tillegg til arbeidsforhold, men er uklart hvordan enkelt utlede kravstiller her (uten mye jobb)
+                DetaljertVilkårUtfall.forArbeidsforhold(utfall, aktivitet.getArbeidsforhold().getType(), aktivitet.getArbeidsforhold().getOrganisasjonsnummer(), aktivitet.getArbeidsforhold().getAktørId(), aktivitet.getArbeidsforhold().getArbeidsforholdId());
             case NYOPPSTARTET_HOS_ARBEIDSGIVER, ANDRE_SKAL_DEKKE_DAGENE ->
                 DetaljertVilkårUtfall.forKravstillerPerArbeidsforhold(utfall, StønadstatistikkKravstillerType.BRUKER, aktivitet.getArbeidsforhold().getType(), aktivitet.getArbeidsforhold().getOrganisasjonsnummer(), aktivitet.getArbeidsforhold().getAktørId(), aktivitet.getArbeidsforhold().getArbeidsforholdId());
-            case FREMTIDIG_KRAV ->
-                DetaljertVilkårUtfall.forKravstillerPerArbeidsforhold(utfall, StønadstatistikkKravstillerType.BRUKER_ELLER_ARBEIDSGIVER, aktivitet.getArbeidsforhold().getType(), aktivitet.getArbeidsforhold().getOrganisasjonsnummer(), aktivitet.getArbeidsforhold().getAktørId(), aktivitet.getArbeidsforhold().getArbeidsforholdId());
             default -> throw new IllegalArgumentException("ikke-støttet vilkårtype: " + vilkårType);
         };
     }
