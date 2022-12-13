@@ -24,7 +24,8 @@ class MapFraÅrskvantumResultat {
         Vilkår.NYOPPSTARTET_HOS_ARBEIDSGIVER,
         Vilkår.SMITTEVERN,  //ulike regler for refusjon/direkte utbetaling. Kan få avslag for direkte ubetaling. Teoretisk pr arbeidsforhold
         Vilkår.ANDRE_SKAL_DEKKE_DAGENE, // PR ARBEIDSFORHOLD, GJELDER KUN SØKNAD
-        Vilkår.FREMTIDIG_KRAV
+        Vilkår.FREMTIDIG_KRAV,
+        Vilkår.FRAVÆR_FRA_ARBEID
     );
 
     public static LocalDateTimeline<UttakResultatPeriode> getTimeline(List<Aktivitet> aktiviteter) {
@@ -115,7 +116,7 @@ class MapFraÅrskvantumResultat {
             case FREMTIDIG_KRAV ->
                 //TODO denne er strengt talt pr kravstiller i tillegg til arbeidsforhold, men er uklart hvordan enkelt utlede kravstiller her (uten mye jobb)
                 DetaljertVilkårUtfall.forArbeidsforhold(utfall, aktivitet.getArbeidsforhold().getType(), aktivitet.getArbeidsforhold().getOrganisasjonsnummer(), aktivitet.getArbeidsforhold().getAktørId(), aktivitet.getArbeidsforhold().getArbeidsforholdId());
-            case NYOPPSTARTET_HOS_ARBEIDSGIVER, ANDRE_SKAL_DEKKE_DAGENE ->
+            case NYOPPSTARTET_HOS_ARBEIDSGIVER, ANDRE_SKAL_DEKKE_DAGENE, FRAVÆR_FRA_ARBEID ->
                 DetaljertVilkårUtfall.forKravstillerPerArbeidsforhold(utfall, StønadstatistikkKravstillerType.BRUKER, aktivitet.getArbeidsforhold().getType(), aktivitet.getArbeidsforhold().getOrganisasjonsnummer(), aktivitet.getArbeidsforhold().getAktørId(), aktivitet.getArbeidsforhold().getArbeidsforholdId());
             default -> throw new IllegalArgumentException("ikke-støttet vilkårtype: " + vilkårType);
         };
