@@ -32,6 +32,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Ple
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
 @Dependent
 public class HentEtablertTilsynTjeneste {
@@ -123,12 +124,16 @@ public class HentEtablertTilsynTjeneste {
         final LocalDate ukesmøringOmsorgstilbudFomDato = (nyLøsning) ? this.ukesmøringOmsorgstilbudFomDato : null;
         
         final List<PeriodeMedVarighet> perioder = hentOgSmørEtablertTilsynPerioder(referanse, unntakEtablertTilsynForPleietrengende, false, ukesmøringOmsorgstilbudFomDato);
-        final LocalDateTimeline<Duration> resultat = toVarighettidslinjeFraPerioderMedVarighet(perioder);
-        if (nyLøsning) {
-            return resultat.compress();
-        } else {
-            return EtablertTilsynUnntaksutnuller.håndterUnntak(resultat, unntakEtablertTilsynForPleietrengende).compress();
+        
+        LocalDateTimeline<Duration> resultat = toVarighettidslinjeFraPerioderMedVarighet(perioder).compress();
+        if (!nyLøsning) {
+            resultat = EtablertTilsynUnntaksutnuller.håndterUnntak(resultat, unntakEtablertTilsynForPleietrengende).compress();
         }
+        
+        final LocalDateTimeline<Boolean> mandagTilFredag = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(resultat.getMinLocalDate(), resultat.getMaxLocalDate());
+        resultat = resultat.intersection(mandagTilFredag);
+        
+        return resultat;
     }
     
     private List<PeriodeMedVarighet> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse,
