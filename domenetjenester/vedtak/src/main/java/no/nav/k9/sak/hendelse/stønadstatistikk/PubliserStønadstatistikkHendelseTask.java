@@ -51,12 +51,12 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
 
         final String value = StønadstatistikkSerializer.toJson(hendelse);
 
-        if (Environment.current().isProd()) {
-            logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}'", key);
-        } else {
+        if (Environment.current().isDev() || Environment.current().isLocal()) {
             //kan ikke logge innhold i hendelsen i  prod, da verdien inneholder bl.a. aktørId og orgNr
             //logger i test for å enkelt sjekke om innhold er riktig
             logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}' Innhold (base64): {}", key, Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8)));
+        } else {
+            logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}'", key);
         }
         meldingProducer.send(key, value);
     }
