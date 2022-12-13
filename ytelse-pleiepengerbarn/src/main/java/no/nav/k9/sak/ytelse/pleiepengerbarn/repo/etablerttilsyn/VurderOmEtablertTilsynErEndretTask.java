@@ -13,6 +13,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -68,6 +69,11 @@ public class VurderOmEtablertTilsynErEndretTask implements ProsessTaskHandler {
 
         final var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer, false).orElseThrow();
         final var sisteBehandlingPåKandidat = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+        if (sisteBehandlingPåKandidat.getStatus() != BehandlingStatus.AVSLUTTET
+                && sisteBehandlingPåKandidat.getStatus() != BehandlingStatus.IVERKSETTER_VEDTAK) {
+            log.info("Starter ikke ET-revurdering for: " + saksnummer.getVerdi() + " siden det er en behandling med status " + sisteBehandlingPåKandidat.getStatus().getKode());
+            return;
+        }
                 
         final NavigableSet<DatoIntervallEntitet> perioder = finnPerioderDerEtablertTilsynHarBlittEndret(sisteBehandlingPåKandidat);
         if (perioder.isEmpty()) {
