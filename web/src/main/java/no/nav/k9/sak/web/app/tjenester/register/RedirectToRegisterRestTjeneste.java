@@ -22,6 +22,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
+import no.nav.k9.felles.exception.IntegrasjonException;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -68,16 +69,16 @@ public class RedirectToRegisterRestTjeneste {
 
     @GET
     @Operation(description = "Redirecter til aa-reg for arbeidstakeren", tags = "aktoer", responses = {
-        @ApiResponse(responseCode = "307", description = "Redirecter til aa-reg for arbeidstakeren" )
+        @ApiResponse(responseCode = "307", description = "Redirecter til aa-reg for arbeidstakeren")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(AA_REG_POSTFIX)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getAktoerInfo(
-            @NotNull
-            @QueryParam(SaksnummerDto.NAME)
-            @Valid
-            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        @NotNull
+        @QueryParam(SaksnummerDto.NAME)
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SaksnummerDto saksnummerDto) {
         Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummerDto.getVerdi()).get();
         var personIdent = tpsTjeneste.hentFnrForAktør(fagsak.getAktørId());
@@ -87,7 +88,7 @@ public class RedirectToRegisterRestTjeneste {
         HttpUriRequest request = new HttpGet(uri);
         request.addHeader(new BasicHeader("Nav-Personident", personIdent.getIdent()));
         try {
-            var respons = restClient.execute(request, new OidcRestClientResponseHandler.StringResponseHandler(uri));
+            var respons = restClient.execute(request, new DebugOidcRestClientResponseHandler.StringResponseHandler(uri));
             var redirectUri = URI.create(respons);
 
             return Response.temporaryRedirect(redirectUri).build();
@@ -103,11 +104,11 @@ public class RedirectToRegisterRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(AINNTEKT_REG_POSTFIX)
     public Response getAInntektUrl(
-            @NotNull
-            @QueryParam(SaksnummerDto.NAME)
-            @Parameter(description = SaksnummerDto.DESC)
-            @Valid
-            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        @NotNull
+        @QueryParam(SaksnummerDto.NAME)
+        @Parameter(description = SaksnummerDto.DESC)
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SaksnummerDto saksnummerDto) {
         Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummerDto.getVerdi()).get();
         var personIdent = tpsTjeneste.hentFnrForAktør(fagsak.getAktørId());
@@ -116,7 +117,7 @@ public class RedirectToRegisterRestTjeneste {
         HttpUriRequest request = new HttpGet(uri);
         request.addHeader(new BasicHeader("Nav-Personident", personIdent.getIdent()));
         try {
-            var respons = restClient.execute(request, new OidcRestClientResponseHandler.StringResponseHandler(uri));
+            var respons = restClient.execute(request, new DebugOidcRestClientResponseHandler.StringResponseHandler(uri));
             var redirectUri = URI.create(respons);
 
             return Response.temporaryRedirect(redirectUri).build();
