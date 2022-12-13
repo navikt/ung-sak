@@ -26,7 +26,7 @@ import no.nav.k9.felles.oidc.ressurs.ExtractRequestDataHelp;
 import no.nav.k9.felles.sikkerhet.ContextPathHolder;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.sikkerhet.oidc.config.OpenIDProvider;
-import no.nav.k9.sikkerhet.oidc.token.bruker.BrukerTokenProvider;
+import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
 
 @Path("/login")
 @ApplicationScoped
@@ -34,13 +34,13 @@ public class FrontendLoginResource {
 
     private final ExtractRequestDataHelp requestDataHelp = new ExtractRequestDataHelp();
     private List<Tuple<String, String>> optionalScopes;
-    private BrukerTokenProvider brukerTokenProvider;
+    private ContextAwareTokenProvider brukerTokenProvider;
 
     public FrontendLoginResource() {
     }
 
     @Inject
-    public FrontendLoginResource(@KonfigVerdi(value = "app.auth.schema.azuread.optional.paths", required = false, defaultVerdi = "") String optionalScopes, BrukerTokenProvider brukerTokenProvider) {
+    public FrontendLoginResource(@KonfigVerdi(value = "app.auth.schema.azuread.optional.paths", required = false, defaultVerdi = "") String optionalScopes, ContextAwareTokenProvider brukerTokenProvider) {
         this.optionalScopes = hentUtPathMedScope(optionalScopes, ContextPathHolder.instance().getContextPath());
         this.brukerTokenProvider = brukerTokenProvider;
     }
