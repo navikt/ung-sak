@@ -126,9 +126,7 @@ public class HentEtablertTilsynTjeneste {
         final List<PeriodeMedVarighet> perioder = hentOgSmørEtablertTilsynPerioder(referanse, unntakEtablertTilsynForPleietrengende, false, ukesmøringOmsorgstilbudFomDato);
         
         LocalDateTimeline<Duration> resultat = toVarighettidslinjeFraPerioderMedVarighet(perioder).compress();
-        if (!nyLøsning) {
-            resultat = EtablertTilsynUnntaksutnuller.håndterUnntak(resultat, unntakEtablertTilsynForPleietrengende).compress();
-        }
+        resultat = EtablertTilsynUnntaksutnuller.håndterUnntak(resultat, unntakEtablertTilsynForPleietrengende).compress();
         
         final LocalDateTimeline<Boolean> mandagTilFredag = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(resultat.getMinLocalDate(), resultat.getMaxLocalDate());
         resultat = resultat.intersection(mandagTilFredag);
