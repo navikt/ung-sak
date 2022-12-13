@@ -68,7 +68,12 @@ public class VurderOmEtablertTilsynErEndretTask implements ProsessTaskHandler {
         final Saksnummer saksnummer = new Saksnummer(prosessTaskData.getSaksnummer());
 
         final var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer, false).orElseThrow();
-        final var sisteBehandlingPåKandidat = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+        final var sisteBehandlingPåKandidatOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+        if (sisteBehandlingPåKandidatOpt.isEmpty()) {
+            log.info("Ingen behandling på sak (ET-revurdering): " + saksnummer.getVerdi());
+            return;
+        }
+        final var sisteBehandlingPåKandidat = sisteBehandlingPåKandidatOpt.get();
         if (sisteBehandlingPåKandidat.getStatus() != BehandlingStatus.AVSLUTTET
                 && sisteBehandlingPåKandidat.getStatus() != BehandlingStatus.IVERKSETTER_VEDTAK) {
             log.info("Starter ikke ET-revurdering for: " + saksnummer.getVerdi() + " siden det er en behandling med status " + sisteBehandlingPåKandidat.getStatus().getKode());
