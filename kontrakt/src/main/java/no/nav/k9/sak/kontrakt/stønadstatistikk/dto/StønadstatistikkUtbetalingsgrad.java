@@ -26,12 +26,10 @@ public class StønadstatistikkUtbetalingsgrad {
     private StønadstatistikkArbeidsforhold arbeidsforhold;
 
     @JsonProperty(value = "normalArbeidstid", required = true)
-    @NotNull
     @Valid
     private Duration normalArbeidstid;
 
     @JsonProperty(value = "faktiskArbeidstid", required = true)
-    @NotNull
     @Valid
     private Duration faktiskArbeidstid;
 
@@ -57,22 +55,15 @@ public class StønadstatistikkUtbetalingsgrad {
                                                                    int dagsats,
                                                                    boolean brukerErMottaker) {
         StønadstatistikkUtbetalingsgrad su = new StønadstatistikkUtbetalingsgrad();
-
         su.aktivitetStatus = aktivitetStatus;
         su.arbeidsforhold = arbeidsforhold;
         su.utbetalingsgrad = utbetalingsgrad;
         su.dagsats = dagsats;
         su.brukerErMottaker = brukerErMottaker;
-
-        //FIXME disse verdiene kan være misvisende
-        su.normalArbeidstid = Duration.ofHours(7).plusMinutes(30);
-        su.faktiskArbeidstid = Duration.ZERO;
         return su;
     }
 
     protected StønadstatistikkUtbetalingsgrad() {
-
-
     }
 
     public StønadstatistikkUtbetalingsgrad(String aktivitetStatus,
