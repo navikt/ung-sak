@@ -88,7 +88,6 @@ public class VurderOmEtablertTilsynErEndretTask implements ProsessTaskHandler {
         
         log.info("Starter ET-revurdering av: " + saksnummer.getVerdi());
         
-        /*
         final var taskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
         taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON.getKode());
         taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODER, utledPerioder(perioder));
@@ -96,7 +95,6 @@ public class VurderOmEtablertTilsynErEndretTask implements ProsessTaskHandler {
         taskData.setBehandling(sisteBehandlingPåKandidat.getFagsakId(), sisteBehandlingPåKandidat.getId(), sisteBehandlingPåKandidat.getAktørId().getId());
 
         fagsakProsessTaskRepository.lagreNyGruppe(taskData);
-        */
     }
     
     public NavigableSet<DatoIntervallEntitet> finnPerioderDerEtablertTilsynHarBlittEndret(Behandling sisteBehandlingPåKandidat) {
