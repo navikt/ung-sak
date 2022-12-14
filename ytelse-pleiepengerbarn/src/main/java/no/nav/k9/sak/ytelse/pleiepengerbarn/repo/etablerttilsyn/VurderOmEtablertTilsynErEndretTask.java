@@ -68,7 +68,12 @@ public class VurderOmEtablertTilsynErEndretTask implements ProsessTaskHandler {
         final Saksnummer saksnummer = new Saksnummer(prosessTaskData.getSaksnummer());
 
         final var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer, false).orElseThrow();
-        final var sisteBehandlingPåKandidat = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+        final var sisteBehandlingPåKandidatOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+        if (sisteBehandlingPåKandidatOpt.isEmpty()) {
+            log.info("Ingen behandling på sak (ET-revurdering): " + saksnummer.getVerdi());
+            return;
+        }
+        final var sisteBehandlingPåKandidat = sisteBehandlingPåKandidatOpt.get();
         if (sisteBehandlingPåKandidat.getStatus() != BehandlingStatus.AVSLUTTET
                 && sisteBehandlingPåKandidat.getStatus() != BehandlingStatus.IVERKSETTER_VEDTAK) {
             log.info("Starter ikke ET-revurdering for: " + saksnummer.getVerdi() + " siden det er en behandling med status " + sisteBehandlingPåKandidat.getStatus().getKode());
@@ -83,6 +88,7 @@ public class VurderOmEtablertTilsynErEndretTask implements ProsessTaskHandler {
         
         log.info("Starter ET-revurdering av: " + saksnummer.getVerdi());
         
+        /*
         final var taskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
         taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON.getKode());
         taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODER, utledPerioder(perioder));
@@ -90,6 +96,7 @@ public class VurderOmEtablertTilsynErEndretTask implements ProsessTaskHandler {
         taskData.setBehandling(sisteBehandlingPåKandidat.getFagsakId(), sisteBehandlingPåKandidat.getId(), sisteBehandlingPåKandidat.getAktørId().getId());
 
         fagsakProsessTaskRepository.lagreNyGruppe(taskData);
+        */
     }
     
     public NavigableSet<DatoIntervallEntitet> finnPerioderDerEtablertTilsynHarBlittEndret(Behandling sisteBehandlingPåKandidat) {

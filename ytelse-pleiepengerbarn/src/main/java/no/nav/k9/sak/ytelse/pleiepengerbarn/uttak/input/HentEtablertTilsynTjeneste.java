@@ -110,12 +110,20 @@ public class HentEtablertTilsynTjeneste {
         final LocalDateTimeline<Duration> perioderUtenSmøring = hentOgSmørEtablertTilsynPerioder(referanse, false);
         final LocalDateTimeline<Duration> perioderMedSmøring = hentOgSmørEtablertTilsynPerioder(referanse, true);
         
-        return perioderMedSmøring.combine(perioderUtenSmøring, (datoInterval, datoSegment, datoSegment2) -> {
+        final LocalDateTimeline<Boolean> endringsTidslinje = perioderMedSmøring.combine(perioderUtenSmøring, (datoInterval, datoSegment, datoSegment2) -> {
+            if (datoSegment == null && datoSegment2.getValue().isZero()) {
+                return new LocalDateSegment<>(datoInterval, Boolean.FALSE);
+            }
+            if (datoSegment2 == null && datoSegment.getValue().isZero()) {
+                return new LocalDateSegment<>(datoInterval, Boolean.FALSE);
+            }
             if (datoSegment == null || datoSegment2 == null) {
                 return new LocalDateSegment<>(datoInterval, Boolean.TRUE);
             }
             return new LocalDateSegment<>(datoInterval, !datoSegment.getValue().equals(datoSegment2.getValue()));
         }, JoinStyle.CROSS_JOIN).compress().filterValue(Boolean::booleanValue);
+        
+        return endringsTidslinje.intersection(new LocalDateTimeline<>(ukesmøringOmsorgstilbudFomDato, Tid.TIDENES_ENDE, Boolean.TRUE));
     }
     
     private LocalDateTimeline<Duration> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse, boolean nyLøsning) {
@@ -127,6 +135,10 @@ public class HentEtablertTilsynTjeneste {
         
         LocalDateTimeline<Duration> resultat = toVarighettidslinjeFraPerioderMedVarighet(perioder).compress();
         resultat = EtablertTilsynUnntaksutnuller.håndterUnntak(resultat, unntakEtablertTilsynForPleietrengende).compress();
+        
+        if (resultat.isEmpty()) {
+            return resultat;
+        }
         
         final LocalDateTimeline<Boolean> mandagTilFredag = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(resultat.getMinLocalDate(), resultat.getMaxLocalDate());
         resultat = resultat.intersection(mandagTilFredag);
