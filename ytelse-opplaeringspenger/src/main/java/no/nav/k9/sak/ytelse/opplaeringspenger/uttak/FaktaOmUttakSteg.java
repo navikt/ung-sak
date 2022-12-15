@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.uttak;
 
 import java.util.List;
+import java.util.NavigableSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -59,7 +60,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private boolean harNoenGodkjentPerioderMedSykdom(List<DatoIntervallEntitet> innvilgedePerioder) {
+    private boolean harNoenGodkjentPerioderMedSykdom(NavigableSet<DatoIntervallEntitet> innvilgedePerioder) {
         return !innvilgedePerioder.isEmpty();
     }
 

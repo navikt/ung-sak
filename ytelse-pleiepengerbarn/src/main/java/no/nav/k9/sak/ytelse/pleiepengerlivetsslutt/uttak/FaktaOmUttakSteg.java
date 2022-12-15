@@ -4,6 +4,7 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 
 import java.util.List;
+import java.util.NavigableSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -67,7 +68,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private boolean harNoenGodkjentPerioderMedSykdom(List<DatoIntervallEntitet> innvilgedePerioder) {
+    private boolean harNoenGodkjentPerioderMedSykdom(NavigableSet<DatoIntervallEntitet> innvilgedePerioder) {
         return !innvilgedePerioder.isEmpty();
     }
 

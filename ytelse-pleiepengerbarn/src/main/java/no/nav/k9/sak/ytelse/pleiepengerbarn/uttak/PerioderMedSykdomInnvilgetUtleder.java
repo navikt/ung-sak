@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
-import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.TreeSet;
@@ -40,7 +39,7 @@ public class PerioderMedSykdomInnvilgetUtleder {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
-    public List<DatoIntervallEntitet> utledInnvilgedePerioderTilVurdering(BehandlingReferanse referanse) {
+    public NavigableSet<DatoIntervallEntitet> utledInnvilgedePerioderTilVurdering(BehandlingReferanse referanse) {
         var behandlingId = referanse.getBehandlingId();
         final var perioderVurdertISykdom = utledPerioderVurdert(behandlingId);
 
@@ -61,7 +60,7 @@ public class PerioderMedSykdomInnvilgetUtleder {
         return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }
 
-    private List<DatoIntervallEntitet> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+    private NavigableSet<DatoIntervallEntitet> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = finnVilkårsPerioderTjeneste(behandlingId);
 
         var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
@@ -78,7 +77,7 @@ public class PerioderMedSykdomInnvilgetUtleder {
         }
 
         tidslinje = tidslinje.filterValue(it -> it);
-        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress()).stream().toList();
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }
 
     private VilkårsPerioderTilVurderingTjeneste finnVilkårsPerioderTjeneste(Long behandlingId) {

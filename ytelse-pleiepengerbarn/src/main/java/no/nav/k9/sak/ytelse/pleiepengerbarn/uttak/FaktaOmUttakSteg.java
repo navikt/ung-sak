@@ -7,6 +7,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -100,7 +101,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
     }
 
-    private List<AksjonspunktDefinisjon> vurderAksjonspunktForNattevåkOgBeredskap(Behandling behandling, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, List<DatoIntervallEntitet> innvilgedePerioderTilVurdering) {
+    private List<AksjonspunktDefinisjon> vurderAksjonspunktForNattevåkOgBeredskap(Behandling behandling, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, NavigableSet<DatoIntervallEntitet> innvilgedePerioderTilVurdering) {
         var aksjonspunkter = new ArrayList<AksjonspunktDefinisjon>();
         if (søktOmNattevåk(unntakEtablertTilsynForPleietrengende) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
             if (harNattevåkPerioderSomIkkeErVurdert(unntakEtablertTilsynForPleietrengende)) {
@@ -135,7 +136,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         return false;
     }
 
-    private boolean harNoenGodkjentPerioderMedSykdom(List<DatoIntervallEntitet> innvilgedePerioder) {
+    private boolean harNoenGodkjentPerioderMedSykdom(NavigableSet<DatoIntervallEntitet> innvilgedePerioder) {
         return !innvilgedePerioder.isEmpty();
     }
 
