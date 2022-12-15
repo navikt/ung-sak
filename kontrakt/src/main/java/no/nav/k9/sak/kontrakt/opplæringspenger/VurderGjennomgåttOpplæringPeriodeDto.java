@@ -24,7 +24,7 @@ public class VurderGjennomgåttOpplæringPeriodeDto {
     @Valid
     private Periode periode;
 
-    @JsonProperty(value = "gjennomførOpplæring", required = true)
+    @JsonProperty(value = "gjennomførtOpplæring", required = true)
     @NotNull
     private Boolean gjennomførtOpplæring;
 
