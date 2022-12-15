@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.uttak;
 
 import java.util.List;
-import java.util.Set;
+import java.util.NavigableSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -16,7 +16,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.PerioderMedSykdomInnvilgetUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
 
@@ -60,8 +60,8 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private boolean harNoenGodkjentPerioderMedSykdom(Set<VilkårPeriode> innvilgetePerioder) {
-        return !innvilgetePerioder.isEmpty();
+    private boolean harNoenGodkjentPerioderMedSykdom(NavigableSet<DatoIntervallEntitet> innvilgedePerioder) {
+        return !innvilgedePerioder.isEmpty();
     }
 
 }

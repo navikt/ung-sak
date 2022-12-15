@@ -2,6 +2,8 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import java.util.TreeSet;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -49,7 +51,7 @@ public class ErEndringPåEtablertTilsynTjeneste {
     }
 
     private LocalDateTimeline<Boolean> endringerFra(BehandlingReferanse referanse, LocalDateTimeline<Boolean> resultat) {
-        resultat = TidslinjeUtil.kunPerioderSomIkkeFinnesI(resultat, TidslinjeUtil.tilTidslinjeKomprimert(medisinskGrunnlagTjeneste.hentManglendeOmsorgenForPerioder(referanse.getBehandlingId())));
+        resultat = TidslinjeUtil.kunPerioderSomIkkeFinnesI(resultat, TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(medisinskGrunnlagTjeneste.hentManglendeOmsorgenForPerioder(referanse.getBehandlingId()))));
         //resultat = SykdomUtils.kunPerioderSomIkkeFinnesI(resultat, SykdomUtils.toLocalDateTimeline(utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)));
         resultat = resultat.intersection(TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurderingTjeneste.utledFullstendigePerioder(referanse.getBehandlingId())));
         return resultat;

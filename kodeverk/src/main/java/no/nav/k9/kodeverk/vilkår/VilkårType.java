@@ -138,10 +138,7 @@ public enum VilkårType implements Kodeverdi {
     NØDVENDIG_OPPLÆRING("K9_VK_20",
         "Nødvendig opplæring",
         Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "§ 9-14"),
-        Avslagsårsak.MANGLENDE_DOKUMENTASJON,
-        Avslagsårsak.IKKE_NØDVENDIG_OPPLÆRING,
-        Avslagsårsak.IKKE_GODKJENT_INSTITUSJON,
-        Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING
+        Avslagsårsak.IKKE_NØDVENDIG_OPPLÆRING
     ),
     GODKJENT_OPPLÆRINGSINSTITUSJON("K9_VK_21",
         "Godkjent opplæringsinstitusjon",
@@ -149,18 +146,15 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.IKKE_GODKJENT_INSTITUSJON
     ),
     GJENNOMGÅ_OPPLÆRING("K9_VK_22",
-        "Nødvendig opplæring",
+        "Gjennomgå opplæring",
         Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "§ 9-14"),
-        Avslagsårsak.MANGLENDE_DOKUMENTASJON,
-        Avslagsårsak.IKKE_GODKJENT_INSTITUSJON,
         Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING,
         Avslagsårsak.IKKE_PÅ_REISE
     ),
     LANGVARIG_SYKDOM("K9_VK_17",
-        "Nødvendig opplæring",
+        "Langvarig sykdom",
         Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "§ 9-14"),
-        Avslagsårsak.MANGLENDE_DOKUMENTASJON,
-        Avslagsårsak.IKKE_GODKJENT_INSTITUSJON
+        Avslagsårsak.MANGLENDE_DOKUMENTASJON
     ),
     UTVIDETRETT("K9_VK_9_6", "Utvidet rett",
         Map.of(FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-6 1. ledd",

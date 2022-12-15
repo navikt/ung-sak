@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.TreeSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -44,7 +44,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.VilkårTidslinjeUtleder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
@@ -134,13 +133,8 @@ public class VurderSykdomSteg implements BehandlingSteg {
             behandling.getUuid(),
             behandling.getAktørId(),
             behandling.getFagsak().getPleietrengendeAktørId(),
-            perioderSamlet.stream()
-                .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
-                .collect(Collectors.toList()),
-            //TODO tom liste her?
-            perioderSamlet.stream()
-                .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
-                .collect(Collectors.toList())
+            perioderSamlet,
+            new TreeSet<>()
         );
     }
 

@@ -1,10 +1,7 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
 
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.GODKJENT;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GJENNOMGÅTT_OPPLÆRING;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT_INSTITUSJON;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT_SYKDOMSVILKÅR;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.MANGLER_VURDERING;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -181,7 +178,7 @@ class VurderNødvendighetTidslinjeUtlederTest {
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
         assertThat(resultat).isNotNull();
-        assertTidslinje(resultat, IKKE_GODKJENT_INSTITUSJON);
+        assertThat(resultat).isEmpty();
     }
 
     @Test
@@ -198,7 +195,7 @@ class VurderNødvendighetTidslinjeUtlederTest {
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
         assertThat(resultat).isNotNull();
-        assertTidslinje(resultat, IKKE_GODKJENT_SYKDOMSVILKÅR);
+        assertThat(resultat).isEmpty();
     }
 
     @Test
@@ -215,7 +212,7 @@ class VurderNødvendighetTidslinjeUtlederTest {
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
         assertThat(resultat).isNotNull();
-        assertTidslinje(resultat, IKKE_GJENNOMGÅTT_OPPLÆRING);
+        assertThat(resultat).isEmpty();
     }
 
     @Test
@@ -235,10 +232,11 @@ class VurderNødvendighetTidslinjeUtlederTest {
         assertThat(resultat).isNotNull();
         var forventetGodkjentTidslinje = resultat.intersection(new LocalDateTimeline<>(søknadsperiodeTom.minusWeeks(1).plusDays(1), søknadsperiodeTom, true));
         assertTidslinje(forventetGodkjentTidslinje, GODKJENT);
-        assertTidslinje(resultat.disjoint(forventetGodkjentTidslinje), IKKE_GJENNOMGÅTT_OPPLÆRING);
+        assertThat(resultat.disjoint(forventetGodkjentTidslinje)).isEmpty();
     }
 
     private void assertTidslinje(LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinje, NødvendighetGodkjenningStatus forventetStatus) {
+        assertThat(tidslinje).isNotEmpty();
         assertThat(tidslinje.disjoint(tidslinje.filterValue(v -> Objects.equals(v, forventetStatus)))).isEmpty();
     }
 }

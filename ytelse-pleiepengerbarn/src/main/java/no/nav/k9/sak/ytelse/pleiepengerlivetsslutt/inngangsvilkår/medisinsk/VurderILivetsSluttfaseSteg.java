@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.TreeSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -43,15 +43,14 @@ import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.regelmodell.LivetsSluttfaseDokumentasjon;
@@ -140,10 +139,8 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
             behandling.getUuid(),
             behandling.getAktørId(),
             behandling.getFagsak().getPleietrengendeAktørId(),
-            perioderSamlet.stream()
-                .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
-                .collect(Collectors.toList()),
-            List.of()
+            perioderSamlet,
+            new TreeSet<>()
         );
     }
 
