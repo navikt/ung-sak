@@ -22,7 +22,6 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.felles.exception.IntegrasjonException;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -88,7 +87,7 @@ public class RedirectToRegisterRestTjeneste {
         HttpUriRequest request = new HttpGet(uri);
         request.addHeader(new BasicHeader("Nav-Personident", personIdent.getIdent()));
         try {
-            var respons = restClient.execute(request, new DebugOidcRestClientResponseHandler.StringResponseHandler(uri));
+            var respons = restClient.execute(request, new OidcRestClientResponseHandler.StringResponseHandler(uri));
             var redirectUri = URI.create(respons);
 
             return Response.temporaryRedirect(redirectUri).build();
@@ -117,7 +116,7 @@ public class RedirectToRegisterRestTjeneste {
         HttpUriRequest request = new HttpGet(uri);
         request.addHeader(new BasicHeader("Nav-Personident", personIdent.getIdent()));
         try {
-            var respons = restClient.execute(request, new DebugOidcRestClientResponseHandler.StringResponseHandler(uri));
+            var respons = restClient.execute(request, new OidcRestClientResponseHandler.StringResponseHandler(uri));
             var redirectUri = URI.create(respons);
 
             return Response.temporaryRedirect(redirectUri).build();

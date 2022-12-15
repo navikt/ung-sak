@@ -53,7 +53,8 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagReposito
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputAktivitetOverstyring;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
-import no.nav.k9.sikkerhet.oidc.token.bruker.BrukerTokenProvider;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = OverstyrInputForBeregningDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -64,7 +65,6 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
-    private BrukerTokenProvider brukerTokenProvider;
     private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
@@ -80,7 +80,6 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                     @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
-                                    BrukerTokenProvider brukerTokenProvider,
                                     ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag,
                                     HistorikkTjenesteAdapter historikkTjenesteAdapter,
                                     @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning) {
@@ -88,7 +87,6 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
-        this.brukerTokenProvider = brukerTokenProvider;
         this.arbeidsgiverHistorikkinnslag = arbeidsgiverHistorikkinnslag;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
@@ -105,7 +103,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
     }
 
     private boolean harTillatelseTilÅLøseAksjonspunkt() {
-        return Arrays.stream(environment.getProperty("INFOTRYGD_MIGRERING_TILLATELSER", "").split(",")).anyMatch(id -> id.equalsIgnoreCase(brukerTokenProvider.getUserId()));
+        return Arrays.stream(environment.getProperty("INFOTRYGD_MIGRERING_TILLATELSER", "").split(",")).anyMatch(id -> id.equalsIgnoreCase(SubjectHandler.getSubjectHandler().getUid()));
     }
 
     private void lagreInputOverstyringer(BehandlingReferanse ref, OverstyrInputForBeregningDto dto) {

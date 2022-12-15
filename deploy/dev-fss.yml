@@ -181,6 +181,8 @@ spec:
       value: http://k9-formidling-dokumentdata.k9saksbehandling/k9/formidling/dokumentdata
     - name: K9_OPPDRAG_DIREKTE_URL
       value: http://k9-oppdrag.k9saksbehandling/k9/oppdrag/api
+    - name: K9_OPPDRAG_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-oppdrag/.default
     - name: K9_TILBAKE_DIREKTE_URL
       value: http://k9-tilbake.k9saksbehandling/k9/tilbake/api
     - name: K9_FORMIDLING_URL
@@ -254,7 +256,7 @@ spec:
     - name: FILTRER_TILSTOTENDE_PERIODE
       value: "true"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
-      value: "2022-08-22"
+      value: "2022-08-08"
     - name: PSB_UTTAK_UNNTAK_BEVAR_VEDTATT_VERDI
       value: "true"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK

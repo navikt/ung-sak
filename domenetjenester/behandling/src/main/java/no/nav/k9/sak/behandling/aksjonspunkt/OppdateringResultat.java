@@ -50,7 +50,7 @@ public class OppdateringResultat {
     public boolean getSkalRekjøreSteg() {
         return skalRekjøreSteg;
     }
-
+    
     public void rekjørSteg() {
         this.skalRekjøreSteg = true;
     }
