@@ -1,15 +1,15 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NavigableSet;
-import java.util.Set;
+import java.util.Objects;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -17,10 +17,8 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -41,7 +39,7 @@ public class PerioderMedSykdomInnvilgetUtleder {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
-    public Set<VilkårPeriode> utledInnvilgedePerioderTilVurdering(BehandlingReferanse referanse) {
+    public NavigableSet<DatoIntervallEntitet> utledInnvilgedePerioderTilVurdering(BehandlingReferanse referanse) {
         var behandlingId = referanse.getBehandlingId();
         final var perioderVurdertISykdom = utledPerioderVurdert(behandlingId);
 
@@ -62,18 +60,24 @@ public class PerioderMedSykdomInnvilgetUtleder {
         return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }
 
-    private Set<VilkårPeriode> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+    private NavigableSet<DatoIntervallEntitet> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = finnVilkårsPerioderTjeneste(behandlingId);
 
-        List<VilkårPeriode> vilkårsperioder = new ArrayList<>();
-        for (VilkårType vilkårType : vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()) {
-            vilkårene.getVilkår(vilkårType).map(Vilkår::getPerioder).ifPresent(vilkårsperioder::addAll);
+        var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
+        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
+
+        for (VilkårType vilkårType : definerendeVilkår) {
+            var segmenter = vilkårene.getVilkår(vilkårType).orElseThrow()
+                .getPerioder()
+                .stream()
+                .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
+                .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), Objects.equals(Utfall.OPPFYLT, it.getGjeldendeUtfall())))
+                .collect(Collectors.toCollection(TreeSet::new));
+            tidslinje = tidslinje.combine(new LocalDateTimeline<>(segmenter), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        return vilkårsperioder.stream()
-            .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
-            .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
-            .collect(Collectors.toSet());
+        tidslinje = tidslinje.filterValue(it -> it);
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }
 
     private VilkårsPerioderTilVurderingTjeneste finnVilkårsPerioderTjeneste(Long behandlingId) {

@@ -15,10 +15,10 @@ class GjennomgåttOpplæringTidslinjeUtleder {
 
     LocalDateTimeline<OpplæringGodkjenningStatus> utled(Vilkårene vilkårene, Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
         Objects.requireNonNull(vilkårene, "Vilkårene må være satt");
-        Objects.requireNonNull(perioderFraSøknad, "Persioder fra søknad må være satt");
+        Objects.requireNonNull(perioderFraSøknad, "Perioder fra søknad må være satt");
         Objects.requireNonNull(tidslinjeTilVurdering, "Tidslinje til vurdering må være satt");
 
-        LocalDateTimeline<OpplæringGodkjenningStatus> tidslinjeIkkeGodkjentTidligereVilkår = lagTidslinjeMedIkkeGodkjentTidligereVilkår(vilkårene, tidslinjeTilVurdering);
+        var tidslinjeIkkeGodkjentTidligereVilkår = lagTidslinjeMedIkkeGodkjentTidligereVilkår(vilkårene);
         var tidslinjeTilVurderingEtterJusteringMotVilkår = tidslinjeTilVurdering.disjoint(tidslinjeIkkeGodkjentTidligereVilkår);
 
         LocalDateTimeline<OpplæringGodkjenningStatus> tidslinjeMedGjennomgåttOpplæring = lagTidslinjeGjennomgåttOpplæring(vurdertOpplæringGrunnlag, tidslinjeTilVurderingEtterJusteringMotVilkår);
@@ -28,12 +28,9 @@ class GjennomgåttOpplæringTidslinjeUtleder {
         return tidslinjeMedGjennomgåttOpplæring.crossJoin(tidslinjeReisetid).crossJoin(tidslinjeTilVurderingEtterJusteringMotVilkår.mapValue(value -> OpplæringGodkjenningStatus.MANGLER_VURDERING));
     }
 
-    private LocalDateTimeline<OpplæringGodkjenningStatus> lagTidslinjeMedIkkeGodkjentTidligereVilkår(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
-        var godkjentInstitusjonTidslinje = VilkårTidslinjeUtleder.utledOppfylt(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
-        var sykdomsTidslinje = VilkårTidslinjeUtleder.utledOppfylt(vilkårene, VilkårType.LANGVARIG_SYKDOM);
-
-        var tidslinjeUtenGodkjentInstitusjon = tidslinjeTilVurdering.disjoint(godkjentInstitusjonTidslinje).mapValue(value -> OpplæringGodkjenningStatus.IKKE_GODKJENT_INSTITUSJON);
-        var tidslinjeUtenSykdomsvilkår = tidslinjeTilVurdering.disjoint(sykdomsTidslinje).mapValue(value -> OpplæringGodkjenningStatus.IKKE_GODKJENT_SYKDOMSVILKÅR);
+    private LocalDateTimeline<Boolean> lagTidslinjeMedIkkeGodkjentTidligereVilkår(Vilkårene vilkårene) {
+        var tidslinjeUtenGodkjentInstitusjon = VilkårTidslinjeUtleder.utledAvslått(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
+        var tidslinjeUtenSykdomsvilkår = VilkårTidslinjeUtleder.utledAvslått(vilkårene, VilkårType.LANGVARIG_SYKDOM);
 
         return tidslinjeUtenGodkjentInstitusjon.crossJoin(tidslinjeUtenSykdomsvilkår);
     }

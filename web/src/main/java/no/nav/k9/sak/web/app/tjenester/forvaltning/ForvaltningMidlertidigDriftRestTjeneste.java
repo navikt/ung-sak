@@ -71,6 +71,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
@@ -80,12 +81,14 @@ import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
+import no.nav.k9.sak.kontrakt.mottak.AktørListeDto;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.StønadstatistikkSerializer;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tasks.OpprettManuellRevurderingTask;
 import no.nav.k9.sak.web.app.tjenester.behandling.SjekkProsessering;
+import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering.DriftLesetilgangVurderer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
@@ -129,6 +132,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private StønadstatistikkService stønadstatistikkService;
 
     private DriftLesetilgangVurderer lesetilgangVurderer;
+    
+    private PersonopplysningRepository personopplysningRepository;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
@@ -145,7 +150,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    SjekkProsessering sjekkProsessering,
                                                    EntityManager entityManager,
                                                    StønadstatistikkService stønadstatistikkService,
-                                                   DriftLesetilgangVurderer lesetilgangVurderer) {
+                                                   DriftLesetilgangVurderer lesetilgangVurderer,
+                                                   PersonopplysningRepository personopplysningRepository) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
@@ -158,6 +164,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.entityManager = entityManager;
         this.stønadstatistikkService = stønadstatistikkService;
         this.lesetilgangVurderer = lesetilgangVurderer;
+        this.personopplysningRepository = personopplysningRepository;
     }
 
     /**
@@ -209,6 +216,27 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, List.of(OVERSTYRING_FRISINN_OPPGITT_OPPTJENING, KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING));
 
         return Response.ok(new SaksnummerDto(fagsak.getSaksnummer())).build();
+    }
+    
+    @POST
+    @Path("/beskyttAktoerId")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Beskytt aktørid og oppdaterer nødvendige tabeller", tags = "forvaltning", responses = {
+        @ApiResponse(responseCode = "200", description = "AktørId er endret."),
+        @ApiResponse(responseCode = "400", description = "AktørId er uendret."),
+        @ApiResponse(responseCode = "500", description = "Feilet pga ukjent feil.")
+    })
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = DRIFT)
+    public Response beskyttAktoerId(@Parameter(description = "Liste med aktør-IDer") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid AktørListeDto aktører) {
+        /*
+        for (AktørId aktørId : aktører.getAktører()) {
+            personopplysningRepository.beskyttAktørId(aktørId);
+        }
+        
+        return Response.ok().build();
+        */
+        throw new IllegalStateException("Dette kallet er deaktivert.");
     }
 
     @POST

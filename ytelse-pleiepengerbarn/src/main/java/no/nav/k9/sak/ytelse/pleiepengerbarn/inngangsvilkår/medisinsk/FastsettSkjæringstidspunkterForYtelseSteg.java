@@ -139,13 +139,13 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
 
         for (VilkårType vilkårType : definerendeVilkår) {
-            var segmenger = vilkårene.getVilkår(vilkårType).orElseThrow()
+            var segmenter = vilkårene.getVilkår(vilkårType).orElseThrow()
                 .getPerioder()
                 .stream()
                 .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
                 .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), Objects.equals(Utfall.OPPFYLT, it.getGjeldendeUtfall())))
                 .collect(Collectors.toCollection(TreeSet::new));
-            tidslinje = tidslinje.combine(new LocalDateTimeline<>(segmenger), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            tidslinje = tidslinje.combine(new LocalDateTimeline<>(segmenter), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
         return tidslinje.compress();

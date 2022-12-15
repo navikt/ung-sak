@@ -99,11 +99,18 @@ public class AksjonspunktApplikasjonTjeneste {
 
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
 
-        if (behandling.isBehandlingPåVent()) {
+
+
+        if (skalIkkeFortsetteBehandling(behandling, aksjonspunktProsessResultat)) {
             // Skal ikke fortsette behandling dersom behandling ble satt på vent
             return;
         }
         fortsettBehandlingen(behandling, kontekst, aksjonspunktProsessResultat);// skal ikke reinnhente her, avgjøres i steg?
+    }
+
+    private boolean skalIkkeFortsetteBehandling(Behandling behandling, AksjonspunktProsessResultat aksjonspunktProsessResultat) {
+        var harÅpneAksjonspunkterISteg = behandling.getAksjonspunkter().stream().anyMatch(a -> a.getAksjonspunktDefinisjon().getBehandlingSteg().equals(behandling.getAktivtBehandlingSteg()) && a.getStatus().erÅpentAksjonspunkt());
+        return behandling.isBehandlingPåVent() || (harÅpneAksjonspunkterISteg && !aksjonspunktProsessResultat.skalRekjøreSteg());
     }
 
     private AksjonspunktProsessResultat spolTilbakeOgBekreft(Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer,

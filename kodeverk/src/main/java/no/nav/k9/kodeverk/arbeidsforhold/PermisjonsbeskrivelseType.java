@@ -41,11 +41,9 @@ public enum PermisjonsbeskrivelseType implements Kodeverdi {
         PermisjonsbeskrivelseType.PERMISJON_MED_FORELDREPENGER
     );
 
-    public static final Set<PermisjonsbeskrivelseType> PERMISJON_TILSVARENDE_VELFERDSPERIMISJON = Set.of(
-        //VELFERDSPERMISJON utgår 31/12-2022 og er erstattes av de to andre her
+    public static final Set<PermisjonsbeskrivelseType> K9_VELFERDSPERMISJON = Set.of(
         PermisjonsbeskrivelseType.VELFERDSPERMISJON,
-        PermisjonsbeskrivelseType.ANNEN_PERMISJON_LOVFESTET,
-        PermisjonsbeskrivelseType.ANNEN_PERMISJON_IKKE_LOVFESTET
+        PermisjonsbeskrivelseType.ANNEN_PERMISJON_LOVFESTET
     );
 
     private static final Map<String, PermisjonsbeskrivelseType> KODER = new LinkedHashMap<>();

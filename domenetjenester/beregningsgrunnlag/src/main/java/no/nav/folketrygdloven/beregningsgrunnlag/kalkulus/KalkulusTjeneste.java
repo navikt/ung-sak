@@ -2,7 +2,6 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,7 +34,6 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.EksternArbeidsforholdRef;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdReferanseDto;
-import no.nav.folketrygdloven.kalkulus.kodeverk.AvklaringsbehovDefinisjon;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
 import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Vilkårsavslagsårsak;
@@ -317,15 +315,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     private BeregningAvklaringsbehovDefinisjon mapTilAvklaringsbehov(AvklaringsbehovMedTilstandDto dto) {
-        return BeregningAvklaringsbehovDefinisjon.fraKode(finnEksternKode(dto.getBeregningAvklaringsbehovDefinisjon()));
-    }
-
-    private String finnEksternKode(AvklaringsbehovDefinisjon beregningAvklaringsbehovDefinisjon) {
-        if (Arrays.stream(BeregningAvklaringsbehovDefinisjon.values()).map(BeregningAvklaringsbehovDefinisjon::getKode)
-            .anyMatch(beregningAvklaringsbehovDefinisjon.getKode()::equals)) {
-            return beregningAvklaringsbehovDefinisjon.getKode();
-        }
-        return beregningAvklaringsbehovDefinisjon.getKodeNy();
+        return BeregningAvklaringsbehovDefinisjon.fraKode(dto.getBeregningAvklaringsbehovDefinisjon().getKode());
     }
 
     private Avslagsårsak mapTilAvslagsårsak(Vilkårsavslagsårsak vilkårsavslagsårsak) {

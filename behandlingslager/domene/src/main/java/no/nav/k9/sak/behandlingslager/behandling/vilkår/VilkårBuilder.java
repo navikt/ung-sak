@@ -25,7 +25,6 @@ import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 public class VilkårBuilder {
 
     private final Vilkår vilkåret;
-    private final NavigableSet<DatoIntervallEntitet> tilbakestiltePerioder = new TreeSet<>();
     private boolean dummy = false;
     private KantIKantVurderer kantIKantVurderer = new IngenVurdering();
     private LocalDateTimeline<WrappedVilkårPeriode> vilkårTidslinje;
@@ -161,7 +160,7 @@ public class VilkårBuilder {
 
             this.vilkårTidslinje = vilkårTidslinje.disjoint(periodeTidslinje);
         }
-        this.tilbakestiltePerioder.addAll(perioder);
+        justereUtfallVedTilbakestilling(perioder);
         return this;
     }
 
@@ -250,9 +249,6 @@ public class VilkårBuilder {
 
         if (dummy) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke bygge en dummy");
-        }
-        if (!tilbakestiltePerioder.isEmpty()) {
-            justereUtfallVedTilbakestilling(tilbakestiltePerioder);
         }
         if (!vilkårTidslinje.isContinuous()) {
             kobleSammenMellomliggendeVilkårsPerioder();
@@ -371,9 +367,6 @@ public class VilkårBuilder {
             throw new IllegalStateException("Ikke dummy så kan ikke hente ut ");
         }
         bygget = true;
-        if (!tilbakestiltePerioder.isEmpty()) {
-            justereUtfallVedTilbakestilling(tilbakestiltePerioder);
-        }
         if (!vilkårTidslinje.isContinuous()) {
             kobleSammenMellomliggendeVilkårsPerioder();
         }

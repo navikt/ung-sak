@@ -4,7 +4,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -52,7 +51,7 @@ class FrisinnOpplysningsperiodeTjeneste implements OpplysningsperiodeTjeneste {
             .getPeriode()
             .getTomDato();
         var førsteSkjæringstidspunkt = førsteUttaksdag(behandlingId);
-        return SkattegrunnlaginnhentingTjeneste.utledSkattegrunnlagOpplysningsperiode(førsteSkjæringstidspunkt, fagsakperiodeTom);
+        return SkattegrunnlaginnhentingTjeneste.utledSkattegrunnlagOpplysningsperiode(førsteSkjæringstidspunkt, fagsakperiodeTom, LocalDate.now());
     }
 
     private LocalDate førsteUttaksdag(Long behandlingId) {

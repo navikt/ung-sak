@@ -17,13 +17,12 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-import jakarta.persistence.EntityManager;
-
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
+import jakarta.persistence.EntityManager;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -63,7 +62,6 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -687,7 +685,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         VilkårResultatBuilder inngangsvilkårBuilder = Vilkårene.builder();
 
         vilkår.forEach(v -> {
-            inngangsvilkårBuilder.leggTil(new VilkårBuilder(v.getVilkårType()).leggTil(new VilkårPeriodeBuilder()
+            inngangsvilkårBuilder.leggTil(inngangsvilkårBuilder.hentBuilderFor(v.getVilkårType()).leggTil(new VilkårPeriodeBuilder()
                 .medPeriode(DatoIntervallEntitet.fra(v.getPeriode()))
                 .medUtfall(v.getUtfall())));
         });
