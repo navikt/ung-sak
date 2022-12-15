@@ -20,8 +20,7 @@ public class DokumentbestillingProducer {
 
     @Inject
     public DokumentbestillingProducer(
-        @KonfigVerdi("kafka.dokumentbestilling.topic") String topicName,
-        @KonfigVerdi(value = "kafka.dokumentbestilling.aiven.topic") String topicV2Name,
+        @KonfigVerdi(value = "kafka.dokumentbestilling.aiven.topic") String topicName,
         @KonfigVerdi(value = "KAFKA_BROKERS") String bootstrapServersAiven,
         @KonfigVerdi("bootstrap.servers") String bootstrapServersOnPrem,
         @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
@@ -33,7 +32,6 @@ public class DokumentbestillingProducer {
         @KonfigVerdi("systembruker.password") String password
     ) {
 
-        String _topicName = aivenEnabled ? topicV2Name : topicName;
         String _bootstrapServer = aivenEnabled ? bootstrapServersAiven : bootstrapServersOnPrem;
 
         var builder = new KafkaPropertiesBuilder()
@@ -51,7 +49,7 @@ public class DokumentbestillingProducer {
                 .password(password)
                 .buildForProducerJaas();
 
-        this.producer = new GenerellKafkaProducer(_topicName, props);
+        this.producer = new GenerellKafkaProducer(topicName, props);
 
     }
 
