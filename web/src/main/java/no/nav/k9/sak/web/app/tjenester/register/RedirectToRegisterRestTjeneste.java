@@ -68,16 +68,16 @@ public class RedirectToRegisterRestTjeneste {
 
     @GET
     @Operation(description = "Redirecter til aa-reg for arbeidstakeren", tags = "aktoer", responses = {
-        @ApiResponse(responseCode = "307", description = "Redirecter til aa-reg for arbeidstakeren" )
+        @ApiResponse(responseCode = "307", description = "Redirecter til aa-reg for arbeidstakeren")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(AA_REG_POSTFIX)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getAktoerInfo(
-            @NotNull
-            @QueryParam(SaksnummerDto.NAME)
-            @Valid
-            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        @NotNull
+        @QueryParam(SaksnummerDto.NAME)
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SaksnummerDto saksnummerDto) {
         Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummerDto.getVerdi()).get();
         var personIdent = tpsTjeneste.hentFnrForAktør(fagsak.getAktørId());
@@ -103,11 +103,11 @@ public class RedirectToRegisterRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(AINNTEKT_REG_POSTFIX)
     public Response getAInntektUrl(
-            @NotNull
-            @QueryParam(SaksnummerDto.NAME)
-            @Parameter(description = SaksnummerDto.DESC)
-            @Valid
-            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        @NotNull
+        @QueryParam(SaksnummerDto.NAME)
+        @Parameter(description = SaksnummerDto.DESC)
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SaksnummerDto saksnummerDto) {
         Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummerDto.getVerdi()).get();
         var personIdent = tpsTjeneste.hentFnrForAktør(fagsak.getAktørId());

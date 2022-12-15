@@ -45,7 +45,7 @@ public final class PermisjonPerYrkesaktivitet {
             var permisjonstidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), true)));
             permisjonstidslinje = permisjonstidslinje.disjoint(ytelsesTidslinje);
             return TidslinjeUtil.tilDatoIntervallEntiteter(permisjonstidslinje.compress());
-        } else if (PermisjonsbeskrivelseType.PERMISJON_TILSVARENDE_VELFERDSPERIMISJON.contains(it.getPermisjonsbeskrivelseType())) {
+        } else if (PermisjonsbeskrivelseType.K9_VELFERDSPERMISJON.contains(it.getPermisjonsbeskrivelseType())) {
             var permisjonstidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), true)));
             // Filtrerer bort overlapp av k9-yteser for velferdspermisjon siden k9-ytelser ofte rapporteres som velferdspermisjon
             for (OpptjeningAktivitetType aktivitetType : OpptjeningAktivitetType.K9_YTELSER) {

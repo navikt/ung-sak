@@ -12,7 +12,7 @@ import no.nav.k9.felles.sikkerhet.abac.Pep;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.Tilgangsbeslutning;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sikkerhet.oidc.token.bruker.BrukerTokenProvider;
+import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
 
 /**
  * Brukes for å manuelt sjekke om kaller har tilgang til en sak, typisk ved rapportgenerering
@@ -20,12 +20,12 @@ import no.nav.k9.sikkerhet.oidc.token.bruker.BrukerTokenProvider;
 @ApplicationScoped
 public class DriftLesetilgangVurderer {
     private Pep pep;
-    private BrukerTokenProvider tokenProvider;
+    private ContextAwareTokenProvider tokenProvider;
 
     public DriftLesetilgangVurderer() {}
 
     @Inject
-    public DriftLesetilgangVurderer(Pep pep, BrukerTokenProvider tokenProvider) {
+    public DriftLesetilgangVurderer(Pep pep, ContextAwareTokenProvider tokenProvider) {
         this.pep = pep;
         this.tokenProvider = tokenProvider;
     }

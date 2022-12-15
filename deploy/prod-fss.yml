@@ -93,8 +93,6 @@ spec:
       value: privat-k9-aksjonspunkthendelse
     - name: KAFKA_AKSJONSPUNKTHENDELSE_AIVEN_TOPIC
       value: k9saksbehandling.k9sak-aksjonspunkthendelse
-    - name: KAFKA_DOKUMENTBESTILLING_TOPIC
-      value: privat-k9-dokumenthendelse
     - name: KAFKA_DOKUMENTBESTILLING_AIVEN_TOPIC
       value: k9saksbehandling.k9-dokumenthendelse-v1
     - name: KAFKA_FATTEVEDTAK_TOPIC
@@ -179,8 +177,12 @@ spec:
       value: https://modapp.adeo.no/ereg/api/v1/organisasjon
     - name: K9_FORMIDLING_DOKUMENTDATA_URL
       value: http://k9-formidling-dokumentdata.k9saksbehandling/k9/formidling/dokumentdata
+    - name: K9_FORMIDLING_DOKUMENTDATA_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-formidling-dokumentdata/.default
     - name: K9_OPPDRAG_DIREKTE_URL
       value: http://k9-oppdrag.k9saksbehandling/k9/oppdrag/api
+    - name: K9_OPPDRAG_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-oppdrag/.default
     - name: K9_TILBAKE_DIREKTE_URL
       value: http://k9-tilbake.k9saksbehandling/k9/tilbake/api
     - name: K9_FORMIDLING_URL

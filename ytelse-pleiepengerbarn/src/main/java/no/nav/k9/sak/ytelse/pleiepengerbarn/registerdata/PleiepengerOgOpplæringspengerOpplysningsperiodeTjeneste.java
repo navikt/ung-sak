@@ -56,7 +56,7 @@ public class PleiepengerOgOpplæringspengerOpplysningsperiodeTjeneste implements
             .getPeriode()
             .getTomDato();
         var førsteSkjæringstidspunkt = førsteUttaksdag(behandlingId);
-        return SkattegrunnlaginnhentingTjeneste.utledSkattegrunnlagOpplysningsperiode(førsteSkjæringstidspunkt, fagsakperiodeTom);
+        return SkattegrunnlaginnhentingTjeneste.utledSkattegrunnlagOpplysningsperiode(førsteSkjæringstidspunkt, fagsakperiodeTom, LocalDate.now());
     }
 
     private LocalDate førsteUttaksdag(Long behandlingId) {
