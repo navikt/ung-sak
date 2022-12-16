@@ -12,26 +12,17 @@ import no.nav.k9.sak.typer.Periode;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class OpplæringPeriodeDto {
 
+    //TODO erstatt med Periode
     @JsonProperty(value = "opplæring", required = true)
     @Valid
     @NotNull
     private Periode periode;
 
-    @JsonProperty(value = "reisetid", required = true)
-    @Valid
-    @NotNull
-    private ReisetidDto reisetid;
-
-    public OpplæringPeriodeDto(Periode periode, ReisetidDto reisetidDto) {
+    public OpplæringPeriodeDto(Periode periode) {
         this.periode = periode;
-        this.reisetid = reisetidDto;
     }
 
     public Periode getPeriode() {
         return periode;
-    }
-
-    public ReisetidDto getReisetid() {
-        return reisetid;
     }
 }

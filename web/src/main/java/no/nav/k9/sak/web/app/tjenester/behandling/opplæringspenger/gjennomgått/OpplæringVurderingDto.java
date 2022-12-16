@@ -30,15 +30,10 @@ public class OpplæringVurderingDto {
     @Valid
     private String begrunnelse;
 
-    @JsonProperty(value = "reisetid", required = true)
-    @Valid
-    private ReisetidVurderingDto reisetidVurdering;
-
-    public OpplæringVurderingDto(Periode periode, Resultat resultat, String begrunnelse, ReisetidVurderingDto reisetidVurdering) {
+    public OpplæringVurderingDto(Periode periode, Resultat resultat, String begrunnelse) {
         this.periode = periode;
         this.resultat = resultat;
         this.begrunnelse = begrunnelse;
-        this.reisetidVurdering = reisetidVurdering;
     }
 
     public Periode getPeriode() {
@@ -51,9 +46,5 @@ public class OpplæringVurderingDto {
 
     public String getBegrunnelse() {
         return begrunnelse;
-    }
-
-    public ReisetidVurderingDto getReisetidVurdering() {
-        return reisetidVurdering;
     }
 }
