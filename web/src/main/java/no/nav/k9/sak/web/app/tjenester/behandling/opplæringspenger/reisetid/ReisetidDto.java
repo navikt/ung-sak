@@ -1,34 +1,38 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.reisetid;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.Valid;
-import no.nav.k9.sak.typer.Periode;
+import jakarta.validation.constraints.Size;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ReisetidDto {
 
-    @JsonProperty(value = "reisetidTil", required = true)
+    @JsonProperty(value = "perioder", required = true)
+    @Size(max = 1000)
     @Valid
-    private Periode reisetidTil;
+    private List<ReisetidPeriodeDto> perioder;
 
-    @JsonProperty(value = "reisetidHjem", required = true)
+    @JsonProperty(value = "vurderinger", required = true)
+    @Size(max = 1000)
     @Valid
-    private Periode reisetidHjem;
+    private List<ReisetidVurderingDto> vurderinger;
 
-    public ReisetidDto(Periode reisetidTil, Periode reisetidHjem) {
-        this.reisetidTil = reisetidTil;
-        this.reisetidHjem = reisetidHjem;
+    public ReisetidDto(List<ReisetidPeriodeDto> perioder, List<ReisetidVurderingDto> vurderinger) {
+        this.perioder = perioder;
+        this.vurderinger = vurderinger;
     }
 
-    public Periode getReisetidTil() {
-        return reisetidTil;
+    public List<ReisetidPeriodeDto> getPerioder() {
+        return perioder;
     }
 
-    public Periode getReisetidHjem() {
-        return reisetidHjem;
+    public List<ReisetidVurderingDto> getVurderinger() {
+        return vurderinger;
     }
 }

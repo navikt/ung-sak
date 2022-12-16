@@ -67,6 +67,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.ÅrskvantumRestT
 import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.gjennomgått.VurderGjennomgåttOpplæringRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.institusjon.VurderInstitusjonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.nødvendighet.VurderNødvendigOpplæringRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.reisetid.ReisetidRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PleietrengendeRestTjeneste;
@@ -408,6 +409,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_LVS_PATH, "sykdom-vurdering-oversikt-lvs", uuidQueryParams));
                 dto.leggTil(getFraMap(VurderGjennomgåttOpplæringRestTjeneste.BASEPATH, "gjennomgått-opplæring", uuidQueryParams));
                 dto.leggTil(getFraMap(VurderNødvendigOpplæringRestTjeneste.BASEPATH, "nødvendig-opplæring", uuidQueryParams));
+                dto.leggTil(getFraMap(ReisetidRestTjeneste.BASEPATH, "reisetid", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
             }
             case PLEIEPENGER_NÆRSTÅENDE -> {

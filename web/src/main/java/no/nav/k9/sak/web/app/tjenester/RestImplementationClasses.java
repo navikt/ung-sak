@@ -28,6 +28,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.ÅrskvantumRestT
 import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.gjennomgått.VurderGjennomgåttOpplæringRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.institusjon.VurderInstitusjonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.nødvendighet.VurderNødvendigOpplæringRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.reisetid.ReisetidRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.ForvaltningPersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
@@ -124,6 +125,7 @@ public class RestImplementationClasses {
         classes.add(VurderInstitusjonRestTjeneste.class);
         classes.add(VurderGjennomgåttOpplæringRestTjeneste.class);
         classes.add(VurderNødvendigOpplæringRestTjeneste.class);
+        classes.add(ReisetidRestTjeneste.class);
 
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);
