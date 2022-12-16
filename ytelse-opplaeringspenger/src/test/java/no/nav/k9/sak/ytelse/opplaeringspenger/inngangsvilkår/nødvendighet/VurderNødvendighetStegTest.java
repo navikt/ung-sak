@@ -156,6 +156,7 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null,
             null
         );
         lagreGrunnlag(grunnlag);
@@ -197,6 +198,7 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null,
             null
         );
         lagreGrunnlag(grunnlag);
@@ -264,6 +266,7 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring1, vurdertOpplæring2)),
+            null,
             null
         );
         lagreGrunnlag(grunnlag);
@@ -305,6 +308,7 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null,
             null
         );
         lagreGrunnlag(grunnlag);
@@ -387,6 +391,7 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null,
             null
         );
         lagreGrunnlag(grunnlag);
@@ -420,6 +425,7 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null,
             null
         );
         lagreGrunnlag(grunnlag);

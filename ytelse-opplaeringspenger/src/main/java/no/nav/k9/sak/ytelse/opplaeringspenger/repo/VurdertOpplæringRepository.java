@@ -47,7 +47,8 @@ public class VurdertOpplæringRepository {
         var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId,
             vurdertInstitusjonHolder,
             aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertOpplæringHolder).orElse(null),
-            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertePerioder).orElse(null));
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertePerioder).orElse(null),
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertReisetid).orElse(null));
         deaktiverEksisterendeGrunnlag(aktivtGrunnlag);
 
         entityManager.persist(nyttGrunnlag.getVurdertInstitusjonHolder());
@@ -64,7 +65,8 @@ public class VurdertOpplæringRepository {
         var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId,
             aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertInstitusjonHolder).orElse(null),
             vurdertOpplæringHolder,
-            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertePerioder).orElse(null));
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertePerioder).orElse(null),
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertReisetid).orElse(null));
         deaktiverEksisterendeGrunnlag(aktivtGrunnlag);
 
         entityManager.persist(nyttGrunnlag.getVurdertOpplæringHolder());
@@ -81,10 +83,29 @@ public class VurdertOpplæringRepository {
         var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId,
             aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertInstitusjonHolder).orElse(null),
             aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertOpplæringHolder).orElse(null),
-            vurdertOpplæringPerioderHolder);
+            vurdertOpplæringPerioderHolder,
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertReisetid).orElse(null));
         deaktiverEksisterendeGrunnlag(aktivtGrunnlag);
 
         entityManager.persist(nyttGrunnlag.getVurdertePerioder());
+        entityManager.persist(nyttGrunnlag);
+        entityManager.flush();
+    }
+
+    public void lagre(Long behandlingId, VurdertReisetidHolder vurdertReisetidHolder) {
+        Objects.requireNonNull(behandlingId, "behandlingId");
+        Objects.requireNonNull(vurdertReisetidHolder, "vurdertReisetidHolder");
+
+        var aktivtGrunnlag = getAktivtGrunnlag(behandlingId);
+
+        var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId,
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertInstitusjonHolder).orElse(null),
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertOpplæringHolder).orElse(null),
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertePerioder).orElse(null),
+            vurdertReisetidHolder);
+        deaktiverEksisterendeGrunnlag(aktivtGrunnlag);
+
+        entityManager.persist(nyttGrunnlag.getVurdertReisetid());
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
     }

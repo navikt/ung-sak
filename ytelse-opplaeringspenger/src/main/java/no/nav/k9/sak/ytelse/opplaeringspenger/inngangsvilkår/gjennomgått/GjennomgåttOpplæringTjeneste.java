@@ -2,10 +2,13 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.GODKJENT;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.IKKE_GODKJENT;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.IKKE_GODKJENT_OPPLÆRING;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.IKKE_GODKJENT_REISETID;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.MANGLER_VURDERING;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.MANGLER_VURDERING_OPPLÆRING;
+import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått.OpplæringGodkjenningStatus.MANGLER_VURDERING_REISETID;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import jakarta.enterprise.context.Dependent;
@@ -22,7 +25,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.Aksjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 
@@ -47,15 +49,23 @@ public class GjennomgåttOpplæringTjeneste {
         this.tidslinjeUtleder = new GjennomgåttOpplæringTidslinjeUtleder();
     }
 
-    public Aksjon vurder(BehandlingReferanse referanse) {
+    public List<Aksjon> vurder(BehandlingReferanse referanse) {
 
         var tidslinje = hentTidslinjeMedVurdering(referanse);
 
-        if (tidslinje.stream().anyMatch(it -> Objects.equals(it.getValue(), MANGLER_VURDERING))) {
-            return Aksjon.TRENGER_AVKLARING;
+        List<Aksjon> aksjoner = new ArrayList<>();
+        if (tidslinje.stream().anyMatch(it -> Objects.equals(it.getValue(), MANGLER_VURDERING_OPPLÆRING))) {
+            aksjoner.add(Aksjon.TRENGER_AVKLARING_OPPLÆRING);
+        }
+        if (tidslinje.stream().anyMatch(it -> Objects.equals(it.getValue(), MANGLER_VURDERING_REISETID))) {
+            aksjoner.add(Aksjon.TRENGER_AVKLARING_REISETID);
         }
 
-        return Aksjon.FORTSETT;
+        if (aksjoner.isEmpty()) {
+            aksjoner.add(Aksjon.FORTSETT);
+        }
+
+        return aksjoner;
     }
 
     public void lagreVilkårsResultat(BehandlingReferanse referanse) {
@@ -84,7 +94,7 @@ public class GjennomgåttOpplæringTjeneste {
 
     private void leggTilVilkårsresultatgjennomgåttOpplæring(VilkårBuilder vilkårBuilder, LocalDateTimeline<OpplæringGodkjenningStatus> tidslinje) {
         var godkjentTidslinje = tidslinje.filterValue(value -> Objects.equals(value, GODKJENT));
-        var ikkeGodkjentTidslinje = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GODKJENT));
+        var ikkeGodkjentTidslinje = tidslinje.filterValue(value -> Objects.equals(value, IKKE_GODKJENT_OPPLÆRING));
 
         leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GJENNOMGÅTT_OPPLÆRING);
         leggTilVilkårResultat(vilkårBuilder, godkjentTidslinje, Utfall.OPPFYLT, Avslagsårsak.UDEFINERT);
