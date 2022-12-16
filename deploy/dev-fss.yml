@@ -122,9 +122,9 @@ spec:
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
-      value: https://app-q1.adeo.no
-    - name: LOADBALANCER_ALTERNATIVE_URL
       value: https://k9.dev.intern.nav.no
+    - name: LOADBALANCER_ALTERNATIVE_URL
+      value: https://app-q1.adeo.no
 
     # LDAP
     - name: LDAP_URL
