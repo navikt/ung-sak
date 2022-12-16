@@ -27,12 +27,12 @@ public class ReisetidDto {
 
     @JsonProperty(value = "reisetidTil", required = true)
     @Valid
-    @NotNull
+    @Size(max = 100)
     private List<ReisetidPeriodeDto> reisetidTil;
 
     @JsonProperty(value = "reisetidHjem", required = true)
     @Valid
-    @NotNull
+    @Size(max = 100)
     private List<ReisetidPeriodeDto> reisetidHjem;
 
     @JsonProperty("begrunnelse")
