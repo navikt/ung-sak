@@ -359,6 +359,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_GJENNOMGÅTT_OPPLÆRING(AksjonspunktKodeDefinisjon.VURDER_GJENNOMGÅTT_OPPLÆRING, AksjonspunktType.MANUELL,
         "Vurder om opplæringen er gjennomgått", BehandlingStatus.UTREDES,
         BehandlingStegType.VURDER_GJENNOMGÅTT_OPPLÆRING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UDEFINERT, TOTRINN, TILBAKE, AVBRYTES),
+    VURDER_REISETID(AksjonspunktKodeDefinisjon.VURDER_REISETID, AksjonspunktType.MANUELL,
+        "Vurder reisetid", BehandlingStatus.UTREDES,
+        BehandlingStegType.VURDER_GJENNOMGÅTT_OPPLÆRING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UDEFINERT, ENTRINN, TILBAKE, AVBRYTES),
 
     // Gruppe : 999x
     AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",

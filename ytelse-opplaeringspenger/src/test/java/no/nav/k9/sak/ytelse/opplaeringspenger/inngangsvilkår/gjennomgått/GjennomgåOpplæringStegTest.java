@@ -40,6 +40,8 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidHolder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
@@ -111,6 +113,9 @@ class GjennomgåOpplæringStegTest {
     }
 
     private void lagreGrunnlag(VurdertOpplæringGrunnlag grunnlag) {
+        if (grunnlag.getVurdertReisetid() != null) {
+            entityManager.persist(grunnlag.getVurdertReisetid());
+        }
         entityManager.persist(grunnlag.getVurdertePerioder());
         entityManager.persist(grunnlag);
         entityManager.flush();
@@ -152,7 +157,8 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, null, ""))));
+                new VurdertOpplæringPeriode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, ""))),
+            null);
         lagreGrunnlag(grunnlag);
 
         BehandleStegResultat resultat = gjennomgåOpplæringSteg.utførSteg(kontekst);
@@ -181,8 +187,9 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, null, ""),
-                new VurdertOpplæringPeriode(søknadsperiode.getTom(), søknadsperiode.getTom(), false, null, ""))));
+                new VurdertOpplæringPeriode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, ""),
+                new VurdertOpplæringPeriode(søknadsperiode.getTom(), søknadsperiode.getTom(), false, ""))),
+            null);
         lagreGrunnlag(grunnlag);
 
         BehandleStegResultat resultat = gjennomgåOpplæringSteg.utførSteg(kontekst);
@@ -238,7 +245,8 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(godkjentPeriode.getFom(), godkjentPeriode.getTom(), true, null, ""))));
+                new VurdertOpplæringPeriode(godkjentPeriode.getFom(), godkjentPeriode.getTom(), true, ""))),
+            null);
         lagreGrunnlag(grunnlag);
 
         BehandleStegResultat resultat = gjennomgåOpplæringSteg.utførSteg(kontekst);
@@ -267,7 +275,8 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, null, ""))));
+                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, ""))),
+            null);
         lagreGrunnlag(grunnlag);
 
         BehandleStegResultat resultat = gjennomgåOpplæringSteg.utførSteg(kontekst);
@@ -284,7 +293,7 @@ class GjennomgåOpplæringStegTest {
     }
 
     @Test
-    void reisetidPåOverEnDagSkalIkkeGodkjennesAutomatisk() {
+    void skalReturnereAksjonspunktNårReisetidPåOverEnDagManglerVurdering() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
@@ -298,7 +307,46 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, new VurdertReisetid(DatoIntervallEntitet.fraOgMedTilOgMed(reisetidTil.getFom(), reisetidTil.getTom()), null, ""), ""))));
+                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, ""))),
+            null);
+        lagreGrunnlag(grunnlag);
+
+        BehandleStegResultat resultat = gjennomgåOpplæringSteg.utførSteg(kontekst);
+        assertThat(resultat).isNotNull();
+        assertThat(resultat.getAksjonspunktResultater()).hasSize(1);
+        assertThat(resultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.VURDER_REISETID);
+        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING).orElse(null);
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(1);
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.IKKE_VURDERT,
+            søknadsperiode.getFom(),
+            søknadsperiode.getTom(),
+            null);
+    }
+
+    @Test
+    void skalReturnereUtenAksjonspunktNårReisetidPåOverEnDagErVurdert() {
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        behandling = scenario.lagre(repositoryProvider);
+        Periode kursperiode = new Periode(søknadsperiode.getFom().plusDays(2), søknadsperiode.getTom().minusDays(2));
+        Periode reisetidTil = new Periode(søknadsperiode.getFom(), søknadsperiode.getFom().plusDays(1));
+        Periode reisetidHjem = new Periode(søknadsperiode.getTom().minusDays(1), søknadsperiode.getTom());
+        setupUttakPerioder(søknadsperiode, reisetidTil, reisetidHjem);
+
+        var kontekst = setupBehandlingskontekst();
+        setupPerioderTilVurdering(kontekst);
+
+        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
+            new VurdertOpplæringPerioderHolder(List.of(
+                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, ""))),
+            new VurdertReisetidHolder(List.of(
+                new VurdertReisetid(DatoIntervallEntitet.fra(kursperiode), List.of(
+                    new VurdertReisetidPeriode(DatoIntervallEntitet.fra(reisetidTil), true),
+                    new VurdertReisetidPeriode(DatoIntervallEntitet.fra(reisetidHjem), false)
+                ), "reise")
+            )));
         lagreGrunnlag(grunnlag);
 
         BehandleStegResultat resultat = gjennomgåOpplæringSteg.utførSteg(kontekst);
@@ -310,12 +358,12 @@ class GjennomgåOpplæringStegTest {
         assertVilkårPeriode(vilkår.getPerioder().get(0),
             Utfall.OPPFYLT,
             søknadsperiode.getFom(),
-            kursperiode.getTom(),
+            søknadsperiode.getTom().minusDays(2),
             null);
         assertVilkårPeriode(vilkår.getPerioder().get(1),
             Utfall.IKKE_OPPFYLT,
-            reisetidHjem.getFom(),
-            reisetidHjem.getTom(),
+            søknadsperiode.getTom().minusDays(1),
+            søknadsperiode.getTom(),
             Avslagsårsak.IKKE_PÅ_REISE);
     }
 
