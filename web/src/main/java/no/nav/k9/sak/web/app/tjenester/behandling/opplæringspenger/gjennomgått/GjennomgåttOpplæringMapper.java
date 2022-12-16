@@ -15,24 +15,24 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 class GjennomgåttOpplæringMapper {
 
     GjennomgåttOpplæringDto mapTilDto(VurdertOpplæringGrunnlag grunnlag, Set<PerioderFraSøknad> perioderFraSøknad) {
-        List<OpplæringPeriodeDto> perioder = mapPerioder(perioderFraSøknad);
+        List<Periode> perioder = mapPerioder(perioderFraSøknad);
         List<OpplæringVurderingDto> vurderinger = mapVurderinger(grunnlag, perioder);
         return new GjennomgåttOpplæringDto(perioder, vurderinger);
     }
 
-    private List<OpplæringPeriodeDto> mapPerioder(Set<PerioderFraSøknad> perioderFraSøknad) {
-        List<OpplæringPeriodeDto> perioder = new ArrayList<>();
+    private List<Periode> mapPerioder(Set<PerioderFraSøknad> perioderFraSøknad) {
+        List<Periode> perioder = new ArrayList<>();
 
         for (PerioderFraSøknad fraSøknad : perioderFraSøknad) {
             for (KursPeriode kursPeriode : fraSøknad.getKurs()) {
-                perioder.add(new OpplæringPeriodeDto(kursPeriode.getPeriode().tilPeriode()));
+                perioder.add(kursPeriode.getPeriode().tilPeriode());
             }
         }
 
         return perioder;
     }
 
-    private List<OpplæringVurderingDto> mapVurderinger(VurdertOpplæringGrunnlag grunnlag, List<OpplæringPeriodeDto> perioder) {
+    private List<OpplæringVurderingDto> mapVurderinger(VurdertOpplæringGrunnlag grunnlag, List<Periode> perioder) {
         List<OpplæringVurderingDto> vurderinger = new ArrayList<>();
 
         if (grunnlag != null && grunnlag.getVurdertePerioder() != null) {
@@ -45,7 +45,6 @@ class GjennomgåttOpplæringMapper {
         }
 
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = new LocalDateTimeline<>(perioder.stream()
-            .map(OpplæringPeriodeDto::getPeriode)
             .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true))
             .toList());
 
