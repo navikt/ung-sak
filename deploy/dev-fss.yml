@@ -217,14 +217,10 @@ spec:
       value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
 
     # Sikkerhet:
-    - name: APP_AUTH_SCHEMA_AZUREAD_ENABLED
-      value: "true"
-    - name: APP_AUTH_SCHEMA_AZUREAD_DOMAIN
-      value: "k9.dev.intern.nav.no"
     - name: APP_AUTH_SCHEMA_AZUREAD_ADDITIONAL_PATHS
       value: "/k9/formidling/dokumentdata,api://dev-fss.k9saksbehandling.k9-formidling-dokumentdata/.default;/k9/formidling,api://dev-fss.k9saksbehandling.k9-formidling/.default"
     - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
-      value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default;/k9/fordel,api://dev-fss.k9saksbehandling.k9-fordel/.default"
+      value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default"
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
     - name: OIDC_OPENAM_HOST_URL
