@@ -137,6 +137,30 @@ public class VilkårBuilder {
 
         return this;
     }
+    
+    public VilkårBuilder leggTilIkkeVurdert(LocalDate fom, LocalDate tom) {
+        validerBuilder();
+        final var segment = new LocalDateSegment<>(fom, tom, Boolean.TRUE);
+       
+        this.vilkårTidslinje = vilkårTidslinje.combine(segment, (p, s1, s2) -> {
+            if (s1 == null) {
+                final VilkårPeriodeBuilder vpb = hentBuilderFor(p.getFomDato(), p.getTomDato()).medUtfall(Utfall.IKKE_VURDERT);
+                return new LocalDateSegment<>(p, new WrappedVilkårPeriode(vpb.build()));
+            }
+            if (s2 == null) {
+                return new LocalDateSegment<>(p, s1.getValue());
+            }
+
+            final VilkårPeriode vp = new VilkårPeriodeBuilder(s1.getValue().getVilkårPeriode())
+                    .medPeriode(p.getFomDato(), p.getTomDato())
+                    .medUtfall(Utfall.IKKE_VURDERT)
+                    .build();
+            
+            return new LocalDateSegment<>(p, new WrappedVilkårPeriode(vp));
+        }, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
+        return this;
+    }
 
     public boolean harDataPåPeriode(DatoIntervallEntitet periode) {
         return vilkårTidslinje.intersection(periode.toLocalDateInterval())
@@ -316,7 +340,9 @@ public class VilkårBuilder {
             for (VilkårPeriode vilkårPeriode : vilkårsPerioderRaw) {
                 if (periode == null) {
                     periode = vilkårPeriode;
-                } else if (kantIKantVurderer.erKantIKant(vilkårPeriode.getPeriode(), periode.getPeriode()) && enAvPeriodeneErTilVurdering(periode, vilkårPeriode)) {
+                } else if (kantIKantVurderer.erKantIKant(vilkårPeriode.getPeriode(), periode.getPeriode())
+                        && enAvPeriodeneErTilVurdering(periode, vilkårPeriode)
+                        && harSammeOverstyring(periode, vilkårPeriode)) {
                     periode = new VilkårPeriodeBuilder(periode)
                         .medPeriode(periode.getFom(), vilkårPeriode.getTom())
                         .medUtfall(Utfall.IKKE_VURDERT)
@@ -331,7 +357,16 @@ public class VilkårBuilder {
             }
             return adjustAndCompress(vilkårPerioder);
         }
+        
         return vilkårsPerioderRaw;
+    }
+    
+    private boolean harSammeOverstyring(VilkårPeriode vp1, VilkårPeriode vp2) {
+        if (!vp1.getErOverstyrt() && !vp2.getErOverstyrt()) {
+            return true;
+        }
+        return vp1.getOverstyrtUtfall() == vp2.getOverstyrtUtfall()
+                && vp1.getBegrunnelse().equals(vp2.getBegrunnelse());
     }
 
     private NavigableSet<VilkårPeriode> adjustAndCompress(List<VilkårPeriode> vilkårPerioder) {

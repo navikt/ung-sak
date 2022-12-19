@@ -145,7 +145,7 @@ public class VilkårResultatBuilder {
                 .medMaksMellomliggendePeriodeAvstand(mellomliggendePeriodeAvstand)
                 .medKantIKantVurderer(kantIKantVurderer)
                 .tilbakestill(perioderSomSkalTilbakestilles);
-            v.forEach(periode -> builder.leggTil(builder.hentBuilderFor(periode.getFomDato(), periode.getTomDato()).medUtfall(Utfall.IKKE_VURDERT)));
+            v.forEach(periode -> builder.leggTilIkkeVurdert(periode.getFomDato(), periode.getTomDato()));
             leggTil(builder);
         });
         return this;
