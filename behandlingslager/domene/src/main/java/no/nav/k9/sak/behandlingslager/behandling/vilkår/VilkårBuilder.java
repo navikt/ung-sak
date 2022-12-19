@@ -342,7 +342,7 @@ public class VilkårBuilder {
                     periode = vilkårPeriode;
                 } else if (kantIKantVurderer.erKantIKant(vilkårPeriode.getPeriode(), periode.getPeriode())
                         && enAvPeriodeneErTilVurdering(periode, vilkårPeriode)
-                        && harSammeOverstyring(periode, vilkårPeriode)) {
+                        && (!vilkåret.getVilkårType().isKanOverstyresPeriodisert() ||  harSammeOverstyring(periode, vilkårPeriode))) {
                     periode = new VilkårPeriodeBuilder(periode)
                         .medPeriode(periode.getFom(), vilkårPeriode.getTom())
                         .medUtfall(Utfall.IKKE_VURDERT)

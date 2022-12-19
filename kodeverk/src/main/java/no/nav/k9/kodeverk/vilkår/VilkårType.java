@@ -274,6 +274,10 @@ public enum VilkårType implements Kodeverdi {
     public String getOffisiellKode() {
         return getKode();
     }
+    
+    public boolean isKanOverstyresPeriodisert() {
+        return this == OMSORGEN_FOR;
+    }
 
     static class Serializer extends StdSerializer<VilkårType> {
 
@@ -290,5 +294,4 @@ public enum VilkårType implements Kodeverdi {
         }
 
     }
-
 }
