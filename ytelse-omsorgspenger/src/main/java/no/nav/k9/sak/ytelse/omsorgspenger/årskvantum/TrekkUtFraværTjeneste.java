@@ -105,14 +105,18 @@ public class TrekkUtFraværTjeneste {
     }
 
     private List<OppgittFraværPeriode> fraværPåBehandling(Behandling behandling) {
+        Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder = kravPåBehandlingenInklSøknadsfristvurdering(behandling);
+        log.info("Fant {} inntektsmeldinger og {} søknader knyttet til behandlingen:", countIm(vurdertePerioder), countSøknad(vurdertePerioder));
+        return trekkUtFraværMapTilOppgittFraværPerioder(vurdertePerioder);
+    }
+
+    public Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> kravPåBehandlingenInklSøknadsfristvurdering(Behandling behandling) {
         Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søkteFraværsperioder = new LinkedHashMap<>();
         søkteFraværsperioder.putAll(søktFraværFraImPåBehandling(behandling));
         søkteFraværsperioder.putAll(fraværFraSøknaderPåBehandling(behandling));
 
         var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), søkteFraværsperioder);
-        log.info("Fant {} inntektsmeldinger og {} søknader knyttet til behandlingen:", countIm(vurdertePerioder), countSøknad(vurdertePerioder));
-
-        return trekkUtFraværMapTilOppgittFraværPerioder(vurdertePerioder);
+        return vurdertePerioder;
     }
 
     public List<OppgittFraværPeriode> fraværFraInntektsmeldingerPåFagsak(Behandling behandling) {
