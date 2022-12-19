@@ -341,12 +341,41 @@ public class VilkårBuilder {
                 if (periode == null) {
                     periode = vilkårPeriode;
                 } else if (kantIKantVurderer.erKantIKant(vilkårPeriode.getPeriode(), periode.getPeriode())
-                        && enAvPeriodeneErTilVurdering(periode, vilkårPeriode)
-                        && (!vilkåret.getVilkårType().isKanOverstyresPeriodisert() ||  harSammeOverstyring(periode, vilkårPeriode))) {
-                    periode = new VilkårPeriodeBuilder(periode)
-                        .medPeriode(periode.getFom(), vilkårPeriode.getTom())
-                        .medUtfall(Utfall.IKKE_VURDERT)
-                        .build();
+                        && enAvPeriodeneErTilVurdering(periode, vilkårPeriode)) {
+                    if (vilkåret.getVilkårType() == null
+                            || !vilkåret.getVilkårType().isKanOverstyresPeriodisert()
+                            || harSammeOverstyring(periode, vilkårPeriode)) {
+                        /*
+                         * OBS: Denne logikken forlenger en eventuell overstyring som ligger i periode
+                         * til å gjelde for vilkårPeriode også.
+                         */
+                        periode = new VilkårPeriodeBuilder(periode)
+                            .medPeriode(periode.getFom(), vilkårPeriode.getTom())
+                            .medUtfall(Utfall.IKKE_VURDERT)
+                            .build();
+                    } else {
+                        /*
+                         * Vi kan ikke slå sammen perioder med forskjellige overstyringer. Derfor blir
+                         * disse periodene lagt in separat.
+                         */
+                        if (!periode.getTom().plusDays(1).equals(vilkårPeriode.getFom())) {
+                            /*
+                             * Forlenger en eventuell overstyring til etterfølgende helg.
+                             */
+                            vilkårPerioder.add(new VilkårPeriodeBuilder(periode)
+                                    .medPeriode(periode.getFom(), vilkårPeriode.getFom().minusDays(1))
+                                    .medUtfall(Utfall.IKKE_VURDERT)
+                                    .build());
+                        } else {
+                            vilkårPerioder.add(new VilkårPeriodeBuilder(periode)
+                                    .medUtfall(Utfall.IKKE_VURDERT)
+                                    .build());
+                        }
+                        
+                        periode = new VilkårPeriodeBuilder(vilkårPeriode)
+                                .medUtfall(Utfall.IKKE_VURDERT)
+                                .build();
+                    }
                 } else {
                     vilkårPerioder.add(periode);
                     periode = vilkårPeriode;
