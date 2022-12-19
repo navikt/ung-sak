@@ -25,10 +25,10 @@ import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.FosterbarnRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.RammevedtakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.ÅrskvantumRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.gjennomgått.VurderGjennomgåttOpplæringRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.institusjon.VurderInstitusjonRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.nødvendighet.VurderNødvendigOpplæringRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.reisetid.ReisetidRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.gjennomgått.GjennomgåttOpplæringRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.institusjon.InstitusjonRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.nødvendighet.NødvendigOpplæringRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.reisetid.ReisetidRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.ForvaltningPersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
@@ -122,9 +122,9 @@ public class RestImplementationClasses {
         classes.add(RedirectToRegisterRestTjeneste.class);
         classes.add(LosRestTjeneste.class);
         classes.add(GodkjentOpplæringsinstitusjonRestTjeneste.class);
-        classes.add(VurderInstitusjonRestTjeneste.class);
-        classes.add(VurderGjennomgåttOpplæringRestTjeneste.class);
-        classes.add(VurderNødvendigOpplæringRestTjeneste.class);
+        classes.add(InstitusjonRestTjeneste.class);
+        classes.add(GjennomgåttOpplæringRestTjeneste.class);
+        classes.add(NødvendigOpplæringRestTjeneste.class);
         classes.add(ReisetidRestTjeneste.class);
 
         // Forvaltningstjenester - fjernes løpende

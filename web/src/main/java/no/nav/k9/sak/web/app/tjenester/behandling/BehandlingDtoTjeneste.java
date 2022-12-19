@@ -64,10 +64,10 @@ import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.FosterbarnRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.RammevedtakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.ÅrskvantumRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.gjennomgått.VurderGjennomgåttOpplæringRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.institusjon.VurderInstitusjonRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.nødvendighet.VurderNødvendigOpplæringRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.reisetid.ReisetidRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.gjennomgått.GjennomgåttOpplæringRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.institusjon.InstitusjonRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.nødvendighet.NødvendigOpplæringRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.reisetid.ReisetidRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PleietrengendeRestTjeneste;
@@ -405,10 +405,10 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(SaksbehandlerRestTjeneste.SAKSBEHANDLER_PATH, "saksbehandler-info", uuidQueryParams));
                 dto.leggTil(getFraMap(BehandlingRestTjeneste.DIREKTE_OVERGANG_PATH, "direkte-overgang", uuidQueryParams));
                 //TODO: Sette opp opplæringspenger som et eget case?
-                dto.leggTil(getFraMap(VurderInstitusjonRestTjeneste.BASEPATH, "institusjon", uuidQueryParams));
+                dto.leggTil(getFraMap(InstitusjonRestTjeneste.BASEPATH, "institusjon", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_LVS_PATH, "sykdom-vurdering-oversikt-lvs", uuidQueryParams));
-                dto.leggTil(getFraMap(VurderGjennomgåttOpplæringRestTjeneste.BASEPATH, "gjennomgått-opplæring", uuidQueryParams));
-                dto.leggTil(getFraMap(VurderNødvendigOpplæringRestTjeneste.BASEPATH, "nødvendig-opplæring", uuidQueryParams));
+                dto.leggTil(getFraMap(GjennomgåttOpplæringRestTjeneste.BASEPATH, "gjennomgått-opplæring", uuidQueryParams));
+                dto.leggTil(getFraMap(NødvendigOpplæringRestTjeneste.BASEPATH, "nødvendig-opplæring", uuidQueryParams));
                 dto.leggTil(getFraMap(ReisetidRestTjeneste.BASEPATH, "reisetid", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
             }
