@@ -36,7 +36,7 @@ public class HealthCheckRestService {
         var configs = OpenIDConfigProvider.instance().getConfigs().stream().map(OpenIDConfig::getProvider).collect(Collectors.toSet());
         Response.ResponseBuilder builder;
 
-        if (configs.containsAll(Set.of(OpenIDProvider.ISSO, OpenIDProvider.STS))) {
+        if (configs.containsAll(Set.of(OpenIDProvider.STS, OpenIDProvider.AZUREAD))) {
             builder = Response.ok("OK", MediaType.TEXT_PLAIN_TYPE);
         } else {
             builder = Response.serverError();
