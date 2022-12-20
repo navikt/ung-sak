@@ -259,8 +259,6 @@ spec:
       value: "true"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
       value: "false"
-    - name: PLS_UTTAK_PROSENT_PLEIEBEHOV
-      value: "true"
     - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
       value: "true"
     - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
