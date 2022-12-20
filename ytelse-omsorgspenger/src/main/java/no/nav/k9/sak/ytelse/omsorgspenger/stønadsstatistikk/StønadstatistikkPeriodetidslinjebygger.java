@@ -267,7 +267,9 @@ class StønadstatistikkPeriodetidslinjebygger {
         public InformasjonTilStønadstatistikkHendelse leggTilVilkårFraK9sak(Map<VilkårType, VilkårUtfall> vilkårFraK9sak) {
             InformasjonTilStønadstatistikkHendelse kopi = new InformasjonTilStønadstatistikkHendelse(this);
             Map<VilkårType, VilkårUtfall> kombinerteVilkår = new HashMap<>();
-            kombinerteVilkår.putAll(this.getVilkårFraK9sak());
+            if (this.getVilkårFraK9sak() != null) {
+                kombinerteVilkår.putAll(this.getVilkårFraK9sak());
+            }
 
             for (Map.Entry<VilkårType, VilkårUtfall> e : vilkårFraK9sak.entrySet()) {
                 VilkårUtfall ny = e.getValue();
