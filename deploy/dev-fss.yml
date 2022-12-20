@@ -223,10 +223,6 @@ spec:
       value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default"
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
-    - name: OIDC_OPENAM_HOST_URL
-      value: https://isso-q.adeo.no/isso/oauth2
-    - name: OIDC_OPENAM_CLIENT_ID
-      value: k9-sak-q1
 
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
