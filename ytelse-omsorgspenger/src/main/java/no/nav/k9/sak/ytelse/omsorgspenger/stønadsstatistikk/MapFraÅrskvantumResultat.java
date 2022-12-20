@@ -79,7 +79,7 @@ class MapFraÅrskvantumResultat {
                 segmenter.add(new LocalDateSegment<>(uttaksperiode.getPeriode().getFom(), uttaksperiode.getPeriode().getTom(), mapVilkår(uttaksperiode, aktivitet)));
             }
         }
-        return new LocalDateTimeline<>(segmenter, (intervall, lhs, rhs) -> new LocalDateSegment<>(intervall, krevLike(lhs.getValue(), rhs.getValue())));
+        return new LocalDateTimeline<>(segmenter, (intervall, lhs, rhs) -> new LocalDateSegment<>(intervall, VilkårKombinator.kombinerVilkår(lhs.getValue(), rhs.getValue())));
     }
 
     private static Map<Vilkår, Utfall> mapVilkårPrAktivitet(Uttaksperiode uttaksperiode) {

@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.stønadsstatistikk;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -266,32 +265,10 @@ class StønadstatistikkPeriodetidslinjebygger {
 
         public InformasjonTilStønadstatistikkHendelse leggTilVilkårFraK9sak(Map<VilkårType, VilkårUtfall> vilkårFraK9sak) {
             InformasjonTilStønadstatistikkHendelse kopi = new InformasjonTilStønadstatistikkHendelse(this);
-            Map<VilkårType, VilkårUtfall> kombinerteVilkår = new HashMap<>();
-            if (this.getVilkårFraK9sak() != null) {
-                kombinerteVilkår.putAll(this.getVilkårFraK9sak());
-            }
-
-            for (Map.Entry<VilkårType, VilkårUtfall> e : vilkårFraK9sak.entrySet()) {
-                VilkårUtfall ny = e.getValue();
-                if (kombinerteVilkår.containsKey(e.getKey())) {
-                    VilkårUtfall forrige = kombinerteVilkår.get(e.getKey());
-                    Utfall hovedutfall = forrige.getUtfall() == Utfall.OPPFYLT ? forrige.getUtfall() : ny.getUtfall();
-                    if (forrige.getDetaljer() != null || ny.getDetaljer() != null) {
-                        Set<DetaljertVilkårUtfall> detaljer = new LinkedHashSet<>();
-                        detaljer.addAll(forrige.getDetaljer() != null ? forrige.getDetaljer() : Set.of());
-                        detaljer.addAll(ny.getDetaljer() != null ? ny.getDetaljer() : Set.of());
-                        kombinerteVilkår.put(e.getKey(), new VilkårUtfall(hovedutfall, detaljer));
-                    } else {
-                        kombinerteVilkår.put(e.getKey(), new VilkårUtfall(hovedutfall));
-                    }
-                } else {
-                    kombinerteVilkår.put(e.getKey(), ny);
-                }
-            }
-
-            kopi.vilkårFraK9sak = kombinerteVilkår;
+            kopi.vilkårFraK9sak = VilkårKombinator.kombinerVilkår(this.getVilkårFraK9sak(), vilkårFraK9sak);
             return kopi;
         }
+
 
         public InformasjonTilStønadstatistikkHendelse kopiMedVilkårFraÅrskvantum(Map<Vilkår, VilkårUtfall> vilkårFraÅrskvantum) {
             InformasjonTilStønadstatistikkHendelse kopi = new InformasjonTilStønadstatistikkHendelse(this);
