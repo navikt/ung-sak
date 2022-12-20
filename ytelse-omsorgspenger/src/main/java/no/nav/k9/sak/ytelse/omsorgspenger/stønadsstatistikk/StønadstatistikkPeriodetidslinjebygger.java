@@ -161,7 +161,13 @@ class StønadstatistikkPeriodetidslinjebygger {
     }
 
     private static VilkårUtfall lagVilkårUtfallSøknadsfristSøknad(Utfall utfall, AktivitetTypeArbeidsgiver aktivitet) {
-        return new VilkårUtfall(utfall, Set.of(DetaljertVilkårUtfall.forKravstillerPerArbeidsforhold(utfall, StønadstatistikkKravstillerType.BRUKER, aktivitet.aktivitetType().getKode(), aktivitet.arbeidsgiver().getArbeidsgiverOrgnr(), aktivitet.arbeidsgiver().getArbeidsgiverAktørId(), null)));
+        return new VilkårUtfall(utfall, Set.of(DetaljertVilkårUtfall.forKravstillerPerArbeidsforhold(
+            utfall,
+            StønadstatistikkKravstillerType.BRUKER,
+            aktivitet.aktivitetType().getKode(),
+            aktivitet.arbeidsgiver() != null ? aktivitet.arbeidsgiver().getArbeidsgiverOrgnr() : null,
+            aktivitet.arbeidsgiver() != null ? aktivitet.arbeidsgiver().getArbeidsgiverAktørId() : null,
+            null)));
     }
 
     private static LocalDateSegmentCombinator<Map<VilkårType, VilkårUtfall>, Map<VilkårType, VilkårUtfall>, Map<VilkårType, VilkårUtfall>> SEGMENT_KOMBINATOR_VILKÅR_UTFALL = (LocalDateInterval intervall, LocalDateSegment<Map<VilkårType, VilkårUtfall>> lhs, LocalDateSegment<Map<VilkårType, VilkårUtfall>> rhs) -> new LocalDateSegment<>(intervall, nullSafeUnion(lhs, rhs));
