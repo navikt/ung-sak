@@ -122,8 +122,6 @@ spec:
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
-      value: https://app.adeo.no
-    - name: LOADBALANCER_ALTERNATIVE_URL
       value: https://k9.intern.nav.no
 
     # LDAP
@@ -225,10 +223,6 @@ spec:
       value: https://sts.adeo.no/SecurityTokenServiceProvider/
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.adeo.no
-    - name: OIDC_OPENAM_HOST_URL
-      value: https://isso.adeo.no/isso/oauth2
-    - name: OIDC_OPENAM_CLIENT_ID
-      value: k9-sak-p
 
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
