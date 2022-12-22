@@ -136,7 +136,7 @@ public class StønadstatistikkHendelse {
 
     @AssertTrue
     boolean isDetaljertInngangsvilkårBruktKunForOmsorgspenger() {
-        return ytelseType == FagsakYtelseType.OMSORGSPENGER || perioder.stream().flatMap(p -> p.getInngangsvilkår().stream()).noneMatch(iv -> iv.getDetaljertUtfall() != null);
+        return ytelseType == FagsakYtelseType.OMSORGSPENGER || perioder.stream().flatMap(p -> p.getInngangsvilkår().stream()).noneMatch(iv -> iv.getDetaljertUtfall() != null && !iv.getDetaljertUtfall().isEmpty());
     }
 
     @AssertFalse

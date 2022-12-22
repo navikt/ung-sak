@@ -263,7 +263,7 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
 
     private List<StønadstatistikkDetaljertUtfall> mapDetaljertUtfall(Set<DetaljertVilkårUtfall> detaljer) {
         if (detaljer == null) {
-            return null;
+            return List.of();
         }
         return detaljer.stream()
             .map(this::mapDetaljert)
