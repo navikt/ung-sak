@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 
@@ -41,22 +43,19 @@ class ReisetidMapper {
 
         if (grunnlag != null && grunnlag.getVurdertReisetid() != null) {
             for (VurdertReisetid vurdertReisetid : grunnlag.getVurdertReisetid().getReisetid()) {
-                Periode opplæringPeriode = vurdertReisetid.getOpplæringperiode().tilPeriode();
-                Set<VurdertReisetidPeriode> vurdertReisetidPerioder = vurdertReisetid.getReiseperioder();
+                Periode opplæringPeriode = finnOpplæringsperiodeFraReisetid(vurdertReisetid.getPeriode(), perioder);
 
                 List<ReisetidPeriodeVurderingDto> reisetidTil = new ArrayList<>();
                 List<ReisetidPeriodeVurderingDto> reisetidHjem = new ArrayList<>();
 
-                for (VurdertReisetidPeriode vurdertReisetidPeriode : vurdertReisetidPerioder) {
-                    if (vurdertReisetidPeriode.getPeriode().getFomDato().isBefore(opplæringPeriode.getFom())) {
-                        reisetidTil.add(new ReisetidPeriodeVurderingDto(
-                            vurdertReisetidPeriode.getPeriode().tilPeriode(),
-                            vurdertReisetidPeriode.getGodkjent() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT));
-                    } else {
-                        reisetidHjem.add(new ReisetidPeriodeVurderingDto(
-                            vurdertReisetidPeriode.getPeriode().tilPeriode(),
-                            vurdertReisetidPeriode.getGodkjent() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT));
-                    }
+                if (vurdertReisetid.getPeriode().getFomDato().isBefore(opplæringPeriode.getFom())) {
+                    reisetidTil.add(new ReisetidPeriodeVurderingDto(
+                        vurdertReisetid.getPeriode().tilPeriode(),
+                        vurdertReisetid.getGodkjent() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT));
+                } else {
+                    reisetidHjem.add(new ReisetidPeriodeVurderingDto(
+                        vurdertReisetid.getPeriode().tilPeriode(),
+                        vurdertReisetid.getGodkjent() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT));
                 }
 
                 LocalDateTimeline<Boolean> oppgittTidslinjeTil = TidslinjeUtil.tilTidslinjeKomprimert(List.of(perioder.stream()
@@ -101,6 +100,22 @@ class ReisetidMapper {
         }
 
         return vurderinger;
+    }
+
+    private Periode finnOpplæringsperiodeFraReisetid(DatoIntervallEntitet reisetid, List<ReisetidPeriodeDto> perioder) {
+        List<LocalDateSegment<Periode>> segmenter = new ArrayList<>();
+        for (ReisetidPeriodeDto periodeDto : perioder) {
+            segmenter.add(new LocalDateSegment<>(
+                periodeDto.getReisetidTil().getFom(),
+                periodeDto.getReisetidTil().getTom(),
+                periodeDto.getOpplæringPeriode()));
+            segmenter.add(new LocalDateSegment<>(
+                periodeDto.getReisetidHjem().getFom(),
+                periodeDto.getReisetidHjem().getTom(),
+                periodeDto.getOpplæringPeriode()));
+        }
+        LocalDateTimeline<Periode> tidslinje = new LocalDateTimeline<>(segmenter);
+        return tidslinje.getSegment(new LocalDateInterval(reisetid.getFomDato(), reisetid.getTomDato())).getValue();
     }
 
     private boolean harVarighetEnDag(LocalDateTimeline<Boolean> tidslinje) {
