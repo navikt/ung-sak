@@ -30,7 +30,6 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidHolder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 
@@ -205,11 +204,10 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
         Set<PerioderFraSøknad> perioderFraSøknad = setupPerioderFraSøknad(List.of(kursPeriode));
 
         VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(opplæringPeriode, true, "");
-        List<VurdertReisetidPeriode> vurdertReisetidPerioder = List.of(
-            new VurdertReisetidPeriode(reisetidTil, true),
-            new VurdertReisetidPeriode(reisetidHjem, false));
-        VurdertReisetid vurdertReisetid = new VurdertReisetid(opplæringPeriode, vurdertReisetidPerioder, "derfor");
-        VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæringPeriode), List.of(vurdertReisetid));
+        List<VurdertReisetid> vurdertReisetid = List.of(
+            new VurdertReisetid(reisetidTil, true, "ja"),
+            new VurdertReisetid(reisetidHjem, false, "nei"));
+        VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæringPeriode), vurdertReisetid);
 
         var vilkårene = vilkårResultatBuilder.build();
 

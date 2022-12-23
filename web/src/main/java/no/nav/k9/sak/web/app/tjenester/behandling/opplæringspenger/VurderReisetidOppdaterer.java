@@ -2,7 +2,6 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -15,13 +14,11 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.opplæringspenger.ReisetidDto;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderReisetidDto;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidHolder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidPeriode;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderReisetidDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -40,8 +37,6 @@ public class VurderReisetidOppdaterer implements AksjonspunktOppdaterer<VurderRe
     @Override
     public OppdateringResultat oppdater(VurderReisetidDto dto, AksjonspunktOppdaterParameter param) {
         List<VurdertReisetid> vurdertReisetid = mapDtoTilVurdertReisetid(dto);
-
-        //TODO: sjekke at opplæringsperiode passer med en periode fra søknad?
 
         var aktivHolder = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(param.getBehandlingId())
             .map(VurdertOpplæringGrunnlag::getVurdertReisetid);
@@ -66,36 +61,17 @@ public class VurderReisetidOppdaterer implements AksjonspunktOppdaterer<VurderRe
     private List<VurdertReisetid> mapDtoTilVurdertReisetid(VurderReisetidDto dto) {
         List<VurdertReisetid> vurdertReisetid = dto.getReisetid()
             .stream()
-            .map(reisetidDto -> new VurdertReisetid(DatoIntervallEntitet.fra(reisetidDto.getOpplæringPeriode()),
-                mapTilVurdertReisetidPerioder(reisetidDto),
+            .map(reisetidDto -> new VurdertReisetid(
+                DatoIntervallEntitet.fra(reisetidDto.getPeriode()),
+                reisetidDto.isGodkjent(),
                 reisetidDto.getBegrunnelse()))
             .toList();
         sjekkOverlappendePerioder(vurdertReisetid);
         return vurdertReisetid;
     }
 
-    private List<VurdertReisetidPeriode> mapTilVurdertReisetidPerioder(ReisetidDto dto) {
-        List<VurdertReisetidPeriode> perioder = new ArrayList<>();
-
-        perioder.addAll(dto.getReisetidTil().stream()
-            .map(periodeDto -> new VurdertReisetidPeriode(DatoIntervallEntitet.fra(periodeDto.getPeriode()), periodeDto.isGodkjent()))
-            .toList());
-        perioder.addAll(dto.getReisetidHjem().stream()
-            .map(periodeDto -> new VurdertReisetidPeriode(DatoIntervallEntitet.fra(periodeDto.getPeriode()), periodeDto.isGodkjent()))
-            .toList());
-
-        return perioder;
-    }
-
     private void sjekkOverlappendePerioder(List<VurdertReisetid> vurdertReisetid) {
-        List<DatoIntervallEntitet> perioder = new ArrayList<>();
-
-        for (Set<VurdertReisetidPeriode> reisetidPerioder : vurdertReisetid.stream().map(VurdertReisetid::getReiseperioder).toList()) {
-            perioder.addAll(reisetidPerioder.stream().map(VurdertReisetidPeriode::getPeriode).toList());
-        }
-
-        perioder.addAll(vurdertReisetid.stream().map(VurdertReisetid::getOpplæringperiode).toList());
-
+        List<DatoIntervallEntitet> perioder = new ArrayList<>(vurdertReisetid.stream().map(VurdertReisetid::getPeriode).toList());
         new LocalDateTimeline<>(perioder.stream().map(periode -> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), true)).toList());
     }
 
@@ -111,8 +87,8 @@ public class VurderReisetidOppdaterer implements AksjonspunktOppdaterer<VurderRe
         final var segments = perioder
             .stream()
             .map(vurdertReisetid -> new LocalDateSegment<>(
-                vurdertReisetid.getOpplæringperiode().getFomDato(),
-                vurdertReisetid.getOpplæringperiode().getTomDato(),
+                vurdertReisetid.getPeriode().getFomDato(),
+                vurdertReisetid.getPeriode().getTomDato(),
                 vurdertReisetid))
             .collect(Collectors.toList());
         return new LocalDateTimeline<>(segments);

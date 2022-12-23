@@ -41,7 +41,6 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHold
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidHolder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
@@ -342,11 +341,9 @@ class GjennomgåOpplæringStegTest {
             new VurdertOpplæringPerioderHolder(List.of(
                 new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, ""))),
             new VurdertReisetidHolder(List.of(
-                new VurdertReisetid(DatoIntervallEntitet.fra(kursperiode), List.of(
-                    new VurdertReisetidPeriode(DatoIntervallEntitet.fra(reisetidTil), true),
-                    new VurdertReisetidPeriode(DatoIntervallEntitet.fra(reisetidHjem), false)
-                ), "reise")
-            )));
+                new VurdertReisetid(DatoIntervallEntitet.fra(reisetidTil), true, "reise"),
+                new VurdertReisetid(DatoIntervallEntitet.fra(reisetidHjem), false, "ikke reise")))
+            );
         lagreGrunnlag(grunnlag);
 
         BehandleStegResultat resultat = gjennomgåOpplæringSteg.utførSteg(kontekst);

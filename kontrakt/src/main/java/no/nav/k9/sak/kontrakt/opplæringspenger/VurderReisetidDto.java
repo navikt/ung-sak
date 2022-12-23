@@ -24,16 +24,16 @@ public class VurderReisetidDto extends BekreftetAksjonspunktDto {
     @Size(min = 1)
     @Valid
     @NotNull
-    private List<ReisetidDto> reisetid;
+    private List<VurderReisetidPeriodeDto> reisetid;
 
     public VurderReisetidDto() {
     }
 
-    public VurderReisetidDto(List<ReisetidDto> reisetid) {
+    public VurderReisetidDto(List<VurderReisetidPeriodeDto> reisetid) {
         this.reisetid = reisetid;
     }
 
-    public List<ReisetidDto> getReisetid() {
+    public List<VurderReisetidPeriodeDto> getReisetid() {
         return reisetid;
     }
 }
