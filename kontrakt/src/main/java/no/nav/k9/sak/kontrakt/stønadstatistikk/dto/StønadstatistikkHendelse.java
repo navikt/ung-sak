@@ -128,8 +128,9 @@ public class StønadstatistikkHendelse {
         hendelse.vedtakstidspunkt = vedtakstidspunkt;
         hendelse.perioder = perioder;
 
-        //ubrukte
+        //ubrukte, sender tom liste etter ønske fra mottaker (stønadsstatistikk)
         hendelse.diagnosekoder = List.of();
+        hendelse.relasjon = List.of();
         return hendelse;
     }
 
