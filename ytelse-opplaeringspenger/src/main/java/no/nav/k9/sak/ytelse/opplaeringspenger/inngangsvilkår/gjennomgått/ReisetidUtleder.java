@@ -58,11 +58,10 @@ class ReisetidUtleder {
         if (vurdertOpplæringGrunnlag != null && vurdertOpplæringGrunnlag.getVurdertReisetid() != null) {
             List<VurdertReisetid> vurdertReisetid = vurdertOpplæringGrunnlag.getVurdertReisetid().getReisetid().stream().toList();
             for (VurdertReisetid reisetid : vurdertReisetid) {
-                reisetid.getReiseperioder()
-                    .forEach(reiseperiode -> segmenter.add(new LocalDateSegment<>(
-                        reiseperiode.getPeriode().getFomDato(),
-                        reiseperiode.getPeriode().getTomDato(),
-                        reiseperiode.getGodkjent() ? OpplæringGodkjenningStatus.GODKJENT : OpplæringGodkjenningStatus.IKKE_GODKJENT_REISETID)));
+                segmenter.add(new LocalDateSegment<>(
+                    reisetid.getPeriode().getFomDato(),
+                    reisetid.getPeriode().getTomDato(),
+                    reisetid.getGodkjent() ? OpplæringGodkjenningStatus.GODKJENT : OpplæringGodkjenningStatus.IKKE_GODKJENT_REISETID));
             }
         }
         return new LocalDateTimeline<>(segmenter);

@@ -9,12 +9,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import no.nav.k9.sak.kontrakt.dokument.TekstValideringRegex;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ReisetidPeriodeDto {
+public class VurderReisetidPeriodeDto {
 
     @JsonProperty(value = "periode", required = true)
     @Valid
@@ -25,17 +28,24 @@ public class ReisetidPeriodeDto {
     @NotNull
     private boolean godkjent;
 
-    public ReisetidPeriodeDto() {
+    @JsonProperty("begrunnelse")
+    @Size(max = 4000)
+    @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String begrunnelse;
+
+    public VurderReisetidPeriodeDto() {
     }
 
-    public ReisetidPeriodeDto(Periode periode, boolean godkjent) {
+    public VurderReisetidPeriodeDto(Periode periode, boolean godkjent, String begrunnelse) {
         this.periode = periode;
         this.godkjent = godkjent;
+        this.begrunnelse = begrunnelse;
     }
 
-    public ReisetidPeriodeDto(LocalDate fom, LocalDate tom, boolean godkjent) {
+    public VurderReisetidPeriodeDto(LocalDate fom, LocalDate tom, boolean godkjent, String begrunnelse) {
         this.periode = new Periode(fom, tom);
         this.godkjent = godkjent;
+        this.begrunnelse = begrunnelse;
     }
 
     public Periode getPeriode() {
@@ -44,5 +54,9 @@ public class ReisetidPeriodeDto {
 
     public boolean isGodkjent() {
         return godkjent;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
     }
 }

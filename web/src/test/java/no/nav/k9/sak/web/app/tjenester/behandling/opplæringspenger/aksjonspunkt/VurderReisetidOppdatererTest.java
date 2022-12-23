@@ -21,14 +21,12 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.opplæringspenger.ReisetidDto;
-import no.nav.k9.sak.kontrakt.opplæringspenger.ReisetidPeriodeDto;
+import no.nav.k9.sak.kontrakt.opplæringspenger.VurderReisetidPeriodeDto;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderReisetidDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidPeriode;
 
 @CdiDbAwareTest
 class VurderReisetidOppdatererTest {
@@ -62,15 +60,10 @@ class VurderReisetidOppdatererTest {
     @Test
     void skalLagreNyttGrunnlag() {
         var opplæringPeriode = new Periode(idag, idag.plusDays(4));
-        var reiseperiodeTil = new Periode(opplæringPeriode.getFom().minusDays(2), opplæringPeriode.getFom().minusDays(1));
-        var reiseperiodeHjem = new Periode(opplæringPeriode.getTom().plusDays(1), opplæringPeriode.getTom().plusDays(2));
+        var reiseperiode = new Periode(opplæringPeriode.getFom().minusDays(2), opplæringPeriode.getFom().minusDays(1));
 
-        var reisetidDto = new ReisetidDto(
-            opplæringPeriode,
-            List.of(new ReisetidPeriodeDto(reiseperiodeTil, true)),
-            List.of(new ReisetidPeriodeDto(reiseperiodeHjem, false)),
-            "reise");
-        var dto = new VurderReisetidDto(List.of(reisetidDto));
+        var dto = new VurderReisetidDto(List.of(
+            new VurderReisetidPeriodeDto(reiseperiode, true, "ja")));
 
         var resultat = lagreGrunnlag(dto);
         assertThat(resultat).isNotNull();
@@ -81,105 +74,58 @@ class VurderReisetidOppdatererTest {
         assertThat(grunnlag.get().getVurdertReisetid().getReisetid()).hasSize(1);
 
         VurdertReisetid reisetidFraGrunnlag = grunnlag.get().getVurdertReisetid().getReisetid().get(0);
-        assertThat(reisetidFraGrunnlag.getOpplæringperiode()).isEqualTo(DatoIntervallEntitet.fra(opplæringPeriode));
-        assertThat(reisetidFraGrunnlag.getBegrunnelse()).isEqualTo(reisetidDto.getBegrunnelse());
-        assertThat(reisetidFraGrunnlag.getReiseperioder()).hasSize(2);
-
-        Optional<VurdertReisetidPeriode> periode1 = reisetidFraGrunnlag.getReiseperioder().stream()
-            .filter(reiseperiode -> reiseperiode.getPeriode().equals(DatoIntervallEntitet.fra(reiseperiodeTil))).findFirst();
-        assertThat(periode1).isPresent();
-        assertThat(periode1.get().getGodkjent()).isTrue();
-
-        Optional<VurdertReisetidPeriode> periode2 = reisetidFraGrunnlag.getReiseperioder().stream()
-            .filter(reiseperiode -> reiseperiode.getPeriode().equals(DatoIntervallEntitet.fra(reiseperiodeHjem))).findFirst();
-        assertThat(periode2).isPresent();
-        assertThat(periode2.get().getGodkjent()).isFalse();
+        assertThat(reisetidFraGrunnlag.getPeriode()).isEqualTo(DatoIntervallEntitet.fra(reiseperiode));
+        assertThat(reisetidFraGrunnlag.getGodkjent()).isTrue();
+        assertThat(reisetidFraGrunnlag.getBegrunnelse()).isEqualTo("ja");
     }
 
     @Test
     void skalOppdatereGrunnlag() {
         var opplæringPeriode = new Periode(idag, idag.plusDays(4));
-        var reiseperiodeTil = new Periode(opplæringPeriode.getFom().minusDays(2), opplæringPeriode.getFom().minusDays(1));
-        var reiseperiodeHjem = new Periode(opplæringPeriode.getTom().plusDays(1), opplæringPeriode.getTom().plusDays(2));
+        var reiseperiode = new Periode(opplæringPeriode.getFom().minusDays(2), opplæringPeriode.getFom().minusDays(1));
 
-        var reisetidDto1 = new ReisetidDto(
-            opplæringPeriode,
-            List.of(new ReisetidPeriodeDto(reiseperiodeTil, true)),
-            List.of(new ReisetidPeriodeDto(reiseperiodeHjem, true)),
-            "ok");
-        var dto1 = new VurderReisetidDto(List.of(reisetidDto1));
+        var dto1 = new VurderReisetidDto(List.of(
+            new VurderReisetidPeriodeDto(reiseperiode, true, "ok")));
         lagreGrunnlag(dto1);
 
-        var reiseperiode1 = new Periode(reiseperiodeTil.getFom(), reiseperiodeTil.getFom());
-        var reiseperiode2 = new Periode(reiseperiodeTil.getTom(), reiseperiodeTil.getTom());
-        var reiseperiode3 = new Periode(reiseperiodeHjem.getFom(), reiseperiodeHjem.getFom());
-        var reiseperiode4 = new Periode(reiseperiodeHjem.getTom(), reiseperiodeHjem.getTom());
+        var reiseperiode1 = new Periode(reiseperiode.getFom(), reiseperiode.getFom());
+        var reiseperiode2 = new Periode(reiseperiode.getTom(), reiseperiode.getTom());
 
-        var reisetidDto2 = new ReisetidDto(
-            opplæringPeriode,
-            List.of(new ReisetidPeriodeDto(reiseperiode1, false),
-                new ReisetidPeriodeDto(reiseperiode2, true)),
-            List.of(new ReisetidPeriodeDto(reiseperiode3, true),
-                new ReisetidPeriodeDto(reiseperiode4, false)),
-            "for lang");
-        var dto2 = new VurderReisetidDto(List.of(reisetidDto2));
+        var dto2 = new VurderReisetidDto(List.of(
+            new VurderReisetidPeriodeDto(reiseperiode1, false, "grunn 1"),
+            new VurderReisetidPeriodeDto(reiseperiode2, true, "grunn 2")));
         lagreGrunnlag(dto2);
 
         var grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
         assertThat(grunnlag).isPresent();
         assertThat(grunnlag.get().getVurdertReisetid()).isNotNull();
-        assertThat(grunnlag.get().getVurdertReisetid().getReisetid()).hasSize(1);
+        assertThat(grunnlag.get().getVurdertReisetid().getReisetid()).hasSize(2);
 
-        VurdertReisetid reisetidFraGrunnlag = grunnlag.get().getVurdertReisetid().getReisetid().get(0);
-        assertThat(reisetidFraGrunnlag.getOpplæringperiode()).isEqualTo(DatoIntervallEntitet.fra(opplæringPeriode));
-        assertThat(reisetidFraGrunnlag.getBegrunnelse()).isEqualTo(reisetidDto2.getBegrunnelse());
-        assertThat(reisetidFraGrunnlag.getReiseperioder()).hasSize(4);
-
-        Optional<VurdertReisetidPeriode> periode1 = reisetidFraGrunnlag.getReiseperioder().stream()
-            .filter(reiseperiode -> reiseperiode.getPeriode().equals(DatoIntervallEntitet.fra(reiseperiode1))).findFirst();
+        Optional<VurdertReisetid> periode1 = grunnlag.get().getVurdertReisetid().getReisetid().stream()
+            .filter(reisetid -> reisetid.getPeriode().equals(DatoIntervallEntitet.fra(reiseperiode1))).findFirst();
         assertThat(periode1).isPresent();
         assertThat(periode1.get().getGodkjent()).isFalse();
+        assertThat(periode1.get().getBegrunnelse()).isEqualTo("grunn 1");
 
-        Optional<VurdertReisetidPeriode> periode2 = reisetidFraGrunnlag.getReiseperioder().stream()
-            .filter(reiseperiode -> reiseperiode.getPeriode().equals(DatoIntervallEntitet.fra(reiseperiode2))).findFirst();
+        Optional<VurdertReisetid> periode2 = grunnlag.get().getVurdertReisetid().getReisetid().stream()
+            .filter(reisetid -> reisetid.getPeriode().equals(DatoIntervallEntitet.fra(reiseperiode2))).findFirst();
         assertThat(periode2).isPresent();
         assertThat(periode2.get().getGodkjent()).isTrue();
-
-        Optional<VurdertReisetidPeriode> periode3 = reisetidFraGrunnlag.getReiseperioder().stream()
-            .filter(reiseperiode -> reiseperiode.getPeriode().equals(DatoIntervallEntitet.fra(reiseperiode3))).findFirst();
-        assertThat(periode3).isPresent();
-        assertThat(periode3.get().getGodkjent()).isTrue();
-
-        Optional<VurdertReisetidPeriode> periode4 = reisetidFraGrunnlag.getReiseperioder().stream()
-            .filter(reiseperiode -> reiseperiode.getPeriode().equals(DatoIntervallEntitet.fra(reiseperiode4))).findFirst();
-        assertThat(periode4).isPresent();
-        assertThat(periode4.get().getGodkjent()).isFalse();
+        assertThat(periode2.get().getBegrunnelse()).isEqualTo("grunn 2");
     }
 
     @Test
     void skalKopiereFraAktivtGrunnlag() {
         var opplæringPeriode1 = new Periode(idag, idag.plusDays(4));
-        var reiseperiodeTil1 = new Periode(opplæringPeriode1.getFom().minusDays(2), opplæringPeriode1.getFom().minusDays(1));
-        var reiseperiodeHjem1 = new Periode(opplæringPeriode1.getTom().plusDays(1), opplæringPeriode1.getTom().plusDays(2));
+        var reiseperiodeTil = new Periode(opplæringPeriode1.getFom().minusDays(2), opplæringPeriode1.getFom().minusDays(1));
+        var reiseperiodeHjem = new Periode(opplæringPeriode1.getTom().plusDays(1), opplæringPeriode1.getTom().plusDays(2));
 
-        var reisetidDto1 = new ReisetidDto(
-            opplæringPeriode1,
-            List.of(new ReisetidPeriodeDto(reiseperiodeTil1, true)),
-            List.of(new ReisetidPeriodeDto(reiseperiodeHjem1, true)),
-            "ok");
-        var dto1 = new VurderReisetidDto(List.of(reisetidDto1));
+        var dto1 = new VurderReisetidDto(List.of(
+            new VurderReisetidPeriodeDto(reiseperiodeTil, true, "ja")));
         lagreGrunnlag(dto1);
 
-        var opplæringPeriode2 = new Periode(idag.plusWeeks(2), idag.plusWeeks(3));
-        var reiseperiodeTil2 = new Periode(opplæringPeriode2.getFom().minusDays(2), opplæringPeriode2.getFom().minusDays(1));
-        var reiseperiodeHjem2 = new Periode(opplæringPeriode2.getTom().plusDays(1), opplæringPeriode2.getTom().plusDays(2));
-
-        var reisetidDto2 = new ReisetidDto(
-            opplæringPeriode2,
-            List.of(new ReisetidPeriodeDto(reiseperiodeTil2, true)),
-            List.of(new ReisetidPeriodeDto(reiseperiodeHjem2, true)),
-            "ok");
-        var dto2 = new VurderReisetidDto(List.of(reisetidDto2));
+        var dto2 = new VurderReisetidDto(List.of(
+            new VurderReisetidPeriodeDto(reiseperiodeHjem, false, "nei")));
         lagreGrunnlag(dto2);
 
         var grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
@@ -193,30 +139,10 @@ class VurderReisetidOppdatererTest {
         var opplæringPeriode = new Periode(idag, idag.plusDays(4));
         var reiseperiodeTil1 = new Periode(opplæringPeriode.getFom().minusDays(2), opplæringPeriode.getFom().minusDays(1));
         var reiseperiodeTil2 = new Periode(opplæringPeriode.getFom().minusDays(1), opplæringPeriode.getFom().minusDays(1));
-        var reiseperiodeHjem = new Periode(opplæringPeriode.getTom().plusDays(1), opplæringPeriode.getTom().plusDays(2));
 
-        var reisetidDto = new ReisetidDto(
-            opplæringPeriode,
-            List.of(new ReisetidPeriodeDto(reiseperiodeTil1, true), new ReisetidPeriodeDto(reiseperiodeTil2, true)),
-            List.of(new ReisetidPeriodeDto(reiseperiodeHjem, true)),
-            "ok");
-        var dto = new VurderReisetidDto(List.of(reisetidDto));
-
-        assertThrows(IllegalArgumentException.class, () -> lagreGrunnlag(dto));
-    }
-
-    @Test
-    void overlappendeReisetidOgOpplæringSkalFeile() {
-        var opplæringPeriode = new Periode(idag, idag.plusDays(4));
-        var reiseperiodeTil = new Periode(opplæringPeriode.getFom().minusDays(2), opplæringPeriode.getFom());
-        var reiseperiodeHjem = new Periode(opplæringPeriode.getTom().plusDays(1), opplæringPeriode.getTom().plusDays(2));
-
-        var reisetidDto = new ReisetidDto(
-            opplæringPeriode,
-            List.of(new ReisetidPeriodeDto(reiseperiodeTil, true)),
-            List.of(new ReisetidPeriodeDto(reiseperiodeHjem, true)),
-            "ok");
-        var dto = new VurderReisetidDto(List.of(reisetidDto));
+        var dto = new VurderReisetidDto(List.of(
+            new VurderReisetidPeriodeDto(reiseperiodeTil1, true, "ok"),
+            new VurderReisetidPeriodeDto(reiseperiodeTil2, true, "ok")));
 
         assertThrows(IllegalArgumentException.class, () -> lagreGrunnlag(dto));
     }
