@@ -6,12 +6,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -25,6 +27,8 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 @ApplicationScoped
 @FagsakYtelseTypeRef
 public class BehandlingDump implements DebugDumpFagsak {
+
+    private static final Logger logger = LoggerFactory.getLogger(BehandlingDump.class);
 
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
@@ -116,6 +120,7 @@ public class BehandlingDump implements DebugDumpFagsak {
             var dumpstere = FagsakYtelseTypeRef.Lookup.list(DebugDumpBehandling.class, behandlingDumpere, ytelseType);
             for (var inst : dumpstere) {
                 for (var dumper : inst) {
+                    logger.info("Dumper fra {} for behandling {}", dumper.getClass().getName(), b.getUuid());
                     dumper.dump(b)
                         .forEach(d -> resultat.add(new DumpOutput(path + "/" + d.getPath(), d.getContent())));
                 }
