@@ -32,10 +32,10 @@ spec:
   resources:
     limits:
       cpu: "4000m"
-      memory: "2048Mi"
+      memory: "4096Mi"
     requests:
       cpu: "500m"
-      memory: "1024Mi"
+      memory: "4096Mi"
   ingresses:
     - "https://k9-sak.nais.adeo.no/"
   kafka:
