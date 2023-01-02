@@ -167,28 +167,6 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     }
 
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
-        final var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingUuid());
-
-        final var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        final var vurderingsperioderTimeline = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
-
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, perioder)
-            .getDiffPerioder();
-
-        final LocalDateTimeline<Boolean> utvidedePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
-
-        var ekstraPerioder = TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
-
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId())
-            .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
-        if (vilkårene.isPresent()) {
-            return utledVilkårsPerioderFraPerioderTilVurdering(referanse.getBehandlingId(), vilkårene.get(), ekstraPerioder);
-        }
-        return ekstraPerioder;
-    }
-
-    @Override
     public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
         return søknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId);
     }
