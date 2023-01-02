@@ -261,8 +261,6 @@ spec:
       value: "true"
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
       value: "true"
-    - name: VENT_REGELENDRING_8_41
-      vale: "false"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       vale: "true"
 
