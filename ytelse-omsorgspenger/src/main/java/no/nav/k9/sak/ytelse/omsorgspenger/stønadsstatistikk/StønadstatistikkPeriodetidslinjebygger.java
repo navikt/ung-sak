@@ -106,8 +106,8 @@ class StønadstatistikkPeriodetidslinjebygger {
     }
 
     InformasjonTilStønadstatistikkHendelse fjernDuplisertOmsorgenFor(InformasjonTilStønadstatistikkHendelse hendelse) {
-        VilkårUtfall k9sakOmsorgenFor = hendelse.getVilkårFraK9sak().get(VilkårType.OMSORGEN_FOR);
-        VilkårUtfall k9årskvantumOmsorgenFor = hendelse.getVilkårFraÅrskvantum().get(Vilkår.OMSORGSVILKÅRET);
+        VilkårUtfall k9sakOmsorgenFor = hendelse.getVilkårFraK9sak() != null ? hendelse.getVilkårFraK9sak().get(VilkårType.OMSORGEN_FOR) : null;
+        VilkårUtfall k9årskvantumOmsorgenFor = hendelse.getVilkårFraÅrskvantum() != null ? hendelse.getVilkårFraÅrskvantum().get(Vilkår.OMSORGSVILKÅRET) : null;
         if (k9sakOmsorgenFor == null || k9årskvantumOmsorgenFor == null) {
             //omsorgen for er ikke lagt til begge steder
             return hendelse;
