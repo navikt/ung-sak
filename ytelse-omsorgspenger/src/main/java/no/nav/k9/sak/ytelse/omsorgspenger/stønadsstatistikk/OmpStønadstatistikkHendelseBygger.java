@@ -139,7 +139,10 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
             throw new IllegalArgumentException("Ikke-håndtert utfall-type: UDEFINERT");
         }
         if (alleUtfall.contains(Utfall.IKKE_VURDERT)) {
-            throw new IllegalArgumentException("Ikke-håndtert utfall-type: IKKE_VURDERT");
+            List<String> vilkårTyper = new ArrayList<>();
+            vilkårTyper.addAll(hendelse.getVilkårFraK9sak().entrySet().stream().filter(e->e.getValue().getUtfall() == Utfall.IKKE_VURDERT).map(e->e.getKey().getKode()).toList());
+            vilkårTyper.addAll(hendelse.getVilkårFraÅrskvantum().entrySet().stream().filter(e->e.getValue().getUtfall() == Utfall.IKKE_VURDERT).map(e->e.getKey().toString()).toList());
+            throw new IllegalArgumentException("Ikke-håndtert utfall-type: IKKE_VURDERT for " + vilkårTyper);
         }
         return StønadstatistikkUtfall.OPPFYLT;
     }
