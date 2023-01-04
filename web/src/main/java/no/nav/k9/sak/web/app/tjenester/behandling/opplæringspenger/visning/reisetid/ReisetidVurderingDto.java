@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.sak.typer.Periode;
 
@@ -31,17 +30,10 @@ public class ReisetidVurderingDto {
     @Size(max = 100)
     private List<ReisetidPeriodeVurderingDto> reisetidHjem;
 
-    @JsonProperty(value = "begrunnelse", required = true)
-    @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    @Valid
-    private String begrunnelse;
-
-    public ReisetidVurderingDto(Periode opplæringPeriode, List<ReisetidPeriodeVurderingDto> reisetidTil, List<ReisetidPeriodeVurderingDto> reisetidHjem, String begrunnelse) {
+    public ReisetidVurderingDto(Periode opplæringPeriode, List<ReisetidPeriodeVurderingDto> reisetidTil, List<ReisetidPeriodeVurderingDto> reisetidHjem) {
         this.opplæringPeriode = opplæringPeriode;
         this.reisetidTil = reisetidTil;
         this.reisetidHjem = reisetidHjem;
-        this.begrunnelse = begrunnelse;
     }
 
     public Periode getOpplæringPeriode() {
@@ -54,9 +46,5 @@ public class ReisetidVurderingDto {
 
     public List<ReisetidPeriodeVurderingDto> getReisetidHjem() {
         return reisetidHjem;
-    }
-
-    public String getBegrunnelse() {
-        return begrunnelse;
     }
 }

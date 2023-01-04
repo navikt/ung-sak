@@ -60,7 +60,7 @@ class NødvendigOpplæringRestTjenesteTest {
     }
 
     private PerioderFraSøknad lagPerioderFraSøknad(JournalpostId journalpostId, Periode kursperiode) {
-        no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad perioderFraSøknad = new PerioderFraSøknad(journalpostId,
+        PerioderFraSøknad perioderFraSøknad = new PerioderFraSøknad(journalpostId,
             List.of(new UttakPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(kursperiode.getFom(), kursperiode.getTom()), Duration.ofHours(7).plusMinutes(30))),
             Collections.emptyList(),
             Collections.emptyList(),

@@ -48,4 +48,8 @@ public class ReisetidPeriodeVurderingDto {
     public Resultat getResultat() {
         return resultat;
     }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
+    }
 }
