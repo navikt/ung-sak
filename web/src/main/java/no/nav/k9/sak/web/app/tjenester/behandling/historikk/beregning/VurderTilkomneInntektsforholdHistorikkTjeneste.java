@@ -3,7 +3,9 @@ package no.nav.k9.sak.web.app.tjenester.behandling.historikk.beregning;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -22,6 +24,7 @@ import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.VurderTilkomneInntektsforholdDtoer;
 import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
 
+@ApplicationScoped
 public class VurderTilkomneInntektsforholdHistorikkTjeneste {
 
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
@@ -58,7 +61,8 @@ public class VurderTilkomneInntektsforholdHistorikkTjeneste {
                     .stream()
                     .filter(p -> perioder.stream().anyMatch(vp -> vp.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFom(), p.getPeriode().getTom()))))
                     .toList();
-                var nyttInntektsforholdEndringer = periodeEndringer.stream().flatMap(p -> p.getNyttInntektsforholdEndringer().stream()).distinct();
+                var nyttInntektsforholdEndringer = periodeEndringer.stream().flatMap(p -> p.getNyttInntektsforholdEndringer().stream())
+                    .collect(Collectors.toSet());
                 LocalDate skjæringstidspunkt = endringer.getSkjæringstidspunkt();
                 historikkTjenesteAdapter.tekstBuilder().medNavnOgGjeldendeFra(HistorikkEndretFeltType.VURDER_NYTT_INNTEKTSFORHOLD, null, skjæringstidspunkt);
                 nyttInntektsforholdEndringer
@@ -84,7 +88,7 @@ public class VurderTilkomneInntektsforholdHistorikkTjeneste {
             arbeidsforholdOverstyringer);
         historikkBuilder.medEndretFelt(HistorikkEndretFeltType.VURDER_NYTT_INNTEKTSFORHOLD,
             arbeidsforholdInfo,
-            e.getSkalRedusereUtbetalingEndring().getFraVerdiEllerNull(),
+            e.getSkalRedusereUtbetalingEndring().erEndret() ? e.getSkalRedusereUtbetalingEndring().getFraVerdiEllerNull() : null,
             e.getSkalRedusereUtbetalingEndring().getTilVerdi());
         var bruttoInntektPrÅrEndring = e.getBruttoInntektPrÅrEndring();
         if (bruttoInntektPrÅrEndring != null) {
@@ -92,7 +96,7 @@ public class VurderTilkomneInntektsforholdHistorikkTjeneste {
             var tilBeløpPrMnd = bruttoInntektPrÅrEndring.getTilBeløp();
             historikkBuilder.medEndretFelt(HistorikkEndretFeltType.BRUTTO_INNTEKT_NYTT_INNTEKTSFORHOLD,
                 arbeidsforholdInfo,
-                fraBeløpPrMnd,
+                fraBeløpPrMnd == null || tilBeløpPrMnd.compareTo(fraBeløpPrMnd) == 0 ? null : fraBeløpPrMnd,
                 tilBeløpPrMnd);
         }
     }

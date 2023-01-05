@@ -2,6 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.resultat;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Objects;
 import java.util.Optional;
 
 public class BeløpEndring {
@@ -30,4 +31,16 @@ public class BeløpEndring {
         return tilBeløp == null ? null : tilBeløp.divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP).setScale(0, RoundingMode.HALF_UP);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BeløpEndring that = (BeløpEndring) o;
+        return Objects.equals(fraBeløp, that.fraBeløp) && Objects.equals(tilBeløp, that.tilBeløp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fraBeløp, tilBeløp);
+    }
 }
