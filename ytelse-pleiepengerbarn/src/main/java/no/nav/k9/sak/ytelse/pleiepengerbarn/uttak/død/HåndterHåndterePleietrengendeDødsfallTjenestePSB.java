@@ -14,6 +14,9 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.uttak.RettVedDødType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -119,9 +122,13 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
         var perioder = utledPerioder(referanse);
         var perioderSomMåforlenges = TidslinjeUtil.tilTidslinjeKomprimert(perioder)
+            .combine(new LocalDateSegment<>(periode.toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN)
             .compress()
             .intersection(periode.toLocalDateInterval())
-            .stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval())).collect(Collectors.toCollection(TreeSet::new));
+            .stream()
+            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+            .collect(Collectors.toCollection(TreeSet::new));
+
         if (perioderSomMåforlenges.size() > 1) {
             throw new IllegalStateException("Fant flere perioder som må forlenges.");
         }
