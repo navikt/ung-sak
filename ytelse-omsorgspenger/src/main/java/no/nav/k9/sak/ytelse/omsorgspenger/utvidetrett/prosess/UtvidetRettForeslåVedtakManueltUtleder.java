@@ -5,9 +5,9 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.DefaultForeslåVedtakManueltUtleder;
@@ -29,7 +29,7 @@ public class UtvidetRettForeslåVedtakManueltUtleder implements ForeslåVedtakMa
     }
 
     @Inject
-    public UtvidetRettForeslåVedtakManueltUtleder(K9FormidlingKlient formidlingKlient, DefaultForeslåVedtakManueltUtleder defaultForeslåVedtakManueltUtleder) {
+    public UtvidetRettForeslåVedtakManueltUtleder(K9FormidlingKlient formidlingKlient, @Any DefaultForeslåVedtakManueltUtleder defaultForeslåVedtakManueltUtleder) {
         this.formidlingKlient = formidlingKlient;
         this.defaultForeslåVedtakManueltUtleder = defaultForeslåVedtakManueltUtleder;
     }
