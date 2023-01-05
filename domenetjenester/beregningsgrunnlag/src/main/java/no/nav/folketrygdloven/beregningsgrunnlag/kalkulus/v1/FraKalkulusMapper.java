@@ -29,7 +29,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAktivitetHandlingType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
-import no.nav.k9.kodeverk.beregningsgrunnlag.SammenligningsgrunnlagType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
@@ -111,17 +110,6 @@ public class FraKalkulusMapper {
                 .forEach(periodeBuilder -> periodeBuilder.build(bg));
 
         return bg;
-    }
-
-    private static SammenligningsgrunnlagType mapSammenligningType(no.nav.folketrygdloven.kalkulus.kodeverk.SammenligningsgrunnlagType sammenligningsgrunnlagType) {
-        return switch(sammenligningsgrunnlagType) {
-            case SAMMENLIGNING_AT -> SammenligningsgrunnlagType.SAMMENLIGNING_AT;
-            case SAMMENLIGNING_FL -> SammenligningsgrunnlagType.SAMMENLIGNING_FL;
-            case SAMMENLIGNING_AT_FL -> SammenligningsgrunnlagType.SAMMENLIGNING_AT_FL;
-            case SAMMENLIGNING_SN -> SammenligningsgrunnlagType.SAMMENLIGNING_SN;
-            case SAMMENLIGNING_ATFL_SN -> SammenligningsgrunnlagType.SAMMENLIGNING_ATFL_SN;
-            case SAMMENLIGNING_MIDL_INAKTIV -> SammenligningsgrunnlagType.SAMMENLIGNING_MIDL_INAKTIV;
-        };
     }
 
     private static List<BeregningsgrunnlagPeriode.Builder> mapPerioder(List<BeregningsgrunnlagPeriodeDto> beregningsgrunnlagPerioder) {
