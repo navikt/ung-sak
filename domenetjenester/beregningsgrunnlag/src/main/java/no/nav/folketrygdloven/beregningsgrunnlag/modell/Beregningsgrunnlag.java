@@ -20,7 +20,6 @@ public class Beregningsgrunnlag {
     private LocalDate skjæringstidspunkt;
     private List<BeregningsgrunnlagAktivitetStatus> aktivitetStatuser = new ArrayList<>();
     private List<BeregningsgrunnlagPeriode> beregningsgrunnlagPerioder = new ArrayList<>();
-    private Sammenligningsgrunnlag sammenligningsgrunnlag;
     private List<SammenligningsgrunnlagPrStatus> sammenligningsgrunnlagPrStatusListe = new ArrayList<>();
     private Beløp grunnbeløp;
     private List<BeregningsgrunnlagFaktaOmBeregningTilfelle> faktaOmBeregningTilfeller = new ArrayList<>();
@@ -39,10 +38,6 @@ public class Beregningsgrunnlag {
             .stream()
             .sorted(Comparator.comparing(BeregningsgrunnlagPeriode::getBeregningsgrunnlagPeriodeFom))
             .toList();
-    }
-
-    public Sammenligningsgrunnlag getSammenligningsgrunnlag() {
-        return sammenligningsgrunnlag;
     }
 
     public Beløp getGrunnbeløp() {
@@ -199,13 +194,7 @@ public class Beregningsgrunnlag {
             this.kladd.faktaOmBeregningTilfeller.add(b);
         }
 
-        public Builder medSammenligningsgrunnlag(Sammenligningsgrunnlag sammenligningsgrunnlag) {
-            verifiserKanModifisere();
-            kladd.sammenligningsgrunnlag = sammenligningsgrunnlag;
-            return this;
-        }
-
-        public Builder leggTilSammenligningsgrunnlag(SammenligningsgrunnlagPrStatus.Builder sammenligningsgrunnlagPrStatusBuilder) { // NOSONAR
+        public Builder leggTilSammenligningsgrunnlag(SammenligningsgrunnlagPrStatus.Builder sammenligningsgrunnlagPrStatusBuilder) {
             kladd.sammenligningsgrunnlagPrStatusListe.add(sammenligningsgrunnlagPrStatusBuilder.medBeregningsgrunnlag(kladd).build());
             return this;
         }

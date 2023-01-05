@@ -14,7 +14,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagBuilder;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.Sammenligningsgrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagPrStatus;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningAktivitetAggregatDto;
@@ -25,11 +25,13 @@ import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagPeriodeDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagPrStatusOgAndelDto;
+import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.SammenligningsgrunnlagPrStatusDto;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAktivitetHandlingType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.kodeverk.beregningsgrunnlag.SammenligningsgrunnlagType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
@@ -104,14 +106,36 @@ public class FraKalkulusMapper {
                 .collect(Collectors.toList());
             builder.leggTilFaktaOmBeregningTilfeller(tilfeller);
         }
+
+        if (beregningsgrunnlagDto.getSammenligningsgrunnlagPrStatusListe() != null) {
+            beregningsgrunnlagDto.getSammenligningsgrunnlagPrStatusListe().forEach(sg -> builder.leggTilSammenligningsgrunnlag(mapSammenligningsgrunnlag(sg)));
+        }
+
         Beregningsgrunnlag bg = builder.build();
 
         mapPerioder(beregningsgrunnlagDto.getBeregningsgrunnlagPerioder())
                 .forEach(periodeBuilder -> periodeBuilder.build(bg));
-        if (beregningsgrunnlagDto.getSammenligningsgrunnlag() != null) {
-            mapSammenligningsgrunnlag(beregningsgrunnlagDto.getSammenligningsgrunnlag()).build(bg);
-        }
+
         return bg;
+    }
+
+    private static SammenligningsgrunnlagPrStatus.Builder mapSammenligningsgrunnlag(SammenligningsgrunnlagPrStatusDto sgDto) {
+        return SammenligningsgrunnlagPrStatus.builder()
+            .medSammenligningsperiode(sgDto.getSammenligningsperiodeFom(), sgDto.getSammenligningsperiodeTom())
+            .medAvvikPromille(sgDto.getAvvikPromilleNy().longValue())
+            .medRapportertPrÅr(sgDto.getRapportertPrÅr())
+            .medSammenligningsgrunnlagType(mapSammenligningType(sgDto.getSammenligningsgrunnlagType()));
+    }
+
+    private static SammenligningsgrunnlagType mapSammenligningType(no.nav.folketrygdloven.kalkulus.kodeverk.SammenligningsgrunnlagType sammenligningsgrunnlagType) {
+        return switch(sammenligningsgrunnlagType) {
+            case SAMMENLIGNING_AT -> SammenligningsgrunnlagType.SAMMENLIGNING_AT;
+            case SAMMENLIGNING_FL -> SammenligningsgrunnlagType.SAMMENLIGNING_FL;
+            case SAMMENLIGNING_AT_FL -> SammenligningsgrunnlagType.SAMMENLIGNING_AT_FL;
+            case SAMMENLIGNING_SN -> SammenligningsgrunnlagType.SAMMENLIGNING_SN;
+            case SAMMENLIGNING_ATFL_SN -> SammenligningsgrunnlagType.SAMMENLIGNING_ATFL_SN;
+            case SAMMENLIGNING_MIDL_INAKTIV -> SammenligningsgrunnlagType.SAMMENLIGNING_MIDL_INAKTIV;
+        };
     }
 
     private static List<BeregningsgrunnlagPeriode.Builder> mapPerioder(List<BeregningsgrunnlagPeriodeDto> beregningsgrunnlagPerioder) {
@@ -183,12 +207,5 @@ public class FraKalkulusMapper {
             return Arbeidsgiver.virksomhet(arbeidsgiver.getArbeidsgiverOrgnr());
         }
         return Arbeidsgiver.person(new AktørId(arbeidsgiver.getArbeidsgiverAktørId()));
-    }
-
-    private static Sammenligningsgrunnlag.Builder mapSammenligningsgrunnlag(no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.Sammenligningsgrunnlag sammenligningsgrunnlag) {
-        return Sammenligningsgrunnlag.builder()
-                .medSammenligningsperiode(sammenligningsgrunnlag.getSammenligningsperiodeFom(), sammenligningsgrunnlag.getSammenligningsperiodeTom())
-                .medRapportertPrÅr(sammenligningsgrunnlag.getRapportertPrÅr())
-                .medAvvikPromille(sammenligningsgrunnlag.getAvvikPromilleNy().longValue());
     }
 }
