@@ -68,7 +68,7 @@ class VurderNødvendighetTidslinjeUtlederTest {
     }
 
     private KursPeriode lagKursperiode(LocalDate fom, LocalDate tom, String institusjon, UUID uuid) {
-        return new KursPeriode(fom, tom, null, null, institusjon, uuid, "beskrivelse");
+        return new KursPeriode(fom, tom, null, null, institusjon, uuid);
     }
 
     private VurdertOpplæringGrunnlag setupVurderingsgrunnlag(List<VurdertOpplæring> vurdertOpplæring) {
