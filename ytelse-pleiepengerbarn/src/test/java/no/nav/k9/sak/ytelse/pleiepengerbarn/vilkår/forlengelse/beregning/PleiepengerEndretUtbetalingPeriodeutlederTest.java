@@ -71,7 +71,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
     void setUp() {
         fagsakRepository = new FagsakRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
-        utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjenester, true);
+        utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository, null, true);
         originalBehandling = opprettBehandling(SKJÆRINGSTIDSPUNKT);
         behandling = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING).build();
     }
