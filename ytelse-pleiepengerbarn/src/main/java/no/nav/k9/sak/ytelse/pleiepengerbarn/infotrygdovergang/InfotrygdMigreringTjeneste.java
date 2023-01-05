@@ -308,7 +308,7 @@ public class InfotrygdMigreringTjeneste {
     }
 
     private boolean harPerioderTilVurderingIEllerEtterÅr(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, int år) {
-        return perioderTilVurdering.stream().anyMatch(p -> p.getFomDato().getYear() <= år && p.getTomDato().getYear() >= år);
+        return perioderTilVurdering.stream().anyMatch(p -> p.getTomDato().getYear() >= år);
     }
 
 }

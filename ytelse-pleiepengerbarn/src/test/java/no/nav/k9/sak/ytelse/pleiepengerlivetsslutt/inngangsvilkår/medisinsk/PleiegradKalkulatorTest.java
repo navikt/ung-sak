@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,46 @@ class PleiegradKalkulatorTest {
 
         assertThat(PleiegradKalkulator.regnUtPleiegrad(vilkårresultat)).isEqualTo(new LocalDateTimeline<>(dag1, dag2, Pleiegrad.LIVETS_SLUTT_TILSYN));
         assertThat(Pleiegrad.LIVETS_SLUTT_TILSYN.getProsent()).isEqualTo(100);
+    }
+
+    @Test
+    void skal_ha_200prosent_pleiegrad_når_dokumentasjon_av_livets_sluttfase_er_OK_og_etter_2022() {
+        LocalDate dag1i2023 = LocalDate.of(2023, Month.JANUARY, 1);
+        LocalDate dag2i2023 = dag1i2023.plusDays(1);
+        LocalDate dag3i2023 = dag1i2023.plusDays(1);
+
+
+        vilkårresultat.setPleieperioder(List.of(
+            new PleiePeriode(dag1i2023, dag3i2023, Pleielokasjon.HJEMME)));
+        vilkårresultat.setDokumentasjonLivetsSluttfasePerioder(List.of(
+            new LivetsSluttfaseDokumentasjonPeriode(dag1i2023, dag2i2023, LivetsSluttfaseDokumentasjon.DOKUMENTERT)));
+
+        assertThat(PleiegradKalkulator.regnUtPleiegrad(vilkårresultat)).isEqualTo(new LocalDateTimeline<>(dag1i2023, dag2i2023, Pleiegrad.LIVETS_SLUTT_TILSYN_FOM2023));
+        assertThat(Pleiegrad.LIVETS_SLUTT_TILSYN_FOM2023.getProsent()).isEqualTo(200);
+    }
+
+    @Test
+    void skal_ha_100prosent_pleiegrad_i_2022_og_200prosent_etter_2022_når_dokumentasjon_av_livets_sluttfase_er_OK() {
+        LocalDate dag1i2022 = LocalDate.of(2022, Month.DECEMBER, 28);
+        LocalDate dag2i2023 = dag1i2022.plusDays(5);
+        LocalDate dag3i2023 = dag1i2022.plusDays(6);
+
+        LocalDate sisteDatoI2022 = LocalDate.of(2022, Month.DECEMBER, 31);
+        LocalDate førsteDatoI2023 = LocalDate.of(2023, Month.JANUARY, 1);
+
+        vilkårresultat.setPleieperioder(List.of(
+            new PleiePeriode(dag1i2022, dag3i2023, Pleielokasjon.HJEMME)));
+        vilkårresultat.setDokumentasjonLivetsSluttfasePerioder(List.of(
+            new LivetsSluttfaseDokumentasjonPeriode(dag1i2022, dag2i2023, LivetsSluttfaseDokumentasjon.DOKUMENTERT)));
+
+
+        assertThat(PleiegradKalkulator.regnUtPleiegrad(vilkårresultat)).isEqualTo(new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(dag1i2022, sisteDatoI2022, Pleiegrad.LIVETS_SLUTT_TILSYN),
+            new LocalDateSegment<>(førsteDatoI2023, dag2i2023, Pleiegrad.LIVETS_SLUTT_TILSYN_FOM2023)
+        )));
+
+        assertThat(Pleiegrad.LIVETS_SLUTT_TILSYN.getProsent()).isEqualTo(100);
+        assertThat(Pleiegrad.LIVETS_SLUTT_TILSYN_FOM2023.getProsent()).isEqualTo(200);
     }
 
     @Test

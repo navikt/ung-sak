@@ -63,19 +63,16 @@ public class MapInputTilUttakTjeneste {
     private final HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private final String unntak;
     private final boolean enableBevarVerdi;
-    private final boolean ny200ProsentPleiebehovFor2023;
     private final boolean skalKjøreNyLogikkForSpeiling;
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
                                     @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
                                     @KonfigVerdi(value = "psb.uttak.unntak.bevar.vedtatt.verdi", required = false, defaultVerdi = "false") boolean enableBevarVerdi,
-                                    @KonfigVerdi(value = "pls.uttak.prosent.pleiebehov", required = false, defaultVerdi = "false") boolean ny200ProsentPleiebehovFor2023,
                                     @KonfigVerdi(value = "IKKE_YRKESAKTIV_UTEN_SPEILING", required = false, defaultVerdi = "false") boolean skalKjøreNyLogikkForSpeiling) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
         this.enableBevarVerdi = enableBevarVerdi;
-        this.ny200ProsentPleiebehovFor2023 = ny200ProsentPleiebehovFor2023;
         this.skalKjøreNyLogikkForSpeiling = skalKjøreNyLogikkForSpeiling;
     }
 
@@ -333,9 +330,8 @@ public class MapInputTilUttakTjeneste {
     private Pleiebehov mapToPleiebehov(Pleiegrad grad) {
         return switch (grad) {
             case INGEN -> Pleiebehov.PROSENT_0;
-            case LIVETS_SLUTT_TILSYN -> (ny200ProsentPleiebehovFor2023) ? Pleiebehov.PROSENT_200 : Pleiebehov.PROSENT_100;
-            case KONTINUERLIG_TILSYN, NØDVENDIG_OPPLÆRING -> Pleiebehov.PROSENT_100;
-            case UTVIDET_KONTINUERLIG_TILSYN, INNLEGGELSE -> Pleiebehov.PROSENT_200;
+            case LIVETS_SLUTT_TILSYN, KONTINUERLIG_TILSYN, NØDVENDIG_OPPLÆRING -> Pleiebehov.PROSENT_100;
+            case LIVETS_SLUTT_TILSYN_FOM2023, UTVIDET_KONTINUERLIG_TILSYN, INNLEGGELSE -> Pleiebehov.PROSENT_200;
             default -> throw new IllegalStateException("Ukjent Pleiegrad: " + grad);
         };
     }

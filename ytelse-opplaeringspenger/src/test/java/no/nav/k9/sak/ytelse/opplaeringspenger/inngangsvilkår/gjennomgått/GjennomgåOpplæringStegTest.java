@@ -106,7 +106,7 @@ class GjennomgåOpplæringStegTest {
             List.of(new KursPeriode(kursperiode.getFom(), kursperiode.getTom(),
                 reisetidTil != null ? DatoIntervallEntitet.fraOgMedTilOgMed(reisetidTil.getFom(), reisetidTil.getTom()) : null,
                 reisetidHjem != null ? DatoIntervallEntitet.fraOgMedTilOgMed(reisetidHjem.getFom(), reisetidHjem.getTom()) : null,
-                "institusjon", null, "beskrivelse")));
+                "institusjon", null)));
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), uttakPerioderGrunnlagRepository.hentGrunnlag(behandling.getId()).map(UttaksPerioderGrunnlag::getOppgitteSøknadsperioder).orElseThrow());
     }

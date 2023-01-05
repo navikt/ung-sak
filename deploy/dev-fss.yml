@@ -122,8 +122,6 @@ spec:
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
-      value: https://app-q1.adeo.no
-    - name: LOADBALANCER_ALTERNATIVE_URL
       value: https://k9.dev.intern.nav.no
 
     # LDAP
@@ -217,20 +215,12 @@ spec:
       value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
 
     # Sikkerhet:
-    - name: APP_AUTH_SCHEMA_AZUREAD_ENABLED
-      value: "true"
-    - name: APP_AUTH_SCHEMA_AZUREAD_DOMAIN
-      value: "k9.dev.intern.nav.no"
     - name: APP_AUTH_SCHEMA_AZUREAD_ADDITIONAL_PATHS
       value: "/k9/formidling/dokumentdata,api://dev-fss.k9saksbehandling.k9-formidling-dokumentdata/.default;/k9/formidling,api://dev-fss.k9saksbehandling.k9-formidling/.default"
     - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
       value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default"
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
-    - name: OIDC_OPENAM_HOST_URL
-      value: https://isso-q.adeo.no/isso/oauth2
-    - name: OIDC_OPENAM_CLIENT_ID
-      value: k9-sak-q1
 
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
@@ -247,6 +237,8 @@ spec:
       value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
       value: "true"
+    - name: OMP_STONADSTATISTIKK
+      value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "true"
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
@@ -261,8 +253,6 @@ spec:
       value: "true"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
       value: "false"
-    - name: PLS_UTTAK_PROSENT_PLEIEBEHOV
-      value: "true"
     - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
       value: "true"
     - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
@@ -271,8 +261,6 @@ spec:
       value: "true"
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
       value: "true"
-    - name: VENT_REGELENDRING_8_41
-      vale: "false"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       vale: "true"
 
