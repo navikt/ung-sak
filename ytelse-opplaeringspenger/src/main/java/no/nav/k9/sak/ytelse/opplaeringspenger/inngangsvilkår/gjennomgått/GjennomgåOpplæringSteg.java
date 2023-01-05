@@ -47,11 +47,6 @@ public class GjennomgåOpplæringSteg implements BehandlingSteg {
         var referanse = BehandlingReferanse.fra(behandling);
         var aksjoner = gjennomgåttOpplæringTjeneste.vurder(referanse);
 
-        if (aksjoner.contains(Aksjon.FORTSETT)) {
-            gjennomgåttOpplæringTjeneste.lagreVilkårsResultat(referanse);
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-
         List<AksjonspunktResultat> aksjonspunkter = new ArrayList<>();
         if (aksjoner.contains(Aksjon.TRENGER_AVKLARING_OPPLÆRING)) {
             aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_GJENNOMGÅTT_OPPLÆRING));
@@ -59,7 +54,12 @@ public class GjennomgåOpplæringSteg implements BehandlingSteg {
         if (aksjoner.contains(Aksjon.TRENGER_AVKLARING_REISETID)) {
             aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_REISETID));
         }
-        return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter);
+        if (!aksjonspunkter.isEmpty()) {
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter);
+        }
+
+        gjennomgåttOpplæringTjeneste.lagreVilkårsResultat(referanse);
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
     @Override

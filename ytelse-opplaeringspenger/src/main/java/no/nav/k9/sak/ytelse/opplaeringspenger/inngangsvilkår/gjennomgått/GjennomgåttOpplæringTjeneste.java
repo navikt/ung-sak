@@ -61,10 +61,6 @@ public class GjennomgåttOpplæringTjeneste {
             aksjoner.add(Aksjon.TRENGER_AVKLARING_REISETID);
         }
 
-        if (aksjoner.isEmpty()) {
-            aksjoner.add(Aksjon.FORTSETT);
-        }
-
         return aksjoner;
     }
 
