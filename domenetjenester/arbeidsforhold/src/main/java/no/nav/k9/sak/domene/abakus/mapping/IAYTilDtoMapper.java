@@ -36,10 +36,6 @@ public class IAYTilDtoMapper {
         this.behandlingReferanse = behandlingReferanse;
     }
 
-    public InntektArbeidYtelseGrunnlagDto mapTilDto(FagsakYtelseType ytelseType, InntektArbeidYtelseGrunnlag grunnlag) {
-        return mapTilDto(YtelseType.fraKode(ytelseType.getKode()), grunnlag, true);
-    }
-
     public OverstyrtInntektArbeidYtelseDto mapTilDto(FagsakYtelseType fagsakYtelseType, InntektArbeidYtelseAggregat overstyrt, ArbeidsforholdInformasjon arbeidsforholdInformasjon) {
         var ytelseType = YtelseType.fraKode(fagsakYtelseType.getKode());
         var person = new AktørIdPersonident(aktørId.getId());
