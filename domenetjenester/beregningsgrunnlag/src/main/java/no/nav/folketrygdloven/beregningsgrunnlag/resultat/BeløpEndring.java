@@ -24,7 +24,7 @@ public class BeløpEndring {
     }
 
     public BigDecimal getTilBeløp() {
-        return tilBeløp.setScale(0, RoundingMode.HALF_UP);
+        return tilBeløp == null ? null : tilBeløp.setScale(0, RoundingMode.HALF_UP);
     }
 
     public BigDecimal getTilMånedsbeløp() {

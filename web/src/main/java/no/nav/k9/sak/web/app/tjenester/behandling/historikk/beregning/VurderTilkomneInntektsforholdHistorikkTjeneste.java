@@ -91,7 +91,7 @@ public class VurderTilkomneInntektsforholdHistorikkTjeneste {
             e.getSkalRedusereUtbetalingEndring().erEndret() ? e.getSkalRedusereUtbetalingEndring().getFraVerdiEllerNull() : null,
             e.getSkalRedusereUtbetalingEndring().getTilVerdi());
         var bruttoInntektPrÅrEndring = e.getBruttoInntektPrÅrEndring();
-        if (bruttoInntektPrÅrEndring != null) {
+        if (bruttoInntektPrÅrEndring != null && bruttoInntektPrÅrEndring.getTilBeløp() != null) {
             var fraBeløpPrMnd = bruttoInntektPrÅrEndring.getFraBeløp().orElse(null);
             var tilBeløpPrMnd = bruttoInntektPrÅrEndring.getTilBeløp();
             historikkBuilder.medEndretFelt(HistorikkEndretFeltType.BRUTTO_INNTEKT_NYTT_INNTEKTSFORHOLD,
