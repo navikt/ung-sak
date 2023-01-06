@@ -178,7 +178,20 @@ public class MapEndringsresultat {
     private static BeregningsgrunnlagPeriodeEndring mapTilPeriodeEndring(no.nav.folketrygdloven.kalkulus.response.v1.håndtering.BeregningsgrunnlagPeriodeEndring beregningsgrunnlagPeriodeEndring) {
         return new BeregningsgrunnlagPeriodeEndring(
             mapAndelEndringer(beregningsgrunnlagPeriodeEndring.getBeregningsgrunnlagPrStatusOgAndelEndringer()),
-            new Periode(beregningsgrunnlagPeriodeEndring.getPeriode().getFom(), beregningsgrunnlagPeriodeEndring.getPeriode().getTom())
+            mapNyeInntektsforholdEndringer(beregningsgrunnlagPeriodeEndring.getNyttInntektsforholdEndringer()), new Periode(beregningsgrunnlagPeriodeEndring.getPeriode().getFom(), beregningsgrunnlagPeriodeEndring.getPeriode().getTom())
+        );
+    }
+
+    private static List<NyttInntektsforholdEndring> mapNyeInntektsforholdEndringer(List<no.nav.folketrygdloven.kalkulus.response.v1.håndtering.NyttInntektsforholdEndring> nyttInntektsforholdEndringer) {
+        return nyttInntektsforholdEndringer.stream().map(MapEndringsresultat::mapInnteksforholdEndring).toList();
+    }
+
+    private static NyttInntektsforholdEndring mapInnteksforholdEndring(no.nav.folketrygdloven.kalkulus.response.v1.håndtering.NyttInntektsforholdEndring endring) {
+        return new NyttInntektsforholdEndring(
+            AktivitetStatus.fraKode(endring.getAktivitetStatus().getKode()),
+            mapArbeidsgiver(endring.getArbeidsgiver()),
+            mapInntektEndring(endring.getBruttoInntektPrÅrEndring()),
+            mapTilToggle(endring.getSkalRedusereUtbetalingEndring())
         );
     }
 
