@@ -146,10 +146,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
     }
 
     private void leggTilResultatIkkeGodkjentInstitusjon(VilkårBuilder builder, LocalDateTimeline<Boolean> tidslinje) {
-        TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje)
-            .forEach(datoIntervallEntitet -> builder.leggTil(builder.hentBuilderFor(datoIntervallEntitet)
-                .medUtfall(Utfall.IKKE_OPPFYLT)
-                .medAvslagsårsak(Avslagsårsak.IKKE_GODKJENT_INSTITUSJON)));
+        TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje).forEach(builder::tilbakestill);
     }
 
     private void vurder(BehandlingskontrollKontekst kontekst,
