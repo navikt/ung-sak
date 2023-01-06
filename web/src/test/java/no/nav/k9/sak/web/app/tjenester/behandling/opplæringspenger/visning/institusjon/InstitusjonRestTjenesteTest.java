@@ -80,7 +80,7 @@ class InstitusjonRestTjenesteTest {
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
-            List.of(new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), null, null, institusjonNavn, institusjonUuid, "")));
+            List.of(new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), null, null, institusjonNavn, institusjonUuid)));
 
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         return perioderFraSøknad;
