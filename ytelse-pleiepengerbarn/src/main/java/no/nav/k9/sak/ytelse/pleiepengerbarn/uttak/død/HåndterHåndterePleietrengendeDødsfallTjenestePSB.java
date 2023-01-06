@@ -124,7 +124,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         var perioderSomMåforlenges = TidslinjeUtil.tilTidslinjeKomprimert(perioder)
             .combine(new LocalDateSegment<>(periode.toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN)
             .compress()
-            .intersection(periode.toLocalDateInterval())
+            .combine(new LocalDateTimeline<>(periode.toLocalDateInterval(), true), StandardCombinators::coalesceLeftHandSide, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .stream()
             .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             .collect(Collectors.toCollection(TreeSet::new));
