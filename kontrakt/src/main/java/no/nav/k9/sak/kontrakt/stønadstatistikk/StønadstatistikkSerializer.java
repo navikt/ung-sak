@@ -21,14 +21,16 @@ public class StønadstatistikkSerializer {
             .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS);
-    
+
     public static String toJson(StønadstatistikkHendelse object) {
+        new StønadstatistikkHendelseValidator().valider(object);
+
         try {
             Writer jsonWriter = new StringWriter();
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(jsonWriter, object);
             jsonWriter.flush();
             final String json = jsonWriter.toString();
-            
+
             // Verifiserer at JSON er gyldig ved deserialisering:
             Objects.requireNonNull(fromJson(json), "json-deserialisert");
             return json;
@@ -36,7 +38,7 @@ public class StønadstatistikkSerializer {
             throw new IllegalStateException(e);
         }
     }
-    
+
     public static StønadstatistikkHendelse fromJson(String json) {
         try {
             return objectMapper.readerFor(StønadstatistikkHendelse.class).readValue(json);

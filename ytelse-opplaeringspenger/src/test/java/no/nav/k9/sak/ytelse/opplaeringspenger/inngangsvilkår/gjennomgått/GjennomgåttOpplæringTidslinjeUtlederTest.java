@@ -56,7 +56,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
     }
 
     private Set<PerioderFraSøknad> setupEnkelKursperiode() {
-        KursPeriode kursPeriode = new KursPeriode(søknadsperiodeFom, søknadsperiodeTom, null, null, "institusjon", null, "beskrivelse");
+        KursPeriode kursPeriode = new KursPeriode(søknadsperiodeFom, søknadsperiodeTom, null, null, "institusjon", null);
         return setupPerioderFraSøknad(List.of(kursPeriode));
     }
 
@@ -180,7 +180,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
         KursPeriode kursPeriode = new KursPeriode(søknadsperiodeFom.plusDays(2), søknadsperiodeTom.minusDays(2),
             DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeFom.plusDays(1)),
             DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeTom.minusDays(1), søknadsperiodeTom),
-            "", null, "");
+            "", null);
         Set<PerioderFraSøknad> perioderFraSøknad = setupPerioderFraSøknad(List.of(kursPeriode));
 
         VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom.plusDays(2), søknadsperiodeTom.minusDays(2)), true, "");
@@ -200,7 +200,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
         DatoIntervallEntitet reisetidTil = DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeFom.plusDays(1));
         DatoIntervallEntitet reisetidHjem = DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeTom.minusDays(1), søknadsperiodeTom);
         DatoIntervallEntitet opplæringPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom.plusDays(2), søknadsperiodeTom.minusDays(2));
-        KursPeriode kursPeriode = new KursPeriode(opplæringPeriode, reisetidTil, reisetidHjem, "", null, "");
+        KursPeriode kursPeriode = new KursPeriode(opplæringPeriode, reisetidTil, reisetidHjem, "", null);
         Set<PerioderFraSøknad> perioderFraSøknad = setupPerioderFraSøknad(List.of(kursPeriode));
 
         VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(opplæringPeriode, true, "");
@@ -222,7 +222,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
     void reisetidOppTil1DagGodkjennesAutomatisk() {
         DatoIntervallEntitet reisetidTil = DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeFom);
         DatoIntervallEntitet reisetidHjem = DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeTom, søknadsperiodeTom);
-        KursPeriode kursPeriode = new KursPeriode(søknadsperiodeFom.plusDays(1), søknadsperiodeTom.minusDays(1), reisetidTil, reisetidHjem, "", null, "");
+        KursPeriode kursPeriode = new KursPeriode(søknadsperiodeFom.plusDays(1), søknadsperiodeTom.minusDays(1), reisetidTil, reisetidHjem, "", null);
         Set<PerioderFraSøknad> perioderFraSøknad = setupPerioderFraSøknad(List.of(kursPeriode));
 
         VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom.plusDays(1), søknadsperiodeTom.minusDays(1)), true, "");

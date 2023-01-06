@@ -6,15 +6,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.StreamingOutput;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -56,6 +55,7 @@ public class DebugDumpsters {
 
         List<DumpOutput> allDumps = dumpers.stream().flatMap(ddp -> {
             try {
+                log.info("Dumper fra {}", ddp.getClass().getName());
                 return ddp.dump(fagsak).stream();
             } catch (Exception e) {
                 StringWriter sw = new StringWriter();

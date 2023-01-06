@@ -43,10 +43,10 @@
         <felles.version>1.0.7</felles.version>
         <swagger.version>2.2.3</swagger.version>
         <junit.version>5.9.1</junit.version>
-        <k9format.version>7.0.4</k9format.version>
-        <jackson.version>2.14.1</jackson.version>
+        <k9format.version>8.0.1</k9format.version>
+         <jackson.version>2.14.1</jackson.version>
         <asm.version>9.4</asm.version>
-        <kotlin-stdlib.version>1.7.22</kotlin-stdlib.version>
+        <kotlin-stdlib.version>1.8.0</kotlin-stdlib.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -127,7 +127,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>1.0.3</version>
+                <version>1.0.4</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -155,7 +155,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt-jakarta</artifactId>
-                <version>2.0.0</version>
+                <version>2.0.3</version>
             </dependency>
 
             <dependency>
@@ -166,7 +166,7 @@
             <dependency>
                 <groupId>org.threeten</groupId>
                 <artifactId>threeten-extra</artifactId>
-                <version>1.7.1</version>
+                <version>1.7.2</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
@@ -378,7 +378,7 @@
             <dependency>
                 <groupId>no.nav.pleiepengerbarn.uttak</groupId>
                 <artifactId>kontrakter</artifactId>
-                <version>1.2.6</version>
+                <version>1.2.7</version>
             </dependency>
 
             <dependency>
@@ -468,7 +468,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.9.0</version>
+                <version>4.11.0</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
@@ -557,7 +557,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
-                <version>4.8.152</version>
+                <version>4.8.154</version>
             </dependency>
 
             <dependency>
@@ -849,7 +849,7 @@
                     <dependency>
                         <groupId>no.nav.k9.dev</groupId>
                         <artifactId>dev-jakarta-transform</artifactId>
-                        <version>0.6.4</version>
+                        <version>0.6.5</version>
                     </dependency>
                     <dependency>
                         <groupId>ant-contrib</groupId>

@@ -154,7 +154,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         final LocalDateTimeline<Boolean> perioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
         final LocalDateTimeline<VilkårPeriode> omsorgenForTidslinje = vilkårene.getVilkårTimeline(VilkårType.OMSORGEN_FOR);
 
-        return perioderTidslinje.combine(omsorgenForTidslinje, (datoInterval, p, vp) -> new LocalDateSegment<>(datoInterval, vp.getValue().getUtfall()), JoinStyle.LEFT_JOIN).compress();
+        return perioderTidslinje.combine(omsorgenForTidslinje, (datoInterval, p, vp) -> new LocalDateSegment<>(datoInterval, vp.getValue().getGjeldendeUtfall()), JoinStyle.LEFT_JOIN).compress();
     }
 
     private MedisinskGrunnlag opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, NavigableSet<DatoIntervallEntitet> perioderTilVurderingUtenOmsorgenFor, final Behandling behandling) {

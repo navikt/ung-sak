@@ -22,12 +22,11 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.integrasjon.rest.NoAuthRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
@@ -47,7 +46,7 @@ public class RedirectToRegisterRestTjeneste {
 
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
-    private OidcRestClient restClient;
+    private NoAuthRestClient restClient;
     private String arbeidOgInntektBaseURL;
 
     RedirectToRegisterRestTjeneste() {
@@ -57,8 +56,8 @@ public class RedirectToRegisterRestTjeneste {
     @Inject
     public RedirectToRegisterRestTjeneste(
         TpsTjeneste tpsTjeneste,
-        BehandlingRepository behandlingRepository,
-        FagsakRepository fagsakRepository, OidcRestClient restClient,
+        FagsakRepository fagsakRepository,
+        NoAuthRestClient restClient,
         @KonfigVerdi(value = "arbeid.og.inntekt.base.url", required = false, defaultVerdi = "https://arbeid-og-inntekt.nais.adeo.no") String arbeidOgInntektBaseURL) {
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakRepository = fagsakRepository;
