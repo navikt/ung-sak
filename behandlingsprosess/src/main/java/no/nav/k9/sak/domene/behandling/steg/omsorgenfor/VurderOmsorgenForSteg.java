@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_OMSORG_FOR
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -16,7 +17,9 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -60,6 +63,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynTjenester;
+    private boolean omsorgenforFlyttet;
 
     VurderOmsorgenForSteg() {
         // CDI
@@ -69,18 +73,25 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     public VurderOmsorgenForSteg(BehandlingRepositoryProvider repositoryProvider,
                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                  OmsorgenForTjeneste omsorgenForTjeneste,
-                                 @Any Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynTjenester) {
+                                 @Any Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynTjenester,
+                                 @KonfigVerdi(value = "oms.omsorgenfor.flyttet", defaultVerdi = "false") boolean omsorgenforFlyttet) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
         this.perioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.omsorgenForTjeneste = omsorgenForTjeneste;
         this.brukerdialoginnsynTjenester = brukerdialoginnsynTjenester;
+        this.omsorgenforFlyttet = omsorgenforFlyttet;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        if (skalHoppeOverVurdering(behandling)) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        } else if(måSettesPåVent(behandling)) {
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VENTE_PA_OMSORGENFOR_OMS)));
+        }
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
         final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(kontekst, perioder);
@@ -108,6 +119,24 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private boolean måSettesPåVent(Behandling behandling) {
+        if (!Objects.equals(behandling.getFagsakYtelseType(), FagsakYtelseType.OMP)) {
+            return false;
+        }
+        var vilkårene = vilkårResultatRepository.hent(behandling.getId());
+
+        return !omsorgenforFlyttet && vilkårene.getVilkår(VILKÅRET).isPresent();
+    }
+
+    private boolean skalHoppeOverVurdering(Behandling behandling) {
+        if (!Objects.equals(behandling.getFagsakYtelseType(), FagsakYtelseType.OMP)) {
+            return false;
+        }
+        var vilkårene = vilkårResultatRepository.hent(behandling.getId());
+
+        return vilkårene.getVilkår(VILKÅRET).isEmpty();
     }
 
     private boolean harOmsorgenForISistePeriode(Vilkårene vilkårene) {
