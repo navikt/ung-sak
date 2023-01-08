@@ -141,6 +141,7 @@ public class AksjonspunktKodeDefinisjon {
 
     // Generelt manglende funksjonalitet.
     public static final String AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET = "9999";
+    public static final String AUTO_VENTE_PA_OMSORGENFOR_OMS = "9099";
 
     // Kompletthet for beregning
     public static final String AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9069";
