@@ -238,8 +238,6 @@ spec:
       value: "false"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
-    - name: OMP_STONADSTATISTIKK
-      value: "false"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
