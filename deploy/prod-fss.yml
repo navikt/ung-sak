@@ -259,7 +259,7 @@ spec:
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
-      vale: "false"
+      value: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
