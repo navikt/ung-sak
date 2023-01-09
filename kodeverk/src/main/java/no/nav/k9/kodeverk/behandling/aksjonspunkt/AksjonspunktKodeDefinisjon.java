@@ -124,6 +124,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_INSTITUSJON = "9300";
     public static final String VURDER_NØDVENDIGHET = "9301";
     public static final String VURDER_GJENNOMGÅTT_OPPLÆRING = "9302";
+    public static final String VURDER_REISETID = "9303";
 
     // OMS
     public static final String AVKLAR_OMSORGEN_FOR_KODE = "9002";
