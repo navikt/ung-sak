@@ -249,7 +249,7 @@ spec:
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2023-01-02"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
-      value: "false"
+      value: "true"
     - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
       value: "true"
     - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
@@ -259,7 +259,7 @@ spec:
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
-      vale: "false"
+      value: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

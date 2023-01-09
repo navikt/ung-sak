@@ -77,7 +77,7 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
                 "Behandling " + behandling.getId() + " har ugyldig resultatType=" + resultatType + ", støtter ikke allerede henlagt behandling i Foreslå Behandlingsresultat");
         }
 
-        if (BehandlingResultatType.getInnvilgetKoder().contains(resultatType) || Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(behandling.getFagsakYtelseType())) {
+        if (BehandlingResultatType.getInnvilgetKoder().contains(resultatType) || Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN, FagsakYtelseType.OLP, FagsakYtelseType.OMP).contains(behandling.getFagsakYtelseType())) {
             validerAtAlleVilkårErVurdert(behandling.getId());
         }
     }
