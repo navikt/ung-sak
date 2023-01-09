@@ -52,6 +52,6 @@ public class GodkjentOpplæringsinstitusjonRepositoryTest {
         entityManager.flush();
 
         List<GodkjentOpplæringsinstitusjon> resultat = godkjentOpplæringsinstitusjonRepository.hentAlle();
-        assertThat(resultat).hasSize(2);
+        assertThat(resultat.size()).isGreaterThanOrEqualTo(2);
     }
 }

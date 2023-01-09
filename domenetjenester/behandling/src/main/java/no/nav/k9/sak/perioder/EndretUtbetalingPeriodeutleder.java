@@ -15,4 +15,7 @@ public interface EndretUtbetalingPeriodeutleder {
     }
 
     public NavigableSet<DatoIntervallEntitet> utledPerioder(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode);
+
+    public NavigableSet<DatoIntervallEntitet> utledPerioder(BehandlingReferanse behandlingReferanse);
+
 }
