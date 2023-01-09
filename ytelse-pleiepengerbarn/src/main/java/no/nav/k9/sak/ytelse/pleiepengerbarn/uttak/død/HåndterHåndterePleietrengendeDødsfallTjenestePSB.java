@@ -140,8 +140,6 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
 
         forlengPeriode(periode, pleietrengendePersonopplysninger, brukerPersonopplysninger, vilkårene, resultatBuilder);
 
-        perioderSomMåforlenges.stream().filter(it -> !periodeSomOverlapperMedDødsfallet.contains(it)).forEach(restPeriode -> forlengPeriode(restPeriode, pleietrengendePersonopplysninger, brukerPersonopplysninger, vilkårene, resultatBuilder));
-
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), resultatBuilder.build());
 
         final var nåværendeResultat = resultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
