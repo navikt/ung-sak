@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -122,7 +123,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
         var perioder = utledPerioder(referanse);
         var perioderSomMåforlenges = TidslinjeUtil.tilTidslinjeKomprimert(perioder)
-            .intersection(periode.toLocalDateInterval())
+            .intersection(new LocalDateInterval(periode.getFomDato(), LocalDateInterval.TIDENES_ENDE))
             .combine(new LocalDateSegment<>(periode.toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN)
             .combine(new LocalDateTimeline<>(periode.toLocalDateInterval(), true), StandardCombinators::coalesceLeftHandSide, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .compress()
