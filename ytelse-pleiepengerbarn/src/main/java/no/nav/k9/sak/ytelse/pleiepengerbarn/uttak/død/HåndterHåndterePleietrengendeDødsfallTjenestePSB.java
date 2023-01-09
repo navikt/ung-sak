@@ -131,20 +131,29 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
             .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             .collect(Collectors.toCollection(TreeSet::new));
 
-        if (perioderSomMåforlenges.size() > 1) {
+        var periodeSomOverlapperMedDødsfallet = perioderSomMåforlenges.stream().filter(it -> it.overlapper(utvidelsesperiode.get())).collect(Collectors.toCollection(TreeSet::new));
+
+        if (periodeSomOverlapperMedDødsfallet.size() > 1) {
             throw new IllegalStateException("Fant flere perioder som må forlenges." + perioderSomMåforlenges);
         }
-        periode = utledPeriode(periode, perioderSomMåforlenges);
+        periode = utledPeriode(periode, periodeSomOverlapperMedDødsfallet);
 
-        forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato());
-        forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
-        forlengAndreVilkår(periode, vilkårene, resultatBuilder);
+        forlengPeriode(periode, pleietrengendePersonopplysninger, brukerPersonopplysninger, vilkårene, resultatBuilder);
+
+        perioderSomMåforlenges.stream().filter(it -> !periodeSomOverlapperMedDødsfallet.contains(it)).forEach(restPeriode -> forlengPeriode(restPeriode, pleietrengendePersonopplysninger, brukerPersonopplysninger, vilkårene, resultatBuilder));
+
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), resultatBuilder.build());
 
         final var nåværendeResultat = resultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
         var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
         builder.tilbakeStill(periode);
         resultatRepository.lagreOgFlush(referanse.getBehandlingId(), builder);
+    }
+
+    private void forlengPeriode(DatoIntervallEntitet periode, PersonopplysningEntitet pleietrengendePersonopplysninger, PersonopplysningEntitet brukerPersonopplysninger, Vilkårene vilkårene, VilkårResultatBuilder resultatBuilder) {
+        forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato());
+        forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
+        forlengAndreVilkår(periode, vilkårene, resultatBuilder);
     }
 
     private NavigableSet<DatoIntervallEntitet> utledPerioder(BehandlingReferanse referanse) {
