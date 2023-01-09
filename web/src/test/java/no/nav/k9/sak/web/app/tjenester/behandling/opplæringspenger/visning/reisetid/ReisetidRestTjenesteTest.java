@@ -224,4 +224,22 @@ class ReisetidRestTjenesteTest {
         assertThat(result.getPerioder()).hasSize(2);
         assertThat(result.getVurderinger()).hasSize(2);
     }
+
+    @Test
+    void ingenReisetid() {
+        setupPerioderFraSøknad(null, null);
+
+        Response response = restTjeneste.hentVurdertReisetid(new BehandlingUuidDto(behandling.getUuid()));
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        ReisetidDto result = (ReisetidDto) response.getEntity();
+        assertThat(result).isNotNull();
+
+        assertThat(result.getPerioder()).hasSize(1);
+        assertThat(result.getPerioder().get(0).getReisetidTil()).isNull();
+        assertThat(result.getPerioder().get(0).getReisetidHjem()).isNull();
+
+        assertThat(result.getVurderinger()).isEmpty();
+    }
 }

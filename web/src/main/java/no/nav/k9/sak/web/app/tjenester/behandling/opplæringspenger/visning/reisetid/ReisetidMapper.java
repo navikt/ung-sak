@@ -31,8 +31,8 @@ class ReisetidMapper {
             for (KursPeriode kursPeriode : fraSøknad.getKurs()) {
                 perioder.add(new ReisetidPeriodeDto(
                     kursPeriode.getPeriode().tilPeriode(),
-                    kursPeriode.getReiseperiodeTil().tilPeriode(),
-                    kursPeriode.getReiseperiodeHjem().tilPeriode()));
+                    kursPeriode.getReiseperiodeTil() != null ? kursPeriode.getReiseperiodeTil().tilPeriode() : null,
+                    kursPeriode.getReiseperiodeHjem() != null ? kursPeriode.getReiseperiodeHjem().tilPeriode() : null));
             }
         }
 
@@ -84,21 +84,25 @@ class ReisetidMapper {
         for (PerioderFraSøknad fraSøknad : perioderFraSøknad) {
             for (KursPeriode kursPeriode : fraSøknad.getKurs()) {
 
-                segmenterFraSøknad.add(new LocalDateSegment<>(
-                    kursPeriode.getReiseperiodeTil().getFomDato(),
-                    kursPeriode.getReiseperiodeTil().getTomDato(),
-                    new ReisetidVurderingData(harVarighetEnDag(
-                        kursPeriode.getReiseperiodeTil().tilPeriode()) ? Resultat.GODKJENT_AUTOMATISK : Resultat.MÅ_VURDERES,
-                        null,
-                        kursPeriode.getPeriode().tilPeriode())));
+                if (kursPeriode.getReiseperiodeTil() != null) {
+                    segmenterFraSøknad.add(new LocalDateSegment<>(
+                        kursPeriode.getReiseperiodeTil().getFomDato(),
+                        kursPeriode.getReiseperiodeTil().getTomDato(),
+                        new ReisetidVurderingData(harVarighetEnDag(
+                            kursPeriode.getReiseperiodeTil().tilPeriode()) ? Resultat.GODKJENT_AUTOMATISK : Resultat.MÅ_VURDERES,
+                            null,
+                            kursPeriode.getPeriode().tilPeriode())));
+                }
 
-                segmenterFraSøknad.add(new LocalDateSegment<>(
-                    kursPeriode.getReiseperiodeHjem().getFomDato(),
-                    kursPeriode.getReiseperiodeHjem().getTomDato(),
-                    new ReisetidVurderingData(harVarighetEnDag(
-                        kursPeriode.getReiseperiodeHjem().tilPeriode()) ? Resultat.GODKJENT_AUTOMATISK : Resultat.MÅ_VURDERES,
-                        null,
-                        kursPeriode.getPeriode().tilPeriode())));
+                if (kursPeriode.getReiseperiodeHjem() != null) {
+                    segmenterFraSøknad.add(new LocalDateSegment<>(
+                        kursPeriode.getReiseperiodeHjem().getFomDato(),
+                        kursPeriode.getReiseperiodeHjem().getTomDato(),
+                        new ReisetidVurderingData(harVarighetEnDag(
+                            kursPeriode.getReiseperiodeHjem().tilPeriode()) ? Resultat.GODKJENT_AUTOMATISK : Resultat.MÅ_VURDERES,
+                            null,
+                            kursPeriode.getPeriode().tilPeriode())));
+                }
             }
         }
 
