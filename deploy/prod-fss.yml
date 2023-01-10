@@ -258,6 +258,8 @@ spec:
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "false"
+    - name: PSB_UTTAK_UNNTAK_BEVAR_VEDTATT_VERDI
+      value: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
