@@ -42,6 +42,7 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
 
     @Override
     public void doTask(ProsessTaskData pd) {
+        long t0 = System.currentTimeMillis();
         final String key = Objects.requireNonNull(pd.getSaksnummer());
         final StønadstatistikkHendelse hendelse = stønadstatistikkService.lagHendelse(Long.parseLong(pd.getBehandlingId()));
         if (hendelse == null) {
@@ -59,6 +60,8 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
             logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}'", key);
         }
         meldingProducer.send(key, value);
+        logger.info("Publisere hendelse til stønadstatistikk brukte {} ms for {}", System.currentTimeMillis() - t0, hendelse.getYtelseType());
+
     }
 
 
