@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.uttak.RettVedDødType;
@@ -38,6 +37,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBu
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 
 @ApplicationScoped
@@ -120,14 +120,17 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
 
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
 
-        var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
+        var kantIKantVurderer = vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer();
+        var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(kantIKantVurderer);
         var perioder = utledPerioder(referanse);
-        var perioderSomMåforlenges = TidslinjeUtil.tilTidslinjeKomprimert(perioder)
+        var tidslinjen = TidslinjeUtil.tilTidslinjeKomprimert(perioder)
             .intersection(new LocalDateInterval(periode.getFomDato(), LocalDateInterval.TIDENES_ENDE))
-            .combine(new LocalDateSegment<>(periode.toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN)
-            .combine(new LocalDateTimeline<>(periode.toLocalDateInterval(), true), StandardCombinators::coalesceLeftHandSide, LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .compress()
-            .stream()
+            .combine(new LocalDateTimeline<>(periode.toLocalDateInterval(), true), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN)
+            .compress();
+
+        tidslinjen = tidslinjen.combine(Hjelpetidslinjer.utledHullSomMåTettes(tidslinjen, kantIKantVurderer), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
+        var perioderSomMåforlenges = tidslinjen.stream()
             .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             .collect(Collectors.toCollection(TreeSet::new));
 
