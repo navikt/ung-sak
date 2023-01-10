@@ -62,17 +62,14 @@ public class MapInputTilUttakTjeneste {
 
     private final HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private final String unntak;
-    private final boolean enableBevarVerdi;
     private final boolean skalKjøreNyLogikkForSpeiling;
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
                                     @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
-                                    @KonfigVerdi(value = "psb.uttak.unntak.bevar.vedtatt.verdi", required = false, defaultVerdi = "false") boolean enableBevarVerdi,
                                     @KonfigVerdi(value = "IKKE_YRKESAKTIV_UTEN_SPEILING", required = false, defaultVerdi = "false") boolean skalKjøreNyLogikkForSpeiling) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
-        this.enableBevarVerdi = enableBevarVerdi;
         this.skalKjøreNyLogikkForSpeiling = skalKjøreNyLogikkForSpeiling;
     }
 
@@ -182,9 +179,6 @@ public class MapInputTilUttakTjeneste {
 
     private Map<String, String> mapSisteVedtatteBehandlingForBehandling(Map<UUID, UUID> sisteVedtatteBehandlingForBehandling) {
         Map<String, String> behandlinger = new HashMap<>();
-        if (!enableBevarVerdi) {
-            return behandlinger;
-        }
         for (Map.Entry<UUID, UUID> entry : sisteVedtatteBehandlingForBehandling.entrySet()) {
             if (entry.getKey() != null && entry.getValue() != null) {
                 behandlinger.put(entry.getKey().toString(), entry.getValue().toString());
