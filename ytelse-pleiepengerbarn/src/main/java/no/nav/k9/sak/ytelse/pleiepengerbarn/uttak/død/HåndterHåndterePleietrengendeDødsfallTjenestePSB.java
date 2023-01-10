@@ -17,6 +17,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.uttak.RettVedDødType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -34,6 +35,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
@@ -148,6 +150,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         final var nåværendeResultat = resultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
         var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
         builder.tilbakeStill(periode);
+        builder.leggTil(new EtablertPleieperiode(periode, Pleiegrad.KONTINUERLIG_TILSYN));
         resultatRepository.lagreOgFlush(referanse.getBehandlingId(), builder);
     }
 
