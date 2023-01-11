@@ -85,7 +85,7 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
             .map(VilkårPeriode::getMerknad)
             .orElse(null);
         var opptjeningResultat = opptjeningsperioderTjeneste.hentOpptjeningHvisFinnes(behandlingId);
-        if (opptjeningResultat.isEmpty()) {
+        if (opptjeningResultat.isEmpty() || VilkårUtfallMerknad.VM_7847_A.equals(vilkårUtfallMerknad)) {
             return Collections.emptyList();
         }
         var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(vilkårsperiode.getFomDato())).orElseThrow();
