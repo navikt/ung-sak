@@ -94,9 +94,10 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         }
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
-        final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(kontekst, perioder);
+        var referanse = BehandlingReferanse.fra(behandling);
+        final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(referanse, perioder);
 
-        if (skalHaAksjonspunktGrunnetManuellRevurdering(samletOmsorgenForTidslinje, behandling) || harAksjonspunkt(samletOmsorgenForTidslinje, false)) {
+        if (skalHaAksjonspunktGrunnetManuellRevurdering(samletOmsorgenForTidslinje, behandling) || skalHaAksjonspunkt(samletOmsorgenForTidslinje, false)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2)));
         } else if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2) && harIkkeLengerAksjonspunkt(behandling, samletOmsorgenForTidslinje)) {
             log.info("Har aksjonspunt for omsorgen for, men det er ikke relevant lenger");
@@ -108,7 +109,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
 
         final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         final boolean haddeOmsorgenForISistePeriode = harOmsorgenForISistePeriode(vilkårene);
-        final List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(BehandlingReferanse.fra(behandling), samletOmsorgenForTidslinje);
+        final List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(referanse, samletOmsorgenForTidslinje);
 
         final Vilkårene oppdaterteVilkår = oppdaterVilkårene(perioderTilVurderingTjeneste, vilkårene, vilkårData);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
@@ -150,19 +151,19 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
 
 
     private boolean harIkkeLengerAksjonspunkt(Behandling behandling, LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje) {
-        return !harAksjonspunkt(samletOmsorgenForTidslinje, behandling.erManueltOpprettet());
+        return !skalHaAksjonspunkt(samletOmsorgenForTidslinje, behandling.erManueltOpprettet());
     }
 
     private boolean skalHaAksjonspunktGrunnetManuellRevurdering(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, final Behandling behandling) {
         return behandling.erManueltOpprettet()
-            && harAksjonspunkt(samletOmsorgenForTidslinje, true)
+            && skalHaAksjonspunkt(samletOmsorgenForTidslinje, true)
             && behandling.getAksjonspunkter().stream().noneMatch(a -> a.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2);
     }
 
-    private boolean harAksjonspunkt(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, boolean medAlleGamleVurderingerPåNytt) {
+    private boolean skalHaAksjonspunkt(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, boolean medAlleGamleVurderingerPåNytt) {
         for (LocalDateSegment<OmsorgenForVilkårGrunnlag> s : samletOmsorgenForTidslinje.toSegments()) {
             final OmsorgenForVilkårGrunnlag grunnlag = s.getValue();
-            if ((grunnlag.getErOmsorgsPerson() == null || medAlleGamleVurderingerPåNytt) && (
+            if ((grunnlag.getHarBlittVurdertSomOmsorgsPerson() == null || medAlleGamleVurderingerPåNytt) && (
                 grunnlag.getRelasjonMellomSøkerOgPleietrengende() == null
                     || grunnlag.getRelasjonMellomSøkerOgPleietrengende().getRelasjonsRolle() == null
                     || grunnlag.getRelasjonMellomSøkerOgPleietrengende().getRelasjonsRolle() != RelasjonsRolle.BARN)) {

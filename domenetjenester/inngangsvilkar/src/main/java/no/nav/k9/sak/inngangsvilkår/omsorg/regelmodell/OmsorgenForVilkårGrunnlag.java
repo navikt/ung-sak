@@ -19,6 +19,10 @@ public class OmsorgenForVilkårGrunnlag implements VilkårGrunnlag {
         this.erOmsorgsPerson = erOmsorgsPerson;
     }
 
+    public OmsorgenForVilkårGrunnlag(Boolean erOmsorgsPerson) {
+        this(null, null, null, erOmsorgsPerson);
+    }
+
     public Relasjon getRelasjonMellomSøkerOgPleietrengende() {
         return relasjonMellomSøkerOgPleietrengende;
     }
@@ -31,7 +35,7 @@ public class OmsorgenForVilkårGrunnlag implements VilkårGrunnlag {
         return pleietrengendeAdresser;
     }
 
-    public Boolean getErOmsorgsPerson() {
+    public Boolean getHarBlittVurdertSomOmsorgsPerson() {
         return erOmsorgsPerson;
     }
 

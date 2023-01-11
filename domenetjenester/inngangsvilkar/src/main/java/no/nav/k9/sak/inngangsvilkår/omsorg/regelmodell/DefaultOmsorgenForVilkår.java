@@ -21,6 +21,12 @@ public class DefaultOmsorgenForVilkår implements OmsorgenForVilkår {
         return getSpecification().evaluate(grunnlag);
     }
 
+    @Override
+    public Evaluation evaluer(OmsorgenForVilkårGrunnlag input, Object outputContainer) {
+        // Ignorerer output container
+        return evaluer(input);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Specification<OmsorgenForVilkårGrunnlag> getSpecification() {
