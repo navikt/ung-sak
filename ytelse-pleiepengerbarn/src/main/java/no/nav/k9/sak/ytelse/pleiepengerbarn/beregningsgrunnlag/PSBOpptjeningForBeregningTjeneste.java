@@ -18,11 +18,13 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter.OpptjeningPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningsaktiviteterPerYtelse;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -30,6 +32,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
+import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
@@ -48,6 +51,8 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
     private VilkårResultatRepository vilkårResultatRepository;
 
+    private boolean skalBrukeOpptjeningResultat;
+
     private OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
         OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD,
@@ -60,10 +65,12 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     @Inject
     public PSBOpptjeningForBeregningTjeneste(OpptjeningsperioderTjeneste opptjeningsperioderTjeneste,
                                              OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider,
-                                             VilkårResultatRepository vilkårResultatRepository) {
+                                             VilkårResultatRepository vilkårResultatRepository,
+                                             @KonfigVerdi(value = "PSB_BG_BRUKER_OPPTJENING_RESULTAT", defaultVerdi = "false") boolean skalBrukeOpptjeningResultat) {
         this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
         this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.skalBrukeOpptjeningResultat = skalBrukeOpptjeningResultat;
     }
 
 
@@ -85,18 +92,34 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
             .map(VilkårPeriode::getMerknad)
             .orElse(null);
         var opptjeningResultat = opptjeningsperioderTjeneste.hentOpptjeningHvisFinnes(behandlingId);
-        if (opptjeningResultat.isEmpty() || VilkårUtfallMerknad.VM_7847_A.equals(vilkårUtfallMerknad)) {
+        if (opptjeningResultat.isEmpty()) {
             return Collections.emptyList();
         }
         var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(vilkårsperiode.getFomDato())).orElseThrow();
         var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()));
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), vilkårsperiode, yrkesaktivitetFilter);
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse,
+            iayGrunnlag,
+            finnVurderer(opptjeningResultat.get()),
+            opptjening.getOpptjeningPeriode(),
+            vilkårsperiode,
+            yrkesaktivitetFilter);
         return aktiviteter.stream()
             .filter(oa -> filtrerForVilkårsperiode(vilkårsperiode, oa, vilkårUtfallMerknad))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
             .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType()))
-            .filter(oa -> !erAvslåttArbeid(oa))
+            .filter(this::filtrerBasertPåVurdering)
             .collect(Collectors.toList());
+    }
+
+    private boolean filtrerBasertPåVurdering(OpptjeningsperiodeForSaksbehandling oa) {
+        if (skalBrukeOpptjeningResultat) {
+            return oa.getVurderingsStatus().equals(VurderingsStatus.GODKJENT);
+        }
+        return !erAvslåttArbeid(oa);
+    }
+
+    private OpptjeningAktivitetVurdering finnVurderer(OpptjeningResultat opptjeningResultat) {
+        return skalBrukeOpptjeningResultat ? new OpptjeningAktivitetResultatVurdering(opptjeningResultat) : vurderOpptjening;
     }
 
     private boolean filtrerForVilkårsperiode(DatoIntervallEntitet vilkårsperiode, OpptjeningsperiodeForSaksbehandling oa, VilkårUtfallMerknad vilkårUtfallMerknad) {

@@ -261,6 +261,8 @@ spec:
       value: "true"
     - name: OMS_OMSORGENFOR_FLYTTET
       value: "true"
+    - name: PSB_BG_BRUKER_OPPTJENING_RESULTAT
+      value: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

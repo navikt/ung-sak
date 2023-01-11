@@ -258,6 +258,8 @@ spec:
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "false"
+    - name: PSB_BG_BRUKER_OPPTJENING_RESULTAT
+      value: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
