@@ -180,13 +180,17 @@ public class BehandlingProsessHendelse {
     @Valid
     @JsonProperty(value = "aksjonspunktTilstander", required = true)
     private List<AksjonspunktTilstandDto> aksjonspunktTilstand;
-    
+
     /**
      * {@code true} hvis det finnes minst én ny periode det er søkt om i behandlingen.
      */
     @Valid
     @JsonProperty(value = "nyeKrav", required = false)
     private Boolean nyeKrav;
+
+    @Valid
+    @JsonProperty(value = "vedtaksdato")
+    private LocalDate vedtaksdato;
 
     public BehandlingProsessHendelse() {
     }
@@ -214,6 +218,7 @@ public class BehandlingProsessHendelse {
         this.ansvarligBeslutterForTotrinn = kopierFra.ansvarligBeslutterForTotrinn;
         this.aksjonspunktTilstand = kopierFra.aksjonspunktTilstand.stream().map(AksjonspunktTilstandDto::new).toList();
         this.nyeKrav = kopierFra.nyeKrav;
+        this.vedtaksdato = kopierFra.vedtaksdato;
     }
 
     public static Builder builder() {
@@ -291,9 +296,13 @@ public class BehandlingProsessHendelse {
     public List<AksjonspunktTilstandDto> getAksjonspunktTilstand() {
         return aksjonspunktTilstand;
     }
-    
+
     public boolean isNyeKrav() {
         return nyeKrav != null && nyeKrav;
+    }
+
+    public LocalDate getVedtaksdato() {
+        return vedtaksdato;
     }
 
     public static class Builder {
@@ -407,9 +416,14 @@ public class BehandlingProsessHendelse {
             kladd.aksjonspunktTilstand = aksjonspunktTilstand;
             return this;
         }
-        
+
         public Builder medNyeKrav(Boolean nyeKrav) {
             kladd.nyeKrav = nyeKrav;
+            return this;
+        }
+
+        public Builder medVedtaksdato(LocalDate vedtaksdato) {
+            kladd.vedtaksdato = vedtaksdato;
             return this;
         }
 

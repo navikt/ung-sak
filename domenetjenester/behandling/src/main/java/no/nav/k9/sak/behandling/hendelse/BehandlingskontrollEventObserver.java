@@ -24,6 +24,9 @@ import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringAksjonspunktHendelse;
@@ -37,6 +40,7 @@ public class BehandlingskontrollEventObserver {
 
     private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
+    private BehandlingVedtakRepository behandlingVedtakRepository;
     private BehandlingProsessHendelseMapper behandlingProsessHendelseMapper;
 
     public BehandlingskontrollEventObserver() {
@@ -44,10 +48,12 @@ public class BehandlingskontrollEventObserver {
 
     @Inject
     public BehandlingskontrollEventObserver(ProsessTaskTjeneste prosessTaskRepository,
-            BehandlingRepository behandlingRepository,
-            BehandlingProsessHendelseMapper behandlingProsessHendelseMapper) {
+                                            BehandlingRepository behandlingRepository,
+                                            BehandlingVedtakRepository behandlingVedtakRepository,
+                                            BehandlingProsessHendelseMapper behandlingProsessHendelseMapper) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
+        this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.behandlingProsessHendelseMapper = behandlingProsessHendelseMapper;
     }
 
@@ -103,6 +109,30 @@ public class BehandlingskontrollEventObserver {
         } catch (IOException ex) {
             throw new RuntimeException("Publisering av BehandlingAvsluttetHendelse for produksjonsstyring feilet", ex);
         }
+    }
+
+    public void observerVedtakFattetEvent(@Observes BehandlingVedtakEvent event) {
+        try {
+            ProsessTaskData prosessTaskData = opprettProsessTaskVedtattBehandlingprosess(event.getVedtak())
+        }
+    }
+
+    private ProsessTaskData opprettProsessTaskVedtattBehandlingprosess(BehandlingVedtak vedtak) {
+        ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
+        taskData.setCallIdFraEksisterende();
+        taskData.setPrioritet(50);
+
+        Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId).orElseThrow();
+        ProduksjonsstyringAksjonspunktHendelse dto = new ProduksjonsstyringAksjonspunktHendelse(
+            behandling.getUuid(),
+            LocalDateTime.now(),
+            behandlingProsessHendelseMapper.lagAksjonspunkttilstander(hendelse.getAksjonspunkter())
+        );
+
+        taskData.setPayload(JsonObjectMapper.getJson(dto));
+        taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
+        taskData.setProperty(PubliserProduksjonsstyringHendelseTask.BESKRIVELSE, String.valueOf(dto.aksjonspunktTilstander));
+        return taskData;
     }
 
     public void observerAksjonspunktHarEndretBehandlendeEnhetEvent(@Observes BehandlingEnhetEvent event) {
