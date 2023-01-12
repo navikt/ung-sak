@@ -88,7 +88,7 @@ public class OpptjeningsperioderTjeneste {
 
         perioder.addAll(mapOppgittOpptjening(mapArbeidOpptjening, oppgittOpptjening, vurderOpptjening, ref));
         var ytelseFilterVenstreSide = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato());
-        perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(ref, vurderOpptjening, true, ytelseFilterVenstreSide));
+        perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(ref, vilkårsPeriode, vurderOpptjening, true, ytelseFilterVenstreSide));
         lagOpptjeningsperiodeForFrilansAktivitet(ref, oppgittOpptjening, vurderOpptjening, grunnlag, perioder, opptjeningPeriode,
             mapArbeidOpptjening).ifPresent(perioder::add);
 

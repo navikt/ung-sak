@@ -10,9 +10,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -35,7 +32,6 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.vilkår.EndringIUttakPeriodeUtleder;
@@ -46,10 +42,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
 
-
 public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
-    private Logger logger = LoggerFactory.getLogger(PleiepengerVilkårsPerioderTilVurderingTjeneste.class);
     private final PåTversAvHelgErKantIKantVurderer erKantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
     private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering;
@@ -108,6 +102,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
 
     private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Long behandlingId, Vilkår vilkår, NavigableSet<DatoIntervallEntitet> perioder) {
         var perioderTilVurdering = new TreeSet<>(utledPerioderTilVurderingVedÅHensyntaFullstendigTidslinje(behandlingId, perioder));
+
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         var referanse = BehandlingReferanse.fra(behandling);
@@ -172,29 +167,6 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     }
 
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
-        final var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingUuid());
-
-        final var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        final var vurderingsperioderTimeline = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
-        List<Periode> nyeVurderingsperioder = TidslinjeUtil.tilPerioder(perioder);
-
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder)
-            .getDiffPerioder();
-
-        final LocalDateTimeline<Boolean> utvidedePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
-
-        var ekstraPerioder = TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
-
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId())
-            .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
-        if (vilkårene.isPresent()) {
-            return utledVilkårsPerioderFraPerioderTilVurdering(referanse.getBehandlingId(), vilkårene.get(), ekstraPerioder);
-        }
-        return ekstraPerioder;
-    }
-
-    @Override
     public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
         return søknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId);
     }
@@ -255,7 +227,6 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         utvidedePerioder = utvidedePerioder.union(etablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
         utvidedePerioder = utvidedePerioder.union(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId()), StandardCombinators::alwaysTrueForMatch);
         utvidedePerioder = utvidedePerioder.union(uttaksendringerSidenForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
-
         return TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
     }
 
@@ -297,12 +268,18 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private List<Periode> utledVurderingsperiode(Vilkårene vilkårene) {
-        return definerendeVilkår().stream()
-            .flatMap(vt -> vilkårene.getVilkår(vt).stream())
-            .flatMap(v -> v.getPerioder().stream())
-            .map(VilkårPeriode::getPeriode)
-            .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
-            .toList();
+    private NavigableSet<DatoIntervallEntitet> utledVurderingsperiode(Vilkårene vilkårene) {
+        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
+
+        for (VilkårType vilkårType : definerendeVilkår()) {
+            var vilkår = vilkårene.getVilkår(vilkårType);
+            if (vilkår.isPresent()) {
+                var vilkårperioder = vilkår.get().getPerioder();
+                var perioder = vilkårperioder.stream().map(VilkårPeriode::getPeriode).toList();
+                tidslinje = tidslinje.combine(TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(perioder)), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
+        }
+
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje);
     }
 }

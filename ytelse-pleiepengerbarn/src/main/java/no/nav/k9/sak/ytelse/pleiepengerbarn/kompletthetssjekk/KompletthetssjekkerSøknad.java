@@ -7,31 +7,30 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
 @Dependent
 public class KompletthetssjekkerSøknad {
 
-    private SøknadRepository søknadRepository;
     private Period ventefristForTidligSøknad;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     KompletthetssjekkerSøknad() {
         // for proxy
     }
 
     @Inject
-    public KompletthetssjekkerSøknad(SøknadRepository søknadRepository,
+    public KompletthetssjekkerSøknad(SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                      @KonfigVerdi(value = "fp.ventefrist.tidlig.soeknad", defaultVerdi = "P4W") Period ventefristForTidligSøknad) {
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.ventefristForTidligSøknad = ventefristForTidligSøknad;
-        this.søknadRepository = søknadRepository;
     }
 
     public Optional<LocalDateTime> erSøknadMottattForTidlig(BehandlingReferanse ref) {
-        Optional<LocalDate> permisjonsstart = ref.getSkjæringstidspunkt().getSkjæringstidspunktHvisUtledet();
+        Optional<LocalDate> permisjonsstart = søknadsperiodeTjeneste.utledFullstendigPeriode(ref.getBehandlingId()).stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo);
         if (permisjonsstart.isPresent()) {
             LocalDate ventefrist = permisjonsstart.get().minus(ventefristForTidligSøknad);
             boolean erSøknadMottattForTidlig = ventefrist.isAfter(LocalDate.now());
@@ -41,10 +40,5 @@ public class KompletthetssjekkerSøknad {
             }
         }
         return Optional.empty();
-    }
-
-    public Boolean erSøknadMottatt(BehandlingReferanse ref) {
-        final Optional<SøknadEntitet> søknad = søknadRepository.hentSøknadHvisEksisterer(ref.getBehandlingId());
-        return søknad.isPresent();
     }
 }

@@ -4,11 +4,10 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.NavigableSet;
+import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,21 +16,24 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
@@ -124,7 +126,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         var sykdomGrunnlag = medisinskGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
             .map(MedisinskGrunnlag::getGrunnlagsdata);
 
-        List<Periode> nyeVurderingsperioder = utledVurderingsperiode(ref);
+        NavigableSet<DatoIntervallEntitet> nyeVurderingsperioder = utledVurderingsperiode(ref);
         var utledGrunnlag = medisinskGrunnlagTjeneste.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
         var sykdomGrunnlagSammenlikningsresultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
@@ -133,22 +135,25 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         return startpunktType;
     }
 
-    private List<Periode> utledVurderingsperiode(BehandlingReferanse ref) {
+    private NavigableSet<DatoIntervallEntitet> utledVurderingsperiode(BehandlingReferanse ref) {
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(ref.getBehandlingId());
         if (vilkårene.isEmpty()) {
-            return List.of();
+            return new TreeSet<>();
         }
 
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
-        return perioderTilVurderingTjeneste.definerendeVilkår()
-            .stream()
-            .map(vilkårType -> vilkårene.get().getVilkår(vilkårType)
-                .map(Vilkår::getPerioder))
-            .flatMap(Optional::stream)
-            .flatMap(Collection::stream)
-            .map(VilkårPeriode::getPeriode)
-            .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
-            .toList();
+
+        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
+
+        for (VilkårType vilkårType : perioderTilVurderingTjeneste.definerendeVilkår()) {
+            var vilkår = vilkårene.get().getVilkår(vilkårType);
+            if (vilkår.isPresent()) {
+                var perioder = vilkår.get().getPerioder().stream().map(VilkårPeriode::getPeriode).toList();
+                tidslinje = tidslinje.combine(TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(perioder)), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
+        }
+
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje);
     }
 
 }

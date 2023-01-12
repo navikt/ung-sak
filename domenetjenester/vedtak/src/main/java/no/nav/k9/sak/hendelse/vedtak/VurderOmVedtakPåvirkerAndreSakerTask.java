@@ -10,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -49,7 +50,7 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         var vedtakHendelse = JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), Ytelse.class);
-        var fagsakYtelseType = VedtaksHendelseHåndterer.mapYtelse(vedtakHendelse);
+        var fagsakYtelseType = mapYtelse(vedtakHendelse);
         LOG_CONTEXT.add("ytelseType", fagsakYtelseType);
         LOG_CONTEXT.add("saksnummer", vedtakHendelse.getSaksnummer());
 
@@ -80,5 +81,21 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
     private String utledPerioder(NavigableSet<DatoIntervallEntitet> perioder) {
         return perioder.stream().map(it -> it.getFomDato() + "/" + it.getTomDato())
             .collect(Collectors.joining("|"));
+    }
+
+    static FagsakYtelseType mapYtelse(Ytelse vedtak) {
+        if (vedtak.getYtelse() == null) {
+            return FagsakYtelseType.UDEFINERT;
+        }
+        return switch (vedtak.getYtelse()) {
+            case PLEIEPENGER_NÆRSTÅENDE -> FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+            case PLEIEPENGER_SYKT_BARN -> FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+            case OMSORGSPENGER -> FagsakYtelseType.OMSORGSPENGER;
+            case OPPLÆRINGSPENGER -> FagsakYtelseType.OPPLÆRINGSPENGER;
+            case FRISINN -> FagsakYtelseType.FRISINN;
+            case ENGANGSTØNAD -> FagsakYtelseType.ENGANGSTØNAD;
+            case FORELDREPENGER -> FagsakYtelseType.FORELDREPENGER;
+            case SVANGERSKAPSPENGER -> FagsakYtelseType.SVANGERSKAPSPENGER;
+        };
     }
 }

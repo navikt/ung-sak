@@ -17,6 +17,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -40,6 +41,7 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
@@ -49,39 +51,36 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 @CdiDbAwareTest
 public class VurderNødvendighetStegTest {
 
+    private final JournalpostId journalpostId1 = new JournalpostId("123");
+    private final JournalpostId journalpostId2 = new JournalpostId("321");
     @Inject
     private EntityManager entityManager;
-
     @Inject
     private VilkårResultatRepository vilkårResultatRepository;
-
     @Inject
     private BehandlingRepository behandlingRepository;
-
     @Inject
     private VurdertOpplæringRepository vurdertOpplæringRepository;
-
     @Inject
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
-
+    @Inject
+    private PleiebehovResultatRepository resultatRepository;
     @Inject
     @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteBean;
-
     private BehandlingRepositoryProvider repositoryProvider;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteMock;
     private Behandling behandling;
     private VurderNødvendighetSteg vurderNødvendighetSteg;
     private Periode søknadsperiode;
     private TestScenarioBuilder scenario;
-    private final JournalpostId journalpostId1 = new JournalpostId("123");
-    private final JournalpostId journalpostId2 = new JournalpostId("321");
 
     @BeforeEach
-    public void setup(){
+    public void setup() {
         perioderTilVurderingTjenesteMock = spy(perioderTilVurderingTjenesteBean);
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        vurderNødvendighetSteg = new VurderNødvendighetSteg(repositoryProvider, perioderTilVurderingTjenesteMock, vurdertOpplæringRepository, uttakPerioderGrunnlagRepository);
+        vurderNødvendighetSteg = new VurderNødvendighetSteg(repositoryProvider, perioderTilVurderingTjenesteMock, resultatRepository,
+            new VurderNødvendighetTjeneste(repositoryProvider, perioderTilVurderingTjenesteMock, vurdertOpplæringRepository, uttakPerioderGrunnlagRepository));
         LocalDate now = LocalDate.now();
         søknadsperiode = new Periode(now.minusMonths(3), now);
         scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OPPLÆRINGSPENGER);
@@ -102,7 +101,7 @@ public class VurderNødvendighetStegTest {
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
-            List.of(new KursPeriode(periode.getFom(), periode.getTom(), null, null, "institusjon", null, "beskrivelse")));
+            List.of(new KursPeriode(periode.getFom(), periode.getTom(), null, null, "institusjon", null)));
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), uttakPerioderGrunnlagRepository.hentGrunnlag(behandling.getId()).map(UttaksPerioderGrunnlag::getOppgitteSøknadsperioder).orElseThrow());
     }
@@ -114,9 +113,10 @@ public class VurderNødvendighetStegTest {
     }
 
     @Test
-    public void skalReturnereAksjonspunktNårOpplæringIkkeErVurdert() {
+    public void skalReturnereAksjonspunktNårNødvendighetIkkeErVurdert() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -140,9 +140,10 @@ public class VurderNødvendighetStegTest {
     }
 
     @Test
-    public void skalReturnereUtenAksjonspunktNårOpplæringErGodkjent() {
+    public void skalReturnereUtenAksjonspunktNårNødvendighetErGodkjent() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -154,7 +155,9 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null,
+            null
         );
         lagreGrunnlag(grunnlag);
 
@@ -169,12 +172,20 @@ public class VurderNødvendighetStegTest {
             søknadsperiode.getFom(),
             søknadsperiode.getTom(),
             null);
+
+        var pleiebehovResultat = resultatRepository.hentHvisEksisterer(behandling.getId());
+        assertThat(pleiebehovResultat).isPresent();
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder()).hasSize(1);
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getPeriode().getFomDato()).isEqualTo(søknadsperiode.getFom());
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getPeriode().getTomDato()).isEqualTo(søknadsperiode.getTom());
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getGrad()).isEqualTo(Pleiegrad.NØDVENDIG_OPPLÆRING);
     }
 
     @Test
-    public void skalReturnereUtenAksjonspunktNårOpplæringIkkeErGodkjent() {
+    public void skalReturnereUtenAksjonspunktNårNødvendighetIkkeErGodkjent() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -186,7 +197,9 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, false, "test");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null,
+            null
         );
         lagreGrunnlag(grunnlag);
 
@@ -200,13 +213,21 @@ public class VurderNødvendighetStegTest {
             Utfall.IKKE_OPPFYLT,
             søknadsperiode.getFom(),
             søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_NØDVENDIG);
+            Avslagsårsak.IKKE_NØDVENDIG_OPPLÆRING);
+
+        var pleiebehovResultat = resultatRepository.hentHvisEksisterer(behandling.getId());
+        assertThat(pleiebehovResultat).isPresent();
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder()).hasSize(1);
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getPeriode().getFomDato()).isEqualTo(søknadsperiode.getFom());
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getPeriode().getTomDato()).isEqualTo(søknadsperiode.getTom());
+        assertThat(pleiebehovResultat.get().getPleieperioder().getPerioder().get(0).getGrad()).isEqualTo(Pleiegrad.INGEN);
     }
 
     @Test
     public void skalReturnereUtenAksjonspunktNårInstitusjonsvilkårIkkeErOppfylt() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.IKKE_OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.IKKE_OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.IKKE_OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -220,19 +241,16 @@ public class VurderNødvendighetStegTest {
         assertThat(resultat.getAksjonspunktResultater()).isEmpty();
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
-        assertThat(vilkår.getPerioder()).hasSize(1);
-        assertVilkårPeriode(vilkår.getPerioder().get(0),
-            Utfall.IKKE_OPPFYLT,
-            søknadsperiode.getFom(),
-            søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
+        assertThat(vilkår.getPerioder()).isEmpty();
     }
 
     @Test
-    public void skalReturnereUtenAksjonspunktNårOpplæringErPeriodevisGodkjentOgIkkeGodkjent() {
+    public void skalReturnereUtenAksjonspunktNårNødvendighetErPeriodevisGodkjentOgIkkeGodkjent() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
+
         Periode søknadsperiode1 = new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1));
         setupUttakPerioder(journalpostId1, søknadsperiode1);
         Periode søknadsperiode2 = new Periode(søknadsperiode.getTom(), søknadsperiode.getTom());
@@ -247,44 +265,9 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring2 = new VurdertOpplæring(journalpostId2, false, "tast");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring1, vurdertOpplæring2))
-        );
-        lagreGrunnlag(grunnlag);
-
-        BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
-        assertThat(resultat).isNotNull();
-        assertThat(resultat.getAksjonspunktResultater()).isEmpty();
-        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
-        assertThat(vilkår).isNotNull();
-        assertThat(vilkår.getPerioder()).hasSize(2);
-        assertVilkårPeriode(vilkår.getPerioder().get(0),
-            Utfall.OPPFYLT,
-            søknadsperiode.getFom(),
-            søknadsperiode.getTom().minusDays(1),
-            null);
-        assertVilkårPeriode(vilkår.getPerioder().get(1),
-            Utfall.IKKE_OPPFYLT,
-            søknadsperiode.getTom(),
-            søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_NØDVENDIG);
-    }
-
-    @Test
-    public void skalReturnereUtenAksjonspunktNårInstitusjonsvilkårErDelvisOppfyltOgOpplæringErGodkjent() {
-        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1)));
-        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
-        behandling = scenario.lagre(repositoryProvider);
-        setupUttakPerioder(journalpostId1, søknadsperiode);
-
-        Fagsak fagsak = behandling.getFagsak();
-        BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
-            behandlingRepository.taSkriveLås(behandling));
-        setupPerioderTilVurdering(kontekst);
-
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "test");
-        VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring1, vurdertOpplæring2)),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+            null
         );
         lagreGrunnlag(grunnlag);
 
@@ -303,14 +286,16 @@ public class VurderNødvendighetStegTest {
             Utfall.IKKE_OPPFYLT,
             søknadsperiode.getTom(),
             søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
+            Avslagsårsak.IKKE_NØDVENDIG_OPPLÆRING);
     }
 
     @Test
     public void skalReturnereAksjonspunktNårVurderingIkkeErKomplett() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
+
         setupUttakPerioder(journalpostId1, new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1)));
         setupUttakPerioder(journalpostId2, new Periode(søknadsperiode.getTom(), søknadsperiode.getTom()));
 
@@ -322,7 +307,9 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "test");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null,
+            null
         );
         lagreGrunnlag(grunnlag);
 
@@ -344,6 +331,7 @@ public class VurderNødvendighetStegTest {
     public void skalReturnereUtenAksjonspunktNårSykdomsvilkårIkkeErOppfylt() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.IKKE_OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.IKKE_OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -357,18 +345,40 @@ public class VurderNødvendighetStegTest {
         assertThat(resultat.getAksjonspunktResultater()).isEmpty();
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
-        assertThat(vilkår.getPerioder()).hasSize(1);
-        assertVilkårPeriode(vilkår.getPerioder().get(0),
-            Utfall.IKKE_OPPFYLT,
-            søknadsperiode.getFom(),
-            søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE);
+        assertThat(vilkår.getPerioder()).isEmpty();
     }
 
     @Test
-    public void skalReturnereUtenAksjonspunktNårSykdomsvilkårErDelvisOppfyltOgOpplæringErGodkjent() {
+    public void skalReturnereUtenAksjonspunktNårGjennomgåttOpplæringIkkeErOppfylt() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
-        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusMonths(1)));
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.IKKE_OPPFYLT, søknadsperiode);
+        behandling = scenario.lagre(repositoryProvider);
+        setupUttakPerioder(journalpostId1, søknadsperiode);
+
+        Fagsak fagsak = behandling.getFagsak();
+        BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(),
+            behandlingRepository.taSkriveLås(behandling));
+        setupPerioderTilVurdering(kontekst);
+
+        BehandleStegResultat resultat = vurderNødvendighetSteg.utførSteg(kontekst);
+        assertThat(resultat).isNotNull();
+        assertThat(resultat.getAksjonspunktResultater()).isEmpty();
+        Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).isEmpty();
+    }
+
+    @Test
+    public void skalReturnereUtenAksjonspunktNårTidligereVilkårErDelvisOppfyltOgNødvendighetErGodkjent() {
+        Periode godkjentPeriode = new Periode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1));
+        Periode ikkeGodkjentPeriode = new Periode(søknadsperiode.getTom(), søknadsperiode.getTom());
+
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.IKKE_OPPFYLT, ikkeGodkjentPeriode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, godkjentPeriode);
+
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -380,7 +390,9 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null,
+            null
         );
         lagreGrunnlag(grunnlag);
 
@@ -388,23 +400,19 @@ public class VurderNødvendighetStegTest {
         assertThat(resultat.getAksjonspunktResultater()).isEmpty();
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.NØDVENDIG_OPPLÆRING).orElse(null);
         assertThat(vilkår).isNotNull();
-        assertThat(vilkår.getPerioder()).hasSize(2);
+        assertThat(vilkår.getPerioder()).hasSize(1);
         assertVilkårPeriode(vilkår.getPerioder().get(0),
             Utfall.OPPFYLT,
-            søknadsperiode.getFom(),
-            søknadsperiode.getTom().minusMonths(1),
+            godkjentPeriode.getFom(),
+            godkjentPeriode.getTom(),
             null);
-        assertVilkårPeriode(vilkår.getPerioder().get(1),
-            Utfall.IKKE_OPPFYLT,
-            søknadsperiode.getTom().minusMonths(1).plusDays(1),
-            søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE);
     }
 
     @Test
     public void skalIkkeLagreVilkårPeriodeUtenforSøknadsperiode() {
         scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.OPPFYLT, søknadsperiode);
         scenario.leggTilVilkår(VilkårType.LANGVARIG_SYKDOM, Utfall.OPPFYLT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.GJENNOMGÅ_OPPLÆRING, Utfall.OPPFYLT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         setupUttakPerioder(journalpostId1, søknadsperiode);
 
@@ -416,7 +424,9 @@ public class VurderNødvendighetStegTest {
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "");
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
-            new VurdertOpplæringHolder(List.of(vurdertOpplæring))
+            new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
+            null,
+            null
         );
         lagreGrunnlag(grunnlag);
 

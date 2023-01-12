@@ -15,6 +15,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrun
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
+import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -47,13 +48,13 @@ public interface KalkulusApiTjeneste {
                                   List<BeregnInput> beregningInput,
                                   BehandlingStegType stegType);
 
-    /** Lager en kopi av grunnlaget lagret i Steg 4: VURDER_VILKAR_BERGRUNN (Vurder vilkår)
-     *
-     * @param referanse BehandlingReferanse
+    /** Lager en kopi av grunnlaget lagret i steg
+     *  @param referanse BehandlingReferanse
      * @param beregningInput Input med informasjon om referanser og original referanser
+     * @param stegType Steget/tilstanden det skal lages kopi av
      */
     void kopier(BehandlingReferanse referanse,
-                List<BeregnInput> beregningInput);
+                List<BeregnInput> beregningInput, StegType stegType);
 
 
     /**

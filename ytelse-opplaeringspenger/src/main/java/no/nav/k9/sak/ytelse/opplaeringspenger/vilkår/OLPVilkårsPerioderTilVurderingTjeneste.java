@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.vilkår;
 
-import static no.nav.k9.kodeverk.vilkår.VilkårType.NØDVENDIG_OPPLÆRING;
-
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -62,6 +61,11 @@ public class OLPVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
 
     @Override
     public Set<VilkårType> definerendeVilkår() {
-        return Set.of(NØDVENDIG_OPPLÆRING);
+        Set<VilkårType> vilkårIRekkefølge = new LinkedHashSet<>();
+        vilkårIRekkefølge.add(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
+        vilkårIRekkefølge.add(VilkårType.LANGVARIG_SYKDOM);
+        vilkårIRekkefølge.add(VilkårType.GJENNOMGÅ_OPPLÆRING);
+        vilkårIRekkefølge.add(VilkårType.NØDVENDIG_OPPLÆRING);
+        return vilkårIRekkefølge;
     }
 }

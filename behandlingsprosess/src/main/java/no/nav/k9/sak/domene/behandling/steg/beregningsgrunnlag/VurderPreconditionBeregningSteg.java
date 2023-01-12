@@ -19,6 +19,7 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FastsettPGIPeriodeTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
+import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
@@ -201,7 +202,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         var perioderTilVurderingIBeregning = periodeFilter.filtrerPerioder(vurdertePerioderIOpptjening, VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
             .stream().map(PeriodeTilVurdering::getPeriode).toList();
 
-        var opptjeningForBeregningTjeneste = finnOpptjeningForBeregningTjeneste(behandling);
+        var opptjeningForBeregningTjeneste = finnOpptjeningForBeregningTjeneste(BehandlingReferanse.fra(behandling));
         var grunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
         var avslåttePerioder = vilkåret.getPerioder()
@@ -251,14 +252,15 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
             .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + ref.getFagsakYtelseType() + "], behandlingtype [" + ref.getBehandlingType() + "]"));
     }
 
-    private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(Behandling behandling) {
-        FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
+    private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(BehandlingReferanse behandlingRef) {
+        FagsakYtelseType ytelseType = behandlingRef.getFagsakYtelseType();
         return FagsakYtelseTypeRef.Lookup.find(opptjeningForBeregningTjeneste, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningForBeregningTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
     }
 
     private List<AksjonspunktResultat> finnAksjonspunkter(Behandling behandling) {
         FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
+
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(aksjonspunktUtledere, ytelseType);
         return tjeneste.map(utleder -> utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling))))
             .orElse(Collections.emptyList());
@@ -288,7 +290,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
             var forlengelseperioder = allePerioder.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toSet());
             if (!forlengelseperioder.isEmpty()) {
                 log.info("Kopierer beregning for forlengelser {}", forlengelseperioder);
-                kalkulusTjeneste.kopier(ref, forlengelseperioder);
+                kalkulusTjeneste.kopier(ref, forlengelseperioder, StegType.VURDER_VILKAR_BERGRUNN);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
                 beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
                     kontekst,

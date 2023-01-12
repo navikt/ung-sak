@@ -35,6 +35,7 @@ import no.nav.k9.felles.integrasjon.saf.LogiskVedlegg;
 import no.nav.k9.felles.integrasjon.saf.RelevantDato;
 import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 import no.nav.k9.felles.integrasjon.saf.Sak;
+import no.nav.k9.felles.integrasjon.saf.Sakstype;
 import no.nav.k9.felles.integrasjon.saf.SkjermingType;
 import no.nav.k9.felles.integrasjon.saf.Tema;
 import no.nav.k9.felles.integrasjon.saf.Variantformat;
@@ -203,7 +204,7 @@ public class DokumentArkivTjenesteImplTest {
         journalpost.setKanal(Kanal.ALTINN);
         journalpost.setTema(Tema.AAP);
         journalpost.setBehandlingstema("behandlingstema");
-        journalpost.setSak(new Sak("arkivsaksystem", Arkivsaksystem.GSAK, LocalDateTime.now(), "fagsakId", "fagsaksystem"));
+        journalpost.setSak(new Sak("arkivsaksystem", Arkivsaksystem.GSAK, LocalDateTime.now(), "fagsakId", "fagsaksystem", Sakstype.FAGSAK, Tema.OMS));
         journalpost.setBruker(new Bruker("id", BrukerIdType.AKTOERID));
         journalpost.setAvsenderMottaker(new AvsenderMottaker("fnr", AvsenderMottakerIdType.FNR, "Navn", "Land", true));
         journalpost.setJournalfoerendeEnhet("journalstatus");

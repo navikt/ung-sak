@@ -18,13 +18,13 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
+import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
@@ -57,17 +57,20 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.YtelseType;
 @Dependent
 public class MapInputTilUttakTjeneste {
 
+    private static final String SPEILE_SAK_SOM_HAR_BLITT_FEIL = "BiJUC";
+
+
     private final HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private final String unntak;
-    private final boolean enableBevarVerdi;
+    private final boolean skalKjøreNyLogikkForSpeiling;
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
                                     @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
-                                    @KonfigVerdi(value = "psb.uttak.unntak.bevar.vedtatt.verdi", required = false, defaultVerdi = "false") boolean enableBevarVerdi) {
+                                    @KonfigVerdi(value = "IKKE_YRKESAKTIV_UTEN_SPEILING", required = false, defaultVerdi = "false") boolean skalKjøreNyLogikkForSpeiling) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
-        this.enableBevarVerdi = enableBevarVerdi;
+        this.skalKjøreNyLogikkForSpeiling = skalKjøreNyLogikkForSpeiling;
     }
 
 
@@ -112,7 +115,11 @@ public class MapInputTilUttakTjeneste {
             .map(VilkårPeriode::getPeriode)
             .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).toList());
 
-        var inaktivitetUtlederInput = new InaktivitetUtlederInput(behandling.getAktørId(), opptjeningTidslinje, input.getInntektArbeidYtelseGrunnlag());
+        var inaktivitetUtlederInput = new InaktivitetUtlederInput(
+            behandling.getAktørId(),
+            opptjeningTidslinje,
+            input.getInntektArbeidYtelseGrunnlag(),
+            skalKjøreNyLogikkForSpeiling || behandling.getFagsak().getSaksnummer().getVerdi().equals(SPEILE_SAK_SOM_HAR_BLITT_FEIL));
         var inaktivTidslinje = new PerioderMedInaktivitetUtleder().utled(inaktivitetUtlederInput);
 
         var arbeidstidInput = new ArbeidstidMappingInput()
@@ -172,9 +179,6 @@ public class MapInputTilUttakTjeneste {
 
     private Map<String, String> mapSisteVedtatteBehandlingForBehandling(Map<UUID, UUID> sisteVedtatteBehandlingForBehandling) {
         Map<String, String> behandlinger = new HashMap<>();
-        if (!enableBevarVerdi) {
-            return behandlinger;
-        }
         for (Map.Entry<UUID, UUID> entry : sisteVedtatteBehandlingForBehandling.entrySet()) {
             if (entry.getKey() != null && entry.getValue() != null) {
                 behandlinger.put(entry.getKey().toString(), entry.getValue().toString());
@@ -320,8 +324,8 @@ public class MapInputTilUttakTjeneste {
     private Pleiebehov mapToPleiebehov(Pleiegrad grad) {
         return switch (grad) {
             case INGEN -> Pleiebehov.PROSENT_0;
-            case KONTINUERLIG_TILSYN, LIVETS_SLUTT_TILSYN -> Pleiebehov.PROSENT_100;
-            case UTVIDET_KONTINUERLIG_TILSYN, INNLEGGELSE -> Pleiebehov.PROSENT_200;
+            case LIVETS_SLUTT_TILSYN, KONTINUERLIG_TILSYN, NØDVENDIG_OPPLÆRING -> Pleiebehov.PROSENT_100;
+            case LIVETS_SLUTT_TILSYN_FOM2023, UTVIDET_KONTINUERLIG_TILSYN, INNLEGGELSE -> Pleiebehov.PROSENT_200;
             default -> throw new IllegalStateException("Ukjent Pleiegrad: " + grad);
         };
     }

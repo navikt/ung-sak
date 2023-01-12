@@ -9,8 +9,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.typer.AktørId;
 
 public class EndringUnntakEtablertTilsynTjenesteTest {

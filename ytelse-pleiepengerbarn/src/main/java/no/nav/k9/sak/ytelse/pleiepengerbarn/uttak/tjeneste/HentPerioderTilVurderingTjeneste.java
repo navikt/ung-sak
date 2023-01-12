@@ -72,12 +72,12 @@ public class HentPerioderTilVurderingTjeneste {
     private NavigableSet<DatoIntervallEntitet> finnSykdomsperioder(BehandlingReferanse referanse) {
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = perioderTilVurderingTjeneste(referanse);
         var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
-        final var resultat = new TreeSet<DatoIntervallEntitet>();
+        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
         for (VilkårType vilkårType : definerendeVilkår) {
-            final var periode = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), vilkårType);
-            resultat.addAll(periode);
+            final var perioder = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), vilkårType);
+            tidslinje = tidslinje.combine(TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(perioder)), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-        return resultat;
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje);
     }
 
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste(BehandlingReferanse behandlingReferanse) {

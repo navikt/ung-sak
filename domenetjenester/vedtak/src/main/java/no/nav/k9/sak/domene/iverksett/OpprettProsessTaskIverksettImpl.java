@@ -23,8 +23,7 @@ public class OpprettProsessTaskIverksettImpl extends OpprettProsessTaskIverksett
     public OpprettProsessTaskIverksettImpl(FagsakProsessTaskRepository prosessTaskRepository,
                                            OppgaveTjeneste oppgaveTjeneste,
                                            InfotrygdFeedService infotrygdFeedService,
-                                           StønadstatistikkService stønadstatistikkService,
-                                           @KonfigVerdi(value = "PGI_FILTER_ENABLED", defaultVerdi = "false") boolean sigrunFilterEnabled) {
-        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService, sigrunFilterEnabled);
+                                           StønadstatistikkService stønadstatistikkService) {
+        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService);
     }
 }

@@ -74,7 +74,11 @@ public class MapYtelseperioderTjeneste {
         return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
     }
 
-    public List<OpptjeningsperiodeForSaksbehandling> mapYtelsePerioder(BehandlingReferanse behandlingReferanse, OpptjeningAktivitetVurdering vurderOpptjening, boolean skalIkkeTaMedEgenSak, YtelseFilter ytelseFilter) {
+    public List<OpptjeningsperiodeForSaksbehandling> mapYtelsePerioder(BehandlingReferanse behandlingReferanse,
+                                                                       DatoIntervallEntitet vilkårsPeriode,
+                                                                       OpptjeningAktivitetVurdering vurderOpptjening,
+                                                                       boolean skalIkkeTaMedEgenSak,
+                                                                       YtelseFilter ytelseFilter) {
         AktørId aktørId = behandlingReferanse.getAktørId();
         List<OpptjeningsperiodeForSaksbehandling> ytelsePerioder = new ArrayList<>();
         ytelseFilter.getFiltrertYtelser().stream()
@@ -82,13 +86,16 @@ public class MapYtelseperioderTjeneste {
             .filter(ytelse -> !skalIkkeTaMedEgenSak || !(ytelse.getKilde().equals(Fagsystem.K9SAK) && ytelse.getSaksnummer().equals(behandlingReferanse.getSaksnummer())))
             .filter(ytelse -> ytelse.getYtelseType().girOpptjeningsTid(behandlingReferanse.getFagsakYtelseType()))
             .forEach(behandlingRelaterteYtelse -> {
-                List<OpptjeningsperiodeForSaksbehandling> periode = mapYtelseAnvist(behandlingRelaterteYtelse, behandlingReferanse, vurderOpptjening);
+                List<OpptjeningsperiodeForSaksbehandling> periode = mapYtelseAnvist(behandlingRelaterteYtelse, behandlingReferanse, vilkårsPeriode, vurderOpptjening);
                 ytelsePerioder.addAll(periode);
             });
         return slåSammenYtelsePerioder(ytelsePerioder);
     }
 
-    private List<OpptjeningsperiodeForSaksbehandling> mapYtelseAnvist(Ytelse ytelse, BehandlingReferanse behandlingReferanse, OpptjeningAktivitetVurdering vurderForSaksbehandling) {
+    private List<OpptjeningsperiodeForSaksbehandling> mapYtelseAnvist(Ytelse ytelse,
+                                                                      BehandlingReferanse behandlingReferanse,
+                                                                      DatoIntervallEntitet vilkårsPeriode,
+                                                                      OpptjeningAktivitetVurdering vurderForSaksbehandling) {
         OpptjeningAktivitetType type = mapYtelseType(ytelse);
         List<OpptjeningsperiodeForSaksbehandling> ytelserAnvist = new ArrayList<>();
         List<YtelseStørrelse> grunnlagList = ytelse.getYtelseGrunnlag().map(YtelseGrunnlag::getYtelseStørrelse).orElse(Collections.emptyList());
@@ -105,7 +112,7 @@ public class MapYtelseperioderTjeneste {
                 .stream()
                 .flatMap(ytelseAnvist -> mapAnvisning(ytelseAnvist, ytelse, type, orgnumre, vurderingsstatus))
                 .forEach(ytelserAnvist::add);
-        } else if (erDagpengerIVentetiden(ytelse)) {
+        } else if (erDagpengerIVentetiden(ytelse, vilkårsPeriode)) {
             // Dagpenger i ventetiden skal gi opptjening på lik linje med utbetalte dagpenger
             var dagpengerIVentetiden = OpptjeningsperiodeForSaksbehandling.Builder.ny()
                 .medPeriode(ytelse.getPeriode())
@@ -123,12 +130,14 @@ public class MapYtelseperioderTjeneste {
      * Søker vil dermed ikke ha meldekort dersom oppstart av pleiepenger er i løpet av denne perioden.
      *
      * @param ytelse Ytelse
+     * @param vilkårsPeriode
      * @return Er dagpenger i ventetiden
      */
-    private boolean erDagpengerIVentetiden(Ytelse ytelse) {
+    private boolean erDagpengerIVentetiden(Ytelse ytelse, DatoIntervallEntitet vilkårsPeriode) {
         return ytelse.getYtelseType().equals(FagsakYtelseType.DAGPENGER)
             && ytelse.getYtelseAnvist().isEmpty()
-            && ytelse.getPeriode().antallArbeidsdager() <= 3;
+            && ytelse.getPeriode().getFomDato().isBefore(vilkårsPeriode.getFomDato()) &&
+            DatoIntervallEntitet.fraOgMedTilOgMed(ytelse.getPeriode().getFomDato(), vilkårsPeriode.getFomDato().minusDays(1)).antallArbeidsdager() <= 3;
     }
 
     private Stream<OpptjeningsperiodeForSaksbehandling> mapAnvisning(YtelseAnvist ytelseAnvist, Ytelse ytelse,

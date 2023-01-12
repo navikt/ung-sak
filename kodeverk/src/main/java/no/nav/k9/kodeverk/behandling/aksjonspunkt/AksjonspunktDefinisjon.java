@@ -113,6 +113,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     FORDEL_BEREGNINGSGRUNNLAG(AksjonspunktKodeDefinisjon.FORDEL_BEREGNINGSGRUNNLAG_KODE,
         AksjonspunktType.MANUELL, "Fordel beregningsgrunnlag", BehandlingStatus.UTREDES, BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_FORDELING, TOTRINN),
+    VURDER_NYTT_INNTEKTSFORHOLD(AksjonspunktKodeDefinisjon.VURDER_NYTT_INNTEKTSFORHOLD_KODE,
+        AksjonspunktType.MANUELL, "Fordel beregningsgrunnlag", BehandlingStatus.UTREDES, BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG, VurderingspunktType.UT,
+        UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_FORDELING, TOTRINN),
     VURDER_REFUSJON_BERGRUNN(AksjonspunktKodeDefinisjon.VURDER_REFUSJON_BERGRUNN_KODE,
         AksjonspunktType.MANUELL, "Vurder refusjon beregningsgrunnlag", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_REF_BERGRUNN, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_FORDELING, TOTRINN),
@@ -175,13 +178,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_TILBAKETREKK(AksjonspunktKodeDefinisjon.VURDER_TILBAKETREKK_KODE,
         AksjonspunktType.MANUELL, "Vurder tilbaketrekk", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_TILBAKETREKK, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.TILKJENT_YTELSE, TOTRINN),
-    /**
-     * @deprecated pt. ikke i bruk i K9
-     */
-    @Deprecated(forRemoval = true)
-    VURDER_FARESIGNALER(AksjonspunktKodeDefinisjon.VURDER_FARESIGNALER_KODE,
-        AksjonspunktType.MANUELL, "Vurder Faresignaler", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FARESIGNALER, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.VURDER_FARESIGNALER, TOTRINN),
     KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE,
         AksjonspunktType.MANUELL, "Vurder søknadsfrist", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST, VurderingspunktType.UT,
         VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null),
@@ -272,6 +268,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W"),
     AUTO_VENT_ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING(AksjonspunktKodeDefinisjon.ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING_KODE, AksjonspunktType.AUTOPUNKT, "Vent på etterlyst inntektsmelding og/eller tilsvar på varsel om avslag",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P3W"),
+    AUTO_VENT_PÅ_LOVENDRING_8_41(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_LOVENDRING_8_41_KODE, AksjonspunktType.AUTOPUNKT,
+        "Vent på vedtak om lovendring vedrørende beregning av næring i kombinasjon med arbeid eller frilans", BehandlingStatus.UTREDES, BehandlingStegType.PRECONDITION_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR,
+        UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST),
 
     // Gruppe : 80xx (FRISINN)
     AUTO_VENT_FRISINN_BEREGNING(AksjonspunktKodeDefinisjon.AUTO_VENT_FRISINN_BEREGNING, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",
@@ -297,6 +296,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_OMSORGEN_FOR_V2(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE_V2,
         AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT,
         VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN, TILBAKE, SKAL_IKKE_AVBRYTES),
+    VENTE_PA_OMSORGENFOR_OMS(AksjonspunktKodeDefinisjon.AUTO_VENTE_PA_OMSORGENFOR_OMS,
+        AksjonspunktType.AUTOPUNKT, "Omsorgen for", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT,
+        VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, ENTRINN, TILBAKE, "P1D"),
     VURDER_ÅRSKVANTUM_KVOTE(AksjonspunktKodeDefinisjon.VURDER_ÅRSKVANTUM_KVOTE,
         AksjonspunktType.MANUELL, "Årskvantum", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, ENTRINN, FORBLI, null),
@@ -349,6 +351,12 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_NØDVENDIGHET(AksjonspunktKodeDefinisjon.VURDER_NØDVENDIGHET, AksjonspunktType.MANUELL,
         "Vurder om opplæringen er nødvendig for å behandle og ta seg av barnet", BehandlingStatus.UTREDES,
         BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UDEFINERT, ENTRINN, TILBAKE, AVBRYTES),
+    VURDER_GJENNOMGÅTT_OPPLÆRING(AksjonspunktKodeDefinisjon.VURDER_GJENNOMGÅTT_OPPLÆRING, AksjonspunktType.MANUELL,
+        "Vurder om opplæringen er gjennomgått", BehandlingStatus.UTREDES,
+        BehandlingStegType.VURDER_GJENNOMGÅTT_OPPLÆRING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UDEFINERT, TOTRINN, TILBAKE, AVBRYTES),
+    VURDER_REISETID(AksjonspunktKodeDefinisjon.VURDER_REISETID, AksjonspunktType.MANUELL,
+        "Vurder reisetid", BehandlingStatus.UTREDES,
+        BehandlingStegType.VURDER_GJENNOMGÅTT_OPPLÆRING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UDEFINERT, TOTRINN, TILBAKE, AVBRYTES),
 
     // Gruppe : 999x
     AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",

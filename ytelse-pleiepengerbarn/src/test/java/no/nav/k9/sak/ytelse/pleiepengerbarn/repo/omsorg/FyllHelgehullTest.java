@@ -6,15 +6,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import jakarta.persistence.EntityManager;
+import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForGrunnlagRepository;
+import no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForPeriode;
 import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 
 class FyllHelgehullTest {
 

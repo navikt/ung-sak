@@ -1,18 +1,19 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
-import no.nav.k9.sak.typer.AktørId;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.inject.Inject;
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.kodeverk.sykdom.Resultat;
+import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.AktørId;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)

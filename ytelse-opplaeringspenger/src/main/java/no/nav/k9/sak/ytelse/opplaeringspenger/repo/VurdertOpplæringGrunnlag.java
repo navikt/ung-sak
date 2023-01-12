@@ -34,6 +34,16 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
     @JoinColumn(name = "vurdert_opplaering_holder_id", updatable = false, unique = true)
     private VurdertOpplæringHolder vurdertOpplæringHolder;
 
+    @ManyToOne
+    @Immutable
+    @JoinColumn(name = "vurderte_perioder_id", updatable = false, unique = true)
+    private VurdertOpplæringPerioderHolder vurdertePerioder;
+
+    @ManyToOne
+    @Immutable
+    @JoinColumn(name = "vurdert_reisetid_holder_id", updatable = false, unique = true)
+    private VurdertReisetidHolder vurdertReisetid;
+
     @Column(name = "aktiv", nullable = false)
     private Boolean aktiv = true;
 
@@ -44,22 +54,28 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
     VurdertOpplæringGrunnlag() {
     }
 
-    public VurdertOpplæringGrunnlag(Long behandlingId, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder) {
+    public VurdertOpplæringGrunnlag(Long behandlingId, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder, VurdertOpplæringPerioderHolder vurdertePerioder, VurdertReisetidHolder vurdertReisetid) {
         this.behandlingId = behandlingId;
         this.vurdertInstitusjonHolder = vurdertInstitusjonHolder;
         this.vurdertOpplæringHolder = vurdertOpplæringHolder;
+        this.vurdertePerioder = vurdertePerioder;
+        this.vurdertReisetid = vurdertReisetid;
     }
 
-    public VurdertOpplæringGrunnlag(VurdertOpplæringGrunnlag grunnlag, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder) {
+    public VurdertOpplæringGrunnlag(VurdertOpplæringGrunnlag grunnlag, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder, VurdertOpplæringPerioderHolder vurdertePerioder, VurdertReisetidHolder vurdertReisetid) {
         this.behandlingId = grunnlag.behandlingId;
         this.vurdertInstitusjonHolder = vurdertInstitusjonHolder;
         this.vurdertOpplæringHolder = vurdertOpplæringHolder;
+        this.vurdertePerioder = vurdertePerioder;
+        this.vurdertReisetid = vurdertReisetid;
     }
 
     public VurdertOpplæringGrunnlag(Long behandlingId, VurdertOpplæringGrunnlag grunnlag) {
         this.behandlingId = behandlingId;
         this.vurdertInstitusjonHolder = grunnlag.vurdertInstitusjonHolder;
         this.vurdertOpplæringHolder = grunnlag.vurdertOpplæringHolder;
+        this.vurdertePerioder = grunnlag.vurdertePerioder;
+        this.vurdertReisetid = grunnlag.vurdertReisetid;
     }
 
     public VurdertInstitusjonHolder getVurdertInstitusjonHolder() {
@@ -68,6 +84,14 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
 
     public VurdertOpplæringHolder getVurdertOpplæringHolder() {
         return vurdertOpplæringHolder;
+    }
+
+    public VurdertOpplæringPerioderHolder getVurdertePerioder() {
+        return vurdertePerioder;
+    }
+
+    public VurdertReisetidHolder getVurdertReisetid() {
+        return vurdertReisetid;
     }
 
     void setAktiv(Boolean aktiv) {

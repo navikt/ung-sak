@@ -615,7 +615,7 @@ class MapArbeidTest {
         var result = mapper.map(input);
         assertThat(result).hasSize(1);
         assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
-            Map.of(new LukketPeriode(sisteDagMedPermisjon.plusDays(1), dødsperiode.getFomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)), new LukketPeriode(dødsperiode.getFomDato().plusDays(1), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ZERO))));
+            Map.of(new LukketPeriode(sisteDagMedPermisjon.plusDays(1), dødsperiode.getFomDato().minusDays(1)), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)), new LukketPeriode(dødsperiode.getFomDato(), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ZERO))));
     }
 
     @Test

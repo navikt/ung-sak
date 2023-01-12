@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.TreeSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -44,14 +44,8 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.OppfyltVilkårTidslinjeUtleder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.LangvarigSykdomPeriode;
+import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.VilkårTidslinjeUtleder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
@@ -67,7 +61,6 @@ public class VurderSykdomSteg implements BehandlingSteg {
 
     private final MedisinskVilkårTjeneste medisinskVilkårTjeneste = new MedisinskVilkårTjeneste();
     private BehandlingRepositoryProvider repositoryProvider;
-    private PleiebehovResultatRepository resultatRepository;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -81,7 +74,6 @@ public class VurderSykdomSteg implements BehandlingSteg {
 
     @Inject
     public VurderSykdomSteg(BehandlingRepositoryProvider repositoryProvider,
-                            PleiebehovResultatRepository resultatRepository,
                             @FagsakYtelseTypeRef(OPPLÆRINGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                             SykdomVurderingTjeneste sykdomVurderingTjeneste,
                             MedisinskGrunnlagRepository medisinskGrunnlagRepository,
@@ -89,7 +81,6 @@ public class VurderSykdomSteg implements BehandlingSteg {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
-        this.resultatRepository = resultatRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
@@ -115,7 +106,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
 
         var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.LANGVARIG_SYKDOM));
 
-        final var tidslinjeMedInstitusjonsvilkårOppfylt = OppfyltVilkårTidslinjeUtleder.utled(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
+        final var tidslinjeMedInstitusjonsvilkårOppfylt = VilkårTidslinjeUtleder.utledOppfylt(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
         final var tidslinjeUtenInstitusjonsvilkårOppfylt = tidslinjeTilVurdering.disjoint(tidslinjeMedInstitusjonsvilkårOppfylt);
 
         tidslinjeTilVurdering = tidslinjeTilVurdering.intersection(tidslinjeMedInstitusjonsvilkårOppfylt);
@@ -142,13 +133,8 @@ public class VurderSykdomSteg implements BehandlingSteg {
             behandling.getUuid(),
             behandling.getAktørId(),
             behandling.getFagsak().getPleietrengendeAktørId(),
-            perioderSamlet.stream()
-                .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
-                .collect(Collectors.toList()),
-            //TODO tom liste her?
-            perioderSamlet.stream()
-                .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
-                .collect(Collectors.toList())
+            perioderSamlet,
+            new TreeSet<>()
         );
     }
 
@@ -174,22 +160,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
         for (DatoIntervallEntitet periode : perioder) {
             final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(VilkårType.LANGVARIG_SYKDOM, kontekst, periode, medisinskGrunnlag);
             oppdaterBehandlingMedVilkårresultat(vilkårData, builder);
-            oppdaterResultatStruktur(kontekst, periode, vilkårData);
         }
-    }
-
-    private void oppdaterResultatStruktur(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, VilkårData vilkårData) {
-        final var nåværendeResultat = resultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
-        var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
-        builder.tilbakeStill(periodeTilVurdering);
-        final var vilkårresultat = ((MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat());
-
-        vilkårresultat.getLangvarigSykdomPerioder().forEach(periode -> builder.leggTil(utledPeriode(periode)));
-        resultatRepository.lagreOgFlush(kontekst.getBehandlingId(), builder);
-    }
-
-    private EtablertPleieperiode utledPeriode(LangvarigSykdomPeriode periode) {
-        return new EtablertPleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), no.nav.k9.kodeverk.medisinsk.Pleiegrad.fraKode(periode.getGrad().name()));
     }
 
     private void oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, VilkårBuilder vilkårBuilder) {

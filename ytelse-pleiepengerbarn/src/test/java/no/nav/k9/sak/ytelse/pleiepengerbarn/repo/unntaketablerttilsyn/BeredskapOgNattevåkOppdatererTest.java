@@ -1,13 +1,14 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
-import no.nav.k9.sak.typer.AktørId;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+
+import no.nav.k9.kodeverk.sykdom.Resultat;
+import no.nav.k9.sak.typer.AktørId;
 
 class BeredskapOgNattevåkOppdatererTest {
 

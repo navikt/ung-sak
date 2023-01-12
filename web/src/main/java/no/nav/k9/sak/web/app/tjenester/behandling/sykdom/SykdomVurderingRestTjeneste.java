@@ -162,7 +162,9 @@ public class SykdomVurderingRestTjeneste {
         SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingTjeneste.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
         final LocalDate pleietrengendesFødselsdato = sykdomVurderingTjeneste.finnPleietrengendesFødselsdato(behandling);
 
-        return sykdomVurderingOversiktMapper.mapPSB(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato);
+        final boolean lukketBehandling = behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK);
+        
+        return sykdomVurderingOversiktMapper.mapPSB(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato, lukketBehandling);
     }
 
     @GET
@@ -188,7 +190,9 @@ public class SykdomVurderingRestTjeneste {
         final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingTjeneste.hentVurderingerForToOmsorgspersoner(behandling);
         final LocalDate pleietrengendesFødselsdato = sykdomVurderingTjeneste.finnPleietrengendesFødselsdato(behandling);
 
-        return sykdomVurderingOversiktMapper.mapPSB(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato);
+        final boolean lukketBehandling = behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK);
+        
+        return sykdomVurderingOversiktMapper.mapPSB(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato, lukketBehandling);
     }
 
     @GET
@@ -213,7 +217,9 @@ public class SykdomVurderingRestTjeneste {
         validerYtelsetype(behandling, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE);
         final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingTjeneste.hentVurderingerForILivetsSluttfase(behandling);
 
-        return sykdomVurderingOversiktMapper.mapPPN(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder);
+        final boolean lukketBehandling = behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK);
+        
+        return sykdomVurderingOversiktMapper.mapPPN(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, lukketBehandling);
     }
 
     @GET

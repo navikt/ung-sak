@@ -55,7 +55,6 @@ import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.registerinnhenting.impl.SaksopplysningerFeil;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
@@ -69,10 +68,10 @@ public class RegisterdataInnhenter {
     private BehandlingRepository behandlingRepository;
     private MedlemskapRepository medlemskapRepository;
     private AbakusTjeneste abakusTjeneste;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BehandlingLåsRepository behandlingLåsRepository;
     private Instance<InformasjonselementerUtleder> informasjonselementer;
     private Instance<YtelsesspesifikkRelasjonsFilter> relasjonsFiltre;
+    private Instance<OpplysningsperiodeTjeneste> opplysningsperiodeTjeneste;
 
     RegisterdataInnhenter() {
         // for CDI proxy
@@ -83,14 +82,12 @@ public class RegisterdataInnhenter {
                                  MedlemTjeneste medlemTjeneste,
                                  BehandlingRepositoryProvider repositoryProvider,
                                  MedlemskapRepository medlemskapRepository,
-                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                  AbakusTjeneste abakusTjeneste,
                                  @Any Instance<InformasjonselementerUtleder> utledInformasjonselementer,
-                                 @Any Instance<YtelsesspesifikkRelasjonsFilter> relasjonsFiltre
-    ) {
+                                 @Any Instance<YtelsesspesifikkRelasjonsFilter> relasjonsFiltre,
+                                 @Any Instance<OpplysningsperiodeTjeneste> opplysningsperiodeTjeneste) {
         this.personinfoAdapter = personinfoAdapter;
         this.medlemTjeneste = medlemTjeneste;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingLåsRepository = repositoryProvider.getBehandlingLåsRepository();
@@ -98,6 +95,7 @@ public class RegisterdataInnhenter {
         this.abakusTjeneste = abakusTjeneste;
         this.informasjonselementer = utledInformasjonselementer;
         this.relasjonsFiltre = relasjonsFiltre;
+        this.opplysningsperiodeTjeneste = opplysningsperiodeTjeneste;
     }
 
     public Personinfo innhentSaksopplysningerForSøker(AktørId søkerAktørId) {
@@ -137,7 +135,8 @@ public class RegisterdataInnhenter {
         var informasjonBuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
 
         var fagsakYtelseType = behandling.getFagsakYtelseType();
-        var opplysningsperioden = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), fagsakYtelseType, true);
+        var opplysningsperioden = OpplysningsperiodeTjeneste.getTjeneste(opplysningsperiodeTjeneste, behandling.getFagsakYtelseType())
+            .utledOpplysningsperiode(behandling.getId(), true);
 
         Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(søkerPersonInfo.getAktørId(), opplysningsperioden);
         mapInfoMedHistorikkTilEntitet(søkerPersonInfo, personhistorikkinfo, informasjonBuilder, behandling);
@@ -260,8 +259,13 @@ public class RegisterdataInnhenter {
     private void mapAdresser(List<AdressePeriode> adressehistorikk, PersonInformasjonBuilder informasjonBuilder, Personinfo personinfo) {
         AktørId aktørId = personinfo.getAktørId();
         for (AdressePeriode adresse : adressehistorikk) {
-            final DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(
-                brukFødselsdatoHvisEtter(adresse.getGyldighetsperiode().getFom(), personinfo.getFødselsdato()), adresse.getGyldighetsperiode().getTom());
+            LocalDate tom = adresse.getGyldighetsperiode().getTom();
+            LocalDate fom = brukFødselsdatoHvisEtter(adresse.getGyldighetsperiode().getFom(), personinfo.getFødselsdato());
+            if (tom.isBefore(personinfo.getFødselsdato())) {
+                log.warn("Ignorerer en adresse for en person på saken, da adressen opphørte før personen ble født");
+                continue;
+            }
+            final DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
             final PersonInformasjonBuilder.AdresseBuilder adresseBuilder = informasjonBuilder.getAdresseBuilder(aktørId, periode,
                 adresse.getAdresse().getAdresseType());
             adresseBuilder.medPeriode(periode)
@@ -461,7 +465,8 @@ public class RegisterdataInnhenter {
     }
 
     private List<MedlemskapPerioderEntitet> innhentMedlemskapsopplysningerFor(AktørId søkerInfo, Behandling behandling) {
-        var opplysningsperiode = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), behandling.getFagsakYtelseType(), false);
+        var opplysningsperiode = OpplysningsperiodeTjeneste.getTjeneste(opplysningsperiodeTjeneste, behandling.getFagsakYtelseType())
+            .utledOpplysningsperiode(behandling.getId(), false);
         LocalDate fom = opplysningsperiode.getFom();
         LocalDate tom = opplysningsperiode.getTom();
         List<Medlemskapsperiode> medlemskapsperioder = medlemTjeneste.finnMedlemskapPerioder(søkerInfo, fom, tom);
@@ -501,7 +506,10 @@ public class RegisterdataInnhenter {
     private void doInnhentIAYIAbakus(Behandling behandling, BehandlingType behandlingType, FagsakYtelseType fagsakYtelseType) {
         var behandlingUuid = behandling.getUuid();
         var saksnummer = behandling.getFagsak().getSaksnummer().getVerdi();
-        var opplysningsperiode = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), fagsakYtelseType, false);
+
+        var periodeTjeneste = OpplysningsperiodeTjeneste.getTjeneste(opplysningsperiodeTjeneste, fagsakYtelseType);
+
+        var opplysningsperiode = periodeTjeneste.utledOpplysningsperiode(behandling.getId(), false);
 
 
         var ytelseType = YtelseType.fraKode(fagsakYtelseType.getKode());
@@ -516,9 +524,9 @@ public class RegisterdataInnhenter {
         var innhentRegisterdataRequest = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
         innhentRegisterdataRequest.setCallbackUrl(abakusTjeneste.getCallbackUrl());
 
-        skjæringstidspunktTjeneste.utledOpplysningsperiodeSkattegrunnlag(behandling.getId(), fagsakYtelseType)
-            .map(p -> new Periode(p.getFom(), p.getTom()))
-            .ifPresent(innhentRegisterdataRequest::setOpplysningsperiodeSkattegrunnlag);
+        var opplysningsperiodeSkattegrunnlag = periodeTjeneste.utledOpplysningsperiodeSkattegrunnlag(behandling.getId());
+        log.info("Opplysningsperiode skattegrunnlag: " + opplysningsperiodeSkattegrunnlag);
+        innhentRegisterdataRequest.setOpplysningsperiodeSkattegrunnlag(new Periode(opplysningsperiodeSkattegrunnlag.getFom(), opplysningsperiodeSkattegrunnlag.getTom()));
 
         abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
     }

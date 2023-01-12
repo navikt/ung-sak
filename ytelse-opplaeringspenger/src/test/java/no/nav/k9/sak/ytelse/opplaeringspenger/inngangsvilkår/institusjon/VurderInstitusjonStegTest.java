@@ -38,7 +38,6 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.GodkjentOpplæringsinstitusjonTjeneste;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjonPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
@@ -87,7 +86,8 @@ class VurderInstitusjonStegTest {
     void setup() {
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteMock = spy(perioderTilVurderingTjenesteBean);
         BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        vurderInstitusjonSteg = new VurderInstitusjonSteg(repositoryProvider, perioderTilVurderingTjenesteMock, vurdertOpplæringRepository, godkjentOpplæringsinstitusjonTjeneste, uttakPerioderGrunnlagRepository);
+        vurderInstitusjonSteg = new VurderInstitusjonSteg(repositoryProvider,
+            new VurderInstitusjonTjeneste(repositoryProvider, godkjentOpplæringsinstitusjonTjeneste, perioderTilVurderingTjenesteMock, vurdertOpplæringRepository, uttakPerioderGrunnlagRepository));
 
         LocalDate fom = LocalDate.now().minusMonths(3);
         LocalDate tom = LocalDate.now();
@@ -110,7 +110,7 @@ class VurderInstitusjonStegTest {
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
-            List.of(new KursPeriode(fom, tom, null, null, "institusjon", institusjonUuid, "beskrivelse")));
+            List.of(new KursPeriode(fom, tom, null, null, "institusjon", institusjonUuid)));
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
     }

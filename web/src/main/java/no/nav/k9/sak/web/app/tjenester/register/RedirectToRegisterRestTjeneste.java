@@ -22,12 +22,11 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.integrasjon.rest.NoAuthRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
@@ -47,7 +46,7 @@ public class RedirectToRegisterRestTjeneste {
 
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
-    private OidcRestClient restClient;
+    private NoAuthRestClient restClient;
     private String arbeidOgInntektBaseURL;
 
     RedirectToRegisterRestTjeneste() {
@@ -57,8 +56,8 @@ public class RedirectToRegisterRestTjeneste {
     @Inject
     public RedirectToRegisterRestTjeneste(
         TpsTjeneste tpsTjeneste,
-        BehandlingRepository behandlingRepository,
-        FagsakRepository fagsakRepository, OidcRestClient restClient,
+        FagsakRepository fagsakRepository,
+        NoAuthRestClient restClient,
         @KonfigVerdi(value = "arbeid.og.inntekt.base.url", required = false, defaultVerdi = "https://arbeid-og-inntekt.nais.adeo.no") String arbeidOgInntektBaseURL) {
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakRepository = fagsakRepository;
@@ -68,16 +67,16 @@ public class RedirectToRegisterRestTjeneste {
 
     @GET
     @Operation(description = "Redirecter til aa-reg for arbeidstakeren", tags = "aktoer", responses = {
-        @ApiResponse(responseCode = "307", description = "Redirecter til aa-reg for arbeidstakeren" )
+        @ApiResponse(responseCode = "307", description = "Redirecter til aa-reg for arbeidstakeren")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(AA_REG_POSTFIX)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getAktoerInfo(
-            @NotNull
-            @QueryParam(SaksnummerDto.NAME)
-            @Valid
-            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        @NotNull
+        @QueryParam(SaksnummerDto.NAME)
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SaksnummerDto saksnummerDto) {
         Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummerDto.getVerdi()).get();
         var personIdent = tpsTjeneste.hentFnrForAktør(fagsak.getAktørId());
@@ -103,11 +102,11 @@ public class RedirectToRegisterRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(AINNTEKT_REG_POSTFIX)
     public Response getAInntektUrl(
-            @NotNull
-            @QueryParam(SaksnummerDto.NAME)
-            @Parameter(description = SaksnummerDto.DESC)
-            @Valid
-            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        @NotNull
+        @QueryParam(SaksnummerDto.NAME)
+        @Parameter(description = SaksnummerDto.DESC)
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SaksnummerDto saksnummerDto) {
         Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummerDto.getVerdi()).get();
         var personIdent = tpsTjeneste.hentFnrForAktør(fagsak.getAktørId());

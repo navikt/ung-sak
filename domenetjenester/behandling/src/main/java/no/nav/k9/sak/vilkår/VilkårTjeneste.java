@@ -226,7 +226,6 @@ public class VilkårTjeneste {
         var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), vilkårType));
         var utvidetTilVUrdering = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref);
         if (!utvidetTilVUrdering.isEmpty()) {
-            log.info("Utvidet revurderingperioder " + utvidetTilVUrdering);
             perioder.addAll(utvidetTilVUrdering);
         }
         return perioder;

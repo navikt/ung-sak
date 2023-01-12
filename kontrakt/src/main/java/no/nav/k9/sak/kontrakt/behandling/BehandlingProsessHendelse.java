@@ -180,6 +180,13 @@ public class BehandlingProsessHendelse {
     @Valid
     @JsonProperty(value = "aksjonspunktTilstander", required = true)
     private List<AksjonspunktTilstandDto> aksjonspunktTilstand;
+    
+    /**
+     * {@code true} hvis det finnes minst én ny periode det er søkt om i behandlingen.
+     */
+    @Valid
+    @JsonProperty(value = "nyeKrav", required = false)
+    private Boolean nyeKrav;
 
     public BehandlingProsessHendelse() {
     }
@@ -206,6 +213,7 @@ public class BehandlingProsessHendelse {
         this.relatertPartAktørId = kopierFra.relatertPartAktørId;
         this.ansvarligBeslutterForTotrinn = kopierFra.ansvarligBeslutterForTotrinn;
         this.aksjonspunktTilstand = kopierFra.aksjonspunktTilstand.stream().map(AksjonspunktTilstandDto::new).toList();
+        this.nyeKrav = kopierFra.nyeKrav;
     }
 
     public static Builder builder() {
@@ -282,6 +290,10 @@ public class BehandlingProsessHendelse {
 
     public List<AksjonspunktTilstandDto> getAksjonspunktTilstand() {
         return aksjonspunktTilstand;
+    }
+    
+    public boolean isNyeKrav() {
+        return nyeKrav != null && nyeKrav;
     }
 
     public static class Builder {
@@ -393,6 +405,11 @@ public class BehandlingProsessHendelse {
 
         public Builder medAksjonspunktTilstander(List<AksjonspunktTilstandDto> aksjonspunktTilstand) {
             kladd.aksjonspunktTilstand = aksjonspunktTilstand;
+            return this;
+        }
+        
+        public Builder medNyeKrav(Boolean nyeKrav) {
+            kladd.nyeKrav = nyeKrav;
             return this;
         }
 

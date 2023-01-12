@@ -33,7 +33,7 @@ public class VurdertInstitusjon extends BaseEntitet {
     @Column(name = "godkjent", nullable = false)
     private Boolean godkjent = false;
 
-    @Column(name = "begrunnelse")
+    @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
 
     @Version

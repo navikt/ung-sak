@@ -31,6 +31,8 @@ public enum UttakArbeidType implements Kodeverdi {
     KUN_YTELSE(AktivitetStatus.BRUKERS_ANDEL, "Kun ytelse"),
 
     IKKE_YRKESAKTIV(AktivitetStatus.IKKE_YRKESAKTIV, "Ikke yrkesaktiv"),
+    IKKE_YRKESAKTIV_UTEN_ERSTATNING(AktivitetStatus.IKKE_YRKESAKTIV, "IKKE_YRKESAKTIV_UTEN_ERSTATNING", "Ikke yrkesaktiv som ikke har blitt erstattet med nytt"),
+
     // 8-47 opptjening gir inaktiv
     INAKTIV(AktivitetStatus.MIDLERTIDIG_INAKTIV, "Inaktiv"),
     ANNET("ANNET", "Annet"),
@@ -57,6 +59,12 @@ public enum UttakArbeidType implements Kodeverdi {
 
     @JsonIgnore
     private AktivitetStatus aktivitetStatus;
+
+    UttakArbeidType(AktivitetStatus aktivitetStatus, String kode, String navn) {
+        this.aktivitetStatus = aktivitetStatus;
+        this.kode = kode;
+        this.navn = navn;
+    }
 
     UttakArbeidType(AktivitetStatus aktivitetStatus, String navn) {
         this.aktivitetStatus = aktivitetStatus;
@@ -127,7 +135,7 @@ public enum UttakArbeidType implements Kodeverdi {
     }
 
     public boolean matcher(AktivitetStatus aktivitetStatus) {
-        if (UttakArbeidType.IKKE_YRKESAKTIV.equals(this)) {
+        if (UttakArbeidType.IKKE_YRKESAKTIV.equals(this) || UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING.equals(this)) {
             return Objects.equals(UttakArbeidType.ARBEIDSTAKER.getAktivitetStatus().getKode(), aktivitetStatus.getKode());
         }
         if (UttakArbeidType.INAKTIV.equals(this)) {

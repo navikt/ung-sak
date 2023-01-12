@@ -25,7 +25,6 @@
 		<dependency>
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>kontrakt-jakarta</artifactId>
-            <scope>provided</scope> <!-- ikke trekk med transitivt for andre moduler -->
         </dependency>
 
         <dependency>
@@ -43,6 +42,10 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-streams</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.felles.integrasjon</groupId>
+            <artifactId>k9-kafka-klient</artifactId>
         </dependency>
         <!-- Test avhengigheter -->
         <dependency>

@@ -8,6 +8,7 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -26,6 +27,7 @@ import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -40,12 +42,12 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.hendelse.vedtak.SakMedPeriode;
 import no.nav.k9.sak.hendelse.vedtak.VurderOmVedtakPåvirkerSakerTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
@@ -122,7 +124,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     @Override
     public List<SakMedPeriode> utledSakerMedPerioderSomErKanVærePåvirket(Ytelse vedtakHendelse) {
         var fagsak = fagsakRepository.hentSakGittSaksnummer(new Saksnummer(vedtakHendelse.getSaksnummer())).orElseThrow();
-        Behandling vedtattBehandling = behandlingRepository.hentBehandling(((YtelseV1)vedtakHendelse).getVedtakReferanse());
+        Behandling vedtattBehandling = behandlingRepository.hentBehandling(((YtelseV1) vedtakHendelse).getVedtakReferanse());
 
         AktørId pleietrengende = vedtattBehandling.getFagsak().getPleietrengendeAktørId();
         List<Saksnummer> alleSaksnummer = medisinskGrunnlagRepository.hentAlleSaksnummer(pleietrengende)
@@ -161,6 +163,9 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                     }
                     if (enableFeriepengerPåTversAvSaker) {
                         log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}, feriepenger={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty(), skalReberegneFeriepenger);
+                        if (Environment.current().isDev() && !skalRevurderesPgaEndretUttak.isEmpty()) {
+                            log.info("Endringer i uttak: {}", skalRevurderesPgaEndretUttak);
+                        }
                     } else {
                         log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty());
                     }
@@ -251,7 +256,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         return modell.erStegAFørStegB(steg, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
     }
 
-    private List<Periode> utledVurderingsperiode(Behandling behandling) {
+    private NavigableSet<DatoIntervallEntitet> utledVurderingsperiode(Behandling behandling) {
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
         var vilkårene = vilkårResultatRepository.hent(behandling.getId());
 
@@ -262,8 +267,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
             .flatMap(Optional::stream)
             .flatMap(Collection::stream)
             .map(VilkårPeriode::getPeriode)
-            .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
-            .toList();
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
 }

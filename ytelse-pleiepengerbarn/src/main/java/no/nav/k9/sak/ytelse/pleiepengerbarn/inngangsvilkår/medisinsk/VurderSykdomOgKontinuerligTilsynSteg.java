@@ -10,7 +10,6 @@ import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -46,7 +45,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PleiePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.Pleiegrad;
@@ -156,7 +154,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         final LocalDateTimeline<Boolean> perioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
         final LocalDateTimeline<VilkårPeriode> omsorgenForTidslinje = vilkårene.getVilkårTimeline(VilkårType.OMSORGEN_FOR);
 
-        return perioderTidslinje.combine(omsorgenForTidslinje, (datoInterval, p, vp) -> new LocalDateSegment<>(datoInterval, vp.getValue().getUtfall()), JoinStyle.LEFT_JOIN).compress();
+        return perioderTidslinje.combine(omsorgenForTidslinje, (datoInterval, p, vp) -> new LocalDateSegment<>(datoInterval, vp.getValue().getGjeldendeUtfall()), JoinStyle.LEFT_JOIN).compress();
     }
 
     private MedisinskGrunnlag opprettGrunnlag(NavigableSet<DatoIntervallEntitet> perioderSamlet, NavigableSet<DatoIntervallEntitet> perioderTilVurderingUtenOmsorgenFor, final Behandling behandling) {
@@ -165,12 +163,8 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             behandling.getUuid(),
             behandling.getAktørId(),
             behandling.getFagsak().getPleietrengendeAktørId(),
-            perioderSamlet.stream()
-                .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
-                .collect(Collectors.toList()),
-            perioderTilVurderingUtenOmsorgenFor.stream()
-                .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
-                .collect(Collectors.toList())
+            perioderSamlet,
+            perioderTilVurderingUtenOmsorgenFor
         );
     }
 

@@ -32,8 +32,6 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
     protected OppgaveTjeneste oppgaveTjeneste;
     protected InfotrygdFeedService infotrygdFeedService;
     private StønadstatistikkService stønadstatistikkService;
-    private boolean pgiFilterEnabled;
-
 
     protected OpprettProsessTaskIverksettTilkjentYtelseFelles() {
         // for CDI proxy
@@ -42,13 +40,11 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
     public OpprettProsessTaskIverksettTilkjentYtelseFelles(FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                                            OppgaveTjeneste oppgaveTjeneste,
                                                            InfotrygdFeedService infotrygdFeedService,
-                                                           StønadstatistikkService stønadstatistikkService,
-                                                           boolean pgiFilterEnabled) {
+                                                           StønadstatistikkService stønadstatistikkService) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.infotrygdFeedService = infotrygdFeedService;
         this.stønadstatistikkService = stønadstatistikkService;
-        this.pgiFilterEnabled = pgiFilterEnabled;
     }
 
     @Override
@@ -78,7 +74,7 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
         // Da denne sender tilkjent ytelse til fp.oppdrag via kafka
         // taskData.addNesteSekvensiell( ProsessTaskData.forProsessTask(SendTilkjentYtelseTask.TASKTYPE));
 
-        if (pgiFilterEnabled && behandling.getFagsakYtelseType().omfattesAvK8()) {
+        if (behandling.getFagsakYtelseType().omfattesAvK8()) {
             taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(FastsettPGIPerioderTask.class));
         }
 
